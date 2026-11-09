@@ -3,7 +3,12 @@ import { transformSync, type NodePath, type types as t } from '@babel/core';
 import MagicString from 'magic-string';
 import type { Plugin } from 'vite';
 
-function componentValue(node: t.Node | null | undefined): boolean {
+function runtimeValue(node: t.Node | null | undefined): t.Node | null | undefined {
+  while (node?.type === 'TSAsExpression' || node?.type === 'TSSatisfiesExpression' || node?.type === 'TSNonNullExpression' || node?.type === 'ParenthesizedExpression' || node?.type === 'TypeCastExpression') node = node.expression;
+  return node;
+}
+function componentValue(value: t.Node | null | undefined): boolean {
+  const node = runtimeValue(value);
   if (!node) return false;
   if (['ArrowFunctionExpression', 'FunctionExpression', 'ClassExpression'].includes(node.type)) return true;
   if (node.type !== 'CallExpression') return false;
@@ -13,11 +18,27 @@ function componentValue(node: t.Node | null | undefined): boolean {
     callee.object.name === 'React' && callee.property.type === 'Identifier' ? callee.property.name : '';
   return ['memo', 'forwardRef'].includes(wrapper) && componentValue(node.arguments[0]);
 }
+function expressionBinding(expression: NodePath): string | undefined {
+  let value = expression;
+  while (value.parentPath) {
+    const parent = value.parentPath;
+    if (runtimeValue(parent.node) !== parent.node ||
+        (parent.isCallExpression() && parent.node.arguments[0] === value.node && componentValue(parent.node))) {
+      value = parent;
+      continue;
+    }
+    if (parent.isVariableDeclarator() && parent.node.init === value.node && parent.node.id.type === 'Identifier' && /^[A-Z]/.test(parent.node.id.name)) {
+      return parent.node.id.name;
+    }
+    break;
+  }
+}
 function componentName(element: NodePath<t.JSXOpeningElement>): string {
   for (let parent: NodePath | null = element.parentPath; parent; parent = parent.parentPath) {
     let name: string | undefined;
     if (parent.isFunctionDeclaration() || parent.isClassDeclaration()) name = parent.node.id?.name;
-    else if (parent.isVariableDeclarator() && parent.node.id.type === 'Identifier' && componentValue(parent.node.init)) name = parent.node.id.name;
+    else if (parent.isFunctionExpression() || parent.isClassExpression()) name = expressionBinding(parent) ?? parent.node.id?.name;
+    else if (parent.isArrowFunctionExpression()) name = expressionBinding(parent);
     if (name && /^[A-Z]/.test(name)) return name;
   }
   return 'Anonymous';

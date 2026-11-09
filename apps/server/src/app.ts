@@ -57,11 +57,19 @@ export async function createApp(options: { dataDirectory?: string; base?: string
     const asset = await service.submit({ prompt, img, version }, idempotencyKey);
     return reply.code(asset.status === 'ready' ? 200 : 202).send(asset);
   });
-  app.post<{ Body: { taskId: string | number } }>('/assets/lux3d/import', {
+  app.post<{ Body: { taskId: unknown } }>('/assets/lux3d/import', {
     schema: { body: { type: 'object', additionalProperties: false, required: ['taskId'], properties: {
-      taskId: { anyOf: [{ type: 'string', pattern: '^\\d{1,20}$' }, { type: 'integer', minimum: 1, maximum: Number.MAX_SAFE_INTEGER }] },
+      // Keep the original JSON value: a typed anyOf would coerce it before the handler.
+      taskId: {},
     } } },
-  }, async (request, reply) => reply.code(202).send(await service.importTask(String(request.body.taskId))));
+  }, async (request, reply) => {
+    const taskId = request.body.taskId;
+    if (!((typeof taskId === 'string' && /^[1-9][0-9]{0,18}$/.exec(taskId)?.[0] === taskId) ||
+        (typeof taskId === 'number' && Number.isSafeInteger(taskId) && taskId > 0))) {
+      throw new AssetError('INVALID_TASK', '任务编号必须是安全正整数，或不含前导零的十进制数字字符串');
+    }
+    return reply.code(202).send(await service.importTask(String(taskId)));
+  });
   app.get('/assets', async () => service.list());
   app.get<{ Params: { id: string } }>('/assets/:id', async (request, reply) => {
     const asset = service.get(request.params.id);
