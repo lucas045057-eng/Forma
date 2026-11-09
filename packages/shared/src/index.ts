@@ -19,6 +19,8 @@ export type PickSelection = Omit<Selection, 'baseVersion'>;
 export interface ModelMetrics {
   before: { bytes: number; vertices: number };
   after: { bytes: number; vertices: number };
+  webReady?: boolean;
+  parts?: { recognized: boolean; reason?: string; lid?: string; nodes: Array<{ sourceIndex: number; name: string; bounds: { min: number[]; max: number[] } }> };
   durationMs: number;
   bounds: { min: number[]; max: number[] };
 }

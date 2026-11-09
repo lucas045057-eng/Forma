@@ -2,7 +2,7 @@
 .asset-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .asset-header h2 { margin: 8px 0 0; }
 .asset-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; min-height: 0; flex: 1; }
-.model-area { position: relative; background: #efe8dc; border-radius: 10px; overflow: hidden; min-height: 300px; color: #514635; }
+.model-area { position: relative; background: #efe8dc; border-radius: 10px; overflow: hidden; width: 100%; align-self: start; color: #514635; }
 .model-area canvas { touch-action: none; }
 .model-empty, .model-loading { position: absolute; top: 45%; width: 100%; text-align: center; pointer-events: none; }
 .orbit-hint { position: absolute; bottom: 18px; left: 18px; font-size: 12px; background: #fff9; padding: 8px 12px; border-radius: 4px; pointer-events: none; }
@@ -12,4 +12,4 @@
 .asset-controls form button { width: 100%; }
 .asset-controls dt { font-size: 11px; color: #8ea5b5; margin-top: 18px; }
 .asset-controls dd { margin: 6px 0; font-size: 13px; }
-@media (max-width: 700px) { .asset-layout { grid-template-columns: 1fr; overflow: auto; } .model-area { height: 55vh; flex: none; } .asset-dialog { padding: 12px; } }
+@media (max-width: 700px) { .asset-layout { grid-template-columns: 1fr; overflow: auto; } .model-area { flex: none; } .asset-dialog { padding: 12px; } }

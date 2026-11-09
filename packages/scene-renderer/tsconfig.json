@@ -1,0 +1,1 @@
+{ "extends": "../../tsconfig.json", "compilerOptions": { "rewriteRelativeImportExtensions": true }, "include": ["src"] }

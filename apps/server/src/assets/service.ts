@@ -6,7 +6,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import type { Asset, AssetEvent, ModelMetrics } from '@spatial/shared';
 import { AssetError, Lux3DClient, type GenerationInput } from './lux3d.ts';
 import { downloadGlb } from './download.ts';
-import { processModel } from './process-model.ts';
+import { processModelIsolated } from './process-isolated.ts';
+import { cleanupAssetTemporaries } from './cleanup.ts';
 
 type RecordEntry = Asset & { keyHash?: string; fingerprint?: string; deadline?: number };
 export interface ServiceOptions {
@@ -41,6 +42,7 @@ export class AssetService {
   constructor(options: ServiceOptions) { this.options = options; }
   async init() {
     await mkdir(this.options.directory, { recursive: true });
+    await cleanupAssetTemporaries(this.options.directory);
     try {
       this.entries = JSON.parse(await readFile(path.join(this.options.directory, 'index.json'), 'utf8')) as RecordEntry[];
       if (!Array.isArray(this.entries) || this.entries.some(entry => !validAssetId(entry.id))) throw new Error('Invalid asset index');
@@ -193,7 +195,11 @@ export class AssetService {
     this.abort.signal.throwIfAborted();
     await this.update(entry, { status: 'processing' });
     const directory = path.join(this.options.directory, entry.taskId ?? entry.id);
-    const metrics = await (this.options.process ?? processModel)(path.join(directory, 'raw.glb'), path.join(directory, 'model.glb'));
+    const input = path.join(directory, 'raw.glb');
+    const output = path.join(directory, 'model.glb');
+    const metrics = this.options.process
+      ? await this.options.process(input, output)
+      : await processModelIsolated(input, output, { signal: this.abort.signal });
     this.abort.signal.throwIfAborted();
     await this.update(entry, { status: 'ready', metrics, modelUrl: `/assets/${entry.id}/model.glb?revision=${randomUUID()}`, error: undefined });
   }

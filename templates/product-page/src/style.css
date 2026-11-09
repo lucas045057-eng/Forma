@@ -16,7 +16,8 @@ h1 { font: 48px/1.4 Georgia, "SimSun", serif; letter-spacing: 3px; margin: 22px 
 .button:hover { filter: brightness(.92); }
 .button-secondary { background: transparent; color: #756044; }
 .fine-print { font-size: 10px; color: #9e8b74; margin-top: 20px; }
-.product-art { min-height: 420px; border-radius: 48% 48% 6px 6px; background: #eee4d3; position: relative; display: grid; place-items: center; overflow: hidden; }
+.product-scene { position: relative; width: 100%; overflow: hidden; border-radius: 48% 48% 6px 6px; }
+.product-art { width: 100%; height: 100%; border-radius: 48% 48% 6px 6px; background: #eee4d3; position: relative; display: grid; place-items: center; overflow: hidden; }
 .halo { position: absolute; width: 280px; height: 280px; border-radius: 50%; background: #f9f0dc; filter: blur(30px); }
 .bottle { position: relative; width: 136px; height: 200px; border-radius: 18px 18px 24px 24px; background: linear-gradient(100deg,#a15e2bd9,#d8a462c9 45%,#8d512bd9); box-shadow: 20px 28px 28px #7e5e4933, inset 4px 0 10px #ffffff40; margin-top: 35px; }
 .cap { position: absolute; top: -45px; left: 7px; width: 122px; height: 55px; border-radius: 8px 8px 3px 3px; background: repeating-linear-gradient(0deg,#765235 0px,#916d49 3px,#83603e 5px); }
@@ -32,4 +33,4 @@ h3 { font-size: 16px; font-weight: 500; }
 .benefits p { color: #8b7963; font-size: 12px; line-height: 2; }
 footer { text-align: center; padding: 28px; font-size: 11px; color: #95826a; }
 .action-status:not(:empty) { position: fixed; bottom: 16px; left: 16px; background: #483a2d; color: white; padding: 12px 20px; border-radius: 4px; font-size: 12px; }
-@media (max-width: 650px) { .hero { grid-template-columns: 1fr; padding-top: 32px; } h1 { font-size: 40px; } .product-art { min-height: 330px; } .benefits { grid-template-columns: 1fr; gap: 16px; } }
+@media (max-width: 650px) { .hero { grid-template-columns: 1fr; padding-top: 32px; } h1 { font-size: 40px; } .product-scene { max-width: 480px; margin: auto; } .benefits { grid-template-columns: 1fr; gap: 16px; } }

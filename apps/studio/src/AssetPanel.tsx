@@ -1,20 +1,9 @@
-import { Component, Suspense, useEffect, useState, type ReactNode } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { useEffect, useState } from 'react';
+import { ProductScene, sceneRenderSettings } from '@spatial/scene-renderer';
 import type { Asset } from '@spatial/shared';
+import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import './assets.css';
 
-class ModelErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <p role="alert">3D 模型加载失败。请检查资产状态或重新导入。</p> : this.props.children; }
-}
-function Model({ url, onReady }: { url: string; onReady: () => void }) {
-  const gltf = useGLTF(url, false, false, loader => loader.setMeshoptDecoder(MeshoptDecoder));
-  useEffect(onReady, [url, onReady]);
-  return <primitive object={gltf.scene}/>;
-}
 const labels: Record<Asset['status'], string> = {
   submitting: '提交中', submit_unknown: '提交结果待确认，请查询远端任务后导入', polling: '等待生成',
   downloading: '下载中', processing: '优化模型中', ready: '可查看', failed: '失败', cancelled: '已取消',
@@ -27,6 +16,7 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [loadedUrl, setLoadedUrl] = useState('');
+  const [failedUrl, setFailedUrl] = useState('');
   const current = assets.find(asset => asset.id === selected);
   const loaded = current?.status === 'ready' && current.modelUrl === loadedUrl;
   const ready = assets.filter(asset => asset.status === 'ready');
@@ -67,20 +57,12 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
   return <div className="asset-dialog" role="dialog" aria-modal="true" aria-label="3D 资产视口">
     <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
     <div className="asset-layout">
-      <section className="model-area" data-testid="model-viewport" data-loaded={loaded}>
-        {current?.status === 'ready' && current.modelUrl ? <ModelErrorBoundary key={current.modelUrl}>
-          <Canvas camera={{ position: [1.6, 1.1, 1.6], fov: 35 }} dpr={[1, 2]} gl={{ antialias: true }}>
-            <color attach="background" args={['#efe8dc']}/>
-            <ambientLight intensity={1.2}/>
-            <hemisphereLight args={['#fff4de', '#655644', 2]}/>
-            <directionalLight position={[3, 5, 4]} intensity={3}/>
-            <directionalLight position={[-3, 2, -2]} intensity={1.5}/>
-            <Suspense fallback={null}><Model url={current.modelUrl} onReady={() => setLoadedUrl(current.modelUrl!)}/></Suspense>
-            <OrbitControls makeDefault target={[0, 0.5, 0]} minDistance={0.6} maxDistance={5}/>
-            <gridHelper args={[3, 12, '#c1b5a3', '#ddd3c2']}/>
-          </Canvas>
-          {!loaded && <p className="model-loading">加载模型中…</p>}
-        </ModelErrorBoundary> : <p className="model-empty">{current ? labels[current.status] : '导入已有任务，或选择已处理模型'}</p>}
+      <section className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>
+        {current?.status === 'ready' && current.modelUrl ? <ProductScene config={defaultSceneConfig} modelUrl={current.modelUrl} controls
+          onReady={() => { setLoadedUrl(current.modelUrl!); setFailedUrl(''); }}
+          onError={() => { setLoadedUrl(''); setFailedUrl(current.modelUrl!); }}
+          fallback={failedUrl === current.modelUrl ? <p role="alert">3D 模型加载失败。请检查资产状态或重新导入。</p> : <p className="model-loading">加载模型中…</p>}/>
+          : <p className="model-empty">{current ? labels[current.status] : '导入已有任务，或选择已处理模型'}</p>}
         <div className="orbit-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
       </section>
       <aside className="asset-controls">
@@ -92,12 +74,14 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
         <h3>导入已有 Lux3D 任务</h3>
         <p className="hint">读取已有结果，不创建新的付费任务。</p>
         <form onSubmit={event => { event.preventDefault(); void importTask(); }}>
-          <input aria-label="任务编号" data-testid="asset-task-id" value={taskId} onChange={event => setTaskId(event.target.value)} pattern="[0-9]{1,20}" required/>
+          <input aria-label="任务编号" data-testid="asset-task-id" value={taskId} onChange={event => setTaskId(event.target.value)} pattern="[1-9][0-9]{0,18}" required/>
           <button type="submit" disabled={busy} data-testid="asset-import">{busy ? '请求中…' : '导入任务'}</button>
         </form>
         {error && <p className="error" role="alert">{error}</p>}
         {current && <div data-testid="asset-status"><h3>{labels[current.status]}</h3><code>{current.id}</code>
           {current.error && <p role="alert" className="error">{current.error.message}</p>}
+          {current.metrics?.webReady === false && <p role="alert">模型超过 3 MB 或 10 万顶点，不适合网页，请先优化。</p>}
+          {current.metrics?.parts?.recognized === false && <p role="status">未识别部件，开盖关键帧不可用。</p>}
           {current.metrics && <dl><dt>文件体积</dt><dd>{(current.metrics.before.bytes / 1e6).toFixed(2)} → {(current.metrics.after.bytes / 1e6).toFixed(2)} MB</dd><dt>顶点数</dt><dd>{current.metrics.before.vertices.toLocaleString()} → {current.metrics.after.vertices.toLocaleString()}</dd><dt>处理耗时</dt><dd>{current.metrics.durationMs} ms</dd><dt>尺寸约定</dt><dd>最大边 1，底面中心为原点</dd></dl>}
         </div>}
       </aside>

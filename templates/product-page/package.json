@@ -1,6 +1,6 @@
 {
   "name": "@spatial/product-page", "private": true, "type": "module",
   "scripts": { "dev": "vite", "build": "vite build", "typecheck": "tsc" },
-  "dependencies": { "@spatial/bridge": "workspace:*", "react": "^19.2.0", "react-dom": "^19.2.0" },
+  "dependencies": { "@spatial/bridge": "workspace:*", "@spatial/shared": "workspace:*", "@spatial/scene-renderer": "workspace:*", "react": "^19.2.0", "react-dom": "^19.2.0" },
   "devDependencies": { "@spatial/vite-plugin-source-tag": "workspace:*", "vite": "^7.2.0", "@vitejs/plugin-react": "^5.1.0", "@types/react": "^19.2.0", "@types/react-dom": "^19.2.0" }
 }
