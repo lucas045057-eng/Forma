@@ -1,3 +1,6 @@
+export { defaultSceneConfig, isSceneConfig, sceneConfigSchema } from './scene-config.ts';
+export type { SceneConfig, Vec3 } from './scene-config.ts';
+
 export type SelectionStyles = Pick<CSSStyleDeclaration,
   'display' | 'position' | 'color' | 'backgroundColor' | 'fontSize' | 'fontFamily' |
   'fontWeight' | 'lineHeight' | 'padding' | 'margin' | 'borderRadius' | 'width' | 'height'>;
