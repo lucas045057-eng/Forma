@@ -4,14 +4,21 @@ import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import type { AssetEvent } from '@spatial/shared';
+import type { SceneChanged } from '@spatial/shared/scene-edit';
+import { SceneService, SceneError } from './scene/service.ts';
 import { AssetService } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 
-export async function createApp(options: { dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
+export async function createApp(options: { workRoot?: string; historyDirectory?: string; dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
   const downloadTimeoutMs = options.downloadTimeoutMs ?? Number(process.env.ASSET_DOWNLOAD_TIMEOUT_MS ?? 120_000);
   if (!Number.isFinite(downloadTimeoutMs) || downloadTimeoutMs <= 0) throw new Error('Invalid ASSET_DOWNLOAD_TIMEOUT_MS');
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16_384, disableRequestLogging: true });
-  const subscribers = new Set<(event: AssetEvent) => void>();
+  const subscribers = new Set<(event: AssetEvent | SceneChanged) => void>();
+  const scene = new SceneService({
+    workRoot: options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url)),
+    historyDirectory: options.historyDirectory ?? process.env.SCENE_HISTORY_DIR ?? fileURLToPath(new URL('../../../.data/scene-history/', import.meta.url)),
+    emit: event => subscribers.forEach(send => send(event)),
+  });
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
@@ -27,6 +34,7 @@ export async function createApp(options: { dataDirectory?: string; base?: string
     }
   });
   app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
     if (error instanceof AssetError) {
       return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : 400).send({ error: { code: error.code, message: error.message } });
     }
@@ -35,7 +43,7 @@ export async function createApp(options: { dataDirectory?: string; base?: string
   });
   app.get('/health', async () => ({ status: 'ok', milestone: 'M0-A' }));
   app.get('/events', { websocket: true }, socket => {
-    const send = (event: AssetEvent) => { if (socket.readyState === 1) socket.send(JSON.stringify(event)); };
+    const send = (event: AssetEvent | SceneChanged) => { if (socket.readyState === 1) socket.send(JSON.stringify(event)); };
     subscribers.add(send);
     socket.send(JSON.stringify({ type: 'ready' }));
     socket.on('close', () => subscribers.delete(send));
@@ -81,6 +89,15 @@ export async function createApp(options: { dataDirectory?: string; base?: string
     try { await stat(filename); } catch { return reply.code(404).send({ error: { code: 'MODEL_MISSING', message: '模型文件已丢失，请重新导入资产' } }); }
     return reply.type('model/gltf-binary').header('Cache-Control', 'no-cache').send(createReadStream(filename));
   });
-  app.addHook('preClose', async () => { subscribers.clear(); await service.close(); });
-  return { app, service };
+  app.get('/scene', async () => scene.get());
+  app.put('/scene', async request => scene.put(request.body));
+  app.post('/scene/undo', async () => scene.undo());
+  app.post<{ Params: { id: string }; Body: unknown }>('/assets/:id/adopt', async request => {
+    const body = request.body ?? {};
+    if (typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => key !== 'force')
+      || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
+    return scene.adopt(service, request.params.id, 'force' in body && body.force === true);
+  });
+  app.addHook('preClose', async () => { subscribers.clear(); await service.close(); await scene.idle(); });
+  return { app, service, scene };
 }
