@@ -79,6 +79,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     socket.onmessage = event => {
       try {
         const value = JSON.parse(String(event.data));
+        if (value.type === 'asset.ready') void request<Asset[]>('/assets').then(list => { if (mounted.current) setAssets(list); }).catch(() => {});
         if (value.type === 'scene.changed' && isSceneConfig(value.config) && Array.isArray(value.diff)) {
           setLatest(value);
           if (!dirty.current) { ++loadSequence.current; applyConfig(value.config); }

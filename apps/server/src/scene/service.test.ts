@@ -93,5 +93,13 @@ it('adopts only ready assets, requires force and copies metadata with undo', asy
     expect(JSON.parse(await readFile(path.join(f.options.workRoot, 'public/assets/asset1.parts.json'), 'utf8')).lid).toBe('lid');
     expect((await app.inject({ method: 'POST', url: '/scene/undo' })).json().config).toEqual(defaultSceneConfig);
     expect((await app.inject({ method: 'POST', url: '/assets/absent/adopt', payload: {} })).statusCode).toBe(409);
+    await writeFile(path.join(assets, 'asset1/model.glb'), 'different-model');
+    expect((await app.inject({ method: 'POST', url: '/assets/asset1/adopt', payload: { force: true } })).statusCode).toBe(409);
+    await writeFile(path.join(assets, 'asset1/model.glb'), model);
+    await rm(path.join(f.options.workRoot, 'public/assets'), { recursive: true });
+    const outside = path.join(f.root, 'outside-adoption'); await mkdir(outside);
+    await symlink(outside, path.join(f.options.workRoot, 'public/assets'), 'junction');
+    expect((await app.inject({ method: 'POST', url: '/assets/asset1/adopt', payload: { force: true } })).statusCode).toBe(403);
+    expect(await readdir(outside)).toEqual([]);
   } finally { await app.close(); }
 });
