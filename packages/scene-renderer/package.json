@@ -1,0 +1,7 @@
+{
+  "name": "@spatial/scene-renderer", "private": true, "type": "module", "exports": "./src/index.tsx",
+  "scripts": { "build": "tsc --noEmit false --declaration --outDir dist", "typecheck": "tsc", "test": "vitest run" },
+  "dependencies": { "@spatial/shared": "workspace:*", "three": "^0.180.0", "@react-three/fiber": "^9.4.0", "@react-three/drei": "^10.7.0" },
+  "peerDependencies": { "react": "^19.2.0", "react-dom": "^19.2.0" },
+  "devDependencies": { "@types/three": "^0.180.0", "@types/react": "^19.2.0", "@types/react-dom": "^19.2.0", "vitest": "^3.2.4" }
+}
