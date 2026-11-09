@@ -1,14 +1,14 @@
 {
   "containsPlaintext": false,
   "entry": {
-    "id": "2de1e387-5b94-4207-8344-bbae96d655da",
+    "id": "adc03cb5-c0f0-48c0-a6c6-4f6f5251212b",
     "status": "ready",
-    "createdAt": "2026-11-09T08:08:46.554Z",
-    "updatedAt": "2026-11-09T08:08:47.547Z",
-    "keyHash": "b03b66e1eb9f4e0d82c6ec69a5fff5a60c611d41f07ad8fdbf04d4987c0430cb",
+    "createdAt": "2026-11-09T08:22:12.331Z",
+    "updatedAt": "2026-11-09T08:22:12.997Z",
+    "keyHash": "4c27fc0c6545fd391bb38f1aa40e8e92e1f89a48e0d288a058b4a0b0ab9211e1",
     "fingerprint": "634c290e30e1f2fe07599fc542ad47bf46b5cc0ee9467451414dc77a57da4b77",
     "taskId": "9000006",
-    "deadline": 1794211756560,
+    "deadline": 1794212562334,
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -18,7 +18,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 664,
+      "durationMs": 409,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -32,6 +32,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/2de1e387-5b94-4207-8344-bbae96d655da/model.glb?revision=30d1427f-158a-4745-8efc-383920c0038d"
+    "modelUrl": "/assets/adc03cb5-c0f0-48c0-a6c6-4f6f5251212b/model.glb?revision=1debee30-4576-4232-86fa-7309f1c60da0"
   }
 }

@@ -49,7 +49,7 @@ describe('组件名归属（S3）', () => {
     expect(cids(output)).toEqual(['Page']);
   });
 
-  // ---- 应修 N1：下列写法的 cid 目前退化为 Anonymous，待 CodeBuddy 修复 ----
+  // ---- N1（已由 fix/n1-cid 修复，合并提交 9d50cc4）：下列写法必须保留正确的 cid ----
 
   it('具名默认导出的 memo 组件应保留 Card', () => {
     const output = transform('export default memo(function Card(){return <div/>});');

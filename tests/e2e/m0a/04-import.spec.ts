@@ -40,26 +40,35 @@ test.describe('M0-A 导入已有任务（零额度）', () => {
     const events = await collectEvents('ws://127.0.0.1:3001/events');
     events.close();
 
-    // 非数字任务编号被拒
-    const rejectedIds = ['abc', '-1', '1.5', ' '];
-    const rejected: Array<{ taskId: string; status: number }> = [];
-    for (const bad of rejectedIds) {
-      const response = await postJson(`${BACKEND_BASE}/assets/lux3d/import`, { taskId: bad });
-      rejected.push({ taskId: bad, status: response.status });
-      expect(response.status, `taskId=${JSON.stringify(bad)} 应被拒绝`).toBe(400);
-    }
+    // 数字形态的任务号仍然可用（防止“收紧过度”的反向对照）
+    const numeric = await postJson(`${BACKEND_BASE}/assets/lux3d/import`, { taskId: 7000010 });
+    expect(numeric.status, JSON.stringify(numeric.body)).toBe(202);
+    await waitForAsset(BACKEND_BASE, (numeric.body as any).id, (item) => item.status === 'ready', { timeoutMs: 60_000 });
 
-    // 观察项（不是本次验收要求）：Fastify 默认开启 coerceTypes，像 "1e5" 这种“看着像数字”的
-    // 字符串会被转换成整数 100000 并通过校验。只记录实际行为，不当作通过条件。
-    const coerced = await postJson(`${BACKEND_BASE}/assets/lux3d/import`, { taskId: '1e5' });
+    // 任务号必须是安全正整数，或不含前导零的十进制数字字符串。
+    // 之前 “1e5” 会被 Fastify 的 coerceTypes 当成 100000 接受（“观察项”），整改后已改为正式拒绝。
+    const invalidTaskIds: unknown[] = ['abc', '-1', '1.5', ' ', '1e5', '0123', ' 123', '0', '', 9007199254740993];
+    const beforeInvalid = (await getJson(`${MOCK_BASE}/__stats`)).body as { creates: number; gets: number };
+    const rejected: Array<{ taskId: unknown; status: number; code: string | null }> = [];
+    for (const bad of invalidTaskIds) {
+      const response = await postJson(`${BACKEND_BASE}/assets/lux3d/import`, { taskId: bad });
+      rejected.push({ taskId: bad, status: response.status, code: (response.body as any)?.error?.code ?? null });
+      expect(response.status, `taskId=${JSON.stringify(bad)} 应被拒绝`).toBe(400);
+      expect((response.body as any)?.error?.code, `taskId=${JSON.stringify(bad)} 的错误码`).toBe('INVALID_TASK');
+    }
+    // 被拒的请求不应碰上游：creates / gets 都不变
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const afterInvalid = (await getJson(`${MOCK_BASE}/__stats`)).body as { creates: number; gets: number };
+    expect(afterInvalid.creates, '非法 taskId 触发了上游创建').toBe(beforeInvalid.creates);
+    expect(afterInvalid.gets, '非法 taskId 触发了上游查询').toBe(beforeInvalid.gets);
 
     writeArtifact('import.json', {
       imported: created,
       asset,
       model: { bytes: model.buffer.length, header, inspected },
-      mockStats: { before, after, afterReimport },
+      mockStats: { before, after, afterReimport, beforeInvalid, afterInvalid },
+      numericControl: { taskId: 7000010, status: numeric.status },
       rejected,
-      coercedObservation: { taskId: '1e5', status: coerced.status, taskIdInResponse: (coerced.body as any)?.taskId },
     });
   });
 });

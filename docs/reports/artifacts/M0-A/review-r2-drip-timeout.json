@@ -1,15 +1,15 @@
 {
   "asset": {
-    "id": "40c992f1-0eb8-4495-995b-32036fcca187",
+    "id": "a1aaf1b3-a599-4599-903a-6d9c523307ae",
     "status": "failed",
-    "createdAt": "2026-11-09T08:09:05.756Z",
-    "updatedAt": "2026-11-09T08:09:07.413Z",
+    "createdAt": "2026-11-09T08:22:24.395Z",
+    "updatedAt": "2026-11-09T08:22:26.044Z",
     "taskId": "9000001",
     "error": {
       "code": "DOWNLOAD_TIMEOUT",
       "message": "模型下载超过总时限，请重新导入原任务"
     }
   },
-  "elapsedMs": 1707,
+  "elapsedMs": 1698,
   "temps": []
 }

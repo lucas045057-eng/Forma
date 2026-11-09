@@ -2,10 +2,10 @@
   "submitted": {
     "status": 202,
     "asset": {
-      "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+      "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
       "status": "polling",
-      "createdAt": "2026-11-09T08:08:15.388Z",
-      "updatedAt": "2026-11-09T08:08:15.400Z",
+      "createdAt": "2026-11-09T08:21:41.883Z",
+      "updatedAt": "2026-11-09T08:21:41.895Z",
       "taskId": "9000001"
     }
   },
@@ -15,10 +15,10 @@
     "ready"
   ],
   "finalAsset": {
-    "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+    "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
     "status": "ready",
-    "createdAt": "2026-11-09T08:08:15.388Z",
-    "updatedAt": "2026-11-09T08:08:16.189Z",
+    "createdAt": "2026-11-09T08:21:41.883Z",
+    "updatedAt": "2026-11-09T08:21:42.661Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -29,7 +29,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 505,
+      "durationMs": 498,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -43,7 +43,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/f5effd74-33c0-4392-9e03-b44b19e84f29/model.glb?revision=c46c4306-e70c-4d08-b852-2318284fc74a"
+    "modelUrl": "/assets/6af43ffb-a683-4f59-9f66-5bc40fbfcbed/model.glb?revision=58916ae2-ce0e-4348-bdcf-c8cdf1d6c627"
   },
   "glb": {
     "header": {
@@ -82,73 +82,73 @@
   "events": [
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:08:15.400Z",
+      "ts": "2026-11-09T08:21:41.895Z",
       "sequence": 1,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "polling",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:15.400Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:41.895Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:08:15.403Z",
+      "ts": "2026-11-09T08:21:41.898Z",
       "sequence": 2,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "polling",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:15.403Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:41.898Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:08:15.498Z",
+      "ts": "2026-11-09T08:21:41.994Z",
       "sequence": 3,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "polling",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:15.498Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:41.994Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:08:15.592Z",
+      "ts": "2026-11-09T08:21:42.087Z",
       "sequence": 4,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "downloading",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:15.592Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:42.087Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:08:15.643Z",
+      "ts": "2026-11-09T08:21:42.121Z",
       "sequence": 5,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "processing",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:15.643Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:42.121Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.ready",
-      "ts": "2026-11-09T08:08:16.189Z",
+      "ts": "2026-11-09T08:21:42.661Z",
       "sequence": 6,
       "asset": {
-        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
+        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
         "status": "ready",
-        "createdAt": "2026-11-09T08:08:15.388Z",
-        "updatedAt": "2026-11-09T08:08:16.189Z",
+        "createdAt": "2026-11-09T08:21:41.883Z",
+        "updatedAt": "2026-11-09T08:21:42.661Z",
         "taskId": "9000001",
         "metrics": {
           "before": {
@@ -159,7 +159,7 @@
             "bytes": 983560,
             "vertices": 85436
           },
-          "durationMs": 505,
+          "durationMs": 498,
           "bounds": {
             "min": [
               -0.15895565660573138,
@@ -173,7 +173,7 @@
             ]
           }
         },
-        "modelUrl": "/assets/f5effd74-33c0-4392-9e03-b44b19e84f29/model.glb?revision=c46c4306-e70c-4d08-b852-2318284fc74a"
+        "modelUrl": "/assets/6af43ffb-a683-4f59-9f66-5bc40fbfcbed/model.glb?revision=58916ae2-ce0e-4348-bdcf-c8cdf1d6c627"
       }
     }
   ],
@@ -190,7 +190,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 3972,
+    "pid": 49516,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   }
 }

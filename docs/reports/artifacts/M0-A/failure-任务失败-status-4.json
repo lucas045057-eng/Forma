@@ -6,24 +6,24 @@
     "code": "GENERATION_FAILED"
   },
   "submitted": {
-    "id": "abd80729-48d4-4495-8776-e011b2da9ced",
+    "id": "89a75f06-7f70-4bfa-a6d9-e0e381241b25",
     "status": "polling",
-    "createdAt": "2026-11-09T08:08:24.856Z",
-    "updatedAt": "2026-11-09T08:08:24.869Z",
+    "createdAt": "2026-11-09T08:21:51.053Z",
+    "updatedAt": "2026-11-09T08:21:51.065Z",
     "taskId": "9000001"
   },
   "finalAsset": {
-    "id": "abd80729-48d4-4495-8776-e011b2da9ced",
+    "id": "89a75f06-7f70-4bfa-a6d9-e0e381241b25",
     "status": "failed",
-    "createdAt": "2026-11-09T08:08:24.856Z",
-    "updatedAt": "2026-11-09T08:08:24.872Z",
+    "createdAt": "2026-11-09T08:21:51.053Z",
+    "updatedAt": "2026-11-09T08:21:51.067Z",
     "taskId": "9000001",
     "error": {
       "code": "GENERATION_FAILED",
       "message": "Lux3D 生成失败"
     }
   },
-  "elapsedMs": 19,
+  "elapsedMs": 17,
   "stats": {
     "before": {
       "creates": 1,

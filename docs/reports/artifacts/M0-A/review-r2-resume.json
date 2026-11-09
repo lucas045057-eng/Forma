@@ -1,10 +1,10 @@
 {
   "record": {
-    "id": "8494795c-9423-4651-a050-0e805c98eb0f",
+    "id": "4355a07e-b63a-45ed-9158-90d84ccaa25a",
     "status": "polling",
-    "createdAt": "2026-11-09T08:09:09.239Z",
-    "updatedAt": "2026-11-09T08:09:09.436Z",
-    "keyHash": "90a03706f29c7a719e410cad93fd31d2fa09b08f472f82190a048b761d2ec3a1",
+    "createdAt": "2026-11-09T08:22:27.562Z",
+    "updatedAt": "2026-11-09T08:22:27.759Z",
+    "keyHash": "05d13880612ae9af68e8aa1115a39e7ae4706bc4b9a5ca5a811dfcda31673180",
     "fingerprint": "760e2ea4f13096c77266c1113fbf8086db3f02537cf4210e912cfa3bfec280f5",
     "taskId": "9000001",
     "error": {
@@ -13,10 +13,10 @@
     }
   },
   "resumed": {
-    "id": "8494795c-9423-4651-a050-0e805c98eb0f",
+    "id": "4355a07e-b63a-45ed-9158-90d84ccaa25a",
     "status": "ready",
-    "createdAt": "2026-11-09T08:09:09.239Z",
-    "updatedAt": "2026-11-09T08:09:10.645Z",
+    "createdAt": "2026-11-09T08:22:27.562Z",
+    "updatedAt": "2026-11-09T08:22:28.946Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -27,7 +27,7 @@
         "bytes": 1300,
         "vertices": 3
       },
-      "durationMs": 15,
+      "durationMs": 12,
       "bounds": {
         "min": [
           -0.5,
@@ -41,7 +41,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/8494795c-9423-4651-a050-0e805c98eb0f/model.glb?revision=b48db598-cf45-4178-9cdc-f8f859fae143"
+    "modelUrl": "/assets/4355a07e-b63a-45ed-9158-90d84ccaa25a/model.glb?revision=5ceb0ea8-06b3-4541-91de-96b1a2986236"
   },
   "stats": {
     "creates": 0,

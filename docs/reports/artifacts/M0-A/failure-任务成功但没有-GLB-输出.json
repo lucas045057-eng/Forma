@@ -6,24 +6,24 @@
     "code": "NO_GLB"
   },
   "submitted": {
-    "id": "6f74a4fb-4063-4a59-9cda-fc65a1962c0e",
+    "id": "bc299194-4ae8-4a4d-9e68-63f231366ed5",
     "status": "polling",
-    "createdAt": "2026-11-09T08:08:41.662Z",
-    "updatedAt": "2026-11-09T08:08:41.674Z",
+    "createdAt": "2026-11-09T08:22:07.343Z",
+    "updatedAt": "2026-11-09T08:22:07.355Z",
     "taskId": "7770001"
   },
   "finalAsset": {
-    "id": "6f74a4fb-4063-4a59-9cda-fc65a1962c0e",
+    "id": "bc299194-4ae8-4a4d-9e68-63f231366ed5",
     "status": "failed",
-    "createdAt": "2026-11-09T08:08:41.662Z",
-    "updatedAt": "2026-11-09T08:08:41.677Z",
+    "createdAt": "2026-11-09T08:22:07.343Z",
+    "updatedAt": "2026-11-09T08:22:07.357Z",
     "taskId": "7770001",
     "error": {
       "code": "NO_GLB",
       "message": "任务成功但没有 GLB 输出，请使用 outputFormat: glb 创建任务"
     }
   },
-  "elapsedMs": 22,
+  "elapsedMs": 20,
   "stats": {
     "before": {
       "creates": 1,

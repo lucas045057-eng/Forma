@@ -7,26 +7,26 @@
     "code": "UPSTREAM_REJECTED"
   },
   "submitted": {
-    "id": "46102055-dc85-4764-9414-b75a7aa023d7",
+    "id": "b2d0e060-5bed-4269-b727-0364352ef6cd",
     "status": "submit_unknown",
-    "createdAt": "2026-11-09T08:08:37.941Z",
-    "updatedAt": "2026-11-09T08:08:37.952Z",
+    "createdAt": "2026-11-09T08:22:03.884Z",
+    "updatedAt": "2026-11-09T08:22:03.895Z",
     "error": {
       "code": "UPSTREAM_REJECTED",
       "message": "Lux3D 未接受请求，请核对参数、额度及并发任务"
     }
   },
   "finalAsset": {
-    "id": "46102055-dc85-4764-9414-b75a7aa023d7",
+    "id": "b2d0e060-5bed-4269-b727-0364352ef6cd",
     "status": "submit_unknown",
-    "createdAt": "2026-11-09T08:08:37.941Z",
-    "updatedAt": "2026-11-09T08:08:37.952Z",
+    "createdAt": "2026-11-09T08:22:03.884Z",
+    "updatedAt": "2026-11-09T08:22:03.895Z",
     "error": {
       "code": "UPSTREAM_REJECTED",
       "message": "Lux3D 未接受请求，请核对参数、额度及并发任务"
     }
   },
-  "elapsedMs": 16,
+  "elapsedMs": 15,
   "stats": {
     "before": {
       "creates": 1,

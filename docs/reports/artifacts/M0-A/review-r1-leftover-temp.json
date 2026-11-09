@@ -11,10 +11,10 @@
   ],
   "indexTemps": [],
   "asset": {
-    "id": "52ab4646-54cf-4ed7-aaf6-48ce76f9d72e",
+    "id": "0da3ea78-9cad-473f-9c7e-2f589a214fae",
     "status": "ready",
-    "createdAt": "2026-11-09T08:09:03.878Z",
-    "updatedAt": "2026-11-09T08:09:04.042Z",
+    "createdAt": "2026-11-09T08:22:22.714Z",
+    "updatedAt": "2026-11-09T08:22:22.881Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -39,6 +39,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/52ab4646-54cf-4ed7-aaf6-48ce76f9d72e/model.glb?revision=3d169527-e202-415f-820a-24b19695b221"
+    "modelUrl": "/assets/0da3ea78-9cad-473f-9c7e-2f589a214fae/model.glb?revision=c568e7cc-8485-4b79-a143-d8a7649e846b"
   }
 }

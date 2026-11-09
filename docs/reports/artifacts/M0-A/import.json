@@ -3,16 +3,16 @@
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "polling",
-    "createdAt": "2026-11-09T08:08:42.961Z",
-    "updatedAt": "2026-11-09T08:08:42.961Z"
+    "createdAt": "2026-11-09T08:22:08.578Z",
+    "updatedAt": "2026-11-09T08:22:08.578Z"
   },
   "asset": {
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "ready",
-    "createdAt": "2026-11-09T08:08:42.961Z",
-    "updatedAt": "2026-11-09T08:08:43.995Z",
-    "modelUrl": "/assets/lux3d-7000001/model.glb?revision=df54f7f2-b691-499a-a974-d53b28646ab0",
+    "createdAt": "2026-11-09T08:22:08.578Z",
+    "updatedAt": "2026-11-09T08:22:09.290Z",
+    "modelUrl": "/assets/lux3d-7000001/model.glb?revision=0799f0bf-b8fa-4aaf-b282-3994ee3766e8",
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -22,7 +22,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 690,
+      "durationMs": 437,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -83,29 +83,70 @@
     "afterReimport": {
       "creates": 5,
       "gets": 18
+    },
+    "beforeInvalid": {
+      "creates": 5,
+      "gets": 21
+    },
+    "afterInvalid": {
+      "creates": 5,
+      "gets": 21
     }
+  },
+  "numericControl": {
+    "taskId": 7000010,
+    "status": 202
   },
   "rejected": [
     {
       "taskId": "abc",
-      "status": 400
+      "status": 400,
+      "code": "INVALID_TASK"
     },
     {
       "taskId": "-1",
-      "status": 400
+      "status": 400,
+      "code": "INVALID_TASK"
     },
     {
       "taskId": "1.5",
-      "status": 400
+      "status": 400,
+      "code": "INVALID_TASK"
     },
     {
       "taskId": " ",
-      "status": 400
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": "1e5",
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": "0123",
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": " 123",
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": "0",
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": "",
+      "status": 400,
+      "code": "INVALID_TASK"
+    },
+    {
+      "taskId": 9007199254740992,
+      "status": 400,
+      "code": "INVALID_TASK"
     }
-  ],
-  "coercedObservation": {
-    "taskId": "1e5",
-    "status": 202,
-    "taskIdInResponse": "100000"
-  }
+  ]
 }

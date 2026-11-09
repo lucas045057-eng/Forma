@@ -6,24 +6,24 @@
     "code": "GENERATION_CANCELLED"
   },
   "submitted": {
-    "id": "92cb3a56-2c7f-4595-af2d-6ed726442ae3",
+    "id": "11d9c56a-6ab6-49d5-b5e5-8cb4dbffb753",
     "status": "polling",
-    "createdAt": "2026-11-09T08:08:26.785Z",
-    "updatedAt": "2026-11-09T08:08:26.798Z",
+    "createdAt": "2026-11-09T08:21:52.933Z",
+    "updatedAt": "2026-11-09T08:21:52.945Z",
     "taskId": "9000001"
   },
   "finalAsset": {
-    "id": "92cb3a56-2c7f-4595-af2d-6ed726442ae3",
+    "id": "11d9c56a-6ab6-49d5-b5e5-8cb4dbffb753",
     "status": "cancelled",
-    "createdAt": "2026-11-09T08:08:26.785Z",
-    "updatedAt": "2026-11-09T08:08:26.800Z",
+    "createdAt": "2026-11-09T08:21:52.933Z",
+    "updatedAt": "2026-11-09T08:21:52.948Z",
     "taskId": "9000001",
     "error": {
       "code": "GENERATION_CANCELLED",
       "message": "Lux3D 任务已取消"
     }
   },
-  "elapsedMs": 20,
+  "elapsedMs": 17,
   "stats": {
     "before": {
       "creates": 1,

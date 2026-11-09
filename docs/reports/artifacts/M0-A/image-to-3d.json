@@ -1,9 +1,9 @@
 {
   "asset": {
-    "id": "8cf76868-2854-4e45-9936-d8283780a151",
+    "id": "fd66cab5-ec42-43c1-8cf5-46179998935d",
     "status": "ready",
-    "createdAt": "2026-11-09T08:08:16.279Z",
-    "updatedAt": "2026-11-09T08:08:16.997Z",
+    "createdAt": "2026-11-09T08:21:42.754Z",
+    "updatedAt": "2026-11-09T08:21:43.454Z",
     "taskId": "9000002",
     "metrics": {
       "before": {
@@ -14,7 +14,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 443,
+      "durationMs": 440,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -28,7 +28,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/8cf76868-2854-4e45-9936-d8283780a151/model.glb?revision=08a2e4ab-668e-4a22-afcd-72d8270b2a16"
+    "modelUrl": "/assets/fd66cab5-ec42-43c1-8cf5-46179998935d/model.glb?revision=4e9f5f1e-edce-41d7-9f3c-b01c09f640c2"
   },
   "invalid": {
     "both": 400,
