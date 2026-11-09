@@ -31,7 +31,7 @@ pnpm build
 pnpm test
 ```
 
-`pnpm build` 构建各包及页面至各自 `dist/`；`pnpm test` 运行源码插件与资产后端的 Vitest 测试。正式 Playwright 浏览器验收由 Pi 负责，已有 M0-B 用例可通过 `pnpm test:e2e` 执行。
+`pnpm build` 构建各包及页面至各自 `dist/`；`pnpm test` 运行源码插件与资产后端的 Vitest 测试，以及 packages/bridge 的 Node test 浏览器探针（复用已有 Playwright，Windows 优先使用本机 Chrome，其余环境使用已安装的 Chromium）。bridge 探针使用独立临时端口，不启动项目 dev 服务。正式 Playwright 浏览器验收由 Pi 负责，已有 M0-B 用例可通过 `pnpm test:e2e` 执行。
 
 pnpm 11 需要显式批准依赖构建脚本；workspace 仅允许 esbuild、sharp 的必要安装脚本。依赖锁定在 `pnpm-lock.yaml`。
 
@@ -50,13 +50,17 @@ pnpm 11 需要显式批准依赖构建脚本；workspace 仅允许 esbuild、sha
 - `data-src` 是相对 **模板 Vite root** 的路径，统一 `/` 分隔，加上 `:行:列`。模板 root 为 `templates/product-page`，不是 monorepo 根。
 - 行、列均从 **1** 开始，指向原始源文件 JSX 开标签的 `<`。列使用 Babel/JavaScript 的 UTF-16 code unit 计数，制表符占一列；CRLF 不影响行号。不会按格式化后的代码定位。
 - 仅小写原生 JSX 标签（含自定义小写标签）注入；大写组件、成员组件、Fragment 不注入。`data-src` / `data-cid` 为保留属性，最终标记排在展开属性之后。
-- `data-cid` 取最近的大写命名函数、变量或类组件；匿名 default export 等无法推断名字时为 `Anonymous`。
+- `data-cid` 取最近的大写命名函数、类组件或绑定组件函数/类的大写变量，支持 `memo` / `forwardRef` 及 `React.memo` / `React.forwardRef` 的嵌套包装。保存 JSX 值的变量（如 `const Heading=<h1/>`）不算组件；匿名 default export 等无法推断名字时为 `Anonymous`。
+- 移除原生元素已有 `data-src` / `data-cid` 时，跳过已删除属性的整个 JSX 子树；保留其他属性、组件元素属性和正常子元素的源码标记。
 - 消息格式是 `{ type, payload? }`。双方严格验证 `origin`、`source` 和消息形状；发送使用精确 origin，禁用 `*`。
-- bridge 在 window capture 阶段拦截 `click` / `auxclick`，先阻止默认行为与后续传播，再查找最近标记。
+- 选取模式在 window capture 阶段拦截 `pointerdown` / `pointerup` / `mousedown` / `mouseup` / `click` / `auxclick` / `dblclick` / `contextmenu` / `submit`，阻止默认行为与后续传播。
+- **选取上报时机仍为 `click`（兼容既有 `auxclick`）**；按下、抬起及其他激活事件只阻止业务副作用，不上报，避免一次操作重复选取。Chromium 实测取消 pointerdown 后仍有 click，物理点击可正常选取。
+- 可激活元素、表单及其后代中的 Enter/Space，在 keydown/keypress/keyup 阶段均拦截；普通页面文字上的空格滚动不受影响。pointermove/mousemove/wheel/scroll 保留，用于悬停与滚动。
+- 退出选取立即恢复事件行为，下一帧清除高亮；安装期只有一套待命监听器和空覆盖层，不随开关重复添加。dispose/HMR 清理全部监听器、observer、待执行帧及覆盖层。
 - Selection 的 `bbox` 为 iframe 视口内 `[x, y, width, height]`（CSS 像素）；`styles` 为关键计算样式；`ancestors` 检查直接向上的三个 DOM 层级，只收集有标记的 src。
 - 同 src 全部实例计入 `instances`；列表与共享组件统一提示影响范围，不猜测循环语义。点击无标记的子元素会归属最近标记祖先，并带 `note: "outer-container"`；完全找不到标记时发 error。
 - bridge 上报的 `PickSelection` 不含 `baseVersion`，Studio 加上启动配置时的 Git HEAD。M0 不实现候选版本管理或脏工作区版本校验，提交变化后需重启 Studio 刷新该版本号。
-- 高亮使用独立、不可点击的覆盖层，不修改作品元素样式；停止选取时清除，滚动、尺寸变化和 DOM 更新时重绘。
+- 高亮使用独立、不可点击的覆盖层，不修改作品元素样式；停止选取时清除，滚动、尺寸变化和 DOM 更新时重绘。MutationObserver 忽略覆盖层及其后代的记录，无 `#root` 时观察 body 也不会自触发持续重绘。
 
 ## 测试访问点与边界
 
@@ -64,7 +68,7 @@ Studio：`pick-toggle`、`preview-frame`、`preview-status`、`selection-json`�
 
 模板：`buy-button`、`save-button`、`gift-button`、`benefits`、`benefit-item`、`action-status`（`data-purchases` 记录真实按钮点击次数）。高亮层使用 `data-bridge-overlay` / `data-highlight-src`。
 
-M0 只支持本项目同源模板。生产静态部署、后端网页预览代理、候选版本持久化、候选任务执行均未实现。此阶段 build 验证编译产物，不提供生产环境下的源码选取服务。Shadow DOM、跨域内嵌页面和任意第三方脚本不在本任务范围；点击拦截不覆盖业务自行监听 pointerdown 等先行事件的情形。
+M0 只支持本项目同源模板。生产静态部署、后端网页预览代理、候选版本持久化、候选任务执行均未实现。此阶段 build 验证编译产物，不提供生产环境下的源码选取服务。Shadow DOM、跨域内嵌页面和任意第三方脚本不在本任务范围；bridge 安装前已注册的 window capture 业务监听器不保证被阻止，应继续在模板业务挂载前安装 bridge。
 
 实现说明见 `docs/reports/M0-B-impl.md`、`docs/reports/M0-A-impl.md`。
 
