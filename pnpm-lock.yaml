@@ -57,6 +57,9 @@ importers:
       '@react-three/fiber':
         specifier: ^9.4.0
         version: 9.8.2(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.180.0)
+      '@spatial/scene-renderer':
+        specifier: workspace:*
+        version: link:../../packages/scene-renderer
       '@spatial/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -159,6 +162,12 @@ importers:
       '@spatial/bridge':
         specifier: workspace:*
         version: link:../../packages/bridge
+      '@spatial/scene-renderer':
+        specifier: workspace:*
+        version: link:../../packages/scene-renderer
+      '@spatial/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       react:
         specifier: ^19.2.0
         version: 19.3.1

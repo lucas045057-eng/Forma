@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from './components/Button';
+import { ProductHero } from './components/ProductHero';
 
 const benefits = [
   { number: '01', title: '让呼吸慢下来', text: '雪松与佛手柑，像雨后走进一片安静的森林。' },
@@ -28,11 +29,7 @@ export default function App() {
           </div>
           <p className="fine-print">一份给自己，也给生活的温柔礼物。</p>
         </div>
-        <div className="product-art" role="img" aria-label="香薰商品图占位：琥珀色瓶身与木质瓶盖">
-          <div className="halo"/>
-          <div className="bottle"><div className="cap"/><div className="label">木间<span>CEDARWOOD<br/>HOME DIFFUSER</span><small>100 mL</small></div></div>
-          <span className="art-caption">静静陪伴 · 慢慢散香</span>
-        </div>
+        <ProductHero/>
       </section>
       <section id="details" className="details">
         <p className="eyebrow">SMALL RITUALS, EVERY DAY</p>

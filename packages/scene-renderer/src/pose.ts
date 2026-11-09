@@ -1,4 +1,4 @@
-import type { SceneConfig, Vec3 } from '@spatial/shared';
+import type { SceneConfig, Vec3 } from '@spatial/shared/scene-config';
 import { Matrix3, Matrix4, Object3D, Vector3 } from 'three';
 
 type Point = { at: number; value: Vec3 };

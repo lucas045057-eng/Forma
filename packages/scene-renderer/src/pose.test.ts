@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { Group, Vector3 } from 'three';
-import { defaultSceneConfig, type SceneConfig } from '@spatial/shared';
+import { defaultSceneConfig, type SceneConfig } from '@spatial/shared/scene-config';
 import { applyPartOffsets, partPositions, scenePose } from './pose';
 
 const config: SceneConfig = { ...defaultSceneConfig, scroll: [

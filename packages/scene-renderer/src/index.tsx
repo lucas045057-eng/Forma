@@ -4,7 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace, Mesh, Texture, type Material, type Object3D, type PerspectiveCamera } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import type { SceneConfig } from '@spatial/shared';
+import type { SceneConfig } from '@spatial/shared/scene-config';
 import { applyPartOffsets, partPositions, scenePose } from './pose';
 export { scenePose } from './pose';
 
