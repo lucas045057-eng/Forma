@@ -54,3 +54,9 @@
 ## 留给后续
 - 写入候选 worktree 而非直接写作品目录：M2。
 - 持久事件序号与补拉（M0-A 审查 S2）：M2。
+
+### M1-A-fix 审查整改（依据 docs/reports/M1-A-review.md，结论“有条件通过”；按用户“做完收个尾”留到下次开工）
+- R1：Studio 视口用默认配置，没读作品当前 scene.config.json 和滚动姿态——M1-B 的 `GET /scene` 与“视口 vs 网页一致性测试接点”应覆盖；M1-B 交回后核对是否已解决，未解决则并入本卡。
+- R2：parts.recognized=false 时，原模型里恰好名为 `lid` 的节点仍会被开盖轨道移动——渲染器应只在 recognized=true 时应用 parts.* 偏移。
+- R3：启动清理 *.tmp 无写入者所有权检查，可能误删另一个活跃实例正在写的临时文件——临时名带实例/进程标识，只清理本实例或确认过期（如超过时限且无锁）的文件。
+- 建议：S1 Euler 逐轴插值跨 ±π 绕远路（改四元数 slerp 或规定最短路径语义）；S2 GLTFLoader 改动全局默认 LoadingManager；S3 draft-07 Schema 不表达关键帧严格递增，写回方必须同时用 guard；S4 Three 分包体积警告，记录加载预算。
