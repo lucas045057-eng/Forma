@@ -1,14 +1,16 @@
 # M0-A Lux3D 调用跑通 · Pi 测试报告
 
 - 日期：2026-11-09
-- 被测版本：master `1c6a6e7`（M0-A 实现 `d6bd268`…`e44bc88` + M0-B 测试）
+- 首轮被测版本：master `1c6a6e7`（M0-A 实现 `d6bd268`…`e44bc88` + M0-B 测试）；整改回归被测版本：合并 `5275f7c`（`fix/m0a-review`）之后
 - 测试代码：`tests/e2e/m0a/`、根级 `playwright.m0a.config.ts`、根 `package.json` 的 `test:e2e:m0a`
 - 未修改 `apps/`、`packages/`、`templates/` 的任何实现代码；未安装/升级依赖，未改 lockfile
 - 证据：`docs/reports/artifacts/M0-A/`
 
 ## 结论
 
-**过关。** 要求 1–7 全部通过，22 个用例全部通过（0 失败、0 未运行）。没有发现阻断级缺陷；有一条输入校验的观察项（见文末“观察”），不影响 M0-A 验收。
+**首轮：过关。** 要求 1–7 全部通过，22 个用例全部通过（0 失败、0 未运行）。没有发现阻断级缺陷；有一条输入校验的观察项（见文末“观察”），不影响 M0-A 验收。
+
+**整改回归（`5275f7c` 合并后）：过关。** 新增 5 个针对审查整改的 e2e 全通过，原 22 项仍全通过，单元测试 67 项（其中 M0-B 的 N1 三条 `it.fails` 属预期失败）全绿；详见文末“整改回归”一节。
 
 | # | 要求 | 结果 |
 | --- | --- | --- |
@@ -154,7 +156,61 @@ CodeBuddy 的 mock 没有"并发超限 / create 500 / 无 GLB"三种剧本，所
 
 ## 产物
 
-- `docs/reports/artifacts/M0-A/playwright-results.json` — Playwright 原始结果（22 passed）
+- `docs/reports/artifacts/M0-A/playwright-results.json` — Playwright 原始结果
 - `pipeline.json`、`image-to-3d.json`、`idempotency-*.json`、`failure-*.json`、`import.json`、`security-*.json`、`viewport.json`、`guard-selftest.json`
 - `viewport-initial.png`、`viewport-rotated.png` — 视口截图
 - 运行说明：`tests/e2e/README.md`
+
+---
+
+# 整改回归（依据 `docs/reports/M0-A-review.md`）
+
+日期：2026-11-09。前置：调度已把 `fix/m0a-review` 合并到 master（`5275f7c`，修复提交 `67083df` / `b8af8ad` / `fc11845` / `a82958e`），内容见 `docs/reports/M0-A-fix-impl.md`：R1 唯一临时名、R2 下载 120 s 总时限 + AbortSignal 贯穿 + 优雅停机可恢复、R3 ready 缺文件用原 taskId 修复、S1 严格 mock、S3 非 loopback 的 http 上游拒绝启动。
+
+## 测试侧怎么适配的（只改 tests/）
+
+| 变化 | 处理 |
+| --- | --- |
+| `modelUrl` 现在带 `?revision=<uuid>` | `01-pipeline` 里原来断言精确字符串，改为匹配 `^/assets/<id>/model\.glb\?revision=[\w-]+$` |
+| mock 现在校验 `Authorization` / `version` / `prompt\|img` / `outputFormat: ["glb"]` | 启动器本来就发 `mock-only`，客户端原本就发 `outputFormat: ["glb"]`，**无需放宽不改 mock 就全绿**（反向证明协议确实对得上） |
+| 需要验证“下载中途优雅停机” | Windows 上 `taskkill /F` 拿不到 `app.close()`，给测试启动器加了 stdin 控制通道：收到 `close` 就调 `app.close()`（与 SIGTERM 同一路径） |
+| 需要验证“配置错就拒绝启动” | 启动器捕获 `createApp` 抛错后以退出码 **12** 结束并打印原因；harness 新增 `startBackendExpectingRejection` 等退出码 |
+| 下载总时限需要调短 | `ASSET_DOWNLOAD_TIMEOUT_MS`（实现本身就支持）由 `startBackend({downloadTimeoutMs})` 透传 |
+| 子进程提前退出时启动会等满超时 | `startChild` 现在把“进程已退出”和“等待就绪”赛跑，失败时立刻报 `code=` 与输出 |
+| 换 mock 场景时端口可能没释放 | 新增 `waitPortFree` 再重绑同端口 |
+
+## 新增用例（`tests/e2e/m0a/07-review-fixes.spec.ts`）
+
+| 用例 | 做法 | 实测结果 |
+| --- | --- | --- |
+| **R1** 残留临时文件不阻断重试 | 在 mock 将要使用的 `9000001/` 目录里预置 `model.glb.tmp` / `raw.glb.tmp`，再跑完整导入 | **ready**，无 `EEXIST`；目录最终为 `model.glb / model.glb.tmp / raw.glb / raw.glb.tmp`（旧残留保留、本次临时文件已清理）；资产根目录无任何 `.tmp` |
+| **R2a** 滴流下载被总时限中止 | `MOCK_SCENARIO=drip`（1 字节 / 100 ms）+ `ASSET_DOWNLOAD_TIMEOUT_MS=1500` | **failed / `DOWNLOAD_TIMEOUT`**，提示“模型下载超过总时限”，**1.7 s** 结束，未留 `.tmp` |
+| **R2b** 下载中优雅停机 → 可恢复 → 重启续跑 | drip mock + 长时限，等进入 `downloading` 后 stdin 触发 `app.close()`，换健康 mock（同端口）重启 | 停机退出码 **0**；索引里记录为 **`polling` + `SERVICE_STOPPED`**、`taskId=9000001` 保留；重启后自动变 **ready**，新 mock `creates = 0`、`gets = 3`，模型可下载且 GLB 合法 |
+| **R3** ready 模型丢失 → 视口报错 → 重导入恢复 | 浏览器里导入 → ready → 删磁盘上的 `model.glb` → 刷新并选中该资产 → 重导入 | 错误边界出现“3D 模型加载失败”；重导入后 `data-loaded=true`、画布 **10,522** 种颜色；`modelUrl` revision 从 `…f42d7d08` 变为 `…0dbb3aed`；mock `creates = 0`；页面唯一异常是旧 URL 的 404（预期内），新 URL 无报错 |
+| **S3** 非 loopback 的 http 上游拒绝启动 | 以 `LUX3D_BASE=http://192.0.2.10:4010`（TEST-NET-1）启动后端 | 退出码 **12**，输出 `Invalid LUX3D_BASE: HTTPS required except for loopback mock`；出站守卫**已加载**（marker active）且日志**为空** —— 没带着 key 发过任何请求 |
+
+证据：`docs/reports/artifacts/M0-A/review-r1-leftover-temp.json`、`review-r2-drip-timeout.json`、`review-r2-resume.json`、`review-r3-model-missing.json`、`review-s3-http-base.json`。
+
+## 全量结果
+
+| 套件 | 结果 |
+| --- | --- |
+| `pnpm test` | **67 项**：插件 20（含 M0-B N1 三条 `it.fails` 预期失败）、资产 **46**、bridge 1 |
+| `pnpm test:e2e`（M0-B） | **24 通过** |
+| `pnpm test:e2e:m0a`（M0-A） | **27 通过**（原 22 + 新增 5） |
+| `pnpm typecheck` | 通过 |
+
+测试期间 `apps/server/src`、`apps/studio/src`、`packages/shared/src` 文件哈希前后一致；跑完 3001/4010/5173/5174 均已释放。
+
+## 本轮未运行 / 限制
+
+- **没有用 OS 级 SIGTERM 子进程验证**：用 stdin 触发的是同一个 `app.close()` 路径（实现的 SIGTERM 入口也是调它）。
+- 没有验证“已进入同步模型转换时的强制中断”——实现方已声明转换隔离留给 M1，本轮只验证了“等待转换返回后保存可恢复状态”。
+- 100 MiB 下载上限、私网/IPv6 重定向、截断 GLB、DNS 卡死等只在后端单元测试覆盖，e2e 只覆盖了滴流超时与模型缺失。
+- S2（事件持久化/断线补拉）、S4（部件命名/体积门槛/转换隔离）按安排未做。
+- 仍未打真实 Lux3D 接口（真实生成 / part-split / 真实 2 小时过期都没验证）；"瓶盖打开"仍未验证。
+- 只跑 Chromium；Firefox/WebKit、移动端未测。
+
+## 整改回归结论
+
+R1/R2/R3/S3 的回归全部通过，原 22 项无回退。**M0-A 测试侧可以最终过关**，待 Codex 复核整改。

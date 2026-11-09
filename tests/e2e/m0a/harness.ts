@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import net from 'node:net';
 import path from 'node:path';
@@ -20,6 +20,9 @@ const requireFromServer = createRequire(path.join(SERVER_DIR, 'package.json'));
 export interface Child {
   pid: number;
   stop(): Promise<void>;
+  /** 模拟 SIGTERM 的优雅停机：stdin 发 close，等进程自己退出。 */
+  gracefulClose(timeoutMs?: number): Promise<{ code: number | null; output: string }>;
+  output(): string;
 }
 
 export async function freePort(): Promise<number> {
@@ -59,29 +62,99 @@ interface StartOptions {
   timeoutMs?: number;
 }
 
-export async function startChild(options: StartOptions): Promise<Child & { output: () => string }> {
+export async function startChild(options: StartOptions): Promise<Child> {
   const child: ChildProcess = spawn(options.command, options.args, {
     cwd: options.cwd,
     env: { ...process.env, ...options.env },
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['pipe', 'pipe', 'pipe'],
     windowsHide: true,
   });
   let output = '';
   child.stdout?.on('data', (chunk) => { output += String(chunk); });
   child.stderr?.on('data', (chunk) => { output += String(chunk); });
+  const exited = new Promise<number | null>((resolve) => child.once('exit', (code) => resolve(code)));
   const stop = async () => {
     if (child.exitCode !== null || child.pid === undefined) return;
     // Windows 下需要整棵进程树
     spawnSync('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' });
     await new Promise((resolve) => setTimeout(resolve, 150));
   };
+  const gracefulClose = async (timeoutMs = 30_000) => {
+    child.stdin?.write('close\n');
+    const code = await Promise.race([
+      exited,
+      new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), timeoutMs)),
+    ]);
+    if (code === 'timeout') {
+      await stop();
+      return { code: null, output };
+    }
+    return { code, output };
+  };
   try {
-    await waitForHttp(options.readyUrl, options.timeoutMs ?? 60_000);
+    await Promise.race([
+      waitForHttp(options.readyUrl, options.timeoutMs ?? 60_000),
+      exited.then((code) => { throw new Error(`${options.label} 在就绪前退出（code=${code}）\n${output}`); }),
+    ]);
   } catch (error) {
     await stop();
     throw new Error(`${options.label} 启动失败：${error instanceof Error ? error.message : String(error)}\n${output}`);
   }
-  return { pid: child.pid ?? -1, stop, output: () => output };
+  return { pid: child.pid ?? -1, stop, gracefulClose, output: () => output };
+}
+
+/**
+ * 启动一个「应该拒绝启动」的后端：不等就绪，直接等退出码。
+ * 用于验证 `LUX3D_BASE` 配成非 loopback 的 http:// 时会在发请求前就被拒。
+ */
+export async function startBackendExpectingRejection(options: {
+  base: string;
+  assetsDir: string;
+  guardLog?: string;
+  timeoutMs?: number;
+}): Promise<{ code: number | null; output: string; guardLog: string; guardMarker: Record<string, unknown> | null }> {
+  const guardLog = options.guardLog ?? path.join(M0A_DATA, `net-guard-reject-${Date.now()}.log`);
+  mkdirSync(M0A_DATA, { recursive: true });
+  writeFileSync(guardLog, '', 'utf8');
+  rmSync(`${guardLog}.loaded`, { force: true });
+  const child = spawn(process.execPath, [BACKEND_LAUNCHER], {
+    cwd: SERVER_DIR,
+    env: {
+      ...process.env,
+      PORT: '1',
+      LUX3D_BASE: options.base,
+      LUX3D_API_KEY: SENTINEL_KEY,
+      ASSETS_DIR: options.assetsDir,
+      PI_NET_GUARD_LOG: guardLog,
+      NODE_OPTIONS: `--require ${GUARD_SCRIPT_ARG}`,
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
+  let output = '';
+  child.stdout?.on('data', (chunk) => { output += String(chunk); });
+  child.stderr?.on('data', (chunk) => { output += String(chunk); });
+  const code = await new Promise<number | null>((resolve) => {
+    const timer = setTimeout(() => { spawnSync('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' }); }, options.timeoutMs ?? 30_000);
+    child.once('exit', (exitCode) => { clearTimeout(timer); resolve(exitCode); });
+  });
+  return { code, output, guardLog, guardMarker: readGuardMarker(guardLog) };
+}
+
+/** 等一个端口不再被监听（换 mock 场景时避免 TIME_WAIT / 旧进程占口）。 */
+export async function waitPortFree(port: number, timeoutMs = 10_000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const inUse = await new Promise<boolean>((resolve) => {
+      const socket = net.connect({ port, host: '127.0.0.1' });
+      socket.once('connect', () => { socket.destroy(); resolve(true); });
+      socket.once('error', () => resolve(false));
+      socket.setTimeout(500, () => { socket.destroy(); resolve(false); });
+    });
+    if (!inUse) return true;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return false;
 }
 
 /** 启动 CodeBuddy 提供的 mock Lux3D 服务（apps/server/src/assets/mock-server.ts）。 */
@@ -121,6 +194,7 @@ export async function startBackend(options: {
   assetsDir: string;
   pollMs?: number;
   timeoutMs?: number;
+  downloadTimeoutMs?: number;
   guardLog?: string;
 }) {
   const port = options.port ?? (await freePort());
@@ -128,20 +202,22 @@ export async function startBackend(options: {
   mkdirSync(M0A_DATA, { recursive: true });
   writeFileSync(guardLog, '', 'utf8');
   rmSync(`${guardLog}.loaded`, { force: true });
+  const env: Record<string, string> = {
+    PORT: String(port),
+    LUX3D_BASE: options.base,
+    LUX3D_API_KEY: SENTINEL_KEY,
+    ASSETS_DIR: options.assetsDir,
+    POLL_MS: String(options.pollMs ?? 60),
+    TIMEOUT_MS: String(options.timeoutMs ?? 20_000),
+    PI_NET_GUARD_LOG: guardLog,
+    NODE_OPTIONS: `--require ${GUARD_SCRIPT_ARG}`,
+  };
+  if (options.downloadTimeoutMs !== undefined) env.ASSET_DOWNLOAD_TIMEOUT_MS = String(options.downloadTimeoutMs);
   const child = await startChild({
     command: process.execPath,
     args: [BACKEND_LAUNCHER],
     cwd: SERVER_DIR,
-    env: {
-      PORT: String(port),
-      LUX3D_BASE: options.base,
-      LUX3D_API_KEY: SENTINEL_KEY,
-      ASSETS_DIR: options.assetsDir,
-      POLL_MS: String(options.pollMs ?? 60),
-      TIMEOUT_MS: String(options.timeoutMs ?? 20_000),
-      PI_NET_GUARD_LOG: guardLog,
-      NODE_OPTIONS: `--require ${GUARD_SCRIPT_ARG}`,
-    },
+    env,
     readyUrl: `http://127.0.0.1:${port}/health`,
     label: 'backend',
   });

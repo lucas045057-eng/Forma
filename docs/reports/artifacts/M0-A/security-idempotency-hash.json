@@ -1,14 +1,14 @@
 {
   "containsPlaintext": false,
   "entry": {
-    "id": "f437b27d-21b2-492c-8ec2-2c1968fe6b4d",
+    "id": "2de1e387-5b94-4207-8344-bbae96d655da",
     "status": "ready",
-    "createdAt": "2026-11-09T07:52:23.599Z",
-    "updatedAt": "2026-11-09T07:52:24.253Z",
-    "keyHash": "7dd4a9518245d9aa48eeaeebdd8f700b76743f5a26e00ee70a53cbed26c7604c",
+    "createdAt": "2026-11-09T08:08:46.554Z",
+    "updatedAt": "2026-11-09T08:08:47.547Z",
+    "keyHash": "b03b66e1eb9f4e0d82c6ec69a5fff5a60c611d41f07ad8fdbf04d4987c0430cb",
     "fingerprint": "634c290e30e1f2fe07599fc542ad47bf46b5cc0ee9467451414dc77a57da4b77",
     "taskId": "9000006",
-    "deadline": 1794210773602,
+    "deadline": 1794211756560,
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -18,7 +18,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 402,
+      "durationMs": 664,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -32,6 +32,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/f437b27d-21b2-492c-8ec2-2c1968fe6b4d/model.glb"
+    "modelUrl": "/assets/2de1e387-5b94-4207-8344-bbae96d655da/model.glb?revision=30d1427f-158a-4745-8efc-383920c0038d"
   }
 }

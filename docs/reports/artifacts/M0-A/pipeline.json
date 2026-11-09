@@ -2,24 +2,23 @@
   "submitted": {
     "status": 202,
     "asset": {
-      "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+      "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
       "status": "polling",
-      "createdAt": "2026-11-09T07:51:54.393Z",
-      "updatedAt": "2026-11-09T07:51:54.405Z",
+      "createdAt": "2026-11-09T08:08:15.388Z",
+      "updatedAt": "2026-11-09T08:08:15.400Z",
       "taskId": "9000001"
     }
   },
   "restStatuses": [
     "polling",
-    "downloading",
     "processing",
     "ready"
   ],
   "finalAsset": {
-    "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+    "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
     "status": "ready",
-    "createdAt": "2026-11-09T07:51:54.393Z",
-    "updatedAt": "2026-11-09T07:51:55.160Z",
+    "createdAt": "2026-11-09T08:08:15.388Z",
+    "updatedAt": "2026-11-09T08:08:16.189Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -30,7 +29,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 491,
+      "durationMs": 505,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -44,7 +43,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/f23624df-cd60-460e-a196-2d7de6eac4ed/model.glb"
+    "modelUrl": "/assets/f5effd74-33c0-4392-9e03-b44b19e84f29/model.glb?revision=c46c4306-e70c-4d08-b852-2318284fc74a"
   },
   "glb": {
     "header": {
@@ -83,73 +82,73 @@
   "events": [
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:51:54.405Z",
+      "ts": "2026-11-09T08:08:15.400Z",
       "sequence": 1,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "polling",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:54.405Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:15.400Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:51:54.407Z",
+      "ts": "2026-11-09T08:08:15.403Z",
       "sequence": 2,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "polling",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:54.407Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:15.403Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:51:54.492Z",
+      "ts": "2026-11-09T08:08:15.498Z",
       "sequence": 3,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "polling",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:54.492Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:15.498Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:51:54.586Z",
+      "ts": "2026-11-09T08:08:15.592Z",
       "sequence": 4,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "downloading",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:54.586Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:15.592Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:51:54.626Z",
+      "ts": "2026-11-09T08:08:15.643Z",
       "sequence": 5,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "processing",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:54.626Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:15.643Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.ready",
-      "ts": "2026-11-09T07:51:55.160Z",
+      "ts": "2026-11-09T08:08:16.189Z",
       "sequence": 6,
       "asset": {
-        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
+        "id": "f5effd74-33c0-4392-9e03-b44b19e84f29",
         "status": "ready",
-        "createdAt": "2026-11-09T07:51:54.393Z",
-        "updatedAt": "2026-11-09T07:51:55.160Z",
+        "createdAt": "2026-11-09T08:08:15.388Z",
+        "updatedAt": "2026-11-09T08:08:16.189Z",
         "taskId": "9000001",
         "metrics": {
           "before": {
@@ -160,7 +159,7 @@
             "bytes": 983560,
             "vertices": 85436
           },
-          "durationMs": 491,
+          "durationMs": 505,
           "bounds": {
             "min": [
               -0.15895565660573138,
@@ -174,7 +173,7 @@
             ]
           }
         },
-        "modelUrl": "/assets/f23624df-cd60-460e-a196-2d7de6eac4ed/model.glb"
+        "modelUrl": "/assets/f5effd74-33c0-4392-9e03-b44b19e84f29/model.glb?revision=c46c4306-e70c-4d08-b852-2318284fc74a"
       }
     }
   ],
@@ -191,7 +190,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 44400,
+    "pid": 3972,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   }
 }

@@ -61,5 +61,13 @@ pnpm test:e2e:m0a      # = playwright test -c playwright.m0a.config.ts
 | `start-backend.mjs` | 被测后端启动器：与 `src/index.ts` 同一条 `createApp()`，只把 `pollMs`/`timeoutMs` 改成毫秒级；检查守卫是否加载 |
 | `stub-upstream.mjs` | 补 CodeBuddy mock 没有的剧本：并发超限、create 500、无 GLB 输出 |
 | `01-pipeline` … `06-viewport` | 主链路、幂等、失败路径、导入、安全、Studio 3D 视口 |
+| `07-review-fixes` | M0-A 审查整改回归：残留 `.tmp` 不阻断重试、滴流下载被总时限中止、下载中优雅停机后可恢复、ready 模型丢失可修复、非 loopback http 上游拒绝启动 |
+
+启动器还有两个测试专用钩子（`start-backend.mjs`）：
+
+- `createApp` 报配置错时以退出码 **12** 结束（`startBackendExpectingRejection` 等它退出）；
+- stdin 收到 `close` 就调 `app.close()`——Windows 上 `taskkill /F` 拿不到优雅停机，用这个模拟 SIGTERM。
+
+下载总时限通过 `ASSET_DOWNLOAD_TIMEOUT_MS` 调短（`startBackend({ downloadTimeoutMs })` 透传）。
 
 **不会碰真实 Lux3D**：后端进程不读 `apps/server/.env`，`LUX3D_BASE` 指向本地 mock，且带出站守卫；`docs/reports/M0-A-test.md` 有完整证据链。

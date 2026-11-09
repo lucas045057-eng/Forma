@@ -78,7 +78,7 @@ test.describe('M0-A 主链路（全程 mock Lux3D）', () => {
       await events.waitFor((list) => list.some((event) => event.type === 'asset.ready' && event.asset?.id === created.id));
 
       // REST 侧
-      expect(asset.modelUrl).toBe(`/assets/${created.id}/model.glb`);
+      expect(asset.modelUrl).toMatch(new RegExp(`^/assets/${created.id}/model\\.glb\\?revision=[\\w-]+$`));
       expect(asset.metrics).toBeTruthy();
       const { before, after, durationMs } = asset.metrics;
       expect(before.bytes).toBeGreaterThan(10_000_000);      // mock 供的是 13.3 MB 真模型

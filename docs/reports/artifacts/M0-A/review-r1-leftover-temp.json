@@ -1,0 +1,44 @@
+{
+  "files": [
+    "model.glb",
+    "model.glb.tmp",
+    "raw.glb",
+    "raw.glb.tmp"
+  ],
+  "temps": [
+    "model.glb.tmp",
+    "raw.glb.tmp"
+  ],
+  "indexTemps": [],
+  "asset": {
+    "id": "52ab4646-54cf-4ed7-aaf6-48ce76f9d72e",
+    "status": "ready",
+    "createdAt": "2026-11-09T08:09:03.878Z",
+    "updatedAt": "2026-11-09T08:09:04.042Z",
+    "taskId": "9000001",
+    "metrics": {
+      "before": {
+        "bytes": 488,
+        "vertices": 3
+      },
+      "after": {
+        "bytes": 1300,
+        "vertices": 3
+      },
+      "durationMs": 10,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          0
+        ],
+        "max": [
+          0.5,
+          1,
+          0
+        ]
+      }
+    },
+    "modelUrl": "/assets/52ab4646-54cf-4ed7-aaf6-48ce76f9d72e/model.glb?revision=3d169527-e202-415f-820a-24b19695b221"
+  }
+}

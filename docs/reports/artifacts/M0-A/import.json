@@ -3,15 +3,16 @@
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "polling",
-    "createdAt": "2026-11-09T07:52:20.823Z",
-    "updatedAt": "2026-11-09T07:52:20.823Z"
+    "createdAt": "2026-11-09T08:08:42.961Z",
+    "updatedAt": "2026-11-09T08:08:42.961Z"
   },
   "asset": {
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "ready",
-    "createdAt": "2026-11-09T07:52:20.823Z",
-    "updatedAt": "2026-11-09T07:52:21.535Z",
+    "createdAt": "2026-11-09T08:08:42.961Z",
+    "updatedAt": "2026-11-09T08:08:43.995Z",
+    "modelUrl": "/assets/lux3d-7000001/model.glb?revision=df54f7f2-b691-499a-a974-d53b28646ab0",
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -21,7 +22,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 452,
+      "durationMs": 690,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -34,8 +35,7 @@
           0.16475417340617085
         ]
       }
-    },
-    "modelUrl": "/assets/lux3d-7000001/model.glb"
+    }
   },
   "model": {
     "bytes": 983560,

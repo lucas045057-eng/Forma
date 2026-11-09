@@ -1,0 +1,51 @@
+{
+  "record": {
+    "id": "8494795c-9423-4651-a050-0e805c98eb0f",
+    "status": "polling",
+    "createdAt": "2026-11-09T08:09:09.239Z",
+    "updatedAt": "2026-11-09T08:09:09.436Z",
+    "keyHash": "90a03706f29c7a719e410cad93fd31d2fa09b08f472f82190a048b761d2ec3a1",
+    "fingerprint": "760e2ea4f13096c77266c1113fbf8086db3f02537cf4210e912cfa3bfec280f5",
+    "taskId": "9000001",
+    "error": {
+      "code": "SERVICE_STOPPED",
+      "message": "服务已停止，重启后继续查询原任务"
+    }
+  },
+  "resumed": {
+    "id": "8494795c-9423-4651-a050-0e805c98eb0f",
+    "status": "ready",
+    "createdAt": "2026-11-09T08:09:09.239Z",
+    "updatedAt": "2026-11-09T08:09:10.645Z",
+    "taskId": "9000001",
+    "metrics": {
+      "before": {
+        "bytes": 488,
+        "vertices": 3
+      },
+      "after": {
+        "bytes": 1300,
+        "vertices": 3
+      },
+      "durationMs": 15,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          0
+        ],
+        "max": [
+          0.5,
+          1,
+          0
+        ]
+      }
+    },
+    "modelUrl": "/assets/8494795c-9423-4651-a050-0e805c98eb0f/model.glb?revision=b48db598-cf45-4178-9cdc-f8f859fae143"
+  },
+  "stats": {
+    "creates": 0,
+    "gets": 3
+  },
+  "modelBytes": 1300
+}

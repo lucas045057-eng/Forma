@@ -1,0 +1,19 @@
+{
+  "oldUrl": "/assets/lux3d-7000003/model.glb?revision=3808895a-433b-43e7-90f9-f42d7d0801d3",
+  "newUrl": "/assets/lux3d-7000003/model.glb?revision=6fcba686-810a-4854-a8dd-0dbb3aedf9d2",
+  "creates": 0,
+  "canvas": {
+    "width": 1056,
+    "height": 781,
+    "uniqueColors": 10522,
+    "mean": 216.63014305992058,
+    "stdDev": 48.58100762178604
+  },
+  "pageErrors": [
+    "Could not load /assets/lux3d-7000003/model.glb?revision=3808895a-433b-43e7-90f9-f42d7d0801d3: fetch for \"http://127.0.0.1:5173/assets/lux3d-7000003/model.glb?revision=3808895a-433b-43e7-90f9-f42d7d0801d3\" responded with 404: Not Found"
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "%o\n\n%s\n\n%s\n Error: Could not load /assets/lux3d-7000003/model.glb?revision=3808895a-433b-43e7-90f9-f42d7d0801d3: fetch for \"http://127.0.0.1:5173/assets/lux3d-7000003/model.glb?revision=3808895a-433b-43e7-90f9-f42d7d0801d3\" responded with 404: Not Found\n    at http://127.0.0.1:5173/node_modules/.vite/deps/chunk-CVKLUUPT.js?v=2c210771:43439:38\n    at Object._onError [as onError] (http://127.0.0.1:5173/node_modules/.vite/deps/@react-three_drei.js?v=2c210771:26732:9)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/chunk-CVKLUUPT.js?v=2c210771:24147:40 The above error occurred in the <CanvasImpl> component. React will try to recreate this component tree from scratch using the error boundary you provided, ModelErrorBoundary."
+  ]
+}

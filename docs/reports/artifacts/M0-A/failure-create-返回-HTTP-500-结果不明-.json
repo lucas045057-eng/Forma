@@ -7,26 +7,26 @@
     "code": "UPSTREAM_HTTP"
   },
   "submitted": {
-    "id": "af00e33f-14be-4eb6-94ce-9a04d25d6f4a",
+    "id": "0c61bfd9-bba8-45bd-9346-72f53f9d7b66",
     "status": "submit_unknown",
-    "createdAt": "2026-11-09T07:52:17.933Z",
-    "updatedAt": "2026-11-09T07:52:17.944Z",
+    "createdAt": "2026-11-09T08:08:39.871Z",
+    "updatedAt": "2026-11-09T08:08:39.884Z",
     "error": {
       "code": "UPSTREAM_HTTP",
       "message": "Lux3D 返回 HTTP 500"
     }
   },
   "finalAsset": {
-    "id": "af00e33f-14be-4eb6-94ce-9a04d25d6f4a",
+    "id": "0c61bfd9-bba8-45bd-9346-72f53f9d7b66",
     "status": "submit_unknown",
-    "createdAt": "2026-11-09T07:52:17.933Z",
-    "updatedAt": "2026-11-09T07:52:17.944Z",
+    "createdAt": "2026-11-09T08:08:39.871Z",
+    "updatedAt": "2026-11-09T08:08:39.884Z",
     "error": {
       "code": "UPSTREAM_HTTP",
       "message": "Lux3D 返回 HTTP 500"
     }
   },
-  "elapsedMs": 15,
+  "elapsedMs": 17,
   "stats": {
     "before": {
       "creates": 1,

@@ -6,24 +6,24 @@
     "code": "UNKNOWN_STATUS"
   },
   "submitted": {
-    "id": "c28999af-1f54-4e64-9feb-b9d8c17eda85",
+    "id": "b2fef314-b63e-47ba-91dc-0685d463ab01",
     "status": "polling",
-    "createdAt": "2026-11-09T07:52:14.512Z",
-    "updatedAt": "2026-11-09T07:52:14.523Z",
+    "createdAt": "2026-11-09T08:08:36.138Z",
+    "updatedAt": "2026-11-09T08:08:36.151Z",
     "taskId": "9000001"
   },
   "finalAsset": {
-    "id": "c28999af-1f54-4e64-9feb-b9d8c17eda85",
+    "id": "b2fef314-b63e-47ba-91dc-0685d463ab01",
     "status": "failed",
-    "createdAt": "2026-11-09T07:52:14.512Z",
-    "updatedAt": "2026-11-09T07:52:14.526Z",
+    "createdAt": "2026-11-09T08:08:36.138Z",
+    "updatedAt": "2026-11-09T08:08:36.153Z",
     "taskId": "9000001",
     "error": {
       "code": "UNKNOWN_STATUS",
       "message": "Lux3D 返回未知任务状态"
     }
   },
-  "elapsedMs": 17,
+  "elapsedMs": 19,
   "stats": {
     "before": {
       "creates": 1,
