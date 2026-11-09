@@ -1,0 +1,35 @@
+* { box-sizing: border-box; }
+:root { font-family: "Microsoft YaHei", sans-serif; color: #483a2d; background: #faf6ee; font-synthesis: none; }
+body { margin: 0; }
+a { color: inherit; text-decoration: none; }
+.navigation { display: flex; align-items: center; justify-content: space-between; padding: 28px 6%; border-bottom: 1px solid #e7dece; font-size: 13px; }
+.brand { font-size: 28px; letter-spacing: 5px; font-family: serif; }
+.brand span { display: block; font: 8px sans-serif; letter-spacing: 2px; margin-top: 8px; }
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: center; padding: 64px 6%; }
+.eyebrow { letter-spacing: 3px; font-size: 10px; color: #927a5a; }
+h1 { font: 48px/1.4 Georgia, "SimSun", serif; letter-spacing: 3px; margin: 22px 0; }
+.intro { font-size: 14px; line-height: 2; color: #82715c; }
+.price { font-size: 26px; margin: 28px 0; }
+.price span { font-size: 11px; color: #82715c; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.button { border: 1px solid #756044; background: #756044; color: #fffaf0; border-radius: 3px; padding: 14px 25px; cursor: pointer; font: inherit; font-size: 13px; }
+.button:hover { filter: brightness(.92); }
+.button-secondary { background: transparent; color: #756044; }
+.fine-print { font-size: 10px; color: #9e8b74; margin-top: 20px; }
+.product-art { min-height: 420px; border-radius: 48% 48% 6px 6px; background: #eee4d3; position: relative; display: grid; place-items: center; overflow: hidden; }
+.halo { position: absolute; width: 280px; height: 280px; border-radius: 50%; background: #f9f0dc; filter: blur(30px); }
+.bottle { position: relative; width: 136px; height: 200px; border-radius: 18px 18px 24px 24px; background: linear-gradient(100deg,#a15e2bd9,#d8a462c9 45%,#8d512bd9); box-shadow: 20px 28px 28px #7e5e4933, inset 4px 0 10px #ffffff40; margin-top: 35px; }
+.cap { position: absolute; top: -45px; left: 7px; width: 122px; height: 55px; border-radius: 8px 8px 3px 3px; background: repeating-linear-gradient(0deg,#765235 0px,#916d49 3px,#83603e 5px); }
+.label { background: #f6efdf; margin: 48px 10px 0; padding: 20px 4px 12px; text-align: center; font: 25px serif; letter-spacing: 4px; }
+.label span { display: block; font: 8px/1.8 sans-serif; letter-spacing: 1px; margin: 12px 0; }
+.label small { display: block; font-size: 8px; letter-spacing: 1px; }
+.art-caption { position: absolute; bottom: 24px; font-size: 10px; letter-spacing: 4px; color: #8d7556; }
+.details { padding: 48px 6% 64px; text-align: center; background: #f0e9dd; }
+h2 { font: 28px/1.5 Georgia, "SimSun", serif; }
+.benefits { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; margin: 40px 0; text-align: left; }
+.number { color: #ab9475; font: italic 26px Georgia,serif; }
+h3 { font-size: 16px; font-weight: 500; }
+.benefits p { color: #8b7963; font-size: 12px; line-height: 2; }
+footer { text-align: center; padding: 28px; font-size: 11px; color: #95826a; }
+.action-status:not(:empty) { position: fixed; bottom: 16px; left: 16px; background: #483a2d; color: white; padding: 12px 20px; border-radius: 4px; font-size: 12px; }
+@media (max-width: 650px) { .hero { grid-template-columns: 1fr; padding-top: 32px; } h1 { font-size: 40px; } .product-art { min-height: 330px; } .benefits { grid-template-columns: 1fr; gap: 16px; } }
