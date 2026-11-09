@@ -1,0 +1,13 @@
+{
+  "name": "spatial-ai-workbench",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": { "node": ">=24", "pnpm": ">=11" },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @spatial/studio --filter @spatial/product-page --filter @spatial/server dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @spatial/vite-plugin-source-tag test"
+  },
+  "devDependencies": { "typescript": "~5.9.3", "@types/node": "^24.0.0" }
+}

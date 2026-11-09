@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.data/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+orbital/sessions/
+orbital/ledger/
+orbital/tool-results/
+orbital/sub_agents/*/*.jsonl

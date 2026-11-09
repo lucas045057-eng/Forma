@@ -1,0 +1,6 @@
+{
+  "name": "@spatial/vite-plugin-source-tag", "private": true, "type": "module", "exports": "./src/index.ts",
+  "scripts": { "build": "tsc --noEmit false --declaration --outDir dist", "typecheck": "tsc", "test": "vitest run" },
+  "dependencies": { "@babel/core": "^7.28.0", "magic-string": "^0.30.21" },
+  "devDependencies": { "@types/babel__core": "^7.20.5", "vite": "^7.2.0", "vitest": "^3.2.4" }
+}

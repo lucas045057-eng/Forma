@@ -1,0 +1,5 @@
+{
+  "name": "@spatial/server", "private": true, "type": "module",
+  "scripts": { "dev": "node --watch src/index.ts", "build": "tsc --noEmit false --outDir dist", "typecheck": "tsc" },
+  "dependencies": { "fastify": "^5.6.0", "@fastify/websocket": "^11.2.0" }
+}
