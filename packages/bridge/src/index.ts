@@ -40,11 +40,23 @@ export function installBridge(): () => void {
     }
     schedule();
   };
-  const click = (event: MouseEvent) => {
+  const intercept = (event: Event) => {
     if (!picking) return;
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
+  };
+  const keyboard = (event: KeyboardEvent) => {
+    if (!picking || (event.key !== 'Enter' && event.key !== ' ')) return;
+    const target = event.target;
+    const activatable = target instanceof Element && target.closest(
+      'a[href],button,input,select,textarea,form,summary,[contenteditable],[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="switch"],[role="menuitem"],[tabindex]',
+    );
+    if (activatable) intercept(event);
+  };
+  const click = (event: MouseEvent) => {
+    if (!picking) return;
+    intercept(event);
     const element = nearest(event.target);
     if (!element) {
       send({ type: 'error', payload: { message: '未找到带源码标记的外层容器' } });
@@ -86,21 +98,34 @@ export function installBridge(): () => void {
   const error = (event: ErrorEvent) => send({ type: 'error', payload: { message: event.message } });
   const rejection = (event: PromiseRejectionEvent) => send({ type: 'error', payload: { message: String(event.reason) } });
   window.addEventListener('message', receive);
+  const activationEvents = ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'dblclick', 'contextmenu', 'submit'] as const;
+  const listenerOptions: AddEventListenerOptions = { capture: true };
   window.addEventListener('click', click, true);
   window.addEventListener('auxclick', click, true);
+  for (const type of activationEvents) window.addEventListener(type, intercept, listenerOptions);
+  window.addEventListener('keydown', keyboard, true);
+  window.addEventListener('keypress', keyboard, true);
+  window.addEventListener('keyup', keyboard, true);
   window.addEventListener('pointermove', move, true);
   document.documentElement.addEventListener('pointerleave', leave);
   window.addEventListener('scroll', scroll, true);
   window.addEventListener('resize', schedule);
   window.addEventListener('error', error);
   window.addEventListener('unhandledrejection', rejection);
-  const observer = new MutationObserver(schedule);
+  const observer = new MutationObserver(records => {
+    if (records.every(record => overlay.contains(record.target))) return;
+    schedule();
+  });
   observer.observe(document.getElementById('root') ?? document.body, { subtree: true, childList: true, attributes: true, characterData: true });
   send({ type: 'ready' });
   return () => {
     window.removeEventListener('message', receive);
     window.removeEventListener('click', click, true);
     window.removeEventListener('auxclick', click, true);
+    for (const type of activationEvents) window.removeEventListener(type, intercept, listenerOptions);
+    window.removeEventListener('keydown', keyboard, true);
+    window.removeEventListener('keypress', keyboard, true);
+    window.removeEventListener('keyup', keyboard, true);
     window.removeEventListener('pointermove', move, true);
     document.documentElement.removeEventListener('pointerleave', leave);
     window.removeEventListener('scroll', scroll, true);

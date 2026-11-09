@@ -1,0 +1,92 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { createServer } from 'node:http';
+import { chromium } from '@playwright/test';
+import ts from 'typescript';
+
+const transpile = source => ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
+const shared = transpile(await readFile(new URL('../../shared/src/index.ts', import.meta.url), 'utf8')).replace(/^export /gm, '');
+const bridge = transpile(await readFile(new URL('./index.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
+const activation = ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'auxclick', 'dblclick', 'contextmenu', 'submit', 'keydown', 'keypress', 'keyup'];
+
+test('capture isolation, real click selection, restoration and idle overlay without #root', async () => {
+  const server = createServer((req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end(req.url === '/child' ? '<body><button data-src="src/Button.tsx:1:1" data-cid="Button">Pick</button><form><input aria-label="input"></form><a href="#target">Link</a><p>plain text</p></body>' : '<iframe src="/child" style="width:600px;height:500px"></iframe>');
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+  const browser = await chromium.launch({ executablePath: existsSync(chrome) ? chrome : undefined });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`http://127.0.0.1:${server.address().port}/`);
+    await page.evaluate(() => { window.results = []; window.addEventListener('message', event => { if (event.data.type === 'pick:result') window.results.push(event.data.payload); }); });
+    const frame = page.frames().find(item => item.url().endsWith('/child'));
+    await frame.evaluate(types => {
+      window.counts = {};
+      for (const type of [...types, 'pointermove', 'mousemove', 'wheel', 'scroll']) {
+        document.addEventListener(type, event => { window.counts[type] = (window.counts[type] ?? 0) + 1; if (type === 'submit') event.preventDefault(); });
+      }
+      window.originalRaf = window.requestAnimationFrame.bind(window);
+      window.framesScheduled = 0;
+      window.requestAnimationFrame = fn => { window.framesScheduled++; return window.originalRaf(fn); };
+      const add = window.addEventListener.bind(window), remove = window.removeEventListener.bind(window);
+      window.bridgeListeners = [];
+      window.addEventListener = (type, fn, options) => { window.bridgeListeners.push({type, fn, options}); add(type, fn, options); };
+      window.removeEventListener = (type, fn, options) => { window.bridgeListeners = window.bridgeListeners.filter(item => !(item.type === type && item.fn === fn && item.options === options)); remove(type, fn, options); };
+    }, activation);
+    await frame.addScriptTag({ content: `${shared}\n${bridge}\nconst beforeInstall = window.bridgeListeners.length; window.disposeBridge = installBridge(); window.bridgeOwned = window.bridgeListeners.slice(beforeInstall);` });
+    const selectMode = async type => {
+      await page.evaluate(type => document.querySelector('iframe').contentWindow.postMessage({type}, location.origin), type);
+      // Same-origin ping ensures the prior message has been processed in the iframe event loop.
+      await frame.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    };
+    await selectMode('pick:start');
+    await frame.locator('button').click();
+    await page.waitForFunction(() => window.results.length === 1);
+    assert.equal((await page.evaluate(() => window.results[0])).src, 'src/Button.tsx:1:1');
+    for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click']) assert.equal(await frame.evaluate(type => window.counts[type] ?? 0, type), 0, type);
+    await frame.locator('input').focus();
+    await frame.locator('input').press('Enter');
+    await frame.locator('button').focus();
+    await frame.locator('button').press('Space');
+    await frame.locator('a').focus();
+    await frame.locator('a').press('Enter');
+    assert.equal(new URL(frame.url()).hash, '');
+    assert.equal(await frame.evaluate(() => window.counts.submit ?? 0), 0);
+    assert.equal(await frame.evaluate(() => window.counts.keydown ?? 0), 0);
+    const blocked = await frame.evaluate(types => types.map(type => {
+      const target = type === 'submit' ? document.querySelector('form') : document.querySelector('button');
+      const event = type.startsWith('key') ? new KeyboardEvent(type, {key:'Enter', bubbles:true,cancelable:true}) : new Event(type,{bubbles:true,cancelable:true});
+      target.dispatchEvent(event);
+      return event.defaultPrevented;
+    }), activation.filter(type => !['click', 'auxclick'].includes(type)));
+    assert.ok(blocked.every(Boolean));
+    const movement = await frame.evaluate(() => ['pointermove','mousemove','wheel','scroll'].map(type => {
+      const event = new Event(type,{bubbles:true,cancelable:true});document.querySelector('button').dispatchEvent(event);return event.defaultPrevented;
+    }));
+    assert.ok(movement.every(value => !value));
+    await frame.evaluate(() => new Promise(resolve => window.originalRaf(() => window.originalRaf(resolve))));
+    const before = await frame.evaluate(() => window.framesScheduled);
+    await frame.evaluate(() => new Promise(resolve => { let remaining=12; function next(){if(--remaining) window.originalRaf(next); else resolve();} window.originalRaf(next); }));
+    assert.equal(await frame.evaluate(() => window.framesScheduled), before, 'overlay mutations must not schedule idle frames');
+    await selectMode('pick:stop');
+    assert.equal(await frame.locator('[data-highlight-src]').count(), 0);
+    await frame.locator('button').click();
+    assert.equal(await frame.evaluate(() => window.counts.click), 1);
+    await frame.locator('input').press('Enter');
+    assert.equal(await frame.evaluate(() => window.counts.submit), 1);
+    await frame.locator('a').press('Enter');
+    assert.equal(new URL(frame.url()).hash, '#target');
+    const unblocked = await frame.evaluate(types => types.filter(type => type !== 'submit').map(type => {
+      const event = type.startsWith('key') ? new KeyboardEvent(type,{key:'Enter',bubbles:true,cancelable:true}) : new Event(type,{bubbles:true,cancelable:true});
+      document.querySelector('button').dispatchEvent(event); return !event.defaultPrevented;
+    }), activation);
+    assert.ok(unblocked.every(Boolean));
+    await frame.evaluate(() => window.disposeBridge());
+    assert.equal(await frame.locator('[data-bridge-overlay]').count(), 0);
+    assert.equal(await frame.evaluate(() => window.bridgeListeners.filter(item => window.bridgeOwned.includes(item)).length), 0);
+  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+});

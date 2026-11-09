@@ -10,7 +10,7 @@
     "dev": "pnpm --parallel --filter @spatial/studio --filter @spatial/product-page --filter @spatial/server dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @spatial/vite-plugin-source-tag --filter @spatial/server test",
+    "test": "pnpm --filter @spatial/vite-plugin-source-tag --filter @spatial/server --filter @spatial/bridge test",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:m0a": "playwright test -c playwright.m0a.config.ts"

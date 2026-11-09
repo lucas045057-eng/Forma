@@ -27,6 +27,26 @@ describe('source tags', () => {
     expect(result.indexOf('data-src')).toBeGreaterThan(result.indexOf('{...props}'));
     expect(result.match(/data-src=/g)).toHaveLength(1);
   });
+  it('does not traverse or edit JSX inside removed reserved attributes', () => {
+    for (const code of ['const Page=()=> <div data-src={<span/>}/>;', 'const Page=()=> <div data-cid={<b/>}>content</div>;']) {
+      const result = transform(code);
+      expect(result).toContain(`data-src={"src/Page.tsx:1:${code.indexOf('<div') + 1}"}`);
+      expect(result.match(/data-src=/g)).toHaveLength(1);
+      expect(result).not.toContain('<span');
+      expect(result).not.toContain('b');
+      expect(result).toContain('data-cid={"Page"}');
+    }
+  });
+  it('does not treat a capitalized JSX value as a component', () => {
+    const result = transform('const Page=()=>{const Heading=<h1/>; return Heading;}');
+    expect(result).toContain('data-cid={"Page"}');
+    expect(result).not.toContain('data-cid={"Heading"}');
+  });
+  it('keeps named function expressions, top-level helpers and wrapped components', () => {
+    const result = transform('const Page = function PageView() { return <main/> }; const Panel = memo(forwardRef(function PanelView() { return <section/> }));');
+    expect(result).toContain('data-cid={"Page"}');
+    expect(result).toContain('data-cid={"Panel"}');
+  });
   it('uses UTF-16 columns and handles multiline opening tags', () => {
     const code = 'const Page = () => <>香🌿<img\n alt="香"\n /></>;';
     expect(transform(code)).toContain(`src/Page.tsx:1:${code.indexOf('<img') + 1}`);

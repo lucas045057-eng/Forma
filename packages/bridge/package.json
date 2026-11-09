@@ -1,5 +1,5 @@
 {
   "name": "@spatial/bridge", "private": true, "type": "module", "exports": "./src/index.ts",
-  "scripts": { "build": "tsc --noEmit false --declaration --outDir dist", "typecheck": "tsc" },
+  "scripts": { "build": "tsc --noEmit false --declaration --outDir dist", "typecheck": "tsc", "test": "node --test src/index.test.mjs" },
   "dependencies": { "@spatial/shared": "workspace:*" }
 }
