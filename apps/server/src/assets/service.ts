@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, open, copyFile } from 'node:fs/promises';
+import { writeAtomic } from './atomic-file.ts';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import type { Asset, AssetEvent, ModelMetrics } from '@spatial/shared';
@@ -13,6 +14,7 @@ export interface ServiceOptions {
   client: Lux3DClient;
   pollMs?: number;
   timeoutMs?: number;
+  downloadTimeoutMs?: number;
   process?: (input: string, output: string) => Promise<ModelMetrics>;
   download?: typeof downloadGlb;
   emit?: (event: AssetEvent) => void;
@@ -48,6 +50,16 @@ export class AssetService {
         entry.status = 'submit_unknown';
         entry.error = { code: 'SUBMIT_UNCONFIRMED', message: '上次提交未确认；请先查询 Lux3D 任务列表并导入，禁止自动重复提交' };
       }
+      if (entry.status === 'ready' && !await this.modelExists(entry)) {
+        entry.status = 'failed';
+        entry.modelUrl = undefined;
+        entry.error = { code: 'MODEL_MISSING', message: '模型文件缺失，请按原任务编号重新导入修复' };
+      }
+      if (entry.taskId && ['polling', 'downloading', 'processing'].includes(entry.status)) {
+        entry.status = 'polling';
+        entry.deadline = Date.now() + (this.options.timeoutMs ?? 900_000);
+        entry.error = undefined;
+      }
     }
     await this.save();
     for (const entry of this.entries) {
@@ -58,14 +70,16 @@ export class AssetService {
     const json = JSON.stringify(this.entries, null, 2);
     const file = path.join(this.options.directory, 'index.json');
     const operation = this.writes.then(async () => {
-      await writeFile(`${file}.tmp`, json);
-      await rename(`${file}.tmp`, file);
+      await writeAtomic(file, json);
     });
     this.writes = operation.catch(() => {});
     return operation;
   }
   private exclusive<T>(work: () => Promise<T>): Promise<T> {
-    const result = this.submissions.then(work);
+    const result = this.submissions.then(() => {
+      if (this.abort.signal.aborted) throw new AssetError('SERVICE_STOPPED', '资产服务已停止');
+      return work();
+    });
     this.submissions = result.catch(() => {});
     return result;
   }
@@ -76,6 +90,13 @@ export class AssetService {
   }
   list() { return this.entries.map(publicAsset); }
   get(id: string) { const entry = this.entries.find(item => item.id === id); return entry ? publicAsset(entry) : undefined; }
+  private async modelExists(entry: RecordEntry) {
+    try {
+      const file = await open(path.join(this.options.directory, entry.taskId ?? entry.id, 'model.glb'), 'r');
+      try { const info = await file.stat(); return info.isFile() && info.size > 0; }
+      finally { await file.close(); }
+    } catch { return false; }
+  }
   modelPath(id: string) {
     if (!validAssetId(id) || this.get(id)?.status !== 'ready') return undefined;
     const entry = this.entries.find(item => item.id === id)!;
@@ -95,7 +116,7 @@ export class AssetService {
       this.entries.push(entry);
       await this.save();
       try {
-        const taskId = input.prompt ? await this.options.client.createTextTo3d(input) : await this.options.client.createImgTo3d(input);
+        const taskId = input.prompt ? await this.options.client.createTextTo3d(input, this.abort.signal) : await this.options.client.createImgTo3d(input, this.abort.signal);
         await this.update(entry, { taskId, status: 'polling', deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
         this.start(entry);
       } catch (error) {
@@ -108,11 +129,12 @@ export class AssetService {
     if (!/^\d{1,20}$/.test(taskId)) return Promise.reject(new AssetError('INVALID_TASK', '任务编号必须为数字'));
     return this.exclusive(async () => {
       const existing = this.entries.find(item => item.taskId === taskId);
-      if (existing?.status === 'ready' || (existing && this.jobs.has(existing.id))) return publicAsset(existing);
+      if (existing && this.jobs.has(existing.id)) return publicAsset(existing);
+      if (existing?.status === 'ready' && await this.modelExists(existing)) return publicAsset(existing);
       const now = new Date().toISOString();
       const entry: RecordEntry = existing ?? { id: `lux3d-${taskId}`, taskId, status: 'polling', createdAt: now, updatedAt: now };
       if (!existing) this.entries.push(entry);
-      await this.update(entry, { status: 'polling', error: undefined, deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
+      await this.update(entry, { status: 'polling', modelUrl: undefined, error: undefined, deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
       // Re-import always queries current remote state before downloading; it never creates another paid task.
       this.start(entry);
       return publicAsset(entry);
@@ -136,16 +158,20 @@ export class AssetService {
   }
   private start(entry: RecordEntry) {
     const job = this.run(entry).catch(async error => {
-      if (!this.abort.signal.aborted) await this.update(entry, { status: 'failed', error: failure(error) });
+      if (this.abort.signal.aborted) {
+        await this.update(entry, { status: 'polling', deadline: undefined, error: { code: 'SERVICE_STOPPED', message: '服务已停止，重启后继续查询原任务' } });
+      } else await this.update(entry, { status: 'failed', error: failure(error) });
     }).finally(() => this.jobs.delete(entry.id));
     this.jobs.set(entry.id, job);
     // A persistence failure must not become an unhandled rejection or expose upstream data.
     void job.catch(() => {});
   }
   private async run(entry: RecordEntry) {
-    while (!this.abort.signal.aborted) {
+    while (true) {
+      this.abort.signal.throwIfAborted();
       if (Date.now() >= (entry.deadline ?? 0)) throw new AssetError('POLL_TIMEOUT', '等待 Lux3D 超过 15 分钟；可使用原任务编号重新导入查询，勿重复生成');
-      const task = await this.options.client.getTask(entry.taskId!);
+      const task = await this.options.client.getTask(entry.taskId!, this.abort.signal);
+      this.abort.signal.throwIfAborted();
       if (task.status === 4) throw new AssetError('GENERATION_FAILED', 'Lux3D 生成失败');
       if (task.status === 6) { await this.update(entry, { status: 'cancelled', error: { code: 'GENERATION_CANCELLED', message: 'Lux3D 任务已取消' } }); return; }
       if (task.status === 3) {
@@ -154,7 +180,7 @@ export class AssetService {
         const directory = path.join(this.options.directory, entry.taskId ?? entry.id);
         await mkdir(directory, { recursive: true });
         await this.update(entry, { status: 'downloading' });
-        await (this.options.download ?? downloadGlb)(output.content, path.join(directory, 'raw.glb'), this.options.client.base);
+        await (this.options.download ?? downloadGlb)(output.content, path.join(directory, 'raw.glb'), this.options.client.base, { signal: this.abort.signal, timeoutMs: this.options.downloadTimeoutMs });
         await this.process(entry);
         return;
       }
@@ -164,11 +190,13 @@ export class AssetService {
     }
   }
   private async process(entry: RecordEntry) {
+    this.abort.signal.throwIfAborted();
     await this.update(entry, { status: 'processing' });
     const directory = path.join(this.options.directory, entry.taskId ?? entry.id);
     const metrics = await (this.options.process ?? processModel)(path.join(directory, 'raw.glb'), path.join(directory, 'model.glb'));
-    await this.update(entry, { status: 'ready', metrics, modelUrl: `/assets/${entry.id}/model.glb`, error: undefined });
+    this.abort.signal.throwIfAborted();
+    await this.update(entry, { status: 'ready', metrics, modelUrl: `/assets/${entry.id}/model.glb?revision=${randomUUID()}`, error: undefined });
   }
   async idle() { await Promise.allSettled([...this.jobs.values()]); await this.writes; }
-  async close() { this.abort.abort(); await this.idle(); }
+  async close() { this.abort.abort(); await this.submissions; await this.idle(); }
 }
