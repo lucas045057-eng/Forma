@@ -1,0 +1,26 @@
+{
+  "firstStats": {
+    "width": 1056,
+    "height": 781,
+    "uniqueColors": 10522,
+    "mean": 216.63014305992058,
+    "stdDev": 48.58100762178604
+  },
+  "rotatedStats": {
+    "width": 1056,
+    "height": 781,
+    "uniqueColors": 11099,
+    "mean": 216.8994567150377,
+    "stdDev": 48.948929954205305
+  },
+  "diff": {
+    "ratio": 0.11791652116556085,
+    "changed": 97250,
+    "total": 824736
+  },
+  "errors": [],
+  "screenshots": [
+    "docs/reports/artifacts/M0-A/viewport-initial.png",
+    "docs/reports/artifacts/M0-A/viewport-rotated.png"
+  ]
+}

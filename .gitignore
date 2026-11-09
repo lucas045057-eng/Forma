@@ -12,3 +12,5 @@ orbital/sub_agents/*/*.jsonl
 
 docs/reports/artifacts/M0-B/output/
 .worktrees/
+
+docs/reports/artifacts/M0-A/output/

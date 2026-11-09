@@ -41,3 +41,22 @@ pnpm test:e2e
 R1（`m0b-known-issues.spec.ts` 的 R1a/R1b）用 `test.fail()` 标注，R2 两条用 `it.fails` 标注：**修复后它们会变成「意外通过」并让套件失败**，届时删掉这些标记即可。
 
 容器类元素（`main`）和零尺寸元素（`br`）鼠标无法命中，会退化为在元素自身派发 `click`；每条记录里的 `clickMode` 标明用了哪种方式。
+
+## M0-A（Lux3D）测试：`m0a/` 子目录
+
+```powershell
+pnpm test:e2e:m0a      # = playwright test -c playwright.m0a.config.ts
+```
+
+与 M0-B 分开：用的是另一个配置文件，也不需要 `pnpm dev`。跑之前先确保 3001/4010/5173/5174 空闲（它自己会起 mock 4010 + 后端 3001 + Studio 5173 + 模板 5174，跑完自己收掉）。
+
+| 文件 | 内容 |
+| --- | --- |
+| `env.ts` | 端口、数据目录、证据目录、运行 ID；M0-A 的单一事实来源（配置和测试都从这里取） |
+| `harness.ts` | 起/停 mock、后端、剧本 stub 子进程；HTTP/WebSocket 客户端；GLB 解析（带 Meshopt 解码器）；截图统计与像素对比 |
+| `no-real-network.cjs` | **出站网络守卫**（preload）：只放行回环地址，其余记录并拒绝 |
+| `start-backend.mjs` | 被测后端启动器：与 `src/index.ts` 同一条 `createApp()`，只把 `pollMs`/`timeoutMs` 改成毫秒级；检查守卫是否加载 |
+| `stub-upstream.mjs` | 补 CodeBuddy mock 没有的剧本：并发超限、create 500、无 GLB 输出 |
+| `01-pipeline` … `06-viewport` | 主链路、幂等、失败路径、导入、安全、Studio 3D 视口 |
+
+**不会碰真实 Lux3D**：后端进程不读 `apps/server/.env`，`LUX3D_BASE` 指向本地 mock，且带出站守卫；`docs/reports/M0-A-test.md` 有完整证据链。
