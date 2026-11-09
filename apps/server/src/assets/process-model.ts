@@ -1,6 +1,8 @@
 import { mkdir, readFile } from 'node:fs/promises';
 import { writeAtomic } from './atomic-file.ts';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+import { groupParts } from './parts.ts';
+export type { PartsMetadata } from './parts.ts';
 import { Document, NodeIO, getBounds, type Scene } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { meshopt, simplify, textureCompress, weld } from '@gltf-transform/functions';
@@ -46,6 +48,7 @@ export async function processModel(inputPath: string, outputPath: string) {
   }
   // Decode the same validated bytes, without resolving filesystem or network resources.
   const document = await io.readBinary(input);
+  const sourceNodes = document.getRoot().listNodes();
   const before = { bytes: input.byteLength, vertices: vertexCount(document) };
   if (!before.vertices || !document.getRoot().listScenes().length) {
     throw new Error('Model has no scene geometry');
@@ -61,9 +64,6 @@ export async function processModel(inputPath: string, outputPath: string) {
       ratio: Math.min(0.9, 80_000 / vertices),
       error,
     }));
-  }
-  if (vertexCount(document) >= 100_000) {
-    throw new Error('Model cannot be simplified below 100,000 vertices within the error limit');
   }
   await document.transform(
     textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [1024, 1024], quality: 80 }),
@@ -91,14 +91,19 @@ export async function processModel(inputPath: string, outputPath: string) {
       .addChild(root);
     for (const scene of parents) scene.addChild(parent);
   }
+  const parts = groupParts(document, sourceNodes);
   const binary = await io.writeBinary(document);
   // Measure decoded output before publishing it, including compression encoder changes.
   const output = await io.readBinary(binary);
   await mkdir(dirname(outputPath), { recursive: true });
   await writeAtomic(outputPath, binary);
+  await writeAtomic(join(dirname(outputPath), 'parts.json'), Buffer.from(JSON.stringify(parts, null, 2)));
+  const after = { bytes: binary.byteLength, vertices: vertexCount(output) };
   return {
     before,
-    after: { bytes: binary.byteLength, vertices: vertexCount(output) },
+    after,
+    webReady: after.bytes <= 3_000_000 && after.vertices <= 100_000,
+    parts,
     durationMs: Math.round(performance.now() - started),
     bounds: boundsOf(output.getRoot().listScenes()),
   };

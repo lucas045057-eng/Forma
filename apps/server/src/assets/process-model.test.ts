@@ -13,7 +13,7 @@ afterEach(async () => {
 });
 
 it('normalizes world-space geometry and preserves textured material through meshopt decoding', async () => {
-  const data = resolve(import.meta.dirname, '../../../../.data');
+  const data = resolve(import.meta.dirname, '../../../../../.data');
   await mkdir(data, { recursive: true });
   const directory = await mkdtemp(join(data, 'process-model-'));
   directories.push(directory);
@@ -47,6 +47,9 @@ it('normalizes world-space geometry and preserves textured material through mesh
   expect(result.before.vertices).toBe(4);
   expect(result.after.vertices).toBe(4);
   expect(result.after.bytes).toBeLessThan(3_000_000);
+  expect(result.webReady).toBe(true);
+  expect(result.parts.recognized).toBe(false);
+  expect(result.parts.reason).toBeTruthy();
   expect(result.durationMs).toBeGreaterThanOrEqual(0);
   const io = new NodeIO().registerExtensions(ALL_EXTENSIONS)
     .registerDependencies({ 'meshopt.decoder': MeshoptDecoder });
@@ -70,7 +73,7 @@ it('normalizes world-space geometry and preserves textured material through mesh
 });
 
 it('rejects models without scene geometry', async () => {
-  const data = resolve(import.meta.dirname, '../../../../.data');
+  const data = resolve(import.meta.dirname, '../../../../../.data');
   await mkdir(data, { recursive: true });
   const directory = await mkdtemp(join(data, 'process-model-'));
   directories.push(directory);
@@ -82,7 +85,7 @@ it('rejects models without scene geometry', async () => {
 });
 
 it.each(['buffers', 'images'])('rejects external %s URIs before resolving resources', async (kind) => {
-  const data = resolve(import.meta.dirname, '../../../../.data');
+  const data = resolve(import.meta.dirname, '../../../../../.data');
   await mkdir(data, { recursive: true });
   const directory = await mkdtemp(join(data, 'process-model-'));
   directories.push(directory);
