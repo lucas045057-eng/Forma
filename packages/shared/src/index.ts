@@ -15,6 +15,30 @@ export interface Selection {
   baseVersion: string;
 }
 export type PickSelection = Omit<Selection, 'baseVersion'>;
+
+export interface ModelMetrics {
+  before: { bytes: number; vertices: number };
+  after: { bytes: number; vertices: number };
+  durationMs: number;
+  bounds: { min: number[]; max: number[] };
+}
+export type AssetStatus = 'submitting' | 'submit_unknown' | 'polling' | 'downloading' | 'processing' | 'ready' | 'failed' | 'cancelled';
+export interface Asset {
+  id: string;
+  taskId?: string;
+  status: AssetStatus;
+  createdAt: string;
+  updatedAt: string;
+  modelUrl?: string;
+  metrics?: ModelMetrics;
+  error?: { code: string; message: string };
+}
+export interface AssetEvent {
+  type: 'asset.progress' | 'asset.ready';
+  ts: string;
+  sequence: number;
+  asset: Asset;
+}
 export interface TaskEvent { type: string; ts: string; sequence: number; message: string }
 export interface FileDiff { path: string; patch: string }
 export interface Task {

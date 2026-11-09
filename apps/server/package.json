@@ -1,5 +1,6 @@
 {
   "name": "@spatial/server", "private": true, "type": "module",
-  "scripts": { "dev": "node --watch src/index.ts", "build": "tsc --noEmit false --outDir dist", "typecheck": "tsc" },
-  "dependencies": { "fastify": "^5.6.0", "@fastify/websocket": "^11.2.0" }
+  "scripts": { "dev": "node --env-file-if-exists=.env --watch src/index.ts", "build": "tsc --noEmit false --rewriteRelativeImportExtensions --outDir dist", "typecheck": "tsc", "test": "vitest run", "mock": "node src/assets/mock-server.ts", "process-model": "node src/assets/process-cli.ts" },
+  "dependencies": { "fastify": "^5.6.0", "@fastify/websocket": "^11.2.0", "@spatial/shared": "workspace:*", "@gltf-transform/core": "^4.2.0", "@gltf-transform/extensions": "^4.2.0", "@gltf-transform/functions": "^4.2.0", "meshoptimizer": "^0.25.0", "sharp": "^0.35.5" },
+  "devDependencies": { "vitest": "^3.2.4" }
 }
