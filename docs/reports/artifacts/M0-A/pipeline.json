@@ -2,23 +2,24 @@
   "submitted": {
     "status": 202,
     "asset": {
-      "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+      "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
       "status": "polling",
-      "createdAt": "2026-11-09T07:43:48.958Z",
-      "updatedAt": "2026-11-09T07:43:48.969Z",
+      "createdAt": "2026-11-09T07:51:54.393Z",
+      "updatedAt": "2026-11-09T07:51:54.405Z",
       "taskId": "9000001"
     }
   },
   "restStatuses": [
     "polling",
+    "downloading",
     "processing",
     "ready"
   ],
   "finalAsset": {
-    "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+    "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
     "status": "ready",
-    "createdAt": "2026-11-09T07:43:48.958Z",
-    "updatedAt": "2026-11-09T07:43:49.717Z",
+    "createdAt": "2026-11-09T07:51:54.393Z",
+    "updatedAt": "2026-11-09T07:51:55.160Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -29,7 +30,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 489,
+      "durationMs": 491,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -43,7 +44,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/00ebdd07-7995-48fb-9fd4-2b0969db9293/model.glb"
+    "modelUrl": "/assets/f23624df-cd60-460e-a196-2d7de6eac4ed/model.glb"
   },
   "glb": {
     "header": {
@@ -82,73 +83,73 @@
   "events": [
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:43:48.969Z",
+      "ts": "2026-11-09T07:51:54.405Z",
       "sequence": 1,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "polling",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:48.969Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:54.405Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:43:48.971Z",
+      "ts": "2026-11-09T07:51:54.407Z",
       "sequence": 2,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "polling",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:48.971Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:54.407Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:43:49.061Z",
+      "ts": "2026-11-09T07:51:54.492Z",
       "sequence": 3,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "polling",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:49.061Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:54.492Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:43:49.155Z",
+      "ts": "2026-11-09T07:51:54.586Z",
       "sequence": 4,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "downloading",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:49.155Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:54.586Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T07:43:49.187Z",
+      "ts": "2026-11-09T07:51:54.626Z",
       "sequence": 5,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "processing",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:49.187Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:54.626Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.ready",
-      "ts": "2026-11-09T07:43:49.717Z",
+      "ts": "2026-11-09T07:51:55.160Z",
       "sequence": 6,
       "asset": {
-        "id": "00ebdd07-7995-48fb-9fd4-2b0969db9293",
+        "id": "f23624df-cd60-460e-a196-2d7de6eac4ed",
         "status": "ready",
-        "createdAt": "2026-11-09T07:43:48.958Z",
-        "updatedAt": "2026-11-09T07:43:49.717Z",
+        "createdAt": "2026-11-09T07:51:54.393Z",
+        "updatedAt": "2026-11-09T07:51:55.160Z",
         "taskId": "9000001",
         "metrics": {
           "before": {
@@ -159,7 +160,7 @@
             "bytes": 983560,
             "vertices": 85436
           },
-          "durationMs": 489,
+          "durationMs": 491,
           "bounds": {
             "min": [
               -0.15895565660573138,
@@ -173,7 +174,7 @@
             ]
           }
         },
-        "modelUrl": "/assets/00ebdd07-7995-48fb-9fd4-2b0969db9293/model.glb"
+        "modelUrl": "/assets/f23624df-cd60-460e-a196-2d7de6eac4ed/model.glb"
       }
     }
   ],
@@ -190,7 +191,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 46116,
+    "pid": 44400,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   }
 }

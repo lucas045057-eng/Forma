@@ -7,24 +7,24 @@
     "messageIncludes": "404"
   },
   "submitted": {
-    "id": "26eb0bb4-e0a3-4f72-ac7e-472055d1ae58",
+    "id": "886dafef-e8b6-485e-9c1a-d20ceefb2c0c",
     "status": "polling",
-    "createdAt": "2026-11-09T07:44:04.071Z",
-    "updatedAt": "2026-11-09T07:44:04.082Z",
+    "createdAt": "2026-11-09T07:52:09.330Z",
+    "updatedAt": "2026-11-09T07:52:09.341Z",
     "taskId": "9000001"
   },
   "finalAsset": {
-    "id": "26eb0bb4-e0a3-4f72-ac7e-472055d1ae58",
+    "id": "886dafef-e8b6-485e-9c1a-d20ceefb2c0c",
     "status": "failed",
-    "createdAt": "2026-11-09T07:44:04.071Z",
-    "updatedAt": "2026-11-09T07:44:04.206Z",
+    "createdAt": "2026-11-09T07:52:09.330Z",
+    "updatedAt": "2026-11-09T07:52:09.465Z",
     "taskId": "9000001",
     "error": {
       "code": "OUTPUT_URL_EXPIRED",
       "message": "模型下载返回 404：结果 URL 可能已超过 2 小时有效期，请重新查询任务后导入，或创建新任务"
     }
   },
-  "elapsedMs": 197,
+  "elapsedMs": 198,
   "stats": {
     "before": {
       "creates": 1,

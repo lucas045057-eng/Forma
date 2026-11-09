@@ -1,10 +1,14 @@
 {
   "probe": {
-    "pointerdown": 1,
-    "mousedown": 1,
-    "mouseup": 1,
+    "pointerdown": 0,
+    "mousedown": 0,
+    "mouseup": 0,
     "click": 0,
+    "auxclick": 0,
+    "dblclick": 0,
+    "contextmenu": 0,
     "submit": 0,
-    "keydown": 0
+    "keydown": 0,
+    "keyup": 0
   }
 }

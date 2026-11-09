@@ -31,14 +31,17 @@ pnpm test:e2e
 | `source-model.ts` | **AST oracle**：解析 `templates/product-page/src/**/*.tsx`，算出每个原生 JSX 开标签的 1 基行列。完全不经过插件、不读 DOM 的 `data-src` |
 | `checks.ts` | 用例 8/9 与变异验证共用的判定逻辑 |
 | `m0b-pick.spec.ts` | 验收用例 1–7 + 行号自检 + 用例 8（AST 确定性锚点）+ 用例 9（应标记节点完整性） |
-| `m0b-known-issues.spec.ts` | Codex 审查 R1 的回归（pointerdown/mousedown、单输入框 Enter 隐式提交、链接、退出恢复） |
+| `m0b-known-issues.spec.ts` | Codex 审查 R1 的回归（pointer/mouse 按下抬起、单输入框 Enter 隐式提交、右键/双击/Space 激活、链接、退出恢复、悬停与滚动不被误伤）。修复合并后已改为普通断言 |
 | `m0b-message-guard.spec.ts` | Codex 审查 S4 的消息安全回归（两端 origin/source 与畸形 payload） |
 | `m0b-mutation-check.spec.ts` | 变异验证：同名标签错标、漏标某类元素、列号偏移都会被判定抓到 |
 | `../../packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts` | Codex 审查 R2 的插件层回归（保留属性内嵌 JSX），只新增测试文件 |
+| `../../packages/vite-plugin-source-tag/src/component-name.test.ts` | Codex 审查 S3 的插件层回归（组件名归属），只新增测试文件 |
 
-## 已知待修（预期失败，不是回归）
+`playwright.config.ts` 用 `testIgnore: ['**/m0a/**']` 把 M0-A 的用例挡在外面——它们必须用 `playwright.m0a.config.ts`（自带 mock 与专用后端）跑。
 
-R1（`m0b-known-issues.spec.ts` 的 R1a/R1b）用 `test.fail()` 标注，R2 两条用 `it.fails` 标注：**修复后它们会变成「意外通过」并让套件失败**，届时删掉这些标记即可。
+## 关于“预期失败”标记
+
+整改回合 1 里 R1a/R1b（`test.fail`）和 R2 两条（`it.fails`）是“已知待修”的钩子；修复合并后（`59824d5`）已全部删除，现在是正常断言。**今后不要再给已修复的问题加这类标记**，它的作用只是把待修项和新回归分开。
 
 容器类元素（`main`）和零尺寸元素（`br`）鼠标无法命中，会退化为在元素自身派发 `click`；每条记录里的 `clickMode` 标明用了哪种方式。
 

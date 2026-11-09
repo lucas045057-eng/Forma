@@ -31,7 +31,9 @@
         "id": "chromium",
         "name": "chromium",
         "testDir": "E:/空间化AI工作台/tests/e2e",
-        "testIgnore": [],
+        "testIgnore": [
+          "**/m0a/**"
+        ],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
         ],
@@ -51,7 +53,9 @@
         "name": "chromium",
         "testDir": "E:\\空间化AI工作台\\tests\\e2e",
         "snapshotDir": "E:\\空间化AI工作台\\tests\\e2e",
-        "testIgnore": [],
+        "testIgnore": [
+          "**/m0a/**"
+        ],
         "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
         "timeout": 120000,
         "use": {
@@ -101,14 +105,7 @@
     "updateSourceMethod": "patch",
     "version": "1.65.0",
     "workers": 1,
-    "webServer": {
-      "command": "pnpm dev",
-      "url": "http://127.0.0.1:5173/",
-      "reuseExistingServer": true,
-      "timeout": 180000,
-      "stdout": "ignore",
-      "stderr": "pipe"
-    }
+    "webServer": null
   },
   "suites": [
     {
@@ -119,9 +116,9 @@
       "specs": [],
       "suites": [
         {
-          "title": "R1 选取模式不得触发先于 click 的业务行为",
+          "title": "R1 选取模式不得触发先于/绕过 click 的业务行为",
           "file": "m0b-known-issues.spec.ts",
-          "line": 27,
+          "line": 29,
           "column": 6,
           "specs": [
             {
@@ -131,81 +128,31 @@
               "tests": [
                 {
                   "timeout": 120000,
-                  "annotations": [
-                    {
-                      "type": "fail",
-                      "description": "R1 未修复：选取模式需要在 capture 阶段拦截 pointer 按下/抬起（Codex M0-B-review R1）。修复后删除本条 test.fail。",
-                      "location": {
-                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                        "line": 29,
-                        "column": 10
-                      }
-                    }
-                  ],
-                  "expectedStatus": "failed",
+                  "annotations": [],
+                  "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 1109,
-                      "error": {
-                        "message": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
-                        "stack": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:41:55",
-                        "location": {
-                          "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                          "column": 55,
-                          "line": 41
-                        },
-                        "snippet": " \u001b[90m 39 |\u001b[39m     \u001b[36mconst\u001b[39m probe \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m readProbe(frame)\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m     writeArtifact(\u001b[32m'case-r1a-pointer-events.json'\u001b[39m\u001b[33m,\u001b[39m { probe })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mpointerdown\u001b[33m,\u001b[39m \u001b[32m'pointerdown 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 42 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mmousedown\u001b[33m,\u001b[39m \u001b[32m'mousedown 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mmouseup\u001b[33m,\u001b[39m \u001b[32m'mouseup 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 44 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mclick\u001b[33m,\u001b[39m \u001b[32m'click 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                            "column": 55,
-                            "line": 41
-                          },
-                          "message": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  39 |     const probe = await readProbe(frame);\n  40 |     writeArtifact('case-r1a-pointer-events.json', { probe });\n> 41 |     expect(probe.pointerdown, 'pointerdown 触达了业务监听器').toBe(0);\n     |                                                       ^\n  42 |     expect(probe.mousedown, 'mousedown 触达了业务监听器').toBe(0);\n  43 |     expect(probe.mouseup, 'mouseup 触达了业务监听器').toBe(0);\n  44 |     expect(probe.click, 'click 触达了业务监听器').toBe(0);\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:41:55"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 1096,
+                      "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:46.934Z",
-                      "annotations": [
-                        {
-                          "type": "fail",
-                          "description": "R1 未修复：选取模式需要在 capture 阶段拦截 pointer 按下/抬起（Codex M0-B-review R1）。修复后删除本条 test.fail。",
-                          "location": {
-                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                            "line": 29,
-                            "column": 10
-                          }
-                        }
-                      ],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-known-issues-R1-选取模式不得-3e83c-mousedown-mouseup-不应触达业务监听器-chromium\\error-context.md"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                        "column": 55,
-                        "line": 41
-                      }
+                      "startTime": "2026-11-09T07:51:02.217Z",
+                      "annotations": [],
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
                 }
               ],
-              "id": "8a2b2de19721cdbcb913-3f7ed583cc174cac433c",
+              "id": "8a2b2de19721cdbcb913-8dec85f290aa04cad97e",
               "file": "m0b-known-issues.spec.ts",
-              "line": 28,
+              "line": 30,
               "column": 3
             },
             {
@@ -215,81 +162,31 @@
               "tests": [
                 {
                   "timeout": 120000,
-                  "annotations": [
-                    {
-                      "type": "fail",
-                      "description": "R1 未修复：选取模式需要拦截 submit 与键盘激活（Codex M0-B-review R1）。修复后删除本条 test.fail。",
-                      "location": {
-                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                        "line": 48,
-                        "column": 10
-                      }
-                    }
-                  ],
-                  "expectedStatus": "failed",
+                  "annotations": [],
+                  "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 1201,
-                      "error": {
-                        "message": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
-                        "stack": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:60:45",
-                        "location": {
-                          "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                          "column": 45,
-                          "line": 60
-                        },
-                        "snippet": " \u001b[90m 58 |\u001b[39m     \u001b[36mconst\u001b[39m probe \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m readProbe(frame)\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m     writeArtifact(\u001b[32m'case-r1b-form-submit.json'\u001b[39m\u001b[33m,\u001b[39m { probe })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 60 |\u001b[39m     expect(probe\u001b[33m.\u001b[39msubmit\u001b[33m,\u001b[39m \u001b[32m'单输入框回车触发了隐式表单提交'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 61 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m\n \u001b[90m 63 |\u001b[39m   test(\u001b[32m'R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                            "column": 45,
-                            "line": 60
-                          },
-                          "message": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  58 |     const probe = await readProbe(frame);\n  59 |     writeArtifact('case-r1b-form-submit.json', { probe });\n> 60 |     expect(probe.submit, '单输入框回车触发了隐式表单提交').toBe(0);\n     |                                             ^\n  61 |   });\n  62 |\n  63 |   test('R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转', async ({ page }) => {\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:60:45"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 1149,
+                      "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:48.131Z",
-                      "annotations": [
-                        {
-                          "type": "fail",
-                          "description": "R1 未修复：选取模式需要拦截 submit 与键盘激活（Codex M0-B-review R1）。修复后删除本条 test.fail。",
-                          "location": {
-                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                            "line": 48,
-                            "column": 10
-                          }
-                        }
-                      ],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-known-issues-R1-选取模式不得-572a8-的业务行为-R1b-单输入框表单的回车隐式提交不应触发-chromium\\error-context.md"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
-                        "column": 45,
-                        "line": 60
-                      }
+                      "startTime": "2026-11-09T07:51:03.400Z",
+                      "annotations": [],
+                      "attachments": []
                     }
                   ],
                   "status": "expected"
                 }
               ],
-              "id": "8a2b2de19721cdbcb913-7e7be39392e046d8fe65",
+              "id": "8a2b2de19721cdbcb913-56a32d000a8ca7854985",
               "file": "m0b-known-issues.spec.ts",
-              "line": 47,
+              "line": 48,
               "column": 3
             },
             {
@@ -308,12 +205,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1550,
+                      "duration": 1558,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:49.341Z",
+                      "startTime": "2026-11-09T07:51:04.554Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -321,7 +218,7 @@
                   "status": "expected"
                 }
               ],
-              "id": "8a2b2de19721cdbcb913-58286c1465e1aa38115c",
+              "id": "8a2b2de19721cdbcb913-1ed01dd80b19826e32b2",
               "file": "m0b-known-issues.spec.ts",
               "line": 63,
               "column": 3
@@ -342,12 +239,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1718,
+                      "duration": 1836,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:50.898Z",
+                      "startTime": "2026-11-09T07:51:06.119Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -355,9 +252,111 @@
                   "status": "expected"
                 }
               ],
-              "id": "8a2b2de19721cdbcb913-81176cc1551594873b50",
+              "id": "8a2b2de19721cdbcb913-6b8a9c3fc087b103da7b",
               "file": "m0b-known-issues.spec.ts",
               "line": 79,
+              "column": 3
+            },
+            {
+              "title": "R1e 选取模式下右键菜单与双击被拦截，退出选取后恢复",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3330,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:51:07.964Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-97b31b7723f09cb652a7",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 101,
+              "column": 3
+            },
+            {
+              "title": "R1f 选取模式下 Space 激活被拦截，退出选取后按钮可被 Space 激活",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1853,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:51:11.305Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-fc0fd101c2d966fdb2d7",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 127,
+              "column": 3
+            },
+            {
+              "title": "R1g 选取期间悬停高亮与滚动仍然正常（拦截不误伤移动/滚动）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1404,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:51:13.166Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-57c7f62a299783385cfe",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 155,
               "column": 3
             }
           ]
@@ -393,12 +392,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1057,
+                      "duration": 1116,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:52.629Z",
+                      "startTime": "2026-11-09T07:51:14.593Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -427,12 +426,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1244,
+                      "duration": 1343,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:53.691Z",
+                      "startTime": "2026-11-09T07:51:15.718Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -461,12 +460,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2670,
+                      "duration": 2810,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:54.941Z",
+                      "startTime": "2026-11-09T07:51:17.069Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -495,12 +494,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1738,
+                      "duration": 1795,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:57.616Z",
+                      "startTime": "2026-11-09T07:51:19.887Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -546,12 +545,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4128,
+                      "duration": 4397,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:29:59.361Z",
+                      "startTime": "2026-11-09T07:51:21.698Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -580,12 +579,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2427,
+                      "duration": 2503,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:03.493Z",
+                      "startTime": "2026-11-09T07:51:26.105Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -614,12 +613,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5,
+                      "duration": 9,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:05.925Z",
+                      "startTime": "2026-11-09T07:51:28.617Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -665,12 +664,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 0,
+                      "duration": 2,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:05.937Z",
+                      "startTime": "2026-11-09T07:51:28.648Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -707,12 +706,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6266,
+                      "duration": 6453,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:05.941Z",
+                      "startTime": "2026-11-09T07:51:28.657Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -747,12 +746,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1525,
+                      "duration": 1574,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:12.212Z",
+                      "startTime": "2026-11-09T07:51:35.118Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -781,12 +780,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1042,
+                      "duration": 1093,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:13.742Z",
+                      "startTime": "2026-11-09T07:51:36.700Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -815,12 +814,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1319,
+                      "duration": 1371,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:14.791Z",
+                      "startTime": "2026-11-09T07:51:37.802Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -849,12 +848,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1260,
+                      "duration": 1311,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:16.114Z",
+                      "startTime": "2026-11-09T07:51:39.183Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -883,12 +882,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1024,
+                      "duration": 1107,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:17.379Z",
+                      "startTime": "2026-11-09T07:51:40.502Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -917,12 +916,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2854,
+                      "duration": 2961,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:18.407Z",
+                      "startTime": "2026-11-09T07:51:41.617Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -951,12 +950,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2389,
+                      "duration": 2508,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:21.266Z",
+                      "startTime": "2026-11-09T07:51:44.587Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -991,12 +990,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 559,
+                      "duration": 636,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:30:23.660Z",
+                      "startTime": "2026-11-09T07:51:47.103Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1016,9 +1015,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-09T07:29:46.660Z",
-    "duration": 37621.782,
-    "expected": 21,
+    "startTime": "2026-11-09T07:51:01.127Z",
+    "duration": 47228.338,
+    "expected": 24,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

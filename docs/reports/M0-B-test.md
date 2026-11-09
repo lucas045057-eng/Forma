@@ -11,6 +11,8 @@
 
 **整改回合 1（按 Codex 审查 R1/R2/R3/S4 补测试）：新增 11 个 e2e 用例全部工作正常 —— 19 项通过、2 项按预期失败（R1 待修）、0 项意外失败；插件层 9 项中 7 项通过、2 项按预期失败（R2 待修）。M0-B 最终过关仍等 CodeBuddy 修完 R1/R2。** 详情见文末“整改回合 1”。
 
+**整改回合 2（fix/m0b-review 合并后回归）：全部通过 —— 单元 30 项、M0-B e2e 24 项、M0-A e2e 22 项，共 76 项，** 0 失败、0 预期失败、0 跳过。R1/R2 的“预期失败”标记已删除并转为永久回归；新增右键/双击/Space 激活、悬停与滚动不被误伤、S3 组件名归属用例。M0-B **可以最终过关**（待 Codex 复核）。详情见文末“整改回合 2”。
+
 ## 环境与命令
 
 | 项 | 值 |
@@ -201,4 +203,68 @@ const Page=()=> <div  data-src={"src/Page.tsx:1:32"} data-cid={"Page"}/>;
 
 - 修复 R1/R2 后的“预期失败转为通过”这次没有跑（实现尚未修）。修完后需重跑全量：R1a/R1b 应转成真实通过（此时必须删 `test.fail`），R2 两条应转成真实通过（删 `it.fails`）。
 - 未做真实跨窗口 `postMessage`（真浏览器发送、非合成事件）验证；S4 的 origin/source 分支用合成 `MessageEvent` 覆盖，这一点与 Codex 审查报告的表述一致。
+
+---
+
+# 整改回合 2（回归）
+
+日期：2026-11-09。前置：调度已把 CodeBuddy 的修复分支 `fix/m0b-review` 合并到 master（合并提交 `59824d5`），修复内容见 `docs/reports/M0-B-fix-impl.md`：R1 在 capture 阶段拦截 pointer/mouse 按下抬起、`dblclick`、`contextmenu`、`submit` 与 Enter/Space 激活（选取仍在 `click` 上报）；R2 插件跳过保留属性子树；S1 observer 忽略覆盖层自身 mutation；S3 `cid` 不再认保存 JSX 的大写变量。
+
+## 本轮改动（只动测试）
+
+1. **删掉“预期失败”标记**：`tests/e2e/m0b-known-issues.spec.ts` 的 R1a/R1b 去掉 `test.fail(...)`；`packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts` 的两条 `it.fails` 改回 `it`。现在它们是永久回归，通过就是通过。
+2. **R1 补测三项**（e2e）：
+   - `R1e` 选取模式下右键菜单与双击被拦截；退出后两者都恢复。
+   - `R1f` 选取模式下 Space 激活被拦截（`keydown`/`keyup` 不触达业务监听器、不产生 `click`、购买计数不变）；退出后按钮可被 Space 激活。
+   - `R1g` 选取期间悬停高亮与滚动**没有被误伤**：悬停出橙色高亮框，页面能真的滚动，Studio 的滚动百分比从 0% 变到 100%。
+3. **S3 单测**（新增 `packages/vite-plugin-source-tag/src/component-name.test.ts`）：`const Heading=<h1/>` 这类保存 JSX 的大写变量不再抢归属（`cid` 为 `Page`）；`memo` / `React.forwardRef` / 类组件 / 命名函数表达式 / 嵌套组件仍正确归属最近组件。
+4. **修了一个测试配置缺陷**（见下“一次判断为测试问题的失败”）：`playwright.config.ts` 加 `testIgnore: ['**/m0a/**']`。
+
+## 结果
+
+| 套件 | 结果 |
+| --- | --- |
+| `pnpm test`（全部单测） | **30 通过**：插件 15（本轮新增 3）、资产 14、bridge 浏览器探针 1 |
+| `pnpm test:e2e`（M0-B） | **24 通过**：原验收 9 项 + R1 七项 + S4 四项 + 变异三项 + 校验器自检 1 项 |
+| `pnpm test:e2e:m0a`（M0-A） | **22 通过**（合并后重跑，未受影响） |
+| `pnpm typecheck` | 通过 |
+
+共 **76 项**，0 失败、0 预期失败、0 跳过。
+
+## R1：修复前后对照（同一个探针，同一组事件）
+
+| 用例 | 回合 1（修复前） | 本轮（修复后） |
+| --- | --- | --- |
+| R1a 左键点击 | `pointerdown/mousedown/mouseup = 1/1/1` | **0/0/0**，`click` 仍为 0 |
+| R1b 单输入框 Enter | `submit = 1` | **submit = 0** |
+| R1e 右键 / 双击 | 未测 | 选取中 `contextmenu = 0`、`dblclick = 0`；退出后 **1 / 1** |
+| R1f Space 激活 | 未测 | 选取中 `keydown = 0`、`keyup = 0`、`click = 0`、`data-purchases = 0`；退出后 **1/1/1** 且 `data-purchases = 1` |
+| R1g 悬停 / 滚动 | 未测 | 悬停框 **1** 个；`scrollY = 472`；滚动百分比 **0% → 100%** |
+| R1d 退出恢复 | `afterStop` 已恢复 | 仍然恢复（`pointerdown/mousedown/click` 各 +1） |
+
+证据：`docs/reports/artifacts/M0-B/case-r1a-pointer-events.json`、`case-r1b-form-submit.json`、`case-r1d-restore.json`、`case-r1e-contextmenu-dblclick.json`、`case-r1f-space.json`、`case-r1g-hover-scroll.json`。
+
+## 一次判断为测试问题的失败（如实记录）
+
+第一次跑 `pnpm test:e2e` 时有 12 项失败，全部是 `tests/e2e/m0a/*`（主链路、幂等、导入、安全、视口）。原因不是实现：`playwright.config.ts` 的 `testDir` 是 `./tests/e2e`，而 M0-A 用例放在 `tests/e2e/m0a/` 子目录里，默认配置把它们也收了进来——它需要的是 m0a 专属的 mock/后端 webServer，默认配置里没有，所以连不上。
+
+- **判断**：测试配置缺陷（我上一轮引入的），不是实现缺陷。
+- **修复**：`playwright.config.ts` 增加 `testIgnore: ['**/m0a/**']`，两个套件各跑各的。
+- **说明**：上一轮没有暴露这个问题，是因为 M0-A 一直用 `-c playwright.m0a.config.ts` 单独跑。
+
+`R1g` 也在第一次落败：`scrollIntoView` 已经把页面滚到底，滚动百分比基线就是 100%，我原来的“滚动后百分比变大”断言不成立。改为先回到顶部取 0% 基线，再往下滚。同样属于测试问题，实现正常。
+
+## 本轮未运行 / 限制
+
+- 右键菜单：headless 环境看不到浏览器原生菜单，断言的是“业务 `contextmenu` 监听器没被触达”（选取中 0，退出后 1），不是“菜单没弹出来”。
+- 双击：断言业务 `dblclick` 未触达；选取期间两次 `click` 仍会各上报一次 `pick:result`（沿用的既定行为），**没有**验证去抖。
+- Space：`keydown`/`keypress`/`keyup` 只在可激活元素/表单内拦截，**普通页面文字上的空格没测**。
+- S3 只有插件层单测，没有 e2e；模板里没有“大写变量存 JSX”的写法。
+- S2（大页面高亮性能）按要求未做，测试侧也没有对应的性能用例；S4 的后端版本/路径校验仍留给 M2。
+- bridge 安装前已注册的 window capture 业务监听器仍不保证被拦（实现方已声明）。
+- 未做真实跨窗口 `postMessage`（同回合 1）。
+
+## 回合 2 结论
+
+R1、R2、R3、S4 的回归全部通过，原验收 7 项仍全部通过，M0-A 22 项不受影响。**M0-B 可以最终过关**，待 Codex 复核 R1–R3。
 

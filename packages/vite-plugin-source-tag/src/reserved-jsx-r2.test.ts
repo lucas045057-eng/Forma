@@ -9,8 +9,8 @@ import { tagSource } from './index';
  * 插件删除这个保留属性后，必须跳过该属性子树里的注入，否则外层元素会被
  * 标成属性内部那个元素的源码位置。
  *
- * 修复前这两条会失败，用 `it.fails` 标成「已知待修」：修复后它们会变成
- * 意外通过并让 `pnpm test` 失败，提醒把 it.fails 改回 it。
+ * 整改回合 1 里这两条用 `it.fails` 标成「已知待修」；CodeBuddy 在 fix/m0b-review
+ * 修好并合并后（合并提交 59824d5），本轮已改回普通 `it`，作为永久回归。
  * 这里只新增测试文件，不改实现。
  */
 
@@ -26,7 +26,7 @@ const parses = (code: string) => {
 };
 
 describe('保留属性内含 JSX（R2）', () => {
-  it.fails('data-src={<span/>} 时外层 <div> 必须标记自己的位置', () => {
+  it('data-src={<span/>} 时外层 <div> 必须标记自己的位置', () => {
     // const Page=()=> 之后就是外层 <div> 的第 17 列
     const output = transform('const Page=()=> <div data-src={<span/>}/>;');
     expect(output).toContain('data-src={"src/Page.tsx:1:17"}');
@@ -35,7 +35,7 @@ describe('保留属性内含 JSX（R2）', () => {
     parses(output);
   });
 
-  it.fails('data-cid={<span/>} 时同样不得把外层标成内层', () => {
+  it('data-cid={<span/>} 时同样不得把外层标成内层', () => {
     const output = transform('const Page=()=> <section data-cid={<i/>}/>;');
     expect(output).toContain('data-src={"src/Page.tsx:1:17"}');
     expect(countOf(output, 'data-src=')).toBe(1);

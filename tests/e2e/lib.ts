@@ -173,23 +173,33 @@ async function findHitPoint(
 
 export type ClickMode = 'mouse' | 'dom-dispatch';
 
+export interface ClickOptions {
+  button?: 'left' | 'right';
+  clicks?: 1 | 2;
+}
+
 /**
  * 在预览页里点击目标。
  * 优先用真实鼠标事件（page.mouse），坐标由 iframe 在 Studio 中的位置换算；
  * 若元素被后代完全覆盖（容器类），退化为在元素自身上派发冒泡 click，
  * 仍会经过 bridge 的 window capture 拦截逻辑。实际使用的方式会被记录。
+ * 右键 / 双击：传 options.button = 'right' 或 options.clicks = 2。
  */
 export async function clickTarget(
   page: Page,
   frame: Frame,
   target: { index?: number; selector?: string },
+  options: ClickOptions = {},
 ): Promise<ClickMode> {
   await scrollIntoView(frame, target);
   const point = await findHitPoint(frame, target);
   if (point) {
     const box = await page.locator('[data-testid="preview-frame"]').boundingBox();
     if (!box) throw new Error('预览 iframe 没有布局盒');
-    await page.mouse.click(box.x + point.x, box.y + point.y);
+    const x = box.x + point.x;
+    const y = box.y + point.y;
+    if (options.clicks === 2) await page.mouse.dblclick(x, y, { button: options.button ?? 'left' });
+    else await page.mouse.click(x, y, { button: options.button ?? 'left' });
     return 'mouse';
   }
   await frame.evaluate((arg) => {
@@ -200,6 +210,27 @@ export async function clickTarget(
     element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, detail: 1 }));
   }, target);
   return 'dom-dispatch';
+}
+
+/** 把鼠标移到目标上（不按下），用于验证悬停高亮仍工作。 */
+export async function hoverTarget(
+  page: Page,
+  frame: Frame,
+  target: { index?: number; selector?: string },
+): Promise<void> {
+  await scrollIntoView(frame, target);
+  const point = await findHitPoint(frame, target);
+  if (!point) throw new Error('找不到可悬停的点');
+  const box = await page.locator('[data-testid="preview-frame"]').boundingBox();
+  if (!box) throw new Error('预览 iframe 没有布局盒');
+  await page.mouse.move(box.x + point.x, box.y + point.y);
+  await page.waitForTimeout(200);
+}
+
+/** 覆盖层里「悬停框」的数量：bridge 把悬停框画成橙色边框，选中框是青色。 */
+export async function hoverBoxCount(frame: Frame): Promise<number> {
+  return frame.evaluate(() => Array.from(document.querySelectorAll('[data-highlight-src]'))
+    .filter((element) => (element as HTMLElement).style.borderColor.replace(/\s/g, '').includes('245,158,11')).length);
 }
 
 export async function selectionText(page: Page): Promise<string> {
@@ -296,14 +327,18 @@ export async function clickMarkedByText(page: Page, frame: Frame): Promise<Click
 /** 在预览页里注入一个探针对象，并把事件监听器挂在指定元素上（只影响本次页面，不改模板）。 */
 export async function installEventProbe(frame: Frame, selector: string): Promise<void> {
   await frame.evaluate((target) => {
-    const probe: Record<string, number> = { pointerdown: 0, mousedown: 0, mouseup: 0, click: 0, submit: 0, keydown: 0 };
+    const probe: Record<string, number> = {
+      pointerdown: 0, mousedown: 0, mouseup: 0, click: 0, auxclick: 0,
+      dblclick: 0, contextmenu: 0, submit: 0, keydown: 0, keyup: 0,
+    };
     (window as unknown as { __probe: Record<string, number> }).__probe = probe;
     const element = document.querySelector(target);
     if (!element) throw new Error(`探针挂载目标不存在：${target}`);
-    for (const type of ['pointerdown', 'mousedown', 'mouseup', 'click']) {
+    for (const type of ['pointerdown', 'mousedown', 'mouseup', 'click', 'auxclick', 'dblclick', 'contextmenu']) {
       element.addEventListener(type, () => { probe[type] += 1; }, true);
     }
     element.addEventListener('keydown', () => { probe.keydown += 1; }, true);
+    element.addEventListener('keyup', () => { probe.keyup += 1; }, true);
   }, selector);
 }
 

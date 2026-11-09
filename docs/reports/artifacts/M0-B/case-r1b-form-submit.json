@@ -4,7 +4,11 @@
     "mousedown": 0,
     "mouseup": 0,
     "click": 0,
-    "submit": 1,
-    "keydown": 0
+    "auxclick": 0,
+    "dblclick": 0,
+    "contextmenu": 0,
+    "submit": 0,
+    "keydown": 0,
+    "keyup": 0
   }
 }

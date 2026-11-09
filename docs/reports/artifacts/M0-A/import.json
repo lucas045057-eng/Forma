@@ -3,15 +3,15 @@
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "polling",
-    "createdAt": "2026-11-09T07:44:15.795Z",
-    "updatedAt": "2026-11-09T07:44:15.795Z"
+    "createdAt": "2026-11-09T07:52:20.823Z",
+    "updatedAt": "2026-11-09T07:52:20.823Z"
   },
   "asset": {
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "ready",
-    "createdAt": "2026-11-09T07:44:15.795Z",
-    "updatedAt": "2026-11-09T07:44:16.493Z",
+    "createdAt": "2026-11-09T07:52:20.823Z",
+    "updatedAt": "2026-11-09T07:52:21.535Z",
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -21,7 +21,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 432,
+      "durationMs": 452,
       "bounds": {
         "min": [
           -0.15895565660573138,

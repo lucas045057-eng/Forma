@@ -1,9 +1,9 @@
 {
   "asset": {
-    "id": "2fddb38f-e569-4bbc-a726-817470b7d5b0",
+    "id": "4e9a0e4e-a2c8-451e-9410-94c6fef622d6",
     "status": "ready",
-    "createdAt": "2026-11-09T07:43:49.806Z",
-    "updatedAt": "2026-11-09T07:43:50.503Z",
+    "createdAt": "2026-11-09T07:51:55.255Z",
+    "updatedAt": "2026-11-09T07:51:55.971Z",
     "taskId": "9000002",
     "metrics": {
       "before": {
@@ -14,7 +14,7 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 430,
+      "durationMs": 442,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -28,7 +28,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/2fddb38f-e569-4bbc-a726-817470b7d5b0/model.glb"
+    "modelUrl": "/assets/4e9a0e4e-a2c8-451e-9410-94c6fef622d6/model.glb"
   },
   "invalid": {
     "both": 400,
