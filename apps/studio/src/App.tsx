@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { isPreviewMessage, type Selection, type StudioMessage } from '@spatial/shared';
 
+const AssetPanel = lazy(() => import('./AssetPanel'));
 declare const __BASE_VERSION__: string;
 
 export default function App() {
+  const [showAssets, setShowAssets] = useState(false);
   const preview = useRef<HTMLIFrameElement>(null);
   const pickingRef = useRef(false);
   const [picking, setPicking] = useState(false);
@@ -45,9 +47,11 @@ export default function App() {
   }
   return (
     <main className="studio">
+      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel onClose={() => setShowAssets(false)}/></Suspense>}
       <header className="toolbar">
         <div><span className="wordmark">ORBIT / STUDIO</span><h1>空间化 AI 创作工作台</h1></div>
         <div className="tools">
+          <button type="button" data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
           <span className="connection" data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
           <button type="button" aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
         </div>

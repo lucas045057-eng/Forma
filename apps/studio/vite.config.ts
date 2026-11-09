@@ -7,6 +7,10 @@ export default defineConfig({
   define: { __BASE_VERSION__: JSON.stringify(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()) },
   server: {
     host: '127.0.0.1', port: 5173, strictPort: true,
-    proxy: { '/preview/main/': { target: 'http://127.0.0.1:5174', ws: true } },
+    proxy: {
+      '/preview/main/': { target: 'http://127.0.0.1:5174', ws: true },
+      '/assets': { target: 'http://127.0.0.1:3001' },
+      '/events': { target: 'http://127.0.0.1:3001', ws: true },
+    },
   },
 });
