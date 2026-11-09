@@ -1,4 +1,5 @@
-import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
+import { writeAtomic } from './atomic-file.ts';
 import { dirname } from 'node:path';
 import { Document, NodeIO, getBounds, type Scene } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
@@ -94,17 +95,7 @@ export async function processModel(inputPath: string, outputPath: string) {
   // Measure decoded output before publishing it, including compression encoder changes.
   const output = await io.readBinary(binary);
   await mkdir(dirname(outputPath), { recursive: true });
-  const temporaryPath = `${outputPath}.tmp`;
-  const temporary = await open(temporaryPath, 'wx');
-  try {
-    await temporary.writeFile(binary);
-    await temporary.close();
-    await rename(temporaryPath, outputPath);
-  } catch (error) {
-    await temporary.close();
-    await rm(temporaryPath, { force: true });
-    throw error;
-  }
+  await writeAtomic(outputPath, binary);
   return {
     before,
     after: { bytes: binary.byteLength, vertices: vertexCount(output) },
