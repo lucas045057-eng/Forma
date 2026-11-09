@@ -9,3 +9,5 @@ orbital/sessions/
 orbital/ledger/
 orbital/tool-results/
 orbital/sub_agents/*/*.jsonl
+
+docs/reports/artifacts/M0-B/output/

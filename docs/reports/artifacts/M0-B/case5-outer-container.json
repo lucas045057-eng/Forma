@@ -1,0 +1,38 @@
+{
+  "hostSrc": "src/App.tsx:42:13",
+  "clickMode": "mouse",
+  "selection": {
+    "src": "src/App.tsx:42:13",
+    "cid": "App",
+    "text": "无标记探针01让呼吸慢下来雪松与佛手柑，像雨后走进一片安静的森林。",
+    "bbox": [
+      61.796875,
+      376.609375,
+      283.46875,
+      123
+    ],
+    "styles": {
+      "display": "list-item",
+      "position": "static",
+      "color": "rgb(72, 58, 45)",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "fontSize": "16px",
+      "fontFamily": "\"Microsoft YaHei\", sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "padding": "0px",
+      "margin": "0px",
+      "borderRadius": "0px",
+      "width": "283.469px",
+      "height": "123px"
+    },
+    "instances": 3,
+    "ancestors": [
+      "src/App.tsx:40:9",
+      "src/App.tsx:37:7",
+      "src/App.tsx:14:5"
+    ],
+    "note": "outer-container",
+    "baseVersion": "ef3b898b9674e2c224eb8bdc6dcb8337ae0288bd"
+  }
+}
