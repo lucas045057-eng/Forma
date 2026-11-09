@@ -65,7 +65,10 @@ it('rejects mixed public/private DNS answers', async () => {
 it('rejects truncated GLB and oversized body without publishing', async () => {
   const dir = await directory();
   const bytes = glb();
-  const base = await host((request, response) => response.end(request.url === '/truncated' ? bytes.subarray(0, 25) : bytes));
+  const base = await host((request, response) => {
+    if (request.url === '/large') response.writeHead(200, { 'Transfer-Encoding': 'chunked' });
+    response.end(request.url === '/truncated' ? bytes.subarray(0, 25) : bytes);
+  });
   await expect(downloadGlb(`${base}/truncated`, join(dir, 'raw.glb'), base)).rejects.toMatchObject({ code: 'INVALID_GLB' });
   await expect(downloadGlb(`${base}/large`, join(dir, 'raw.glb'), base, { maxBytes: 20 })).rejects.toMatchObject({ code: 'MODEL_TOO_LARGE' });
   expect(await fs.readdir(dir)).toEqual([]);
