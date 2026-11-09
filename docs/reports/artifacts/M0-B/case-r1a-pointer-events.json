@@ -1,0 +1,10 @@
+{
+  "probe": {
+    "pointerdown": 1,
+    "mousedown": 1,
+    "mouseup": 1,
+    "click": 0,
+    "submit": 0,
+    "keydown": 0
+  }
+}

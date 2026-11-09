@@ -2,12 +2,14 @@
 
 - 日期：2026-11-09
 - 被测版本：M0-B 实现交付 `92fc0ea`；最后一次全量运行在 `d6bd268`（并行 M0-A 接入）之后的树上，M0-B 相关源文件（`apps/studio/src`、`templates/`、`packages/bridge`、`packages/shared`）在运行前后哈希一致。连续三次全量运行全部通过。
-- 测试代码：`tests/e2e/`（`lib.ts` 工具、`m0b-pick.spec.ts` 用例）、根级 `playwright.config.ts`、根 `package.json` 的 `test:e2e` / `test:e2e:headed` 脚本
+- 测试代码：`tests/e2e/`（`lib.ts` 工具、`source-model.ts` AST oracle、`checks.ts` 判定逻辑、4 个 spec）、根级 `playwright.config.ts`、根 `package.json` 的 `test:e2e` / `test:e2e:headed` 脚本；`packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts`（R2 插件层回归，只新增测试文件）
 - 未修改 `apps/`、`packages/`、`templates/` 的任何实现代码
 
 ## 结论
 
-**过关。** 用例 1 的 20 个随机元素全部定位正确；用例 2–7 全部通过。未发现实现缺陷。有 3 条非阻塞观察（见文末），都属于实现方已声明的已知限制。
+**首轮（验收 7 项）：过关。** 用例 1 的 20 个随机元素全部定位正确；用例 2–7 全部通过。未发现实现缺陷。有 3 条非阻塞观察（见文末），都属于实现方已声明的已知限制。
+
+**整改回合 1（按 Codex 审查 R1/R2/R3/S4 补测试）：新增 11 个 e2e 用例全部工作正常 —— 19 项通过、2 项按预期失败（R1 待修）、0 项意外失败；插件层 9 项中 7 项通过、2 项按预期失败（R2 待修）。M0-B 最终过关仍等 CodeBuddy 修完 R1/R2。** 详情见文末“整改回合 1”。
 
 ## 环境与命令
 
@@ -91,3 +93,112 @@ Error: 随机 20 个元素中存在定位错误
 - 运行说明：`tests/e2e/README.md`
 
 提交说明：本次只提交测试与测试配置。`pnpm-lock.yaml` 里 `@playwright/test` 的条目已随并行任务 M0-A 的提交 `d6bd268` 一起入库，因此本提交不再动锁文件。
+
+---
+
+# 整改回合 1（依据 `docs/reports/M0-B-review.md`）
+
+日期：2026-11-09。整改任务卡：`docs/design/M0-plan.md` 的 “M0-B-fix”，本轮只做其中 **Pi（先做，只改 tests/）** 部分：R3 的测试判定重建、R1/R2 的回归用例预写、S4 的消息安全回归。
+
+## 本轮约束与执行环境
+
+- **没有安装或升级任何依赖，没有改 `pnpm-workspace.yaml` / `pnpm-lock.yaml`，没有改 `apps/`、`packages/`、`templates/` 的实现代码。** 唯一落到 `packages/` 下的改动是新增插件层测试文件 `src/reserved-jsx-r2.test.ts`（任务卡允许“只新增测试文件”）。
+- CodeBuddy 正在同一工作树做 M0-A，它的 `pnpm dev` 一直占着 5173/5174/3001。所以本轮用新加的 `E2E_REUSE_SERVER=1` 复用它的开发服务，并在运行前后比对了 `apps/studio/src`、`templates/product-page/src`、`packages/bridge/src`、`packages/shared/src` 的文件哈希：**哈希一致**，且 `git status` 里这些目录无改动，因此测的就是当前工作树的代码。
+- `PLAYWRIGHT_BROWSERS_PATH` 指向 `%LOCALAPPDATA%\ms-playwright`（原因见首轮“环境与命令”）。
+
+```powershell
+$env:PLAYWRIGHT_BROWSERS_PATH="$env:LOCALAPPDATA\ms-playwright"
+$env:E2E_REUSE_SERVER="1"      # 5173/5174 被并行任务的 pnpm dev 占用时
+pnpm test:e2e
+pnpm test                        # 插件层 vitest
+```
+
+## 计数总览
+
+| 套件 | 通过 | 按预期失败（待修） | 意外失败 | 合计 |
+| --- | --- | --- | --- | --- |
+| Playwright `pnpm test:e2e` | **19** | **2**（R1a、R1b） | **0** | 21 |
+| Vitest `pnpm test` | **7** | **2**（R2 两条 `it.fails`） | **0** | 9 |
+
+两个套件退出码均为 0：Playwright 的 `test.fail()` 与 Vitest 的 `it.fails` 把“已知待修”计为预期失败；一旦 CodeBuddy 修好，这两处会变成“意外通过”并让套件**失败**，提醒把标记改回去。
+
+## R3：判定依据重建（关键整改）
+
+| 新增 | 文件 | 说明 | 结果 |
+| --- | --- | --- | --- |
+| AST oracle | `tests/e2e/source-model.ts` | 用 Babel 解析 `templates/product-page/src` 下全部 `.tsx`，得出原生小写 JSX 开标签的 1 基行列——**完全不经过插件、不读 DOM 的 data-src**。`@babel/core` 按插件包路径 `createRequire` 解析，没有给根包新增依赖。 | — |
+| 用例 8 | `m0b-pick.spec.ts` | 6 个确定性锚点，期望位置全部来自 AST：同一文件里三个位置不同的 `span`（16:45 / 24:40 / 34:11）+ `small` + `h2` + `a`。逐个真实点选，断言上报的 `src` 等于 AST 位置。另含 oracle 自检（该位置确实是 `<` 且标签名一致）。 | **通过** |
+| 用例 9 | `m0b-pick.spec.ts` | 应标记节点完整性：AST 位置集合 ↔ 运行时 DOM 标记集合**双向对照**（DOM 有而 AST 无 = 幽灵位置；AST 有而 DOM 无 = 漏标/未渲染），并要求 `#root` 渲染树里每个元素都带 `data-src`。**没有把候选总数写死**：只记录规模（本轮 AST 36 个唯一位置 / DOM 36 个唯一 src / 46 个元素）并断言两侧集合相等。 | **通过** |
+| 判定共用 | `tests/e2e/checks.ts` | 用例 8/9 与变异验证用同一份判定逻辑，避免两套逻辑漂移。 | — |
+
+### 变异验证（证明判定不空转）
+
+| 变异 | 做法 | 期望 | 实际结果 |
+| --- | --- | --- | --- |
+| A 同名标签错标 | 把渲染树里全部 7 个 `span` 的 `data-src` 统一改成第一个 `span` 的位置 `src/App.tsx:16:45`（等价于插件把同名标签标到同一处源码）。bridge 上报的 src 就直接来自这些属性，所以从 Studio 一侧看与真改插件完全一致。 | 用例 8 的判定必须报错；而“以 data-src 为期望值”的旧判定仍然全过（即 R3 指出的盲点） | **抓到 2 条**：`<span>「/ 100 mL · 雪松与佛手柑」期望 24:40，实际 16:45`、`<span>「静静陪伴 · 慢慢散香」期望 34:11，实际 16:45`；旧判定 6/6 全过 |
+| B 漏标一类元素 | 移除全部 3 个 `li` 的 `data-src`（等价于插件不再给 `li` 注入） | 用例 9 必须报出缺失位置与未标记元素；用例 8 不受影响 | **报出** `missing = [src/App.tsx:42:13]`、`unmarked` 3 个 `li`；用例 8 仍全过 |
+| C 列号整体偏一位 | 纯内存：把 AST 期望位置整体右移一列，走同一套 oracle 自检 | 6 个锚点全部被判定为“该处不是 `<`” | **6/6 全部被抓出** |
+
+产物：`case-mutation-same-tag.json`、`case-mutation-missing-tag.json`、`case-mutation-column-offset.json`。
+
+为什么 A/B 用“改插件产物”而不是“改插件源码再重启”：插件是 Vite 的**配置期依赖**，不在模块图里，改源码不会让运行中的 dev server 重新加载。本轮 5173/5174 被并行任务的 `pnpm dev` 占着，我既不能重启它、也没有空闲端口另起一套。作为对照，上一轮已经用“真改插件源码 + 还原”的方式验证过列号 +1 会被抓到（见上文“断言灵敏度验证”）。本轮确实尝试过真改插件（`span` 错标），确认运行中的服务没有重新加载插件后立刻还原：`git status packages/` 除新增的 R2 测试文件外干净，`index.ts` 无 diff。
+
+## R1：预先写好的回归（待 CodeBuddy 修复）
+
+文件 `tests/e2e/m0b-known-issues.spec.ts`。业务监听器全部由测试在预览页内注入，不改模板。
+
+| 用例 | 内容 | 期望 | 当前实际 |
+| --- | --- | --- | --- |
+| R1a | 选取模式下真实鼠标点击按钮，元素上的 `pointerdown`/`mousedown`/`mouseup`/`click` 监听器都不应被触发 | 修复后通过 | **按预期失败**：`{pointerdown:1, mousedown:1, mouseup:1, click:0}`（与 Codex 探针数字一致） |
+| R1b | 选取模式下聚焦单输入框按 Enter，隐式 `submit` 不应触发 | 修复后通过 | **按预期失败**：`{submit:1}` |
+| R1c | 选取模式下点链接不改变 hash；退出选取后链接恢复可跳转 | 通过 | **通过**（退出后 hash 变成 `#details`） |
+| R1d | 退出选取后 `pointerdown`/`mousedown`/`click` 完全恢复 | 通过 | **通过**（`{pointerdown:2, mousedown:2, click:1}`） |
+
+R1a/R1b 用 `test.fail(true, '…修复后删除本条 test.fail。')` 标注。**CodeBuddy 修完 R1 后要删掉这两处标记**，并把用例 2 的“点击不触发原行为”与 R1 一起跑。
+
+## R2：插件层回归（待 CodeBuddy 修复）
+
+文件 `packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts`（只新增测试文件，不改实现）。
+
+| 用例 | 内容 | 结果 |
+| --- | --- | --- |
+| `data-src={<span/>}` 时外层 `<div>` 必须标记自己的位置 | 期望 `src/Page.tsx:1:17`、只留一个 `data-src`/`data-cid`、输出可被 Babel 解析 | **按预期失败**（`it.fails`）：当前实际输出 `src/Page.tsx:1:32`，即属性内部 `<span>` 的位置 |
+| `data-cid={<i/>}` 时同样不得把外层标成内层 | 同上 | **按预期失败**：当前实际 `1:36` |
+| 字符串保留属性 + spread 的既有行为（对照） | 外层仍为 `1:17`、不残留 `old` | **通过** |
+
+实测输出（本机直接调用 `tagSource`）：
+
+```tsx
+// 输入
+const Page=()=> <div data-src={<span/>}/>;
+// 当前输出（错：指向属性内部的 <span>）
+const Page=()=> <div  data-src={"src/Page.tsx:1:32"} data-cid={"Page"}/>;
+```
+
+## S4：消息安全回归（当前全部通过）
+
+文件 `tests/e2e/m0b-message-guard.spec.ts`。
+
+| 用例 | 内容 | 结果 |
+| --- | --- | --- |
+| S4a | bridge 忽略 `source` 不是 `parent` 的 `pick:start`（origin 正确）→ 点击照常触发业务 | **通过** |
+| S4b | 对照：`source` 正确时 bridge 进入选取模式并拦截点击、画出同源高亮 | **通过** |
+| S4c | Studio 拒绝 12 种形状非法的 `pick:result`：缺 payload、payload 非对象、bbox 3 项、bbox 含 NaN、instances 为 0 / 非整数、ancestors 4 层、styles 缺字段、note 取值非法、src 非字符串、未知类型、`scroll:progress` 越界 | **通过**（12/12 一条都没被接受），且同一通道的合法 payload 会被接受（证明不是通道没通），无 pageerror |
+| S4d | bridge 忽略畸形 `highlight`（`src` 非字符串）与未知 Studio 消息，选取状态不受影响 | **通过**（覆盖框数量保持 3） |
+
+## 本轮结论
+
+- 原验收 7 项 + 行号自检：**全部仍通过**。
+- R3：判定依据已换成 AST oracle，确定性锚点 6/6 对应正确，完整性双向对照无差集；三种变异都被抓到。**整改完成。**
+- R1：2 条回归已预写且按预期失败，2 条（链接、退出恢复）已通过。**等 CodeBuddy 修 pointerdown/mousedown/mouseup/Enter 隐式提交。**
+- R2：插件层 2 条回归已预写且按预期失败，对照用例通过。**等 CodeBuddy 修“删除保留属性时跳过其子树注入”。**
+- S4：4 条消息安全回归全部通过，未发现新缺陷。
+- 本轮未发现新的实现缺陷；也没有做任何实现侧修改。
+
+### 仍未运行
+
+同首轮“未运行”清单，另外补两点：
+
+- 修复 R1/R2 后的“预期失败转为通过”这次没有跑（实现尚未修）。修完后需重跑全量：R1a/R1b 应转成真实通过（此时必须删 `test.fail`），R2 两条应转成真实通过（删 `it.fails`）。
+- 未做真实跨窗口 `postMessage`（真浏览器发送、非合成事件）验证；S4 的 origin/source 分支用合成 `MessageEvent` 覆盖，这一点与 Codex 审查报告的表述一致。
+

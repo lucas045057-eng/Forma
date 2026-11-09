@@ -1,0 +1,18 @@
+{
+  "duringPick": {
+    "pointerdown": 1,
+    "mousedown": 1,
+    "mouseup": 1,
+    "click": 0,
+    "submit": 0,
+    "keydown": 0
+  },
+  "afterStop": {
+    "pointerdown": 2,
+    "mousedown": 2,
+    "mouseup": 2,
+    "click": 1,
+    "submit": 0,
+    "keydown": 0
+  }
+}

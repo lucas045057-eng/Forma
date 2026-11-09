@@ -1,0 +1,22 @@
+{
+  "mutation": "移除所有 li 的 data-src（等价于插件漏标这一类元素）",
+  "removed": 3,
+  "missing": [
+    "src/App.tsx:42:13"
+  ],
+  "unmarked": [
+    {
+      "tag": "li",
+      "text": "01让呼吸慢下来雪松与佛手柑，像雨后走进一片安静的森林。"
+    },
+    {
+      "tag": "li",
+      "text": "02让角落有温度琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。"
+    },
+    {
+      "tag": "li",
+      "text": "03让日常有仪式读书、休息、等一杯茶，让淡淡香气陪你片刻。"
+    }
+  ],
+  "deterministicAnchorsStillPass": true
+}

@@ -22,6 +22,7 @@ import {
   waitForSelectionChange,
   writeArtifact,
 } from './lib';
+import { anchorExpectations, checkCompleteness, checkDeterministicAnchors } from './checks';
 
 /** 构造一条结构合法的 pick:result payload（用于 origin / source 校验用例）。 */
 const forgedPayload = {
@@ -358,5 +359,46 @@ test.describe('M0-B 点选 → 源码定位', () => {
       wrongSourceIgnored: true,
       consoleErrors: errors,
     });
+  });
+
+  // 用例 8/9 是 R3 的整改：期望值一律由 templates/product-page 源码经 Babel AST 算出，
+  // 不读 DOM 上的 data-src，也不把候选总数写死。判定逻辑在 tests/e2e/checks.ts，
+  // 变异验证用例用的是同一份。
+  test('用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src）', async ({ page }, testInfo) => {
+    const expected = anchorExpectations();
+    // 同一文件里的三个 span 必须是三个不同位置，否则这组锚点抓不到「同名标签错标」
+    const spanPositions = expected.filter((item) => item.tag === 'span').map((item) => item.node.src);
+    expect(new Set(spanPositions).size, `三个 span 锚点位置重复：${spanPositions.join(' / ')}`).toBe(spanPositions.length);
+
+    const frame = await openStudio(page);
+    await setPicking(page, true);
+    const { records, failures, oracleFailures } = await checkDeterministicAnchors(page, frame, expected);
+
+    const artifact = writeArtifact('case8-deterministic-ast.json', {
+      oracle: '解析 templates/product-page/src 下全部 .tsx 的 Babel AST，取原生小写 JSX 开标签的 1 基行列',
+      independentFromDataSrc: true,
+      anchors: expected.map((item) => ({ tag: item.tag, text: item.text, expectedFromAst: item.node.src })),
+      oracleFailures,
+      failures,
+      records,
+    });
+    await testInfo.attach('case8-deterministic-ast.json', { path: artifact, contentType: 'application/json' });
+    expect(oracleFailures, 'AST oracle 自检失败').toEqual([]);
+    expect(failures, '确定性锚点定位不一致').toEqual([]);
+  });
+
+  test('用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照', async ({ page }) => {
+    const frame = await openStudio(page);
+    const result = await checkCompleteness(frame);
+
+    writeArtifact('case9-completeness.json', result);
+
+    expect(result.oracleFailures, 'AST oracle 自检失败').toEqual([]);
+    expect(result.phantom, 'DOM 里出现了 AST 中不存在的源码位置').toEqual([]);
+    expect(result.missing, 'AST 里的原生 JSX 位置没有在 DOM 中出现（漏标或未渲染）').toEqual([]);
+    expect(result.unmarked, '渲染树里存在没有 data-src 的元素').toEqual([]);
+    // 只记录规模，不把总数写死成具体数值
+    expect(result.astUniquePositions).toBeGreaterThan(0);
+    expect(result.domUniqueSrcs).toBe(result.astUniquePositions);
   });
 });

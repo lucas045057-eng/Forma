@@ -104,13 +104,538 @@
     "webServer": {
       "command": "pnpm dev",
       "url": "http://127.0.0.1:5173/",
-      "reuseExistingServer": false,
+      "reuseExistingServer": true,
       "timeout": 180000,
       "stdout": "ignore",
       "stderr": "pipe"
     }
   },
   "suites": [
+    {
+      "title": "m0b-known-issues.spec.ts",
+      "file": "m0b-known-issues.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "R1 选取模式不得触发先于 click 的业务行为",
+          "file": "m0b-known-issues.spec.ts",
+          "line": 27,
+          "column": 6,
+          "specs": [
+            {
+              "title": "R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "R1 未修复：选取模式需要在 capture 阶段拦截 pointer 按下/抬起（Codex M0-B-review R1）。修复后删除本条 test.fail。",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                        "line": 29,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1109,
+                      "error": {
+                        "message": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:41:55",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                          "column": 55,
+                          "line": 41
+                        },
+                        "snippet": " \u001b[90m 39 |\u001b[39m     \u001b[36mconst\u001b[39m probe \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m readProbe(frame)\u001b[33m;\u001b[39m\n \u001b[90m 40 |\u001b[39m     writeArtifact(\u001b[32m'case-r1a-pointer-events.json'\u001b[39m\u001b[33m,\u001b[39m { probe })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mpointerdown\u001b[33m,\u001b[39m \u001b[32m'pointerdown 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 42 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mmousedown\u001b[33m,\u001b[39m \u001b[32m'mousedown 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mmouseup\u001b[33m,\u001b[39m \u001b[32m'mouseup 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 44 |\u001b[39m     expect(probe\u001b[33m.\u001b[39mclick\u001b[33m,\u001b[39m \u001b[32m'click 触达了业务监听器'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                            "column": 55,
+                            "line": 41
+                          },
+                          "message": "Error: pointerdown 触达了业务监听器\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  39 |     const probe = await readProbe(frame);\n  40 |     writeArtifact('case-r1a-pointer-events.json', { probe });\n> 41 |     expect(probe.pointerdown, 'pointerdown 触达了业务监听器').toBe(0);\n     |                                                       ^\n  42 |     expect(probe.mousedown, 'mousedown 触达了业务监听器').toBe(0);\n  43 |     expect(probe.mouseup, 'mouseup 触达了业务监听器').toBe(0);\n  44 |     expect(probe.click, 'click 触达了业务监听器').toBe(0);\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:41:55"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:46.934Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "R1 未修复：选取模式需要在 capture 阶段拦截 pointer 按下/抬起（Codex M0-B-review R1）。修复后删除本条 test.fail。",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                            "line": 29,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-known-issues-R1-选取模式不得-3e83c-mousedown-mouseup-不应触达业务监听器-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                        "column": 55,
+                        "line": 41
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-3f7ed583cc174cac433c",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 28,
+              "column": 3
+            },
+            {
+              "title": "R1b 单输入框表单的回车隐式提交不应触发",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "R1 未修复：选取模式需要拦截 submit 与键盘激活（Codex M0-B-review R1）。修复后删除本条 test.fail。",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                        "line": 48,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1201,
+                      "error": {
+                        "message": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m",
+                        "stack": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:60:45",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                          "column": 45,
+                          "line": 60
+                        },
+                        "snippet": " \u001b[90m 58 |\u001b[39m     \u001b[36mconst\u001b[39m probe \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m readProbe(frame)\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m     writeArtifact(\u001b[32m'case-r1b-form-submit.json'\u001b[39m\u001b[33m,\u001b[39m { probe })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 60 |\u001b[39m     expect(probe\u001b[33m.\u001b[39msubmit\u001b[33m,\u001b[39m \u001b[32m'单输入框回车触发了隐式表单提交'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 61 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m\n \u001b[90m 63 |\u001b[39m   test(\u001b[32m'R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                            "column": 45,
+                            "line": 60
+                          },
+                          "message": "Error: 单输入框回车触发了隐式表单提交\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m0\u001b[39m\nReceived: \u001b[31m1\u001b[39m\n\n  58 |     const probe = await readProbe(frame);\n  59 |     writeArtifact('case-r1b-form-submit.json', { probe });\n> 60 |     expect(probe.submit, '单输入框回车触发了隐式表单提交').toBe(0);\n     |                                             ^\n  61 |   });\n  62 |\n  63 |   test('R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转', async ({ page }) => {\n    at E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts:60:45"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:48.131Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "R1 未修复：选取模式需要拦截 submit 与键盘激活（Codex M0-B-review R1）。修复后删除本条 test.fail。",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                            "line": 48,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-known-issues-R1-选取模式不得-572a8-的业务行为-R1b-单输入框表单的回车隐式提交不应触发-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m0b-known-issues.spec.ts",
+                        "column": 45,
+                        "line": 60
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-7e7be39392e046d8fe65",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 47,
+              "column": 3
+            },
+            {
+              "title": "R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1550,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:49.341Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-58286c1465e1aa38115c",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 63,
+              "column": 3
+            },
+            {
+              "title": "R1d 退出选取后 pointer / mouse / click 监听器完全恢复",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1718,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:50.898Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8a2b2de19721cdbcb913-81176cc1551594873b50",
+              "file": "m0b-known-issues.spec.ts",
+              "line": 79,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "m0b-message-guard.spec.ts",
+      "file": "m0b-message-guard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "S4 消息来源与形状校验",
+          "file": "m0b-message-guard.spec.ts",
+          "line": 64,
+          "column": 6,
+          "specs": [
+            {
+              "title": "S4a bridge 忽略 source 不是 parent 的 pick:start",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1057,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:52.629Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "02afd3a46f1658ec1634-e9c1aaa3096c6c25e8e4",
+              "file": "m0b-message-guard.spec.ts",
+              "line": 65,
+              "column": 3
+            },
+            {
+              "title": "S4b 对照：source 正确时 bridge 会进入选取模式并拦截点击",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1244,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:53.691Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "02afd3a46f1658ec1634-3ce5ed1e5f7c365e5cb7",
+              "file": "m0b-message-guard.spec.ts",
+              "line": 85,
+              "column": 3
+            },
+            {
+              "title": "S4c Studio 忽略形状非法的 pick:result（合法对照必须被接受）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2670,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:54.941Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "02afd3a46f1658ec1634-4a41417d65ed29e94faf",
+              "file": "m0b-message-guard.spec.ts",
+              "line": 105,
+              "column": 3
+            },
+            {
+              "title": "S4d bridge 忽略畸形 highlight 与未知 Studio 消息",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1738,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:57.616Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "02afd3a46f1658ec1634-73163dacd4a82ffcfbb4",
+              "file": "m0b-message-guard.spec.ts",
+              "line": 145,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "m0b-mutation-check.spec.ts",
+      "file": "m0b-mutation-check.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "变异验证（R3：证明判定条件有效）",
+          "file": "m0b-mutation-check.spec.ts",
+          "line": 18,
+          "column": 6,
+          "specs": [
+            {
+              "title": "变异 A 同名标签错标：所有 span 统一指向第一个 span 的位置，必须被抓到",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4128,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:29:59.361Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7fd9558e220a45a98fb3-804df082f7a176f9cb38",
+              "file": "m0b-mutation-check.spec.ts",
+              "line": 19,
+              "column": 3
+            },
+            {
+              "title": "变异 B 漏标一类元素：li 不再注入 data-src，完整性校验必须报出来",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2427,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:30:03.493Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7fd9558e220a45a98fb3-be1ba3ba8e5e7b58370e",
+              "file": "m0b-mutation-check.spec.ts",
+              "line": 59,
+              "column": 3
+            },
+            {
+              "title": "变异 C 列号整体偏一位：AST 期望本身自检能发现 oracle 与源码不一致",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:30:05.925Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7fd9558e220a45a98fb3-2dabb22665d7683bef2f",
+              "file": "m0b-mutation-check.spec.ts",
+              "line": 92,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
     {
       "title": "m0b-pick.spec.ts",
       "file": "m0b-pick.spec.ts",
@@ -121,7 +646,7 @@
         {
           "title": "M0-B 校验器自检（非验收用例）",
           "file": "m0b-pick.spec.ts",
-          "line": 66,
+          "line": 67,
           "column": 6,
           "specs": [
             {
@@ -140,12 +665,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4,
+                      "duration": 0,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:26.895Z",
+                      "startTime": "2026-11-09T07:30:05.937Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -155,7 +680,7 @@
               ],
               "id": "7397b0be8b703146ae13-75a76a8b0d6f7a2dc012",
               "file": "m0b-pick.spec.ts",
-              "line": 67,
+              "line": 68,
               "column": 3
             }
           ]
@@ -163,7 +688,7 @@
         {
           "title": "M0-B 点选 → 源码定位",
           "file": "m0b-pick.spec.ts",
-          "line": 78,
+          "line": 79,
           "column": 6,
           "specs": [
             {
@@ -182,12 +707,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6335,
+                      "duration": 6266,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:26.921Z",
+                      "startTime": "2026-11-09T07:30:05.941Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -203,7 +728,7 @@
               ],
               "id": "7397b0be8b703146ae13-f42771ede2bf2b64de0c",
               "file": "m0b-pick.spec.ts",
-              "line": 79,
+              "line": 80,
               "column": 3
             },
             {
@@ -222,12 +747,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1522,
+                      "duration": 1525,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:33.326Z",
+                      "startTime": "2026-11-09T07:30:12.212Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -237,7 +762,7 @@
               ],
               "id": "7397b0be8b703146ae13-4436e5fdb6be10fd51ea",
               "file": "m0b-pick.spec.ts",
-              "line": 162,
+              "line": 163,
               "column": 3
             },
             {
@@ -256,12 +781,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1099,
+                      "duration": 1042,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:34.854Z",
+                      "startTime": "2026-11-09T07:30:13.742Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -271,7 +796,7 @@
               ],
               "id": "7397b0be8b703146ae13-95af08a3cafba332f15e",
               "file": "m0b-pick.spec.ts",
-              "line": 181,
+              "line": 182,
               "column": 3
             },
             {
@@ -290,12 +815,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1395,
+                      "duration": 1319,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:35.960Z",
+                      "startTime": "2026-11-09T07:30:14.791Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -305,7 +830,7 @@
               ],
               "id": "7397b0be8b703146ae13-f84c1afc9066eb1f5a84",
               "file": "m0b-pick.spec.ts",
-              "line": 207,
+              "line": 208,
               "column": 3
             },
             {
@@ -324,12 +849,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1323,
+                      "duration": 1260,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:37.363Z",
+                      "startTime": "2026-11-09T07:30:16.114Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -339,7 +864,7 @@
               ],
               "id": "7397b0be8b703146ae13-5595fbc8d9bad361a646",
               "file": "m0b-pick.spec.ts",
-              "line": 236,
+              "line": 237,
               "column": 3
             },
             {
@@ -358,12 +883,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1124,
+                      "duration": 1024,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:38.694Z",
+                      "startTime": "2026-11-09T07:30:17.379Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -373,7 +898,7 @@
               ],
               "id": "7397b0be8b703146ae13-00729180237fff8dba48",
               "file": "m0b-pick.spec.ts",
-              "line": 267,
+              "line": 268,
               "column": 3
             },
             {
@@ -392,12 +917,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2910,
+                      "duration": 2854,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-09T07:10:39.826Z",
+                      "startTime": "2026-11-09T07:30:18.407Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -407,7 +932,81 @@
               ],
               "id": "7397b0be8b703146ae13-cc5431bb8f9d8448ef87",
               "file": "m0b-pick.spec.ts",
-              "line": 302,
+              "line": 303,
+              "column": 3
+            },
+            {
+              "title": "用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2389,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:30:21.266Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "case8-deterministic-ast.json",
+                          "contentType": "application/json",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium\\attachments\\case8-deterministic-ast-json-ce639b9e4ca49819a43962326b8267a3b6ac7ac7.json"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7397b0be8b703146ae13-c4f8edbf8da7a7c0b981",
+              "file": "m0b-pick.spec.ts",
+              "line": 367,
+              "column": 3
+            },
+            {
+              "title": "用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 559,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-09T07:30:23.660Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7397b0be8b703146ae13-b1852e4baee6e135d067",
+              "file": "m0b-pick.spec.ts",
+              "line": 390,
               "column": 3
             }
           ]
@@ -417,9 +1016,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-09T07:10:25.702Z",
-    "duration": 17392.092,
-    "expected": 8,
+    "startTime": "2026-11-09T07:29:46.660Z",
+    "duration": 37621.782,
+    "expected": 21,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

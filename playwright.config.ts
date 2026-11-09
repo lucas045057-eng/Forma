@@ -4,6 +4,11 @@ import { defineConfig, devices } from '@playwright/test';
  * M0-B「点选 → 源码定位」端到端测试配置（Pi 负责）。
  * 只依赖根级配置与 tests/ 目录，不改 apps/、packages/、templates/ 的实现代码。
  */
+
+// 若端口已被另一个并行任务的 `pnpm dev` 占用，设 E2E_REUSE_SERVER=1 复用它。
+// 复用前必须确认那个服务就是当前工作树，否则测的不是你要测的代码。
+const reuseExistingServer = process.env.E2E_REUSE_SERVER === '1';
+
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 120_000,
@@ -30,16 +35,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],
-  // 默认用 `pnpm dev` 起三个服务。
-  // 若根目录 pnpm 状态暂不可用（例如并行任务正在安装依赖、pnpm-workspace.yaml 非法），
-  // 设 E2E_DIRECT_WEBSERVER=1 直接用 node 跑两个 Vite 开发服务（M0-B 测试不需要后端）。
+  // 默认用 `pnpm dev` 起三个服务。若根目录 pnpm 状态暂不可用（并行任务正在安装依赖、
+  // pnpm-workspace.yaml 非法），设 E2E_DIRECT_WEBSERVER=1 直接用 node 跑两个 Vite
+  // 开发服务（M0-B 测试不需要后端）。
   webServer: process.env.E2E_DIRECT_WEBSERVER === '1'
     ? [
         {
           command: 'node node_modules/vite/bin/vite.js',
           cwd: 'templates/product-page',
           url: 'http://127.0.0.1:5174/preview/main/',
-          reuseExistingServer: false,
+          reuseExistingServer,
           timeout: 180_000,
           stdout: 'ignore',
           stderr: 'pipe',
@@ -48,7 +53,7 @@ export default defineConfig({
           command: 'node node_modules/vite/bin/vite.js',
           cwd: 'apps/studio',
           url: 'http://127.0.0.1:5173/',
-          reuseExistingServer: false,
+          reuseExistingServer,
           timeout: 180_000,
           stdout: 'ignore',
           stderr: 'pipe',
@@ -57,7 +62,7 @@ export default defineConfig({
     : {
         command: 'pnpm dev',
         url: 'http://127.0.0.1:5173/',
-        reuseExistingServer: false,
+        reuseExistingServer,
         timeout: 180_000,
         stdout: 'ignore',
         stderr: 'pipe',

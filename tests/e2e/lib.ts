@@ -260,6 +260,104 @@ export async function highlightBoxCount(frame: Frame, src: string): Promise<numb
   );
 }
 
+/**
+ * 按「标签 + 自身静态文本」在预览页里定位元素，命中后临时打上 `data-e2e-target`，
+ * 方便复用已有的真实鼠标点击逻辑。返回命中个数（应当正好 1 个）。
+ * 自身文本 = 直接子级文本节点拼起来并折叠空白，和 AST 侧 JSXText 的口径一致。
+ */
+export async function markByOwnText(frame: Frame, tag: string, ownText: string): Promise<number> {
+  return frame.evaluate(({ tag: tagName, text }) => {
+    const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+    const ownTextOf = (element: Element) => normalize(
+      Array.from(element.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent ?? '')
+        .join(''),
+    );
+    const matches = Array.from(document.querySelectorAll(tagName)).filter((element) => ownTextOf(element) === text);
+    for (const element of matches) element.setAttribute('data-e2e-target', '1');
+    return matches.length;
+  }, { tag, text: ownText });
+}
+
+export async function clearE2eMarks(frame: Frame): Promise<void> {
+  await frame.evaluate(() => {
+    for (const element of Array.from(document.querySelectorAll('[data-e2e-target]'))) element.removeAttribute('data-e2e-target');
+  });
+}
+
+/** 点击一个已被 `markByOwnText` 标记的元素。 */
+export async function clickMarkedByText(page: Page, frame: Frame): Promise<ClickMode> {
+  const mode = await clickTarget(page, frame, { selector: '[data-e2e-target="1"]' });
+  await clearE2eMarks(frame);
+  return mode;
+}
+
+/** 在预览页里注入一个探针对象，并把事件监听器挂在指定元素上（只影响本次页面，不改模板）。 */
+export async function installEventProbe(frame: Frame, selector: string): Promise<void> {
+  await frame.evaluate((target) => {
+    const probe: Record<string, number> = { pointerdown: 0, mousedown: 0, mouseup: 0, click: 0, submit: 0, keydown: 0 };
+    (window as unknown as { __probe: Record<string, number> }).__probe = probe;
+    const element = document.querySelector(target);
+    if (!element) throw new Error(`探针挂载目标不存在：${target}`);
+    for (const type of ['pointerdown', 'mousedown', 'mouseup', 'click']) {
+      element.addEventListener(type, () => { probe[type] += 1; }, true);
+    }
+    element.addEventListener('keydown', () => { probe.keydown += 1; }, true);
+  }, selector);
+}
+
+/** 在预览页里注入「单输入框 + 无提交按钮」的表单，监听 submit（阻止真实导航）。 */
+export async function installSingleInputForm(frame: Frame): Promise<void> {
+  await frame.evaluate(() => {
+    const host = document.querySelector('[data-testid="benefits"]') ?? document.getElementById('root');
+    if (!host) throw new Error('找不到注入宿点');
+    const form = document.createElement('form');
+    form.id = 'probe-form';
+    const input = document.createElement('input');
+    input.id = 'probe-input';
+    input.type = 'text';
+    input.setAttribute('style', 'display:block;width:160px;height:28px;margin:8px 0;');
+    form.append(input);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const probe = (window as unknown as { __probe: Record<string, number> }).__probe;
+      if (probe) probe.submit += 1;
+    });
+    host.after(form);
+  });
+}
+
+export async function readProbe(frame: Frame): Promise<Record<string, number>> {
+  return frame.evaluate(() => ({ ...((window as unknown as { __probe: Record<string, number> }).__probe ?? {}) }));
+}
+
+export async function previewHash(frame: Frame): Promise<string> {
+  return frame.evaluate(() => window.location.hash);
+}
+
+/** 预览页里所有元素（用于完整性对照），带标记状态。 */
+export async function domTagInventory(frame: Frame): Promise<{ total: number; unmarked: Array<{ tag: string; text: string }> }> {
+  return frame.evaluate(() => {
+    const scope = document.getElementById('root') ?? document.body;
+    const all = Array.from(scope.querySelectorAll('*')).filter((element) =>
+      !element.closest('[data-bridge-overlay]') && element.getAttribute('data-e2e-target') === null);
+    const unmarked = all
+      .filter((element) => !element.hasAttribute('data-src'))
+      .map((element) => ({
+        tag: element.tagName.toLowerCase(),
+        text: (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40),
+      }));
+    return { total: all.length, unmarked };
+  });
+}
+
+/** 运行时 DOM 里出现过的全部 data-src（去重）。 */
+export async function domSrcSet(frame: Frame): Promise<string[]> {
+  return frame.evaluate(() => Array.from(new Set(Array.from(document.querySelectorAll('[data-src]'))
+    .map((element) => element.getAttribute('data-src') ?? ''))).sort());
+}
+
 export function writeArtifact(name: string, data: unknown): string {
   mkdirSync(ARTIFACT_DIR, { recursive: true });
   const file = path.join(ARTIFACT_DIR, name);
