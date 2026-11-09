@@ -1,0 +1,14 @@
+.workspace.scene-editing { grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); }
+.scene-editor { background: #17232d; border: 1px solid #34424d; border-radius: 8px; padding: 16px; overflow: auto; }
+.scene-editor header { display: flex; align-items: center; justify-content: space-between; }
+.scene-editor h2 { font-size: 17px; }
+.scene-editor label { display: block; margin: 12px 0; font-size: 12px; }
+.scene-editor input[type=range] { display: block; width: 100%; }
+.scene-editor input[type=number], .scene-editor select { max-width: 100%; color: #d7e4ee; background: #101820; border: 1px solid #4d7986; padding: 6px; }
+.scene-editor fieldset { margin: 14px 0; border: 1px solid #34424d; border-radius: 5px; }
+.scene-editor legend { font-size: 12px; color: #9ddfd8; }
+.scene-editor button { margin: 4px 4px 4px 0; padding: 8px 10px; font-size: 12px; }
+.scene-editor button:disabled { opacity: .5; cursor: default; }
+.scene-viewport { position: relative; background: #efe8dc; flex: none; }
+.scene-viewport canvas { touch-action: none; }
+@media (max-width: 650px) { .scene-editor { overflow: auto; } }

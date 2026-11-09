@@ -8,7 +8,12 @@ import { writeAtomic } from '../assets/atomic-file.ts';
 import type { AssetService } from '../assets/service.ts';
 
 export class SceneError extends Error {
-  constructor(public code: string, message: string, public status = 400, public fields?: unknown) { super(message); }
+  code: string;
+  status: number;
+  fields?: unknown;
+  constructor(code: string, message: string, status = 400, fields?: unknown) {
+    super(message); this.code = code; this.status = status; this.fields = fields;
+  }
 }
 const validate = new Ajv({ allErrors: true, strict: true }).compile(sceneConfigSchema);
 export function validateScene(value: unknown): asserts value is SceneConfig {
@@ -39,7 +44,8 @@ export class SceneService {
   private queue: Promise<unknown> = Promise.resolve();
   private state?: Journal;
   private journalFile = '';
-  constructor(private options: { workRoot: string; historyDirectory: string; emit?: (event: SceneChanged) => void }) {}
+  private options: { workRoot: string; historyDirectory: string; emit?: (event: SceneChanged) => void };
+  constructor(options: { workRoot: string; historyDirectory: string; emit?: (event: SceneChanged) => void }) { this.options = options; }
   private serial<T>(work: () => Promise<T>): Promise<T> {
     const result = this.queue.then(work);
     this.queue = result.catch(() => {});
