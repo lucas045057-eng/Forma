@@ -90,10 +90,10 @@ test.describe('变异验证（R3：证明判定条件有效）', () => {
   });
 
   test('变异 C 列号整体偏一位：AST 期望本身自检能发现 oracle 与源码不一致', async () => {
-    // 这一条不依赖浏览器：把 AST 期望位置整体右移一列，校验 readSourceAt 的自检会报错，
-    // 说明「读源码确认该处是 < 且标签一致」这一步本身也有效。
+    // 这一条不依赖浏览器：把 AST 期望位置整体右移一列（列号已是 1 基，所以 +1 就是偏一列），
+    // 校验 readSourceAt 的自检会报错，说明「读源码确认该处是 < 且标签一致」这一步本身也有效。
     const expected = anchorExpectations();
-    const shifted = expected.map((item) => ({ ...item, node: { ...item.node, src: `${item.node.file}:${item.node.line}:${item.node.column + 2}` } }));
+    const shifted = expected.map((item) => ({ ...item, node: { ...item.node, src: `${item.node.file}:${item.node.line}:${item.node.column + 1}` } }));
     const { readSourceAt } = await import('./lib');
     const failures = shifted
       .map((item) => ({ item, hit: readSourceAt(item.node.src) }))

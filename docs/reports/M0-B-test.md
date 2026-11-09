@@ -11,7 +11,9 @@
 
 **整改回合 1（按 Codex 审查 R1/R2/R3/S4 补测试）：新增 11 个 e2e 用例全部工作正常 —— 19 项通过、2 项按预期失败（R1 待修）、0 项意外失败；插件层 9 项中 7 项通过、2 项按预期失败（R2 待修）。M0-B 最终过关仍等 CodeBuddy 修完 R1/R2。** 详情见文末“整改回合 1”。
 
-**整改回合 2（fix/m0b-review 合并后回归）：全部通过 —— 单元 30 项、M0-B e2e 24 项、M0-A e2e 22 项，共 76 项，** 0 失败、0 预期失败、0 跳过。R1/R2 的“预期失败”标记已删除并转为永久回归；新增右键/双击/Space 激活、悬停与滚动不被误伤、S3 组件名归属用例。M0-B **可以最终过关**（待 Codex 复核）。详情见文末“整改回合 2”。
+**整改回合 2（fix/m0b-review 合并后回归）：全部通过 —— 单元 30 项、M0-B e2e 24 项、M0-A e2e 22 项，共 76 项，** 0 失败、0 预期失败、0 跳过。R1/R2 的“预期失败”标记已删除并转为永久回归；新增右键/双击/Space 激活、悬停与滚动不被误伤、S3 组件名归属用例。详情见文末“整改回合 2”。
+
+**整改回合 3（Codex 复核后）：S3 的修法带出一项应修 N1（`memo` 具名默认导出、`as`/`satisfies` 包装的组件 cid 退化为 Anonymous）——已用 3 条 `it.fails` 预写回归；同时更正了变异 C 的列号偏移（原实现实际偏两列）。当前单元 35 项中 3 项按预期失败，其余全过。M0-B 仍待 N1 修复 + Codex 复核。** 详情见文末“整改回合 3”。
 
 ## 环境与命令
 
@@ -139,7 +141,7 @@ pnpm test                        # 插件层 vitest
 | --- | --- | --- | --- |
 | A 同名标签错标 | 把渲染树里全部 7 个 `span` 的 `data-src` 统一改成第一个 `span` 的位置 `src/App.tsx:16:45`（等价于插件把同名标签标到同一处源码）。bridge 上报的 src 就直接来自这些属性，所以从 Studio 一侧看与真改插件完全一致。 | 用例 8 的判定必须报错；而“以 data-src 为期望值”的旧判定仍然全过（即 R3 指出的盲点） | **抓到 2 条**：`<span>「/ 100 mL · 雪松与佛手柑」期望 24:40，实际 16:45`、`<span>「静静陪伴 · 慢慢散香」期望 34:11，实际 16:45`；旧判定 6/6 全过 |
 | B 漏标一类元素 | 移除全部 3 个 `li` 的 `data-src`（等价于插件不再给 `li` 注入） | 用例 9 必须报出缺失位置与未标记元素；用例 8 不受影响 | **报出** `missing = [src/App.tsx:42:13]`、`unmarked` 3 个 `li`；用例 8 仍全过 |
-| C 列号整体偏一位 | 纯内存：把 AST 期望位置整体右移一列，走同一套 oracle 自检 | 6 个锚点全部被判定为“该处不是 `<`” | **6/6 全部被抓出** |
+| C 列号偏一位 | 纯内存：把 AST 期望位置整体右移**一列**（`column + 1`，列号本身就是 1 基），走同一套 oracle 自检 | 6 个锚点全部被判定为“该处不是 `<`” | **6/6 全部被抓出**（原实现误写成 `+ 2`，即实际偏两列，回合 3 已更正） |
 
 产物：`case-mutation-same-tag.json`、`case-mutation-missing-tag.json`、`case-mutation-column-offset.json`。
 
@@ -267,4 +269,38 @@ const Page=()=> <div  data-src={"src/Page.tsx:1:32"} data-cid={"Page"}/>;
 ## 回合 2 结论
 
 R1、R2、R3、S4 的回归全部通过，原验收 7 项仍全部通过，M0-A 22 项不受影响。**M0-B 可以最终过关**，待 Codex 复核 R1–R3。
+
+---
+
+# 整改回合 3（N1 预写回归 / N2 变异描述更正）
+
+日期：2026-11-09。依据：Codex 对整改回合 2 的复核（`docs/reports/M0-B-review.md` 末尾）。本轮只改测试文件，不碰实现。
+
+## N1：S3 修法引入的退化（待 CodeBuddy 修）
+
+`packages/vite-plugin-source-tag/src/component-name.test.ts` 新增 3 条 `it.fails`（修好后会变成意外通过，提醒删标记）+ 2 条正常断言（必须保持）：
+
+| 写法 | 应得 cid | 当前实测 | 标记 |
+| --- | --- | --- | --- |
+| `export default memo(function Card(){return <div/>});` | `Card` | **`Anonymous`** | `it.fails` |
+| `const Page = (() => <main/>) satisfies React.FC;` | `Page` | **`Anonymous`** | `it.fails` |
+| `const Page = (() => <main/>) as React.FC;` | `Page` | **`Anonymous`** | `it.fails` |
+| `const Page=()=>{const Heading=<h1/>;return Heading;}` | `Page` | `Page` | 正常断言 |
+| `const Page = function PageView(){ return <main/> };` | `Page`（优先公开绑定名） | `Page` | 正常断言 |
+
+当前退化已复现：三个 `Anonymous` 的 `data-src` 位置都是对的（`1:44` / `1:21` / `1:21`），只有组件名掉了——所以只是归属问题，不是定位问题。
+
+## N2：变异 C 实际偏了两列
+
+`tests/e2e/m0b-mutation-check.spec.ts` 的变异 C 原来写的是 `column + 2`，而 `column` 本身已是 1 基、正是 `<` 所在列，所以实际是**向右偏两列**，与“偏一位”的标题不符。已改为 `column + 1`（真正偏一列），并重跑确认：6 个锚点仍然全部被抓出（偏移后该位置是标签名的首字母，不是 `<`）。产物 `case-mutation-column-offset.json` 已刷新。
+
+## N3：暂不改
+
+用例 9 的“AST 位置集合 ↔ DOM 标记集合”相等检查依赖“所有原生 JSX 节点都会被渲染”。当前模板没有条件渲染，所以成立；M1 引入条件渲染后这条会误报，处理方式已写进 M1 的测试要求（按条件渲染分组或白名单）。
+
+## 回合 3 结果
+
+- `pnpm test`：插件 20（含 **3 项按预期失败**，等 N1）＋ 资产 14 ＋ bridge 探针 1，共 35 项，**除 3 个预期失败外全部通过**。
+- 变异 C 专项重跑：通过（6/6 被抓出）。
+- **M0-B 仍未最终过关**：等 CodeBuddy 修 N1，届时把 3 条 `it.fails` 改回 `it` 并重跑全量，再由 Codex 复核。
 
