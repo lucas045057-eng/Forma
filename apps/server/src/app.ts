@@ -7,13 +7,15 @@ import type { AssetEvent } from '@spatial/shared';
 import { AssetService } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 
-export async function createApp(options: { dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; logger?: boolean } = {}) {
+export async function createApp(options: { dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
+  const downloadTimeoutMs = options.downloadTimeoutMs ?? Number(process.env.ASSET_DOWNLOAD_TIMEOUT_MS ?? 120_000);
+  if (!Number.isFinite(downloadTimeoutMs) || downloadTimeoutMs <= 0) throw new Error('Invalid ASSET_DOWNLOAD_TIMEOUT_MS');
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16_384, disableRequestLogging: true });
   const subscribers = new Set<(event: AssetEvent) => void>();
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
-    pollMs: options.pollMs, timeoutMs: options.timeoutMs,
+    pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs,
     emit: event => subscribers.forEach(send => send(event)),
   });
   await service.init();
@@ -71,6 +73,6 @@ export async function createApp(options: { dataDirectory?: string; base?: string
     try { await stat(filename); } catch { return reply.code(404).send({ error: { code: 'MODEL_MISSING', message: '模型文件已丢失，请重新导入资产' } }); }
     return reply.type('model/gltf-binary').header('Cache-Control', 'no-cache').send(createReadStream(filename));
   });
-  app.addHook('onClose', async () => { subscribers.clear(); await service.close(); });
+  app.addHook('preClose', async () => { subscribers.clear(); await service.close(); });
   return { app, service };
 }

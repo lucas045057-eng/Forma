@@ -26,8 +26,9 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
   const [taskId, setTaskId] = useState('4969293');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [loadedUrl, setLoadedUrl] = useState('');
   const current = assets.find(asset => asset.id === selected);
+  const loaded = current?.status === 'ready' && current.modelUrl === loadedUrl;
   const ready = assets.filter(asset => asset.status === 'ready');
   useEffect(() => {
     let active = true;
@@ -52,7 +53,6 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
     const timer = window.setInterval(() => { void refresh(); }, 3000);
     return () => { active = false; clearInterval(timer); socket.close(); };
   }, []);
-  useEffect(() => { setLoaded(false); }, [selected]);
   async function importTask() {
     setBusy(true); setError('');
     try {
@@ -68,14 +68,14 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
     <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
     <div className="asset-layout">
       <section className="model-area" data-testid="model-viewport" data-loaded={loaded}>
-        {current?.status === 'ready' && current.modelUrl ? <ModelErrorBoundary key={current.id}>
+        {current?.status === 'ready' && current.modelUrl ? <ModelErrorBoundary key={current.modelUrl}>
           <Canvas camera={{ position: [1.6, 1.1, 1.6], fov: 35 }} dpr={[1, 2]} gl={{ antialias: true }}>
             <color attach="background" args={['#efe8dc']}/>
             <ambientLight intensity={1.2}/>
             <hemisphereLight args={['#fff4de', '#655644', 2]}/>
             <directionalLight position={[3, 5, 4]} intensity={3}/>
             <directionalLight position={[-3, 2, -2]} intensity={1.5}/>
-            <Suspense fallback={null}><Model url={current.modelUrl} onReady={() => setLoaded(true)}/></Suspense>
+            <Suspense fallback={null}><Model url={current.modelUrl} onReady={() => setLoadedUrl(current.modelUrl!)}/></Suspense>
             <OrbitControls makeDefault target={[0, 0.5, 0]} minDistance={0.6} maxDistance={5}/>
             <gridHelper args={[3, 12, '#c1b5a3', '#ddd3c2']}/>
           </Canvas>

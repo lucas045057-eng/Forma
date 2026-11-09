@@ -12,7 +12,7 @@ afterEach(async () => { for (const cleanup of cleanups.reverse()) await cleanup(
 async function setup(scenario: MockScenario = 'success', timeoutMs = 2000) {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-assets-'));
   cleanups.push(() => rm(directory, { recursive: true, force: true }));
-  const mock = await createMockServer({ scenario });
+  const mock = await createMockServer({ scenario, key: 'test-only-key' });
   const base = await mock.listen({ host: '127.0.0.1', port: 0 });
   cleanups.push(() => mock.close());
   const client = new Lux3DClient({ base, key: 'test-only-key' });

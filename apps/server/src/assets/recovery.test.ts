@@ -1,0 +1,136 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { createMockServer, type MockScenario } from './mock-server.ts';
+import { Lux3DClient } from './lux3d.ts';
+import { AssetService } from './service.ts';
+import { createApp } from '../app.ts';
+import * as atomic from './atomic-file.ts';
+
+const cleanups: (() => Promise<unknown>)[] = [];
+afterEach(async () => { vi.restoreAllMocks(); for (const close of cleanups.reverse()) await close(); cleanups.length = 0; });
+async function setup(scenario: MockScenario = 'success') {
+  const root = resolve(import.meta.dirname, '../../../../.data');
+  await mkdir(root, { recursive: true });
+  const directory = await mkdtemp(join(root, 'recovery-test-'));
+  cleanups.push(() => rm(directory, { recursive: true, force: true }));
+  const mock = await createMockServer({ scenario });
+  const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  cleanups.push(() => mock.close());
+  const client = new Lux3DClient({ base, key: 'mock-only' });
+  return { root, directory, mock, base, client };
+}
+
+it('processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL', async () => {
+  const { directory, mock, base } = await setup();
+  const { app, service } = await createApp({ dataDirectory: directory, base, key: 'mock-only', pollMs: 1 });
+  cleanups.push(() => app.close());
+  await mkdir(join(directory, '123'));
+  await writeFile(join(directory, '123', 'model.glb.tmp'), 'crash residue');
+  await writeFile(join(directory, '123', 'raw.glb.tmp'), 'crash residue');
+  const first = (await app.inject({ method: 'POST', url: '/assets/lux3d/import', payload: { taskId: '123' } })).json();
+  await service.idle();
+  const ready = service.get(first.id)!;
+  expect(ready.status).toBe('ready');
+  expect((await app.inject(ready.modelUrl!)).statusCode).toBe(200);
+  const file = service.modelPath(first.id)!;
+  await rm(file);
+  expect((await app.inject(ready.modelUrl!)).json().error.code).toBe('MODEL_MISSING');
+  const gets = (await mock.inject('/__stats')).json().gets;
+  const repaired = await service.importTask('123');
+  expect(repaired.id).toBe(first.id);
+  await service.idle();
+  expect(service.get(first.id)?.status).toBe('ready');
+  expect(service.get(first.id)?.modelUrl).not.toBe(ready.modelUrl);
+  expect((await app.inject(service.get(first.id)!.modelUrl!)).statusCode).toBe(200);
+  expect((await mock.inject('/__stats')).json()).toEqual({ creates: 0, gets: gets + 1 });
+  const names = await readdir(join(directory, '123'));
+  expect(names.filter(name => name.endsWith('.tmp')).sort()).toEqual(['model.glb.tmp', 'raw.glb.tmp']);
+});
+it('detects missing ready models on restart and allows re-import', async () => {
+  const { directory, client, mock } = await setup();
+  const first = new AssetService({ directory, client, pollMs: 1 });
+  await first.init();
+  const asset = await first.importTask('123');
+  await first.idle(); await first.close();
+  await rm(join(directory, '123', 'model.glb'));
+  const second = new AssetService({ directory, client, pollMs: 1 });
+  cleanups.push(() => second.close());
+  await second.init();
+  expect(second.get(asset.id)).toMatchObject({ status: 'failed', error: { code: 'MODEL_MISSING' } });
+  await second.importTask('123'); await second.idle();
+  expect(second.get(asset.id)?.status).toBe('ready');
+  expect((await mock.inject('/__stats')).json().creates).toBe(0);
+});
+it('never repeats a paid request after upstream accepts it but loses the response', async () => {
+  const { directory, client, mock } = await setup('response-lost');
+  const first = new AssetService({ directory, client });
+  await first.init();
+  const input = { prompt: 'bottle', version: 'G1-Turbo' as const };
+  const asset = await first.submit(input, 'lost-response');
+  expect(asset.status).toBe('submit_unknown');
+  await first.close();
+  const restarted = new AssetService({ directory, client });
+  cleanups.push(() => restarted.close());
+  await restarted.init();
+  expect((await restarted.submit(input, 'lost-response')).id).toBe(asset.id);
+  expect((await mock.inject('/__stats')).json().creates).toBe(1);
+});
+it('does not resubmit after taskId persistence fails, even after restart', async () => {
+  const { directory, client, mock } = await setup();
+  const first = new AssetService({ directory, client });
+  await first.init();
+  const actual = atomic.writeAtomic;
+  const failedWrite = vi.spyOn(atomic, 'writeAtomic').mockImplementation(async (filename, contents, signal) => {
+    if (filename.endsWith('index.json') && JSON.parse(String(contents)).some((entry: { taskId?: string }) => entry.taskId)) throw new Error('disk full');
+    return actual(filename, contents, signal);
+  });
+  const input = { prompt: 'bottle', version: 'G1' as const };
+  await expect(first.submit(input, 'disk-failure')).rejects.toThrow('disk full');
+  await first.close();
+  expect(JSON.parse(await readFile(join(directory, 'index.json'), 'utf8'))[0].status).toBe('submitting');
+  failedWrite.mockRestore();
+  const restarted = new AssetService({ directory, client, pollMs: 1 });
+  cleanups.push(() => restarted.close());
+  await restarted.init();
+  expect((await restarted.submit(input, 'disk-failure')).status).toBe('submit_unknown');
+  expect((await mock.inject('/__stats')).json().creates).toBe(1);
+  await restarted.importTask('9000001'); await restarted.idle();
+  expect(restarted.get('lux3d-9000001')?.status).toBe('ready');
+  expect((await mock.inject('/__stats')).json().creates).toBe(1);
+});
+it.each(['drip', 'timeout'] as const)('app.close stops %s work and persists a restartable record', async scenario => {
+  const { directory, mock, base } = await setup(scenario);
+  const { app, service } = await createApp({ dataDirectory: directory, base, key: 'mock-only', pollMs: scenario === 'timeout' ? 60_000 : 1, downloadTimeoutMs: 60_000 });
+  cleanups.push(() => app.close());
+  let downloading = false;
+  mock.server.on('request', request => { if (request.url === '/output/model.glb') downloading = true; });
+  const asset = await service.importTask('123');
+  await vi.waitFor(async () => {
+    if (scenario === 'drip') expect(downloading).toBe(true);
+    else expect((await mock.inject('/__stats')).json().gets).toBeGreaterThan(0);
+  });
+  const start = Date.now();
+  await app.close();
+  expect(Date.now() - start).toBeLessThan(2000);
+  const stored = JSON.parse(await readFile(join(directory, 'index.json'), 'utf8'))[0];
+  expect(stored).toMatchObject({ id: asset.id, status: 'polling', error: { code: 'SERVICE_STOPPED' } });
+  expect((await mock.inject('/__stats')).json().creates).toBe(0);
+  if (scenario === 'drip') expect(await readdir(join(directory, '123'))).toEqual([]);
+  const resumedMock = await createMockServer();
+  const resumedBase = await resumedMock.listen({ host: '127.0.0.1', port: 0 });
+  cleanups.push(() => resumedMock.close());
+  const resumed = new AssetService({ directory, client: new Lux3DClient({ base: resumedBase, key: 'mock-only' }), pollMs: 1 });
+  cleanups.push(() => resumed.close());
+  await resumed.init(); await resumed.idle();
+  expect(resumed.get(asset.id)?.status).toBe('ready');
+  expect((await resumedMock.inject('/__stats')).json().creates).toBe(0);
+});
+it('rejects truncated mock output without publishing a model', async () => {
+  const { directory, client } = await setup('truncated');
+  const service = new AssetService({ directory, client, pollMs: 1 });
+  cleanups.push(() => service.close()); await service.init();
+  const asset = await service.importTask('123'); await service.idle();
+  expect(service.get(asset.id)).toMatchObject({ status: 'failed', error: { code: 'INVALID_GLB' } });
+  expect(await readdir(join(directory, '123'))).toEqual([]);
+});
