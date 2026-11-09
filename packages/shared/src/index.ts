@@ -75,12 +75,13 @@ export function isPreviewMessage(value: unknown): value is PreviewMessage {
   if (value.type === 'error') return typeof p.message === 'string';
   if (value.type === 'scroll:progress') return typeof p.at === 'number' && p.at >= 0 && p.at <= 1;
   if (value.type !== 'pick:result') return false;
+  const styles = p.styles;
   return typeof p.src === 'string' && typeof p.cid === 'string' &&
     (p.text === undefined || typeof p.text === 'string') &&
     (p.note === undefined || p.note === 'outer-container') &&
     Array.isArray(p.bbox) && p.bbox.length === 4 && p.bbox.every(n => typeof n === 'number' && Number.isFinite(n)) &&
     typeof p.instances === 'number' && Number.isInteger(p.instances) && p.instances > 0 &&
     Array.isArray(p.ancestors) && p.ancestors.length <= 3 && p.ancestors.every(s => typeof s === 'string') &&
-    record(p.styles) && ['display', 'position', 'color', 'backgroundColor', 'fontSize', 'fontFamily',
-      'fontWeight', 'lineHeight', 'padding', 'margin', 'borderRadius', 'width', 'height'].every(k => typeof p.styles[k] === 'string');
+    record(styles) && ['display', 'position', 'color', 'backgroundColor', 'fontSize', 'fontFamily',
+      'fontWeight', 'lineHeight', 'padding', 'margin', 'borderRadius', 'width', 'height'].every(k => typeof styles[k] === 'string');
 }
