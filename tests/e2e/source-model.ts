@@ -41,6 +41,8 @@ export interface JsxNodeModel {
   ownText: string;
   /** `文件:行:列`，与插件注入的 data-src 同一格式 */
   src: string;
+  /** 最近一层具名函数/变量绑定的组件名（与插件 cid 同口径）；M1 条件渲染靠它分组 */
+  component: string;
 }
 
 function collectTsxFiles(dir: string): string[] {
@@ -68,6 +70,21 @@ function walk(node: BabelNode | undefined, parent: BabelNode | null, visit: (nod
 
 const normalize = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
+/** 向上找最近一层「具名函数/变量绑定的组件」，与插件 cid 同口径。 */
+function componentOf(node: BabelNode, parents: Map<BabelNode, BabelNode | null>): string {
+  for (let parent = parents.get(node) ?? null; parent; parent = parents.get(parent) ?? null) {
+    let name: string | undefined;
+    if (['FunctionDeclaration', 'FunctionExpression', 'ClassDeclaration', 'ClassExpression'].includes(parent.type)) {
+      name = (parent as unknown as { id?: { name?: string } }).id?.name;
+    } else if (parent.type === 'VariableDeclarator') {
+      const id = (parent as unknown as { id?: { type?: string; name?: string } }).id;
+      if (id?.type === 'Identifier') name = id.name;
+    }
+    if (name && /^[A-Z]/.test(name)) return name;
+  }
+  return 'Anonymous';
+}
+
 /** 模板源码里所有「原生小写 JSX 开标签」的位置（AST 口径，独立于插件产物）。 */
 export function nativeJsxNodes(): JsxNodeModel[] {
   const babel = loadBabel();
@@ -81,7 +98,9 @@ export function nativeJsxNodes(): JsxNodeModel[] {
       ast: true,
       parserOpts: { sourceType: 'module', plugins: ['jsx', 'typescript'] },
     });
+    const parents = new Map<BabelNode, BabelNode | null>();
     walk(ast.program, null, (node, parent) => {
+      parents.set(node, parent);
       if (node.type !== 'JSXOpeningElement') return;
       if (!node.name || node.name.type !== 'JSXIdentifier' || !/^[a-z]/.test(node.name.name)) return;
       const ownText = (parent?.children ?? [])
@@ -91,7 +110,10 @@ export function nativeJsxNodes(): JsxNodeModel[] {
       const relative = path.relative(TEMPLATE_ROOT, file).split(path.sep).join('/');
       const line = node.loc!.start.line;
       const column = node.loc!.start.column + 1;
-      nodes.push({ file: relative, line, column, tag: node.name.name, ownText: normalize(ownText), src: `${relative}:${line}:${column}` });
+      nodes.push({
+        file: relative, line, column, tag: node.name.name, ownText: normalize(ownText),
+        src: `${relative}:${line}:${column}`, component: componentOf(node, parents),
+      });
     });
   }
   return nodes.sort((a, b) => a.src.localeCompare(b.src, 'en', { numeric: true }));

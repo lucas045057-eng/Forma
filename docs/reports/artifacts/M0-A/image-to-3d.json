@@ -1,9 +1,9 @@
 {
   "asset": {
-    "id": "fd66cab5-ec42-43c1-8cf5-46179998935d",
+    "id": "00a1c9e1-fa82-4698-aa76-01c56202f2c5",
     "status": "ready",
-    "createdAt": "2026-11-09T08:21:42.754Z",
-    "updatedAt": "2026-11-09T08:21:43.454Z",
+    "createdAt": "2026-11-09T12:30:41.750Z",
+    "updatedAt": "2026-11-09T12:30:42.670Z",
     "taskId": "9000002",
     "metrics": {
       "before": {
@@ -14,7 +14,30 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 440,
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 509,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -28,7 +51,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/fd66cab5-ec42-43c1-8cf5-46179998935d/model.glb?revision=4e9f5f1e-edce-41d7-9f3c-b01c09f640c2"
+    "modelUrl": "/assets/00a1c9e1-fa82-4698-aa76-01c56202f2c5/model.glb?revision=c773aa58-e738-41b6-8acf-15033f87a0a9"
   },
   "invalid": {
     "both": 400,

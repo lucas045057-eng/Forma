@@ -2,6 +2,7 @@
   "files": [
     "model.glb",
     "model.glb.tmp",
+    "parts.json",
     "raw.glb",
     "raw.glb.tmp"
   ],
@@ -11,10 +12,10 @@
   ],
   "indexTemps": [],
   "asset": {
-    "id": "0da3ea78-9cad-473f-9c7e-2f589a214fae",
+    "id": "e0df60ca-c09e-45a7-a1d7-c334b3d86a5d",
     "status": "ready",
-    "createdAt": "2026-11-09T08:22:22.714Z",
-    "updatedAt": "2026-11-09T08:22:22.881Z",
+    "createdAt": "2026-11-09T12:31:33.022Z",
+    "updatedAt": "2026-11-09T12:31:33.328Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -25,7 +26,30 @@
         "bytes": 1300,
         "vertices": 3
       },
-      "durationMs": 10,
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 0,
+            "name": "",
+            "bounds": {
+              "min": [
+                -0.5,
+                0,
+                0
+              ],
+              "max": [
+                0.5,
+                1,
+                0
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 13,
       "bounds": {
         "min": [
           -0.5,
@@ -39,6 +63,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/0da3ea78-9cad-473f-9c7e-2f589a214fae/model.glb?revision=c568e7cc-8485-4b79-a143-d8a7649e846b"
+    "modelUrl": "/assets/e0df60ca-c09e-45a7-a1d7-c334b3d86a5d/model.glb?revision=a2faafb0-4b3a-4749-ae7b-5849694919e6"
   }
 }

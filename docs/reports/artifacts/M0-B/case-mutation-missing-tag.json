@@ -2,7 +2,7 @@
   "mutation": "移除所有 li 的 data-src（等价于插件漏标这一类元素）",
   "removed": 3,
   "missing": [
-    "src/App.tsx:42:13"
+    "src/App.tsx:39:13"
   ],
   "unmarked": [
     {

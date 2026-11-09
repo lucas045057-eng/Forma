@@ -1,10 +1,10 @@
 {
   "record": {
-    "id": "4355a07e-b63a-45ed-9158-90d84ccaa25a",
+    "id": "0b348a60-2731-4518-9027-41520d3973d7",
     "status": "polling",
-    "createdAt": "2026-11-09T08:22:27.562Z",
-    "updatedAt": "2026-11-09T08:22:27.759Z",
-    "keyHash": "05d13880612ae9af68e8aa1115a39e7ae4706bc4b9a5ca5a811dfcda31673180",
+    "createdAt": "2026-11-09T12:31:38.439Z",
+    "updatedAt": "2026-11-09T12:31:38.633Z",
+    "keyHash": "ec1171f5cc7cdbb183aa40a500677699a82065ab142555a055b91c94c60cb5b3",
     "fingerprint": "760e2ea4f13096c77266c1113fbf8086db3f02537cf4210e912cfa3bfec280f5",
     "taskId": "9000001",
     "error": {
@@ -13,10 +13,10 @@
     }
   },
   "resumed": {
-    "id": "4355a07e-b63a-45ed-9158-90d84ccaa25a",
+    "id": "0b348a60-2731-4518-9027-41520d3973d7",
     "status": "ready",
-    "createdAt": "2026-11-09T08:22:27.562Z",
-    "updatedAt": "2026-11-09T08:22:28.946Z",
+    "createdAt": "2026-11-09T12:31:38.439Z",
+    "updatedAt": "2026-11-09T12:31:39.930Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -27,7 +27,30 @@
         "bytes": 1300,
         "vertices": 3
       },
-      "durationMs": 12,
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 0,
+            "name": "",
+            "bounds": {
+              "min": [
+                -0.5,
+                0,
+                0
+              ],
+              "max": [
+                0.5,
+                1,
+                0
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 13,
       "bounds": {
         "min": [
           -0.5,
@@ -41,7 +64,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/4355a07e-b63a-45ed-9158-90d84ccaa25a/model.glb?revision=5ceb0ea8-06b3-4541-91de-96b1a2986236"
+    "modelUrl": "/assets/0b348a60-2731-4518-9027-41520d3973d7/model.glb?revision=30b58f12-f025-4c14-9c35-e027e3b94c68"
   },
   "stats": {
     "creates": 0,

@@ -1,22 +1,22 @@
 {
   "firstStats": {
     "width": 1056,
-    "height": 781,
-    "uniqueColors": 10522,
-    "mean": 216.63014305992058,
-    "stdDev": 48.58100762178604
+    "height": 1056,
+    "uniqueColors": 3954,
+    "mean": 209.98462100885752,
+    "stdDev": 62.35262198349176
   },
   "rotatedStats": {
     "width": 1056,
-    "height": 781,
-    "uniqueColors": 11099,
-    "mean": 216.8994567150377,
-    "stdDev": 48.948929954205305
+    "height": 1056,
+    "uniqueColors": 4005,
+    "mean": 209.79641616209443,
+    "stdDev": 63.52492827552836
   },
   "diff": {
-    "ratio": 0.11791652116556085,
-    "changed": 97250,
-    "total": 824736
+    "ratio": 0.09154309429522497,
+    "changed": 102083,
+    "total": 1115136
   },
   "errors": [],
   "screenshots": [

@@ -72,6 +72,16 @@ export function readSourceAt(src: string): SourceHit {
 }
 
 /** 打开 Studio，等待预览 iframe 连接并渲染出模板。 */
+/** 等作品首屏进入稳定的渲染状态。回退态要等到 R3F 的 canvas 已经移除（加载中不算）。 */
+export async function waitForSceneState(frame: Frame, state: 'ready' | 'fallback'): Promise<void> {
+  await frame.waitForFunction((expected) => {
+    const scene = document.querySelector('[data-testid="product-scene"]');
+    if (!scene || scene.getAttribute('data-state') !== expected) return false;
+    const canvas = scene.querySelector('canvas');
+    return expected === 'fallback' ? canvas === null : canvas !== null;
+  }, state, { timeout: 90_000 });
+}
+
 export async function openStudio(page: Page): Promise<Frame> {
   const consoleErrors: string[] = [];
   page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
@@ -90,6 +100,8 @@ export async function openStudio(page: Page): Promise<Frame> {
   const frame = await handle?.contentFrame();
   if (!frame) throw new Error('未取到预览 iframe 的 Frame');
   await frame.waitForSelector('[data-testid="buy-button"]', { timeout: 45_000 });
+  // M1-A 起首屏是 3D：等它进入 ready，否则元素集合会在占位/3D 之间抖动
+  await waitForSceneState(frame, 'ready');
   // 给 bridge 的 ready / Studio 状态同步留一点余量
   await page.waitForTimeout(300);
   return frame;
@@ -372,18 +384,25 @@ export async function previewHash(frame: Frame): Promise<string> {
 }
 
 /** 预览页里所有元素（用于完整性对照），带标记状态。 */
-export async function domTagInventory(frame: Frame): Promise<{ total: number; unmarked: Array<{ tag: string; text: string }> }> {
+export async function domTagInventory(frame: Frame): Promise<{ total: number; unmarked: Array<{ tag: string; text: string }>; externalElements: number }> {
   return frame.evaluate(() => {
     const scope = document.getElementById('root') ?? document.body;
+    // M1-A 起，作品首屏会渲染 R3F 生成的 Canvas 容器（第三方组件输出，不来自模板 AST，
+    // 插件按设计不会给它打标记）。只排除「product-scene 下不带 data-src 的直接子元素」
+    // 这棵子树，其余元素仍必须全部带标记。
+    const externalRoots = Array.from(document.querySelectorAll('[data-testid="product-scene"] > *'))
+      .filter((element) => !element.hasAttribute('data-src'));
+    const isExternal = (element: Element) => externalRoots.some((root) => root === element || root.contains(element));
     const all = Array.from(scope.querySelectorAll('*')).filter((element) =>
-      !element.closest('[data-bridge-overlay]') && element.getAttribute('data-e2e-target') === null);
+      !element.closest('[data-bridge-overlay]') && element.getAttribute('data-e2e-target') === null && !isExternal(element));
     const unmarked = all
       .filter((element) => !element.hasAttribute('data-src'))
       .map((element) => ({
         tag: element.tagName.toLowerCase(),
         text: (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40),
       }));
-    return { total: all.length, unmarked };
+    const externalElements = Array.from(scope.querySelectorAll('*')).filter((element) => isExternal(element)).length;
+    return { total: all.length, unmarked, externalElements };
   });
 }
 

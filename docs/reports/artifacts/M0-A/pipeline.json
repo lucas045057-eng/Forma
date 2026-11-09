@@ -2,10 +2,10 @@
   "submitted": {
     "status": 202,
     "asset": {
-      "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+      "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
       "status": "polling",
-      "createdAt": "2026-11-09T08:21:41.883Z",
-      "updatedAt": "2026-11-09T08:21:41.895Z",
+      "createdAt": "2026-11-09T12:30:40.737Z",
+      "updatedAt": "2026-11-09T12:30:40.748Z",
       "taskId": "9000001"
     }
   },
@@ -15,10 +15,10 @@
     "ready"
   ],
   "finalAsset": {
-    "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+    "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
     "status": "ready",
-    "createdAt": "2026-11-09T08:21:41.883Z",
-    "updatedAt": "2026-11-09T08:21:42.661Z",
+    "createdAt": "2026-11-09T12:30:40.737Z",
+    "updatedAt": "2026-11-09T12:30:41.674Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -29,7 +29,30 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 498,
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 514,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -43,7 +66,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/6af43ffb-a683-4f59-9f66-5bc40fbfcbed/model.glb?revision=58916ae2-ce0e-4348-bdcf-c8cdf1d6c627"
+    "modelUrl": "/assets/2e43a94d-b25a-4846-a173-6ac99ca80edd/model.glb?revision=648e621d-deed-4755-99ca-1fad00e64942"
   },
   "glb": {
     "header": {
@@ -82,73 +105,73 @@
   "events": [
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:21:41.895Z",
+      "ts": "2026-11-09T12:30:40.748Z",
       "sequence": 1,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "polling",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:41.895Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:40.748Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:21:41.898Z",
+      "ts": "2026-11-09T12:30:40.751Z",
       "sequence": 2,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "polling",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:41.898Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:40.751Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:21:41.994Z",
+      "ts": "2026-11-09T12:30:40.845Z",
       "sequence": 3,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "polling",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:41.994Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:40.845Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:21:42.087Z",
+      "ts": "2026-11-09T12:30:40.939Z",
       "sequence": 4,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "downloading",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:42.087Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:40.939Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-09T08:21:42.121Z",
+      "ts": "2026-11-09T12:30:40.973Z",
       "sequence": 5,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "processing",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:42.121Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:40.973Z",
         "taskId": "9000001"
       }
     },
     {
       "type": "asset.ready",
-      "ts": "2026-11-09T08:21:42.661Z",
+      "ts": "2026-11-09T12:30:41.674Z",
       "sequence": 6,
       "asset": {
-        "id": "6af43ffb-a683-4f59-9f66-5bc40fbfcbed",
+        "id": "2e43a94d-b25a-4846-a173-6ac99ca80edd",
         "status": "ready",
-        "createdAt": "2026-11-09T08:21:41.883Z",
-        "updatedAt": "2026-11-09T08:21:42.661Z",
+        "createdAt": "2026-11-09T12:30:40.737Z",
+        "updatedAt": "2026-11-09T12:30:41.674Z",
         "taskId": "9000001",
         "metrics": {
           "before": {
@@ -159,7 +182,30 @@
             "bytes": 983560,
             "vertices": 85436
           },
-          "durationMs": 498,
+          "webReady": true,
+          "parts": {
+            "recognized": false,
+            "nodes": [
+              {
+                "sourceIndex": 1,
+                "name": "geometry_0",
+                "bounds": {
+                  "min": [
+                    -0.15895565660573138,
+                    0,
+                    -0.16475417340617085
+                  ],
+                  "max": [
+                    0.15895565660573138,
+                    1,
+                    0.16475417340617085
+                  ]
+                }
+              }
+            ],
+            "reason": "Expected body, cap and at least one reed"
+          },
+          "durationMs": 514,
           "bounds": {
             "min": [
               -0.15895565660573138,
@@ -173,7 +219,7 @@
             ]
           }
         },
-        "modelUrl": "/assets/6af43ffb-a683-4f59-9f66-5bc40fbfcbed/model.glb?revision=58916ae2-ce0e-4348-bdcf-c8cdf1d6c627"
+        "modelUrl": "/assets/2e43a94d-b25a-4846-a173-6ac99ca80edd/model.glb?revision=648e621d-deed-4755-99ca-1fad00e64942"
       }
     }
   ],
@@ -190,7 +236,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 49516,
+    "pid": 50792,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   }
 }

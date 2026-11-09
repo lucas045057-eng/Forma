@@ -45,6 +45,27 @@ pnpm test:e2e
 
 容器类元素（`main`）和零尺寸元素（`br`）鼠标无法命中，会退化为在元素自身派发 `click`；每条记录里的 `clickMode` 标明用了哪种方式。
 
+## M1-A（共享 3D 渲染 / 场景配置 / 部件命名）：`m1a/` 子目录
+
+```powershell
+pnpm test:e2e:m1a     # = playwright test -c playwright.m1a.config.ts
+```
+
+与 M0-A 分开：这里的 mock 供的是 M1-A 的**拆分模型** `fallback/lux3d-split-4969889.glb`，处理后应与作品页里提交的 `public/assets/diffuser-4969889.glb` 一致；同样带出站守卫。
+
+| 文件 | 内容 |
+| --- | --- |
+| `env.ts` | 端口、数据目录、证据目录、模板配置/模型/parts.json 路径 |
+| `visual.ts` | 区域截屏（不触发 Playwright 自动滚动）、归一化比较、带平移对齐的逐像素比较、轮廓包围盒 |
+| `viewport.ts` | 导入资产、打开作品页/Studio 视口、等渲染状态、滚到指定 at、**临时改 scene.config.json 并保证还原** |
+| `01-consistency` | Studio 视口 vs 作品页首屏同尺寸像素对比 |
+| `02-scroll-lid` | 滚动关键帧 / lid 上移量（像素量测）+ 复位 + 中间插值 |
+| `03-fallback-config` | 模型失败回退（含回退态 N3 完整性）与非法配置 HMR |
+| `04-parts` | 部件命名 / `lid` 分组 / `webReady` / 单 mesh 未识别 |
+| `05-resource-release` | 多次重载与 HMR 的 WebGL 上下文堆积 |
+
+**注意**：`02`/`03`/`05` 会临时改写 `templates/product-page/src/scene.config.json`（HMR 验证），结束时按原字节还原并断言文件内容一致。
+
 ## M0-A（Lux3D）测试：`m0a/` 子目录
 
 ```powershell

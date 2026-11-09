@@ -174,6 +174,10 @@ test.describe('M0-A 审查整改回归', () => {
     await page.getByTestId('asset-task-id').fill(taskId);
     await page.getByTestId('asset-import').click();
     const viewport = page.locator('[data-testid="model-viewport"]');
+    // 面板会自动选中已有的 ready 资产，所以 data-loaded 可能提前就是 true；
+    // 先等这次导入的资产在后端真正 ready，再等面板切到它并加载完。
+    await expect.poll(async () => (await getJson(`${BACKEND_BASE}/assets/lux3d-${taskId}`)).body.status, { timeout: 120_000 }).toBe('ready');
+    await expect(page.getByTestId('asset-select')).toHaveValue(`lux3d-${taskId}`, { timeout: 60_000 });
     await expect(viewport).toHaveAttribute('data-loaded', 'true', { timeout: 90_000 });
     const asset = (await getJson(`${BACKEND_BASE}/assets/lux3d-${taskId}`)).body as any;
     expect(asset.status).toBe('ready');
@@ -217,11 +221,13 @@ test.describe('M0-A 审查整改回归', () => {
     expect(repaired.modelUrl, '修复后模型 URL 的 revision 没有更新').not.toBe(oldUrl);
     expect(mockAfter.creates - mockBefore.creates, '重新导入时创建了新任务').toBe(0);
     expect(stats.uniqueColors, `画布没有恢复：${JSON.stringify(stats)}`).toBeGreaterThan(20);
-    // 模型文件被删后，useGLTF 的 fetch 会以未捕获异常暴露到页面；这是预期内的“加载失败”。
-    // 只要求：报错都指向旧模型 URL，且修复后的新 URL 不再报错。
-    expect(pageErrors.some((line) => line.includes(oldUrl)), '视口没有报出加载失败').toBe(true);
-    expect(pageErrors.filter((line) => !line.includes(oldUrl))).toEqual([]);
-    expect(pageErrors.some((line) => line.includes(repaired.modelUrl))).toBe(false);
+    // M1-A 起共享渲染器自己 fetch 并捕获错误，失败只体现为回退提示（不再抛未捕获异常）。
+    // 所以这里改成更严的要求：不许有任何未捕获异常，也不许出现与“模型缺失”无关的控制台错误。
+    expect(pageErrors, `模型缺失时出现了未捕获异常：${JSON.stringify(pageErrors)}`).toEqual([]);
+    expect(
+      consoleErrors.filter((line) => !/404|Failed to load resource|net::ERR/i.test(line)),
+      `模型缺失时出现了无关的控制台错误：${JSON.stringify(consoleErrors)}`,
+    ).toEqual([]);
   });
 
   test('S3 非 loopback 的 http 上游在启动时被拒绝，且没有发出任何请求', async () => {

@@ -1,14 +1,14 @@
 {
   "containsPlaintext": false,
   "entry": {
-    "id": "adc03cb5-c0f0-48c0-a6c6-4f6f5251212b",
+    "id": "e75d2e74-79a1-48eb-9e7e-741f70d6fe78",
     "status": "ready",
-    "createdAt": "2026-11-09T08:22:12.331Z",
-    "updatedAt": "2026-11-09T08:22:12.997Z",
-    "keyHash": "4c27fc0c6545fd391bb38f1aa40e8e92e1f89a48e0d288a058b4a0b0ab9211e1",
+    "createdAt": "2026-11-09T12:31:14.367Z",
+    "updatedAt": "2026-11-09T12:31:15.326Z",
+    "keyHash": "b7ae21deb22d80eadb258ec5d2cdb74cdaa8ec4cf0a56a80cf55c3aa9e796d44",
     "fingerprint": "634c290e30e1f2fe07599fc542ad47bf46b5cc0ee9467451414dc77a57da4b77",
     "taskId": "9000006",
-    "deadline": 1794212562334,
+    "deadline": 1794227504372,
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -18,7 +18,30 @@
         "bytes": 983560,
         "vertices": 85436
       },
-      "durationMs": 409,
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 512,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -32,6 +55,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/adc03cb5-c0f0-48c0-a6c6-4f6f5251212b/model.glb?revision=1debee30-4576-4232-86fa-7309f1c60da0"
+    "modelUrl": "/assets/e75d2e74-79a1-48eb-9e7e-741f70d6fe78/model.glb?revision=61700807-3fd6-4e56-8249-d9ac497f5ccb"
   }
 }

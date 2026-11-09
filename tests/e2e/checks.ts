@@ -16,7 +16,25 @@ import { astSrcSet, nativeJsxNodes, nodeByText, type JsxNodeModel } from './sour
  * 用例 8（确定性目标）与用例 9（应标记节点完整性）的判定逻辑。
  * 单独放一份，供验收用例和「变异验证」用例共用同一套判定 —— 变异验证要证明的
  * 正是这套判定不会空转。
+ *
+ * M1-A 起作品页有条件渲染（3D 加载成功 / 回退占位），所以期望集合按渲染状态分组：
+ * 不得写死数量，也不得删掉 missing 检查。
  */
+
+export type RenderState = 'ready' | 'fallback';
+
+/** 只在特定渲染状态下出现的组件（M1-A：ProductHero.tsx 里的 Placeholder）。 */
+const STATE_ONLY_COMPONENTS: Record<string, RenderState> = { Placeholder: 'fallback' };
+
+function isExpected(node: JsxNodeModel, state: RenderState): boolean {
+  const required = STATE_ONLY_COMPONENTS[node.component];
+  return required === undefined || required === state;
+}
+
+/** 某一渲染状态下“应该被渲染并打标记”的 AST 节点。 */
+export function expectedNodes(state: RenderState, nodes = nativeJsxNodes()): JsxNodeModel[] {
+  return nodes.filter((node) => isExpected(node, state));
+}
 
 /** 确定性锚点：同一文件里位置不同的同名标签 + 不同标签 + 链接，期望值全部来自 AST。 */
 export const DETERMINISTIC_ANCHORS: Array<{ tag: string; text: string }> = [
@@ -34,9 +52,12 @@ export interface AnchorExpectation extends JsxNodeModel {
   node: JsxNodeModel;
 }
 
-export function anchorExpectations(): AnchorExpectation[] {
+/** 按渲染状态取锚点：回退态才有 Placeholder 里的文本。 */
+export function anchorExpectations(state: RenderState = 'ready'): AnchorExpectation[] {
   const nodes = nativeJsxNodes();
-  return DETERMINISTIC_ANCHORS.map((anchor) => ({ ...anchor, node: nodeByText(nodes, anchor.tag, anchor.text) })) as AnchorExpectation[];
+  return DETERMINISTIC_ANCHORS
+    .map((anchor) => ({ ...anchor, node: nodeByText(nodes, anchor.tag, anchor.text) }))
+    .filter((item) => isExpected(item.node, state)) as AnchorExpectation[];
 }
 
 export interface AnchorCheckResult {
@@ -100,22 +121,30 @@ export async function checkDeterministicAnchors(page: Page, frame: Frame, expect
 }
 
 export interface CompletenessResult {
+  state: RenderState;
   astNodeCount: number;
-  astUniquePositions: number;
+  expectedUniquePositions: number;
+  excludedUniquePositions: number;
   domUniqueSrcs: number;
   domElementCount: number;
-  astPositions: string[];
+  externalElements: number;
+  expectedPositions: string[];
   domPositions: string[];
   phantom: string[];
   missing: string[];
+  /** 本状态下不该出现的节点（另一状态的专属节点）却出现在 DOM 里 */
+  leaked: string[];
   unmarked: Array<{ tag: string; text: string }>;
   oracleFailures: string[];
 }
 
-/** AST 位置集合 ↔ 运行时 DOM 标记集合双向对照，并要求渲染树里没有漏标元素。 */
-export async function checkCompleteness(frame: Frame): Promise<CompletenessResult> {
+/** AST 位置集合 ↔ 运行时 DOM 标记集合双向对照，按渲染状态分别判定。 */
+export async function checkCompleteness(frame: Frame, state: RenderState): Promise<CompletenessResult> {
   const nodes = nativeJsxNodes();
-  const astSet = astSrcSet(nodes);
+  const expected = expectedNodes(state, nodes);
+  const excluded = nodes.filter((node) => !isExpected(node, state));
+  const expectedSet = new Set(expected.map((node) => node.src));
+  const excludedSet = new Set(excluded.map((node) => node.src));
   const oracleFailures: string[] = [];
   for (const node of nodes) {
     const hit = readSourceAt(node.src);
@@ -125,14 +154,18 @@ export async function checkCompleteness(frame: Frame): Promise<CompletenessResul
   const domSet = await domSrcSet(frame);
   const inventory = await domTagInventory(frame);
   return {
+    state,
     astNodeCount: nodes.length,
-    astUniquePositions: astSet.size,
+    expectedUniquePositions: expectedSet.size,
+    excludedUniquePositions: excludedSet.size,
     domUniqueSrcs: domSet.length,
     domElementCount: inventory.total,
-    astPositions: [...astSet].sort(),
+    externalElements: inventory.externalElements,
+    expectedPositions: [...expectedSet].sort(),
     domPositions: domSet,
-    phantom: domSet.filter((src) => !astSet.has(src)),
-    missing: [...astSet].filter((src) => !domSet.includes(src)),
+    phantom: domSet.filter((src) => !expectedSet.has(src) && !excludedSet.has(src)),
+    missing: [...expectedSet].filter((src) => !domSet.includes(src)),
+    leaked: domSet.filter((src) => excludedSet.has(src)),
     unmarked: inventory.unmarked,
     oracleFailures,
   };
