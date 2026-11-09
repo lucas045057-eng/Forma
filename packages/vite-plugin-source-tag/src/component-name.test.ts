@@ -51,17 +51,17 @@ describe('组件名归属（S3）', () => {
 
   // ---- 应修 N1：下列写法的 cid 目前退化为 Anonymous，待 CodeBuddy 修复 ----
 
-  it.fails('具名默认导出的 memo 组件应保留 Card', () => {
+  it('具名默认导出的 memo 组件应保留 Card', () => {
     const output = transform('export default memo(function Card(){return <div/>});');
     expect(cids(output)).toEqual(['Card']);
   });
 
-  it.fails('satisfies 包装的组件应保留 Page', () => {
+  it('satisfies 包装的组件应保留 Page', () => {
     const output = transform('const Page = (() => <main/>) satisfies React.FC;');
     expect(cids(output)).toEqual(['Page']);
   });
 
-  it.fails('as 包装的组件应保留 Page', () => {
+  it('as 包装的组件应保留 Page', () => {
     const output = transform('const Page = (() => <main/>) as React.FC;');
     expect(cids(output)).toEqual(['Page']);
   });
