@@ -8,6 +8,7 @@ import { AssetError, Lux3DClient, type GenerationInput } from './lux3d.ts';
 import { downloadGlb } from './download.ts';
 import { processModelIsolated } from './process-isolated.ts';
 import { cleanupAssetTemporaries } from './cleanup.ts';
+import { acquireInstanceLock } from './instance-lock.ts';
 
 type RecordEntry = Asset & { keyHash?: string; fingerprint?: string; deadline?: number };
 export interface ServiceOptions {
@@ -39,9 +40,12 @@ export class AssetService {
   private jobs = new Map<string, Promise<void>>();
   private abort = new AbortController();
   private sequence = 0;
+  private releaseLock?: () => Promise<void>;
   constructor(options: ServiceOptions) { this.options = options; }
   async init() {
     await mkdir(this.options.directory, { recursive: true });
+    // Ownership first: nothing below may run while another instance owns this directory.
+    this.releaseLock = await acquireInstanceLock(this.options.directory);
     await cleanupAssetTemporaries(this.options.directory);
     try {
       this.entries = JSON.parse(await readFile(path.join(this.options.directory, 'index.json'), 'utf8')) as RecordEntry[];
@@ -204,5 +208,9 @@ export class AssetService {
     await this.update(entry, { status: 'ready', metrics, modelUrl: `/assets/${entry.id}/model.glb?revision=${randomUUID()}`, error: undefined });
   }
   async idle() { await Promise.allSettled([...this.jobs.values()]); await this.writes; }
-  async close() { this.abort.abort(); await this.submissions; await this.idle(); }
+  async close() {
+    this.abort.abort(); await this.submissions; await this.idle();
+    const release = this.releaseLock; this.releaseLock = undefined;
+    await release?.();
+  }
 }

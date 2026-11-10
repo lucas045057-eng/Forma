@@ -67,3 +67,18 @@ it('refuses non-upright remaining geometry without partial renaming', () => {
   expect(groupParts(document, source).recognized).toBe(false);
   expect(source.map((node) => node.getName())).toEqual(names);
 });
+
+it('marks only pipeline-confirmed parts and strips forged markers from unrecognized models', () => {
+  const ok = fixture();
+  groupParts(ok.document, ok.document.getRoot().listNodes());
+  const marked = Object.fromEntries(ok.document.getRoot().listNodes()
+    .filter((node) => node.getExtras().spatialPart).map((node) => [node.getName(), node.getExtras().spatialPart]));
+  expect(marked).toEqual({ lid: 'lid', cap: 'cap', reed_1: 'reed_1', body: 'body' });
+
+  const bad = fixture();
+  bad.cap.setTranslation([0, 0.2, 0]).setName('lid').setExtras({ spatialPart: 'lid', keep: 1 });
+  const result = groupParts(bad.document, bad.document.getRoot().listNodes());
+  expect(result.recognized).toBe(false);
+  expect(bad.cap.getName()).toBe('lid');
+  expect(bad.cap.getExtras()).toEqual({ keep: 1 });
+});

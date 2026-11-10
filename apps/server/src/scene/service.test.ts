@@ -103,3 +103,34 @@ it('adopts only ready assets, requires force and copies metadata with undo', asy
     expect(await readdir(outside)).toEqual([]);
   } finally { await app.close(); }
 });
+
+it('bounds the persisted journal and undo stack', async () => {
+  const f = await fixture();
+  for (let i = 1; i <= 55; i++) await f.service.put(changed(i / 10));
+  const journal = JSON.parse(await readFile(path.join(f.options.historyDirectory, (await readdir(f.options.historyDirectory))[0]), 'utf8'));
+  expect(journal.entries).toHaveLength(50);
+  expect(journal.stack).toHaveLength(50);
+  expect(journal.sequence).toBe(55);
+  expect((await f.service.undo()).config.hero.lights.ambient).toBe(5.4);
+});
+
+it('refuses requests addressed to a non-loopback host name unless explicitly allowed', async () => {
+  const f = await fixture();
+  const base = { ...f.options, dataDirectory: path.join(f.root, 'assets'), base: 'http://127.0.0.1:4010', key: 'mock-only' };
+  const { app } = await createApp(base);
+  try {
+    for (const host of ['localhost:3001', '127.0.0.1:5173', '[::1]:3001']) {
+      expect((await app.inject({ url: '/scene', headers: { host } })).statusCode).toBe(200);
+    }
+    for (const host of ['evil.example:3001', 'evil.example', '127.0.0.1.evil.example:3001']) {
+      // Same-origin from the browser's point of view after DNS rebinding, still refused.
+      const response = await app.inject({ method: 'PUT', url: '/scene', headers: { host, origin: `http://${host}` }, payload: changed(9) });
+      expect(response.statusCode).toBe(403);
+      expect(response.json().error.code).toBe('HOST_DENIED');
+    }
+    expect((await f.service.get()).hero.lights.ambient).toBe(defaultSceneConfig.hero.lights.ambient);
+  } finally { await app.close(); }
+  const { app: allowed } = await createApp({ ...base, allowedHosts: ['studio.lan'] });
+  try { expect((await allowed.inject({ url: '/scene', headers: { host: 'studio.lan:3001' } })).statusCode).toBe(200); }
+  finally { await allowed.close(); }
+});

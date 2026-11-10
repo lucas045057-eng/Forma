@@ -1,7 +1,7 @@
 import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, TransformControls } from '@react-three/drei';
-import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace, Mesh, Texture, type Vector3, type Material, type Object3D, type PerspectiveCamera } from 'three';
+import { ACESFilmicToneMapping, LoadingManager, PCFSoftShadowMap, SRGBColorSpace, Mesh, Texture, type Vector3, type Material, type Object3D, type PerspectiveCamera } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import type { SceneConfig, Vec3 } from '@spatial/shared/scene-config';
@@ -95,7 +95,8 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
         if (!response.ok) throw new Error('Model download failed');
         const bytes = await response.arrayBuffer();
         // Asset processing emits self-contained GLB; never resolve external model resources.
-        const loader = new GLTFLoader();
+        // A private manager keeps the URL policy out of Three's global default manager.
+        const loader = new GLTFLoader(new LoadingManager());
         loader.manager.setURLModifier(url => {
           if (!url.startsWith('blob:') && !url.startsWith('data:')) throw new Error('External model resource rejected');
           return url;

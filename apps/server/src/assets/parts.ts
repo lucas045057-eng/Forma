@@ -17,7 +17,14 @@ export function groupParts(document: Document, sourceNodes: Node[]): PartsMetada
     recognized: false,
     nodes: entries.map(({ node, sourceIndex, bounds }) => ({ sourceIndex, name: node.getName(), bounds })),
   };
-  const fail = (reason: string) => ({ ...metadata, reason });
+  const fail = (reason: string) => {
+    // An unrecognized source model must not smuggle in a pre-existing marker.
+    for (const node of sourceNodes) {
+      const { spatialPart, ...extras } = node.getExtras() as Record<string, unknown>;
+      if (spatialPart !== undefined) node.setExtras(extras);
+    }
+    return { ...metadata, reason };
+  };
   if (entries.length < 3) return fail('Expected body, cap and at least one reed');
   const scenes = document.getRoot().listScenes();
   if (scenes.length !== 1 || candidates.some((node) => node.listChildren().length || node.getSkin())) {
@@ -82,6 +89,10 @@ export function groupParts(document: Document, sourceNodes: Node[]): PartsMetada
     lid.addChild(node);
     node.setMatrix(matrices[index]!);
   });
+  // The renderer animates only nodes carrying this marker, never nodes that merely share a name.
+  for (const node of [lid, body.node, cap.node, ...reeds.map((entry) => entry.node)]) {
+    node.setExtras({ ...node.getExtras(), spatialPart: node.getName() });
+  }
   return {
     recognized: true, lid: 'lid',
     nodes: entries.map(({ node, sourceIndex, bounds }) => ({ sourceIndex, name: node.getName(), bounds })),

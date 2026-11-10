@@ -37,3 +37,15 @@ it('setting hero also replaces frame zero so old keyframes cannot mask it', () =
   expect(next.scroll[0].parts?.lid.offset).toEqual([0, 0.05, 0]);
   expect(next.scroll[1].at).toBe(0.6);
 });
+it('unwraps handle angles against the preceding rotation so crossing ±π takes the short arc', () => {
+  const deg = (value: number) => value * Math.PI / 180;
+  const input = { ...defaultSceneConfig, hero: { ...defaultSceneConfig.hero, model: { rotation: [0, deg(179), 0] as [number, number, number], scale: 1 } }, scroll: [] };
+  const crossed = setSceneKeyframe(input, 0.5, [0, deg(-179), 0]).scroll[0].model!.rotation[1];
+  expect(crossed).toBeCloseTo(deg(181), 10);
+  // The reference is the nearest earlier frame that carries a rotation, not just the hero.
+  const chained = setSceneKeyframe({ ...input, scroll: [{ at: 0.3, model: { rotation: [0, deg(350), 0] } }, { at: 0.4 }] }, 0.8, [0, deg(10), 0]);
+  expect(chained.scroll.at(-1)!.model!.rotation[1]).toBeCloseTo(deg(370), 10);
+  // Frame zero has nothing before it, and nearby angles are left untouched.
+  expect(setSceneKeyframe(input, 0, [0, deg(-179), 0]).scroll[0].model!.rotation[1]).toBe(deg(-179));
+  expect(setSceneKeyframe(input, 0.5, [0, 1, 0]).scroll[0].model!.rotation).toEqual([0, 1, 0]);
+});

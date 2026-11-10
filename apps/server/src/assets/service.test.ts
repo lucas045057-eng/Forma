@@ -37,6 +37,8 @@ describe('asset idempotency and polling', () => {
     expect(events).toContain('asset.ready');
     expect((await mock.inject('/__stats')).json().creates).toBe(1);
     await expect(service.submit({ ...input, prompt: 'different' }, 'same-key')).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+    // A restart means the first instance is gone: the directory admits one owner at a time.
+    await service.close();
     const restarted = new AssetService({ directory, client });
     await restarted.init();
     expect((await restarted.submit(input, 'same-key')).taskId).toBe(first.taskId);

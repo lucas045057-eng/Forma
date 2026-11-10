@@ -22,9 +22,22 @@ export function temperatureToHex(kelvin: number): string {
   return `#${channels.map(value => Math.round(Math.max(0, Math.min(255, value))).toString(16).padStart(2, '0')).join('')}`;
 }
 
+/** The equivalent angle (value + 2πk) nearest to reference. */
+export function unwrapAngle(value: number, reference: number): number {
+  return value + 2 * Math.PI * Math.round((reference - value) / (2 * Math.PI));
+}
+
 export function setSceneKeyframe(config: SceneConfig, at: number, rotation: Vec3, lid?: number): SceneConfig {
   const next = structuredClone(config);
   const position = Math.max(0, Math.min(1, at));
+  // The renderer interpolates Euler angles numerically, so a multi-turn spin stays expressible in
+  // the file. Editor handles report angles in (-π, π]; unwrap them against the preceding rotation
+  // so that crossing ±π animates through the short arc instead of nearly a full turn backwards.
+  if (position > 0) {
+    const before = next.scroll.filter(frame => frame.model && frame.at < position - 0.02 - Number.EPSILON).at(-1);
+    const reference = before?.model?.rotation ?? next.hero.model.rotation;
+    rotation = rotation.map((value, axis) => unwrapAngle(value, reference[axis])) as Vec3;
+  }
   const near = next.scroll.filter(frame => Math.abs(frame.at - position) <= 0.02 + Number.EPSILON);
   const closest = [...near].sort((a, b) => Math.abs(a.at - position) - Math.abs(b.at - position))[0];
   const frame = { ...closest, at: position, model: { rotation: [...rotation] as Vec3 } };

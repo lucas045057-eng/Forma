@@ -40,11 +40,19 @@ export function partPositions(scene: Object3D) {
   return result;
 }
 
+function markedPart(scene: Object3D, name: string): Object3D | undefined {
+  let found: Object3D | undefined;
+  scene.traverse(node => { if (!found && node !== scene && node.userData.spatialPart === name) found = node; });
+  return found;
+}
+
 export function applyPartOffsets(scene: Object3D, base: Map<Object3D, Vector3>, offsets: Record<string, Vec3>) {
   for (const [node, position] of base) node.position.copy(position);
   for (const [name, offset] of Object.entries(offsets)) {
-    const node = scene.getObjectByName(name);
-    if (!node || node === scene) continue;
+    // Only parts confirmed by the asset pipeline (glTF extras.spatialPart) may move;
+    // a node that merely happens to be named "lid" in an unrecognized model stays put.
+    const node = markedPart(scene, name);
+    if (!node) continue;
     // Offsets use normalized model coordinates, regardless of a node's scaled parent.
     const parentMatrix = new Matrix4();
     const parents: Object3D[] = [];

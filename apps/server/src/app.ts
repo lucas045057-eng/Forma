@@ -9,7 +9,9 @@ import { SceneService, SceneError } from './scene/service.ts';
 import { AssetService } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 
-export async function createApp(options: { workRoot?: string; historyDirectory?: string; dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
+const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
+
+export async function createApp(options: { allowedHosts?: string[]; workRoot?: string; historyDirectory?: string; dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
   const downloadTimeoutMs = options.downloadTimeoutMs ?? Number(process.env.ASSET_DOWNLOAD_TIMEOUT_MS ?? 120_000);
   if (!Number.isFinite(downloadTimeoutMs) || downloadTimeoutMs <= 0) throw new Error('Invalid ASSET_DOWNLOAD_TIMEOUT_MS');
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16_384, disableRequestLogging: true });
@@ -27,7 +29,15 @@ export async function createApp(options: { workRoot?: string; historyDirectory?:
   });
   await service.init();
   await app.register(websocket);
+  const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
+    .map(host => host.trim().toLowerCase()).filter(Boolean));
   app.addHook('onRequest', async (request, reply) => {
+    // DNS-rebinding defence: a page on an attacker's domain that resolves to 127.0.0.1 would
+    // otherwise pass the same-origin check below and could spend Lux3D credits or rewrite the work.
+    const host = (request.headers.host ?? '').toLowerCase().replace(/:\d+$/, '');
+    if (!allowedHosts.has(host)) {
+      return reply.code(403).send({ error: { code: 'HOST_DENIED', message: '仅允许通过本机地址访问；其他主机名需写入 ALLOWED_HOSTS' } });
+    }
     const origin = request.headers.origin;
     if (origin && origin !== `http://${request.headers.host}` && origin !== `https://${request.headers.host}`) {
       return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许同源工作台访问' } });

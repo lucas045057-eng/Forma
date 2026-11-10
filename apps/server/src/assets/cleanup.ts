@@ -1,7 +1,8 @@
 import { readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 
-// Run only during single-process service startup, before jobs or index writes begin.
+// Call only while holding the directory's instance lock (see instance-lock.ts): the name
+// patterns identify pipeline temporaries, the lock proves no live writer still owns them.
 export async function cleanupAssetTemporaries(directory: string) {
   const suffix = '(?:\\.[0-9a-f-]{36})?\\.tmp';
   const index = new RegExp(`^index\\.json${suffix}$`);

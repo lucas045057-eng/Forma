@@ -23,7 +23,7 @@ it('respects explicit zero keyframes and empty timelines', () => {
 });
 it('moves cap and reeds together without moving body or accumulating offsets', () => {
   const scene = new Group(), lid = new Group(), cap = new Group(), reed = new Group(), body = new Group();
-  lid.name = 'lid'; scene.add(body, lid); lid.add(cap, reed);
+  lid.name = 'lid'; lid.userData.spatialPart = 'lid'; scene.add(body, lid); lid.add(cap, reed);
   cap.position.y = 0.3; reed.position.y = 0.5;
   const base = partPositions(scene);
   for (let i = 0; i < 3; i++) applyPartOffsets(scene, base, { lid: [0, 0.08, 0] });
@@ -36,8 +36,14 @@ it('moves cap and reeds together without moving body or accumulating offsets', (
 it('converts normalized offsets through scaled and rotated parents', () => {
   const scene = new Group(), parent = new Group(), cap = new Group();
   parent.scale.setScalar(3); parent.rotation.z = Math.PI / 2;
-  cap.name = 'cap'; parent.add(cap); scene.add(parent);
+  cap.name = 'cap'; cap.userData.spatialPart = 'cap'; parent.add(cap); scene.add(parent);
   applyPartOffsets(scene, partPositions(scene), { cap: [0, 0.08, 0] });
   const position = cap.getWorldPosition(new Vector3());
   expect(position.x).toBeCloseTo(0); expect(position.y).toBeCloseTo(0.08);
+});
+it('never moves a node that only shares a part name without the pipeline marker', () => {
+  const scene = new Group(), lid = new Group();
+  lid.name = 'lid'; scene.add(lid);
+  applyPartOffsets(scene, partPositions(scene), { lid: [0, 0.08, 0] });
+  expect(lid.position.y).toBe(0);
 });

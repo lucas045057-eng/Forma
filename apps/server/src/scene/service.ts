@@ -37,6 +37,8 @@ export async function safeWorkPath(root: string, relative: string) {
   }
   return target;
 }
+// Bound the journal: it is rewritten on every commit and each entry holds two full configs.
+const MAX_HISTORY = 50;
 interface HistoryEntry { sequence: number; ts: string; previous: SceneConfig; next: SceneConfig; kind: 'write' | 'undo' }
 interface Journal { sequence: number; stack: SceneConfig[]; entries: HistoryEntry[]; pending?: { entry: HistoryEntry; stack: SceneConfig[] } }
 
@@ -74,7 +76,7 @@ export class SceneService {
       validateScene(pending.entry.next);
       // A durable intent is replayed after interruption; never publish an event before the file.
       await writeAtomic(await this.configPath(), JSON.stringify(pending.entry.next, null, 2) + '\n');
-      const next: Journal = { sequence: pending.entry.sequence, stack: pending.stack, entries: [...this.state.entries, pending.entry] };
+      const next: Journal = { sequence: pending.entry.sequence, stack: pending.stack.slice(-MAX_HISTORY), entries: [...this.state.entries, pending.entry].slice(-MAX_HISTORY) };
       await writeAtomic(this.journalFile, JSON.stringify(next, null, 2));
       this.state = next;
     }
