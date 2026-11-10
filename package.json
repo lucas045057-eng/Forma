@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:m0a": "playwright test -c playwright.m0a.config.ts",
-    "test:e2e:m1a": "playwright test -c playwright.m1a.config.ts"
+    "test:e2e:m1a": "playwright test -c playwright.m1a.config.ts",
+    "test:e2e:m1b": "playwright test -c playwright.m1b.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",

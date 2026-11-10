@@ -43,12 +43,12 @@
   },
   "models": {
     "committed": {
-      "bytes": 987884,
-      "sha256": "b0df0bef539bfeef07590e8553f48c406e86627578b7d79e643bb40b1073c6c1"
+      "bytes": 988116,
+      "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
     },
     "served": {
-      "bytes": 987884,
-      "sha256": "b0df0bef539bfeef07590e8553f48c406e86627578b7d79e643bb40b1073c6c1"
+      "bytes": 988116,
+      "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
     },
     "identical": true
   },

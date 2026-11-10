@@ -3,7 +3,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 49416,
+    "pid": 6512,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   },
   "output": "createApp rejected configuration: Invalid LUX3D_BASE: HTTPS required except for loopback mock\n"

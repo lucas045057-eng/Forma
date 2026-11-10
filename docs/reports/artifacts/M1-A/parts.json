@@ -140,7 +140,7 @@
       "vertices": 123874
     },
     "after": {
-      "bytes": 987884,
+      "bytes": 988116,
       "vertices": 86529
     },
     "webReady": true,
@@ -246,7 +246,7 @@
         }
       ]
     },
-    "durationMs": 445,
+    "durationMs": 432,
     "bounds": {
       "min": [
         -0.17140335107576024,

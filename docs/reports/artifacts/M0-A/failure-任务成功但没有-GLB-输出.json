@@ -6,17 +6,17 @@
     "code": "NO_GLB"
   },
   "submitted": {
-    "id": "e9be8c6a-1f5a-4ccd-afd9-1a5a435de96d",
+    "id": "6ffc9bae-59e1-46be-8d7f-5e39c2092720",
     "status": "polling",
-    "createdAt": "2026-11-09T12:31:08.312Z",
-    "updatedAt": "2026-11-09T12:31:08.323Z",
+    "createdAt": "2026-11-10T07:54:17.123Z",
+    "updatedAt": "2026-11-10T07:54:17.135Z",
     "taskId": "7770001"
   },
   "finalAsset": {
-    "id": "e9be8c6a-1f5a-4ccd-afd9-1a5a435de96d",
+    "id": "6ffc9bae-59e1-46be-8d7f-5e39c2092720",
     "status": "failed",
-    "createdAt": "2026-11-09T12:31:08.312Z",
-    "updatedAt": "2026-11-09T12:31:08.326Z",
+    "createdAt": "2026-11-10T07:54:17.123Z",
+    "updatedAt": "2026-11-10T07:54:17.137Z",
     "taskId": "7770001",
     "error": {
       "code": "NO_GLB",

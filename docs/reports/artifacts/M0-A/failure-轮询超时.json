@@ -7,24 +7,24 @@
     "code": "POLL_TIMEOUT"
   },
   "submitted": {
-    "id": "dc27de70-d298-4b89-92af-031138823a48",
+    "id": "9600f74d-2c71-4b13-be4f-aa033805aa1c",
     "status": "polling",
-    "createdAt": "2026-11-09T12:30:59.588Z",
-    "updatedAt": "2026-11-09T12:30:59.601Z",
+    "createdAt": "2026-11-10T07:54:09.190Z",
+    "updatedAt": "2026-11-10T07:54:09.201Z",
     "taskId": "9000001"
   },
   "finalAsset": {
-    "id": "dc27de70-d298-4b89-92af-031138823a48",
+    "id": "9600f74d-2c71-4b13-be4f-aa033805aa1c",
     "status": "failed",
-    "createdAt": "2026-11-09T12:30:59.588Z",
-    "updatedAt": "2026-11-09T12:31:00.807Z",
+    "createdAt": "2026-11-10T07:54:09.190Z",
+    "updatedAt": "2026-11-10T07:54:10.411Z",
     "taskId": "9000001",
     "error": {
       "code": "POLL_TIMEOUT",
       "message": "等待 Lux3D 超过 15 分钟；可使用原任务编号重新导入查询，勿重复生成"
     }
   },
-  "elapsedMs": 1254,
+  "elapsedMs": 1256,
   "stats": {
     "before": {
       "creates": 1,

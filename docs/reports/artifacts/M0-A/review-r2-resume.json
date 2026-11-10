@@ -1,10 +1,10 @@
 {
   "record": {
-    "id": "0b348a60-2731-4518-9027-41520d3973d7",
+    "id": "57f07b3c-2168-49b0-9360-a5d4f9867a24",
     "status": "polling",
-    "createdAt": "2026-11-09T12:31:38.439Z",
-    "updatedAt": "2026-11-09T12:31:38.633Z",
-    "keyHash": "ec1171f5cc7cdbb183aa40a500677699a82065ab142555a055b91c94c60cb5b3",
+    "createdAt": "2026-11-10T07:54:39.748Z",
+    "updatedAt": "2026-11-10T07:54:39.946Z",
+    "keyHash": "20e16e6797635172f351ea2ace1ee49fd2385e39ae0386fdc8ba3c5dcde1ab96",
     "fingerprint": "760e2ea4f13096c77266c1113fbf8086db3f02537cf4210e912cfa3bfec280f5",
     "taskId": "9000001",
     "error": {
@@ -13,10 +13,10 @@
     }
   },
   "resumed": {
-    "id": "0b348a60-2731-4518-9027-41520d3973d7",
+    "id": "57f07b3c-2168-49b0-9360-a5d4f9867a24",
     "status": "ready",
-    "createdAt": "2026-11-09T12:31:38.439Z",
-    "updatedAt": "2026-11-09T12:31:39.930Z",
+    "createdAt": "2026-11-10T07:54:39.748Z",
+    "updatedAt": "2026-11-10T07:54:41.171Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -64,7 +64,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/0b348a60-2731-4518-9027-41520d3973d7/model.glb?revision=30b58f12-f025-4c14-9c35-e027e3b94c68"
+    "modelUrl": "/assets/57f07b3c-2168-49b0-9360-a5d4f9867a24/model.glb?revision=2044a232-bbf3-4993-ba76-aa794063d36a"
   },
   "stats": {
     "creates": 0,

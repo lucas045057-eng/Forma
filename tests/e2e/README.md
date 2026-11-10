@@ -66,6 +66,30 @@ pnpm test:e2e:m1a     # = playwright test -c playwright.m1a.config.ts
 
 **注意**：`02`/`03`/`05` 会临时改写 `templates/product-page/src/scene.config.json`（HMR 验证），结束时按原字节还原并断言文件内容一致。
 
+## M1-B（场景写回 / 编辑面板）：`m1b/` 子目录
+
+```powershell
+pnpm test:e2e:m1b     # = playwright test -c playwright.m1b.config.ts
+```
+
+主后端以**真实模板目录**为 `WORK_ROOT`（否则写回不会反映到作品页），沙箱用例（采用、路径越界、并发写）用 `.data/pi-m1b/sandbox/*` 的副本。
+
+| 文件 | 内容 |
+| --- | --- |
+| `env.ts` | 端口、WORK_ROOT、历史/资产目录、模板文件路径 |
+| `start-backend.mjs` | 带 `WORK_ROOT`/`SCENE_HISTORY_DIR` 的启动器；createApp 报错以退出码 12 结束（实例锁等）；stdin `close` 优雅停机 |
+| `api.ts` | `/scene`、`/scene/undo`、`/assets/:id/adopt`、原始 Host 请求、配置文件快照/还原、沙箱与离线处理 |
+| `editor.ts` | 打开编辑面板、`scene-load/match-size/compare` 对照流程、滑杆、滚动、只截对照画布、裁剪公共可见段 |
+| `01-consistency` | 三组一致性（出厂 / 改后 / at≈0.6）+ 配置来源断言 |
+| `02-writeback` | 写回延迟、无整页刷新、diff 字段 |
+| `03-undo` | 撤回恢复、空历史 409 |
+| `04-keyframe` | 关键帧写入与像素位移、±0.02 覆盖 |
+| `05-api` | 非法配置 / 并发 / 路径越界 / Host 白名单 / 代理 |
+| `06-adopt` | 采用落盘、force 门槛、同名冲突、作品页换模型 |
+| `07-fixes` | R2 部件标记门控、R3 实例锁、B1 Host、S1 角度展开 |
+
+所有改写 `scene.config.json` 的用例都在 `finally`/`afterAll` 里按快照还原并断言；采用用例会删掉写进 `public/assets` 的产物。
+
 ## M0-A（Lux3D）测试：`m0a/` 子目录
 
 ```powershell
