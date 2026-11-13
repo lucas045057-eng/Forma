@@ -17,8 +17,9 @@ export const TEMPLATE_PORT = 5174;
 export const MOCK_BASE = `http://127.0.0.1:${MOCK_PORT}`;
 export const BACKEND_BASE = `http://127.0.0.1:${BACKEND_PORT}`;
 export const STUDIO_URL = `http://127.0.0.1:${STUDIO_PORT}/`;
-/** 作品页：经 Studio 同源代理访问模板 dev server */
-export const PREVIEW_PATH = '/preview/main/';
+/** 作品页：预览分源后由独立预览源 5175 提供（Studio 不再代理 /preview/*）。 */
+export const PREVIEW_ORIGIN = 'http://127.0.0.1:5175';
+export const PREVIEW_PATH = `${PREVIEW_ORIGIN}/preview/main/`;
 
 /** mock 供的下载内容：M1-A 的默认拆分模型，处理后应等于作品页里提交的那一份。 */
 export const SPLIT_GLB = path.join(REPO_ROOT, 'fallback', 'lux3d-split-4969889.glb');

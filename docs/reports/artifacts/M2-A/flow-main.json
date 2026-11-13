@@ -5,7 +5,7 @@
     "text": "立即购买",
     "bbox": [
       61.796875,
-      337.375,
+      312.375,
       104,
       47
     ],
@@ -30,12 +30,12 @@
       "src/App.tsx:21:9",
       "src/App.tsx:20:7"
     ],
-    "baseVersion": "305e148347be9eba2d5cb15907970ca4a6b3e9f6"
+    "baseVersion": "d2a09ae414f8b1791675bb0c12caa85d16fab565"
   },
-  "versionBefore": "305e148347be9eba2d5cb15907970ca4a6b3e9f6",
-  "versionAfter": "eb90a5baa3637d045f765e8954d404ff55a43c9a",
+  "versionBefore": "d2a09ae414f8b1791675bb0c12caa85d16fab565",
+  "versionAfter": "b47b6cfb9c7550660adb1d116366259415667319",
   "candidate": {
-    "id": "17a756cbc30f4ebea3ae1005644bada0",
+    "id": "1655cf8d3c724385aec0ea9e292b928f",
     "diff": [
       "src/App.tsx"
     ],

@@ -40,10 +40,12 @@ if (process.env.PI_NET_GUARD_LOG) {
 }
 
 const { createApp } = await import('../../../apps/server/src/app.ts');
+const { listenWithPreview } = await import('../shared/server.mjs');
 const port = Number(process.env.PORT ?? 3001);
 let app;
+let work;
 try {
-  ({ app } = await createApp({
+  ({ app, work } = await createApp({
     dataDirectory: directory,
     workRoot,
     historyDirectory,
@@ -60,7 +62,14 @@ try {
   process.exit(12);
 }
 try {
-  await app.listen({ port, host: '127.0.0.1' });
+  await listenWithPreview({
+    app,
+    work,
+    apiPort: port,
+    previewPort: Number(process.env.PREVIEW_ORIGIN_PORT ?? 0),
+    mainPort: Number(process.env.MAIN_PREVIEW_PORT ?? 5174),
+    studioOrigin: process.env.STUDIO_ORIGIN ?? 'http://127.0.0.1:5173',
+  });
 } catch (error) {
   console.error(`listen failed: ${error instanceof Error ? error.message : String(error)}`);
   await app.close().catch(() => {});

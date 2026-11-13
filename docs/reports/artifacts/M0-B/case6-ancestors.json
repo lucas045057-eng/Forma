@@ -16,7 +16,7 @@
     "text": "立即购买",
     "bbox": [
       61.796875,
-      337.375,
+      312.375,
       104,
       47
     ],
@@ -41,6 +41,6 @@
       "src/App.tsx:21:9",
       "src/App.tsx:20:7"
     ],
-    "baseVersion": "74c9d0acbd703909d4418c4617dd4b10d02342e2"
+    "baseVersion": "4edf6eb0d5b7da4b2c7c90434bda4076f2d524a1"
   }
 }

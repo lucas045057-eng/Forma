@@ -6,7 +6,7 @@
       "test",
       "-c",
       "playwright.m2a.config.ts",
-      "tests/e2e/m2a/11-resources.spec.ts"
+      "tests/e2e/m2a/zz-kill.spec.ts"
     ],
     "configFile": "E:\\空间化AI工作台\\playwright.m2a.config.ts",
     "rootDir": "E:/空间化AI工作台/tests/e2e/m2a",
@@ -108,64 +108,90 @@
   },
   "suites": [
     {
-      "title": "11-resources.spec.ts",
-      "file": "11-resources.spec.ts",
+      "title": "zz-kill.spec.ts",
+      "file": "zz-kill.spec.ts",
       "column": 0,
       "line": 0,
-      "specs": [],
-      "suites": [
+      "specs": [
         {
-          "title": "进程与资源",
-          "file": "11-resources.spec.ts",
-          "line": 12,
-          "column": 6,
-          "specs": [
+          "title": "R6：后端被强杀后候选预览进程随之退出",
+          "ok": false,
+          "tags": [],
+          "tests": [
             {
-              "title": "删除候选不会删到 junction 指向的真实依赖",
-              "ok": true,
-              "tags": [],
-              "tests": [
+              "timeout": 420000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
                 {
-                  "timeout": 420000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 37170,
+                  "error": {
+                    "message": "Error: 后端被杀后候选预览进程还在\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                    "stack": "Error: 后端被杀后候选预览进程还在\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts:40:33",
+                    "location": {
+                      "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts",
+                      "column": 33,
+                      "line": 40
+                    },
+                    "snippet": " \u001b[90m 38 |\u001b[39m   \u001b[36mconst\u001b[39m gone \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m waitFor(() \u001b[33m=>\u001b[39m countPreviewVite() \u001b[33m===\u001b[39m \u001b[35m0\u001b[39m\u001b[33m,\u001b[39m \u001b[35m30_000\u001b[39m\u001b[33m,\u001b[39m \u001b[35m500\u001b[39m)\u001b[33m.\u001b[39mthen(() \u001b[33m=>\u001b[39m \u001b[36mtrue\u001b[39m)\u001b[33m.\u001b[39mcatch(() \u001b[33m=>\u001b[39m \u001b[36mfalse\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 39 |\u001b[39m   writeArtifactFrom(\u001b[32m'isolation-r6.json'\u001b[39m\u001b[33m,\u001b[39m { pid\u001b[33m,\u001b[39m viteBefore\u001b[33m,\u001b[39m viteAfter\u001b[33m:\u001b[39m countPreviewVite()\u001b[33m,\u001b[39m gone\u001b[33m,\u001b[39m candidateId\u001b[33m:\u001b[39m id })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 40 |\u001b[39m   expect(gone\u001b[33m,\u001b[39m \u001b[32m'后端被杀后候选预览进程还在'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 41 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 42 |\u001b[39m"
+                  },
+                  "errors": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3858,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:44:59.937Z",
-                      "annotations": [],
-                      "attachments": []
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts",
+                        "column": 33,
+                        "line": 40
+                      },
+                      "message": "Error: 后端被杀后候选预览进程还在\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  38 |   const gone = await waitFor(() => countPreviewVite() === 0, 30_000, 500).then(() => true).catch(() => false);\n  39 |   writeArtifactFrom('isolation-r6.json', { pid, viteBefore, viteAfter: countPreviewVite(), gone, candidateId: id });\n> 40 |   expect(gone, '后端被杀后候选预览进程还在').toBe(true);\n     |                                 ^\n  41 | });\n  42 |\n    at E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts:40:33"
                     }
                   ],
-                  "status": "expected"
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T13:11:01.548Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-A\\output\\zz-kill-R6：后端被强杀后候选预览进程随之退出-chromium\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-A\\output\\zz-kill-R6：后端被强杀后候选预览进程随之退出-chromium\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts",
+                    "column": 33,
+                    "line": 40
+                  }
                 }
               ],
-              "id": "7da17b2a0aff422f393f-492fe8e1189c3770dd69",
-              "file": "11-resources.spec.ts",
-              "line": 16,
-              "column": 3
+              "status": "unexpected"
             }
-          ]
+          ],
+          "id": "6ca21468063afb31afef-0c11242b0f9e3ff0687a",
+          "file": "zz-kill.spec.ts",
+          "line": 18,
+          "column": 1
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-13T11:44:57.793Z",
-    "duration": 7531.349,
-    "expected": 1,
+    "startTime": "2026-11-13T13:10:58.448Z",
+    "duration": 41869.734,
+    "expected": 0,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }

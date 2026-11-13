@@ -1,0 +1,15 @@
+{
+  "candidateId": "b5668956c12848f797ee0b882e019e8c",
+  "statuses": {
+    "get": 200,
+    "head": 200,
+    "post": 404,
+    "missing": 404,
+    "main": 200
+  },
+  "cors": "http://127.0.0.1:5173",
+  "apiPaths": "all 404",
+  "origin": "http://127.0.0.1:5175",
+  "backend": "http://127.0.0.1:3001",
+  "mock": "http://127.0.0.1:4011"
+}

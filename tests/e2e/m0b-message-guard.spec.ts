@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
+  PREVIEW_ORIGIN,
+  STUDIO_ORIGIN,
   clickTarget,
   consoleErrorsOf,
   highlightBoxCount,
@@ -67,14 +69,14 @@ test.describe('S4 消息来源与形状校验', () => {
     const status = frame.locator('[data-testid="action-status"]');
     const index = await markedIndexOf(frame, '[data-testid="buy-button"]');
 
-    // 伪造：origin 正确，但 source 是预览页自己而不是父窗口
-    await frame.evaluate(() => {
+    // 伪造：origin 正确（bridge 期望的 studioOrigin），但 source 是预览页自己而不是父窗口
+    await frame.evaluate((studioOrigin) => {
       window.dispatchEvent(new MessageEvent('message', {
         data: { type: 'pick:start' },
-        origin: window.location.origin,
+        origin: studioOrigin,
         source: window,
       }));
-    });
+    }, STUDIO_ORIGIN);
     await page.waitForTimeout(200);
 
     await clickTarget(page, frame, { index });
@@ -87,13 +89,13 @@ test.describe('S4 消息来源与形状校验', () => {
     const status = frame.locator('[data-testid="action-status"]');
     const index = await markedIndexOf(frame, '[data-testid="buy-button"]');
 
-    await frame.evaluate(() => {
+    await frame.evaluate((studioOrigin) => {
       window.dispatchEvent(new MessageEvent('message', {
         data: { type: 'pick:start' },
-        origin: window.location.origin,
+        origin: studioOrigin,
         source: window.parent,
       }));
-    });
+    }, STUDIO_ORIGIN);
     await page.waitForTimeout(200);
 
     await clickTarget(page, frame, { index });
@@ -111,14 +113,14 @@ test.describe('S4 消息来源与形状校验', () => {
     expect(baseline).toContain(buttonSrc);
 
     const dispatch = async (message: unknown) => {
-      await page.evaluate((data) => {
+      await page.evaluate(({ data, previewOrigin }) => {
         const iframe = document.querySelector('[data-testid="preview-frame"]') as HTMLIFrameElement | null;
         window.dispatchEvent(new MessageEvent('message', {
           data,
-          origin: window.location.origin,
+          origin: previewOrigin,
           source: iframe?.contentWindow ?? null,
         }));
-      }, message);
+      }, { data: message, previewOrigin: PREVIEW_ORIGIN });
       await page.waitForTimeout(120);
       return selectionText(page);
     };
@@ -151,24 +153,24 @@ test.describe('S4 消息来源与形状校验', () => {
     await expect.poll(() => highlightBoxCount(frame, buttonSrc), { timeout: 10_000 }).toBe(3);
 
     // 畸形 highlight：src 不是字符串，应当被整条忽略，覆盖框数量不变
-    await frame.evaluate(() => {
+    await frame.evaluate((studioOrigin) => {
       window.dispatchEvent(new MessageEvent('message', {
         data: { type: 'highlight', payload: { src: 123 } },
-        origin: window.location.origin,
+        origin: studioOrigin,
         source: window.parent,
       }));
-    });
+    }, STUDIO_ORIGIN);
     await page.waitForTimeout(200);
     expect(await highlightBoxCount(frame, buttonSrc), '畸形 highlight 改变了高亮').toBe(3);
 
     // 未知类型不应改变选取状态
-    await frame.evaluate(() => {
+    await frame.evaluate((studioOrigin) => {
       window.dispatchEvent(new MessageEvent('message', {
         data: { type: 'pick:start!' },
-        origin: window.location.origin,
+        origin: studioOrigin,
         source: window.parent,
       }));
-    });
+    }, STUDIO_ORIGIN);
     await page.waitForTimeout(200);
 
     const before = await selectionText(page);

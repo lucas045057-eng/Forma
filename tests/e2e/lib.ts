@@ -12,6 +12,8 @@ export const SEED = 20261109;
 export const SAMPLE_SIZE = 20;
 
 export const STUDIO_ORIGIN = 'http://127.0.0.1:5173';
+/** 预览分源：作品与候选预览由 5175 提供，Studio 不再代理 /preview/*。 */
+export const PREVIEW_ORIGIN = 'http://127.0.0.1:5175';
 
 export interface MarkedElement {
   index: number;

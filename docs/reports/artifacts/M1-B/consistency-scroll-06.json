@@ -7,8 +7,8 @@
   ],
   "canvas": {
     "size": 378,
-    "visibleHeight": 281,
-    "hiddenTop": 97
+    "visibleHeight": 251,
+    "hiddenTop": 127
   },
   "diff": {
     "aligned": {
@@ -16,130 +16,130 @@
         "x": 0,
         "y": 0
       },
-      "meanAbsDiff": 0.18666327741060837,
+      "meanAbsDiff": 0.05312084993359894,
       "maxDiff": 18,
       "changedRatio": 0,
-      "pixels": 106218,
+      "pixels": 94878,
       "tried": [
         {
           "x": -3,
           "y": -3,
-          "changedRatio": 0.03143405275779376
+          "changedRatio": 0.027548387096774193
         },
         {
           "x": -2,
           "y": -3,
-          "changedRatio": 0.024060538803000152
+          "changedRatio": 0.021298043925875084
         },
         {
           "x": -1,
           "y": -3,
-          "changedRatio": 0.015218594355285003
+          "changedRatio": 0.014481902969110979
         },
         {
           "x": 0,
           "y": -3,
-          "changedRatio": 0.00971603669445396
+          "changedRatio": 0.009899300221880868
         },
         {
           "x": 1,
           "y": -3,
-          "changedRatio": 0.014798771062725416
+          "changedRatio": 0.013818772995636178
         },
         {
           "x": 2,
           "y": -3,
-          "changedRatio": 0.022462880759222408
+          "changedRatio": 0.01973232669869595
         },
         {
           "x": 3,
           "y": -3,
-          "changedRatio": 0.029764988009592326
+          "changedRatio": 0.025924731182795698
         },
         {
           "x": -3,
           "y": -2,
-          "changedRatio": 0.03005973715651135
+          "changedRatio": 0.0260669344042838
         },
         {
           "x": -2,
           "y": -2,
-          "changedRatio": 0.022144055517425456
+          "changedRatio": 0.019289925660087158
         },
         {
           "x": -1,
           "y": -2,
-          "changedRatio": 0.012492513048686574
+          "changedRatio": 0.011654043228617387
         },
         {
           "x": 0,
           "y": -2,
-          "changedRatio": 0.0068365856896322845
+          "changedRatio": 0.007150294298888677
         },
         {
           "x": 1,
           "y": -2,
-          "changedRatio": 0.012188281376268028
+          "changedRatio": 0.01131315713783516
         },
         {
           "x": 2,
           "y": -2,
-          "changedRatio": 0.02125753069473042
+          "changedRatio": 0.018371357771511578
         },
         {
           "x": 3,
           "y": -2,
-          "changedRatio": 0.028826762246117084
+          "changedRatio": 0.024856760374832663
         },
         {
           "x": -3,
           "y": -1,
-          "changedRatio": 0.0286
+          "changedRatio": 0.024554666666666666
         },
         {
           "x": -2,
           "y": -1,
-          "changedRatio": 0.01978533434650456
+          "changedRatio": 0.016840425531914893
         },
         {
           "x": -1,
           "y": -1,
-          "changedRatio": 0.009179613489958318
+          "changedRatio": 0.008212201591511935
         },
         {
           "x": 0,
           "y": -1,
-          "changedRatio": 0.0037509448223733938
+          "changedRatio": 0.004063492063492063
         },
         {
           "x": 1,
           "y": -1,
-          "changedRatio": 0.00909435392194013
+          "changedRatio": 0.00820159151193634
         },
         {
           "x": 2,
           "y": -1,
-          "changedRatio": 0.0192629179331307
+          "changedRatio": 0.016361702127659576
         },
         {
           "x": 3,
           "y": -1,
-          "changedRatio": 0.028114285714285713
+          "changedRatio": 0.024117333333333334
         },
         {
           "x": -3,
           "y": 0,
-          "changedRatio": 0.0273214709371293
+          "changedRatio": 0.023245683930942895
         },
         {
           "x": -2,
           "y": 0,
-          "changedRatio": 0.018181646096766865
+          "changedRatio": 0.015268712384504534
         },
         {
           "x": -1,
           "y": 0,
-          "changedRatio": 0.006494425932393781
+          "changedRatio": 0.005643209654749701
         },
         {
           "x": 0,
@@ -149,127 +149,127 @@
         {
           "x": 1,
           "y": 0,
-          "changedRatio": 0.006484986359817628
+          "changedRatio": 0.0056326418464074735
         },
         {
           "x": 2,
           "y": 0,
-          "changedRatio": 0.018191110774589233
+          "changedRatio": 0.015279308298720014
         },
         {
           "x": 3,
           "y": 0,
-          "changedRatio": 0.027330960854092527
+          "changedRatio": 0.023256308100929615
         },
         {
           "x": -3,
           "y": 1,
-          "changedRatio": 0.028104761904761903
+          "changedRatio": 0.024106666666666665
         },
         {
           "x": -2,
           "y": 1,
-          "changedRatio": 0.01928191489361702
+          "changedRatio": 0.016382978723404256
         },
         {
           "x": -1,
           "y": 1,
-          "changedRatio": 0.009103827207275483
+          "changedRatio": 0.008212201591511935
         },
         {
           "x": 0,
           "y": 1,
-          "changedRatio": 0.0037509448223733938
+          "changedRatio": 0.004063492063492063
         },
         {
           "x": 1,
           "y": 1,
-          "changedRatio": 0.009189086775293672
+          "changedRatio": 0.008222811671087533
         },
         {
           "x": 2,
           "y": 1,
-          "changedRatio": 0.01978533434650456
+          "changedRatio": 0.016840425531914893
         },
         {
           "x": 3,
           "y": 1,
-          "changedRatio": 0.028628571428571427
+          "changedRatio": 0.024586666666666666
         },
         {
           "x": -3,
           "y": 2,
-          "changedRatio": 0.02885543608124253
+          "changedRatio": 0.024888888888888887
         },
         {
           "x": -2,
           "y": 2,
-          "changedRatio": 0.02125753069473042
+          "changedRatio": 0.018371357771511578
         },
         {
           "x": -1,
           "y": 2,
-          "changedRatio": 0.012188281376268028
+          "changedRatio": 0.01131315713783516
         },
         {
           "x": 0,
           "y": 2,
-          "changedRatio": 0.0068365856896322845
+          "changedRatio": 0.007150294298888677
         },
         {
           "x": 1,
           "y": 2,
-          "changedRatio": 0.012483005808923496
+          "changedRatio": 0.011643390538280443
         },
         {
           "x": 2,
           "y": 2,
-          "changedRatio": 0.022124990467475025
+          "changedRatio": 0.019268563616166794
         },
         {
           "x": 3,
           "y": 2,
-          "changedRatio": 0.03005973715651135
+          "changedRatio": 0.0260669344042838
         },
         {
           "x": -3,
           "y": 3,
-          "changedRatio": 0.029774580335731413
+          "changedRatio": 0.02593548387096774
         },
         {
           "x": -2,
           "y": 3,
-          "changedRatio": 0.022482014388489208
+          "changedRatio": 0.019753774879890187
         },
         {
           "x": -1,
           "y": 3,
-          "changedRatio": 0.014798771062725416
+          "changedRatio": 0.013818772995636178
         },
         {
           "x": 0,
           "y": 3,
-          "changedRatio": 0.00971603669445396
+          "changedRatio": 0.009899300221880868
         },
         {
           "x": 1,
           "y": 3,
-          "changedRatio": 0.015218594355285003
+          "changedRatio": 0.014481902969110979
         },
         {
           "x": 2,
           "y": 3,
-          "changedRatio": 0.024031838359099954
+          "changedRatio": 0.021265871654083734
         },
         {
           "x": 3,
           "y": 3,
-          "changedRatio": 0.03148201438848921
+          "changedRatio": 0.027602150537634408
         }
       ]
     },
     "normalized": {
-      "meanAbsDiff": 0.19022750854492188,
+      "meanAbsDiff": 0.055469512939453125,
       "maxDiff": 19,
       "changedRatio": 0,
       "pixels": 262144

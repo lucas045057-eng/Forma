@@ -1,0 +1,13 @@
+{
+  "candidateId": "6c25f07994de4ae98e87c03421b38f96",
+  "navigations": 1,
+  "state": {
+    "rootChildren": 1,
+    "text": "马上购买",
+    "src": "src/components/Button.tsx:5:5",
+    "sceneState": "ready"
+  },
+  "hmrConnected": true,
+  "connectionLost": 0,
+  "pageErrors": []
+}

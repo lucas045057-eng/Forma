@@ -122,3 +122,48 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 ## 产物
 
 `docs/reports/artifacts/M2-A/`：`playwright-results.json`（21 expected、2 expected-failure）、`flow-main.json`、`flow-out-of-scope.json`、`discard.json`、`adopt-once.json`、`selection-invalid.json`、`selection-stale.json`、`selection-valid.json`、`sandbox.json`、`sandbox-junction.json`、`failure-*.json`、`candidate-limit*.json`、`adopt-conflict.json`、`events-replay.json`、`events-restart.json`、`proxy.json`、`resources.json`、`known-defect-preview-reload.json`。
+
+---
+
+# 回合 2（M2-B 界面 + M2-A 整改 + D1/D2 回归）
+
+日期：2026-11-13。被测版本 master `c93286f`。
+
+## 迁移（预览分源）
+
+| 变化 | 测试侧改动 |
+| --- | --- |
+| 预览改由独立预览源 `127.0.0.1:5175` 提供，Studio 不再代理 `/preview/*` | 作品页/候选预览地址改为 5175；`previewFetch` 指向预览源；M0-B 的配置改为自己起「API + 预览源（`tests/e2e/shared/server.mjs` 调 `createPreviewOrigin`）+ Studio + 模板」 |
+| iframe 带 `studioOrigin`，bridge 只接受精确 Studio 来源 | M0-B 消息安全用例按跨源约定重写：Studio 侧伪造消息 `origin=5175`；bridge 侧 `origin=5173`（studioOrigin） |
+| Studio 不再读 iframe DOM；画布尺寸由 bridge 上报 `viewport:size` | M1-B 对照模式改为「等 `scene-size` 上报值 ≈ Studio 画布宽度」，backing 尺寸用 `frame.evaluate` 读 |
+| 每个后端要额外起预览监听 | m0a/m1a/m1b/m2a 启动器统一走 `listenWithPreview`；沙箱后端 `PREVIEW_ORIGIN_PORT=0` 跳过 |
+
+迁移后：**M0-B 24、M0-A 27、M1-A 7、M1-B 23、M2-A 26、R6 1 失败、M2-B 3**。没有放松任何断言。
+
+## D1 / D2 回归
+
+- **D1 已修复**：去掉 `test.fail`，改为直接打开 `http://127.0.0.1:5175/preview/c/<id>/`。断言：导航 1 次、`#root` 有内容、买按钮 `马上购买`、`data-src=src/components/Button.tsx:5:5`、`[vite] connected` 出现且 `connection lost` 为 0、无 pageerror（`d1-candidate-preview.json`）。
+- **D2 按新行为验证**：作品目录 `src/` 下有 junction 时 `POST /tasks` 与 `GET /version` 都 **409 `UNSAFE_WORK_TREE`**、junction 目标为空、作品目录无新增文件、上游未调用（`sandbox-unsafe-work-tree.json`）；候选新增 `src/link-out/escape.ts` 后作品目录该路径变 junction 时采用 **409 `UNSAFE_WORK_TREE`**、主线不变，删链接后同一候选可正常采用并落在作品内（`sandbox-adopt-unsafe.json`）。
+
+## M2-A 整改验收
+
+| 项 | 结果 | 证据 |
+| --- | --- | --- |
+| B1 预览不能调用正式接口 | **通过**：候选页面里 `fetch` PUT /scene、POST /assets/lux3d、/tasks、adopt、revert 全部失败（CORS），配置字符串不变、候选数不变、Lux3D 调用计数不变 | `isolation-b1.json` |
+| B2 Vite 文件边界 | **通过**：`/preview/main/@fs/<repo>/docs|orbital|.data|apps/server/sentinel-m2.txt` 读不到哨兵内容，自己的 `src/App.tsx` 仍 200 | `isolation-b2.json` |
+| R1 快照不收敏感文件 | **通过**：`.env.local`、`src/notes.bak`、`src/secret.pem` 不在 work 仓库 `ls-tree HEAD` 里，`src/App.tsx` 仍在 | `isolation-r1.json` |
+| R3 事件序号 | 通过（`08-events`：断线补拉连续、重启 seq 接续不归零） | `events-*.json` |
+| R6 后端强杀后预览回收 | **失败（缺陷 D3）**：杀掉 3001 后端后 30 秒内带 `preview-cache` 的 Vite 进程仍为 2（`gone:false`） | `isolation-r6.json` |
+
+## 缺陷（回合 2）
+
+**D3（应修）R6 未达成：后端被强杀后候选预览进程仍在**
+- 复现：起候选（预览可用）→ `taskkill /T /F` 杀 3001 后端 → 30 秒内 `vite.js` 且命令行含 `preview-cache` 的进程数仍为 2（`isolation-r6.json`，`gone:false`）。
+- 影响：崩溃/强杀后预览 worker 与端口残留，与整改报告“父进程异常退出后预览自动退出”的说法不符。
+- 本轮结束已手工结束残留 Vite 进程，3001/4011/5173/5174/5175 全部释放。
+
+## 未运行（回合 2）
+
+- 真实模型“10 次至少 8 次改对”。
+- 重启后无主候选目录自动清理、事件容量/截断（S2）、完整 CSP（S1）的端到端。
+- 预览源 HMR 转发对**候选**的外来 Origin 负向用例（仅实现方单测覆盖）。

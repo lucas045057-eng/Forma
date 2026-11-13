@@ -7,7 +7,7 @@
     "text": "无标记探针01让呼吸慢下来雪松与佛手柑，像雨后走进一片安静的森林。",
     "bbox": [
       61.796875,
-      376.609375,
+      326.609375,
       283.46875,
       123
     ],
@@ -33,6 +33,6 @@
       "src/App.tsx:15:5"
     ],
     "note": "outer-container",
-    "baseVersion": "74c9d0acbd703909d4418c4617dd4b10d02342e2"
+    "baseVersion": "4edf6eb0d5b7da4b2c7c90434bda4076f2d524a1"
   }
 }

@@ -46,6 +46,9 @@ export default defineConfig({
       cwd: SERVER_DIR,
       env: {
         PORT: '3001',
+        PREVIEW_ORIGIN_PORT: '5175',
+        MAIN_PREVIEW_PORT: '5174',
+        STUDIO_ORIGIN: 'http://127.0.0.1:5173',
         WORK_ROOT,
         WORK_DATA_DIR: WORK_DATA,
         ASSETS_DIR: ASSETS,

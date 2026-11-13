@@ -118,21 +118,19 @@ export async function captureCanvases(page: Page, frame: Frame): Promise<CanvasP
   const studio = await captureRegion(page, {
     x: Math.round(studioRect.x), y: Math.round(studioRect.y) + start, width: size, height: visibleHeight,
   });
-  const backing = await page.evaluate(() => {
+  const backing = await frame.evaluate(() => {
+    const previewCanvas = document.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
+    return { preview: previewCanvas?.width ?? -1, dpr: window.devicePixelRatio };
+  });
+  const studioBacking = await page.evaluate(() => {
     const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement;
-    const frameElement = document.querySelector('[data-testid="preview-frame"]') as HTMLIFrameElement;
-    const previewCanvas = frameElement.contentDocument?.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
-    return {
-      preview: previewCanvas?.width ?? -1,
-      studio: studioCanvas.width,
-      dpr: window.devicePixelRatio,
-    };
+    return { studio: studioCanvas.width, dpr: window.devicePixelRatio };
   });
   return {
     size,
     preview: { rect: previewRect, png: preview.png, offsetY: start, visibleHeight },
     studio: { rect: studioRect, png: studio.png },
-    backing,
+    backing: { preview: backing.preview, studio: studioBacking.studio, dpr: studioBacking.dpr },
   };
 }
 
@@ -164,18 +162,15 @@ export async function enableCompare(page: Page, options: { pinnedSize?: number }
     await page.waitForTimeout(200);
   }
   await page.getByTestId('scene-compare').check();
-  // ResizeObserver 是异步的：等两边 CSS 与 backing 尺寸都一致
-  await page.waitForFunction(() => {
+  // 跨源后 Studio 读不到 iframe 的 DOM，改用 bridge 上报的画布宽度 + 两边 CSS 尺寸对比
+  await page.waitForFunction((expectedMax) => {
     const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement | null;
-    const frameElement = document.querySelector('[data-testid="preview-frame"]') as HTMLIFrameElement | null;
-    const previewCanvas = frameElement?.contentDocument?.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
-    if (!studioCanvas || !previewCanvas) return false;
+    const sizeInput = document.querySelector('[data-testid="scene-size"]') as HTMLInputElement | null;
+    if (!studioCanvas || !sizeInput) return false;
     const studioWidth = studioCanvas.getBoundingClientRect().width;
-    const previewWidth = previewCanvas.getBoundingClientRect().width;
-    return Math.abs(studioWidth - previewWidth) <= 1
-      && Math.abs(studioCanvas.width - previewCanvas.width) <= 1
-      && studioCanvas.width > 200;
-  }, undefined, { timeout: 30_000 });
+    const reported = Number(sizeInput.value);
+    return Math.abs(studioWidth - reported) <= 1 && studioWidth > 200 && studioWidth <= expectedMax;
+  }, 1600, { timeout: 30_000 });
   await page.waitForTimeout(900);
 }
 

@@ -38,10 +38,12 @@ if (process.env.PI_NET_GUARD_LOG) {
 }
 
 const { createApp } = await import('../../../apps/server/src/app.ts');
+const { listenWithPreview } = await import('../shared/server.mjs');
 const port = Number(process.env.PORT ?? 3001);
 let app;
+let work;
 try {
-  ({ app } = await createApp({
+  ({ app, work } = await createApp({
     dataDirectory: directory,
     base: process.env.LUX3D_BASE,
     key: process.env.LUX3D_API_KEY,
@@ -54,7 +56,14 @@ try {
   console.error(`createApp rejected configuration: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(12);
 }
-await app.listen({ port, host: '127.0.0.1' });
+await listenWithPreview({
+  app,
+  work,
+  apiPort: port,
+  previewPort: Number(process.env.PREVIEW_ORIGIN_PORT ?? 0),
+  mainPort: Number(process.env.MAIN_PREVIEW_PORT ?? 5174),
+  studioOrigin: process.env.STUDIO_ORIGIN ?? 'http://127.0.0.1:5173',
+});
 console.log(`pi-m0a backend ready on ${port} (base=${process.env.LUX3D_BASE ?? 'default'})`);
 
 for (const signal of ['SIGINT', 'SIGTERM']) {

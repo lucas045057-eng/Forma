@@ -3,7 +3,10 @@
     "argv": [
       "E:\\Node\\node.exe",
       "E:\\空间化AI工作台\\node_modules\\@playwright\\test\\cli.js",
-      "test"
+      "test",
+      "-c",
+      "playwright.config.ts",
+      "tests/e2e/m0b-message-guard.spec.ts"
     ],
     "configFile": "E:\\空间化AI工作台\\playwright.config.ts",
     "rootDir": "E:/空间化AI工作台/tests/e2e",
@@ -35,7 +38,8 @@
           "**/m0a/**",
           "**/m1a/**",
           "**/m1b/**",
-          "**/m2a/**"
+          "**/m2a/**",
+          "**/m2b/**"
         ],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -60,7 +64,8 @@
           "**/m0a/**",
           "**/m1a/**",
           "**/m1b/**",
-          "**/m2a/**"
+          "**/m2a/**",
+          "**/m2b/**"
         ],
         "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
         "timeout": 120000,
@@ -115,261 +120,6 @@
   },
   "suites": [
     {
-      "title": "m0b-known-issues.spec.ts",
-      "file": "m0b-known-issues.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "R1 选取模式不得触发先于/绕过 click 的业务行为",
-          "file": "m0b-known-issues.spec.ts",
-          "line": 29,
-          "column": 6,
-          "specs": [
-            {
-              "title": "R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1296,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:12.682Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-8dec85f290aa04cad97e",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 30,
-              "column": 3
-            },
-            {
-              "title": "R1b 单输入框表单的回车隐式提交不应触发",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1361,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:14.066Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-56a32d000a8ca7854985",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 48,
-              "column": 3
-            },
-            {
-              "title": "R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2011,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:15.437Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-1ed01dd80b19826e32b2",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 63,
-              "column": 3
-            },
-            {
-              "title": "R1d 退出选取后 pointer / mouse / click 监听器完全恢复",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1997,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:17.457Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-6b8a9c3fc087b103da7b",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 79,
-              "column": 3
-            },
-            {
-              "title": "R1e 选取模式下右键菜单与双击被拦截，退出选取后恢复",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3694,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:19.462Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-97b31b7723f09cb652a7",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 101,
-              "column": 3
-            },
-            {
-              "title": "R1f 选取模式下 Space 激活被拦截，退出选取后按钮可被 Space 激活",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2202,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:23.165Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-fc0fd101c2d966fdb2d7",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 127,
-              "column": 3
-            },
-            {
-              "title": "R1g 选取期间悬停高亮与滚动仍然正常（拦截不误伤移动/滚动）",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1754,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:25.376Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "8a2b2de19721cdbcb913-57c7f62a299783385cfe",
-              "file": "m0b-known-issues.spec.ts",
-              "line": 155,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
       "title": "m0b-message-guard.spec.ts",
       "file": "m0b-message-guard.spec.ts",
       "column": 0,
@@ -379,7 +129,7 @@
         {
           "title": "S4 消息来源与形状校验",
           "file": "m0b-message-guard.spec.ts",
-          "line": 64,
+          "line": 66,
           "column": 6,
           "specs": [
             {
@@ -398,12 +148,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1509,
+                      "duration": 1280,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T11:42:27.144Z",
+                      "startTime": "2026-11-13T12:56:45.341Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -413,7 +163,7 @@
               ],
               "id": "02afd3a46f1658ec1634-e9c1aaa3096c6c25e8e4",
               "file": "m0b-message-guard.spec.ts",
-              "line": 65,
+              "line": 67,
               "column": 3
             },
             {
@@ -432,12 +182,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1529,
+                      "duration": 1420,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T11:42:28.661Z",
+                      "startTime": "2026-11-13T12:56:46.701Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -447,7 +197,7 @@
               ],
               "id": "02afd3a46f1658ec1634-3ce5ed1e5f7c365e5cb7",
               "file": "m0b-message-guard.spec.ts",
-              "line": 85,
+              "line": 87,
               "column": 3
             },
             {
@@ -466,12 +216,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3257,
+                      "duration": 3035,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T11:42:30.199Z",
+                      "startTime": "2026-11-13T12:56:48.129Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -481,7 +231,7 @@
               ],
               "id": "02afd3a46f1658ec1634-4a41417d65ed29e94faf",
               "file": "m0b-message-guard.spec.ts",
-              "line": 105,
+              "line": 107,
               "column": 3
             },
             {
@@ -500,12 +250,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2190,
+                      "duration": 2239,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T11:42:33.464Z",
+                      "startTime": "2026-11-13T12:56:51.170Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -515,503 +265,7 @@
               ],
               "id": "02afd3a46f1658ec1634-73163dacd4a82ffcfbb4",
               "file": "m0b-message-guard.spec.ts",
-              "line": 145,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "m0b-mutation-check.spec.ts",
-      "file": "m0b-mutation-check.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "变异验证（R3：证明判定条件有效）",
-          "file": "m0b-mutation-check.spec.ts",
-          "line": 20,
-          "column": 6,
-          "specs": [
-            {
-              "title": "变异 A 同名标签错标：所有 span 统一指向同一个错误位置，必须被抓到",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3667,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:35.668Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7fd9558e220a45a98fb3-b216a69033746b04f678",
-              "file": "m0b-mutation-check.spec.ts",
-              "line": 21,
-              "column": 3
-            },
-            {
-              "title": "变异 B 漏标一类元素：li 不再注入 data-src，完整性校验必须报出来",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2192,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:39.344Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7fd9558e220a45a98fb3-be1ba3ba8e5e7b58370e",
-              "file": "m0b-mutation-check.spec.ts",
-              "line": 65,
-              "column": 3
-            },
-            {
-              "title": "变异 C 列号整体偏一位：AST 期望本身自检能发现 oracle 与源码不一致",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 12,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:41.545Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7fd9558e220a45a98fb3-2dabb22665d7683bef2f",
-              "file": "m0b-mutation-check.spec.ts",
-              "line": 98,
-              "column": 3
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "m0b-pick.spec.ts",
-      "file": "m0b-pick.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "M0-B 校验器自检（非验收用例）",
-          "file": "m0b-pick.spec.ts",
-          "line": 67,
-          "column": 6,
-          "specs": [
-            {
-              "title": "readSourceAt 能识别列号偏移（防止断言空转）",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:41.574Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-75a76a8b0d6f7a2dc012",
-              "file": "m0b-pick.spec.ts",
-              "line": 68,
-              "column": 3
-            }
-          ]
-        },
-        {
-          "title": "M0-B 点选 → 源码定位",
-          "file": "m0b-pick.spec.ts",
-          "line": 79,
-          "column": 6,
-          "specs": [
-            {
-              "title": "用例 1：随机 20 个 data-src 元素，点选后 src 指向该元素 JSX 开标签",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 6645,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:41.585Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "case1-random-sample.json",
-                          "contentType": "application/json",
-                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium\\attachments\\case1-random-sample-json-e9c5553a58799d28a0a328afd225c5b7ad762e03.json"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-f42771ede2bf2b64de0c",
-              "file": "m0b-pick.spec.ts",
-              "line": 80,
-              "column": 3
-            },
-            {
-              "title": "用例 2：选取模式下点击不触发原行为，退出选取后恢复",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1994,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:48.242Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-4436e5fdb6be10fd51ea",
-              "file": "m0b-pick.spec.ts",
-              "line": 163,
-              "column": 3
-            },
-            {
-              "title": "用例 3：共享 Button 的 instances 与高亮框数量一致（≥3）",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1490,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:50.246Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-95af08a3cafba332f15e",
-              "file": "m0b-pick.spec.ts",
-              "line": 182,
-              "column": 3
-            },
-            {
-              "title": "用例 4：map 生成的卖点列表项被标注为多实例且 instances 正确",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1772,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:51.744Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-f84c1afc9066eb1f5a84",
-              "file": "m0b-pick.spec.ts",
-              "line": 208,
-              "column": 3
-            },
-            {
-              "title": "用例 5：点击无 data-src 的子元素归到最近标记外层并带 outer-container",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1508,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:53.525Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-5595fbc8d9bad361a646",
-              "file": "m0b-pick.spec.ts",
-              "line": 237,
-              "column": 3
-            },
-            {
-              "title": "用例 6：ancestors 最多 3 层且每项都是合法 data-src",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1511,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:55.042Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-00729180237fff8dba48",
-              "file": "m0b-pick.spec.ts",
-              "line": 268,
-              "column": 3
-            },
-            {
-              "title": "用例 7：错误 origin 的 pick:result 被 Studio 忽略（bridge 侧同样校验）",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3284,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:56.561Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-cc5431bb8f9d8448ef87",
-              "file": "m0b-pick.spec.ts",
-              "line": 303,
-              "column": 3
-            },
-            {
-              "title": "用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src）",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2331,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:42:59.853Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "case8-deterministic-ast.json",
-                          "contentType": "application/json",
-                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M0-B\\output\\m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium\\attachments\\case8-deterministic-ast-json-ce639b9e4ca49819a43962326b8267a3b6ac7ac7.json"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-c4f8edbf8da7a7c0b981",
-              "file": "m0b-pick.spec.ts",
-              "line": 368,
-              "column": 3
-            },
-            {
-              "title": "用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 981,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-11-13T11:43:02.192Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "7397b0be8b703146ae13-b1852e4baee6e135d067",
-              "file": "m0b-pick.spec.ts",
-              "line": 392,
+              "line": 147,
               "column": 3
             }
           ]
@@ -1021,9 +275,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-13T11:42:11.619Z",
-    "duration": 52175.295,
-    "expected": 24,
+    "startTime": "2026-11-13T12:56:42.340Z",
+    "duration": 11963.821,
+    "expected": 4,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

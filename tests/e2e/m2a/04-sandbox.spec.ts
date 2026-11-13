@@ -2,12 +2,12 @@ import { existsSync, mkdirSync, readdirSync, rmSync, symlinkSync } from 'node:fs
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { M2A_DATA, WORK_ROOT } from './env';
-import { appText, candidateDir, getCandidate, mockStats, pickSelection, restoreTemplate, setScript, submitTask, waitForTask } from './api';
+import { adoptCandidate, appText, candidateDir, getCandidate, mockStats, pickSelection, restoreTemplate, setScript, submitTask, waitForTask } from './api';
 import { writeArtifactFrom } from './artifact';
 
 /**
- * Agent 沙箱：写 ../、package.json、vite.config.ts、public/、src/../..、非法 scene.config.json
- * 全被拒；经 junction 逃逸那一类单独一条（当前会逃出去，记为缺陷）。
+ * Agent 沙箱：六类越界写入被拒；作品目录里出现链接（junction）时，任何写作品树的操
+ * 作都拒绝（409 UNSAFE_WORK_TREE，D2 修复后的行为）。
  */
 
 const FORBIDDEN = [
@@ -19,11 +19,24 @@ const FORBIDDEN = [
   { name: '非法 scene.config.json', path: 'src/scene.config.json', content: '{"model":123}' },
 ];
 
-test.describe('Agent 沙箱边界', () => {
-  test.beforeAll(() => { const restored = restoreTemplate(); expect(restored.clean, restored.status).toBe(true); });
+const linkPath = path.join(WORK_ROOT, 'src', 'link-out');
+const targetPath = path.join(M2A_DATA, 'junction-target');
+
+function makeJunction(): void {
+  rmSync(targetPath, { recursive: true, force: true });
+  mkdirSync(targetPath, { recursive: true });
+  rmSync(linkPath, { recursive: true, force: true });
+  symlinkSync(targetPath, linkPath, 'junction');
+}
+function removeJunction(): void {
+  rmSync(linkPath, { recursive: true, force: true });
+  rmSync(targetPath, { recursive: true, force: true });
+}
+
+test.describe('Agent 沙箱边界（D2 修复后）', () => {
+  test.beforeAll(() => { removeJunction(); const restored = restoreTemplate(); expect(restored.clean, restored.status).toBe(true); });
   test.afterAll(() => {
-    rmSync(path.join(WORK_ROOT, 'src', 'link-out'), { recursive: true, force: true });
-    rmSync(path.join(M2A_DATA, 'junction-target'), { recursive: true, force: true });
+    removeJunction();
     const restored = restoreTemplate();
     expect(restored.clean, `作品目录没有还原：${restored.status}`).toBe(true);
   });
@@ -50,46 +63,91 @@ test.describe('Agent 沙箱边界', () => {
     });
 
     expect(candidate.diff.map((entry) => entry.path), '候选里出现了越界文件').toEqual(['src/App.tsx']);
-    expect(appText()).toContain('立即购买'); // 作品本身还没被采用
+    expect(appText()).toContain('立即购买');
     expect(readdirSync(path.join(directory, 'public')).includes('evil.txt')).toBe(false);
-    expect(existsSync(path.join(directory, 'outside.ts'))).toBe(false);
     expect(existsSync(path.join(path.dirname(directory), 'outside.ts'))).toBe(false);
-    // 被拒之后 Agent 仍然完成了正常改动：read + 6 次越界写入 + replace + finish = 9 轮
     expect((await mockStats()).body.calls).toBeGreaterThanOrEqual(FORBIDDEN.length + 3);
+    await (await import('./api')).discardCandidate(candidate.id);
   });
 
-  test('经 junction 逃逸的写入也应当被拒（当前可逃出去）', async ({ page }) => {
-    test.fail(true, 'M2-A 缺陷：Windows 上 lstat 不把 junction 当符号链接，沙箱可经 src/ 下的 junction 写到作品目录之外。修复后删掉这个标记。');
-    const target = path.join(M2A_DATA, 'junction-target');
-    rmSync(target, { recursive: true, force: true });
-    mkdirSync(target, { recursive: true });
-    const link = path.join(WORK_ROOT, 'src', 'link-out');
-    rmSync(link, { recursive: true, force: true });
-    symlinkSync(target, link, 'junction');
-
+  test('作品目录里出现 junction 时，提交任务被 409 UNSAFE_WORK_TREE 拒绝（D2-1）', async ({ page }) => {
+    // 先拿一个正常的 Selection（内部会读作品版本，此时目录还是干净的）
+    const selection = await pickSelection(page, 'benefits');
+    makeJunction();
     await setScript([
       [{ name: 'read_file', args: { path: 'src/App.tsx' } }],
-      [{ name: 'write_file', args: { path: 'src/link-out/escape.ts', content: 'escaped' } }],
-      [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '立即购买', new: '马上购买' } }],
-      [{ name: 'finish', args: { summary: '尝试经 junction 逃逸' } }],
+      [{ name: 'finish', args: { summary: '不该跑到这里' } }],
     ]);
-    const selection = await pickSelection(page, 'benefits');
-    const task = await waitForTask((await submitTask('尝试经 junction 逃逸', selection)).body.id);
-    const candidate = task.candidateId ? (await getCandidate(task.candidateId)).body : null;
-    const targetEntries = readdirSync(target);
+    const callsBefore = (await mockStats()).body.calls;
+    const response = await submitTask('作品目录里有链接时应当被拒', selection);
+    const versionResponse = await (await import('./api')).getVersion();
+    const targetEntries = readdirSync(targetPath);
+    const workEntries = existsSync(path.join(WORK_ROOT, 'src')) ? readdirSync(path.join(WORK_ROOT, 'src')) : [];
 
-    writeArtifactFrom('sandbox-junction.json', {
-      taskStatus: task.status,
-      diff: candidate?.diff.map((entry) => entry.path) ?? null,
+    writeArtifactFrom('sandbox-unsafe-work-tree.json', {
+      status: response.status,
+      code: (response.body as any)?.error?.code,
+      versionStatus: versionResponse.status,
+      versionCode: (versionResponse.body as any)?.error?.code,
       targetEntries,
-      escaped: targetEntries.length > 0,
+      workEntries,
+      callsBefore,
+      callsAfter: (await mockStats()).body.calls,
     });
 
-    expect(targetEntries, 'junction 目标目录被写入了文件（沙箱逃逸）').toEqual([]);
-    expect(candidate?.diff.map((entry) => entry.path) ?? []).toEqual(['src/App.tsx']);
+    expect(response.status, JSON.stringify(response.body)).toBe(409);
+    expect((response.body as any).error.code).toBe('UNSAFE_WORK_TREE');
+    // 读版本也要先快照，所以同样被拒
+    expect(versionResponse.status).toBe(409);
+    expect(targetEntries, 'junction 目标目录被写入').toEqual([]);
+    expect((await mockStats()).body.calls, '被拒的请求不该调用上游').toBe(callsBefore);
+    expect(workEntries.filter((entry) => entry !== 'link-out')).not.toContain('escape.ts');
 
-    rmSync(link, { recursive: true, force: true });
-    rmSync(target, { recursive: true, force: true });
-    restoreTemplate();
+    removeJunction();
+    expect(restoreTemplate().clean).toBe(true);
+  });
+
+  test('候选里新增同名路径、作品目录里该路径是 junction 时，采用被拒且目标为空（D2-2）', async ({ page }) => {
+    await setScript([
+      [{ name: 'read_file', args: { path: 'src/App.tsx' } }],
+      [{ name: 'write_file', args: { path: 'src/link-out/escape.ts', content: 'export const x = 1;\n' } }],
+      [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '立即购买', new: '马上购买' } }],
+      [{ name: 'finish', args: { summary: '在候选里新建 src/link-out/escape.ts' } }],
+    ]);
+    const selection = await pickSelection(page, 'benefits');
+    const task = await waitForTask((await submitTask('新建 src/link-out/escape.ts', selection)).body.id);
+    expect(task.status, JSON.stringify(task.error)).toBe('done');
+    const candidate = (await getCandidate(task.candidateId!)).body;
+    expect(candidate.diff.map((entry) => entry.path)).toContain('src/link-out/escape.ts');
+
+    // 候选就绪后再在作品目录里建 junction：采用时应当被拒
+    makeJunction();
+    const before = appText();
+    const adopted = await adoptCandidate(candidate.id);
+    const targetEntries = readdirSync(targetPath);
+
+    writeArtifactFrom('sandbox-adopt-unsafe.json', {
+      status: adopted.status,
+      code: (adopted.body as any)?.error?.code,
+      targetEntries,
+      mainUnchanged: appText() === before,
+      candidateDecision: (await getCandidate(candidate.id)).body.decision,
+    });
+
+    expect(adopted.status, JSON.stringify(adopted.body)).toBe(409);
+    expect((adopted.body as any).error.code).toBe('UNSAFE_WORK_TREE');
+    expect(targetEntries, 'git 顺着 junction 把文件写到作品外了').toEqual([]);
+    expect(appText(), '采用被拒但主线被改了').toBe(before);
+    expect((await getCandidate(candidate.id)).body.decision).toBe('pending');
+
+    removeJunction();
+    // 删掉链接后，同一候选可以正常采用，且落在作品内
+    const retried = await adoptCandidate(candidate.id);
+    expect(retried.status, JSON.stringify(retried.body)).toBe(200);
+    expect(existsSync(path.join(WORK_ROOT, 'src', 'link-out', 'escape.ts')), '采用后文件没有落在作品内').toBe(true);
+    const { revertVersion } = await import('./api');
+    expect((await revertVersion()).status).toBe(200);
+    rmSync(path.join(WORK_ROOT, 'src', 'link-out'), { recursive: true, force: true });
+    expect(restoreTemplate().clean).toBe(true);
   });
 });

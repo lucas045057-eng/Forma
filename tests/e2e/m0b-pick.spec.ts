@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Frame, Page } from '@playwright/test';
 import {
   ARTIFACT_DIR,
+  PREVIEW_ORIGIN,
   SAMPLE_SIZE,
   SEED,
   STUDIO_ORIGIN,
@@ -317,7 +318,7 @@ test.describe('M0-B 点选 → 源码定位', () => {
     expect(await page.locator('[data-testid="selection-json"]').innerText()).not.toContain('Forged');
 
     // 2) 对照：同一条 payload 用正确 origin 发出时必须被接受，证明上面被忽略是 origin 校验所致
-    await dispatchToStudio(page, STUDIO_ORIGIN);
+    await dispatchToStudio(page, PREVIEW_ORIGIN);
     await waitForSelectionChange(page, baseline);
     const accepted = await readSelection(page);
     expect(accepted.src).toBe(forgedPayload.src);
@@ -341,13 +342,13 @@ test.describe('M0-B 点选 → 源码定位', () => {
 
     // 4) 错误 source（正确 origin、非预览窗口）同样被忽略
     const beforeWrongSource = await selectionText(page);
-    await page.evaluate((payload) => {
+    await page.evaluate(({ previewOrigin, payload }) => {
       window.dispatchEvent(new MessageEvent('message', {
         data: { type: 'pick:result', payload: { ...payload, src: 'src/App.tsx:9:9', cid: 'WrongSource' } },
-        origin: window.location.origin,
+        origin: previewOrigin,
         source: window,
       }));
-    }, forgedPayload);
+    }, { previewOrigin: PREVIEW_ORIGIN, payload: forgedPayload });
     await page.waitForTimeout(600);
     expect(await selectionText(page), '错误 source 的 pick:result 必须被忽略').toBe(beforeWrongSource);
 

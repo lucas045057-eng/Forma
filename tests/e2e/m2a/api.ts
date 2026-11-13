@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
-import type { Page } from '@playwright/test';
+import type { Page, Frame } from '@playwright/test';
 import { clickTarget, setPicking } from '../lib';
 import {
   BACKEND_BASE, M2A_DATA, MOCK_BASE, REPO_ROOT, TEMPLATE_APP, WORK_DATA, WORK_ROOT,
@@ -55,6 +55,9 @@ const json = (method: string, payload?: unknown): RequestInit => ({
   ...(payload === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
 });
 
+/** 预览分源后的独立预览源（Studio 不再代理 /preview/*）。 */
+export const PREVIEW_ORIGIN = 'http://127.0.0.1:5175';
+
 export const base = (url: string) => `${BACKEND_BASE}${url}`;
 export const getVersion = () => http<{ version: string }>(base('/version'));
 export const revertVersion = () => http(base('/version/revert'), { method: 'POST' });
@@ -69,7 +72,8 @@ export const discardCandidate = (id: string) => http(base(`/candidates/${id}/dis
 export const history = (since: number) => http<{ events: Array<{ type: string; seq: number }>; current: number; oldest: number; truncated: boolean }>(base(`/events/history?since=${since}`));
 export const getScene = () => http<any>(base('/scene'));
 export const putScene = (config: unknown) => http<any>(base('/scene'), json('PUT', config));
-export const previewFetch = (url: string, method = 'GET') => http(base(url), { method });
+export const previewFetch = (url: string, method = 'GET') => http(`${PREVIEW_ORIGIN}${url}`, { method });
+export const previewFetchFrom = (url: string, headers: Record<string, string>, method = 'GET') => http(`${PREVIEW_ORIGIN}${url}`, { method, headers });
 export const setScript = (steps: Array<Array<{ name: string; args?: Record<string, unknown> }>>, delayMs = 0, mode: 'normal' | 'error' | 'text' = 'normal') =>
   http(`${MOCK_BASE}/__script`, json('POST', { steps, delayMs, mode }));
 export const resetMock = () => http(`${MOCK_BASE}/__reset`, { method: 'POST' });
@@ -118,7 +122,7 @@ export async function collectEvents() {
 export async function waitForTemplateModule(expected: string, timeoutMs = 90_000): Promise<number> {
   return waitFor(async () => {
     try {
-      const response = await http('http://127.0.0.1:5174/preview/main/src/App.tsx');
+      const response = await http(`${PREVIEW_ORIGIN}/preview/main/src/App.tsx`);
       return response.status === 200 && response.text.includes(expected);
     } catch { return false; }
   }, timeoutMs, 400);
@@ -128,13 +132,20 @@ export async function waitForTemplateModule(expected: string, timeoutMs = 90_000
 export async function openMainPreview(page: Page, expectedText: string, testId = 'buy-button'): Promise<void> {
   await waitForTemplateModule(expectedText);
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    await page.goto('/preview/main/');
+    await page.goto(`${PREVIEW_ORIGIN}/preview/main/`);
     try {
       await page.locator(`[data-testid="${testId}"]`).waitFor({ state: 'visible', timeout: 25_000 });
       return;
     } catch { await wait(500); }
   }
   await page.locator(`[data-testid="${testId}"]`).waitFor({ state: 'visible', timeout: 30_000 });
+}
+
+export async function previewFrameSafe(page: Page): Promise<Frame> {
+  const handle = await page.locator('[data-testid="preview-frame"]').elementHandle();
+  const frame = await handle?.contentFrame();
+  if (!frame) throw new Error('没有取到预览 iframe');
+  return frame;
 }
 
 /** 从 Studio 点选真实元素拿到 Selection，再把 baseVersion 换成作品版本库的当前提交。 */
@@ -175,8 +186,8 @@ export async function stubViteClient(page: Page): Promise<void> {
 
 /** 打开候选预览（默认装上 HMR 客户端桩，见 09-known-defect 用例的说明）。 */
 export async function openCandidatePreview(page: Page, candidateId: string, options: { stub?: boolean } = {}): Promise<string> {
-  if (options.stub !== false) await stubViteClient(page);
-  const url = `http://127.0.0.1:3001/preview/c/${candidateId}/`;
+  if (options.stub) await stubViteClient(page);
+  const url = `${PREVIEW_ORIGIN}/preview/c/${candidateId}/`;
   await page.goto(url);
   return url;
 }

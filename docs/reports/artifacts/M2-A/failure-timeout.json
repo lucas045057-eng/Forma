@@ -2,7 +2,7 @@
   "status": "failed",
   "error": {
     "code": "AGENT_TIMEOUT",
-    "message": "编码模型请求超时"
+    "message": "编码任务超过总时限"
   },
-  "elapsed": 4823
+  "elapsed": 4830
 }

@@ -1,14 +1,14 @@
 {
-  "at": 0.55,
-  "configUpdateMs": 163,
-  "interpolatedBefore": 0.07842592592592593,
-  "expectedShiftPx": 12.014907407407406,
+  "at": 0.549,
+  "configUpdateMs": 164,
+  "interpolatedBefore": 0.07836426,
+  "expectedShiftPx": 12.032728859999997,
   "measuredShiftPx": 11,
   "modelHeightPx": 289,
-  "ratio": 0.9155293192869969,
+  "ratio": 0.9141733457127034,
   "consistencyAtFrame": {
     "changed": 0,
-    "visibleHeight": 306
+    "visibleHeight": 279
   },
   "frames": [
     {
@@ -20,7 +20,7 @@
       ]
     },
     {
-      "at": 0.5504032258064516,
+      "at": 0.5494505494505495,
       "lid": [
         0,
         0.12,
