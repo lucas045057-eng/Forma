@@ -14,7 +14,8 @@ function syncScroll(frame: HTMLIFrameElement | null, at: number) {
     const document = target?.document;
     if (!target || !document) return;
     const available = document.documentElement.scrollHeight - target.innerHeight;
-    target.scrollTo(0, Math.max(0, available) * at);
+    const top = Math.max(0, available) * at;
+    if (Math.abs(target.scrollY - top) > 1) target.scrollTo(0, top);
   } catch { /* Both previews are same-origin; an unloading frame can simply be skipped. */ }
 }
 
@@ -67,6 +68,7 @@ function Studio() {
       }
       switch (event.data.type) {
         case 'ready':
+          ++pickRequest.current;
           setReady(true);
           setError('');
           setSelection(null);
@@ -126,7 +128,7 @@ function Studio() {
         <section className="preview-panel" aria-label="作品预览">
           <div className="panel-title"><span>作品 / 木间香薰</span><span>{picking ? '选取模式 · 点击查看源码' : '浏览模式'} · {Math.round(progress * 100)}%</span></div>
           <CandidatePanel selectedId={candidate?.id ?? ''} onSelect={setCandidateId} mode={mode} onMode={setMode}>
-            {mode !== 'candidate' && mainFrame}
+            {mainFrame}
             {mode !== 'current' && candidateFrame}
           </CandidatePanel>
         </section>

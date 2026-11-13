@@ -7,7 +7,7 @@ import { useEventCenter } from './EventCenter.tsx';
 export type PreviewMode = 'current' | 'candidate' | 'compare';
 const checkNames = { build: '构建', smoke: '冒烟', occlusion: '遮挡', schema: 'Schema' } as const;
 
-function Diff({ candidate }: { candidate: Candidate }) {
+export function Diff({ candidate }: { candidate: Candidate }) {
   return <div className="candidate-diff" data-testid="candidate-diff">
     <h3>改动文件</h3>
     <ul data-testid="candidate-files">{candidate.diff.map(file => <li key={file.path}><code>{file.path}</code></li>)}</ul>
@@ -36,7 +36,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     try {
       const url = kind === 'revert' ? '/version/revert' : `/candidates/${encodeURIComponent(id!)}/${kind}`;
       await api(url, mutation('POST'));
-      if (kind !== 'revert') onMode('current');
+      onMode('current');
       await reload();
     } catch (cause) {
       if (cause instanceof ApiError && cause.code === 'MERGE_CONFLICT') setError('候选与当前版本冲突，请撤回该候选并重新生成。');
@@ -65,7 +65,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     {selected && <section className="candidate-details" data-testid="candidate-details">
       <div className="candidate-title"><h2>候选 {selected.id.slice(0, 8)}</h2><span>待定候选 {pending.length}/3</span></div>
       {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
-      <div className="candidate-checks" data-testid="candidate-checks">{selected.checks.map(check => <span key={check.name} data-status="not_run">{checkNames[check.name]}：未检查</span>)}</div>
+      <div className="candidate-checks" data-testid="candidate-checks">{Object.entries(checkNames).map(([name, label]) => <span key={name} data-status="not_run">{label}：未检查</span>)}</div>
       <Diff candidate={selected}/>
       <div className="candidate-actions">
         <button type="button" data-testid="candidate-adopt" disabled={busy} onClick={() => void action('adopt', selected.id)}>采用此候选</button>

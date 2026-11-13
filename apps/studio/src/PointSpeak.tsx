@@ -57,7 +57,7 @@ export default function PointSpeak({ selection }: { selection: Selection | null 
       <p className="task-instruction">{active.instruction}</p>
       <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
       {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy} onClick={() => void cancel(active)}>取消任务</button>}
-      {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.message}</p>}
+      {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
       {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, active.selection ?? null); }}>重试</button>}
     </div>}
   </section>;

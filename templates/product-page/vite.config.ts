@@ -13,6 +13,6 @@ export default defineConfig({
   plugins: [sourceTag(), react()],
   server: {
     host: '127.0.0.1', port: Number(process.env.PREVIEW_PORT ?? 5174), strictPort: true,
-    hmr: candidate ? false : { clientPort: 5173, path: '/hmr' },
+    hmr: candidate ? false : { clientPort: Number(process.env.STUDIO_PORT ?? 5173), path: '/hmr' },
   },
 });

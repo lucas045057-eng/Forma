@@ -29,7 +29,7 @@ describe('event replay', () => {
     expect(historyTruncated(10, 0)).toBe(false);
   });
   it('drops already-seen events and sorts replay by sequence', () => {
-    const list = [event(3, {}), event(1, {}), event(2, {})];
+    const list = [event(3, {}), event(1, {}), event(2, {}), event(2, {})];
     expect(newEventsInOrder(list, 1).map(item => item.seq)).toEqual([2, 3]);
   });
 });

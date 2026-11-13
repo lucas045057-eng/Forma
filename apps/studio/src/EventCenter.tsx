@@ -26,14 +26,19 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
   const seqRef = useRef(0);
   const listeners = useRef(new Set<(event: CenterEvent) => void>());
   const mounted = useRef(true);
+  const reloadId = useRef(0);
+  const liveEvents = useRef<IncomingEvent[]>([]);
 
   const notify = useCallback((event: CenterEvent) => {
     for (const listener of listeners.current) listener(event);
   }, []);
   const reload = useCallback(async () => {
+    const requestId = ++reloadId.current;
+    const startedAt = seqRef.current;
     const [tasks, candidates, version] = await Promise.all([json<Task[]>('/tasks'), json<Candidate[]>('/candidates'), json<{ version: string }>('/version')]);
-    if (!mounted.current) return;
-    setState({ tasks, candidates, version: version.version });
+    if (!mounted.current || requestId !== reloadId.current) return;
+    const snapshot = { tasks, candidates, version: version.version };
+    setState(newEventsInOrder(liveEvents.current, startedAt).reduce(reduceM2Event, snapshot));
     notify({ type: 'state.reload' });
   }, [notify]);
   const subscribe = useCallback((listener: (event: CenterEvent) => void) => {
@@ -51,6 +56,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     const accept = (event: IncomingEvent) => {
       if (!mounted.current) return;
       seqRef.current = Math.max(seqRef.current, event.seq);
+      liveEvents.current = [...liveEvents.current.slice(-1999), event];
       setLastSeq(seqRef.current);
       setState(previous => reduceM2Event(previous, event));
       notify(event);
@@ -69,7 +75,9 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
       if (!value || typeof value !== 'object') return;
       const event = value as CenterEvent;
       if (event.type === 'ready') {
-        if (seqRef.current === 0) {
+        if (seqRef.current === 0 || (typeof event.seq === 'number' && event.seq < seqRef.current)) {
+          seqRef.current = 0;
+          liveEvents.current = [];
           await reload();
           if (typeof event.seq === 'number' && Number.isSafeInteger(event.seq)) {
             seqRef.current = Math.max(seqRef.current, event.seq);

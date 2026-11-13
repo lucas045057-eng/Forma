@@ -35,5 +35,7 @@ export function historyTruncated(oldest: number, lastSeq: number) {
 }
 
 export function newEventsInOrder(events: IncomingEvent[], lastSeq: number) {
-  return events.filter(event => Number.isSafeInteger(event.seq) && event.seq > lastSeq).sort((a, b) => a.seq - b.seq);
+  const unique = new Map<number, IncomingEvent>();
+  for (const event of events) if (Number.isSafeInteger(event.seq) && event.seq > lastSeq) unique.set(event.seq, event);
+  return [...unique.values()].sort((a, b) => a.seq - b.seq);
 }
