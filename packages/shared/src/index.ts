@@ -79,9 +79,12 @@ export interface ApprovalCard {
 export type StudioMessage =
   | { type: 'pick:start' }
   | { type: 'pick:stop' }
-  | { type: 'highlight'; payload: { src: string } };
+  | { type: 'highlight'; payload: { src: string } }
+  | { type: 'scroll:to'; payload: { at: number } }
+  | { type: 'viewport:request' };
 export type PreviewMessage =
   | { type: 'pick:result'; payload: PickSelection }
+  | { type: 'viewport:size'; payload: { width: number } }
   | { type: 'scroll:progress'; payload: { at: number } }
   | { type: 'ready' }
   | { type: 'error'; payload: { message: string } };
@@ -92,7 +95,8 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 export function isStudioMessage(value: unknown): value is StudioMessage {
   if (!record(value)) return false;
-  return value.type === 'pick:start' || value.type === 'pick:stop' ||
+  return value.type === 'pick:start' || value.type === 'pick:stop' || value.type === 'viewport:request' ||
+    (value.type === 'scroll:to' && record(value.payload) && typeof value.payload.at === 'number' && Number.isFinite(value.payload.at) && value.payload.at >= 0 && value.payload.at <= 1) ||
     (value.type === 'highlight' && record(value.payload) && typeof value.payload.src === 'string');
 }
 export function isPreviewMessage(value: unknown): value is PreviewMessage {
@@ -101,6 +105,7 @@ export function isPreviewMessage(value: unknown): value is PreviewMessage {
   const p = value.payload;
   if (!record(p)) return false;
   if (value.type === 'error') return typeof p.message === 'string';
+  if (value.type === 'viewport:size') return typeof p.width === 'number' && Number.isFinite(p.width) && p.width > 0 && p.width <= 10000;
   if (value.type === 'scroll:progress') return typeof p.at === 'number' && p.at >= 0 && p.at <= 1;
   if (value.type !== 'pick:result') return false;
   const styles = p.styles;

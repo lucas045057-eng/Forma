@@ -7,6 +7,7 @@ import { setSceneHero, setSceneKeyframe, temperatureToHex, type SceneChanged } f
 import { ProductScene, scenePose, sceneRenderSettings } from '@spatial/scene-renderer';
 import './scene-editor.css';
 import { useEventCenter } from './EventCenter.tsx';
+import { previewOrigin } from './preview-origin.ts';
 
 function LightHandle({ direction, change }: { direction: Vec3; change: (direction: Vec3) => void }) {
   const dragging = useRef(false);
@@ -98,7 +99,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     let active = true; setRecognized(false); setLoaded(false);
     if (saved?.model) {
       const metadata = saved.model === '/assets/diffuser-4969889.glb' ? '/assets/parts.json' : saved.model.replace(/\.glb$/, '.parts.json');
-      void fetch(`/preview/main${metadata}`).then(response => response.ok ? response.json() : null)
+      void fetch(`${previewOrigin}/preview/main${metadata}`).then(response => response.ok ? response.json() : null)
         .then(value => { if (active) setRecognized(value?.recognized === true && value?.lid === 'lid'); }).catch(() => {});
     }
     return () => { active = false; };
@@ -116,7 +117,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     catch (cause) { if (mounted.current) setError(String(cause)); }
     finally { if (mounted.current) setBusy(false); }
   }
-  const modelUrl = saved?.model ? `/preview/main${saved.model}` : '';
+  const modelUrl = saved?.model ? `${previewOrigin}/preview/main${saved.model}` : '';
   return <section className="scene-editor" data-testid="scene-panel">
     <header><h2>3D 场景编辑</h2><button data-testid="scene-close" onClick={onClose}>关闭</button></header>
     <p>预览滚动位置 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></p>

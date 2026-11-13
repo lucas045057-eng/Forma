@@ -1,7 +1,12 @@
 import { isStudioMessage, type PickSelection, type PreviewMessage, type SelectionStyles } from '@spatial/shared';
 
 export function installBridge(): () => void {
-  const origin = window.location.origin;
+  const requested = new URLSearchParams(window.location.search).get('studioOrigin');
+  let origin = window.location.origin;
+  if (requested) {
+    try { const parsed = new URL(requested); if (['http:', 'https:'].includes(parsed.protocol) && parsed.origin === requested) origin = parsed.origin; else return () => {}; }
+    catch { return () => {}; }
+  }
   let picking = false;
   let selectedSrc = '';
   let hovered: Element | null = null;
@@ -13,6 +18,12 @@ export function installBridge(): () => void {
   const send = (message: PreviewMessage) => {
     if (window.parent !== window) window.parent.postMessage(message, origin);
   };
+  const reportSize = () => {
+    const width = document.querySelector('[data-testid="product-scene"] canvas')?.getBoundingClientRect().width;
+    if (width && width > 0) send({ type: 'viewport:size', payload: { width } });
+  };
+  const sizeObserver = new ResizeObserver(reportSize);
+  sizeObserver.observe(document.body);
   const instances = (src: string) => Array.from(document.querySelectorAll('[data-src]'))
     .filter(element => element.getAttribute('data-src') === src);
   const nearest = (target: EventTarget | null) => target instanceof Element ? target.closest('[data-src]') : null;
@@ -37,6 +48,12 @@ export function installBridge(): () => void {
       case 'pick:start': picking = true; break;
       case 'pick:stop': picking = false; hovered = null; selectedSrc = ''; break;
       case 'highlight': selectedSrc = event.data.payload.src; break;
+      case 'viewport:request': reportSize(); break;
+      case 'scroll:to': {
+        const top = Math.max(0, document.documentElement.scrollHeight - window.innerHeight) * event.data.payload.at;
+        if (Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
+        break;
+      }
     }
     schedule();
   };
@@ -114,6 +131,7 @@ export function installBridge(): () => void {
   window.addEventListener('unhandledrejection', rejection);
   const observer = new MutationObserver(records => {
     if (records.every(record => overlay.contains(record.target))) return;
+    reportSize();
     schedule();
   });
   observer.observe(document.getElementById('root') ?? document.body, { subtree: true, childList: true, attributes: true, characterData: true });
@@ -133,6 +151,7 @@ export function installBridge(): () => void {
     window.removeEventListener('error', error);
     window.removeEventListener('unhandledrejection', rejection);
     observer.disconnect();
+    sizeObserver.disconnect();
     cancelAnimationFrame(frame);
     overlay.remove();
   };

@@ -120,11 +120,7 @@ export async function createApp(options: AppOptions = {}) {
   app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => work.adopt(request.params.id));
   app.post<{ Params: { id: string } }>('/candidates/:id/discard', async request => work.discard(request.params.id));
 
-  app.get<{ Params: { id: string } }>('/preview/c/:id', async (request, reply) => reply.redirect(`/preview/c/${request.params.id}/`));
-  app.route<{ Params: { id: string } }>({
-    method: ['GET', 'HEAD'], url: '/preview/c/:id/*',
-    handler: (request, reply) => { reply.hijack(); work.previews.proxy(request.params.id, request.raw, reply.raw); },
-  });
+  // Preview content is served exclusively by the separate preview-origin listener.
 
   const version = { type: 'string', enum: ['G1', 'G1-Turbo'] };
   app.post<{ Body: GenerationInput & { idempotencyKey: string } }>('/assets/lux3d', {

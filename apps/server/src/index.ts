@@ -1,8 +1,20 @@
 import { createApp } from './app.ts';
+import { createPreviewOrigin } from './work/preview-origin.ts';
 
-const { app } = await createApp({ logger: true });
-for (const signal of ['SIGINT', 'SIGTERM'] as const) {
-  process.once(signal, () => { void app.close(); });
-}
-try { await app.listen({ port: Number(process.env.PORT ?? 3001), host: '127.0.0.1' }); }
-catch (error) { await app.close(); throw error; } // Release the asset directory lock when the port is taken.
+const { app, work } = await createApp({ logger: true });
+const preview = createPreviewOrigin(work.previews, {
+  mainPort: Number(process.env.MAIN_PREVIEW_PORT ?? 5174),
+  studioOrigin: process.env.STUDIO_ORIGIN ?? 'http://127.0.0.1:5173',
+});
+app.addHook('preClose', async () => {
+  preview.closeAllConnections();
+  await new Promise<void>(resolve => preview.close(() => resolve()));
+});
+for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => { void app.close(); });
+try {
+  await new Promise<void>((resolve, reject) => {
+    preview.once('error', reject);
+    preview.listen(Number(process.env.PREVIEW_ORIGIN_PORT ?? 5175), '127.0.0.1', resolve);
+  });
+  await app.listen({ port: Number(process.env.PORT ?? 3001), host: '127.0.0.1' });
+} catch (error) { await app.close(); throw error; }

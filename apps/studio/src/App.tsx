@@ -4,19 +4,13 @@ import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
 import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
 import { api } from './api.ts';
+import { previewOrigin, previewUrl } from './preview-origin.ts';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
 
 function syncScroll(frame: HTMLIFrameElement | null, at: number) {
-  try {
-    const target = frame?.contentWindow;
-    const document = target?.document;
-    if (!target || !document) return;
-    const available = document.documentElement.scrollHeight - target.innerHeight;
-    const top = Math.max(0, available) * at;
-    if (Math.abs(target.scrollY - top) > 1) target.scrollTo(0, top);
-  } catch { /* Both previews are same-origin; an unloading frame can simply be skipped. */ }
+  frame?.contentWindow?.postMessage({ type: 'scroll:to', payload: { at } }, previewOrigin);
 }
 
 function Studio() {
@@ -28,6 +22,7 @@ function Studio() {
   const pickingRef = useRef(false);
   const pickRequest = useRef(0);
   const progressRef = useRef(0);
+  const canvasWidth = useRef(400);
   const [picking, setPicking] = useState(false);
   const [ready, setReady] = useState(false);
   const [candidateReady, setCandidateReady] = useState(false);
@@ -38,8 +33,8 @@ function Studio() {
   const [candidateId, setCandidateId] = useState('');
   const pending = state.candidates.filter(candidate => candidate.decision === 'pending');
   const candidate = pending.find(item => item.id === candidateId) ?? pending[0];
-  const send = (message: StudioMessage) => preview.current?.contentWindow?.postMessage(message, window.location.origin);
-  const sendCandidate = (message: StudioMessage) => candidatePreview.current?.contentWindow?.postMessage(message, window.location.origin);
+  const send = (message: StudioMessage) => preview.current?.contentWindow?.postMessage(message, previewOrigin);
+  const sendCandidate = (message: StudioMessage) => candidatePreview.current?.contentWindow?.postMessage(message, previewOrigin);
 
   useEffect(() => {
     if (!candidate) { setCandidateId(''); if (mode !== 'current') setMode('current'); }
@@ -49,7 +44,7 @@ function Studio() {
 
   useEffect(() => {
     const receive = (event: MessageEvent<unknown>) => {
-      if (event.origin !== window.location.origin || !isPreviewMessage(event.data)) return;
+      if (event.origin !== previewOrigin || !isPreviewMessage(event.data)) return;
       const fromMain = event.source === preview.current?.contentWindow;
       const fromCandidate = event.source === candidatePreview.current?.contentWindow;
       if (!fromMain && !fromCandidate) return;
@@ -91,6 +86,7 @@ function Studio() {
           setProgress(event.data.payload.at);
           syncScroll(candidatePreview.current, event.data.payload.at);
           break;
+        case 'viewport:size': canvasWidth.current = event.data.payload.width; break;
         case 'error': setError(event.data.payload.message); break;
       }
     };
@@ -98,7 +94,7 @@ function Studio() {
     return () => window.removeEventListener('message', receive);
   }, []);
 
-  const previewSize = () => preview.current?.contentDocument?.querySelector('[data-testid="product-scene"] canvas')?.getBoundingClientRect().width ?? 400;
+  const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
   function toggle() {
     if (mode === 'candidate') setMode('current');
     pickingRef.current = !pickingRef.current;
@@ -106,10 +102,10 @@ function Studio() {
     send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
     if (pickingRef.current && selection) send({ type: 'highlight', payload: { src: selection.src } });
   }
-  const mainFrame = <iframe ref={preview} src="/preview/main/" title="香薰商品页预览" data-testid="preview-frame" onLoad={() => {
+  const mainFrame = <iframe ref={preview} src={previewUrl('/preview/main/')} title="香薰商品页预览" data-testid="preview-frame" onLoad={() => {
     send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
   }}/>;
-  const candidateFrame = candidate ? <iframe key={candidate.id} ref={candidatePreview} src={candidate.previewUrl} title={`候选版本 ${candidate.id.slice(0, 8)}`} data-testid="candidate-frame" data-ready={candidateReady}/> : null;
+  const candidateFrame = candidate ? <iframe key={candidate.id} ref={candidatePreview} src={previewUrl(candidate.previewUrl)} title={`候选版本 ${candidate.id.slice(0, 8)}`} data-testid="candidate-frame" data-ready={candidateReady}/> : null;
 
   return (
     <main className="studio">

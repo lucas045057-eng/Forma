@@ -1,11 +1,25 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import sourceTag from '@spatial/vite-plugin-source-tag';
+import { realpathSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 
-// The main work is served at /preview/main/ on 5174 with HMR through the Studio proxy.
-// Candidate previews reuse this file from their own worktree; the backend overrides
-// base, port and cache directory through the environment and turns HMR off (a candidate
-// is only served after the coding agent has finished writing it).
+const root = process.cwd();
+const allow = new Set([root]);
+const dependencies = path.join(root, 'node_modules');
+function packages(folder: string) {
+  for (const entry of readdirSync(folder)) {
+    if (entry.startsWith('.')) continue;
+    const location = path.join(folder, entry);
+    if (entry.startsWith('@')) { packages(location); continue; }
+    const real = realpathSync(location);
+    allow.add(real);
+    // pnpm's store contains dependency code, never the enclosing workspace.
+    const pieces = real.split(path.sep), index = pieces.lastIndexOf('.pnpm');
+    if (index >= 0) allow.add(pieces.slice(0, index + 1).join(path.sep));
+  }
+}
+packages(dependencies);
 const candidate = process.env.PREVIEW_BASE !== undefined;
 export default defineConfig({
   base: process.env.PREVIEW_BASE ?? '/preview/main/',
@@ -13,6 +27,7 @@ export default defineConfig({
   plugins: [sourceTag(), react()],
   server: {
     host: '127.0.0.1', port: Number(process.env.PREVIEW_PORT ?? 5174), strictPort: true,
-    hmr: candidate ? false : { clientPort: Number(process.env.STUDIO_PORT ?? 5173), path: '/hmr' },
+    fs: { strict: true, allow: [...allow], deny: ['**/.env*', '**/*.{pem,key,crt,p12,pfx}', '**/.git/**', '**/*.{bak,tmp}'] },
+    hmr: candidate ? false : { clientPort: Number(process.env.PREVIEW_ORIGIN_PORT ?? 5175), path: '/hmr' },
   },
 });
