@@ -40,3 +40,12 @@
 - 启动阻塞：调度指定的 `E:/空间化AI工作台/orbital/coordination/m2-takeover/bg-m2d3.cmd` 读取返回不存在，目录枚举亦无该文件。未自行编造 ORBITAL_SESSION_ID，未退回缺失通知上下文的 bg.cmd；本轮没有新 job id，没有启动真实复现。调度需恢复包装后执行 `E:/空间化AI工作台/orbital/coordination/m2-takeover/bg-m2d3.cmd "node apps/server/d3-diagnostic.mjs"`。
 - 本次 `node --check apps/server/d3-diagnostic.mjs` 和 `git diff --check` 均通过；未运行服务或整套测试。
 - 本次仅修正诊断入口及证据字段；D3 产品实现、重启回收、偶发单测根因及连续五次全量验证仍未完成。
+
+## 候选 fixture 根因（job_dba348b7 后续）
+
+- `2c99743` 已修正 createApp 接口。调度后续恢复通知包装，job_dba348b7 实际启动后端、POST /tasks 返回 202，但未到模型调用/预览/强杀。原证据 `.data/d3-diagnostic-1794583706868/evidence.json` 保留不覆盖，两种场景 cleanupSurvivors 均为空。
+- 本轮对原 backend-pid fixture 直接调用真实 WorkRepo.snapshot/createCandidate，限定探针候选 `diagprobe`。snapshot 返回 `653900a9fe3b668a243c979be44ba9273ac3ff34`；createCandidate 在 linkDependencies 抛 `ENOENT: realpath '<fixture>/work/node_modules/@spatial/bridge'`。失败由生产 createCandidate 回滚；没有启动服务。
+- 对照：原模板 `node_modules/@spatial/bridge` 的 lstat 为链接、realpath 成功解析本工作树 packages/bridge；fixture 的 node_modules 整目录 junction 自身 realpath 成功，但经它访问相同包的 realpath 返回 ENOENT。因此本次失败点是 fixture 整目录链接下的相对包链接解析，不是版本审计拒绝；Git 建候选已到链接依赖阶段。此结论不排除修复后后续阶段出现另一个问题。
+- 最小修正只在诊断脚本：按 scope 递归，从原模板逐包 realpath，再为 fixture 建绝对目录联接；生产路径、Git、版本审计和 API 脱敏规则均未修改。诊断进程对 repo 的 snapshot/createCandidate/linkDependencies/main/inCandidate 捕获原异常码及替换 fixture/worktree 路径后的消息/堆栈，写入独立 repo-errors.json，不经 REST/WS 暴露。
+- 新增 `--smoke`：只运行一个候选到 ready 且实际 worker 监听端口 HTTP 200，记录 readyVerified/mockCalls 后执行本轮进程身份校验清理，不进入两种强杀对照。先通过通知包装运行 smoke；通过后下一轮再启动默认两种强杀。`node --check` 与 `git diff --check` 通过。smoke 结果尚未取得，不宣称候选 ready 或 D3 已复现。
+- 包装缺失这一历史阻塞已解除。本轮修正提交及后台作业 ID 以交回消息为准；D3 产品修复及稳定性任务仍待后续。

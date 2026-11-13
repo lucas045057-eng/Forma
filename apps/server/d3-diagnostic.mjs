@@ -1,6 +1,6 @@
 // Implementation diagnostic, not Pi's formal E2E. Run from this worktree root on Windows.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdir, copyFile, symlink, realpath, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, symlink, realpath, writeFile, readdir } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -17,12 +17,25 @@ if (mode === 'launcher') {
 } else if (mode === 'backend') {
   const [directory, upstream] = process.argv.slice(3);
   const { createApp } = await import('./src/app.ts');
-  const { app } = await createApp({
+  const { app, work } = await createApp({
     workRoot: path.join(directory, 'work'), workDataDirectory: path.join(directory, 'data'),
     dataDirectory: path.join(directory, 'assets'), historyDirectory: path.join(directory, 'history'),
     base: upstream, key: 'fake-d3-only', codingAgentBaseUrl: upstream,
     codingAgentApiKey: 'fake-d3-only', codingAgentModel: 'mock',
   });
+  const boundaries = [];
+  const redact = value => String(value ?? '').replaceAll(directory, '<fixture>').replaceAll(root, '<worktree>');
+  for (const name of ['snapshot', 'createCandidate', 'linkDependencies', 'main', 'inCandidate']) {
+    const operation = work.repo[name].bind(work.repo);
+    work.repo[name] = async (...args) => {
+      try { return await operation(...args); }
+      catch (error) {
+        boundaries.push({ boundary: name, code: error.code, message: redact(error.message), stack: redact(error.stack) });
+        await writeFile(path.join(directory, 'repo-errors.json'), JSON.stringify(boundaries, null, 2));
+        throw error;
+      }
+    };
+  }
   await app.listen({ host: '127.0.0.1', port: 0 });
   process.send?.({ backendPid: process.pid, port: app.server.address().port });
 } else {
@@ -75,7 +88,7 @@ if (mode === 'launcher') {
   const template = path.join(root, 'templates/product-page');
   const files = execFileSync('git', ['ls-files', '-z', '--', 'templates/product-page'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
   try {
-    for (const kind of ['backend-pid', 'launcher-tree']) {
+    for (const kind of (mode === '--smoke' ? ['ready-smoke'] : ['backend-pid', 'launcher-tree'])) {
       const fixture = path.join(directory, kind);
       const work = path.join(fixture, 'work');
       await mkdir(work, { recursive: true });
@@ -86,7 +99,15 @@ if (mode === 'launcher') {
         await mkdir(path.dirname(target), { recursive: true });
         await copyFile(path.join(root, file), target);
       }
-      await symlink(await realpath(path.join(template, 'node_modules')), path.join(work, 'node_modules'), 'junction');
+      const linkPackages = async (source, target) => {
+        await mkdir(target, { recursive: true });
+        for (const name of await readdir(source)) {
+          if (name.startsWith('.')) continue;
+          if (name.startsWith('@')) await linkPackages(path.join(source, name), path.join(target, name));
+          else await symlink(await realpath(path.join(source, name)), path.join(target, name), 'junction');
+        }
+      };
+      await linkPackages(path.join(template, 'node_modules'), path.join(work, 'node_modules'));
       const entry = { kind, fixture, before: snapshot(), owned: [] };
       evidence.cases.push(entry);
       const env = {};
@@ -129,6 +150,9 @@ if (mode === 'launcher') {
         }
         if (!entry.previewResponses.some(r => r.status === 200)) throw new Error('No actual worker-owned Vite HTTP 200');
         entry.piMatches = entry.running.processes.filter(p => p.piMatch);
+        entry.readyVerified = true;
+        entry.mockCalls = [...counts.values()].reduce((sum, count) => sum + count, 0);
+        if (mode === '--smoke') continue;
         const targetPid = kind === 'backend-pid' ? backend.backendPid : launcher.pid;
         const identity = entry.owned.find(p => p.ProcessId === targetPid);
         if (!identity) throw new Error('No verified target identity');
