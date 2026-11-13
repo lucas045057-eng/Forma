@@ -221,11 +221,14 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 
 ---
 
-# D3 进程归属复核（接管后专项，HEAD `a4b27fc`）
+# D3 进程归属复核（接管后专项，HEAD `cf8f8df`；首轮正式跑数 HEAD）
 
-- 日期：2026-11-13。主 HEAD：**`a4b27fc`**（包含上一轮测试提交；生产代码基线仍是 `f70f046`）。`4bfc4c1` 只改诊断脚本/fixture，未改生产 `preview.ts` / `preview-worker.ts`。
+- 日期：2026-11-13。测试提交：**`cf8f8df`**（首轮正式跑数 HEAD；上一轮为 `a4b27fc`）；生产代码基线仍是 `f70f046`。`4bfc4c1` 只改诊断脚本/fixture，未改生产 `preview.ts` / `preview-worker.ts`。
 - 本轮只改测试/证据/报告：重写 `tests/e2e/m2a/zz-kill.spec.ts`；旧证据 `isolation-r6.json` 保留不覆盖，新证据命名为 `isolation-r6-attributed-*.json`。
-- **状态：用例已就绪，本轮未运行（未启动后台任务）。** 工具环境没有 `ORBITAL_SESSION_ID`，按调度要求不自启无人跟踪的任务；待执行命令见下。**不能把本节当作 D3 已通过或已修复。**
+- **状态（2026-11-13 更新）：首轮正式专项已由调度执行并通过；扩大覆盖的两条新场景已写入用例，等待调度执行。**
+  - `job_c0b6a407`（HEAD `cf8f8df`，exit 0，35 秒）：**3 条真正 passed，无 test.fail/skip** —— backend PID-only、整树强杀、decoy 负向对照。证据归档 `docs/reports/artifacts/M2-A/d3-run-c0b6a407/`（`run.json` + 三份 attributed JSON + 跑数 last-run），顶层 `isolation-r6-attributed-*.json` 保留首轮结果。
+  - 本节上一版曾写“用例已就绪、未运行”；以上正式跑数取代该状态，但**不改变**“旧 2→2 是计数自匹配误报、生产 preview 没有被修复”的结论链。
+  - 新增两条 R6 覆盖（同一 backend 下 3 个待定候选；worker 已产生但预览尚未 ready 的启动窗口）已写入 `zz-kill.spec.ts`，**本轮未运行**，命令见下。R6/D3 的最终关闭以扩大用例在冻结 HEAD 上（建议重复多次）无残留为准。
 
 ## 已固定的对照事实
 
@@ -233,8 +236,8 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 
 | 文件 | HEAD / a4b27fc / 5377b52 / 81558a7 |
 | --- | --- |
-| `apps/server/src/work/preview.ts` | `7701aa59…7195b5`（四个 rev 全部相同） |
-| `apps/server/src/work/preview-worker.ts` | `10ed6db2…d4fc1c`（四个 rev 全部相同） |
+| `apps/server/src/work/preview.ts` | `08487d8d…ef8fde`（HEAD/cf8f8df/5377b52/81558a7 全部相同） |
+| `apps/server/src/work/preview-worker.ts` | `a0ef69aa…df291f`（同上） |
 
 旧 `zz-kill` 的全局口径“命令行含 `vite.js` 且含 `preview-cache`”的三个问题已实测：
 
@@ -242,7 +245,7 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 2. **看不见实际 worker**：候选 worker 的命令行是 `node preview-worker.ts <…>/vite.js`，`PREVIEW_CACHE_DIR` 只在环境变量里、不在命令行，所以旧口径对实际 worker `piMatch=false`（与 CodeBuddy 诊断一致）。
 3. **无归属**：加入一个无害 decoy（`node -e setInterval … vite.js preview-cache-d3-decoy`）后，旧口径计数从 3 起步（cmd + powershell + decoy），结构化匹配的 `nodePids` 只有 decoy；实际 worker 仍不在其中。
 
-因此回合 2/3 的“杀后端后仍有 2 个带 preview-cache 的 Vite”**高度可能是统计口径误报**：这 2 个恰好是计数用的 cmd/powershell，而不是正在测试的候选 worker；当时也没有记录 worker 的 PID/PPID/创建时间/端口，无法证明归属。该判断仍需新用例在真实强杀下确认，不能只凭本轮分析写成“已修”。
+因此回合 2/3 的“杀后端后仍有 2 个带 preview-cache 的 Vite”是**统计口径误报**：这 2 个恰好是计数用的 cmd/powershell，而不是正在测试的候选 worker；当时也没有记录 worker 的 PID/PPID/创建时间/端口，无法证明归属。`job_c0b6a407` 用归属判据正式确认：两场景 `gone=true`、`stillAlive/leftoverIdentities/leftoversAfter` 为空，无关 decoy 存活后由 `decoyCleanup` 单独结束（`gone=true`）；生产 preview 两文件 hash 与旧基线仍相同，所以这是**测试统计口径更正，不是生产 preview 被修复**。
 
 ## 新用例的判据（只针对本轮自己启动的进程）
 
@@ -251,7 +254,16 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 - 场景一：`taskkill /F /PID <backend>`（**不带 /T**）→ 只检查该 backend 与其 worker 的“PID+创建时间”身份消失，预览端口不再 200；不要求无关进程退出。
 - 场景二：`taskkill /T /F /PID <backend>` → 检查该 backend 与全部后代身份的“PID+创建时间”消失。
 - 负向对照：无害 decoy 必须被旧全局口径计入、但不被归属判据当成残留，也不能被清理误杀；`finally`/`afterAll` 只结束自己记录的 decoy PID。
-- 实例：杀后 1 秒的存活快照 + 最多 30 秒轮询，均写入 `isolation-r6-attributed-{pid-kill,tree-kill,negative-control}.json`。
+- 时间/快照：每次采样记录单调时钟偏移与采样耗时（见下节“时间证据”）；首轮证据文件名是 `isolation-r6-attributed-{pid-kill,tree-kill,negative-control}.json`，扩大覆盖新增 `-multi-candidate-pid-kill.json` 与 `-startup-window-pid-kill.json`。
+
+## 扩大覆盖：3 个待定候选 + 预览启动窗口（已写入用例，待执行）
+
+独立审查第 5 节要求 R6 至少再覆盖：同一 backend 下 3 个待定候选、以及预览启动中途被杀。两条都用“先证明目标存在，再按身份杀”的方式，不能把“还没创建 worker”当空断言：
+
+- **多候选**：同一 backend 连续生成 3 个待定候选（甲/乙/丙），先按**候选自己的模块内容**把每个候选映射到唯一的 worker PID + 监听端口（矩阵记录 `status/textHasMarker`），并要求 3 个 worker/端口互不重复、3 个 `preview-origin` 都是 200；然后只杀 backend PID（不带 /T），核对 3 个 worker 身份全部消失、3 个端口与 origin 都不再 200、`leftoversAfter=[]`。证据：`isolation-r6-attributed-multi-candidate-pid-kill.json`。
+- **启动窗口**：用临时作品副本，把 `node_modules/vite` 换成测试替身——CommonJS 里 `setTimeout` 异步等待 4 秒后才 import 真正 Vite。`preview-worker.ts` 已注册 IPC disconnect 监听、worker 进程已存在，但端口尚未绑定；测试轮询到“worker 存在 + preview-origin 非 200”后立即只杀 backend PID，核对 worker 身份消失、无残留。替身只在临时 fixture 中，生产 `preview.ts`/`preview-worker.ts` 未改。证据：`isolation-r6-attributed-startup-window-pid-kill.json`。
+- **时间证据**：改用单调时钟（hrtime）记录每次快照相对“杀命令开始”的偏移，并分别记录 `killCommandDurationMs` 与每次 WMI 采样的耗时；只给“最后一次存活快照 / 首次消失快照”的区间，不再用 `after1s` 当精确退出时间。
+- 负向对照同步扩展为检查上述两类场景的 target 身份：旧全局口径仍会被 decoy（以及计数进程自身）骗到，归属判据的 `attributedLeftovers` 必须为空。
 
 ## 交给调度执行的精确命令
 
@@ -269,10 +281,11 @@ $env:PLAYWRIGHT_BROWSERS_PATH="$env:LOCALAPPDATA\ms-playwright"
 node node_modules\@playwright\test\cli.js test -c playwright.m2a.config.ts tests/e2e/m2a/zz-kill.spec.ts --reporter=list --output=docs\reports\artifacts\M2-A\d3-output
 ```
 
-`--reporter=list` 与 `--output` 保证不覆盖旧 `M2-A/playwright-results.json` 与 `M2-A/output/`。预期耗时：webServer 启动 + 两次候选构建，约 1–2 分钟。
+`--reporter=list` 与 `--output` 保证不覆盖旧 `M2-A/playwright-results.json` 与 `M2-A/output/`。本次会跑 5 条（首轮 3 条会重跑，另加 2 条扩大覆盖）；预期 2–4 分钟。
 
 ## 未运行 / 边界（不要当成通过）
 
-- 上方命令尚未运行；`isolation-r6-attributed-*.json` 尚未生成，D3 的“真实通过/仍失败”要等这次跑数。
-- 本轮未重跑 `pnpm test`、M0-B/M0-A/M1-A/M1-B、M2-B、完整 M2-A，也未做 N4/retry 的已知失败重跑；这些等实现交付、审查、合并到同一冻结 HEAD 后统一跑。
-- 全程未调用真实模型/Lux3D、未读真实 `.env`；新用例的 fixture 带出站网络守卫（假 key + loopback mock）。
+- 首轮 `job_c0b6a407` 3/3 已通过并归档；扩大覆盖的 2 条（多候选、启动窗口）**尚未运行**，上面命令未启动（工具环境没有 `ORBITAL_SESSION_ID`，按要求交回调度）。`isolation-r6-attributed-multi-candidate-pid-kill.json` 与 `-startup-window-pid-kill.json` 尚未生成；D3/R6 不能据首轮两场景就宣布关闭。
+- 启动窗口用例的 Vite 由临时 fixture 的替身延迟启动，不是真实 Vite 已开始加载的同一瞬间；它验证的是“worker 已存在、尚未 ready 时父进程死亡”的回收路径，覆盖限制要在下轮报告里沿用。若下轮发现真实残留，需记录拥有者 PID/创建时间/端口/候选阶段，不能删断言或跳过。
+- 本轮未重跑 `pnpm test`、M0-B/M0-A/M1-A/M1-B、M2-B、完整 M2-A，也未重跑 N4/retry 的已知失败（修复仍在 CodeBuddy 分支，master 仍预期失败）。
+- 全程未调用真实模型/Lux3D、未读真实 `.env`；fixture 保持假 key + loopback mock + 出站网络守卫，未安装依赖/改锁文件。
