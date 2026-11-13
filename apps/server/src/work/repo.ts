@@ -88,10 +88,26 @@ export class WorkRepo {
       await this.main(['revert', '--abort'], true);
       await this.main(['worktree', 'prune'], true);
     }
+    await this.auditTree();
   }
   private permitted(file: string) {
     if (file.split('/').some(part => /^(?:\.|.*(?:secret|credential|private.?key|backup))/i.test(part) || /\.(?:pem|key|crt|p12|pfx|bak|tmp|old|orig)$/i.test(part))) return false;
     return /^(?:src|public)\/[a-z0-9_./-]+$/i.test(file) || ['index.html', 'package.json', 'vite.config.ts', 'tsconfig.json'].includes(file);
+  }
+  /**
+   * Audit a commit's whole tree (review F3): a pre-existing repository may already track files the
+   * allow-list forbids (keys, backups, links, submodules). Run unconditionally — not only when there
+   * is something new to stage — at startup, before a snapshot version is handed out and before a
+   * candidate is checked out from it.
+   */
+  async auditTree(revision = 'HEAD') {
+    const listing = (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
+    const bad = listing.filter(line => {
+      const [meta, file = ''] = line.split('\t');
+      const mode = meta.split(' ')[0];
+      return mode === '120000' || mode === '160000' || !this.permitted(file);
+    }).map(line => line.split('\t')[1]);
+    if (bad.length) throw new WorkError('UNSAFE_TRACKED_FILE', `作品版本库跟踪了不允许的文件或链接（${bad.slice(0, 5).join('、')}${bad.length > 5 ? ' 等' : ''}），请人工迁移到干净的版本库`, 409);
   }
   private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {
     const tracked = (await command(['ls-files', '-z'])).stdout.split('\0').filter(Boolean);
@@ -152,6 +168,7 @@ export class WorkRepo {
       await this.stage(this.workRoot, args => this.main(args));
       if ((await this.main(['diff', '--cached', '--name-only'])).stdout.trim()) await this.main(['commit', '-q', '-m', message]);
     }
+    await this.auditTree();
     return this.head();
   }
   async isCommit(version: string) {
@@ -178,6 +195,7 @@ export class WorkRepo {
   async createCandidate(id: string, base: string) {
     const directory = this.candidatePath(id);
     await this.assertNoLinks();
+    await this.auditTree(base);
     if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
     try {
       await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
