@@ -114,3 +114,7 @@ M2-A、M2-B 各一轮，重点：沙箱写入边界、git 操作的崩溃安全�
 ## M2 第二轮整改（依据 M2-A-review.md“复核（整改回合）”与 M2-B-review.md）
 - **F1 阻断**（src/public 根目录本身是 junction 时漏查）：属于 D2 修复的遗漏，Claude Code 已修（master 92ec0c9）：根目录同样做 lstat + 真实路径比对；候选提交前检查候选目录；3D 写回与资产采用的路径检查加真实路径比对。
 - **CodeBuddy（分支 fix/m2-review2）**：F2 预览源加 Host 白名单（HTTP 与 WebSocket 升级统一，默认仅 loopback）、Origin 只与配置的 Studio/预览源比较；F3 已有作品版本库的跟踪路径/索引审计在启动、快照、建候选前无条件执行；F4 事件日志在实例锁内初始化、在所有事件生产者停止且日志关闭后才释放锁；M2-B R1 重新点选、等待版本号期间作废旧选中对象并禁止提交（含快捷键）。建议 S1（画布尺寸带 requestId）、S2（区分操作成功与刷新失败）视工作量处理。
+
+## M2 第三轮（依据 Pi 测试回合 2，docs/reports/M2-B-test.md / M2-A-test.md“回合 2”）
+- **D3（应修，CodeBuddy，分支 fix/m2-d3）**：后端被强杀（`taskkill /T /F`）后，候选预览的 Vite 进程仍存活，端口与进程残留；与 M2-A 整改 R6“父进程异常退出后预览自动退出”不符。证据 docs/reports/artifacts/M2-B/isolation-r6.json（或 M2-A 同名证据）。同时排查后端单测偶发失败（service.test.ts、lux3d.test.ts 各出现过一次）。
+- **Pi**：回归第二轮整改（F2/F3/F4/R1，master 已合并），补测上一轮未运行的界面项（STALE_SELECTION 提示、断线重连补拉与截断重载、3 个待定候选切换、单事件连接复用）。
