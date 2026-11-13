@@ -82,3 +82,29 @@ it('refuses snapshot, candidates, adopt and revert while the work tree contains 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+it('refuses when src/ or public/ itself is a junction (review F1)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  const { mkdir, readdir, rename, rmdir, symlink } = await import('node:fs/promises');
+  const outside = path.join(directory, 'outside-src');
+  const src = path.join(workRoot, 'src');
+  try {
+    const base = await repo.snapshot();
+    await repo.createCandidate('candidate4', base);
+    await writeFile(path.join(repo.candidatePath('candidate4'), 'src', 'escape.ts'), 'escaped\n');
+    await repo.commitCandidate('candidate4', '新增文件');
+    // Move the real src/ away and put a junction in its place.
+    await mkdir(outside, { recursive: true });
+    await rename(src, path.join(directory, 'real-src'));
+    await symlink(outside, src, 'junction');
+    for (const attempt of [() => repo.snapshot(), () => repo.adopt('candidate4'), () => repo.createCandidate('candidate5', base), () => repo.revert(base)]) {
+      await expect(attempt()).rejects.toMatchObject({ code: 'UNSAFE_WORK_TREE', status: 409 });
+    }
+    expect(await readdir(outside)).toEqual([]);
+    await rmdir(src);
+    await rename(path.join(directory, 'real-src'), src);
+  } finally {
+    await import('node:fs/promises').then(({ lstat, rmdir }) => lstat(src).then(info => info.isSymbolicLink() ? rmdir(src) : undefined).catch(() => {}));
+    await rm(directory, { recursive: true, force: true });
+  }
+});

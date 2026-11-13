@@ -117,20 +117,32 @@ export class WorkRepo {
    */
   async assertNoLinks(root = this.workRoot) {
     const base = await realpath(root);
+    const refuse = (file: string) => new WorkError('UNSAFE_WORK_TREE', `作品目录里的 ${file} 是链接（符号链接或目录联接），出于安全拒绝操作；请删除该链接后重试`, 409);
+    /** A path is safe when it is not a link and its real path is exactly where it lexically sits. */
+    const isLink = async (absolute: string, file: string) => {
+      const info = await lstat(absolute);
+      const real = await realpath(absolute).catch(() => '');
+      return { link: info.isSymbolicLink() || !real || path.relative(path.join(base, file), real) !== '', info };
+    };
     const walk = async (folder: string, relative: string): Promise<void> => {
       let entries;
       try { entries = await readdir(folder, { withFileTypes: true }); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
       for (const entry of entries) {
         const absolute = path.join(folder, entry.name), file = `${relative}/${entry.name}`;
-        const info = await lstat(absolute);
-        const real = await realpath(absolute).catch(() => '');
-        if (info.isSymbolicLink() || !real || path.relative(path.join(base, file), real) !== '') {
-          throw new WorkError('UNSAFE_WORK_TREE', `作品目录里的 ${file} 是链接（符号链接或目录联接），出于安全拒绝操作；请删除该链接后重试`, 409);
-        }
+        const { link, info } = await isLink(absolute, file);
+        if (link) throw refuse(file);
         if (info.isDirectory()) await walk(absolute, file);
       }
     };
-    for (const area of ['src', 'public']) await walk(path.join(base, area), area);
+    for (const area of ['src', 'public']) {
+      // The area roots themselves too: a junctioned src/ redirects every write below it (review F1).
+      const absolute = path.join(base, area);
+      let checked;
+      try { checked = await isLink(absolute, area); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue; throw error; }
+      if (checked.link || !checked.info.isDirectory()) throw refuse(area);
+      await walk(absolute, area);
+    }
   }
   async head() { return (await this.main(['rev-parse', 'HEAD'])).stdout.trim(); }
   /** Commit whatever is on disk (3D write-back, manual edits) so HEAD always equals the files. */
@@ -203,6 +215,7 @@ export class WorkRepo {
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
   async commitCandidate(id: string, message: string) {
+    await this.assertNoLinks(this.candidatePath(id));
     await this.stage(this.candidatePath(id), args => this.inCandidate(id, args));
     const changed = (await this.inCandidate(id, ['diff', '--cached', '--name-only'])).stdout.split('\n').map(line => line.trim()).filter(Boolean);
     if (changed.length) await this.inCandidate(id, ['commit', '-q', '-m', message]);

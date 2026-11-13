@@ -32,7 +32,11 @@ export async function safeWorkPath(root: string, relative: string) {
   let current = absoluteRoot;
   for (const part of rel.split(path.sep)) {
     current = path.join(current, part);
-    try { if ((await lstat(current)).isSymbolicLink()) throw new SceneError('PATH_DENIED', '作品路径不得包含符号链接', 403); }
+    try {
+      if ((await lstat(current)).isSymbolicLink()) throw new SceneError('PATH_DENIED', '作品路径不得包含符号链接', 403);
+      // Real-path comparison catches every reparse-point kind, including junctions (review F1).
+      if (path.relative(current, await realpath(current)) !== '') throw new SceneError('PATH_DENIED', '作品路径不得包含符号链接或目录联接', 403);
+    }
     catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   }
   return target;
