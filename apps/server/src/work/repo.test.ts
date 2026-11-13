@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, it } from 'vitest';
-import { WorkRepo, WorkError } from './repo.ts';
+import { WorkRepo } from './repo.ts';
 
 async function fixture() {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-work-'));
@@ -47,7 +47,7 @@ it('aborts a conflicting adoption without changing the main worktree', async () 
     await repo.commitCandidate('candidate1', '候选修改');
     await writeFile(path.join(workRoot, 'src', 'App.tsx'), 'export default () => <button>当前</button>;\n');
     await repo.snapshot();
-    await expect(repo.adopt('candidate1')).rejects.toMatchObject<Partial<WorkError>>({ code: 'MERGE_CONFLICT', status: 409 });
+    await expect(repo.adopt('candidate1')).rejects.toMatchObject({ code: 'MERGE_CONFLICT', status: 409 });
     expect(await readFile(path.join(workRoot, 'src', 'App.tsx'), 'utf8')).toContain('当前');
     expect((await repo.snapshot())).toBe(await repo.head());
     await repo.removeCandidate('candidate1');

@@ -3,61 +3,129 @@ import websocket from '@fastify/websocket';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import type { AssetEvent } from '@spatial/shared';
-import type { SceneChanged } from '@spatial/shared/scene-edit';
+import path from 'node:path';
+import type { Selection } from '@spatial/shared';
 import { SceneService, SceneError } from './scene/service.ts';
 import { AssetService } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
+import { EventLog } from './events.ts';
+import { WorkService } from './work/service.ts';
+import { WorkError } from './work/repo.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
-export async function createApp(options: { allowedHosts?: string[]; workRoot?: string; historyDirectory?: string; dataDirectory?: string; base?: string; key?: string; pollMs?: number; timeoutMs?: number; downloadTimeoutMs?: number; logger?: boolean } = {}) {
+export interface AppOptions {
+  allowedHosts?: string[];
+  workRoot?: string;
+  historyDirectory?: string;
+  dataDirectory?: string;
+  workDataDirectory?: string;
+  base?: string;
+  key?: string;
+  pollMs?: number;
+  timeoutMs?: number;
+  downloadTimeoutMs?: number;
+  codingAgentBaseUrl?: string;
+  codingAgentApiKey?: string;
+  codingAgentModel?: string;
+  agentTimeoutMs?: number;
+  agentMaxRounds?: number;
+  previewStartTimeoutMs?: number;
+  logger?: boolean;
+}
+
+export async function createApp(options: AppOptions = {}) {
   const downloadTimeoutMs = options.downloadTimeoutMs ?? Number(process.env.ASSET_DOWNLOAD_TIMEOUT_MS ?? 120_000);
   if (!Number.isFinite(downloadTimeoutMs) || downloadTimeoutMs <= 0) throw new Error('Invalid ASSET_DOWNLOAD_TIMEOUT_MS');
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16_384, disableRequestLogging: true });
-  const subscribers = new Set<(event: AssetEvent | SceneChanged) => void>();
+  const workDataDirectory = options.workDataDirectory ?? process.env.WORK_DATA_DIR ??
+    (options.dataDirectory ? path.join(options.dataDirectory, 'm2') : fileURLToPath(new URL('../../../.data/work/', import.meta.url)));
+  const events = new EventLog(workDataDirectory);
+  await events.init();
+  const emit = (event: { type: string }) => events.publish(event as { type: string } & Record<string, unknown>);
+  const workRoot = options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url));
   const scene = new SceneService({
-    workRoot: options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url)),
+    workRoot,
     historyDirectory: options.historyDirectory ?? process.env.SCENE_HISTORY_DIR ?? fileURLToPath(new URL('../../../.data/scene-history/', import.meta.url)),
-    emit: event => subscribers.forEach(send => send(event)),
+    emit,
   });
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
     pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs,
-    emit: event => subscribers.forEach(send => send(event)),
+    emit,
   });
+  const work = new WorkService({
+    workRoot, directory: workDataDirectory, emit,
+    previewStartTimeoutMs: options.previewStartTimeoutMs,
+    agent: {
+      baseUrl: options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL,
+      apiKey: options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY,
+      model: options.codingAgentModel ?? process.env.CODING_AGENT_MODEL,
+      timeoutMs: options.agentTimeoutMs, maxRounds: options.agentMaxRounds,
+    },
+  });
+  await work.init();
   await service.init();
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
   app.addHook('onRequest', async (request, reply) => {
     // DNS-rebinding defence: a page on an attacker's domain that resolves to 127.0.0.1 would
-    // otherwise pass the same-origin check below and could spend Lux3D credits or rewrite the work.
+    // otherwise pass the same-origin check below and could spend credits or rewrite the work.
     const host = (request.headers.host ?? '').toLowerCase().replace(/:\d+$/, '');
     if (!allowedHosts.has(host)) {
       return reply.code(403).send({ error: { code: 'HOST_DENIED', message: '仅允许通过本机地址访问；其他主机名需写入 ALLOWED_HOSTS' } });
     }
     const origin = request.headers.origin;
     if (origin && origin !== `http://${request.headers.host}` && origin !== `https://${request.headers.host}`) {
-      return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许同源工作台访问' } });
+      return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许通过同源工作台访问' } });
     }
   });
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
+    if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
     if (error instanceof AssetError) {
       return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : 400).send({ error: { code: error.code, message: error.message } });
     }
     const validation = (error as { validation?: unknown }).validation;
-    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合资产接口约定' : '资产服务错误，请检查本地配置和文件' } });
+    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
   });
-  app.get('/health', async () => ({ status: 'ok', milestone: 'M0-A' }));
+  app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
   app.get('/events', { websocket: true }, socket => {
-    const send = (event: AssetEvent | SceneChanged) => { if (socket.readyState === 1) socket.send(JSON.stringify(event)); };
-    subscribers.add(send);
-    socket.send(JSON.stringify({ type: 'ready' }));
-    socket.on('close', () => subscribers.delete(send));
+    const unsubscribe = events.subscribe(event => { if (socket.readyState === 1) socket.send(JSON.stringify(event)); });
+    socket.send(JSON.stringify({ type: 'ready', seq: events.last, oldest: events.oldest }));
+    socket.on('close', unsubscribe);
   });
+  app.get<{ Querystring: { since?: number } }>('/events/history', {
+    schema: { querystring: { type: 'object', additionalProperties: false, properties: { since: { type: 'integer', minimum: 0, default: 0 } } } },
+  }, async request => {
+    const since = request.query.since ?? 0;
+    return { events: events.since(since), current: events.last, oldest: events.oldest, truncated: since < events.oldest - 1 };
+  });
+
+  app.get('/version', async () => work.version());
+  app.post('/version/revert', async () => work.revert());
+  app.post<{ Body: { instruction: string; selection?: Selection } }>('/tasks', {
+    schema: { body: { type: 'object', additionalProperties: false, required: ['instruction'], properties: {
+      instruction: { type: 'string', minLength: 1, maxLength: 4000 },
+      selection: { type: 'object', required: ['src', 'baseVersion'], properties: { src: { type: 'string' }, baseVersion: { type: 'string' } } },
+    } } },
+  }, async (request, reply) => reply.code(202).send(await work.submit(request.body.instruction, request.body.selection)));
+  app.get('/tasks', async () => work.listTasks());
+  app.get<{ Params: { id: string } }>('/tasks/:id', async request => work.getTask(request.params.id));
+  app.post<{ Params: { id: string } }>('/tasks/:id/cancel', async request => work.cancel(request.params.id));
+  app.get('/candidates', async () => work.listCandidates());
+  app.get<{ Params: { id: string } }>('/candidates/:id', async request => work.getCandidate(request.params.id));
+  app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => work.adopt(request.params.id));
+  app.post<{ Params: { id: string } }>('/candidates/:id/discard', async request => work.discard(request.params.id));
+
+  app.get<{ Params: { id: string } }>('/preview/c/:id', async (request, reply) => reply.redirect(`/preview/c/${request.params.id}/`));
+  app.route<{ Params: { id: string } }>({
+    method: ['GET', 'HEAD'], url: '/preview/c/:id/*',
+    handler: (request, reply) => { reply.hijack(); work.previews.proxy(request.params.id, request.raw, reply.raw); },
+  });
+
   const version = { type: 'string', enum: ['G1', 'G1-Turbo'] };
   app.post<{ Body: GenerationInput & { idempotencyKey: string } }>('/assets/lux3d', {
     schema: { body: {
@@ -108,6 +176,6 @@ export async function createApp(options: { allowedHosts?: string[]; workRoot?: s
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
     return scene.adopt(service, request.params.id, 'force' in body && body.force === true);
   });
-  app.addHook('preClose', async () => { subscribers.clear(); await service.close(); await scene.idle(); });
-  return { app, service, scene };
+  app.addHook('preClose', async () => { await work.close(); await service.close(); await scene.idle(); await events.close(); });
+  return { app, service, scene, work, events };
 }

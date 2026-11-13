@@ -19,15 +19,16 @@ export async function createCodingAgentMock(options: { key?: string; scenario?: 
   const app = Fastify({ logger: false }) as unknown as CodingAgentMock;
   const key = options.key ?? 'mock-only';
   let scenario = options.scenario ?? 'success';
-  let call = 0;
+  const calls = new Map<string, number>();
   app.sessions = [];
-  app.setScenario = next => { scenario = next; call = 0; };
+  app.setScenario = next => { scenario = next; calls.clear(); };
   app.post<{ Body: { messages?: Array<{ content?: string }> } }>('/chat/completions', async (request, reply) => {
     if (request.headers.authorization !== `Bearer ${key}`) return reply.code(401).send({ error: { message: 'invalid mock key' } });
     const session = request.headers['x-opencode-session'];
     if (typeof session !== 'string' || !session) return reply.code(400).send({ error: { message: 'missing session' } });
     app.sessions.push(session);
-    call += 1;
+    const call = (calls.get(session) ?? 0) + 1;
+    calls.set(session, call);
     if (scenario === 'timeout' || options.delayMs) await delay(options.delayMs ?? 1000);
     if (scenario === 'error') return reply.code(500).send({ error: { message: 'scripted upstream failure' } });
     if (scenario === 'no-tools') return response(call, [], '我不会调用工具');
@@ -45,6 +46,6 @@ export async function createCodingAgentMock(options: { key?: string; scenario?: 
     app.setScenario(next!);
     return { ok: true };
   });
-  app.get('/__stats', async () => ({ calls: call, scenario, sessions: app.sessions }));
+  app.get('/__stats', async () => ({ calls: [...calls.values()].reduce((sum, value) => sum + value, 0), scenario, sessions: app.sessions }));
   return app;
 }

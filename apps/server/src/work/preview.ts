@@ -81,6 +81,7 @@ export class PreviewManager {
       outgoing.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
       outgoing.end(JSON.stringify({ error: { code: status === 404 ? 'PREVIEW_NOT_RUNNING' : 'PREVIEW_UNAVAILABLE', message } }));
     };
+    if (incoming.method !== 'GET' && incoming.method !== 'HEAD') return fail(405, '候选预览代理只允许 GET/HEAD');
     if (!port) return fail(404, '该候选版本的预览未在运行');
     const upstream = httpRequest({
       host: '127.0.0.1', port, method: incoming.method, path: incoming.url,
