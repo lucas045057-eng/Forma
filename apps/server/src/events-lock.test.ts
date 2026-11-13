@@ -80,7 +80,20 @@ it('drains an admitted real HTTP snapshot before unlock and preserves nested rep
   await writeFile(path.join(workRoot, 'src', 'app.ts'), 'export const value = 1;');
   const options = { workRoot, workDataDirectory: path.join(root, 'data'), historyDirectory: path.join(root, 'history'),
     dataDirectory: path.join(root, 'assets'), base: 'http://127.0.0.1:9', key: 'mock-only' };
+  const startedAt = performance.now();
+  const stage = (name: string) => console.info(`[n4-http] ${Math.round(performance.now() - startedAt)}ms ${name}`);
+  stage('init-start');
   const instance = await createApp(options);
+  stage('init');
+  const closeEvents = instance.events.close.bind(instance.events);
+  vi.spyOn(instance.events, 'close').mockImplementation(async () => {
+    await readFile(path.join(root, 'data', '.instance.lock'));
+    const log = await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8');
+    expect(JSON.parse(log.trim().split('\n').at(-1)!).type).toBe('version.changed');
+    expect(await readFile(path.join(workRoot, 'src', 'app.ts'), 'utf8')).toBe('export const value = 2;');
+    stage('file-and-event-before-unlock');
+    await closeEvents();
+  });
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   let entered!: () => void;
@@ -95,36 +108,53 @@ it('drains an admitted real HTTP snapshot before unlock and preserves nested rep
   let closing: Promise<void> | undefined;
   try {
     const base = await instance.app.listen({ host: '127.0.0.1', port: 0 });
+    stage('listen');
     await writeFile(path.join(workRoot, 'src', 'app.ts'), 'export const value = 2;');
     const response = new Promise<number>((resolve, reject) => {
-      get(`${base}/version`, result => {
+      get(`${base}/version`, { agent: false, headers: { connection: 'close' } }, result => {
         result.resume();
         result.once('end', () => resolve(result.statusCode!));
       }).on('error', reject);
     });
     await accepted;
+    stage('accepted');
     let closed = false;
-    closing = instance.app.close().then(() => { closed = true; });
+    closing = instance.app.close().then(() => { closed = true; stage('closing-resolved'); });
     await preClose;
+    stage('preClose');
     expect(closed).toBe(false);
     await expect(createApp(options)).rejects.toMatchObject({ code: 'INSTANCE_LOCKED' });
-    expect((await instance.app.inject('/version')).statusCode).toBe(503);
+    stage('second-instance-rejected');
+    await expect(instance.app.inject('/version')).rejects.toMatchObject({ code: 'FST_ERR_REOPENED_CLOSE_SERVER' });
+    stage('new-request-rejected');
     release();
+    stage('gate-released');
     expect(await response).toBe(200);
+    stage('old-response');
     await closing;
+    stage('closing-awaited');
     const log = await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8');
     expect(JSON.parse(log.trim().split('\n').at(-1)!).type).toBe('version.changed');
     await expect(instance.work.repo.snapshot()).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
     expect(() => instance.events.publish({ type: 'late' })).toThrow();
+    stage('restart-start');
     const restarted = await createApp(options);
+    stage('restart-ready');
     try {
       expect(restarted.events.last).toBe(instance.events.last);
       expect(restarted.events.publish({ type: 'restart' }).seq).toBe(instance.events.last + 1);
-    } finally { await restarted.app.close(); }
+    } finally { await restarted.app.close(); stage('restart-closed'); }
+  } catch (error) {
+    console.error('[n4-http] failure before finally', error);
+    throw error;
   } finally {
+    stage('finally-enter');
     release();
+    stage('finally-gate-released');
     await (closing ?? instance.app.close());
+    stage('finally-closed');
     await rm(root, { recursive: true, force: true });
+    stage('finally-cleaned');
   }
 });
 
