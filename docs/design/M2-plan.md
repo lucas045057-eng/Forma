@@ -110,3 +110,7 @@ M2-A、M2-B 各一轮，重点：沙箱写入边界、git 操作的崩溃安全�
 - **D1** 候选预览在浏览器里渲染不出：候选 Vite 仍注入 HMR 客户端，代理不转发 WebSocket，`@vite/client` 反复断线重连导致模块请求被中止。修法：分源后的预览端口要支持 Vite 的 WebSocket 升级（候选与主作品都走同一套），或让候选彻底不注入 HMR 客户端；以 Pi 的 `test.fail` 用例转为通过为准。
 - **D2** 沙箱可经 `src/` 下的 junction 写出：Windows 上 junction 在 `lstat` 里显示为目录，逐段 `isSymbolicLink()` 拦不住。修法：逐段用 `realpath` 比对（或 `lstat` 后检查 reparse point），确认解析后的真实路径仍在候选 `src/` 之内；list/read/write 统一使用。与审查 R5 一起做。
 - 观察：后端 `service.test.ts` 的并发/重启幂等用例偶发 `submit_unknown`（单独重跑通过），排查时序/端口竞争。
+
+## M2 第二轮整改（依据 M2-A-review.md“复核（整改回合）”与 M2-B-review.md）
+- **F1 阻断**（src/public 根目录本身是 junction 时漏查）：属于 D2 修复的遗漏，Claude Code 已修（master 92ec0c9）：根目录同样做 lstat + 真实路径比对；候选提交前检查候选目录；3D 写回与资产采用的路径检查加真实路径比对。
+- **CodeBuddy（分支 fix/m2-review2）**：F2 预览源加 Host 白名单（HTTP 与 WebSocket 升级统一，默认仅 loopback）、Origin 只与配置的 Studio/预览源比较；F3 已有作品版本库的跟踪路径/索引审计在启动、快照、建候选前无条件执行；F4 事件日志在实例锁内初始化、在所有事件生产者停止且日志关闭后才释放锁；M2-B R1 重新点选、等待版本号期间作废旧选中对象并禁止提交（含快捷键）。建议 S1（画布尺寸带 requestId）、S2（区分操作成功与刷新失败）视工作量处理。
