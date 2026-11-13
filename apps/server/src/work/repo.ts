@@ -32,8 +32,10 @@ export class WorkRepo {
   readonly candidatesDir: string;
   private operations: Promise<unknown> = Promise.resolve();
   private scope = new AsyncLocalStorage<boolean>();
+  private closing = false;
   exclusive<T>(operation: () => Promise<T>): Promise<T> {
     if (this.scope.getStore()) return operation();
+    if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受作品操作', 503));
     const result = this.operations.then(() => this.scope.run(true, operation));
     this.operations = result.catch(() => {});
     return result;
@@ -64,6 +66,8 @@ export class WorkRepo {
     return path.join(this.candidatesDir, id);
   }
   branch(id: string) { this.candidatePath(id); return `candidate/${id}`; }
+  /** Review N4: stop accepting work-tree operations and wait until every queued one has finished. */
+  async drain() { this.closing = true; await this.operations; }
 
   async init() {
     this.workRoot.length; // The work root must already exist; realpath throws otherwise.
@@ -83,7 +87,10 @@ export class WorkRepo {
       if (configured && path.resolve(configured) !== this.workRoot) {
         throw new Error(`作品版本库 ${this.gitDir} 属于另一个作品目录（${configured}），请为当前 WORK_ROOT 使用独立的数据目录`);
       }
-      // A merge or revert interrupted by a crash must not leave the work half-applied.
+      // A merge or revert interrupted by a crash must not leave the work half-applied. Aborting
+      // rewrites work files, so refuse first if the work tree holds links (review N1): the conflict
+      // state is kept for a human to resolve instead of being written through a junction.
+      await this.assertNoLinks();
       await this.main(['merge', '--abort'], true);
       await this.main(['revert', '--abort'], true);
       await this.main(['worktree', 'prune'], true);
@@ -102,11 +109,14 @@ export class WorkRepo {
    */
   async auditTree(revision = 'HEAD') {
     const listing = (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
-    const bad = listing.filter(line => {
-      const [meta, file = ''] = line.split('\t');
-      const mode = meta.split(' ')[0];
-      return mode === '120000' || mode === '160000' || !this.permitted(file);
-    }).map(line => line.split('\t')[1]);
+    const bad: string[] = [];
+    for (const record of listing) {
+      // "<mode> <type> <object>\t<path>": the path is everything after the FIRST tab (review N2).
+      const tab = record.indexOf('\t');
+      const meta = tab < 0 ? '' : record.slice(0, tab), file = tab < 0 ? record : record.slice(tab + 1);
+      const mode = /^(\d{6}) (blob|tree|commit) [0-9a-f]{40,64}$/.exec(meta)?.[1];
+      if (!mode || mode === '120000' || mode === '160000' || /[\u0000-\u001f\u007f]/.test(file) || !this.permitted(file)) bad.push(JSON.stringify(file));
+    }
     if (bad.length) throw new WorkError('UNSAFE_TRACKED_FILE', `作品版本库跟踪了不允许的文件或链接（${bad.slice(0, 5).join('、')}${bad.length > 5 ? ' 等' : ''}），请人工迁移到干净的版本库`, 409);
   }
   private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {

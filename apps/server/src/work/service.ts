@@ -43,6 +43,7 @@ export class WorkService {
   private taskQueue: Promise<void> = Promise.resolve();
   private controllers = new Map<string, AbortController>();
   private closing = false;
+  private inFlight = new Set<Promise<unknown>>();
   private releaseLock?: () => Promise<void>;
 
   constructor(options: WorkServiceOptions) {
@@ -51,6 +52,18 @@ export class WorkService {
     this.repo = new WorkRepo({ workRoot: options.workRoot, dataDirectory: options.directory });
     this.previews = new PreviewManager({ workRoot: options.workRoot, cacheDirectory: path.join(options.directory, 'preview-cache'), startTimeoutMs: options.previewStartTimeoutMs });
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    // These mutations can await work outside the repo queue. Register admission
+    // synchronously so close cannot miss a submit that has not enqueued its task yet.
+    for (const name of ['submit', 'cancel']) {
+      const operation = methods[name].bind(this);
+      methods[name] = (...args) => {
+        if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
+        const pending = operation(...args);
+        this.inFlight.add(pending);
+        void pending.then(() => this.inFlight.delete(pending), () => this.inFlight.delete(pending));
+        return pending;
+      };
+    }
     for (const name of ['version', 'validateSelection', 'adopt', 'discard', 'revert', 'trimCandidates']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => this.repo.exclusive(async () => { await this.recoverIntent(); return operation(...args); });
@@ -138,7 +151,6 @@ export class WorkService {
   async version() { return { version: await this.snapshot() }; }
 
   async submit(instruction: string, selection?: Selection) {
-    if (this.closing) throw new WorkError('SERVICE_STOPPED', '服务正在关闭', 409);
     await this.validateSelection(selection);
     const now = new Date().toISOString();
     const task: StoredTask = { id: randomUUID().replaceAll('-', ''), instruction, selection, status: 'queued', events: [], createdAt: now, updatedAt: now };
@@ -299,7 +311,11 @@ export class WorkService {
   async close() {
     this.closing = true;
     for (const controller of this.controllers.values()) controller.abort();
+    await Promise.allSettled([...this.inFlight]);
     await this.taskQueue;
+    // Review N4: queued work-tree operations (adopt, revert, 3D write-back) finish before the
+    // event log closes and the lock is released; new ones are refused from here on.
+    await this.repo.drain();
     await this.previews.stopAll();
     await this.writes;
     await this.releaseLock?.();

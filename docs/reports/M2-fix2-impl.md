@@ -23,3 +23,19 @@
 - `work/repo.test.ts`：已有干净版本库跟踪了 `src/deploy.pem` 时，快照、建候选、重启初始化都 409。
 - `events-lock.test.ts`：第二实例失败且事件日志字节不变；优雅重启后 seq 接续。
 - `studio/pick-state.test.ts`：pending/failed 时不可提交且不回退到旧对象。
+
+## 第二轮复核后的补修（Codex N1–N3、M2-B R1 遗漏）
+
+| 项 | 状态 | 改动 |
+|---|---|---|
+| N1 阻断：启动时 `merge --abort` 未先检查链接 | **已修** | `WorkRepo.init()` 在 `merge --abort`/`revert --abort` 之前先 `assertNoLinks()`；作品目录含链接时拒绝启动并**保留冲突现场**（MERGE_HEAD 不动），等人工处理，不再先 abort 再报错。 |
+| N2 `auditTree` 截断含 tab 的文件名 | **已修** | 每条 `-z` 记录只在**第一个** tab 处切分，其余整段是路径；元数据按 `<6 位 mode> <blob|tree|commit> <对象>` 校验；路径含控制字符一律拒绝；错误信息用 JSON 转义后的完整路径。 |
+| N3 拿锁后构造/注册失败漏释放 | **已修** | `createApp` 从取锁起用一份“所有权列表”：事件日志、场景、资产、作品服务依次登记；初始化任一步失败或正常关闭时按相反顺序逐个关闭，单个关闭失败不影响其余，最后释放锁，抛出第一个错误。 |
+| M2-B R1 遗漏：重试按钮绕过点选状态 | **已修** | 点选状态门禁移进所有入口共用的 `submit()`；“重试”按钮在 pending/failed 时同样禁用。 |
+
+新增单测：
+- `repo.test.ts`：模拟崩溃留下冲突合并后把 `src/` 换成 junction 再重启 → 启动 409 `UNSAFE_WORK_TREE`、外部目录为空、`MERGE_HEAD` 仍在。
+- `repo.test.ts`：用 `git mktree` 造出名为 `src/ok.ts<TAB>evil.pem` 的树记录 → 审计拒绝，错误信息含完整名称（旧实现会把它截成 `src/ok.ts` 放行）。
+- `events-lock.test.ts`：Lux3D 客户端构造器在取锁后抛错 → 锁被释放，随后同一数据目录可正常启动。
+
+全量：typecheck、build、`pnpm test`（shared 68、插件 20、scene-renderer 5、后端 126、studio 7）全过。

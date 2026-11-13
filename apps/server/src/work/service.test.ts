@@ -34,6 +34,34 @@ function selection(baseVersion: string, src = 'src/App.tsx:1:10'): Selection {
   return { src, baseVersion, cid: 'App', bbox: [0, 0, 10, 10], styles: {} as Selection['styles'], instances: 1, ancestors: [] };
 }
 
+it.each([false, true])('drains an admitted direct submit before close returns (selection=%s)', async withSelection => {
+  const f = await fixture();
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let closing: Promise<void> | undefined;
+  try {
+    const selected = withSelection ? selection((await f.work.version()).version) : undefined;
+    const blocked = f.work.repo.exclusive(() => gate);
+    const submitted = f.work.submit('修改购买按钮', selected);
+    let closed = false;
+    closing = f.work.close().then(() => { closed = true; });
+    await expect(f.work.submit('late')).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
+    await expect(f.work.cancel('late')).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
+    expect(closed).toBe(false);
+    release(); await blocked;
+    const task = await submitted;
+    await closing;
+    expect(f.work.getTask(task.id)).toMatchObject({ status: 'failed', error: { code: 'SERVICE_STOPPED' } });
+    const file = path.join(f.directory, 'data', 'tasks.json');
+    const saved = await readFile(file, 'utf8');
+    expect(JSON.parse(saved).tasks[0].status).toBe('failed');
+    const events = JSON.stringify(f.published);
+    await f.work.idle();
+    expect(await readFile(file, 'utf8')).toBe(saved);
+    expect(JSON.stringify(f.published)).toBe(events);
+  } finally { release(); await closing; await cleanup(f); }
+});
+
 it('validates source paths, commits, line ranges and stale selections before enqueueing', async () => {
   const f = await fixture();
   try {

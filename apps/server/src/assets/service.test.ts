@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -8,12 +8,28 @@ import { createMockServer, type MockScenario } from './mock-server.ts';
 import { downloadGlb } from './download.ts';
 
 const cleanups: (() => Promise<unknown>)[] = [];
-afterEach(async () => { for (const cleanup of cleanups.reverse()) await cleanup(); cleanups.length = 0; });
+const nativeFetch = globalThis.fetch;
+beforeEach(() => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (...args) => {
+    try { return await nativeFetch(...args); }
+    catch (error) {
+      const url = new URL(args[0] instanceof Request ? args[0].url : args[0]);
+      if (url.hostname === '127.0.0.1') console.error('[asset-test transport]', { port: url.port,
+        error: error instanceof Error ? error.message : String(error), cause: error instanceof Error ? error.cause : undefined });
+      throw error;
+    }
+  });
+});
+afterEach(async () => {
+  try { for (const cleanup of cleanups.reverse()) await cleanup(); }
+  finally { cleanups.length = 0; vi.restoreAllMocks(); }
+});
 async function setup(scenario: MockScenario = 'success', timeoutMs = 2000) {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-assets-'));
   cleanups.push(() => rm(directory, { recursive: true, force: true }));
   const mock = await createMockServer({ scenario, key: 'test-only-key' });
   const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  console.info('[asset-test fixture]', { port: new URL(base).port, scenario });
   cleanups.push(() => mock.close());
   const client = new Lux3DClient({ base, key: 'test-only-key' });
   const events: string[] = [];

@@ -18,11 +18,22 @@ it('aborts an in-flight task query without waiting for the upstream timeout', as
   const server = createServer(() => started());
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const controller = new AbortController();
+  const nativeFetch = globalThis.fetch;
+  const port = (server.address() as { port: number }).port;
+  console.info('[lux3d-test fixture]', { port });
+  const transport = vi.spyOn(globalThis, 'fetch').mockImplementation(async (...args) => {
+    try { return await nativeFetch(...args); }
+    catch (error) {
+      console.error('[lux3d-test transport]', { port, error: error instanceof Error ? error.message : String(error),
+        cause: error instanceof Error ? error.cause : undefined });
+      throw error;
+    }
+  });
   try {
     const client = new Lux3DClient({ base: `http://127.0.0.1:${(server.address() as { port: number }).port}`, key: 'mock-only' });
     const result = expect(client.getTask('123', controller.signal)).rejects.toMatchObject({ code: 'UPSTREAM_UNAVAILABLE' });
     await received;
     const start = Date.now(); controller.abort(); await result;
     expect(Date.now() - start).toBeLessThan(1500);
-  } finally { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); }
+  } finally { transport.mockRestore(); server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); }
 });

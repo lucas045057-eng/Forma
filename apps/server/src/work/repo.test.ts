@@ -125,3 +125,55 @@ it('refuses an existing clean repository that already tracks a forbidden file (r
     await expect(restarted.init()).rejects.toMatchObject({ code: 'UNSAFE_TRACKED_FILE' });
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+it('does not abort an interrupted merge through a junctioned src/ at startup (review N1)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  const { mkdir, readdir, rename, rmdir, symlink } = await import('node:fs/promises');
+  const { execFileSync } = await import('node:child_process');
+  const gitDir = path.join(directory, 'data', 'work.git');
+  const g = (...args: string[]) => execFileSync('git', ['--git-dir', gitDir, '--work-tree', workRoot, '-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: workRoot, stdio: 'pipe' });
+  const outside = path.join(directory, 'outside');
+  const src = path.join(workRoot, 'src');
+  try {
+    const base = await repo.snapshot();
+    await repo.createCandidate('candidate7', base);
+    await writeFile(path.join(repo.candidatePath('candidate7'), 'src', 'App.tsx'), 'export default () => <button>候选</button>;\n');
+    await repo.commitCandidate('candidate7', '候选改动');
+    await writeFile(path.join(src, 'App.tsx'), 'export default () => <button>主线</button>;\n');
+    await repo.snapshot();
+    // Leave a conflicted merge behind, as if the backend crashed mid-adoption.
+    try { g('merge', '--no-ff', 'candidate/candidate7'); } catch { /* conflict expected */ }
+    await mkdir(outside, { recursive: true });
+    await rename(src, path.join(directory, 'real-src'));
+    await symlink(outside, src, 'junction');
+    const restarted = new WorkRepo({ workRoot, dataDirectory: path.join(directory, 'data') });
+    await expect(restarted.init()).rejects.toMatchObject({ code: 'UNSAFE_WORK_TREE' });
+    expect(await readdir(outside)).toEqual([]);
+    // The conflict state is kept for a human instead of being aborted through the link.
+    expect(g('rev-parse', '-q', '--verify', 'MERGE_HEAD').toString().trim()).toMatch(/^[0-9a-f]{40}$/);
+    await rmdir(src);
+    await rename(path.join(directory, 'real-src'), src);
+  } finally {
+    await import('node:fs/promises').then(({ lstat, rmdir }) => lstat(src).then(info => info.isSymbolicLink() ? rmdir(src) : undefined).catch(() => {}));
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+it('audits paths containing tabs, newlines and spaces as whole names (review N2)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  const { execFileSync } = await import('node:child_process');
+  const gitDir = path.join(directory, 'data', 'work.git');
+  try {
+    // Build a tree entry whose name is "src/ok.ts<TAB>evil.pem" without touching the filesystem.
+    const blob = execFileSync('git', ['--git-dir', gitDir, 'hash-object', '-w', '--stdin'], { input: 'x\n' }).toString().trim();
+    // Git for Windows refuses such a path in the index, but a tree object can still carry it.
+    const mktree = (input: string) => execFileSync('git', ['--git-dir', gitDir, 'mktree', '-z'], { input }).toString().trim();
+    const sub = mktree(`100644 blob ${blob}\tok.ts\tevil.pem\0`);
+    const tree = mktree(`040000 tree ${sub}\tsrc\0`);
+    const commit = execFileSync('git', ['--git-dir', gitDir, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit-tree', tree, '-m', 'tab']).toString().trim();
+    await expect(repo.auditTree(commit)).rejects.toMatchObject({ code: 'UNSAFE_TRACKED_FILE' });
+    await expect(repo.auditTree(commit)).rejects.toThrow('evil.pem');
+    await repo.auditTree('HEAD');
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
