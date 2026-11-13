@@ -1,0 +1,12 @@
+[WebServer] (node:68684) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\m2a\zz-kill.spec.ts:360:3 › R6/D3 进程归属复核 › D3 归属：杀 backend PID（不带 /T），只核对该 backend 的 worker 身份 (10.8s)
+  ok 2 [chromium] › tests\e2e\m2a\zz-kill.spec.ts:426:3 › R6/D3 进程归属复核 › D3 归属：杀实际启动树（/T），核对整树后代身份回收 (12.3s)
+  ok 3 [chromium] › tests\e2e\m2a\zz-kill.spec.ts:484:3 › R6/D3 进程归属复核 › D3 归属：同一 backend 下 3 个待定候选都有独立 worker/端口，杀 backend PID 后全部回收 (17.0s)
+  ok 4 [chromium] › tests\e2e\m2a\zz-kill.spec.ts:590:3 › R6/D3 进程归属复核 › D3 归属：候选 worker 已产生但预览尚未 ready 时杀 backend PID，worker 仍应回收 (8.0s)
+  ok 5 [chromium] › tests\e2e\m2a\zz-kill.spec.ts:678:3 › R6/D3 进程归属复核 › 负向对照：旧全局口径被无关进程骗到，归属判据不误失败也不误杀 (1.7s)
+
+  5 passed (57.3s)

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m2d3/packages/scene-renderer
+
+ ✓ src/pose.test.ts (5 tests) 3ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  00:13:14
+   Duration  365ms (transform 47ms, setup 0ms, collect 97ms, tests 3ms, environment 0ms, prepare 93ms)
+

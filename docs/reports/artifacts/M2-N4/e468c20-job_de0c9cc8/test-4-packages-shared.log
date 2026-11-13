@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m2d3/packages/shared
+
+ ✓ src/scene-edit.test.ts (5 tests) 3ms
+ ✓ src/scene-config.test.ts (63 tests) 16ms
+
+ Test Files  2 passed (2)
+      Tests  68 passed (68)
+   Start at  00:14:31
+   Duration  369ms (transform 73ms, setup 0ms, collect 171ms, tests 19ms, environment 0ms, prepare 198ms)
+
