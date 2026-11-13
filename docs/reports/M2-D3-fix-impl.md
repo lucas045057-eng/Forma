@@ -16,7 +16,7 @@
 
 ## N4 接口与合并注意事项
 
-`d79c467` 的资源所有权顺序是 work → assets → scene → events → unlock。D3 的预览停止必须可等待，完成回收后才能让 work.close 返回；重启孤儿清理应在 work-data 实例锁内、候选目录清理之前执行。N4 的请求/作品队列排空和失败时锁保持由 `.worktrees/m2fix` 承载，本分支不重复实现。后续若双方修改 WorkService.init/close，合并须保留队列屏障及预览回收等待，不能仅保留调用而丢失 await/错误语义。
+`d79c467` 的资源所有权顺序是 work → assets → scene → events → unlock。D3 的预览停止必须可等待，完成回收后才能让 work.close 返回；重启孤儿清理应在 work-data 实例锁内、候选目录清理之前执行。N4 原由 `.worktrees/m2fix` 草稿承载；调度现已将固定补丁正式移交本分支接手，实施记录见 `M2-N4-fix-impl.md`，原工作树保持不动。后续若双方修改 WorkService.init/close，合并须保留队列屏障及预览回收等待，不能仅保留调用而丢失 await/错误语义。
 
 ## 当前验证状态
 
@@ -49,3 +49,20 @@
 - 最小修正只在诊断脚本：按 scope 递归，从原模板逐包 realpath，再为 fixture 建绝对目录联接；生产路径、Git、版本审计和 API 脱敏规则均未修改。诊断进程对 repo 的 snapshot/createCandidate/linkDependencies/main/inCandidate 捕获原异常码及替换 fixture/worktree 路径后的消息/堆栈，写入独立 repo-errors.json，不经 REST/WS 暴露。
 - 新增 `--smoke`：只运行一个候选到 ready 且实际 worker 监听端口 HTTP 200，记录 readyVerified/mockCalls 后执行本轮进程身份校验清理，不进入两种强杀对照。先通过通知包装运行 smoke；通过后下一轮再启动默认两种强杀。`node --check` 与 `git diff --check` 通过。smoke 结果尚未取得，不宣称候选 ready 或 D3 已复现。
 - 包装缺失这一历史阻塞已解除。本轮修正提交及后台作业 ID 以交回消息为准；D3 产品修复及稳定性任务仍待后续。
+
+## 两种真实强杀结果（4bfc4c1，job_e26a8cb0）
+
+先行 smoke job_58d926ed 已确认 readyVerified=true、mockCalls=2、worker HTTP 200、清理无残留（`.data/d3-diagnostic-1794584004577/evidence.json`）。默认对照证据为 `.data/d3-diagnostic-1794584112672/evidence.json`，本轮直接读取并按 PID/创建时间重新计算 1 秒存活列表，不仅依赖退出码。
+
+| 场景 | launcher → backend → worker | backend/worker 端口 | worker 创建时间（Unix ms） | HTTP | 1秒/30秒/清理残留 |
+| --- | --- | --- | --- | --- | --- |
+| 强杀 backend PID | 14376 → 66748 → 66948 | 6317 / 6345 | 1794584117450 | 200 | 0 / 0 / 0 |
+| 强杀 launcher 树 | 65788 → 70112 → 70404 | 11622 / 3901 | 1794584173278 | 200 | 0 / 0 / 0 |
+
+实际 Vite 由 worker 直接监听，各自还有 esbuild/conhost 子进程；这些已记录身份也无残留。两场景 worker.piMatch=false、piMatches=[]。诊断以父子拓扑、创建时间、命令摘要和实际监听者绑定本轮进程，清理前复核身份；模板/数据目录独立、全程 fake key 和本机 mock。
+
+**结论：本场景未复现 D3，不关闭历史缺陷，不为旧全局统计盲改生产 IPC/回收。** Pi 后续应先建立被测 backend 的创建时间和候选 worker 后代集合，再确认候选 HTTP 的实际监听者；强杀后按 PID+创建时间+命令归属核对。同名全局进程只能作旁证，须单列不属于被测树的进程，不能用 `vite.js` 与 `preview-cache` 的全局数量替代本轮存活。此次匹配集为空，无法反推出旧证据中两个进程属于哪个会话，也不能断言旧结果必然是假阳性。
+
+局限：仅 Windows/当前 Node、当前 launcher 与真实 createApp 拓扑、已 ready 的候选；未覆盖历史启动器差异、启动/取消窗口、重启时已有孤儿的归属确认与回收。尤其**重启遗留回收仍无独立证据**，不得用本次父死退出代替该承诺。未修改 Pi 正式测试/证据，全部本轮诊断进程已由记录确认清理。
+
+偶发单测继续调查：两份用例都使用 port=0，尚无共享固定端口证据。额外短探针确认 Node fetch 请求本机 6000/6667 会立即报 `cause: bad port`；这只是可复现的候选机制，未取得原偶发失败实际端口/底层 cause，尚不能当成已确认根因。未放宽超时或断言。
