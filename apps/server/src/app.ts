@@ -46,9 +46,20 @@ export async function createApp(options: AppOptions = {}) {
   // held until every event producer has stopped and the log is closed.
   await mkdir(workDataDirectory, { recursive: true });
   const releaseWorkLock = await acquireInstanceLock(workDataDirectory);
+  // Review N3: everything created after the lock is owned here and released in reverse order,
+  // on failed initialisation and on close; one failing cleanup does not skip the others.
+  const closers: Array<() => Promise<unknown>> = [releaseWorkLock];
+  const closeAll = async () => {
+    let first: unknown;
+    for (const close of closers.splice(0).reverse()) {
+      try { await close(); } catch (error) { first ??= error; }
+    }
+    if (first) throw first;
+  };
+  try {
   const events = new EventLog(workDataDirectory);
-  try { await events.init(); }
-  catch (error) { await releaseWorkLock(); throw error; }
+  closers.push(() => events.close());
+  await events.init();
   const emit = (event: { type: string }) => events.publish(event as { type: string } & Record<string, unknown>);
   const workRoot = options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url));
   const scene = new SceneService({
@@ -56,12 +67,14 @@ export async function createApp(options: AppOptions = {}) {
     historyDirectory: options.historyDirectory ?? process.env.SCENE_HISTORY_DIR ?? fileURLToPath(new URL('../../../.data/scene-history/', import.meta.url)),
     emit,
   });
+  closers.push(() => scene.idle());
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
     pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs,
     emit,
   });
+  closers.push(() => service.close());
   const work = new WorkService({
     workRoot, directory: workDataDirectory, emit, lockHeld: true,
     previewStartTimeoutMs: options.previewStartTimeoutMs,
@@ -72,8 +85,9 @@ export async function createApp(options: AppOptions = {}) {
       timeoutMs: options.agentTimeoutMs, maxRounds: options.agentMaxRounds,
     },
   });
-  try { await work.init(); await service.init(); }
-  catch (error) { await work.close(); await service.close(); await events.close(); await releaseWorkLock(); throw error; }
+  closers.push(() => work.close());
+  await work.init();
+  await service.init();
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -179,6 +193,10 @@ export async function createApp(options: AppOptions = {}) {
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
     return work.repo.exclusive(() => scene.adopt(service, request.params.id, 'force' in body && body.force === true));
   });
-  app.addHook('preClose', async () => { await work.close(); await service.close(); await scene.idle(); await events.close(); await releaseWorkLock(); });
+  app.addHook('preClose', closeAll);
   return { app, service, scene, work, events };
+  } catch (error) {
+    await closeAll().catch(() => {});
+    throw error;
+  }
 }

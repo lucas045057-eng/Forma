@@ -19,7 +19,7 @@ export default function PointSpeak({ pick }: { pick: PickState }) {
   const active = state.tasks.find(task => task.id === activeId) ?? state.tasks[0];
 
   async function submit(text: string, picked: Selection | null) {
-    if (!text.trim() || busy) return;
+    if (!text.trim() || busy || !submittable) return;
     setBusy(true); setError('');
     try {
       const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
@@ -61,7 +61,7 @@ export default function PointSpeak({ pick }: { pick: PickState }) {
       <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
       {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy} onClick={() => void cancel(active)}>取消任务</button>}
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
-      {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, active.selection ?? null); }}>重试</button>}
+      {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy || !submittable} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, active.selection ?? null); }}>重试</button>}
     </div>}
   </section>;
 }
