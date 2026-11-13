@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-14",
+  "head": "e418a231061c44cc31699b606607a04bd50be8ae",
+  "note": "三个 --smoke 场景都走最终 runner 实际的 runStep/收尾/证据落盘路径；临时证据目录在提取事实后已删除，本文件保留关键结果。",
+  "scenarios": {
+    "success": {
+      "command": "run.mjs --smoke=success",
+      "runnerExitCode": 0,
+      "status": "passed",
+      "steps": [
+        { "id": "smoke-no-artifacts", "exitCode": 0, "artifacts": [] },
+        { "id": "smoke-artifacts", "exitCode": 0, "artifacts": ["sample-artifact.json"] }
+      ],
+      "evidenceWrites": {
+        "artifacts": ["smoke-no-artifacts-index.json", "smoke-artifacts-index.json", "sample-artifact.json"],
+        "logs": ["01-smoke-no-artifacts.log", "02-smoke-artifacts.log", "smoke-no-artifacts.summary.json", "smoke-artifacts.summary.json"],
+        "summary": true
+      },
+      "currentStepAfterFinish": null,
+      "proves": "无 artifactDirs 的成功子步骤能建父目录并写索引，随后进入下一步；有产物步骤能归档"
+    },
+    "command-fail": {
+      "command": "run.mjs --smoke=command-fail",
+      "runnerExitCode": 1,
+      "status": "failed",
+      "steps": [
+        { "id": "smoke-no-artifacts", "exitCode": 0, "failed": false },
+        { "id": "smoke-command-fail", "exitCode": 3, "failed": true, "failureReasons": ["exit=3"] }
+      ],
+      "cleanupAttempted": true,
+      "currentStepAfterFinish": null,
+      "summary": true,
+      "proves": "子命令失败会写 failed、记录原因、停止后续步骤并非零退出"
+    },
+    "artifact-error": {
+      "command": "run.mjs --smoke=artifact-error",
+      "runnerExitCode": 1,
+      "status": "failed",
+      "steps": [
+        { "id": "smoke-no-artifacts", "exitCode": 0, "failed": false },
+        { "id": "smoke-artifact-error", "exitCode": 0, "failed": true, "error": { "code": "ENOTDIR", "message": "ENOTDIR: not a directory, scandir '...smoke-artifact-file.json'" } }
+      ],
+      "cleanupAttempted": true,
+      "currentStepAfterFinish": null,
+      "summary": true,
+      "proves": "真实归档异常被捕获并写入 error/code/stack、failed 与 summary，非零退出，不再留下 running"
+    }
+  }
+}

@@ -13,6 +13,14 @@
 - 证据保留：`docs/reports/artifacts/M2-final/final-20261114-0040/`（`evidence.json` 的 `status=blocked`、`steps=[]`、`blocked.reason=test-fail-still-present`；`job-output.log`；`preflight.json`）。
 - 该目录不覆盖、不改写；本轮用新 run-id 重新冻结。
 
+### 0.1 第二次启动的入口归档失败（job_1afbd95b）
+
+- `job_1afbd95b`（冻结点 `e418a23`）**exit 1、约 12 秒、后台 stdout 为空**；`final-20261114-0045` 的 `logs/01-typecheck.log` 显示七包 typecheck 全部 Done、`currentStep.exitCode=0`，HEAD/lock/生产源码摘要均未变。
+- 事实：typecheck **成功**，但入口归档失败；`evidence.steps=[]`、`currentStep` 停在 `artifacts=[]`，**build / 单测 / 六套 e2e 均未运行**。不是产品失败，也不是完整通过。
+- 根因：`run.mjs` 在第一步没有 `artifactDirs` 时，向尚未创建的 `EVIDENCE/artifacts/typecheck-index.json` 写索引；`snapshotArtifacts` 只在有 artifactDirs 循环时才 mkdir，于是抛 ENOENT；外层 catch 未记录异常，直接 exit 1，evidence 停在 `status=running`。
+- 证据保留：`docs/reports/artifacts/M2-final/final-20261114-0045/` 原 `evidence.json`/`logs` 不改，另存 `entry-failure.json` 与 0 字节 `job-output.log`。
+- 修复：索引写入前总是 mkdir；捕获并记录 `message/code/stack`；失败时同步写 `status=failed`、清理 `currentStep`、`finishedAt` 与 `summary.json` 并非零退出；Playwright 报告缺失也判失败。
+
 ## 1. 本轮测试侧改动
 
 1. `tests/e2e/m2b/02-takeover.spec.ts`
@@ -28,6 +36,8 @@
    - 第一失败即停，按本步骤进程 PID 做 `taskkill /T` 清理；仍占用已知端口的进程只记录归属，不按端口强杀并行会话。
    - 运行前后记录 `d3-run-11ed6da0`、`d3-run-c0b6a407`、`isolation-r6.json` 的目录/文件摘要，证明历史证据未被覆盖。
    - preflight 的 `test.fail` 扫描改到独立模块 `tests/e2e/final-verification/spec-scan.mjs`：只扫描被 git 跟踪的 `*.spec.ts|*.spec.tsx|*.test.ts|*.test.tsx`，用 `git grep -F -e <固定字符串>`；退出码 1 表示无匹配，ls-files/grep 的执行错误（status≠0/1 或 spawn error）一律阻断，不再用 catch 把错误当成成功。
+   - 收尾路径加固：`artifacts/` 与每步快照目录总是先 `mkdir`；子进程 `error` 事件、日志关闭、Playwright JSON 缺失、归档异常都进入同一 `runStep` 失败记录；失败时写 `summary.json` 与步骤 summary，并清理 `currentStep`；未捕获的入口异常输出原错误并至少尝试落盘 failed 状态。
+   - `--smoke=<success|command-fail|artifact-error>` 快速自检直接复用实际 `runStep`/收尾代码，不启动真实测试。
 
 ### 1.1 preflight 扫描修复的快速探针（临时 Git fixture，不碰生产）
 
@@ -41,6 +51,16 @@
 | `git ls-files` 返回 128 / spawn error | `clean=false`、`reason=git-ls-files-failed` / `git-ls-files-error` |
 
 仓库内 preflight 复跑：扫描 39 个 tracked spec/test 文件、`clean=true`（`PREFLIGHT OK`）。
+
+### 1.2 runner 收尾路径 smoke（实际 runStep，临时证据目录）
+
+`run.mjs --smoke=<scenario>` 结果（汇总在 `docs/reports/artifacts/M2-final/preflight-smoke.json`，临时目录已删除）：
+
+| 场景 | 结果 |
+| --- | --- |
+| `success`：无产物步骤 → 有产物步骤 | runner exit 0、`status=passed`；两个 index 都写入（无 artifactDirs 也能 mkdir），`sample-artifact.json` 快照归档；进入下一步；`currentStep` 已清 |
+| `command-fail`：第二步 `node -e exit(3)` | runner exit 1、`status=failed`；步骤 `exit=3`、`failureReasons=["exit=3"]`、cleanup 已尝试、summary 已写、`currentStep` 已清 |
+| `artifact-error`：artifactDirs 指向文件 | runner exit 1、`status=failed`；捕获真实 `ENOTDIR`，写入 `error.code/message/stack`、failed 与 summary，不再留 running |
 
 ## 2. 顺序验证范围（同一冻结 HEAD，不并行抢端口）
 
@@ -86,13 +106,13 @@
 
 ## 6. 当前状态：待后台结果（新 run）
 
-- 上一轮 `final-20261114-0040` / `job_e2215d6c` 已归档为 **preflight 阻断**（exit 2、约 6 秒、0 步骤），证据目录保留，不覆盖。
-- preflight 扫描修复后重新冻结；新 run id：**`final-20261114-0045`**。需要由调度从 workspace 根启动（不要人工等待/轮询）：
+- 上一轮 `final-20261114-0040` / `job_e2215d6c` 已归档为 **preflight 阻断**（exit 2、约 6 秒、0 步骤）；`final-20261114-0045` / `job_1afbd95b` 已归档为 **typecheck 成功但入口归档失败**（exit 1、约 12 秒、0 个记录步骤，build/单测/e2e 未运行）。两个目录都保留，不覆盖。
+- 修复扫描与收尾路径、并用实际 runStep 的 smoke 验证后重新冻结；新 run id：**`final-20261114-0100`**。需要由调度从 workspace 根启动（不要人工等待/轮询）：
 
 ```powershell
-orbital\coordination\m2-takeover\bg-root.cmd "node tests/e2e/final-verification/run.mjs --run-id final-20261114-0045 --base b167907"
+orbital\coordination\m2-takeover\bg-root.cmd "node tests/e2e/final-verification/run.mjs --run-id final-20261114-0100 --base b167907"
 ```
 
-- 启动后应看到 job id 与受跟踪通知；job 输出在 `orbital/jobs/<job id>/output.log`，证据在 `docs/reports/artifacts/M2-final/final-20261114-0045/`。
+- 启动后应看到 job id 与受跟踪通知；job 输出在 `orbital/jobs/<job id>/output.log`，证据在 `docs/reports/artifacts/M2-final/final-20261114-0100/`。
 - **本报告不预先宣称通过。** 实跑结果（每套退出码/用例数、expected-failed/skipped、端口与进程清理、证据摘要）由后台通知回来后补入本节与 `evidence.json`/`summary.json`。
 - 若权限阻止或包装不可用：不启动无通知作业，交回上述精确命令与冻结 HEAD，由调度启动。

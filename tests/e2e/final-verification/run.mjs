@@ -17,7 +17,13 @@ import path from 'node:path';
 import { scanTrackedSpecsForMarker } from './spec-scan.mjs';
 
 const ROOT = process.cwd();
-const arg = (name) => { const index = process.argv.indexOf(name); return index > 0 ? process.argv[index + 1] : undefined; };
+const arg = (name) => {
+  const prefix = `${name}=`;
+  const inline = process.argv.find((value) => value.startsWith(prefix));
+  if (inline) return inline.slice(prefix.length);
+  const index = process.argv.indexOf(name);
+  return index > 0 ? process.argv[index + 1] : undefined;
+};
 const stamp = () => new Date().toISOString().replace(/[-:]/g, '').replace(/\..+$/, '').replace('T', '-');
 const runId = arg('--run-id') ?? `final-${stamp()}`;
 const BASE = arg('--base') ?? 'b167907';
@@ -125,7 +131,8 @@ function parsePlaywrightReport(file) {
 }
 
 function snapshotArtifacts(step) {
-  const target = path.join(EVIDENCE, 'artifacts', step.id);
+  const target = path.join(ARTIFACTS, step.id);
+  mkdirSync(target, { recursive: true });
   const files = [];
   for (const relativeDir of step.artifactDirs ?? []) {
     const absoluteDir = path.join(ROOT, relativeDir);
@@ -166,10 +173,57 @@ const evidence = {
   status: 'running',
 };
 const evidenceFile = path.join(EVIDENCE, 'evidence.json');
-const writeEvidence = () => writeFileSync(evidenceFile, `${JSON.stringify(evidence, null, 2)}\n`);
+const ARTIFACTS = path.join(EVIDENCE, 'artifacts');
+mkdirSync(ARTIFACTS, { recursive: true });
+
+function describeError(error) {
+  const value = error && typeof error === 'object' ? error : {};
+  return {
+    name: error instanceof Error ? error.name : typeof error,
+    message: error instanceof Error ? error.message : String(error),
+    code: 'code' in value ? String(value.code) : undefined,
+    stack: String(value.stack ?? '').split('\n').slice(0, 8).join('\n'),
+  };
+}
+
+function writeJsonSafe(file, value) {
+  try {
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+    return true;
+  } catch (error) {
+    console.error(`[runner] 写盘失败 ${file}: ${describeError(error).stack ?? describeError(error).message}`);
+    return false;
+  }
+}
+
+const writeEvidence = () => writeJsonSafe(evidenceFile, evidence);
+
+function writeSummary(status) {
+  return writeJsonSafe(path.join(EVIDENCE, 'summary.json'), {
+    schema: 1,
+    runId,
+    frozenHead: evidence.frozenHead,
+    base: BASE,
+    status,
+    startedAt: evidence.startedAt,
+    finishedAt: evidence.finishedAt ?? now(),
+    steps: evidence.steps.map((step) => ({
+      id: step.id, title: step.title, exitCode: step.exitCode, signal: step.signal, durationMs: step.durationMs,
+      failed: step.failed ?? null, failureReasons: step.failureReasons ?? [], error: step.error ?? null,
+      cleanup: step.cleanup ?? null,
+      playwright: step.playwright ? step.playwright.counts : null,
+      artifacts: step.artifacts ?? null,
+    })),
+    failure: evidence.failure ?? null,
+    blocked: evidence.blocked ?? null,
+    priorEvidenceUnchanged: evidence.priorEvidenceUnchanged ?? null,
+  });
+}
+
 writeEvidence();
 
-const STEPS = [
+const REAL_STEPS = [
   { id: 'typecheck', title: 'pnpm typecheck', command: 'pnpm typecheck', timeoutMs: 15 * 60_000, playwright: false },
   { id: 'build', title: 'pnpm build', command: 'pnpm build', timeoutMs: 20 * 60_000, playwright: false },
   { id: 'unit', title: 'pnpm test（完整单测）', command: 'pnpm test', timeoutMs: 20 * 60_000, playwright: false },
@@ -210,13 +264,42 @@ const STEPS = [
   },
 ];
 
+/**
+ * `--smoke=<success|command-fail|artifact-error>`：用实际 runStep/收尾路径做快速自检，
+ * 不启动真实测试。产物目录放在本次证据目录下，结束后可整目录删除。
+ */
+const SMOKE = arg('--smoke');
+function smokeSteps(scenario) {
+  const artifactDir = path.join('docs', 'reports', 'artifacts', 'M2-final', runId, 'smoke-artifacts-source');
+  const artifactFile = path.join('docs', 'reports', 'artifacts', 'M2-final', runId, 'smoke-artifact-file.json');
+  const base = [
+    { id: 'smoke-no-artifacts', title: 'smoke: 无产物的成功子步骤', command: 'node -e "process.exit(0)"', timeoutMs: 30_000 },
+  ];
+  if (scenario === 'success') {
+    mkdirSync(path.join(ROOT, artifactDir), { recursive: true });
+    writeFileSync(path.join(ROOT, artifactDir, 'sample-artifact.json'), `${JSON.stringify({ smoke: true })}\n`);
+    return [...base, { id: 'smoke-artifacts', title: 'smoke: 有产物的成功步骤', command: 'node -e "process.exit(0)"', timeoutMs: 30_000, artifactDirs: [artifactDir] }];
+  }
+  if (scenario === 'command-fail') {
+    return [...base, { id: 'smoke-command-fail', title: 'smoke: 子命令失败', command: 'node -e "process.exit(3)"', timeoutMs: 30_000 }];
+  }
+  if (scenario === 'artifact-error') {
+    mkdirSync(path.dirname(path.join(ROOT, artifactFile)), { recursive: true });
+    writeFileSync(path.join(ROOT, artifactFile), '{}');
+    return [...base, { id: 'smoke-artifact-error', title: 'smoke: 归档异常', command: 'node -e "process.exit(0)"', timeoutMs: 30_000, artifactDirs: [artifactFile] }];
+  }
+  throw new Error(`未知 smoke 场景：${scenario}`);
+}
+const STEPS = SMOKE ? smokeSteps(SMOKE) : REAL_STEPS;
+
 function blocked(reason, detail) {
   evidence.status = 'blocked';
   evidence.blocked = { reason, detail, at: now() };
   evidence.finishedAt = now();
   writeEvidence();
-  console.log(`BLOCKED: ${reason}`);
-  if (detail) console.log(JSON.stringify(detail, null, 2));
+  writeSummary('blocked');
+  console.error(`BLOCKED: ${reason}`);
+  if (detail) console.error(JSON.stringify(detail, null, 2));
   process.exit(2);
 }
 
@@ -227,9 +310,9 @@ try {
   blocked('base-not-ancestor', { base: BASE, head: HEAD });
 }
 if (productionStatus()) blocked('production-dirty-at-start', { status: productionStatus() });
-const startPorts = portsSnapshot();
+const startPorts = SMOKE ? [] : portsSnapshot();
 evidence.portsAtStart = startPorts;
-if (startPorts.length) blocked('known-port-in-use-at-start', startPorts);
+if (!SMOKE && startPorts.length) blocked('known-port-in-use-at-start', startPorts);
 if (fileHash(path.join(ROOT, 'pnpm-lock.yaml')) == null) blocked('lockfile-missing', null);
 // 只扫描被跟踪的 spec/test 用例文件；runner/fixture/证据不参与，避免自匹配。
 const markerScan = scanTrackedSpecsForMarker({ cwd: ROOT });
@@ -248,6 +331,37 @@ if (process.argv.includes('--preflight-only')) {
 }
 
 /* ---------- 步骤执行 ---------- */
+function writeStepSummary(step) {
+  return writeJsonSafe(path.join(LOGS, `${step.id}.summary.json`), {
+    id: step.id, title: step.title, exitCode: step.exitCode, signal: step.signal, durationMs: step.durationMs,
+    failed: step.failed ?? null, failureReasons: step.failureReasons ?? [], error: step.error ?? null,
+    artifacts: step.artifacts ?? null, cleanup: step.cleanup ?? null, playwright: step.playwright ?? null,
+  });
+}
+
+function finishFailure(record, reasons, error) {
+  if (record) {
+    record.failed = true;
+    record.failureReasons = reasons;
+    record.finishedAt = record.finishedAt ?? now();
+    if (error) record.error = describeError(error);
+  }
+  evidence.status = 'failed';
+  evidence.finishedAt = now();
+  evidence.failure = {
+    step: record?.id ?? evidence.currentStep?.id ?? 'unknown',
+    reasons,
+    error: error ? describeError(error) : (record?.error ?? undefined),
+  };
+  evidence.priorEvidenceAfter = Object.fromEntries(PRIOR_EVIDENCE.map((relative) => [relative, dirDigest(relative) ?? fileHash(path.join(ROOT, relative))]));
+  evidence.priorEvidenceUnchanged = PRIOR_EVIDENCE.every((relative) => evidence.priorEvidence[relative] === evidence.priorEvidenceAfter[relative]);
+  if (record && !evidence.steps.includes(record)) evidence.steps.push(record);
+  delete evidence.currentStep;
+  writeEvidence();
+  writeSummary('failed');
+  if (record) writeStepSummary(record);
+}
+
 async function runStep(step, index) {
   const logFile = path.join(LOGS, `${String(index + 1).padStart(2, '0')}-${step.id}.log`);
   const reportFile = path.join(REPORTS, `${step.id}.json`);
@@ -257,114 +371,131 @@ async function runStep(step, index) {
     id: step.id, title: step.title, command: step.command,
     startedAt: now(), log: path.relative(ROOT, logFile), report: step.playwright ? path.relative(ROOT, reportFile) : null,
     before: {
-      head: git('rev-parse', 'HEAD'),
-      lockHash: lockHash(),
-      productionDigest: productionDigest(),
-      productionStatus: productionStatus(),
-      ports: step.e2e ? portsSnapshot() : null,
+      head: git('rev-parse', 'HEAD'), lockHash: lockHash(), productionDigest: productionDigest(),
+      productionStatus: productionStatus(), ports: step.e2e ? portsSnapshot() : null,
     },
   };
   evidence.currentStep = record;
   writeEvidence();
 
-  const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS };
-  if (step.playwright) env.PLAYWRIGHT_JSON_OUTPUT_NAME = reportFile;
-  const command = step.playwright ? `${step.command} --output="${path.resolve(outputDir)}"` : step.command;
-
-  const started = Date.now();
-  const logStream = createWriteStream(logFile);
-  logStream.write(`# ${now()} ${command}\n`);
-  const child = spawn(command, { cwd: ROOT, env, shell: true, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  child.stdout.pipe(logStream);
-  child.stderr.pipe(logStream);
-  let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; killTree(child.pid); }, step.timeoutMs);
-  const exit = await new Promise((resolve) => child.once('exit', (code, signal) => resolve({ code, signal })));
-  clearTimeout(timer);
-  logStream.end();
-
-  record.finishedAt = now();
-  record.durationMs = Date.now() - started;
-  record.exitCode = timedOut ? 124 : exit.code;
-  record.signal = timedOut ? 'TIMEOUT' : exit.signal;
-  record.after = {
-    head: git('rev-parse', 'HEAD'),
-    lockHash: lockHash(),
-    productionDigest: productionDigest(),
-    productionStatus: productionStatus(),
-    ports: step.e2e ? portsSnapshot() : null,
-  };
-  if (step.playwright) record.playwright = parsePlaywrightReport(reportFile);
-  record.artifacts = snapshotArtifacts(step);
-  writeFileSync(path.join(EVIDENCE, 'artifacts', `${step.id}-index.json`), `${JSON.stringify(record.artifacts, null, 2)}\n`);
-
   const reasons = [];
+  const started = Date.now();
+  let child = null;
+  let timedOut = false;
+  let processFailed = false;
+  try {
+    const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS };
+    if (step.playwright) env.PLAYWRIGHT_JSON_OUTPUT_NAME = reportFile;
+    const command = step.playwright ? `${step.command} --output="${path.resolve(outputDir)}"` : step.command;
+
+    const logStream = createWriteStream(logFile);
+    logStream.write(`# ${now()} ${command}\n`);
+    child = spawn(command, { cwd: ROOT, env, shell: true, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    child.stdout.pipe(logStream);
+    child.stderr.pipe(logStream);
+    const timer = setTimeout(() => { timedOut = true; killTree(child.pid); }, step.timeoutMs);
+    const exit = await new Promise((resolve) => {
+      let settled = false;
+      const done = (value) => { if (!settled) { settled = true; resolve(value); } };
+      child.once('exit', (code, signal) => done({ code, signal }));
+      child.once('error', (error) => done({ code: null, signal: null, spawnError: error }));
+    });
+    clearTimeout(timer);
+    await new Promise((resolve) => logStream.end(resolve)).catch(() => {});
+    record.finishedAt = now();
+    record.durationMs = Date.now() - started;
+    record.exitCode = timedOut ? 124 : (exit.code ?? (exit.spawnError ? 127 : null));
+    record.signal = timedOut ? 'TIMEOUT' : exit.signal;
+    processFailed = timedOut || exit.code !== 0 || Boolean(exit.spawnError);
+    if (exit.spawnError) {
+      record.error = describeError(exit.spawnError);
+      reasons.push(`spawn error：${exit.spawnError.message}`);
+    }
+    record.after = {
+      head: git('rev-parse', 'HEAD'), lockHash: lockHash(), productionDigest: productionDigest(),
+      productionStatus: productionStatus(), ports: step.e2e ? portsSnapshot() : null,
+    };
+    if (step.playwright) {
+      record.playwright = existsSync(reportFile) ? parsePlaywrightReport(reportFile) : null;
+      if (!record.playwright) reasons.push(`Playwright JSON 报告缺失或不可解析：${path.relative(ROOT, reportFile)}`);
+    }
+    record.artifacts = snapshotArtifacts(step);
+    writeJsonSafe(path.join(ARTIFACTS, `${step.id}-index.json`), record.artifacts);
+  } catch (error) {
+    processFailed = true;
+    record.finishedAt = record.finishedAt ?? now();
+    record.durationMs = record.durationMs ?? (Date.now() - started);
+    record.error = describeError(error);
+    reasons.push(`归档/执行异常：${record.error.message}`);
+  } finally {
+    if (child && processFailed) {
+      record.cleanup = { ownTreeKill: killTree(child.pid), at: now() };
+      await sleep(400);
+      record.cleanup.portsAfterCleanup = step.e2e ? portsSnapshot() : [];
+    }
+  }
+
+  if (record.exitCode === undefined) record.exitCode = null;
   if (record.exitCode !== 0) reasons.push(`exit=${record.exitCode}`);
   if (record.signal) reasons.push(`signal=${record.signal}`);
-  if (record.after.head !== evidence.frozenHead) reasons.push(`HEAD 变化：${record.after.head}`);
-  if (record.after.lockHash !== evidence.lockHash) reasons.push('pnpm-lock 摘要变化');
-  if (record.after.productionDigest !== evidence.productionDigest) reasons.push('生产源码树摘要变化');
-  if (record.after.productionStatus) reasons.push(`生产路径变成脏：${record.after.productionStatus.slice(0, 400)}`);
+  if (record.after) {
+    if (record.after.head !== evidence.frozenHead) reasons.push(`HEAD 变化：${record.after.head}`);
+    if (record.after.lockHash !== evidence.lockHash) reasons.push('pnpm-lock 摘要变化');
+    if (record.after.productionDigest !== evidence.productionDigest) reasons.push('生产源码树摘要变化');
+    if (record.after.productionStatus) reasons.push(`生产路径变成脏：${record.after.productionStatus.slice(0, 400)}`);
+  }
   if (record.playwright) {
     const counts = record.playwright.counts;
     if (counts.expectedFailed > 0) reasons.push(`出现 ${counts.expectedFailed} 个 expected-failed（已修 retry/N4 不再接受）`);
     if (counts.unexpectedlyPassed > 0) reasons.push(`出现 ${counts.unexpectedlyPassed} 个“预期失败但通过”`);
   }
-  record.failed = reasons.length > 0;
-  record.failureReasons = reasons;
+  const uniqueReasons = [...new Set(reasons)];
+  record.failureReasons = uniqueReasons;
+  record.failed = uniqueReasons.length > 0;
   evidence.steps.push(record);
   delete evidence.currentStep;
   writeEvidence();
+  writeStepSummary(record);
 
-  const label = record.failed ? 'FAIL' : 'PASS';
   const extra = record.playwright ? ` (${record.playwright.counts.passed} passed, ${record.playwright.counts.unexpectedFailed} failed, ${record.playwright.counts.expectedFailed} expected-failed, ${record.playwright.counts.skipped} skipped)` : '';
-  console.log(`[${label}] ${step.id} exit=${record.exitCode} ${Math.round(record.durationMs / 1000)}s${extra}`);
-
+  console.log(`[${record.failed ? 'FAIL' : 'PASS'}] ${step.id} exit=${record.exitCode} ${Math.round((record.durationMs ?? 0) / 1000)}s${extra}`);
   if (record.failed) {
-    record.cleanup = { ownTreeKill: killTree(child.pid), at: now() };
-    await sleep(1500);
-    record.cleanup.portsAfterCleanup = portsSnapshot();
-    evidence.status = 'failed';
-    evidence.failure = { step: step.id, reasons };
-    evidence.finishedAt = now();
-    evidence.priorEvidenceAfter = Object.fromEntries(PRIOR_EVIDENCE.map((relative) => [relative, dirDigest(relative) ?? fileHash(path.join(ROOT, relative))]));
-    evidence.priorEvidenceUnchanged = PRIOR_EVIDENCE.every((relative) => evidence.priorEvidence[relative] === evidence.priorEvidenceAfter[relative]);
-    writeEvidence();
-    throw new Error(`步骤 ${step.id} 失败：${reasons.join('；')}`);
+    finishFailure(record, uniqueReasons);
+    throw new Error(`步骤 ${step.id} 失败：${uniqueReasons.join('；')}`);
   }
   return record;
 }
 
 (async () => {
-  for (let index = 0; index < STEPS.length; index += 1) {
-    try {
-      await runStep(STEPS[index], index);
-    } catch {
-      // runStep 已写入失败证据；清理自己的步骤进程后退出。
-      const last = evidence.steps.at(-1);
-      if (last?.cleanup?.portsAfterCleanup?.length) {
-        console.log(`注意：仍有已知端口监听，未按端口强杀，请按证据核对归属：${JSON.stringify(last.cleanup.portsAfterCleanup)}`);
+  try {
+    for (let index = 0; index < STEPS.length; index += 1) {
+      try {
+        await runStep(STEPS[index], index);
+      } catch (error) {
+        const last = evidence.steps.at(-1);
+        if (last?.cleanup?.portsAfterCleanup?.length) {
+          console.error(`[runner] 仍有已知端口监听（未按端口强杀）：${JSON.stringify(last.cleanup.portsAfterCleanup)}`);
+        }
+        console.error(`[runner] 步骤失败：${describeError(error).message}`);
+        process.exit(1);
       }
-      writeEvidence();
-      process.exit(1);
     }
+    evidence.status = 'passed';
+    evidence.finishedAt = now();
+    evidence.priorEvidenceAfter = Object.fromEntries(PRIOR_EVIDENCE.map((relative) => [relative, dirDigest(relative) ?? fileHash(path.join(ROOT, relative))]));
+    evidence.priorEvidenceUnchanged = PRIOR_EVIDENCE.every((relative) => evidence.priorEvidence[relative] === evidence.priorEvidenceAfter[relative]);
+    delete evidence.currentStep;
+    writeEvidence();
+    writeSummary('passed');
+    console.log(`ALL PASSED: ${STEPS.length} steps; evidence ${path.relative(ROOT, EVIDENCE)}`);
+    process.exit(0);
+  } catch (error) {
+    console.error(`[runner] 入口异常：${describeError(error).stack ?? describeError(error).message}`);
+    try {
+      finishFailure(evidence.currentStep ?? null, [`入口异常：${describeError(error).message}`], error);
+    } catch (writeError) {
+      console.error(`[runner] 失败证据写盘也失败：${describeError(writeError).stack ?? describeError(writeError).message}`);
+    }
+    process.exit(1);
   }
-  evidence.status = 'passed';
-  evidence.finishedAt = now();
-  evidence.priorEvidenceAfter = Object.fromEntries(PRIOR_EVIDENCE.map((relative) => [relative, dirDigest(relative) ?? fileHash(path.join(ROOT, relative))]));
-  evidence.priorEvidenceUnchanged = PRIOR_EVIDENCE.every((relative) => evidence.priorEvidence[relative] === evidence.priorEvidenceAfter[relative]);
-  evidence.steps.forEach((step) => {
-    writeFileSync(path.join(EVIDENCE, 'logs', `${step.id}.summary.json`), `${JSON.stringify({ id: step.id, exitCode: step.exitCode, signal: step.signal, durationMs: step.durationMs, playwright: step.playwright }, null, 2)}\n`);
-  });
-  writeEvidence();
-  writeFileSync(path.join(EVIDENCE, 'summary.json'), `${JSON.stringify({
-    runId, frozenHead: evidence.frozenHead, status: evidence.status, startedAt: evidence.startedAt, finishedAt: evidence.finishedAt,
-    steps: evidence.steps.map((step) => ({
-      id: step.id, exitCode: step.exitCode, signal: step.signal, durationMs: step.durationMs,
-      playwright: step.playwright ? step.playwright.counts : null,
-    })),
-    priorEvidenceUnchanged: evidence.priorEvidenceUnchanged,
-  }, null, 2)}\n`);
-  console.log(`ALL PASSED: ${STEPS.length} steps; evidence ${path.relative(ROOT, EVIDENCE)}`);
-  process.exit(0);
 })();

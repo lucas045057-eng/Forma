@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "runId": "final-20261114-0045",
+  "startedAt": "2026-11-13T16:41:59.727Z",
+  "base": "b167907",
+  "frozenHead": "e418a231061c44cc31699b606607a04bd50be8ae",
+  "commitsAfterBase": [
+    "e418a23 test: fix final verification preflight scan and refreeze",
+    "cdfed40 test: freeze M2 final regression on merged b167907"
+  ],
+  "productionDigest": "6697b6f64d83255a4b5b737e070b48e64942e7ce211f96dea0ecea7d8dc559cf",
+  "testsDigest": "f51dcd2eff43b5daac625a50a27e097c6b791c2a86f70d6b33078610cfb527a2",
+  "lockHash": "50e02a0c9d14cd5a30a128a6c4bc3716fa703d1f52e377597266ac3beaf91725",
+  "configHashes": {
+    "package.json": "5405fbd436591fe4f243c37e8044a35cec913cd8c8e13a388b1b6b95c0cf318a",
+    "pnpm-lock.yaml": "50e02a0c9d14cd5a30a128a6c4bc3716fa703d1f52e377597266ac3beaf91725",
+    "tsconfig.json": "ee1015d3d228c918651614c6a6fd27e4311e46363ea7a3ae288beba5eadeb0e0",
+    "playwright.config.ts": "708b1613cc0902b479ef9ebc8f7e4a376a46a6de2b9e15b3e7251835f2891c4f",
+    "playwright.m0a.config.ts": "8f5383f598d60d6437e521b3d0937849738d0b5bd3524d1ba6ebe4d9126c959f",
+    "playwright.m1a.config.ts": "3fa23af477fdb61b7400b4f5ea20980590cff8829eb976adbee03f5ce783848e",
+    "playwright.m1b.config.ts": "addce5ff6b1ed9c7453c39beeedd0f1eb178e773f5399c12d0c22877cdcfed7a",
+    "playwright.m2a.config.ts": "892439078b1855ea737d0c752be3fe5f724a781e04e5e34be5b1c4b562aa91e6",
+    "playwright.m2b.config.ts": "7feeb637d0e4b5b372d3cb38cace6539a800611b54e7da2cc2f7f2a3f1b06a2f"
+  },
+  "environment": {
+    "node": "v24.14.1",
+    "pnpm": "11.17.0",
+    "playwrightBrowsersPath": "C:\\Users\\Admin\\AppData\\Local\\ms-playwright",
+    "platform": "win32",
+    "arch": "x64",
+    "mock": "loopback mock coding agent; fake key; outbound guard"
+  },
+  "priorEvidence": {
+    "docs/reports/artifacts/M2-A/d3-run-11ed6da0": "82f9b697b4b8bf7f367b8b710463e2a3bbe770d18373a48c12504ebc0a71145e",
+    "docs/reports/artifacts/M2-A/d3-run-c0b6a407": "c7bcc53056a41a83178bcc04cafa75f8690e204f9296d5c92277e8fbeb7fadec",
+    "docs/reports/artifacts/M2-A/isolation-r6.json": "01ae8f71494a31d6ead9c1badada9ea37a4d5dfcae1b339785b7097521c74404"
+  },
+  "steps": [],
+  "status": "running",
+  "portsAtStart": [],
+  "testFailScan": {
+    "clean": true,
+    "reason": "no-marker",
+    "scannedFiles": 39,
+    "matches": []
+  },
+  "currentStep": {
+    "id": "typecheck",
+    "title": "pnpm typecheck",
+    "command": "pnpm typecheck",
+    "startedAt": "2026-11-13T16:42:05.683Z",
+    "log": "docs\\reports\\artifacts\\M2-final\\final-20261114-0045\\logs\\01-typecheck.log",
+    "report": null,
+    "before": {
+      "head": "e418a231061c44cc31699b606607a04bd50be8ae",
+      "lockHash": "50e02a0c9d14cd5a30a128a6c4bc3716fa703d1f52e377597266ac3beaf91725",
+      "productionDigest": "6697b6f64d83255a4b5b737e070b48e64942e7ce211f96dea0ecea7d8dc559cf",
+      "productionStatus": "",
+      "ports": null
+    },
+    "finishedAt": "2026-11-13T16:42:10.565Z",
+    "durationMs": 4787,
+    "exitCode": 0,
+    "signal": null,
+    "after": {
+      "head": "e418a231061c44cc31699b606607a04bd50be8ae",
+      "lockHash": "50e02a0c9d14cd5a30a128a6c4bc3716fa703d1f52e377597266ac3beaf91725",
+      "productionDigest": "6697b6f64d83255a4b5b737e070b48e64942e7ce211f96dea0ecea7d8dc559cf",
+      "productionStatus": "",
+      "ports": null
+    },
+    "artifacts": []
+  }
+}
