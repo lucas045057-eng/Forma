@@ -53,5 +53,21 @@ it('recovers a committed adoption from durable intent without merging twice', as
     expect(concurrent.filter(result => result.status === 'rejected')).toHaveLength(1);
     expect(await readFile(path.join(workRoot, 'src/App.tsx'), 'utf8')).toBe('before');
     await expect(service.revert()).rejects.toMatchObject({ code: 'NO_ADOPTION' });
+    const nextBase = (await service.version()).version;
+    await repo.createCandidate('example2', nextBase);
+    await writeFile(path.join(repo.candidatePath('example2'), 'src/App.tsx'), 'second');
+    await repo.commitCandidate('example2', 'second edit');
+    await service.close();
+    const saved = JSON.parse(await readFile(path.join(directory, 'tasks.json'), 'utf8'));
+    saved.candidates.push({ id: 'example2', decision: 'pending' });
+    await writeFile(path.join(directory, 'tasks.json'), JSON.stringify(saved));
+    const resumed = new WorkService({ workRoot, directory, agent: {}, emit: event => ({ ...event, seq: 2, ts: 'now' }) });
+    try {
+      await resumed.init();
+      const operations = await Promise.allSettled([resumed.adopt('example2'), resumed.discard('example2'), resumed.version()]);
+      expect(operations.map(result => result.status)).toEqual(['fulfilled', 'rejected', 'fulfilled']);
+      expect(resumed.getCandidate('example2').decision).toBe('adopted');
+      expect(await readFile(path.join(workRoot, 'src/App.tsx'), 'utf8')).toBe('second');
+    } finally { await resumed.close(); }
   } finally { await service.close(); await rm(root, { recursive: true, force: true }); }
 });
