@@ -2,7 +2,8 @@ import type { Selection } from '@spatial/shared';
 import { Sandbox, ToolError, toolDefinitions } from './tools.ts';
 
 export class CodingAgentError extends Error {
-  constructor(readonly code: string, message: string) { super(message); }
+  readonly code: string;
+  constructor(code: string, message: string) { super(message); this.code = code; }
 }
 
 type ToolCall = { id: string; function: { name: string; arguments: string } };
