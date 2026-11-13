@@ -3,6 +3,7 @@ import { ProductScene, sceneRenderSettings } from '@spatial/scene-renderer';
 import type { Asset } from '@spatial/shared';
 import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import './assets.css';
+import { useEventCenter } from './EventCenter.tsx';
 
 const labels: Record<Asset['status'], string> = {
   submitting: '提交中', submit_unknown: '提交结果待确认，请查询远端任务后导入', polling: '等待生成',
@@ -17,6 +18,7 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const [loadedUrl, setLoadedUrl] = useState('');
   const [failedUrl, setFailedUrl] = useState('');
+  const { subscribe } = useEventCenter();
   const current = assets.find(asset => asset.id === selected);
   const loaded = current?.status === 'ready' && current.modelUrl === loadedUrl;
   const ready = assets.filter(asset => asset.status === 'ready');
@@ -35,14 +37,11 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
       } catch { if (active) setError('无法读取资产列表，请确认后端已启动'); }
     };
     void refresh();
-    const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/events`);
-    socket.onmessage = event => {
-      try { const message = JSON.parse(String(event.data)); if (message.type === 'asset.progress' || message.type === 'asset.ready') void refresh(); } catch { /* Ignore unrelated events. */ }
-    };
-    // Polling also recovers state when the WebSocket connection is interrupted.
-    const timer = window.setInterval(() => { void refresh(); }, 3000);
-    return () => { active = false; clearInterval(timer); socket.close(); };
-  }, []);
+    const unsubscribe = subscribe(event => {
+      if (event.type === 'asset.progress' || event.type === 'asset.ready' || event.type === 'state.reload') void refresh();
+    });
+    return () => { active = false; unsubscribe(); };
+  }, [subscribe]);
   async function importTask() {
     setBusy(true); setError('');
     try {

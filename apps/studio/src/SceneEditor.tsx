@@ -6,6 +6,7 @@ import { defaultSceneConfig, isSceneConfig, type SceneConfig, type Vec3 } from '
 import { setSceneHero, setSceneKeyframe, temperatureToHex, type SceneChanged } from '@spatial/shared/scene-edit';
 import { ProductScene, scenePose, sceneRenderSettings } from '@spatial/scene-renderer';
 import './scene-editor.css';
+import { useEventCenter } from './EventCenter.tsx';
 
 function LightHandle({ direction, change }: { direction: Vec3; change: (direction: Vec3) => void }) {
   const dragging = useRef(false);
@@ -54,6 +55,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
   const [tool, setTool] = useState<'camera' | 'rotate' | 'light'>('camera');
   const [temperature, setTemperature] = useState(4000);
   const [size, setSize] = useState(400);
+  const { subscribe } = useEventCenter();
   const currentAt = useRef(at); currentAt.current = at;
   const loadSequence = useRef(0);
   const dirty = useRef(false);
@@ -73,21 +75,20 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     } catch (cause) { if (mounted.current) setError(String(cause)); }
   }
   useEffect(() => {
-    mounted.current = true; void load();
-    void request<Asset[]>('/assets').then(list => { if (mounted.current) setAssets(list); }).catch(cause => { if (mounted.current) setError(String(cause)); });
-    const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/events`);
-    socket.onmessage = event => {
-      try {
-        const value = JSON.parse(String(event.data));
-        if (value.type === 'asset.ready') void request<Asset[]>('/assets').then(list => { if (mounted.current) setAssets(list); }).catch(() => {});
-        if (value.type === 'scene.changed' && isSceneConfig(value.config) && Array.isArray(value.diff)) {
-          setLatest(value);
-          if (!dirty.current) { ++loadSequence.current; applyConfig(value.config); }
-        }
-      } catch { /* Other websocket messages are handled by their own panels. */ }
-    };
-    return () => { mounted.current = false; ++loadSequence.current; socket.close(); };
-  }, []);
+    mounted.current = true;
+    const loadAssets = () => request<Asset[]>('/assets').then(list => { if (mounted.current) setAssets(list); }).catch(cause => { if (mounted.current) setError(String(cause)); });
+    void load();
+    void loadAssets();
+    const unsubscribe = subscribe(event => {
+      if (event.type === 'asset.ready') void loadAssets();
+      if (event.type === 'state.reload') { void load(); void loadAssets(); }
+      if (event.type === 'scene.changed' && isSceneConfig(event.config) && Array.isArray(event.diff)) {
+        setLatest(event as unknown as SceneChanged);
+        if (!dirty.current) { ++loadSequence.current; applyConfig(event.config); }
+      }
+    });
+    return () => { mounted.current = false; ++loadSequence.current; unsubscribe(); };
+  }, [subscribe]);
   useEffect(() => {
     if (!saved) return;
     const pose = scenePose(saved, at);
