@@ -27,3 +27,15 @@ it('keeps the event log inside the work-data lock and continues seq after a grac
     } finally { await second.app.close(); }
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+it('releases the work-data lock when a constructor throws after it was taken (review N3)', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'events-lock-'));
+  const shared = { workRoot: path.resolve(import.meta.dirname, '../../../templates/product-page'), workDataDirectory: path.join(root, 'm2'),
+    historyDirectory: path.join(root, 'history'), key: 'mock-only' };
+  try {
+    // A plain-http non-loopback Lux3D base makes the client constructor throw after the lock is held.
+    await expect(createApp({ ...shared, dataDirectory: path.join(root, 'a'), base: 'http://192.0.2.10:4010' })).rejects.toThrow();
+    const ok = await createApp({ ...shared, dataDirectory: path.join(root, 'b'), base: 'http://127.0.0.1:9' });
+    await ok.app.close();
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
