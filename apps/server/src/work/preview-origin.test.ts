@@ -56,3 +56,37 @@ it('forwards the Vite HMR socket of the main work and of a running candidate, an
   expect(candidate.seen).toHaveLength(1);
   expect(main.seen).toHaveLength(1);
 });
+
+function rawRequest(port: number, lines: string[]): Promise<string> {
+  return new Promise(resolve => {
+    const socket = connect(port, '127.0.0.1', () => socket.write(`${lines.join('\r\n')}\r\n\r\n`));
+    let text = '';
+    socket.on('data', chunk => { text += chunk.toString(); });
+    socket.on('close', () => resolve(text)); socket.on('error', () => resolve(text));
+  });
+}
+it('refuses requests addressed to a foreign host name, for HTTP and WebSocket alike (review F2)', async () => {
+  const main = await upgradeEcho();
+  const content = createServer((_request, response) => { response.end('work source'); });
+  const mainHttp = await listen(content);
+  const previews = { port: () => undefined } as unknown as PreviewManager;
+  const origin = await listen(createPreviewOrigin(previews, { mainPort: mainHttp }));
+  const ok = await rawRequest(origin, [`GET /preview/main/src/App.tsx HTTP/1.1`, `Host: 127.0.0.1:${origin}`, 'Connection: close']);
+  expect(ok).toContain('200 OK');
+  for (const host of [`evil.example:${origin}`, 'evil.example', `127.0.0.1:${origin + 1}`, `localhost.evil.example:${origin}`]) {
+    for (const method of ['GET', 'HEAD']) {
+      const refused = await rawRequest(origin, [`${method} /preview/main/src/App.tsx HTTP/1.1`, `Host: ${host}`, 'Connection: close']);
+      expect(refused, `${method} ${host}`).toContain('403');
+      expect(refused).not.toContain('work source');
+    }
+  }
+  // WebSocket: a rebinding page has Host and Origin both set to its own name.
+  const wsOrigin = await listen(createPreviewOrigin(previews, { mainPort: main.port }));
+  const rebinding = await rawRequest(wsOrigin, ['GET /preview/main/hmr HTTP/1.1', `Host: evil.example:${wsOrigin}`, `Origin: http://evil.example:${wsOrigin}`,
+    'Upgrade: websocket', 'Connection: Upgrade', 'Sec-WebSocket-Version: 13', 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==']);
+  expect(rebinding).toBe('');
+  expect(main.seen).toEqual([]);
+  // Explicitly configured host names are accepted.
+  const lan = await listen(createPreviewOrigin(previews, { mainPort: mainHttp, allowedHosts: ['studio.lan'] }));
+  expect(await rawRequest(lan, ['GET /preview/main/x HTTP/1.1', `Host: studio.lan:${lan}`, 'Connection: close'])).toContain('200 OK');
+});

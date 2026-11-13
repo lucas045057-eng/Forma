@@ -20,6 +20,8 @@ interface Adoption { mergeCommit: string; candidateId: string; at: string }
 interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[]; intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string } }
 
 export interface WorkServiceOptions {
+  /** The caller already holds the instance lock of `directory` (createApp does, so the event log is covered too). */
+  lockHeld?: boolean;
   workRoot: string;
   directory: string;
   agent: CodingAgentOptions;
@@ -57,7 +59,7 @@ export class WorkService {
 
   async init() {
     await mkdir(this.options.directory, { recursive: true });
-    this.releaseLock = await acquireInstanceLock(this.options.directory);
+    if (!this.options.lockHeld) this.releaseLock = await acquireInstanceLock(this.options.directory);
     await this.repo.init();
     try {
       const saved = JSON.parse(await readFile(this.file, 'utf8')) as State;

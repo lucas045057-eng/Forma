@@ -1,3 +1,5 @@
+import { mkdir } from 'node:fs/promises';
+import { acquireInstanceLock } from './assets/instance-lock.ts';
 import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import { createReadStream } from 'node:fs';
@@ -40,8 +42,13 @@ export async function createApp(options: AppOptions = {}) {
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16_384, disableRequestLogging: true });
   const workDataDirectory = options.workDataDirectory ?? process.env.WORK_DATA_DIR ??
     (options.dataDirectory ? path.join(options.dataDirectory, 'm2') : fileURLToPath(new URL('../../../.data/work/', import.meta.url)));
+  // Review F4: the work-data lock is taken before the shared event log is read or repaired, and
+  // held until every event producer has stopped and the log is closed.
+  await mkdir(workDataDirectory, { recursive: true });
+  const releaseWorkLock = await acquireInstanceLock(workDataDirectory);
   const events = new EventLog(workDataDirectory);
-  await events.init();
+  try { await events.init(); }
+  catch (error) { await releaseWorkLock(); throw error; }
   const emit = (event: { type: string }) => events.publish(event as { type: string } & Record<string, unknown>);
   const workRoot = options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url));
   const scene = new SceneService({
@@ -56,7 +63,7 @@ export async function createApp(options: AppOptions = {}) {
     emit,
   });
   const work = new WorkService({
-    workRoot, directory: workDataDirectory, emit,
+    workRoot, directory: workDataDirectory, emit, lockHeld: true,
     previewStartTimeoutMs: options.previewStartTimeoutMs,
     agent: {
       baseUrl: options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL,
@@ -66,7 +73,7 @@ export async function createApp(options: AppOptions = {}) {
     },
   });
   try { await work.init(); await service.init(); }
-  catch (error) { await work.close(); await service.close(); await events.close(); throw error; }
+  catch (error) { await work.close(); await service.close(); await events.close(); await releaseWorkLock(); throw error; }
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -172,6 +179,6 @@ export async function createApp(options: AppOptions = {}) {
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
     return work.repo.exclusive(() => scene.adopt(service, request.params.id, 'force' in body && body.force === true));
   });
-  app.addHook('preClose', async () => { await work.close(); await service.close(); await scene.idle(); await events.close(); });
+  app.addHook('preClose', async () => { await work.close(); await service.close(); await scene.idle(); await events.close(); await releaseWorkLock(); });
   return { app, service, scene, work, events };
 }

@@ -2,12 +2,15 @@ import { useState, type KeyboardEvent } from 'react';
 import type { Selection, Task } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
 import { useEventCenter } from './EventCenter.tsx';
+import { canSubmit, pickHint, submittedSelection, type PickState } from './pick-state.ts';
 
 const statusLabels: Record<Task['status'], string> = {
   queued: '排队中', running: '执行中', awaiting_approval: '等待请示', done: '候选已就绪', failed: '失败', cancelled: '已取消',
 };
 
-export default function PointSpeak({ selection }: { selection: Selection | null }) {
+export default function PointSpeak({ pick }: { pick: PickState }) {
+  const selection = submittedSelection(pick);
+  const submittable = canSubmit(pick);
   const { state, reload } = useEventCenter();
   const [instruction, setInstruction] = useState('');
   const [activeId, setActiveId] = useState('');
@@ -30,7 +33,7 @@ export default function PointSpeak({ selection }: { selection: Selection | null 
   function keyboard(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
-      void submit(instruction, selection);
+      if (submittable) void submit(instruction, selection);
     }
   }
   async function cancel(task: Task) {
@@ -46,8 +49,8 @@ export default function PointSpeak({ selection }: { selection: Selection | null 
       <textarea data-testid="instruction-input" value={instruction} onChange={event => setInstruction(event.target.value)} onKeyDown={keyboard}
         placeholder="例如：把这个按钮改成“马上购买”" rows={3}/>
     </label>
-    <p className="hint">{selection ? `将携带 ${selection.src} 作为选中对象。` : '当前没有选中对象，也可以提交整体修改。'} Ctrl/⌘ + Enter 提交。</p>
-    <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
+    <p className="hint"><span data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span> Ctrl/⌘ + Enter 提交。</p>
+    <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}</p>}
     {active && <div className="task-card" data-testid="task-card">
       <div className="task-heading"><strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong><code>{active.id.slice(0, 8)}</code></div>

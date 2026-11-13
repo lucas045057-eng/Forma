@@ -108,3 +108,20 @@ it('refuses when src/ or public/ itself is a junction (review F1)', async () => 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+it('refuses an existing clean repository that already tracks a forbidden file (review F3)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const gitDir = path.join(directory, 'data', 'work.git');
+    const { execFileSync } = await import('node:child_process');
+    // Plant a tracked secret behind the allow-list's back, then leave the work tree clean.
+    await writeFile(path.join(workRoot, 'src', 'deploy.pem'), 'fake key\n');
+    execFileSync('git', ['--git-dir', gitDir, '--work-tree', workRoot, '-c', 'user.name=t', '-c', 'user.email=t@t', 'add', '-f', 'src/deploy.pem'], { cwd: workRoot });
+    execFileSync('git', ['--git-dir', gitDir, '--work-tree', workRoot, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'legacy'], { cwd: workRoot });
+    const base = await repo.head();
+    await expect(repo.snapshot()).rejects.toMatchObject({ code: 'UNSAFE_TRACKED_FILE' });
+    await expect(repo.createCandidate('candidate6', base)).rejects.toMatchObject({ code: 'UNSAFE_TRACKED_FILE' });
+    const restarted = new WorkRepo({ workRoot, dataDirectory: path.join(directory, 'data') });
+    await expect(restarted.init()).rejects.toMatchObject({ code: 'UNSAFE_TRACKED_FILE' });
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
