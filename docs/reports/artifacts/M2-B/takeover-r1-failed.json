@@ -1,0 +1,16 @@
+{
+  "first": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button"
+  },
+  "failedPrompt": "读取 src/components/Button.tsx:5:5 的作品版本失败，请重新点选后再提交。",
+  "prompt": "将携带 src/components/Button.tsx:5:5 作为选中对象。",
+  "repicked": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "baseVersion": "bd2e62eceeccdb42296d6d13cd2da704bdacea21"
+  },
+  "failedTasksPosted": 0,
+  "tasksBefore": 5,
+  "tasksAfter": 5
+}

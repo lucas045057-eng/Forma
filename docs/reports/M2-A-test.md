@@ -194,3 +194,27 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 - 回合 2 那个“Node 直接崩”的真凶找到了：**本机 `fs.cpSync` 复制含二进制模型（`public/assets/*.glb`）的目录时会以 `0xC0000409` 杀掉进程**；换成 `copyFileSync` 逐文件复制后，作品副本能正常起后端、`GET /version` 也能拿到合法提交。
 - 但在**作品副本**上提交任务会在“建候选”阶段失败，API 只回 `TASK_FAILED`（不带底层原因），走不到“采用”那一步；在主工作树上把被 Vite 监视的 `src` 整体换成 junction 也不稳定。
 - 结论：F1 的 e2e 仍未验证；它由实现方 `repo.test.ts`（`src/public` 根与子项 lstat+realpath 双重检查、四类写操作 409）覆盖。**附带发现**：任务失败时 API 不暴露建候选失败的具体原因（只有 `TASK_FAILED`），排查这类问题只能靠单测，建议后续在任务事件里带上底层错误码。
+
+---
+
+# 接管后专项（N4 停机排空接点，HEAD `f70f046`）
+
+- 日期：2026-11-13。被测 HEAD：**`f70f046`**（master）。N4 的修法目前只在 `.worktrees/m2fix` 的未提交草稿里，**没有当 master 已修**；D3 由 CodeBuddy 在 `.worktrees/m2d3` 处理。
+- 新用例：`tests/e2e/m2a/15-n4-shutdown.spec.ts`。结果标成 **`test.fail`（预期失败）**：当前 master 的关闭路径仍会在 HTTP 排空前关日志/放锁。草稿合并且审查通过后去掉 `test.fail` 重跑，预期它会转为通过（若仍失败则是实现问题，不能改为跳过）。
+- 该用例不跑 D3 的 30 秒强杀全套，也不碰主工作树模板；假 key、loopback-only、出站守卫开启，使用独立临时作品/数据目录（`%TEMP%\pi-m2a-n4-shutdown`，跑完删除），未读真实 `.env`、未调用真实模型/Lux3D。
+
+## 用例设计与实测事实（`takeover-n4-shutdown.json`）
+
+1. 用独立作品副本正常启动一次后端建立版本库，再在**作品版本库**里配置 `core.fsmonitor` 为一段脚本：当测试放置 marker 时就阻塞并记录调用，释放后 `exit 1` 让 git 回退到完整扫描。这样不改实现，也能用一个真实 `GET /version` 的自动快照把一条**已被接受的作品操作**挂在 `repo.exclusive` 队列里。
+2. 写脏 `src/App.tsx` 后发真实 `GET /version`；fsmonitor 调用记录出现、请求保持未完成（`operationAcceptedAndBlocked=true`）。
+3. 触发真实优雅关闭（stdin `close` → `app.close()`），在 marker 仍存在时观察：
+   - 实例锁文件在作品操作完成前就消失（`unlock.reason=lock-file-gone`），当时 `headHasMarker=false`、`eventBytes=0`、`hasVersionChanged=false`、`operationCompleted=false`；
+   - 同一 `WORK_DATA_DIR` 的第二实例**成功启动**（`secondWhileBlocked.locked=false`），没有被 `INSTANCE_LOCKED` 拦下。
+4. 释放 marker 后：被挂住的 `GET /version` 返回 **200**，版本 `5b14d5ce…`；HEAD 与返回版本一致且包含被挂住快照的改动；事件日志出现 `version.changed`（seq 1）；重启实例读到 `current=1`、`oldest=1`（seq 接续，未归零），重启没有改写日志（`logAfterRestartEqualsClose=true`），`writesBeforeUnlock=false`（写入晚于解锁）。
+5. 证据同时记录了四个实例的 PID/端口，均已停止：`n4-bootstrap` 46844:6817、`n4-first` 59012:3008、`n4-second-instance` 59636:3015、`n4-restarted` 47624:11397；临时目录已删除，e2e webServer 的 3001/4011/5173/5174/5175 跑完也全部释放。
+
+## 结论与边界
+
+- **N4 在 master `f70f046` 上可稳定复现**：锁/日志在已接受的作品操作完成前就关闭/释放，第二实例可在关闭期间拿到锁。这是验收接点，不是“已修”证据；不能拿 `.worktrees/m2fix` 的草稿代替。
+- 用例用 `expect.soft` 记录全部事实再统一失败，因此每次都能产出上面这份对照；合并 N4 后要检查它是否变成“意外通过”（Playwright 会报 unexpectedly passed），并同时扫掉 `test.fail`。
+- 本轮未重跑完整 M2-A、`pnpm test`、M0/M1 套件，也未跑 D3 强杀与 F1 根 junction；这些等实现交付、审查通过、合并到同一冻结 HEAD 后统一重跑。
