@@ -2,6 +2,7 @@
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdir, copyFile, symlink, realpath, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -16,7 +17,7 @@ if (mode === 'launcher') {
 } else if (mode === 'backend') {
   const [directory, upstream] = process.argv.slice(3);
   const { createApp } = await import('./src/app.ts');
-  const app = await createApp({
+  const { app } = await createApp({
     workRoot: path.join(directory, 'work'), workDataDirectory: path.join(directory, 'data'),
     dataDirectory: path.join(directory, 'assets'), historyDirectory: path.join(directory, 'history'),
     base: upstream, key: 'fake-d3-only', codingAgentBaseUrl: upstream,
@@ -32,9 +33,17 @@ if (mode === 'launcher') {
   const ps = command => execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], { encoding: 'utf8', timeout: 30_000 });
   const snapshot = () => {
     const result = JSON.parse(ps("$p = @(Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,CreationDate,Name,CommandLine); $n = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,OwningProcess); @{processes=$p;listeners=$n} | ConvertTo-Json -Depth 4 -Compress"));
-    return { at: new Date().toISOString(), ...result };
+    // Raw command lines stay in memory; evidence must not capture other applications' arguments.
+    const processes = result.processes.map(({ CommandLine, ...identity }) => ({
+      ...identity,
+      commandDigest: createHash('sha256').update(CommandLine ?? '').digest('hex'),
+      previewWorker: /preview-worker\.(ts|js)/.test(CommandLine ?? ''),
+      piMatch: /vite.js/i.test(CommandLine ?? '') && /preview-cache/i.test(CommandLine ?? ''),
+      diagnosticDirectory: (CommandLine ?? '').toLowerCase().includes(directory.toLowerCase()),
+    }));
+    return { at: new Date().toISOString(), processes, listeners: result.listeners };
   };
-  const same = (a, b) => a && b && a.ProcessId === b.ProcessId && a.CreationDate === b.CreationDate && a.CommandLine === b.CommandLine;
+  const same = (a, b) => a && b && a.ProcessId === b.ProcessId && a.CreationDate === b.CreationDate && a.commandDigest === b.commandDigest;
   const descendants = (state, pid) => {
     const ids = new Set([pid]);
     for (let changed = true; changed;) {
@@ -111,7 +120,7 @@ if (mode === 'launcher') {
         entry.running = snapshot();
         entry.owned = descendants(entry.running, launcher.pid);
         entry.listeners = entry.running.listeners.filter(n => entry.owned.some(p => p.ProcessId === n.OwningProcess));
-        const workerIds = entry.owned.filter(p => /preview-worker\.(ts|js)/.test(p.CommandLine ?? '')).map(p => p.ProcessId);
+        const workerIds = entry.owned.filter(p => p.previewWorker).map(p => p.ProcessId);
         entry.previewResponses = [];
         for (const listener of entry.listeners.filter(n => workerIds.includes(n.OwningProcess))) {
           const response = await fetch(`http://127.0.0.1:${listener.LocalPort}/preview/c/${entry.task.candidateId}/`, { signal: AbortSignal.timeout(5000) });
@@ -119,7 +128,7 @@ if (mode === 'launcher') {
           await response.body?.cancel();
         }
         if (!entry.previewResponses.some(r => r.status === 200)) throw new Error('No actual worker-owned Vite HTTP 200');
-        entry.piMatches = entry.running.processes.filter(p => /vite.js/i.test(p.CommandLine ?? '') && /preview-cache/i.test(p.CommandLine ?? ''));
+        entry.piMatches = entry.running.processes.filter(p => p.piMatch);
         const targetPid = kind === 'backend-pid' ? backend.backendPid : launcher.pid;
         const identity = entry.owned.find(p => p.ProcessId === targetPid);
         if (!identity) throw new Error('No verified target identity');

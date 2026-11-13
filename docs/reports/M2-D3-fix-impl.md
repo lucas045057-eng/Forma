@@ -31,3 +31,12 @@
 - typecheck / build / 全量单测连续五次：未运行。
 - 正式 E2E：交 Pi 执行，本分支未修改其用例或正式证据。
 - 本轮尚未启动项目服务或候选进程，无本轮服务树待清理。
+
+## 诊断入口修正（2026-11-13 续作）
+
+- 核验起点为 `84cf6c0`，工作树干净，没有重新安装依赖或合并基线。
+- 已读 `orbital/jobs/job_e9883509/output.log`：两种场景都在 backend 启动时失败，`createApp` 返回 `{ app, service, scene, work, events }`，原脚本错误地在返回集合上调用 listen。本次改为解构 `{ app }`。前次没有进入强杀场景，不能计为 D3 复现，日志中两项 cleanupSurvivors 均为空。
+- 全局进程命令行仅用于内存匹配，保存前改为 SHA-256 摘要及 previewWorker/piMatch/diagnosticDirectory 标记；保留 PID、PPID、创建时间、进程名和监听者，不把其他应用完整命令行收进新证据。身份比较继续要求 PID、创建时间、命令摘要一致。
+- 启动阻塞：调度指定的 `E:/空间化AI工作台/orbital/coordination/m2-takeover/bg-m2d3.cmd` 读取返回不存在，目录枚举亦无该文件。未自行编造 ORBITAL_SESSION_ID，未退回缺失通知上下文的 bg.cmd；本轮没有新 job id，没有启动真实复现。调度需恢复包装后执行 `E:/空间化AI工作台/orbital/coordination/m2-takeover/bg-m2d3.cmd "node apps/server/d3-diagnostic.mjs"`。
+- 本次 `node --check apps/server/d3-diagnostic.mjs` 和 `git diff --check` 均通过；未运行服务或整套测试。
+- 本次仅修正诊断入口及证据字段；D3 产品实现、重启回收、偶发单测根因及连续五次全量验证仍未完成。
