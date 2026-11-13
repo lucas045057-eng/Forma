@@ -167,3 +167,10 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 - 真实模型“10 次至少 8 次改对”。
 - 重启后无主候选目录自动清理、事件容量/截断（S2）、完整 CSP（S1）的端到端。
 - 预览源 HMR 转发对**候选**的外来 Origin 负向用例（仅实现方单测覆盖）。
+
+## 回合 2 补测（在 HEAD `81558a7`：F1 修复 + F2/F3/F4/R1 合并之后）
+
+- **重跑**：在 `81558a7` 上重跑了 `pnpm test:e2e:m2a`：**26 通过 / R6（`zz-kill`）仍失败**。
+- **其余套件未在 `81558a7` 之后重跑**：M0-B 24、M0-A 27、M1-A 7、M1-B 23、M2-B 3 是合并前 `3faa865` 上的结果；本轮只改了 04-sandbox 与报告，但 F2（预览源 Host 白名单）、F3、F4、R1 的合并可能影响它们，**需要下一轮在前述 HEAD 上重跑**。
+- **F1（`src/` 或 `public/` 自身是 junction）e2e 未运行**：本机执行「把作品目录 `src` 整体换成 junction + 复制/删除含 junction 的作品副本」这类 fs 操作时，Playwright worker 与独立 Node 进程（`tests/e2e/m2a/f1-check.mjs`）**都会以 `0xC0000409` 直接崩溃且无输出**；已核查 `node_modules` 未受损（`.pnpm` 252 项、`vite`/`react`/`fastify` 仍在）。该保护路径由实现方 `apps/server/src/work/repo.test.ts` 的用例覆盖（作品目录 `src/public` 根与子项均检查 lstat + realpath，四类写操作 409），本报告不宣称它经过 e2e 验证。
+- **D3（R6）仍存在**：在 `81558a7` 上重跑，`taskkill /T /F` 掉 3001 后端后 30 秒内带 `preview-cache` 的 Vite 进程仍不退出（`isolation-r6.json`）。这与整改报告里“父进程异常退出后预览自动退出”的 IPC 生命周期说明不一致，建议排查 `preview-worker` 在父进程被强杀时的 IPC 断开检测。

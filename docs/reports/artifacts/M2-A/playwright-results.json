@@ -5,8 +5,7 @@
       "E:\\空间化AI工作台\\node_modules\\@playwright\\test\\cli.js",
       "test",
       "-c",
-      "playwright.m2a.config.ts",
-      "tests/e2e/m2a/zz-kill.spec.ts"
+      "playwright.m2a.config.ts"
     ],
     "configFile": "E:\\空间化AI工作台\\playwright.m2a.config.ts",
     "rootDir": "E:/空间化AI工作台/tests/e2e/m2a",
@@ -108,6 +107,1131 @@
   },
   "suites": [
     {
+      "title": "01-flow.spec.ts",
+      "file": "01-flow.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "指着说闭环（后端）",
+          "file": "01-flow.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [
+            {
+              "title": "点选 → 任务 → 候选预览 → 采用 → 回退",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                        "line": 21,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6683,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:16:45.244Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                            "line": 21,
+                            "column": 6
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b00f656b6cfa965527f9-001292ceba8f16e0a164",
+              "file": "01-flow.spec.ts",
+              "line": 26,
+              "column": 3
+            },
+            {
+              "title": "改了选中范围以外的文件时 outOfScope 记录下来（不拦截）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                        "line": 21,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4238,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:16:52.113Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                            "line": 21,
+                            "column": 6
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b00f656b6cfa965527f9-f0dd3e71ff77ca35b179",
+              "file": "01-flow.spec.ts",
+              "line": 118,
+              "column": 3
+            },
+            {
+              "title": "候选列表与任务列表包含刚才的记录",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                        "line": 21,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:16:56.360Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m2a\\01-flow.spec.ts",
+                            "line": 21,
+                            "column": 6
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b00f656b6cfa965527f9-1ebb42fa6ccce04323eb",
+              "file": "01-flow.spec.ts",
+              "line": 141,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "02-discard.spec.ts",
+      "file": "02-discard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "撤回候选",
+          "file": "02-discard.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "discard 后候选目录 / 分支 / 预览都消失，作品不变",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5237,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:16:56.461Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "36b03d31e0f04b2dd5ae-66107846cf33beafe69a",
+              "file": "02-discard.spec.ts",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "采用后的候选不能再撤回，也不能重复采用",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4642,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:01.802Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "36b03d31e0f04b2dd5ae-b26ff8772c656dc48e57",
+              "file": "02-discard.spec.ts",
+              "line": 57,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "03-selection.spec.ts",
+      "file": "03-selection.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "选中对象校验",
+          "file": "03-selection.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "非法 src / 行号 / baseVersion 全部 400，且不调用上游",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 834,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:06.541Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8f1e2fdbc9285e2dd756-a441027e3a52097e1709",
+              "file": "03-selection.spec.ts",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "选中文件在 baseVersion 之后被改过 → 409 STALE_SELECTION",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 958,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:07.468Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8f1e2fdbc9285e2dd756-81d1d51bdbbc67f23827",
+              "file": "03-selection.spec.ts",
+              "line": 47,
+              "column": 3
+            },
+            {
+              "title": "合法 baseVersion 可以继续提交（正向对照）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2926,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:08.433Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8f1e2fdbc9285e2dd756-69876bfb6d85e8cb32d7",
+              "file": "03-selection.spec.ts",
+              "line": 64,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "04-sandbox.spec.ts",
+      "file": "04-sandbox.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Agent 沙箱边界（D2 修复后）",
+          "file": "04-sandbox.spec.ts",
+          "line": 41,
+          "column": 6,
+          "specs": [
+            {
+              "title": "六类越界写入被拒，候选里没有越界文件；正常改动仍然生效",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3819,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:11.451Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f976b16a7fa28af063f8-717a58b5b2506259d39f",
+              "file": "04-sandbox.spec.ts",
+              "line": 49,
+              "column": 3
+            },
+            {
+              "title": "作品目录里出现 junction 时，提交任务被 409 UNSAFE_WORK_TREE 拒绝（D2-1）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1693,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:15.357Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f976b16a7fa28af063f8-47ebdaa406901e7b6829",
+              "file": "04-sandbox.spec.ts",
+              "line": 78,
+              "column": 3
+            },
+            {
+              "title": "候选里新增同名路径、作品目录里该路径是 junction 时，采用被拒且目标为空（D2-2）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5157,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:17.055Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f976b16a7fa28af063f8-88c63aa07f4c8d0a700c",
+              "file": "04-sandbox.spec.ts",
+              "line": 113,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "05-failures.spec.ts",
+      "file": "05-failures.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "失败与取消",
+          "file": "05-failures.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "上游 500 → 任务失败且不留候选",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2373,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:22.305Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "139659e21d9f5d3cc6ff-dbbed51d9fc266ce3570",
+              "file": "05-failures.spec.ts",
+              "line": 24,
+              "column": 3
+            },
+            {
+              "title": "上游只回文本（没有工具调用）→ AGENT_PROTOCOL",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2380,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:24.771Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "139659e21d9f5d3cc6ff-89db35e0700e1fefbce6",
+              "file": "05-failures.spec.ts",
+              "line": 37,
+              "column": 3
+            },
+            {
+              "title": "上游超时 → AGENT_TIMEOUT，且不留下候选与预览",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6413,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:27.162Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "139659e21d9f5d3cc6ff-522aa7b82ef41d5cb786",
+              "file": "05-failures.spec.ts",
+              "line": 48,
+              "column": 3
+            },
+            {
+              "title": "任务中途取消 → cancelled，不留候选与预览",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2612,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:33.582Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "139659e21d9f5d3cc6ff-1876c747a432b3704835",
+              "file": "05-failures.spec.ts",
+              "line": 63,
+              "column": 3
+            },
+            {
+              "title": "没有改动就结束 → NO_CHANGES，不留候选",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2950,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:36.199Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "139659e21d9f5d3cc6ff-dc14205f251dc9631f5b",
+              "file": "05-failures.spec.ts",
+              "line": 82,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "06-limit.spec.ts",
+      "file": "06-limit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "候选上限",
+          "file": "06-limit.spec.ts",
+          "line": 17,
+          "column": 6,
+          "specs": [
+            {
+              "title": "第 4 个候选产生时最早的被自动撤回",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 10282,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:39.239Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7be9537fa1e6ea9a4d08-2bbfdb00034718143edb",
+              "file": "06-limit.spec.ts",
+              "line": 24,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "07-conflict.spec.ts",
+      "file": "07-conflict.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "采用冲突",
+          "file": "07-conflict.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "后采用的候选 409 MERGE_CONFLICT，主线不变、无半合并",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8234,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:49.698Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "990aea35b8680ae3be7d-1573c17bf3b27302d9bc",
+              "file": "07-conflict.spec.ts",
+              "line": 14,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "08-events.spec.ts",
+      "file": "08-events.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "事件与补拉",
+          "file": "08-events.spec.ts",
+          "line": 16,
+          "column": 6,
+          "specs": [
+            {
+              "title": "断开 WS 后的事件可以通过 since 补齐",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 125,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:58.114Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "690b652723cfa2442b94-c5ac08863b8f4350532a",
+              "file": "08-events.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "后端重启后 seq 接续（独立沙箱数据目录）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1760,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:17:58.335Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "690b652723cfa2442b94-d735caee59c5c3ceb310",
+              "file": "08-events.spec.ts",
+              "line": 51,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "09-preview-origin.spec.ts",
+      "file": "09-preview-origin.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "预览源与 D1",
+          "file": "09-preview-origin.spec.ts",
+          "line": 16,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET/HEAD 放行，POST 与未知候选被拒，API 路径 404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5370,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:00.199Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fc3c23c96a74b1895231-67b12c55cacf11b2ae9d",
+              "file": "09-preview-origin.spec.ts",
+              "line": 20,
+              "column": 3
+            },
+            {
+              "title": "D1 回归：候选预览在真实浏览器里直接渲染，不反复刷新，HMR 连上",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11809,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:05.672Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fc3c23c96a74b1895231-06c699340818e61e4932",
+              "file": "09-preview-origin.spec.ts",
+              "line": 77,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "11-resources.spec.ts",
+      "file": "11-resources.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "进程与资源",
+          "file": "11-resources.spec.ts",
+          "line": 12,
+          "column": 6,
+          "specs": [
+            {
+              "title": "删除候选不会删到 junction 指向的真实依赖",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5011,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:17.643Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7da17b2a0aff422f393f-492fe8e1189c3770dd69",
+              "file": "11-resources.spec.ts",
+              "line": 16,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "12-isolation.spec.ts",
+      "file": "12-isolation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M2-A 整改验收",
+          "file": "12-isolation.spec.ts",
+          "line": 18,
+          "column": 6,
+          "specs": [
+            {
+              "title": "B1：候选预览页里的脚本调用正式写入/付费接口全部被拒，计数为 0",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5390,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:22.920Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf93fcf07d851d357e5e-3d78548b5d2026d86e58",
+              "file": "12-isolation.spec.ts",
+              "line": 22,
+              "column": 3
+            },
+            {
+              "title": "B2：主作品的 Vite 读不到作品外文件，自己的源码仍然可读",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 20,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:28.418Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf93fcf07d851d357e5e-15be030c63f64b0807c7",
+              "file": "12-isolation.spec.ts",
+              "line": 72,
+              "column": 3
+            },
+            {
+              "title": "R1：自动快照不收录 .env / 备份 / 私钥",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 797,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:18:28.444Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bf93fcf07d851d357e5e-944c38243e5492562d55",
+              "file": "12-isolation.spec.ts",
+              "line": 98,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "zz-kill.spec.ts",
       "file": "zz-kill.spec.ts",
       "column": 0,
@@ -129,7 +1253,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "failed",
-                  "duration": 37170,
+                  "duration": 38029,
                   "error": {
                     "message": "Error: 后端被杀后候选预览进程还在\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
                     "stack": "Error: 后端被杀后候选预览进程还在\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m2a\\zz-kill.spec.ts:40:33",
@@ -153,7 +1277,7 @@
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-13T13:11:01.548Z",
+                  "startTime": "2026-11-13T13:18:29.337Z",
                   "annotations": [],
                   "attachments": [
                     {
@@ -187,9 +1311,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-13T13:10:58.448Z",
-    "duration": 41869.734,
-    "expected": 0,
+    "startTime": "2026-11-13T13:16:42.003Z",
+    "duration": 146286.27399999998,
+    "expected": 26,
     "skipped": 0,
     "unexpected": 1,
     "flaky": 0

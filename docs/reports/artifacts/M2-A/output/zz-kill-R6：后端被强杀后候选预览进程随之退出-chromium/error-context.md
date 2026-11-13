@@ -34,20 +34,21 @@ Received: false
       - generic [ref=e10]: 预览已连接
       - generic [ref=e11]:
         - text: 事件重连中 ·
-        - status [ref=e12]: "13"
+        - status [ref=e12]: "306"
       - button "开启选取" [active] [ref=e13] [cursor=pointer]
   - generic [ref=e14]:
     - region "作品预览" [ref=e15]:
       - generic [ref=e16]:
         - generic [ref=e17]: 作品 / 木间香薰
-        - generic [ref=e18]: 浏览模式 · 40%
+        - generic [ref=e18]: 浏览模式 · 44%
       - generic [ref=e19]:
         - generic [ref=e20]:
           - text: 作品版本
-          - code [ref=e21]: c6ff70d6f4
+          - code [ref=e21]: d325e5c411
         - button "回退上一次采用" [ref=e22] [cursor=pointer]
         - combobox "待定候选版本" [ref=e23]:
-          - option "候选 11dad506" [selected]
+          - option "候选 2dc25a07"
+          - option "候选 f27fe49e" [selected]
         - generic "预览模式" [ref=e24]:
           - button "当前版本" [pressed] [ref=e25] [cursor=pointer]
           - button "候选版本" [ref=e26] [cursor=pointer]
@@ -93,8 +94,8 @@ Received: false
           - status
       - generic [ref=e30]:
         - generic [ref=e31]:
-          - heading "候选 11dad506" [level=2] [ref=e32]
-          - generic [ref=e33]: 待定候选 1/3
+          - heading "候选 f27fe49e" [level=2] [ref=e32]
+          - generic [ref=e33]: 待定候选 2/3
         - generic [ref=e34]:
           - generic [ref=e35]: 构建：未检查
           - generic [ref=e36]: 冒烟：未检查
@@ -109,18 +110,18 @@ Received: false
             - code [ref=e45]: src/App.tsx
             - generic [ref=e46]:
               - generic [ref=e47]: diff --git a/src/App.tsx b/src/App.tsx
-              - generic [ref=e48]: index c9ef103..88b587a 100644
+              - generic [ref=e48]: index c9ef103..2e96fa8 100644
               - generic [ref=e49]: "--- a/src/App.tsx"
               - generic [ref=e50]: +++ b/src/App.tsx
-              - generic [ref=e51]: "@@ -24,7 +24,7 @@ export default function App() {"
-              - generic [ref=e52]: <p className="intro">把森林的温柔带回家。<br/>木间 · 雪松无火香薰，让每一次回家都值得期待。</p>
-              - generic [ref=e53]: <div className="price">¥ 168 <span> / 100 mL · 雪松与佛手柑</span></div>
-              - generic [ref=e54]: <div className="actions">
-              - generic [ref=e55]: "- <Button data-testid=\"buy-button\" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>立即购买</Button>"
-              - generic [ref=e56]: "+ <Button data-testid=\"buy-button\" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>马上购买</Button>"
-              - generic [ref=e57]: "<Button className=\"button-secondary\" data-testid=\"save-button\" onClick={() => setAction('已收藏这缕香气（演示）')}>收藏香气</Button>"
-              - generic [ref=e58]: </div>
-              - generic [ref=e59]: <p className="fine-print">一份给自己，也给生活的温柔礼物。</p>
+              - generic [ref=e51]: "@@ -27,7 +27,7 @@ export default function App() {"
+              - generic [ref=e52]: "<Button data-testid=\"buy-button\" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>立即购买</Button>"
+              - generic [ref=e53]: "<Button className=\"button-secondary\" data-testid=\"save-button\" onClick={() => setAction('已收藏这缕香气（演示）')}>收藏香气</Button>"
+              - generic [ref=e54]: </div>
+              - generic [ref=e55]: "- <p className=\"fine-print\">一份给自己，也给生活的温柔礼物。</p>"
+              - generic [ref=e56]: + <p className="fine-print">一份送自己，也给生活的温柔礼物。</p>
+              - generic [ref=e57]: </div>
+              - generic [ref=e58]: <ProductHero/>
+              - generic [ref=e59]: </section>
         - generic [ref=e60]:
           - button "采用此候选" [ref=e61] [cursor=pointer]
           - button "撤回候选" [ref=e62] [cursor=pointer]
@@ -132,7 +133,7 @@ Received: false
         - strong [ref=e68]: Button
         - code [ref=e69]: src/components/Button.tsx:5:5
       - paragraph [ref=e70]: 同源码实例：3 处；修改将影响全部实例（共享组件或列表项）。
-      - generic [ref=e71]: "{ \"src\": \"src/components/Button.tsx:5:5\", \"cid\": \"Button\", \"text\": \"立即购买\", \"bbox\": [ 61.796875, 312.375, 104, 47 ], \"styles\": { \"display\": \"block\", \"position\": \"static\", \"color\": \"rgb(255, 250, 240)\", \"backgroundColor\": \"rgb(117, 96, 68)\", \"fontSize\": \"13px\", \"fontFamily\": \"\\\"Microsoft YaHei\\\", sans-serif\", \"fontWeight\": \"400\", \"lineHeight\": \"normal\", \"padding\": \"14px 25px\", \"margin\": \"0px\", \"borderRadius\": \"3px\", \"width\": \"104px\", \"height\": \"47px\" }, \"instances\": 3, \"ancestors\": [ \"src/App.tsx:26:11\", \"src/App.tsx:21:9\", \"src/App.tsx:20:7\" ], \"baseVersion\": \"c6ff70d6f485e622cb13dd4408a5a21ce1bde303\" }"
+      - generic [ref=e71]: "{ \"src\": \"src/components/Button.tsx:5:5\", \"cid\": \"Button\", \"text\": \"立即购买\", \"bbox\": [ 61.796875, 152.375, 104, 47 ], \"styles\": { \"display\": \"block\", \"position\": \"static\", \"color\": \"rgb(255, 250, 240)\", \"backgroundColor\": \"rgb(117, 96, 68)\", \"fontSize\": \"13px\", \"fontFamily\": \"\\\"Microsoft YaHei\\\", sans-serif\", \"fontWeight\": \"400\", \"lineHeight\": \"normal\", \"padding\": \"14px 25px\", \"margin\": \"0px\", \"borderRadius\": \"3px\", \"width\": \"104px\", \"height\": \"47px\" }, \"instances\": 3, \"ancestors\": [ \"src/App.tsx:26:11\", \"src/App.tsx:21:9\", \"src/App.tsx:20:7\" ], \"baseVersion\": \"d325e5c411f855174f1c2bb704c9531e3aa60d0b\" }"
       - region "指着说" [ref=e72]:
         - paragraph [ref=e73]: POINT & SPEAK
         - heading "指着说" [level=2] [ref=e74]
@@ -145,21 +146,45 @@ Received: false
         - generic [ref=e79]:
           - generic [ref=e80]:
             - strong [ref=e81]: 候选已就绪
-            - code [ref=e82]: 11dad506
-          - paragraph [ref=e83]: 改按钮
-          - list [ref=e84]:
-            - listitem [ref=e85]: 任务已排队
-            - listitem [ref=e86]: 开始校验选中对象并创建候选版本
-            - listitem [ref=e87]: 候选目录已创建，编码 Agent 开始工作
-            - listitem [ref=e88]: 请求编码模型（第 1/16 轮）
-            - listitem [ref=e89]: 执行工具 read_file
-            - listitem [ref=e90]: 请求编码模型（第 2/16 轮）
-            - listitem [ref=e91]: 执行工具 replace_in_file
-            - listitem [ref=e92]: 请求编码模型（第 3/16 轮）
-            - listitem [ref=e93]: 执行工具 finish
-            - listitem [ref=e94]: 编码 Agent 已完成修改
-            - listitem [ref=e95]: 候选已提交，改动 1 个文件；正在启动预览
-            - listitem [ref=e96]: ok
+            - code [ref=e82]: 2dc25a07
+          - combobox "查看任务" [ref=e83]:
+            - option "2dc25a07 · 候选已就绪" [selected]
+            - option "e4784a04 · 候选已就绪"
+            - option "4ff00912 · 候选已就绪"
+            - option "53f3cc8f · 候选已就绪"
+            - option "375c7b94 · 候选已就绪"
+            - option "84f53905 · 候选已就绪"
+            - option "2c7e7330 · 候选已就绪"
+            - option "72f15fdc · 候选已就绪"
+            - option "b222f044 · 失败"
+            - option "852c2d3f · 失败"
+            - option "90f27301 · 失败"
+            - option "3f1ad1b7 · 已取消"
+            - option "1eb82543 · 失败"
+            - option "1070edb5 · 候选已就绪"
+            - option "63883cd3 · 候选已就绪"
+            - option "1214f819 · 候选已就绪"
+            - option "f27fe49e · 候选已就绪"
+            - option "a37aa96a · 候选已就绪"
+            - option "91a9451e · 候选已就绪"
+            - option "53982124 · 候选已就绪"
+            - option "55506dc6 · 候选已就绪"
+            - option "249188e1 · 候选已就绪"
+            - option "e8d606f1 · 候选已就绪"
+          - paragraph [ref=e84]: 改按钮
+          - list [ref=e85]:
+            - listitem [ref=e86]: 任务已排队
+            - listitem [ref=e87]: 开始校验选中对象并创建候选版本
+            - listitem [ref=e88]: 候选目录已创建，编码 Agent 开始工作
+            - listitem [ref=e89]: 请求编码模型（第 1/16 轮）
+            - listitem [ref=e90]: 执行工具 read_file
+            - listitem [ref=e91]: 请求编码模型（第 2/16 轮）
+            - listitem [ref=e92]: 执行工具 replace_in_file
+            - listitem [ref=e93]: 请求编码模型（第 3/16 轮）
+            - listitem [ref=e94]: 执行工具 finish
+            - listitem [ref=e95]: 编码 Agent 已完成修改
+            - listitem [ref=e96]: 候选已提交，改动 1 个文件；正在启动预览
+            - listitem [ref=e97]: ok
 ```
 
 # Test source

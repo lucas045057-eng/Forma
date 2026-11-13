@@ -8,6 +8,11 @@ import { writeArtifactFrom } from './artifact';
 /**
  * Agent 沙箱：六类越界写入被拒；作品目录里出现链接（junction）时，任何写作品树的操
  * 作都拒绝（409 UNSAFE_WORK_TREE，D2 修复后的行为）。
+ *
+ * F1（`src/` 整个是 junction）未在 e2e 覆盖：本机执行「把 src 换成 junction + 复制/删除含
+ * junction 的作品副本」这类 fs 操作时，Playwright worker 与独立 Node 进程都会以 0xC0000409
+ * 直接崩溃（无输出，node_modules 未受损）。该路径由实现方 `apps/server/src/work/repo.test.ts`
+ * 覆盖，详见报告。
  */
 
 const FORBIDDEN = [
@@ -71,7 +76,6 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
   });
 
   test('作品目录里出现 junction 时，提交任务被 409 UNSAFE_WORK_TREE 拒绝（D2-1）', async ({ page }) => {
-    // 先拿一个正常的 Selection（内部会读作品版本，此时目录还是干净的）
     const selection = await pickSelection(page, 'benefits');
     makeJunction();
     await setScript([
@@ -97,7 +101,6 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
 
     expect(response.status, JSON.stringify(response.body)).toBe(409);
     expect((response.body as any).error.code).toBe('UNSAFE_WORK_TREE');
-    // 读版本也要先快照，所以同样被拒
     expect(versionResponse.status).toBe(409);
     expect(targetEntries, 'junction 目标目录被写入').toEqual([]);
     expect((await mockStats()).body.calls, '被拒的请求不该调用上游').toBe(callsBefore);
@@ -120,7 +123,6 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
     const candidate = (await getCandidate(task.candidateId!)).body;
     expect(candidate.diff.map((entry) => entry.path)).toContain('src/link-out/escape.ts');
 
-    // 候选就绪后再在作品目录里建 junction：采用时应当被拒
     makeJunction();
     const before = appText();
     const adopted = await adoptCandidate(candidate.id);
@@ -141,7 +143,6 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
     expect((await getCandidate(candidate.id)).body.decision).toBe('pending');
 
     removeJunction();
-    // 删掉链接后，同一候选可以正常采用，且落在作品内
     const retried = await adoptCandidate(candidate.id);
     expect(retried.status, JSON.stringify(retried.body)).toBe(200);
     expect(existsSync(path.join(WORK_ROOT, 'src', 'link-out', 'escape.ts')), '采用后文件没有落在作品内').toBe(true);
