@@ -53,3 +53,32 @@ it('aborts a conflicting adoption without changing the main worktree', async () 
     await repo.removeCandidate('candidate1');
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+it('refuses snapshot, candidates, adopt and revert while the work tree contains a junction (D2)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  const { mkdir, readdir, rmdir, symlink } = await import('node:fs/promises');
+  const outside = path.join(directory, 'outside');
+  const link = path.join(workRoot, 'src', 'link-out');
+  try {
+    const base = await repo.snapshot();
+    await repo.createCandidate('candidate2', base);
+    // The candidate adds a file below a path that the work tree will later hold as a junction.
+    await mkdir(path.join(repo.candidatePath('candidate2'), 'src', 'link-out'), { recursive: true });
+    await writeFile(path.join(repo.candidatePath('candidate2'), 'src', 'link-out', 'escape.ts'), 'escaped\n');
+    await repo.commitCandidate('candidate2', '在 link-out 下新增文件');
+    await mkdir(outside, { recursive: true });
+    await symlink(outside, link, 'junction');
+    for (const attempt of [() => repo.snapshot(), () => repo.adopt('candidate2'), () => repo.createCandidate('candidate3', base), () => repo.revert(base)]) {
+      await expect(attempt()).rejects.toMatchObject({ code: 'UNSAFE_WORK_TREE', status: 409 });
+    }
+    expect(await readdir(outside)).toEqual([]);
+    await rmdir(link);
+    // With the link gone the same adoption lands inside the work tree.
+    await repo.adopt('candidate2');
+    expect(await readFile(path.join(workRoot, 'src', 'link-out', 'escape.ts'), 'utf8')).toBe('escaped\n');
+    expect(await readdir(outside)).toEqual([]);
+  } finally {
+    await import('node:fs/promises').then(({ rmdir }) => rmdir(link).catch(() => {}));
+    await rm(directory, { recursive: true, force: true });
+  }
+});

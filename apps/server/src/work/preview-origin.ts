@@ -28,9 +28,13 @@ export function createPreviewOrigin(previews: PreviewManager, options: { mainPor
     upstream.end();
   });
   server.on('upgrade', (incoming, socket, head) => {
-    if (!(incoming.url ?? '').startsWith('/preview/main/hmr') || incoming.headers.origin !== studioOrigin && incoming.headers.origin !== `http://${incoming.headers.host}`) { socket.destroy(); return; }
-    const upstream = connect(mainPort, '127.0.0.1', () => {
-      const headers = { ...incoming.headers, host: `127.0.0.1:${mainPort}` };
+    const url = incoming.url ?? '';
+    // Only the Vite HMR socket of the main work or of a running candidate; nothing else upgrades.
+    const candidate = /^\/preview\/c\/([a-z0-9]{6,32})\/hmr(?:\?|$)/.exec(url);
+    const port = /^\/preview\/main\/hmr(?:\?|$)/.test(url) ? mainPort : candidate ? previews.port(candidate[1]) : undefined;
+    if (!port || incoming.headers.origin !== studioOrigin && incoming.headers.origin !== `http://${incoming.headers.host}`) { socket.destroy(); return; }
+    const upstream = connect(port, '127.0.0.1', () => {
+      const headers = { ...incoming.headers, host: `127.0.0.1:${port}` };
       delete headers.cookie; delete headers.authorization;
       upstream.write(`GET ${incoming.url} HTTP/1.1\r\n${Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join('\r\n')}\r\n\r\n`);
       if (head.length) upstream.write(head);

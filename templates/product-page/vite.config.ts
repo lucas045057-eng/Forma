@@ -20,7 +20,6 @@ function packages(folder: string) {
   }
 }
 packages(dependencies);
-const candidate = process.env.PREVIEW_BASE !== undefined;
 export default defineConfig({
   base: process.env.PREVIEW_BASE ?? '/preview/main/',
   cacheDir: process.env.PREVIEW_CACHE_DIR,
@@ -28,6 +27,9 @@ export default defineConfig({
   server: {
     host: '127.0.0.1', port: Number(process.env.PREVIEW_PORT ?? 5174), strictPort: true,
     fs: { strict: true, allow: [...allow], deny: ['**/.env*', '**/*.{pem,key,crt,p12,pfx}', '**/.git/**', '**/*.{bak,tmp}'] },
-    hmr: candidate ? false : { clientPort: Number(process.env.PREVIEW_ORIGIN_PORT ?? 5175), path: '/hmr' },
+    // Vite's client always opens its WebSocket and reloads the page in a loop when it cannot,
+    // so candidates are not run with HMR off: main work and candidates both reach their own
+    // dev server's socket through the preview origin at <base>hmr.
+    hmr: { clientPort: Number(process.env.PREVIEW_ORIGIN_PORT ?? 5175), path: '/hmr' },
   },
 });

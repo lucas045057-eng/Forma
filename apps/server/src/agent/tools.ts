@@ -44,7 +44,11 @@ export class Sandbox {
     let current = root;
     for (const part of normalized.split('/')) {
       current = path.join(current, part);
-      try { if ((await lstat(current)).isSymbolicLink()) throw new ToolError('路径不得经过符号链接'); }
+      try {
+        if ((await lstat(current)).isSymbolicLink()) throw new ToolError('路径不得经过符号链接');
+        const real = await realpath(current);
+        if (path.relative(current, real) !== '') throw new ToolError('路径不得经过符号链接或目录联接');
+      }
       catch (error) { if (error instanceof ToolError) throw error; if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
     }
     return { absolute: current, relative: normalized };

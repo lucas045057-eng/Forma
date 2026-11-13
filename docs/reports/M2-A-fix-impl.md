@@ -81,3 +81,22 @@ iframe URL 示例：`http://127.0.0.1:5175/preview/main/?studioOrigin=http%3A%2F
 - 没有自动杀死无法确认所有权的历史 PID。本轮已按进程树清理自启服务和 pnpm 残留；最终隔离端口监听数 0、匹配本工作树的进程数 0。
 - R3 使用同步写盘/fsync 以保持原 emit 接口和明确持久化顺序，较高事件频率会增加主线程延迟；长期日志容量优化留 S2。
 - 外部网络/CSP、持久化容量与完整 Selection 校验分别仍在 S1/S2/S3 未完成范围。
+
+## D1 / D2（Pi 测试阻断项）· Claude Code 修复（2026-11-13，用户指定“你来修”）
+
+### D1 候选预览在浏览器里渲染不出 —— 已修
+- **根因**：Vite 的浏览器客户端无论 `hmr` 设置如何都会建立 WebSocket；连不上时进入“server connection lost → 轮询 → location.reload()”循环，正在加载的模块被中止，`#root` 一直为空。候选原先以 `hmr: false` 启动，而预览源只转发主作品的 HMR 升级。
+- **修法**：候选与主作品一律启用 HMR，`clientPort` 指向预览源，路径 `<base>hmr`；预览源转发 `/preview/main/hmr` 与 `/preview/c/<运行中的候选>/hmr` 的 WebSocket 升级到对应 dev server，其他路径、未知候选、外来 Origin 一律断开（`work/preview-origin.ts`）。候选 Vite 进程的环境里传入 `PREVIEW_ORIGIN_PORT`。
+- **验证**：单测 `work/preview-origin.test.ts`（主作品与候选的 HMR 升级被转发、其余被拒）。真实浏览器（隔离的作品副本 + mock 模型 + 预览源）直接打开 `http://127.0.0.1:<预览源>/preview/c/<id>/`：`#root` 有内容、购买按钮为“马上购买”、`data-src=src/components/Button.tsx:5:5`、10 秒内只导航 1 次、控制台有 `[vite] connected`、“connection lost” 0 次。
+
+### D2 沙箱“经 junction 写出 src/” —— 根因与 Pi 报告不同，已修真正的风险
+- **实测**：本机 Node 建的 junction，`lstat().isSymbolicLink()` 为 **true**，沙箱原有检查能识别它。
+- **Pi 用例实际发生的事**：junction 建在**作品目录** `src/link-out`；候选从作品版本库检出，快照本就跳过链接，所以候选里没有这个 junction。Agent 写 `src/link-out/escape.ts` 落在**候选内部**新建的普通目录里，没有逃出（这也是 Pi 看到目标目录为空的原因），只是改动列表多了这个文件。
+- **真正的风险**：采用（或回退）时 git 把这个文件合并回作品目录，而作品目录里 `src/link-out` 是 junction —— git 会顺着它把文件写到作品外。
+- **修法**：
+  1. `WorkRepo.assertNoLinks()`：作品目录 `src/`、`public/` 下出现任何链接（按 lstat 与 realpath 双重判断）时，**快照、建候选、采用、回退一律拒绝**，409 `UNSAFE_WORK_TREE`，提示删除该链接。因为提交任务、读版本都会先快照，所以作品里有链接时 `POST /tasks`、`GET /version` 也会 409。
+  2. 沙箱逐段检查在 `isSymbolicLink()` 之外再比较 realpath，任何类型的重解析点都不能经过。
+- **验证**：单测 `work/repo.test.ts` 新增用例：作品目录含 junction 时四种操作都 409、目标目录为空；删掉链接后同一采用正常落在作品内。
+- **对 Pi 用例的影响**：`04-sandbox` 的 junction 用例原期望“任务完成且候选改动只有 App.tsx”；修复后**提交任务就会被 409 `UNSAFE_WORK_TREE` 拒绝**，需要按新行为改断言（目标目录为空、提交被拒、作品目录不变）。`10-known-defect` 的候选预览地址应改为预览源 `http://127.0.0.1:5175/preview/c/<id>/`（不再经 3001）。
+
+全量：typecheck、build、`pnpm test`（shared 68、插件 20、scene-renderer 5、后端 119、studio 6）全过。

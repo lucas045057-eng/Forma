@@ -39,7 +39,7 @@ export class PreviewManager {
     const vite = await realpath(path.join(this.options.workRoot, 'node_modules', 'vite', 'bin', 'vite.js'));
     const port = await freePort();
     // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
-    const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id) };
+    const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
     for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT', 'ComSpec']) {
       if (process.env[key] !== undefined) env[key] = process.env[key];
     }

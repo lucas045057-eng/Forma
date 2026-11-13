@@ -109,9 +109,33 @@ export class WorkRepo {
     const staged = (await command(['ls-files', '--stage', '-z'])).stdout.split('\0').filter(Boolean);
     if (staged.some(entry => entry.startsWith('120000 ') || !this.permitted(entry.slice(entry.indexOf('\t') + 1)))) throw new WorkError('UNSAFE_INDEX', '暂存区含不允许的路径或链接');
   }
+  /**
+   * Links (symlinks, junctions) inside the work's writable areas are refused outright: git writes
+   * through an existing directory link, so merging a candidate that adds `src/link/x.ts` over a
+   * work tree where `src/link` is a junction would place the file outside the work. Compared by
+   * real path as well, because the link type reported by lstat differs across link kinds.
+   */
+  async assertNoLinks(root = this.workRoot) {
+    const base = await realpath(root);
+    const walk = async (folder: string, relative: string): Promise<void> => {
+      let entries;
+      try { entries = await readdir(folder, { withFileTypes: true }); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
+      for (const entry of entries) {
+        const absolute = path.join(folder, entry.name), file = `${relative}/${entry.name}`;
+        const info = await lstat(absolute);
+        const real = await realpath(absolute).catch(() => '');
+        if (info.isSymbolicLink() || !real || path.relative(path.join(base, file), real) !== '') {
+          throw new WorkError('UNSAFE_WORK_TREE', `作品目录里的 ${file} 是链接（符号链接或目录联接），出于安全拒绝操作；请删除该链接后重试`, 409);
+        }
+        if (info.isDirectory()) await walk(absolute, file);
+      }
+    };
+    for (const area of ['src', 'public']) await walk(path.join(base, area), area);
+  }
   async head() { return (await this.main(['rev-parse', 'HEAD'])).stdout.trim(); }
   /** Commit whatever is on disk (3D write-back, manual edits) so HEAD always equals the files. */
   async snapshot(message = '自动快照：作品目录的未提交改动') {
+    await this.assertNoLinks();
     if ((await this.main(['status', '--porcelain'])).stdout.trim()) {
       await this.stage(this.workRoot, args => this.main(args));
       if ((await this.main(['diff', '--cached', '--name-only'])).stdout.trim()) await this.main(['commit', '-q', '-m', message]);
@@ -141,6 +165,7 @@ export class WorkRepo {
 
   async createCandidate(id: string, base: string) {
     const directory = this.candidatePath(id);
+    await this.assertNoLinks();
     if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
     try {
       await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
@@ -195,6 +220,7 @@ export class WorkRepo {
   }
   /** Merge the candidate into main. Returns the merge commit; a conflict leaves main untouched. */
   async adopt(id: string) {
+    await this.assertNoLinks();
     await this.snapshot();
     const merge = await this.main(['merge', '--no-ff', '-q', '-m', `采用候选版本 ${id}`, this.branch(id)], true);
     if (merge.code !== 0) {
@@ -204,6 +230,7 @@ export class WorkRepo {
     return this.head();
   }
   async revert(mergeCommit: string) {
+    await this.assertNoLinks();
     await this.snapshot();
     const result = await this.main(['revert', '-m', '1', '--no-edit', mergeCommit], true);
     if (result.code !== 0) {
