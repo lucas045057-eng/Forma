@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,7 +10,11 @@ it('rejects preview-origin mutations before any task or paid upstream work, and 
   const root = await mkdtemp(path.join(tmpdir(), 'isolation-'));
   await mkdir(path.join(root, 'work/src'), { recursive: true });
   await writeFile(path.join(root, 'work/src/App.tsx'), '<div/>');
-  const { app, work, service } = await createApp({ workRoot: path.join(root, 'work'), dataDirectory: path.join(root, 'assets'), base: 'http://127.0.0.1:1', key: 'fake-only' });
+  const { app, work, service, scene } = await createApp({ workRoot: path.join(root, 'work'), dataDirectory: path.join(root, 'assets'), base: 'http://127.0.0.1:1', key: 'fake-only' });
+  const paid = vi.spyOn(service, 'submit');
+  const write = vi.spyOn(scene, 'put');
+  const submit = vi.spyOn(work, 'submit');
+  const adopt = vi.spyOn(work, 'adopt');
   const server = createPreviewOrigin(work.previews);
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address() as { port: number };
@@ -21,6 +25,8 @@ it('rejects preview-origin mutations before any task or paid upstream work, and 
       expect(result.json().error.code).toBe('ORIGIN_DENIED');
       expect((await fetch(`http://127.0.0.1:${address.port}${url}`, { method })).status).toBe(404);
     }
+    expect(paid).not.toHaveBeenCalled(); expect(write).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled(); expect(adopt).not.toHaveBeenCalled();
     expect(service.list()).toEqual([]);
     expect(work.listTasks()).toEqual([]);
     expect(work.listCandidates()).toEqual([]);

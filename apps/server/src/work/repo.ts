@@ -125,15 +125,27 @@ export class WorkRepo {
     const result = await this.main(['show', `${version}:${file}`], true);
     return result.code === 0 ? result.stdout : undefined;
   }
+  async transitionMatches(before: string, kind: 'adopt' | 'revert', id: string, target?: string) {
+    const text = (await this.main(['log', '-1', '--format=%P%n%B'])).stdout;
+    const [parents, ...body] = text.split('\n');
+    if (parents.split(' ')[0] !== before) return false;
+    if (kind === 'adopt') {
+      const candidate = (await this.main(['rev-parse', this.branch(id)], true)).stdout.trim();
+      return parents.split(' ')[1] === candidate && body.join('\n').trim() === `采用候选版本 ${id}`;
+    }
+    return !!target && body.join('\n').includes(target);
+  }
   async fileChangedSince(version: string, file: string) {
     return (await this.main(['diff', '--quiet', version, 'HEAD', '--', file], true)).code !== 0;
   }
 
   async createCandidate(id: string, base: string) {
     const directory = this.candidatePath(id);
-    await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
-    try { await this.linkDependencies(directory); return directory; }
-    catch (error) { await this.removeCandidate(id); throw error; }
+    if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
+    try {
+      await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
+      await this.linkDependencies(directory); return directory;
+    } catch (error) { await this.removeCandidate(id); throw error; }
   }
   /** pnpm's package links are relative, so link every package to its real location instead of the folder. */
   private async linkDependencies(directory: string) {

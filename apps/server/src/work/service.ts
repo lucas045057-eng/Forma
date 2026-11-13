@@ -17,7 +17,7 @@ interface StoredTask extends Task {
 }
 interface StoredCandidate extends Candidate { taskId: string; createdAt: string }
 interface Adoption { mergeCommit: string; candidateId: string; at: string }
-interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[]; intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string } }
+interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[]; intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string } }
 
 export interface WorkServiceOptions {
   workRoot: string;
@@ -92,7 +92,8 @@ export class WorkService {
       await this.repo.removeCandidate(intent.id);
       if (candidate) candidate.decision = 'discarded';
     } else if (head !== intent.before) {
-      // The queue owns all writes: a changed HEAD after a durable intent is the committed operation.
+      const target = intent.target;
+      if (!await this.repo.transitionMatches(intent.before, intent.kind, intent.id, target)) throw new WorkError('RECOVERY_CONFLICT', '作品历史与未完成意图不一致，请保留数据并人工检查', 409);
       if (intent.kind === 'adopt') {
         if (candidate) candidate.decision = 'adopted';
         if (!this.state.adoptions.some(a => a.mergeCommit === head)) this.state.adoptions.push({ mergeCommit: head, candidateId: intent.id, at: new Date().toISOString() });
@@ -283,7 +284,7 @@ export class WorkService {
     const adoption = this.state.adoptions.at(-1);
     if (!adoption) throw new WorkError('NO_ADOPTION', '没有可以回退的采用记录', 409);
     await this.snapshot();
-    this.state.intent = { kind: 'revert', id: adoption.candidateId, before: await this.repo.head() };
+    this.state.intent = { kind: 'revert', id: adoption.candidateId, before: await this.repo.head(), target: adoption.mergeCommit };
     await this.save();
     const version = await this.repo.revert(adoption.mergeCommit);
     await this.recoverIntent();

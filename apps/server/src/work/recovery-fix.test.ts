@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -20,6 +20,13 @@ it('only snapshots permitted work files and serializes concurrent snapshots', as
     const heads = await Promise.all(Array.from({ length: 5 }, () => repo.snapshot()));
     expect(new Set(heads).size).toBe(1);
     expect(heads[0]).not.toBe(first);
+    const links = vi.spyOn(repo as unknown as { linkDependencies: () => Promise<void> }, 'linkDependencies').mockRejectedValueOnce(new Error('link failure'));
+    await expect(repo.createCandidate('broken1', heads[0])).rejects.toThrow('link failure');
+    expect(await repo.candidateExists('broken1')).toBe(false);
+    links.mockRestore();
+    await repo.createCandidate('broken1', heads[0]);
+    expect(await repo.candidateExists('broken1')).toBe(true);
+    await repo.removeCandidate('broken1');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
@@ -41,7 +48,9 @@ it('recovers a committed adoption from durable intent without merging twice', as
     await service.init();
     expect(service.getCandidate('example1').decision).toBe('adopted');
     expect((await service.version()).version).toBe(committed);
-    await service.revert();
+    const concurrent = await Promise.allSettled([service.revert(), service.revert(), service.version()]);
+    expect(concurrent.filter(result => result.status === 'fulfilled')).toHaveLength(2);
+    expect(concurrent.filter(result => result.status === 'rejected')).toHaveLength(1);
     expect(await readFile(path.join(workRoot, 'src/App.tsx'), 'utf8')).toBe('before');
     await expect(service.revert()).rejects.toMatchObject({ code: 'NO_ADOPTION' });
   } finally { await service.close(); await rm(root, { recursive: true, force: true }); }

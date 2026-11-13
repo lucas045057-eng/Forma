@@ -18,8 +18,15 @@ export function installBridge(): () => void {
   const send = (message: PreviewMessage) => {
     if (window.parent !== window) window.parent.postMessage(message, origin);
   };
+  let observedCanvas: Element | null = null;
   const reportSize = () => {
-    const width = document.querySelector('[data-testid="product-scene"] canvas')?.getBoundingClientRect().width;
+    const canvas = document.querySelector('[data-testid="product-scene"] canvas');
+    if (canvas !== observedCanvas) {
+      if (observedCanvas) sizeObserver.unobserve(observedCanvas);
+      if (canvas) sizeObserver.observe(canvas);
+      observedCanvas = canvas;
+    }
+    const width = canvas?.getBoundingClientRect().width;
     if (width && width > 0) send({ type: 'viewport:size', payload: { width } });
   };
   const sizeObserver = new ResizeObserver(reportSize);
