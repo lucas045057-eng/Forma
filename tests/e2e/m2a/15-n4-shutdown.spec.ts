@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { request as httpRequest } from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
@@ -9,7 +10,7 @@ import { http } from './api';
 import { writeArtifactFrom } from './artifact';
 
 /**
- * N4 停机排空接点（真实 HTTP / 真实 app.close）— **当前 HEAD f70f046 预期失败**。
+ * N4 停机排空接点（真实 HTTP / 真实 app.close）。
  *
  * 设计：用仓库内的 `core.fsmonitor` 钩子挂住一次真实 GET /version 触发的自动快照，
  * 让一个“已被接受”的作品操作停在 repo.exclusive 队列里；然后走真实优雅关闭
@@ -20,13 +21,33 @@ import { writeArtifactFrom } from './artifact';
  *      最后写入（version.changed）都必须已经落盘；
  *   4. 重启后事件 seq 接续、日志不再被改。
  *
- * 修法目前只在 `.worktrees/m2fix` 的未提交草稿里；master 尚未合并，所以本用例用
- * `test.fail` 标明“预期失败”，草稿合并且审查通过后再去掉标记重跑。
+ * b167907 已合入 N4 成品（审查 M2-N4-final-review.md），本用例按普通断言验收。
+ * 被挂住的请求显式使用 `Connection: close`：最终审查建议 S1 指出，keep-alive 直连客户端会让
+ * close 额外安全等待约 72 秒（锁仍保留到操作结束）；这里避开的是这段 keep-alive 排空等待，
+ * 不是任何 N4 顺序断言。
  * 不使用 taskkill 强杀，也不重复消耗 D3 的 30 秒等待。
  */
 
 const read = (file: string) => { try { return readFileSync(file, 'utf8'); } catch { return ''; } };
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 真实 HTTP GET，显式 Connection: close（见文件头：只避开安全的 keep-alive 排空等待）。 */
+function getClosing(url: string): Promise<{ status: number; body: { version?: string } }> {
+  return new Promise((resolve, reject) => {
+    const request = httpRequest(url, { method: 'GET', headers: { connection: 'close' } }, (response) => {
+      let text = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => { text += chunk; });
+      response.on('end', () => {
+        let body: { version?: string } = {};
+        try { body = text ? JSON.parse(text) : {}; } catch { /* keep empty */ }
+        resolve({ status: response.statusCode ?? 0, body });
+      });
+    });
+    request.on('error', reject);
+    request.end();
+  });
+}
 
 interface UnlockSnapshot {
   at: number; reason: string; lockExists: boolean; head: string; headHasMarker: boolean;
@@ -35,10 +56,6 @@ interface UnlockSnapshot {
 
 test.describe('N4 停机排空（真实 HTTP）', () => {
   test('app.close 等已接受的作品操作完成才关日志/放锁；第二实例在关闭期间仍被锁拒；重启 seq 接续', async () => {
-    // N4 修法只在 .worktrees/m2fix 未提交草稿；master f70f046 的 preClose 仍在 HTTP 排空前关日志/放锁。
-    // 草稿合并且审查通过后去掉 test.fail 再重跑。
-    test.fail(true, 'N4 修法只在 .worktrees/m2fix 未提交草稿；master f70f046 的 preClose 仍在 HTTP 排空前关日志/放锁');
-
     const root = path.join(os.tmpdir(), 'pi-m2a-n4-shutdown');
     const work = path.join(root, 'work');
     const dataDir = path.join(root, 'data');
@@ -136,10 +153,12 @@ test.describe('N4 停机排空（真实 HTTP）', () => {
       writeFileSync(marker, 'hold');
 
       // 3) 发一个真实的 GET /version：它进入 repo.exclusive 后会被 fsmonitor 卡住。
+      //    显式 Connection: close，避开最终审查 S1 描述的安全 keep-alive 排空等待（约 72 秒）。
+      facts.blockedRequest = { method: 'GET', path: '/version', connection: 'close', note: '真实 HTTP；close 只影响 keep-alive 排空耗时，不放宽任何 N4 顺序断言' };
       let versionResult: { status: number; body: { version?: string } } | null = null;
-      const versionPromise = fetch(`${first.base}/version`).then(async (response) => {
-        versionResult = { status: response.status, body: await response.json().catch(() => ({})) };
-        return versionResult;
+      const versionPromise = getClosing(`${first.base}/version`).then((result) => {
+        versionResult = result;
+        return result;
       });
       await new Promise<void>((resolve, reject) => {
         const deadline = Date.now() + 20_000;
@@ -216,7 +235,7 @@ test.describe('N4 停机排空（真实 HTTP）', () => {
         eventsAfterUnlock: { hasVersionChanged: logAfterRestart.includes('version.changed') },
       };
 
-      // 7) N4 的验收断言（当前 HEAD 预期失败；用 soft 让所有事实都先记录）。
+      // 7) N4 的验收断言（b167907 合入成品后按普通断言验收；soft 先记录全部事实再统一失败）。
       expect.soft(facts.operationAcceptedAndBlocked, '被挂住的作品操作提前完成了').toBe(true);
       expect.soft(lockHeldWhileBlocked, '关闭期间实例锁已被提前释放').toBe(true);
       expect.soft(unlock?.operationCompleted, '锁释放那一刻，被挂住的作品操作还没有完成').toBe(true);
@@ -235,7 +254,7 @@ test.describe('N4 停机排空（真实 HTTP）', () => {
       for (const child of [...children].reverse()) await child.stop().catch(() => {});
       for (const instance of instances) instance.stopped = true;
       facts.instances = instances;
-      writeArtifactFrom('takeover-n4-shutdown.json', facts);
+      writeArtifactFrom('takeover-n4-shutdown-b167907.json', facts);
       rmSync(root, { recursive: true, force: true });
     }
   });

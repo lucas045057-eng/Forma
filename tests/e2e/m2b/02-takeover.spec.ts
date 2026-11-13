@@ -10,10 +10,10 @@ import { BACKEND_BASE, STUDIO_PORT, TEMPLATE_APP, WORK_ROOT } from '../m2a/env';
 import { writeArtifactFrom } from './artifact';
 
 /**
- * 接管后专项（M2 收口，HEAD f70f046）：
+ * 接管后专项（M2 收口，最终冻结 HEAD b167907）：
  * 1) 先核实 STALE_SELECTION 的实际 selection.src/baseVersion 与文件 hash，再判定是否有实现缺陷；
  * 2) 断线补拉、历史截断重载、三个待定候选切换、多面板共用一条事件连接；
- * 3) R1 版本请求延迟/失败期间的按钮、快捷键与 retry（retry 门禁由未合并的 d79c467 修复）。
+ * 3) R1 版本请求延迟/失败期间的按钮、快捷键与 retry（retry 的 submittable 门禁已在 b167907 合入，按普通断言验收）。
  */
 
 const BUTTON = path.join(WORK_ROOT, 'src', 'components', 'Button.tsx');
@@ -334,8 +334,7 @@ test.describe('M2-B 接管后专项', () => {
     expect(restoreTemplate().clean).toBe(true);
   });
 
-  test('R1（已知失败，d79c467 未合并）：retry 在 pending/failed 期间不得提交', async ({ page }) => {
-    test.fail(true, 'retry 的 submittable 门禁只存在于 fix/m2-review2 d79c467；master f70f046 尚未合并');
+  test('R1：retry 在 pending/failed 期间也不得提交', async ({ page }) => {
     expect(restoreTemplate().clean).toBe(true);
     await resetMock();
     await setScript([[{ name: 'read_file', args: { path: 'src/App.tsx' } }]], 0, 'error');
@@ -361,7 +360,7 @@ test.describe('M2-B 接管后专项', () => {
       facts.retryDisabledWhileFailed = await page.getByTestId('task-retry').isDisabled();
       expect.soft(facts.retryDisabledWhileFailed, 'failed 期间 retry 仍可点击').toBe(true);
     } finally {
-      writeArtifactFrom('takeover-r1-retry-known-failure.json', facts);
+      writeArtifactFrom('takeover-r1-retry.json', facts);
       if (gate.held.length) await gate.release(version).catch(() => {});
       await gate.dispose();
     }
