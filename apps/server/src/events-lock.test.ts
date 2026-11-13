@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { get } from 'node:http';
+import { get, request } from 'node:http';
+import { CodingAgent } from './agent/client.ts';
 import path from 'node:path';
 import { expect, it, vi } from 'vitest';
 import { createApp } from './app.ts';
@@ -155,6 +156,95 @@ it('drains an admitted real HTTP snapshot before unlock and preserves nested rep
     stage('finally-closed');
     await rm(root, { recursive: true, force: true });
     stage('finally-cleaned');
+  }
+});
+
+it.each(['submit', 'selection', 'cancel'])('drains admitted HTTP %s before task files, journal and lock close', async mode => {
+  const root = await mkdtemp(path.join(tmpdir(), 'n4-task-http-'));
+  const workRoot = path.join(root, 'work');
+  await mkdir(path.join(workRoot, 'src'), { recursive: true });
+  await writeFile(path.join(workRoot, 'src', 'app.ts'), 'export const value = 1;');
+  const options = { workRoot, workDataDirectory: path.join(root, 'data'), historyDirectory: path.join(root, 'history'),
+    dataDirectory: path.join(root, 'assets'), base: 'http://127.0.0.1:9', key: 'mock-only',
+    codingAgentBaseUrl: 'http://127.0.0.1:9', codingAgentApiKey: 'mock-only', codingAgentModel: 'mock' };
+  const instance = await createApp(options);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let entered!: () => void;
+  const accepted = new Promise<void>(resolve => { entered = resolve; });
+  let agentEntered!: () => void;
+  const agentStarted = new Promise<void>(resolve => { agentEntered = resolve; });
+  const agent = vi.spyOn(CodingAgent.prototype, 'run').mockImplementation(async ({ signal }) => {
+    agentEntered();
+    if (mode === 'cancel') await new Promise<void>(resolve => {
+      if (signal?.aborted) resolve(); else signal?.addEventListener('abort', () => resolve(), { once: true });
+    });
+    throw new Error('mock agent stopped');
+  });
+  let preClosed!: () => void;
+  const preClose = new Promise<void>(resolve => { preClosed = resolve; });
+  instance.app.addHook('preClose', async () => { preClosed(); });
+  let closing: Promise<void> | undefined;
+  let taskAtBoundary = '', logAtBoundary = '';
+  const closeEvents = instance.events.close.bind(instance.events);
+  vi.spyOn(instance.events, 'close').mockImplementation(async () => {
+    await readFile(path.join(root, 'data', '.instance.lock'));
+    taskAtBoundary = await readFile(path.join(root, 'data', 'tasks.json'), 'utf8');
+    logAtBoundary = await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8');
+    // Shutdown can mark an aborted Agent failed; either terminal outcome must be
+    // fully persisted before the journal closes, never queued or running.
+    expect(['failed', 'cancelled']).toContain(JSON.parse(taskAtBoundary).tasks[0].status);
+    expect(JSON.parse(taskAtBoundary).tasks).toEqual(instance.work.listTasks());
+    expect(logAtBoundary).toContain('task.updated');
+    await closeEvents();
+  });
+  try {
+    const base = await instance.app.listen({ host: '127.0.0.1', port: 0 });
+    let endpoint = '/tasks';
+    const body: Record<string, unknown> = { instruction: 'change value' };
+    if (mode === 'selection') body.selection = { src: 'src/app.ts:1:1', baseVersion: (await instance.work.version()).version };
+    if (mode === 'cancel') {
+      const task = await instance.work.submit('change value');
+      await agentStarted;
+      endpoint = `/tasks/${task.id}/cancel`;
+      const cancel = instance.work.cancel.bind(instance.work);
+      vi.spyOn(instance.work, 'cancel').mockImplementation(async id => { entered(); await gate; return cancel(id); });
+    } else {
+      void instance.work.repo.exclusive(() => gate);
+      const submit = instance.work.submit.bind(instance.work);
+      vi.spyOn(instance.work, 'submit').mockImplementation((...args) => {
+        const result = submit(...args); entered(); return result;
+      });
+    }
+    const response = new Promise<number>((resolve, reject) => {
+      const req = request(`${base}${endpoint}`, { method: 'POST', agent: false,
+        headers: { 'content-type': 'application/json', connection: 'close' } }, res => {
+        res.resume(); res.once('end', () => resolve(res.statusCode!));
+      });
+      req.on('error', reject); req.end(JSON.stringify(mode === 'cancel' ? {} : body));
+    });
+    await accepted;
+    let closed = false;
+    closing = instance.app.close().then(() => { closed = true; });
+    await preClose;
+    await expect(createApp(options)).rejects.toMatchObject({ code: 'INSTANCE_LOCKED' });
+    expect(closed).toBe(false);
+    release();
+    expect(await response).toBe(mode === 'cancel' ? 200 : 202);
+    await closing;
+    await instance.work.idle();
+    expect(await readFile(path.join(root, 'data', 'tasks.json'), 'utf8')).toBe(taskAtBoundary);
+    expect(await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8')).toBe(logAtBoundary);
+    await expect(instance.work.submit('late')).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
+    await expect(instance.work.cancel('late')).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
+    const restarted = await createApp(options);
+    try { expect(restarted.events.last).toBe(instance.events.last); }
+    finally { await restarted.app.close(); }
+  } finally {
+    release();
+    await (closing ?? instance.app.close());
+    agent.mockRestore();
+    await rm(root, { recursive: true, force: true });
   }
 });
 
