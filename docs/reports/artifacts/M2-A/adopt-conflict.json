@@ -1,0 +1,13 @@
+{
+  "baseVersion": "dea5a40cea640c09b262bb0369955abccc80987a",
+  "first": {
+    "id": "9a4f2f23cd5445c395706be08f814e43",
+    "decision": "adopted"
+  },
+  "second": {
+    "id": "ff8787694a1747d3a3b80d7a94712400",
+    "status": 409,
+    "code": "MERGE_CONFLICT",
+    "decision": "discarded"
+  }
+}

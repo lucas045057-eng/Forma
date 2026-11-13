@@ -1,14 +1,14 @@
 {
   "containsPlaintext": false,
   "entry": {
-    "id": "a2dcebbd-9cc4-45a3-bb1d-897eae8c8ab7",
+    "id": "cd3d9ef1-6e05-4ebc-b357-019145e39529",
     "status": "ready",
-    "createdAt": "2026-11-10T07:54:22.707Z",
-    "updatedAt": "2026-11-10T07:54:23.637Z",
-    "keyHash": "9acd785f8fb90b928d541a6cc35143ff7711232ecdc837a96e8d8ad6210f47a3",
+    "createdAt": "2026-11-13T11:40:45.631Z",
+    "updatedAt": "2026-11-13T11:40:46.600Z",
+    "keyHash": "d3914459279e123c5b03b3c7b0e157a236c1341e74d82ae893f0fbb1fc6b39f3",
     "fingerprint": "634c290e30e1f2fe07599fc542ad47bf46b5cc0ee9467451414dc77a57da4b77",
     "taskId": "9000006",
-    "deadline": 1794297292710,
+    "deadline": 1794570075636,
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -41,7 +41,7 @@
         ],
         "reason": "Expected body, cap and at least one reed"
       },
-      "durationMs": 525,
+      "durationMs": 526,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -55,6 +55,6 @@
         ]
       }
     },
-    "modelUrl": "/assets/a2dcebbd-9cc4-45a3-bb1d-897eae8c8ab7/model.glb?revision=f66ff047-0ffd-49f5-a16f-fa7097830b7c"
+    "modelUrl": "/assets/cd3d9ef1-6e05-4ebc-b357-019145e39529/model.glb?revision=10e28493-b773-4e35-a04d-0e3a180d2c9f"
   }
 }

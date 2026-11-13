@@ -2,10 +2,10 @@
   "submitted": {
     "status": 202,
     "asset": {
-      "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+      "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
       "status": "polling",
-      "createdAt": "2026-11-10T07:53:51.567Z",
-      "updatedAt": "2026-11-10T07:53:51.579Z",
+      "createdAt": "2026-11-13T11:40:09.027Z",
+      "updatedAt": "2026-11-13T11:40:09.038Z",
       "taskId": "9000001"
     }
   },
@@ -15,10 +15,10 @@
     "ready"
   ],
   "finalAsset": {
-    "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+    "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
     "status": "ready",
-    "createdAt": "2026-11-10T07:53:51.567Z",
-    "updatedAt": "2026-11-10T07:53:52.505Z",
+    "createdAt": "2026-11-13T11:40:09.027Z",
+    "updatedAt": "2026-11-13T11:40:09.993Z",
     "taskId": "9000001",
     "metrics": {
       "before": {
@@ -52,7 +52,7 @@
         ],
         "reason": "Expected body, cap and at least one reed"
       },
-      "durationMs": 516,
+      "durationMs": 535,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -66,7 +66,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/81db1bbc-1450-4002-825e-a3df83a9a4c6/model.glb?revision=8ad2ade1-089c-473d-8646-08ced4fb0096"
+    "modelUrl": "/assets/6cbee9a7-6549-4d8f-b6e6-9021a5a46125/model.glb?revision=90c64b8d-69e1-46bd-9882-fedbd61cdc28"
   },
   "glb": {
     "header": {
@@ -105,73 +105,78 @@
   "events": [
     {
       "type": "asset.progress",
-      "ts": "2026-11-10T07:53:51.579Z",
+      "ts": "2026-11-13T11:40:09.038Z",
       "sequence": 1,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "polling",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:51.579Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.038Z",
         "taskId": "9000001"
-      }
+      },
+      "seq": 1
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-10T07:53:51.581Z",
+      "ts": "2026-11-13T11:40:09.040Z",
       "sequence": 2,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "polling",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:51.581Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.040Z",
         "taskId": "9000001"
-      }
+      },
+      "seq": 2
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-10T07:53:51.676Z",
+      "ts": "2026-11-13T11:40:09.126Z",
       "sequence": 3,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "polling",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:51.676Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.126Z",
         "taskId": "9000001"
-      }
+      },
+      "seq": 3
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-10T07:53:51.770Z",
+      "ts": "2026-11-13T11:40:09.219Z",
       "sequence": 4,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "downloading",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:51.770Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.219Z",
         "taskId": "9000001"
-      }
+      },
+      "seq": 4
     },
     {
       "type": "asset.progress",
-      "ts": "2026-11-10T07:53:51.806Z",
+      "ts": "2026-11-13T11:40:09.266Z",
       "sequence": 5,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "processing",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:51.806Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.266Z",
         "taskId": "9000001"
-      }
+      },
+      "seq": 5
     },
     {
       "type": "asset.ready",
-      "ts": "2026-11-10T07:53:52.505Z",
+      "ts": "2026-11-13T11:40:09.993Z",
       "sequence": 6,
       "asset": {
-        "id": "81db1bbc-1450-4002-825e-a3df83a9a4c6",
+        "id": "6cbee9a7-6549-4d8f-b6e6-9021a5a46125",
         "status": "ready",
-        "createdAt": "2026-11-10T07:53:51.567Z",
-        "updatedAt": "2026-11-10T07:53:52.505Z",
+        "createdAt": "2026-11-13T11:40:09.027Z",
+        "updatedAt": "2026-11-13T11:40:09.993Z",
         "taskId": "9000001",
         "metrics": {
           "before": {
@@ -205,7 +210,7 @@
             ],
             "reason": "Expected body, cap and at least one reed"
           },
-          "durationMs": 516,
+          "durationMs": 535,
           "bounds": {
             "min": [
               -0.15895565660573138,
@@ -219,8 +224,9 @@
             ]
           }
         },
-        "modelUrl": "/assets/81db1bbc-1450-4002-825e-a3df83a9a4c6/model.glb?revision=8ad2ade1-089c-473d-8646-08ced4fb0096"
-      }
+        "modelUrl": "/assets/6cbee9a7-6549-4d8f-b6e6-9021a5a46125/model.glb?revision=90c64b8d-69e1-46bd-9882-fedbd61cdc28"
+      },
+      "seq": 6
     }
   ],
   "mockStats": {
@@ -236,7 +242,7 @@
   "guardLog": [],
   "guardMarker": {
     "active": true,
-    "pid": 34260,
+    "pid": 45656,
     "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
   }
 }

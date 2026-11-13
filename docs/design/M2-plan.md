@@ -105,3 +105,8 @@ M2-A、M2-B 各一轮，重点：沙箱写入边界、git 操作的崩溃安全�
 - **R6** 候选创建失败回滚；预览进程 error/close 统一处理；后端重启时清理遗留预览进程与无主候选目录。
 - 建议 S1–S3 视工作量一并处理，未处理的写进报告。
 - 顺序：等 CodeBuddy 交回 M2-B 并合并后再派（分源会改 Studio 的 iframe 与 bridge，和 M2-B 同一块代码）。
+
+### M2-A-fix 追加（依据 Pi 的 docs/reports/M2-A-test.md，2 项阻断缺陷）
+- **D1** 候选预览在浏览器里渲染不出：候选 Vite 仍注入 HMR 客户端，代理不转发 WebSocket，`@vite/client` 反复断线重连导致模块请求被中止。修法：分源后的预览端口要支持 Vite 的 WebSocket 升级（候选与主作品都走同一套），或让候选彻底不注入 HMR 客户端；以 Pi 的 `test.fail` 用例转为通过为准。
+- **D2** 沙箱可经 `src/` 下的 junction 写出：Windows 上 junction 在 `lstat` 里显示为目录，逐段 `isSymbolicLink()` 拦不住。修法：逐段用 `realpath` 比对（或 `lstat` 后检查 reparse point），确认解析后的真实路径仍在候选 `src/` 之内；list/read/write 统一使用。与审查 R5 一起做。
+- 观察：后端 `service.test.ts` 的并发/重启幂等用例偶发 `submit_unknown`（单独重跑通过），排查时序/端口竞争。

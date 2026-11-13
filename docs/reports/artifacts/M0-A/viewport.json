@@ -9,13 +9,13 @@
   "rotatedStats": {
     "width": 1056,
     "height": 1056,
-    "uniqueColors": 4039,
-    "mean": 209.89077206726355,
-    "stdDev": 63.41857072762655
+    "uniqueColors": 4003,
+    "mean": 209.79631243782524,
+    "stdDev": 63.525084191659374
   },
   "diff": {
-    "ratio": 0.09237258953168044,
-    "changed": 103008,
+    "ratio": 0.09154309429522497,
+    "changed": 102083,
     "total": 1115136
   },
   "errors": [],
