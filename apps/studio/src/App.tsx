@@ -1,3 +1,4 @@
+import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { isPreviewMessage, type Selection, type StudioMessage } from '@spatial/shared';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
@@ -26,7 +27,8 @@ function Studio() {
   const [picking, setPicking] = useState(false);
   const [ready, setReady] = useState(false);
   const [candidateReady, setCandidateReady] = useState(false);
-  const [selection, setSelection] = useState<Selection | null>(null);
+  const [pick, setPick] = useState<PickState>({ kind: 'none' });
+  const selection = pick.kind === 'ready' ? pick.selection : null;
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const [mode, setMode] = useState<PreviewMode>('current');
@@ -66,7 +68,7 @@ function Studio() {
           ++pickRequest.current;
           setReady(true);
           setError('');
-          setSelection(null);
+          setPick({ kind: 'none' });
           send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
           break;
         case 'pick:result': {
@@ -74,11 +76,17 @@ function Studio() {
           const payload = event.data.payload;
           const requestId = ++pickRequest.current;
           send({ type: 'highlight', payload: { src: payload.src } });
+          // The previous object stops being submittable the moment a new one is picked.
+          setPick({ kind: 'pending', src: payload.src });
           void api<{ version: string }>('/version').then(result => {
-            if (requestId !== pickRequest.current || !pickingRef.current) return;
-            setSelection({ ...payload, baseVersion: result.version });
+            if (requestId !== pickRequest.current) return;
+            setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
             setError('');
-          }).catch(() => { if (requestId === pickRequest.current) setError('无法读取作品版本，请确认后端已启动后重新点选'); });
+          }).catch(() => {
+            if (requestId !== pickRequest.current) return;
+            setPick({ kind: 'failed', src: payload.src });
+            setError('无法读取作品版本，请确认后端已启动后重新点选');
+          });
           break;
         }
         case 'scroll:progress':
@@ -138,7 +146,7 @@ function Studio() {
             <p className="notice" data-testid="instances">同源码实例：{selection.instances} 处{selection.instances > 1 ? '；修改将影响全部实例（共享组件或列表项）。' : ''}</p>
             <pre data-testid="selection-json">{JSON.stringify(selection, null, 2)}</pre>
           </> : <div className="empty">等待选取页面元素</div>}
-          <PointSpeak selection={selection}/>
+          <PointSpeak pick={pick}/>
         </aside>}
       </div>
     </main>
