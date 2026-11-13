@@ -57,6 +57,7 @@ export interface Candidate {
   branch: string;
   previewUrl: string;
   diff: FileDiff[];
+  outOfScope: string[];
   checks: Check[];
   decision: 'pending' | 'adopted' | 'discarded';
 }
