@@ -20,7 +20,11 @@
 
 ## 当前验证状态
 
-当前 worktree 没有根 node_modules，需要先按锁文件离线安装现有依赖。安装将通过主项目 `orbital/bin/bg.cmd` 从本 worktree 根启动；依用户规则，取得 job 信息后结束本轮，不轮询。后台输出位置由交回消息记录。
+续作已核验：HEAD 为 `fc5c9ff`，分支 `fix/m2-d3`，工作树起始干净，冻结基线均已包含。调度安装后根与 server 的 node_modules 已存在；Node v24.14.1、pnpm 11.17.0，按模板/server package.json 分别解析 Vite/Fastify 成功。首次从根 eval 使用 import.meta.resolve 的 parent 参数解析 Vite 失败，改用包内 createRequire 验证成功；这不是安装缺失。
+
+新增实现诊断入口 `apps/server/d3-diagnostic.mjs`（不属于 Pi 正式 E2E）：通过真实 createApp、loopback mock 模型、独立作品副本/数据目录和动态端口生成候选；逐文件复制 Git 跟踪模板，跳过环境文件，不读取服务 .env。分别强杀实际 backend node PID 和外层 launcher 树，记录 CIM PID/PPID/创建时间/命令行、监听归属、实际候选 HTTP 200、1 秒与 30 秒后快照，并保存 Pi 全局匹配结果用于核对统计口径。finally 仅结束本轮树内且 PID/创建时间/命令行仍一致的进程；保存清理后快照。证据落在本 worktree `.data/d3-diagnostic-<时间>/evidence.json`，不覆盖 Pi 正式证据。
+
+脚本已通过 `node --check`、包内依赖解析及 `git diff --check`。拟通过指定 bg.cmd 启动真实复现；作业 ID/输出/停止命令以启动返回值和交回消息为准，启动不等于复现完成。重启回收及异常启动/取消对照仍待基线结果后接续。
 
 - D3 两种真实 OS 强杀与重启回收：未运行。
 - service.test.ts / lux3d.test.ts 偶发失败根因：未证实；目前看到相关 mock 使用动态端口，不能据此声称共享端口是根因。
