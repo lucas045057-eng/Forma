@@ -218,3 +218,61 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 - **N4 在 master `f70f046` 上可稳定复现**：锁/日志在已接受的作品操作完成前就关闭/释放，第二实例可在关闭期间拿到锁。这是验收接点，不是“已修”证据；不能拿 `.worktrees/m2fix` 的草稿代替。
 - 用例用 `expect.soft` 记录全部事实再统一失败，因此每次都能产出上面这份对照；合并 N4 后要检查它是否变成“意外通过”（Playwright 会报 unexpectedly passed），并同时扫掉 `test.fail`。
 - 本轮未重跑完整 M2-A、`pnpm test`、M0/M1 套件，也未跑 D3 强杀与 F1 根 junction；这些等实现交付、审查通过、合并到同一冻结 HEAD 后统一重跑。
+
+---
+
+# D3 进程归属复核（接管后专项，HEAD `a4b27fc`）
+
+- 日期：2026-11-13。主 HEAD：**`a4b27fc`**（包含上一轮测试提交；生产代码基线仍是 `f70f046`）。`4bfc4c1` 只改诊断脚本/fixture，未改生产 `preview.ts` / `preview-worker.ts`。
+- 本轮只改测试/证据/报告：重写 `tests/e2e/m2a/zz-kill.spec.ts`；旧证据 `isolation-r6.json` 保留不覆盖，新证据命名为 `isolation-r6-attributed-*.json`。
+- **状态：用例已就绪，本轮未运行（未启动后台任务）。** 工具环境没有 `ORBITAL_SESSION_ID`，按调度要求不自启无人跟踪的任务；待执行命令见下。**不能把本节当作 D3 已通过或已修复。**
+
+## 已固定的对照事实
+
+生产预览代码与旧测试基线逐字相同（`git show <rev>:<file>` 的 sha256）：
+
+| 文件 | HEAD / a4b27fc / 5377b52 / 81558a7 |
+| --- | --- |
+| `apps/server/src/work/preview.ts` | `7701aa59…7195b5`（四个 rev 全部相同） |
+| `apps/server/src/work/preview-worker.ts` | `10ed6db2…d4fc1c`（四个 rev 全部相同） |
+
+旧 `zz-kill` 的全局口径“命令行含 `vite.js` 且含 `preview-cache`”的三个问题已实测：
+
+1. **计数脚本自指**：旧写法的 `cmd.exe` 与 `powershell.exe` 自己的命令行里就含这两个关键字。在没有候选预览的干净环境跑同一条命令得到 **2**；用 `-File` 方式（关键字只在文件里）得到 **0**，证明这 2 个就是计数进程自身。
+2. **看不见实际 worker**：候选 worker 的命令行是 `node preview-worker.ts <…>/vite.js`，`PREVIEW_CACHE_DIR` 只在环境变量里、不在命令行，所以旧口径对实际 worker `piMatch=false`（与 CodeBuddy 诊断一致）。
+3. **无归属**：加入一个无害 decoy（`node -e setInterval … vite.js preview-cache-d3-decoy`）后，旧口径计数从 3 起步（cmd + powershell + decoy），结构化匹配的 `nodePids` 只有 decoy；实际 worker 仍不在其中。
+
+因此回合 2/3 的“杀后端后仍有 2 个带 preview-cache 的 Vite”**高度可能是统计口径误报**：这 2 个恰好是计数用的 cmd/powershell，而不是正在测试的候选 worker；当时也没有记录 worker 的 PID/PPID/创建时间/端口，无法证明归属。该判断仍需新用例在真实强杀下确认，不能只凭本轮分析写成“已修”。
+
+## 新用例的判据（只针对本轮自己启动的进程）
+
+- 独立 fixture：自己的 API 端口与预览源端口、自己的 `WORK_DATA_DIR`（作品目录仍用真实模板，但候选/版本库/预览缓存都在独立数据目录；跑完还原模板）。进程强杀只针对本文件启动的 backend/worker。
+- 先取证再判：候选必须 `preview-origin` 200，且 worker **自己的监听端口**也 200；记录 worker 的 PID、PPID（= 本轮 backend）、创建时间、命令行摘要与端口。
+- 场景一：`taskkill /F /PID <backend>`（**不带 /T**）→ 只检查该 backend 与其 worker 的“PID+创建时间”身份消失，预览端口不再 200；不要求无关进程退出。
+- 场景二：`taskkill /T /F /PID <backend>` → 检查该 backend 与全部后代身份的“PID+创建时间”消失。
+- 负向对照：无害 decoy 必须被旧全局口径计入、但不被归属判据当成残留，也不能被清理误杀；`finally`/`afterAll` 只结束自己记录的 decoy PID。
+- 实例：杀后 1 秒的存活快照 + 最多 30 秒轮询，均写入 `isolation-r6-attributed-{pid-kill,tree-kill,negative-control}.json`。
+
+## 交给调度执行的精确命令
+
+在 `E:\空间化AI工作台` 根目录：
+
+```powershell
+orbital\bin\bg.cmd 'set PLAYWRIGHT_BROWSERS_PATH=%LOCALAPPDATA%\ms-playwright&& node node_modules\@playwright\test\cli.js test -c playwright.m2a.config.ts tests/e2e/m2a/zz-kill.spec.ts --reporter=list --output=docs\reports\artifacts\M2-A\d3-output'
+```
+
+等价的直接命令：
+
+```powershell
+cd E:\空间化AI工作台
+$env:PLAYWRIGHT_BROWSERS_PATH="$env:LOCALAPPDATA\ms-playwright"
+node node_modules\@playwright\test\cli.js test -c playwright.m2a.config.ts tests/e2e/m2a/zz-kill.spec.ts --reporter=list --output=docs\reports\artifacts\M2-A\d3-output
+```
+
+`--reporter=list` 与 `--output` 保证不覆盖旧 `M2-A/playwright-results.json` 与 `M2-A/output/`。预期耗时：webServer 启动 + 两次候选构建，约 1–2 分钟。
+
+## 未运行 / 边界（不要当成通过）
+
+- 上方命令尚未运行；`isolation-r6-attributed-*.json` 尚未生成，D3 的“真实通过/仍失败”要等这次跑数。
+- 本轮未重跑 `pnpm test`、M0-B/M0-A/M1-A/M1-B、M2-B、完整 M2-A，也未做 N4/retry 的已知失败重跑；这些等实现交付、审查、合并到同一冻结 HEAD 后统一跑。
+- 全程未调用真实模型/Lux3D、未读真实 `.env`；新用例的 fixture 带出站网络守卫（假 key + loopback mock）。
