@@ -1,12 +1,16 @@
 import { createApp } from './app.ts';
 import { createPreviewOrigin } from './work/preview-origin.ts';
+import type { Socket } from 'node:net';
 
 const { app, work } = await createApp({ logger: true });
 const preview = createPreviewOrigin(work.previews, {
   mainPort: Number(process.env.MAIN_PREVIEW_PORT ?? 5174),
   studioOrigin: process.env.STUDIO_ORIGIN ?? 'http://127.0.0.1:5173',
 });
+const sockets = new Set<Socket>();
+preview.on('connection', socket => { sockets.add(socket); socket.on('close', () => sockets.delete(socket)); });
 app.addHook('preClose', async () => {
+  for (const socket of sockets) socket.destroy();
   preview.closeAllConnections();
   await new Promise<void>(resolve => preview.close(() => resolve()));
 });

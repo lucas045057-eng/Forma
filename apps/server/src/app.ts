@@ -65,8 +65,8 @@ export async function createApp(options: AppOptions = {}) {
       timeoutMs: options.agentTimeoutMs, maxRounds: options.agentMaxRounds,
     },
   });
-  await work.init();
-  await service.init();
+  try { await work.init(); await service.init(); }
+  catch (error) { await work.close(); await service.close(); await events.close(); throw error; }
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -163,14 +163,14 @@ export async function createApp(options: AppOptions = {}) {
     try { await stat(filename); } catch { return reply.code(404).send({ error: { code: 'MODEL_MISSING', message: '模型文件已丢失，请重新导入资产' } }); }
     return reply.type('model/gltf-binary').header('Cache-Control', 'no-cache').send(createReadStream(filename));
   });
-  app.get('/scene', async () => scene.get());
-  app.put('/scene', async request => scene.put(request.body));
-  app.post('/scene/undo', async () => scene.undo());
+  app.get('/scene', async () => work.repo.exclusive(() => scene.get()));
+  app.put('/scene', async request => work.repo.exclusive(() => scene.put(request.body)));
+  app.post('/scene/undo', async () => work.repo.exclusive(() => scene.undo()));
   app.post<{ Params: { id: string }; Body: unknown }>('/assets/:id/adopt', async request => {
     const body = request.body ?? {};
     if (typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => key !== 'force')
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
-    return scene.adopt(service, request.params.id, 'force' in body && body.force === true);
+    return work.repo.exclusive(() => scene.adopt(service, request.params.id, 'force' in body && body.force === true));
   });
   app.addHook('preClose', async () => { await work.close(); await service.close(); await scene.idle(); await events.close(); });
   return { app, service, scene, work, events };
