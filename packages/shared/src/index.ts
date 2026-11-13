@@ -50,6 +50,7 @@ export interface Task {
   status: 'queued' | 'running' | 'awaiting_approval' | 'done' | 'failed' | 'cancelled';
   candidateId?: string;
   events: TaskEvent[];
+  error?: { code: string; message: string };
 }
 export interface Candidate {
   id: string;
