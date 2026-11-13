@@ -53,16 +53,32 @@ export class CodingAgent {
   }
 
   async run(input: { taskId: string; instruction: string; selection?: Selection; root: string; signal?: AbortSignal }) {
-    const sandbox = new Sandbox(input.root);
-    const maxRounds = this.options.maxRounds ?? 16;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 180_000);
+    const signal = input.signal ? AbortSignal.any([input.signal, controller.signal]) : controller.signal;
+    try { return await this.execute({ ...input, signal }); }
+    catch (error) {
+      if (input.signal?.aborted) throw new CodingAgentError('TASK_CANCELLED', '任务已取消');
+      if (controller.signal.aborted || (error as Error).name === 'TimeoutError') throw new CodingAgentError('AGENT_TIMEOUT', '编码任务超过总时限');
+      throw error;
+    } finally { clearTimeout(timer); }
+  }
+
+  private async execute(input: { taskId: string; instruction: string; selection?: Selection; root: string; signal: AbortSignal }) {
+    const maxRounds = Math.min(this.options.maxRounds ?? 16, 16);
     const timeoutMs = this.options.timeoutMs ?? 180_000;
     const deadline = Date.now() + timeoutMs;
+    const sandbox = new Sandbox(input.root, { signal: input.signal, deadline });
+    const check = () => {
+      input.signal.throwIfAborted();
+      if (Date.now() >= deadline) throw new CodingAgentError('AGENT_TIMEOUT', '编码任务超过总时限');
+    };
     const selected = input.selection ? await this.selectedSource(sandbox, input.selection) : undefined;
     const messages: Message[] = [
       { role: 'system', content: '你是网页作品的编码 Agent。先用 list_files/read_file 理解代码，再用 replace_in_file 或 write_file 完成用户指令，最后调用 finish。只能修改候选作品 src/ 下的源码；不要修改依赖、构建配置或 src 之外的文件。没有 shell。尽量做满足指令的最小改动。' },
       { role: 'user', content: JSON.stringify({ instruction: input.instruction, selection: input.selection, selectedFileWithLineNumbers: selected }) },
     ];
-    const step = async (message: string) => { await this.options.onStep?.(message); };
+    const step = async (message: string) => { check(); await this.options.onStep?.(message); check(); };
 
     for (let round = 1; round <= maxRounds; round += 1) {
       input.signal?.throwIfAborted();
@@ -70,7 +86,9 @@ export class CodingAgent {
       if (remaining <= 0) throw new CodingAgentError('AGENT_TIMEOUT', `编码 Agent 超过 ${timeoutMs} ms 总时限`);
       await step(`请求编码模型（第 ${round}/${maxRounds} 轮）`);
       const message = await this.request(messages, input.taskId, input.signal, remaining);
+      check();
       messages.push(message);
+      if ((message.tool_calls?.length ?? 0) > 16) throw new CodingAgentError('AGENT_LIMIT', '单轮工具调用超过 16 次');
       if (!message.tool_calls?.length) throw new CodingAgentError('AGENT_PROTOCOL', '编码模型没有调用工具，也未结束任务');
       for (const call of message.tool_calls) {
         input.signal?.throwIfAborted();
@@ -96,6 +114,7 @@ export class CodingAgent {
         } catch (error) {
           result = error instanceof ToolError || error instanceof CodingAgentError ? error.message : '工具执行失败，请检查路径与参数';
         }
+        check();
         messages.push(this.toolResult(call, result));
       }
     }
@@ -123,12 +142,14 @@ export class CodingAgent {
   private async request(messages: Message[], taskId: string, signal: AbortSignal | undefined, remaining: number): Promise<Message> {
     const timeout = AbortSignal.timeout(remaining);
     const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+    const body = JSON.stringify({ model: this.options.model, messages, tools: toolDefinitions, tool_choice: 'auto' });
+    if (Buffer.byteLength(body) > 4_000_000) throw new CodingAgentError('AGENT_LIMIT', '任务上下文超过 4 MB');
     let response: Response;
     try {
       response = await (this.options.fetch ?? fetch)(this.endpoint, {
         method: 'POST', redirect: 'error', signal: combined,
         headers: { 'content-type': 'application/json', authorization: `Bearer ${this.key}`, 'x-opencode-session': taskId },
-        body: JSON.stringify({ model: this.options.model, messages, tools: toolDefinitions, tool_choice: 'auto' }),
+        body,
       });
     } catch (error) {
       if (signal?.aborted) throw new CodingAgentError('TASK_CANCELLED', '任务已取消');
@@ -140,8 +161,27 @@ export class CodingAgent {
       throw new CodingAgentError('AGENT_UPSTREAM', `编码模型服务返回 HTTP ${response.status}`);
     }
     let payload: unknown;
-    try { payload = await response.json(); }
-    catch { throw new CodingAgentError('AGENT_PROTOCOL', '编码模型服务返回的不是合法 JSON'); }
+    const reader = response.body?.getReader();
+    if (!reader) throw new CodingAgentError('AGENT_PROTOCOL', '编码模型响应为空');
+    const cancel = () => { void reader.cancel().catch(() => {}); };
+    combined.addEventListener('abort', cancel, { once: true });
+    try {
+      const chunks: Uint8Array[] = []; let bytes = 0;
+      while (true) {
+        combined.throwIfAborted();
+        const { value, done } = await reader.read();
+        combined.throwIfAborted();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > 1_000_000) throw new CodingAgentError('AGENT_LIMIT', '模型响应超过 1 MB');
+        chunks.push(value);
+      }
+      payload = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    } catch (error) {
+      combined.throwIfAborted();
+      if (error instanceof CodingAgentError) throw error;
+      throw new CodingAgentError('AGENT_PROTOCOL', '编码模型服务返回的不是合法 JSON');
+    } finally { combined.removeEventListener('abort', cancel); await reader.cancel().catch(() => {}); }
     const message = (payload as { choices?: Array<{ message?: Message }> }).choices?.[0]?.message;
     if (!message || message.role !== 'assistant' || !Array.isArray(message.tool_calls) && message.content === undefined) {
       throw new CodingAgentError('AGENT_PROTOCOL', '编码模型响应缺少 assistant message');

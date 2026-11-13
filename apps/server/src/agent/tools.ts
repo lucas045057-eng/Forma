@@ -1,4 +1,5 @@
-import { lstat, mkdir, readdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readdir, readFile, realpath } from 'node:fs/promises';
+import { writeAtomic } from '../assets/atomic-file.ts';
 import path from 'node:path';
 import { isSceneConfig } from '@spatial/shared/scene-config';
 
@@ -21,11 +22,21 @@ export const toolDefinitions = [
 export class Sandbox {
   private root: string;
   readonly written = new Set<string>();
-  constructor(root: string) { this.root = root; }
+  private bytes = 0;
+  private options: { signal?: AbortSignal; deadline?: number };
+  constructor(root: string, options: { signal?: AbortSignal; deadline?: number } = {}) { this.root = root; this.options = options; }
+  private check(bytes = 0) {
+    this.options.signal?.throwIfAborted();
+    if (this.options.deadline !== undefined && Date.now() >= this.options.deadline) throw new ToolError('任务总时限已到');
+    this.bytes += bytes;
+    if (this.bytes > 2_000_000) throw new ToolError('任务累计读写超过 2 MB');
+  }
 
   private async resolve(relative: unknown, pattern: RegExp, action: string) {
     if (typeof relative !== 'string') throw new ToolError('path 必须是字符串');
+    this.check();
     const normalized = relative.replaceAll('\\', '/').replace(/^\.\//, '');
+    if (normalized.split('/').some(part => /[. ]$/.test(part) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part) || part.includes(':'))) throw new ToolError('路径包含 Windows 保留名称或歧义字符');
     if (!pattern.test(normalized) || normalized.split('/').includes('..')) {
       throw new ToolError(`不允许${action}这个路径：${relative}。${action === '写入' ? '只能写 src/ 下的 .tsx/.ts/.css/.json/.svg 文件；依赖与构建配置不可修改。' : '只能读取 src/、public/ 下的文件以及 index.html、package.json。'}`);
     }
@@ -33,14 +44,20 @@ export class Sandbox {
     let current = root;
     for (const part of normalized.split('/')) {
       current = path.join(current, part);
-      try { if ((await lstat(current)).isSymbolicLink()) throw new ToolError('路径不得经过符号链接'); }
+      try {
+        if ((await lstat(current)).isSymbolicLink()) throw new ToolError('路径不得经过符号链接');
+        const real = await realpath(current);
+        if (path.relative(current, real) !== '') throw new ToolError('路径不得经过符号链接或目录联接');
+      }
       catch (error) { if (error instanceof ToolError) throw error; if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
     }
     return { absolute: current, relative: normalized };
   }
   async list() {
+    await this.resolve('src', /^src$/, '读取');
     const root = await realpath(this.root), result: string[] = [];
     const walk = async (folder: string) => {
+      this.check();
       for (const entry of await readdir(path.join(root, folder), { withFileTypes: true })) {
         const relative = `${folder}/${entry.name}`;
         if (entry.isSymbolicLink()) continue;
@@ -55,15 +72,18 @@ export class Sandbox {
   async read(file: unknown) {
     const target = await this.resolve(file, READABLE, '读取');
     let content: Buffer;
-    try { content = await readFile(target.absolute); }
+    if ((await lstat(target.absolute)).size > MAX_READ) throw new ToolError('文件过大，无法读取');
+    try { content = await readFile(target.absolute, { signal: this.options.signal }); }
     catch { throw new ToolError(`文件不存在：${target.relative}`); }
+    this.check(content.byteLength);
     if (content.byteLength > MAX_READ) throw new ToolError('文件过大，无法读取');
     if (content.includes(0)) throw new ToolError('这是二进制文件，无法作为文本读取');
     return content.toString('utf8');
   }
   private async store(target: { absolute: string; relative: string }, content: string) {
     if (Buffer.byteLength(content) > MAX_WRITE) throw new ToolError('内容过大');
-    if (target.relative === 'src/scene.config.json') {
+    this.check(Buffer.byteLength(content));
+    if (target.relative.toLowerCase() === 'src/scene.config.json') {
       let parsed: unknown;
       try { parsed = JSON.parse(content); } catch { throw new ToolError('scene.config.json 必须是合法 JSON'); }
       if (!isSceneConfig(parsed)) throw new ToolError('scene.config.json 不符合场景配置的约定（字段、取值范围或关键帧顺序）');
@@ -71,7 +91,10 @@ export class Sandbox {
       try { JSON.parse(content); } catch { throw new ToolError('JSON 文件内容不是合法 JSON'); }
     }
     await mkdir(path.dirname(target.absolute), { recursive: true });
-    await writeFile(target.absolute, content);
+    await this.resolve(target.relative, WRITABLE, '写入');
+    this.check();
+    await writeAtomic(target.absolute, content, this.options.signal);
+    this.check();
     this.written.add(target.relative);
   }
   async write(file: unknown, content: unknown) {

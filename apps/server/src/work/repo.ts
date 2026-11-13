@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { lstat, mkdir, readdir, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
@@ -8,11 +9,12 @@ export class WorkError extends Error {
   constructor(code: string, message: string, status = 400) { super(message); this.code = code; this.status = status; }
 }
 const idPattern = /^[a-z0-9]{6,32}$/;
-const identity = ['-c', 'user.name=Studio', '-c', 'user.email=studio@localhost', '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', '-c', 'commit.gpgsign=false'];
+const identity = ['-c', 'core.hooksPath=/dev/null', '-c', 'user.name=Studio', '-c', 'user.email=studio@localhost', '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', '-c', 'commit.gpgsign=false'];
 
 function git(args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    execFile('git', [...identity, ...args], { cwd, env: { ...process.env, GIT_TERMINAL_PROMPT: '0', ...env }, maxBuffer: 32 * 1024 * 1024, windowsHide: true },
+    const clean = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.toUpperCase().startsWith('GIT_')));
+    execFile('git', [...identity, ...args], { cwd, env: { ...clean, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0', ...env }, maxBuffer: 32 * 1024 * 1024, windowsHide: true },
       (error, stdout, stderr) => {
         if (error && typeof (error as { code?: unknown }).code !== 'number') return reject(error);
         resolve({ code: error ? (error as unknown as { code: number }).code : 0, stdout, stderr });
@@ -28,10 +30,24 @@ export class WorkRepo {
   readonly workRoot: string;
   readonly gitDir: string;
   readonly candidatesDir: string;
+  private operations: Promise<unknown> = Promise.resolve();
+  private scope = new AsyncLocalStorage<boolean>();
+  exclusive<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.scope.getStore()) return operation();
+    const result = this.operations.then(() => this.scope.run(true, operation));
+    this.operations = result.catch(() => {});
+    return result;
+  }
   constructor(options: { workRoot: string; dataDirectory: string }) {
     this.workRoot = path.resolve(options.workRoot);
     this.gitDir = path.join(path.resolve(options.dataDirectory), 'work.git');
     this.candidatesDir = path.join(path.resolve(options.dataDirectory), 'candidates');
+    // Bind every repository operation to the same reentrant queue, including nested snapshot calls.
+    const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    for (const name of ['init', 'head', 'snapshot', 'isCommit', 'fileAt', 'fileChangedSince', 'createCandidate', 'commitCandidate', 'diff', 'adopt', 'revert', 'removeCandidate', 'candidateExists']) {
+      const operation = methods[name].bind(this);
+      methods[name] = (...args) => this.exclusive(() => operation(...args));
+    }
   }
   private async main(args: string[], allowFailure = false) {
     const result = await git(['--git-dir', this.gitDir, '--work-tree', this.workRoot, ...args], this.workRoot);
@@ -60,7 +76,7 @@ export class WorkRepo {
       await this.main(['config', 'core.worktree', this.workRoot]);
       await mkdir(path.join(this.gitDir, 'info'), { recursive: true });
       await writeFile(path.join(this.gitDir, 'info', 'exclude'), 'node_modules/\ndist/\n.vite/\n*.tmp\n');
-      await this.main(['add', '-A']);
+      await this.stage(this.workRoot, args => this.main(args));
       await this.main(['commit', '-q', '--allow-empty', '-m', '初始版本']);
     } else {
       const configured = (await this.main(['config', 'core.worktree'], true)).stdout.trim();
@@ -73,12 +89,56 @@ export class WorkRepo {
       await this.main(['worktree', 'prune'], true);
     }
   }
+  private permitted(file: string) {
+    if (file.split('/').some(part => /^(?:\.|.*(?:secret|credential|private.?key|backup))/i.test(part) || /\.(?:pem|key|crt|p12|pfx|bak|tmp|old|orig)$/i.test(part))) return false;
+    return /^(?:src|public)\/[a-z0-9_./-]+$/i.test(file) || ['index.html', 'package.json', 'vite.config.ts', 'tsconfig.json'].includes(file);
+  }
+  private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {
+    const tracked = (await command(['ls-files', '-z'])).stdout.split('\0').filter(Boolean);
+    if (tracked.some(file => !this.permitted(file))) throw new WorkError('UNSAFE_TRACKED_FILE', '作品版本库含不允许的文件，请人工迁移到干净版本库');
+    await command(['add', '-u']);
+    const walk = async (folder: string, prefix = '') => {
+      for (const item of await readdir(folder, { withFileTypes: true })) {
+        const file = prefix + item.name;
+        if (item.isSymbolicLink()) { if (tracked.includes(file)) throw new WorkError('UNSAFE_TRACKED_FILE', '版本库不能跟踪符号链接'); continue; }
+        if (item.isDirectory() && (file === 'src' || file === 'public' || /^(src|public)\//.test(file)) && !item.name.startsWith('.')) await walk(path.join(folder, item.name), `${file}/`);
+        else if (item.isFile() && this.permitted(file)) await command(['add', '--', file]);
+      }
+    };
+    await walk(root);
+    const staged = (await command(['ls-files', '--stage', '-z'])).stdout.split('\0').filter(Boolean);
+    if (staged.some(entry => entry.startsWith('120000 ') || !this.permitted(entry.slice(entry.indexOf('\t') + 1)))) throw new WorkError('UNSAFE_INDEX', '暂存区含不允许的路径或链接');
+  }
+  /**
+   * Links (symlinks, junctions) inside the work's writable areas are refused outright: git writes
+   * through an existing directory link, so merging a candidate that adds `src/link/x.ts` over a
+   * work tree where `src/link` is a junction would place the file outside the work. Compared by
+   * real path as well, because the link type reported by lstat differs across link kinds.
+   */
+  async assertNoLinks(root = this.workRoot) {
+    const base = await realpath(root);
+    const walk = async (folder: string, relative: string): Promise<void> => {
+      let entries;
+      try { entries = await readdir(folder, { withFileTypes: true }); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
+      for (const entry of entries) {
+        const absolute = path.join(folder, entry.name), file = `${relative}/${entry.name}`;
+        const info = await lstat(absolute);
+        const real = await realpath(absolute).catch(() => '');
+        if (info.isSymbolicLink() || !real || path.relative(path.join(base, file), real) !== '') {
+          throw new WorkError('UNSAFE_WORK_TREE', `作品目录里的 ${file} 是链接（符号链接或目录联接），出于安全拒绝操作；请删除该链接后重试`, 409);
+        }
+        if (info.isDirectory()) await walk(absolute, file);
+      }
+    };
+    for (const area of ['src', 'public']) await walk(path.join(base, area), area);
+  }
   async head() { return (await this.main(['rev-parse', 'HEAD'])).stdout.trim(); }
   /** Commit whatever is on disk (3D write-back, manual edits) so HEAD always equals the files. */
   async snapshot(message = '自动快照：作品目录的未提交改动') {
+    await this.assertNoLinks();
     if ((await this.main(['status', '--porcelain'])).stdout.trim()) {
-      await this.main(['add', '-A']);
-      await this.main(['commit', '-q', '-m', message]);
+      await this.stage(this.workRoot, args => this.main(args));
+      if ((await this.main(['diff', '--cached', '--name-only'])).stdout.trim()) await this.main(['commit', '-q', '-m', message]);
     }
     return this.head();
   }
@@ -89,15 +149,28 @@ export class WorkRepo {
     const result = await this.main(['show', `${version}:${file}`], true);
     return result.code === 0 ? result.stdout : undefined;
   }
+  async transitionMatches(before: string, kind: 'adopt' | 'revert', id: string, target?: string) {
+    const text = (await this.main(['log', '-1', '--format=%P%n%B'])).stdout;
+    const [parents, ...body] = text.split('\n');
+    if (parents.split(' ')[0] !== before) return false;
+    if (kind === 'adopt') {
+      const candidate = (await this.main(['rev-parse', this.branch(id)], true)).stdout.trim();
+      return parents.split(' ')[1] === candidate && body.join('\n').trim() === `采用候选版本 ${id}`;
+    }
+    return !!target && body.join('\n').includes(target);
+  }
   async fileChangedSince(version: string, file: string) {
     return (await this.main(['diff', '--quiet', version, 'HEAD', '--', file], true)).code !== 0;
   }
 
   async createCandidate(id: string, base: string) {
     const directory = this.candidatePath(id);
-    await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
-    await this.linkDependencies(directory);
-    return directory;
+    await this.assertNoLinks();
+    if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
+    try {
+      await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
+      await this.linkDependencies(directory); return directory;
+    } catch (error) { await this.removeCandidate(id); throw error; }
   }
   /** pnpm's package links are relative, so link every package to its real location instead of the folder. */
   private async linkDependencies(directory: string) {
@@ -109,8 +182,9 @@ export class WorkRepo {
         else await symlink(await realpath(path.join(from, entry)), path.join(to, entry), 'junction');
       }
     };
-    try { await link(path.join(this.workRoot, 'node_modules'), path.join(directory, 'node_modules')); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    const modules = path.join(this.workRoot, 'node_modules');
+    try { await lstat(modules); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
+    await link(modules, path.join(directory, 'node_modules'));
   }
   private async unlinkDependencies(directory: string) {
     const unlink = async (folder: string) => {
@@ -129,7 +203,7 @@ export class WorkRepo {
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
   async commitCandidate(id: string, message: string) {
-    await this.inCandidate(id, ['add', '-A']);
+    await this.stage(this.candidatePath(id), args => this.inCandidate(id, args));
     const changed = (await this.inCandidate(id, ['diff', '--cached', '--name-only'])).stdout.split('\n').map(line => line.trim()).filter(Boolean);
     if (changed.length) await this.inCandidate(id, ['commit', '-q', '-m', message]);
     return changed;
@@ -146,6 +220,7 @@ export class WorkRepo {
   }
   /** Merge the candidate into main. Returns the merge commit; a conflict leaves main untouched. */
   async adopt(id: string) {
+    await this.assertNoLinks();
     await this.snapshot();
     const merge = await this.main(['merge', '--no-ff', '-q', '-m', `采用候选版本 ${id}`, this.branch(id)], true);
     if (merge.code !== 0) {
@@ -155,6 +230,7 @@ export class WorkRepo {
     return this.head();
   }
   async revert(mergeCommit: string) {
+    await this.assertNoLinks();
     await this.snapshot();
     const result = await this.main(['revert', '-m', '1', '--no-edit', mergeCommit], true);
     if (result.code !== 0) {

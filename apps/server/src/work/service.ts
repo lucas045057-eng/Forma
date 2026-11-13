@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir } from 'node:fs/promises';
+import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
 import type { Candidate, Check, Selection, Task } from '@spatial/shared';
 import { writeAtomic } from '../assets/atomic-file.ts';
@@ -16,7 +17,7 @@ interface StoredTask extends Task {
 }
 interface StoredCandidate extends Candidate { taskId: string; createdAt: string }
 interface Adoption { mergeCommit: string; candidateId: string; at: string }
-interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[] }
+interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[]; intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string } }
 
 export interface WorkServiceOptions {
   workRoot: string;
@@ -40,22 +41,33 @@ export class WorkService {
   private taskQueue: Promise<void> = Promise.resolve();
   private controllers = new Map<string, AbortController>();
   private closing = false;
+  private releaseLock?: () => Promise<void>;
 
   constructor(options: WorkServiceOptions) {
     this.options = options;
     this.file = path.join(options.directory, 'tasks.json');
     this.repo = new WorkRepo({ workRoot: options.workRoot, dataDirectory: options.directory });
     this.previews = new PreviewManager({ workRoot: options.workRoot, cacheDirectory: path.join(options.directory, 'preview-cache'), startTimeoutMs: options.previewStartTimeoutMs });
+    const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
+    for (const name of ['version', 'validateSelection', 'adopt', 'discard', 'revert', 'trimCandidates']) {
+      const operation = methods[name].bind(this);
+      methods[name] = (...args) => this.repo.exclusive(async () => { await this.recoverIntent(); return operation(...args); });
+    }
   }
 
   async init() {
     await mkdir(this.options.directory, { recursive: true });
+    this.releaseLock = await acquireInstanceLock(this.options.directory);
     await this.repo.init();
     try {
       const saved = JSON.parse(await readFile(this.file, 'utf8')) as State;
       if (!Array.isArray(saved.tasks) || !Array.isArray(saved.candidates) || !Array.isArray(saved.adoptions)) throw new Error('invalid state');
       this.state = saved;
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取 M2 任务状态 tasks.json'); }
+    await this.recoverIntent();
+    for (const entry of await readdir(this.repo.candidatesDir, { withFileTypes: true })) {
+      if (/^[a-z0-9]{6,32}$/.test(entry.name) && !this.state.candidates.some(c => c.id === entry.name && c.decision === 'pending')) await this.repo.removeCandidate(entry.name);
+    }
     let recovered = false;
     for (const task of this.state.tasks) {
       if (task.status === 'running' || task.status === 'queued') {
@@ -68,6 +80,27 @@ export class WorkService {
       }
     }
     if (recovered) await this.save();
+  }
+
+  private async recoverIntent() {
+    const intent = this.state.intent;
+    if (!intent) return;
+    const head = await this.repo.head();
+    const candidate = this.state.candidates.find(c => c.id === intent.id);
+    if (intent.kind === 'discard') {
+      await this.previews.stop(intent.id);
+      await this.repo.removeCandidate(intent.id);
+      if (candidate) candidate.decision = 'discarded';
+    } else if (head !== intent.before) {
+      const target = intent.target;
+      if (!await this.repo.transitionMatches(intent.before, intent.kind, intent.id, target)) throw new WorkError('RECOVERY_CONFLICT', '作品历史与未完成意图不一致，请保留数据并人工检查', 409);
+      if (intent.kind === 'adopt') {
+        if (candidate) candidate.decision = 'adopted';
+        if (!this.state.adoptions.some(a => a.mergeCommit === head)) this.state.adoptions.push({ mergeCommit: head, candidateId: intent.id, at: new Date().toISOString() });
+      } else if (this.state.adoptions.at(-1)?.candidateId === intent.id) this.state.adoptions.pop();
+    }
+    this.state.intent = undefined;
+    try { await this.save(); } catch (error) { this.state.intent = intent; throw error; }
   }
 
   private save() {
@@ -216,10 +249,9 @@ export class WorkService {
     }
   }
   private async closeCandidate(candidate: StoredCandidate, reason: string) {
-    await this.previews.stop(candidate.id);
-    await this.repo.removeCandidate(candidate.id);
-    candidate.decision = 'discarded';
+    this.state.intent = { kind: 'discard', id: candidate.id, before: await this.repo.head() };
     await this.save();
+    await this.recoverIntent();
     this.options.emit({ type: 'candidate.closed', candidate: clone(candidate), reason });
   }
 
@@ -227,10 +259,12 @@ export class WorkService {
     const candidate = this.candidate(id);
     if (candidate.decision !== 'pending') throw new WorkError('INVALID_STATE', '只有待定候选可以采用', 409);
     await this.snapshot();
+    this.state.intent = { kind: 'adopt', id, before: await this.repo.head() };
+    await this.save();
     const mergeCommit = await this.repo.adopt(id);
     candidate.decision = 'adopted';
     this.state.adoptions.push({ mergeCommit, candidateId: id, at: new Date().toISOString() });
-    await this.save();
+    await this.recoverIntent();
     await this.previews.stop(id).catch(() => {});
     await this.repo.removeCandidate(id).catch(() => {});
     const version = await this.repo.head();
@@ -250,9 +284,10 @@ export class WorkService {
     const adoption = this.state.adoptions.at(-1);
     if (!adoption) throw new WorkError('NO_ADOPTION', '没有可以回退的采用记录', 409);
     await this.snapshot();
-    const version = await this.repo.revert(adoption.mergeCommit);
-    this.state.adoptions.pop();
+    this.state.intent = { kind: 'revert', id: adoption.candidateId, before: await this.repo.head(), target: adoption.mergeCommit };
     await this.save();
+    const version = await this.repo.revert(adoption.mergeCommit);
+    await this.recoverIntent();
     this.options.emit({ type: 'version.changed', version, reverted: adoption.mergeCommit, candidateId: adoption.candidateId, reason: 'revert' });
     return { version, reverted: adoption.mergeCommit };
   }
@@ -265,5 +300,7 @@ export class WorkService {
     await this.taskQueue;
     await this.previews.stopAll();
     await this.writes;
+    await this.releaseLock?.();
+    this.releaseLock = undefined;
   }
 }

@@ -3,6 +3,7 @@ import { request as httpRequest, type IncomingMessage, type ServerResponse } fro
 import { createServer } from 'node:net';
 import { realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function freePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -38,21 +39,26 @@ export class PreviewManager {
     const vite = await realpath(path.join(this.options.workRoot, 'node_modules', 'vite', 'bin', 'vite.js'));
     const port = await freePort();
     // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
-    const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id) };
+    const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
     for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT', 'ComSpec']) {
       if (process.env[key] !== undefined) env[key] = process.env[key];
     }
-    const child = spawn(process.execPath, [vite], { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    const worker = fileURLToPath(new URL(import.meta.url.endsWith('.ts') ? './preview-worker.ts' : './preview-worker.js', import.meta.url));
+    const child = spawn(process.execPath, [worker, vite], { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], windowsHide: true });
     let output = '';
     const collect = (chunk: Buffer) => { output = (output + chunk.toString('utf8')).slice(-4000); };
-    child.stdout.on('data', collect); child.stderr.on('data', collect);
-    const exited = new Promise<void>(resolve => child.once('exit', () => { if (this.running.get(id)?.child === child) this.running.delete(id); resolve(); }));
+    child.stdout!.on('data', collect); child.stderr!.on('data', collect);
+    let failed = false;
+    const exited = new Promise<void>(resolve => {
+      const finish = () => { failed = true; if (this.running.get(id)?.child === child) this.running.delete(id); resolve(); };
+      child.once('error', finish); child.once('close', finish);
+    });
     this.running.set(id, { port, child, exited });
     const deadline = Date.now() + (this.options.startTimeoutMs ?? 90_000);
     try {
       for (;;) {
         signal?.throwIfAborted();
-        if (child.exitCode !== null) throw new Error(`候选预览服务启动失败：${output.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(-600)}`);
+        if (failed || child.exitCode !== null) throw new Error(`候选预览服务启动失败：${output.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(-600)}`);
         if (await probe(port, previewBase(id)) === 200) break;
         if (Date.now() > deadline) throw new Error('候选预览服务启动超时');
         await new Promise(resolve => setTimeout(resolve, 250));
@@ -85,13 +91,15 @@ export class PreviewManager {
     if (!port) return fail(404, '该候选版本的预览未在运行');
     const upstream = httpRequest({
       host: '127.0.0.1', port, method: incoming.method, path: incoming.url,
-      headers: { ...incoming.headers, host: `127.0.0.1:${port}`, connection: 'close' },
+      headers: { host: `127.0.0.1:${port}`, accept: incoming.headers.accept ?? '*/*', connection: 'close' },
     }, response => {
-      outgoing.writeHead(response.statusCode ?? 502, response.headers);
+      outgoing.statusCode = response.statusCode ?? 502;
+      for (const name of ['content-type', 'cache-control', 'etag']) if (response.headers[name]) outgoing.setHeader(name, response.headers[name]!);
       response.pipe(outgoing);
     });
+    const timer = setTimeout(() => upstream.destroy(), 30_000);
     upstream.on('error', () => fail(502, '候选预览服务没有响应'));
-    outgoing.on('close', () => upstream.destroy());
+    outgoing.on('close', () => { clearTimeout(timer); upstream.destroy(); });
     upstream.end();
   }
 }
