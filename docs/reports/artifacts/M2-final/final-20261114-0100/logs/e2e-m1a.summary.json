@@ -1,0 +1,65 @@
+{
+  "id": "e2e-m1a",
+  "title": "M1-A e2e",
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 43060,
+  "failed": false,
+  "failureReasons": [],
+  "error": null,
+  "artifacts": [
+    {
+      "file": "docs/reports/artifacts/M1-A/consistency.json",
+      "sha256": "8fdc484869a451c13a57ed8db990359bb8ecf04f036e65ab545414fa9df8f2cc"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/fallback.json",
+      "sha256": "c7c2998bdd34e853cd9a8072e91d0a1db6420007acf64e2dba9b178e6cfe9977"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/invalid-config.json",
+      "sha256": "dcc03e4d88aa15f1e66f0699fa7dafc5029353b6da3e10deb22d3cb596f96aa8"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/parts-single-mesh.json",
+      "sha256": "b5aa572a5ce9a5346194b3df7fbae3c10225908df874baa19dae857540d79fdb"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/parts.json",
+      "sha256": "ef3dddf99855f585a74dbb302385f2681ad767fa966e51c8286898c6626d12f5"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/playwright-results.json",
+      "sha256": "2ea85458b6a1f883f943b566fc6039bb43f08d26e07ec1639ae4f1e0fac6f7b8"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/resource-release.json",
+      "sha256": "aa4ba20cdf4b271960617c2e9f93d509e14c8b89869dd8b597f5716bcaeeb4cf"
+    },
+    {
+      "file": "docs/reports/artifacts/M1-A/scroll-lid.json",
+      "sha256": "30ff7780f13d557274aa225de7cbc2decbd365c0bb39e79f8bd2ac0334db873c"
+    }
+  ],
+  "cleanup": null,
+  "playwright": {
+    "stats": {
+      "startTime": "2026-11-13T16:55:22.555Z",
+      "duration": 42709.949,
+      "expected": 7,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "counts": {
+      "total": 7,
+      "passed": 7,
+      "expectedFailed": 0,
+      "unexpectedlyPassed": 0,
+      "unexpectedFailed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "failedTests": []
+  }
+}

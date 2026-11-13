@@ -1,0 +1,13 @@
+{
+  "id": "unit",
+  "title": "pnpm test（完整单测）",
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 24651,
+  "failed": false,
+  "failureReasons": [],
+  "error": null,
+  "artifacts": [],
+  "cleanup": null,
+  "playwright": null
+}

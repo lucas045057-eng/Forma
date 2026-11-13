@@ -1,0 +1,18 @@
+{
+  "status": 409,
+  "code": "UNSAFE_WORK_TREE",
+  "versionStatus": 409,
+  "versionCode": "UNSAFE_WORK_TREE",
+  "targetEntries": [],
+  "workEntries": [
+    "App.tsx",
+    "components",
+    "link-out",
+    "main.tsx",
+    "scene-config-store.ts",
+    "scene.config.json",
+    "style.css"
+  ],
+  "callsBefore": 0,
+  "callsAfter": 0
+}

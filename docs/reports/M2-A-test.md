@@ -289,3 +289,14 @@ node node_modules\@playwright\test\cli.js test -c playwright.m2a.config.ts tests
 - 启动窗口用例的 Vite 由临时 fixture 的替身延迟启动，不是真实 Vite 已开始加载的同一瞬间；它验证的是“worker 已存在、尚未 ready 时父进程死亡”的回收路径，覆盖限制要在下轮报告里沿用。若下轮发现真实残留，需记录拥有者 PID/创建时间/端口/候选阶段，不能删断言或跳过。
 - 本轮未重跑 `pnpm test`、M0-B/M0-A/M1-A/M1-B、M2-B、完整 M2-A，也未重跑 N4/retry 的已知失败（修复仍在 CodeBuddy 分支，master 仍预期失败）。
 - 全程未调用真实模型/Lux3D、未读真实 `.env`；fixture 保持假 key + loopback mock + 出站网络守卫，未安装依赖/改锁文件。
+
+---
+
+# 最终集成回归（`b167907` 合并后，冻结 HEAD `86416ce`）
+
+- 日期：2026-11-14。job **`job_ae81d353`**：exit 0、10m54s；冻结 HEAD **`86416ce080e10f75bea146f6d6b852629555ab79`**；`apps/packages/templates` 与 `pnpm-lock.yaml` 相对 `b167907` 无差异。
+- 完整 M2-A：**35/35 passed**，`expected-failed=0`、`skipped=0`、`retries=0`；含 D3 五场景与 N4。单独第二轮 D3 **5/5 passed**（同一五场景重跑，不是新增用例）。
+- **N4 按普通断言通过**（`takeover-n4-shutdown-b167907.json`）：被接受操作阻塞时关闭期间锁仍在、第二实例 `INSTANCE_LOCKED`；解锁时 `headHasMarker=true`、`hasVersionChanged=true`、`operationCompleted=true`，重启 seq 接续；`blockedRequest.connection='close'` 只避开 S1 的约 72 秒 keep-alive 排空等待，顺序断言未放宽。
+- **D3 五场景两轮均通过**：两轮 `artifacts/e2e-m2a` 与 `artifacts/d3-standalone` 各 5 个 scenario 都是 `gone=true`、`stillAlive=[]`、`leftoverIdentities/leftoversAfter=[]`，decoy 最终 `gone=true`。D3 仍是**旧全局计数自匹配误报的纠正**，生产 `preview.ts`/`preview-worker.ts` 未被修改（hash 与旧基线相同）。
+- 单测明细：server 134、studio 7（含在 235 总数内；shared 68、plugin 20、bridge 1（node:test）、scene-renderer 5）。所有 e2e 步骤后已知端口为空，模板已还原。
+- 限制不变：本轮全部是 mock 模型门槛；真实模型“10 次至少 8 次改对”未运行；F1 根 junction 无正式 E2E、历史孤儿启动清理、资产偶发单测唯一根因仍未覆盖。

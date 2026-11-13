@@ -1,0 +1,197 @@
+{
+  "id": "e2e-m2a",
+  "title": "M2-A e2e（完整，含 D3 五场景与 N4）",
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 168025,
+  "failed": false,
+  "failureReasons": [],
+  "error": null,
+  "artifacts": [
+    {
+      "file": "docs/reports/artifacts/M2-A/adopt-conflict.json",
+      "sha256": "1a4a5157ef5b1a5fc20edc8f35331482730d63537f9770f947f5399cfbda589f"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/adopt-once.json",
+      "sha256": "db83c357eec6f60bea8c6752f3812bb0f9899459a08292e8c438d2f6c9d05959"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/candidate-limit-closed.json",
+      "sha256": "b1f2bfaa17d2727a763bea109d4d004e2ca0fdb2a35d4d3b4696be665446058c"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/candidate-limit.json",
+      "sha256": "d7fe1b143f94fbfee12ab493c26243ffc91fa5c530c3fffdfa06edfc0d884034"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/d1-candidate-preview.json",
+      "sha256": "8964e215980a5b7c3564ff748fa7fbe48aee5394bc76dbf66d2e17e8d161394a"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/discard.json",
+      "sha256": "9d776f4ec18022854c99ee7cbfef07144e0ba602bb7126ee201740a72a96793f"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/events-replay.json",
+      "sha256": "57253d08f2484fac4f0ff80740d0a7a3336cdffa21ba0b323b402a2b2f0c7dab"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/events-restart.json",
+      "sha256": "632c638d4c7f99f8188fa423014f00d8009616c0c939270546c10eb053e793bc"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/failure-cancel.json",
+      "sha256": "b86cbf97d57859a3c697b514f70eb0a0c4b09840b9e80583f597ce7271e17c08"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/failure-no-changes.json",
+      "sha256": "e58f4df13cefa557033abd8664a4b624520f7b7fdd5bfec0e85ca746e108ee06"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/failure-protocol.json",
+      "sha256": "3ac5316cbeb5255eeda0d8c92546e5314c51df49e12fb376fc9ba848f24b20f3"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/failure-timeout.json",
+      "sha256": "346e0ae2022ca79acde0fbb5e9831180cfda8e2323e435d1d6599733278a9e69"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/failure-upstream.json",
+      "sha256": "42fa3fcdc0c2b45bb37717f264aecef6a15e081c48e4d10646ba614bd92fbe32"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/flow-main.json",
+      "sha256": "216de6e327c77ba5740f060907567323be435ceacc3e8d631c968a9bc1a72ed1"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/flow-out-of-scope.json",
+      "sha256": "88e872eed95cbebd50515253fbb09c8b87b739a4ebdd204f9d07d4d61d9e64fd"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-b1.json",
+      "sha256": "fd63b8f9a3cdeec469cded63eb68924362948754143eabe336d6db0572bf7577"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-b2.json",
+      "sha256": "86c51bd3b1f540fc24fd257bd44df79fda82ea3fb91ad590fbab07b0bf62ca52"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r1.json",
+      "sha256": "577c3525eb23082de904ee61abb34625d896b6fdb0c82410ffaa33d13783dffb"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-multi-candidate-pid-kill.json",
+      "sha256": "91dc363e8abfcb3ba1ead1c917052fea4927c68186414185ae2aa3d1fe8a9d69"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-negative-control.json",
+      "sha256": "43f0103237065a4172daa5c9ccde51f93e2b4e9c9320032bd5aa96cdaaaa34d2"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-pid-kill.json",
+      "sha256": "a404b1f276e0ce16c679308eb29e66ad106860544ef77ec2e732d0b4fcb1f5f6"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-startup-window-pid-kill.json",
+      "sha256": "9022395785361dfc7dc3f904a984eb68a0550141a464a9738860c2ac858692df"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-tree-kill.json",
+      "sha256": "c7641b69077098b10eb37a3437dda12e5c415e71f556730d02f9f5ec01776a00"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/isolation-r6.json",
+      "sha256": "01ae8f71494a31d6ead9c1badada9ea37a4d5dfcae1b339785b7097521c74404"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/known-defect-preview-reload.json",
+      "sha256": "4b531824687535ccdc403520966f675b075460d70f93a76734519e32b4b7d8db"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/playwright-results.json",
+      "sha256": "99e21563b4022628a3c3237fefac37183f7331f391230e8ca74ab78d6a6444d8"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/preview-origin.json",
+      "sha256": "6a9ac4e5612d48d2a39e36f2070cf4dc0d28fe639943dafdefd45544ad01a302"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/proxy.json",
+      "sha256": "6fb4e18279f1799e53be5d9e76a4c40ac90f2341f96ae3e34e2fb0a875521e4b"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/resources.json",
+      "sha256": "d598c6408bf1711d78a7ce55dbe1f934fa4226e4279fbfc3cfe7e4efab8d17e1"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/round3-f2-preview-host.json",
+      "sha256": "06788b175fa96567ab96ebb071ddcf610270b9f6729d3a0f46b33ec7c17b1d5f"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/round3-f3-audit.json",
+      "sha256": "28264ff176a441bf4cb82e37b31d34a5736a88bc45bff98a31282a0e0c3f4075"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/round3-f4-instance-lock.json",
+      "sha256": "1669b8ba5b496f3e2c50ae56bbeef3cc419b7e2a65a773cbfb9a5c678af44a85"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/sandbox-adopt-unsafe.json",
+      "sha256": "0b4d7175363736207bc77279fc8cb0555e61124e2889ec9a3712a9916b996871"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/sandbox-junction.json",
+      "sha256": "7383d447703cc7e4e9a9b7e1f574063667d58506e230ca40c60483c880bd3314"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/sandbox-unsafe-work-tree.json",
+      "sha256": "c0666d41558621fdd0ec4533cfd7ed456662ef58878981bf675e2e59794d5e98"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/sandbox.json",
+      "sha256": "7caf2b54dbba24e531e0df8cb5b4c1170f9ebac112de1af0971ccf637158dcef"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/selection-invalid.json",
+      "sha256": "5e698b3f4bf7e6a1a1ba2fb1e7e2bcbc708f04127ea75645af0156e4cc28dcc5"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/selection-stale.json",
+      "sha256": "b5cb610f91d0917ef3072c68b304ab0696b9770ab97a8c923f08cef7491ff5cb"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/selection-valid.json",
+      "sha256": "3ae92d42daa7a3aba97f282828fbc1fe9e84dac2667ee523dd62550c3ea91d5a"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/takeover-n4-shutdown-b167907.json",
+      "sha256": "b721ffc45b94a1e9c059c5ddc3cb465540d77ced0b03c3c1c1feff1ae3d6fa1f"
+    },
+    {
+      "file": "docs/reports/artifacts/M2-A/takeover-n4-shutdown.json",
+      "sha256": "82d4c2073b0c80dae778a3ccf06da568cb38bc7796cc999da2b0e1b7f5e6cc42"
+    }
+  ],
+  "cleanup": null,
+  "playwright": {
+    "stats": {
+      "startTime": "2026-11-13T16:57:55.683Z",
+      "duration": 167680.989,
+      "expected": 35,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "counts": {
+      "total": 35,
+      "passed": 35,
+      "expectedFailed": 0,
+      "unexpectedlyPassed": 0,
+      "unexpectedFailed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "failedTests": []
+  }
+}

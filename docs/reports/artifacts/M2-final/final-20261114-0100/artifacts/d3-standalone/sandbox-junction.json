@@ -1,0 +1,9 @@
+{
+  "taskStatus": "done",
+  "diff": [
+    "src/App.tsx",
+    "src/link-out/escape.ts"
+  ],
+  "targetEntries": [],
+  "escaped": false
+}

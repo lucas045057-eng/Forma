@@ -1,0 +1,121 @@
+{
+  "id": "e2e-m0b",
+  "title": "M0-B e2e（默认 config）",
+  "exitCode": 0,
+  "signal": null,
+  "durationMs": 56883,
+  "failed": false,
+  "failureReasons": [],
+  "error": null,
+  "artifacts": [
+    {
+      "file": "docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+      "sha256": "bb031a6a998e48c683b16a4c53f5c4ce86b2f3c1fe1f71608ff4777332f96441"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-mutation-missing-tag.json",
+      "sha256": "a57f9e3ab757d453fa17b71129b6d09dd05185d8aacb9981460c718edebe611c"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-mutation-same-tag.json",
+      "sha256": "f5bc7fc74d7d5284ecde5b63e4f6153043f41755123e4c0bbeab39d288667a91"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1a-pointer-events.json",
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1b-form-submit.json",
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1c-link.json",
+      "sha256": "a8da4701b792871d0f1a2709f5fa0e6aa93ae0ce4c4b3cb75e231a6f1fdc2ead"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1d-restore.json",
+      "sha256": "26a9944cec4eb19e750c71624a44b20c60c785928c5c4d6844d77777769c95d8"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1e-contextmenu-dblclick.json",
+      "sha256": "df20c597f148c3d002269cac270df17fa6bca17ecc0ffa5b5b68da9dd678000d"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1f-space.json",
+      "sha256": "4e81130cb5f6bfa124799b6bd82113ac19bec446bf08cbfd5334482fddf58dd9"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-r1g-hover-scroll.json",
+      "sha256": "49ad741a07a916d14c77153cca6028b47a51ea9c19b9de950096fceba996ec0c"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-s4a-bridge-source.json",
+      "sha256": "9729291e0244649813f851f600879ed56826656acda2dd83559766d11f20ece3"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-s4c-studio-payload-guard.json",
+      "sha256": "3fa86b2b54a53b20f408023c5e4fb2e4f540bf87f1ebdf261bff6b70398e67ef"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case-s4d-bridge-guard.json",
+      "sha256": "af0fe39aa07d194e089bda1733bc5ffc96d742efe4d56523b28f7aaf57cd65c4"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case1-random-sample.json",
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case3-shared-button.json",
+      "sha256": "c376cba1103f3250b26d9d3fae9be67e719976c1999150243320fc2a5146316b"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case4-map-list.json",
+      "sha256": "f969dfe1b79eae98113bfbdedeeb979bc6e1fe1521f1b34402ee984fd90404ac"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case5-outer-container.json",
+      "sha256": "fe2a09287ae0401253f3b81d12994b31c16c7686862e04611176400271cb400c"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case6-ancestors.json",
+      "sha256": "aa59ad2e80383e59a7fd8d14aacd5a4327c4bd5e9f6a92585d70b778fbd71acd"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case7-origin-check.json",
+      "sha256": "7cec79e89e7f4be5ceae2fdebad38bb6d85e5805840dc4cf110c8b29f85408a7"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case8-deterministic-ast.json",
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/case9-completeness.json",
+      "sha256": "9379a21c0a48843d66195fc7f63de2c792800644a8447404793661a90b897cc4"
+    },
+    {
+      "file": "docs/reports/artifacts/M0-B/playwright-results.json",
+      "sha256": "2029ec30a700c01deeb273213446633097a3ad556c08933f97383f0a90c59904"
+    }
+  ],
+  "cleanup": null,
+  "playwright": {
+    "stats": {
+      "startTime": "2026-11-13T16:52:51.304Z",
+      "duration": 56527.77,
+      "expected": 24,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "counts": {
+      "total": 24,
+      "passed": 24,
+      "expectedFailed": 0,
+      "unexpectedlyPassed": 0,
+      "unexpectedFailed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "failedTests": []
+  }
+}

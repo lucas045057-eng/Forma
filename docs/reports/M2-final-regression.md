@@ -2,7 +2,7 @@
 
 - 日期：2026-11-14（Asia/Shanghai）
 - 集成基线：master **`b167907`**（合并独立审查通过的 `e468c20`；含 d79c467 的 retry 门禁与 N4 成品）
-- 冻结 HEAD：本轮**测试/接线提交**（`b167907` 之后只有测试、验证入口与本报告；上一轮为 `cdfed40`；本轮重新提交后的完整 hash 由验证入口在 `evidence.json` 的 `frozenHead` 记录，并在交回消息中给出）
+- 冻结 HEAD：**`86416ce080e10f75bea146f6d6b852629555ab79`**（`b167907` 之后的测试/接线提交；`apps/packages/templates` 与锁文件相对 `b167907` 无差异）。结果归档提交见交回消息。
 - 角色边界：只改测试、测试接线、测试报告与证据；未改 `apps/`、`packages/`、`templates/` 生产源码，未装依赖、未改锁文件、未合并分支；`.worktrees/m2fix`、`.worktrees/m2d3` 未动。
 - 安全约束：假 key、loopback mock、出站网络守卫；未读真实 `.env`/ASKS，未调用真实模型或 Lux3D。
 
@@ -103,16 +103,36 @@
 - 资产偶发测试（`service.test.ts` / `lux3d.test.ts`）尚未唯一归因到动态端口 bad-port；本轮只记录实际结果，不靠重试/加超时凑绿。
 - N4 的 `Connection: close` 只避开约 72 秒 keep-alive 排空等待；该等待本身（S1 建议）仍是安全行为，不是缺陷验证。
 - 启动窗口 D3 用例使用临时作品副本里的延迟 Vite 替身；生产 preview 代码未改，仍属于“覆盖限制”。
+- 本轮全部 e2e 都是 **mock 模型门槛**；真实模型“连续 10 次至少 8 次改对”未运行，需要额度确认后另行派单，不能由本轮结果替代。
 
-## 6. 当前状态：待后台结果（新 run）
+## 6. 实际结果：通过（mock 集成回归）
 
-- 上一轮 `final-20261114-0040` / `job_e2215d6c` 已归档为 **preflight 阻断**（exit 2、约 6 秒、0 步骤）；`final-20261114-0045` / `job_1afbd95b` 已归档为 **typecheck 成功但入口归档失败**（exit 1、约 12 秒、0 个记录步骤，build/单测/e2e 未运行）。两个目录都保留，不覆盖。
-- 修复扫描与收尾路径、并用实际 runStep 的 smoke 验证后重新冻结；新 run id：**`final-20261114-0100`**。需要由调度从 workspace 根启动（不要人工等待/轮询）：
+- `job_ae81d353`：**exit 0、10m54s**；冻结 HEAD `86416ce…`；`evidence.status=passed`，10 个步骤全部 `exitCode=0`、`signal=null`、`failed=false`。
+- 每步 before/after 的 HEAD、`pnpm-lock` 摘要（`50e02a0c…1725`）、生产源码树摘要（`6697b6f6…59cf`）一致，生产路径 `git status` 为空；`priorEvidenceUnchanged=true`，`final-20261114-0040`/`-0045` 保留。
 
-```powershell
-orbital\coordination\m2-takeover\bg-root.cmd "node tests/e2e/final-verification/run.mjs --run-id final-20261114-0100 --base b167907"
-```
+| 步骤 | 结果 |
+| --- | --- |
+| typecheck | exit 0 |
+| build | exit 0 |
+| 完整单测 | exit 0；**235**（shared 68、plugin 20、bridge 1（node:test）、scene-renderer 5、server 134、studio 7），无 skip/fail |
+| M0-B e2e | 24/24 passed |
+| M0-A e2e | 27/27 passed |
+| M1-A e2e | 7/7 passed |
+| M1-B e2e | 23/23 passed |
+| 完整 M2-A e2e | 35/35 passed（含 D3 五场景与 N4 正常断言） |
+| 完整 M2-B e2e | 12/12 passed（含 retry 正常断言） |
+| D3 单独复核 | 5/5 passed（同一五场景重跑，**不是五个新增用例**） |
 
-- 启动后应看到 job id 与受跟踪通知；job 输出在 `orbital/jobs/<job id>/output.log`，证据在 `docs/reports/artifacts/M2-final/final-20261114-0100/`。
-- **本报告不预先宣称通过。** 实跑结果（每套退出码/用例数、expected-failed/skipped、端口与进程清理、证据摘要）由后台通知回来后补入本节与 `evidence.json`/`summary.json`。
-- 若权限阻止或包装不可用：不启动无通知作业，交回上述精确命令与冻结 HEAD，由调度启动。
+- 六套 e2e 合计 **128**（24+27+7+23+35+12）；七份 Playwright JSON 里的每个 test 都是 `expectedStatus=passed`、`status=expected`、唯一 result `status=passed`，`expected-failed=0`、`skipped=0`、`unexpected=0`、`retries=0`。
+- N4（`takeover-n4-shutdown-b167907.json`）：blocked 操作先被接受，关闭期间锁仍在、第二实例 `INSTANCE_LOCKED`，解锁时 `headHasMarker=true`、`hasVersionChanged=true`、`operationCompleted=true`，重启 seq 接续；已按普通断言通过，不再 expected-failed。
+- retry（`takeover-r1-retry.json`）：pending/failed 期间 `retryDisabledWhilePending=true`、`retryDisabledWhileFailed=true`，正常断言通过。
+- D3：`artifacts/e2e-m2a/` 与 `artifacts/d3-standalone/` 两轮各自 5 个 scenario 都是 `gone=true`、`stillAlive=[]`、`leftoverIdentities/leftoversAfter=[]`；decoy 在目标清理后仍活、最终 `decoyCleanup.gone=true`；两轮 hash 不同，说明是独立重跑。D3 仍是**测试口径误报的纠正**，不是生产 `preview` 被修复。
+- 端口/进程：每个 e2e 步骤后的已知端口列表为空；当前 3001/4011/5173/5174/5175 均空闲，没有本轮身份的 preview/vite/node 残留；N4 临时目录已删除；模板/配置 `git status` 干净。`.data/pi-m2a` 下仍有早期回合的 fixture 目录（非本轮创建，未删除）。
+
+### 6.1 根目录生成物与独立证据
+
+- 本轮刷新过的 **63 个 tracked report artifacts**（M0-A/M0-B/M1-A/M1-B/M2-A/M2-B）都已先完整快照到 `final-20261114-0100/artifacts/<step>/`（逐文件 sha256 在 `evidence.json`），随后才从 HEAD 还原根目录旧文件；旧结论没有被静默替换，新证据以本轮快照为准。
+- M0-A 的二进制 `viewport-rotated.png` 也被本轮刷新；runner 的 JSON 快照不含二进制，已手工归档到 `final-20261114-0100/artifacts/e2e-m0a/viewport-rotated.png`，hash 记在 `artifacts-index-supplement.json`。
+- 新增根文件 `takeover-r1-retry.json`、`takeover-n4-shutdown-b167907.json` 随本次提交保留；D3 的五个 tracked attributed 文件在根目录保持旧版，本轮两轮新版只在 run 目录快照中。
+
+**结论：mock 门槛下 M2 的已审查成品集成回归通过。** 这不等于整个 M2 完成：真实模型成功率验收、F1 根 junction 正式 E2E、历史孤儿启动清理、资产偶发单测唯一根因仍未覆盖，按要求保留为未覆盖项。

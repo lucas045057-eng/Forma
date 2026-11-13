@@ -1,0 +1,136 @@
+{
+  "environment": {
+    "head": "86416ce080e10f75bea146f6d6b852629555ab79",
+    "baselines": [
+      "5377b52",
+      "81558a7"
+    ],
+    "files": [
+      {
+        "file": "apps/server/src/work/preview.ts",
+        "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+        "baselines": {
+          "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+        },
+        "identicalToAllBaselines": true
+      },
+      {
+        "file": "apps/server/src/work/preview-worker.ts",
+        "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+        "baselines": {
+          "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+        },
+        "identicalToAllBaselines": true
+      }
+    ],
+    "identicalToAllBaselines": true
+  },
+  "kind": "launcher-tree",
+  "backend": {
+    "pid": 45948,
+    "created": "2026-11-14T01:00:00.6167190+08:00",
+    "base": "http://127.0.0.1:9939",
+    "previewOrigin": "http://127.0.0.1:9940"
+  },
+  "candidate": {
+    "id": "8b30319e301e40339d6291591fd5edd9",
+    "previewUrl": "/preview/c/8b30319e301e40339d6291591fd5edd9/"
+  },
+  "preview": {
+    "originStatus": 200,
+    "workerPorts": [
+      9971
+    ],
+    "directStatuses": [
+      {
+        "port": 9971,
+        "status": 200
+      }
+    ]
+  },
+  "worker": {
+    "pid": 36172,
+    "ppid": 45948,
+    "created": "2026-11-14T01:00:03.2442780+08:00",
+    "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite\\bin\\vite"
+  },
+  "tree": [
+    {
+      "pid": 14756,
+      "ppid": 45948,
+      "created": "2026-11-14T01:00:00.6188320+08:00",
+      "summary": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+    },
+    {
+      "pid": 36172,
+      "ppid": 45948,
+      "created": "2026-11-14T01:00:03.2442780+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite\\bin\\vite"
+    },
+    {
+      "pid": 55784,
+      "ppid": 36172,
+      "created": "2026-11-14T01:00:03.2475940+08:00",
+      "summary": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+    },
+    {
+      "pid": 49328,
+      "ppid": 36172,
+      "created": "2026-11-14T01:00:03.4509020+08:00",
+      "summary": "E:\\�ռ仯AI����̨\\node_modules\\.pnpm\\@esbuild+win32-x64@0.28.2\\node_modules\\@esbuild\\win32-x64\\esbuild.exe --service=0.28.2 --ping"
+    }
+  ],
+  "oldMetric": {
+    "oldStyleCount": 3,
+    "matcher": {
+      "selfPid": 60484,
+      "selfMatched": true,
+      "pids": [
+        64488,
+        60484
+      ],
+      "nodePids": [
+        64488
+      ]
+    },
+    "nodePidsOtherThanDecoy": []
+  },
+  "decoy": {
+    "pid": 64488,
+    "created": "2026-11-14T00:59:48.7587250+08:00",
+    "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+    "alive": true
+  },
+  "kill": {
+    "method": "taskkill /T /F /PID 45948",
+    "killStartedAtWall": "2026-11-13T17:00:07.743Z",
+    "killCommandDurationMs": 292,
+    "snapshots": [
+      {
+        "label": "immediately-after-kill-command",
+        "requestedOffsetMs": 0,
+        "sampleStartedOffsetMs": 292,
+        "sampleFinishedOffsetMs": 1646,
+        "alive": []
+      },
+      {
+        "label": "poll-250ms",
+        "requestedOffsetMs": 1900,
+        "sampleStartedOffsetMs": 1900,
+        "sampleFinishedOffsetMs": 3249,
+        "alive": []
+      }
+    ],
+    "gone": true,
+    "stillAlive": [],
+    "firstSnapshotAlive": [],
+    "aliveLastSeenAtMs": null,
+    "goneFirstSeenAtMs": 1646,
+    "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+    "previewStatusAfter": 0,
+    "leftoversAfter": [],
+    "decoyAliveAfter": true
+  }
+}

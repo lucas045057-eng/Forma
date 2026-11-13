@@ -80,3 +80,13 @@
 - `retry` 的已知失败只代表 **master `f70f046`**；`d79c467`/`.worktrees/m2fix` 未合并前不能算通过。
 - 本轮未重跑 `pnpm test`、M0-B、M0-A、M1-A、M1-B、完整 M2-A（含 D3/R6）与 F1 根 junction；D3 由 CodeBuddy 在 `.worktrees/m2d3` 修，本轮没有重复消耗 30 秒强杀的已知失败。最终各套必须在所有实现交付、审查通过并合并后的**同一冻结 HEAD** 上统一重跑，不能用不同 HEAD 的跑数拼成“全过”。
 - 仍未运行：真实模型“10 次至少 8 次改对”、Firefox/WebKit、触屏。
+
+---
+
+# 最终集成回归（`b167907` 合并后，冻结 HEAD `86416ce`）
+
+- 日期：2026-11-14。job **`job_ae81d353`**：exit 0、10m54s；冻结 HEAD **`86416ce080e10f75bea146f6d6b852629555ab79`**；生产源码/锁文件相对 `b167907` 未变。
+- 完整 M2-B：**12/12 passed**，`expected-failed=0`、`skipped=0`、`retries=0`；STALE 同文件/不同文件、R1 pending/failed、断线补拉、truncated 重载、三候选切换、单事件连接全部通过。
+- **retry 已按普通断言通过**（`takeover-r1-retry.json`）：`retryDisabledWhilePending=true`、`retryDisabledWhileFailed=true`，不再使用 `test.fail`，无 expected-failed。
+- 证据以 `docs/reports/artifacts/M2-final/final-20261114-0100/artifacts/e2e-m2b/` 的本轮快照为准；根目录旧生成物已从 HEAD 还原，新证据未被静默替换。
+- 限制：全部为 mock 模型门槛；真实模型“10 次至少 8 次改对”、Firefox/WebKit、触屏仍未运行。

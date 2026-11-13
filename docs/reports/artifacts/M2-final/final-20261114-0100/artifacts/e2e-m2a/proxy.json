@@ -1,0 +1,11 @@
+{
+  "candidateId": "bc3fa75a036a49b09f55ecffb982d690",
+  "statuses": {
+    "get": 200,
+    "head": 200,
+    "post": 404,
+    "missing": 404,
+    "evil": 403
+  },
+  "leakedKey": false
+}
