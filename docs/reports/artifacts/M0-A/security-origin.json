@@ -4,7 +4,7 @@
     "body": {
       "error": {
         "code": "ORIGIN_DENIED",
-        "message": "仅允许同源工作台访问"
+        "message": "仅允许通过同源工作台访问"
       }
     }
   },

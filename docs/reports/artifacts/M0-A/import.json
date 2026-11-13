@@ -3,16 +3,16 @@
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "polling",
-    "createdAt": "2026-11-10T07:54:18.264Z",
-    "updatedAt": "2026-11-10T07:54:18.264Z"
+    "createdAt": "2026-11-13T11:40:40.870Z",
+    "updatedAt": "2026-11-13T11:40:40.870Z"
   },
   "asset": {
     "id": "lux3d-7000001",
     "taskId": "7000001",
     "status": "ready",
-    "createdAt": "2026-11-10T07:54:18.264Z",
-    "updatedAt": "2026-11-10T07:54:19.181Z",
-    "modelUrl": "/assets/lux3d-7000001/model.glb?revision=ae2de798-6192-49b4-803f-d711b6f94292",
+    "createdAt": "2026-11-13T11:40:40.870Z",
+    "updatedAt": "2026-11-13T11:40:41.854Z",
+    "modelUrl": "/assets/lux3d-7000001/model.glb?revision=2c340bf6-a386-4a9f-a4b0-a4cc930c38a6",
     "metrics": {
       "before": {
         "bytes": 13345788,
@@ -45,7 +45,7 @@
         ],
         "reason": "Expected body, cap and at least one reed"
       },
-      "durationMs": 509,
+      "durationMs": 523,
       "bounds": {
         "min": [
           -0.15895565660573138,

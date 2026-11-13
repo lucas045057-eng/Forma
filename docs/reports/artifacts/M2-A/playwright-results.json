@@ -1,0 +1,171 @@
+{
+  "config": {
+    "argv": [
+      "E:\\Node\\node.exe",
+      "E:\\空间化AI工作台\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "-c",
+      "playwright.m2a.config.ts",
+      "tests/e2e/m2a/11-resources.spec.ts"
+    ],
+    "configFile": "E:\\空间化AI工作台\\playwright.m2a.config.ts",
+    "rootDir": "E:/空间化AI工作台/tests/e2e/m2a",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/空间化AI工作台/docs/reports/artifacts/M2-A/output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "E:/空间化AI工作台/tests/e2e/m2a",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 420000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-A\\output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "E:\\空间化AI工作台\\tests\\e2e\\m2a",
+        "snapshotDir": "E:\\空间化AI工作台\\tests\\e2e\\m2a",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 420000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5173/",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "trace": "off",
+          "video": "off",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-A/playwright-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "11-resources.spec.ts",
+      "file": "11-resources.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "进程与资源",
+          "file": "11-resources.spec.ts",
+          "line": 12,
+          "column": 6,
+          "specs": [
+            {
+              "title": "删除候选不会删到 junction 指向的真实依赖",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3858,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T11:44:59.937Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7da17b2a0aff422f393f-492fe8e1189c3770dd69",
+              "file": "11-resources.spec.ts",
+              "line": 16,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-13T11:44:57.793Z",
+    "duration": 7531.349,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

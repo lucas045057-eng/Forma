@@ -1,9 +1,9 @@
 {
   "asset": {
-    "id": "cfb77640-aa7f-4bc0-95bf-df595097ce19",
+    "id": "77e78d53-bc6b-446e-bbc2-25237ea4ea10",
     "status": "ready",
-    "createdAt": "2026-11-10T07:53:52.603Z",
-    "updatedAt": "2026-11-10T07:53:53.547Z",
+    "createdAt": "2026-11-13T11:40:10.156Z",
+    "updatedAt": "2026-11-13T11:40:11.136Z",
     "taskId": "9000002",
     "metrics": {
       "before": {
@@ -37,7 +37,7 @@
         ],
         "reason": "Expected body, cap and at least one reed"
       },
-      "durationMs": 518,
+      "durationMs": 529,
       "bounds": {
         "min": [
           -0.15895565660573138,
@@ -51,7 +51,7 @@
         ]
       }
     },
-    "modelUrl": "/assets/cfb77640-aa7f-4bc0-95bf-df595097ce19/model.glb?revision=89c6a973-dc4e-42b3-bc40-efc859111a45"
+    "modelUrl": "/assets/77e78d53-bc6b-446e-bbc2-25237ea4ea10/model.glb?revision=4e50abea-84bc-400d-bd77-7547aafce1a3"
   },
   "invalid": {
     "both": 400,

@@ -90,6 +90,33 @@ pnpm test:e2e:m1b     # = playwright test -c playwright.m1b.config.ts
 
 所有改写 `scene.config.json` 的用例都在 `finally`/`afterAll` 里按快照还原并断言；采用用例会删掉写进 `public/assets` 的产物。
 
+## M2-A（指着说闭环 · 后端）：`m2a/` 子目录
+
+```powershell
+pnpm test:e2e:m2a     # = playwright test -c playwright.m2a.config.ts
+```
+
+编码 Agent 上游用本机可脚本化 mock（`agent-mock.mjs`，`POST /__script {steps,delayMs,mode}`），Lux3D 指向没人监听的 loopback 端口，后端带出站守卫。主后端 `WORK_ROOT` = 真实模板目录（采用后 `/preview/main/` 才会变），工作数据与作品版本库在 `.data/pi-m2a`；所有改作品目录的用例都 `git checkout/clean templates/product-page` 还原并断言。
+
+| 文件 | 内容 |
+| --- | --- |
+| `agent-mock.mjs` | 可脚本化 OpenAI 兼容上游：按轮次返回工具调用，支持 error/text 模式与延迟 |
+| `start-backend.mjs` | 带 WORK_ROOT / WORK_DATA_DIR / Agent 配置的启动器，守卫 + stdin 优雅停机 |
+| `api.ts` | 任务/候选/事件/`/scene` 接口、WS 收集、点选取 Selection、模板还原、依赖完整性检查 |
+| `01-flow` | 主链路（含越界记录） |
+| `02-discard` | 撤回与采用后不可重复操作 |
+| `03-selection` | 选中对象九种非法输入 + `STALE_SELECTION` |
+| `04-sandbox` | 六类越界写入被拒；junction 逃逸（已知缺陷，`test.fail`） |
+| `05-failures` | 上游 500 / 只回文本 / 超时 / 取消 / 无改动 |
+| `06-limit` | 第 4 个候选挤掉最早的 |
+| `07-conflict` | 采用冲突 409 且无半合并 |
+| `08-events` | 断线补拉 + 重启 seq 接续（沙箱后端） |
+| `09-proxy` | 代理 GET/HEAD、404、Host 白名单、不泄露 key |
+| `10-known-defect` | 候选预览在真实浏览器里渲染不出（已知缺陷，`test.fail`） |
+| `11-resources` | 删除候选不伤 junction 依赖、目录完整删除 |
+
+**注意**：`test.fail` 标的两条是已知缺陷（junction 逃逸、候选预览空白），修复后会变“意外通过”，届时要删标记。
+
 ## M0-A（Lux3D）测试：`m0a/` 子目录
 
 ```powershell

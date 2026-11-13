@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "error": {
+    "code": "AGENT_TIMEOUT",
+    "message": "编码模型请求超时"
+  },
+  "elapsed": 4823
+}

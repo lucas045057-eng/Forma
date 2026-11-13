@@ -11,8 +11,8 @@ const reuseExistingServer = process.env.E2E_REUSE_SERVER === '1';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // M0-A / M1-A / M1-B 的用例需要各自的配置（不同 mock、不同 WORK_ROOT 与专用后端启动器），不能跟 M0-B 混跑。
-  testIgnore: ['**/m0a/**', '**/m1a/**', '**/m1b/**'],
+  // M0-A / M1-A / M1-B / M2-A 的用例需要各自的配置（不同 mock、WORK_ROOT 与专用后端启动器），不能跟 M0-B 混跑。
+  testIgnore: ['**/m0a/**', '**/m1a/**', '**/m1b/**', '**/m2a/**'],
   timeout: 120_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
