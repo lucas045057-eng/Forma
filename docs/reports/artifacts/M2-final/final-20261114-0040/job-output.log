@@ -1,0 +1,4 @@
+BLOCKED: test-fail-still-present
+[
+  "tests/e2e/final-verification/run.mjs:234:  const testFail = git('grep', '-n', 'test.fail(', '--', 'tests/e2e');"
+]

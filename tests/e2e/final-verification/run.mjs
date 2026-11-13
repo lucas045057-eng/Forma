@@ -14,6 +14,7 @@ import { spawn, spawnSync, execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { scanTrackedSpecsForMarker } from './spec-scan.mjs';
 
 const ROOT = process.cwd();
 const arg = (name) => { const index = process.argv.indexOf(name); return index > 0 ? process.argv[index + 1] : undefined; };
@@ -230,10 +231,13 @@ const startPorts = portsSnapshot();
 evidence.portsAtStart = startPorts;
 if (startPorts.length) blocked('known-port-in-use-at-start', startPorts);
 if (fileHash(path.join(ROOT, 'pnpm-lock.yaml')) == null) blocked('lockfile-missing', null);
-try {
-  const testFail = git('grep', '-n', 'test.fail(', '--', 'tests/e2e');
-  blocked('test-fail-still-present', testFail.split('\n').slice(0, 10));
-} catch { /* git grep exits 1 when no match: good */ }
+// 只扫描被跟踪的 spec/test 用例文件；runner/fixture/证据不参与，避免自匹配。
+const markerScan = scanTrackedSpecsForMarker({ cwd: ROOT });
+evidence.testFailScan = {
+  clean: markerScan.clean, reason: markerScan.reason, scannedFiles: markerScan.scannedFiles,
+  matches: (markerScan.matches ?? []).slice(0, 10), status: markerScan.status, stderr: markerScan.stderr,
+};
+if (!markerScan.clean) blocked('test-fail-scan-blocked', evidence.testFailScan);
 writeEvidence();
 if (process.argv.includes('--preflight-only')) {
   evidence.status = 'preflight-ok';
