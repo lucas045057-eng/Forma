@@ -21,10 +21,10 @@
     "not_run",
     "not_run"
   ],
-  "versionAfterAdopt": "3744e2bb158d3ca69a33f28a727766dff1794567",
+  "versionAfterAdopt": "140df6810d11d073e12fb2092d6fec911978c0e2",
   "decisions": [
     {
-      "id": "13c554ef3fd14bebbfa25f4a93dc8bdd",
+      "id": "a7e963182d464d709d23a4eb2d5580dc",
       "decision": "adopted"
     }
   ]

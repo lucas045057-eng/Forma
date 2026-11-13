@@ -44,11 +44,11 @@ Received: false
       - generic [ref=e19]:
         - generic [ref=e20]:
           - text: 作品版本
-          - code [ref=e21]: d325e5c411
+          - code [ref=e21]: ec54c7bab0
         - button "回退上一次采用" [ref=e22] [cursor=pointer]
         - combobox "待定候选版本" [ref=e23]:
-          - option "候选 2dc25a07"
-          - option "候选 f27fe49e" [selected]
+          - option "候选 080ba401"
+          - option "候选 e7dcf6c9" [selected]
         - generic "预览模式" [ref=e24]:
           - button "当前版本" [pressed] [ref=e25] [cursor=pointer]
           - button "候选版本" [ref=e26] [cursor=pointer]
@@ -94,7 +94,7 @@ Received: false
           - status
       - generic [ref=e30]:
         - generic [ref=e31]:
-          - heading "候选 f27fe49e" [level=2] [ref=e32]
+          - heading "候选 e7dcf6c9" [level=2] [ref=e32]
           - generic [ref=e33]: 待定候选 2/3
         - generic [ref=e34]:
           - generic [ref=e35]: 构建：未检查
@@ -133,7 +133,7 @@ Received: false
         - strong [ref=e68]: Button
         - code [ref=e69]: src/components/Button.tsx:5:5
       - paragraph [ref=e70]: 同源码实例：3 处；修改将影响全部实例（共享组件或列表项）。
-      - generic [ref=e71]: "{ \"src\": \"src/components/Button.tsx:5:5\", \"cid\": \"Button\", \"text\": \"立即购买\", \"bbox\": [ 61.796875, 152.375, 104, 47 ], \"styles\": { \"display\": \"block\", \"position\": \"static\", \"color\": \"rgb(255, 250, 240)\", \"backgroundColor\": \"rgb(117, 96, 68)\", \"fontSize\": \"13px\", \"fontFamily\": \"\\\"Microsoft YaHei\\\", sans-serif\", \"fontWeight\": \"400\", \"lineHeight\": \"normal\", \"padding\": \"14px 25px\", \"margin\": \"0px\", \"borderRadius\": \"3px\", \"width\": \"104px\", \"height\": \"47px\" }, \"instances\": 3, \"ancestors\": [ \"src/App.tsx:26:11\", \"src/App.tsx:21:9\", \"src/App.tsx:20:7\" ], \"baseVersion\": \"d325e5c411f855174f1c2bb704c9531e3aa60d0b\" }"
+      - generic [ref=e71]: "{ \"src\": \"src/components/Button.tsx:5:5\", \"cid\": \"Button\", \"text\": \"立即购买\", \"bbox\": [ 61.796875, 152.375, 104, 47 ], \"styles\": { \"display\": \"block\", \"position\": \"static\", \"color\": \"rgb(255, 250, 240)\", \"backgroundColor\": \"rgb(117, 96, 68)\", \"fontSize\": \"13px\", \"fontFamily\": \"\\\"Microsoft YaHei\\\", sans-serif\", \"fontWeight\": \"400\", \"lineHeight\": \"normal\", \"padding\": \"14px 25px\", \"margin\": \"0px\", \"borderRadius\": \"3px\", \"width\": \"104px\", \"height\": \"47px\" }, \"instances\": 3, \"ancestors\": [ \"src/App.tsx:26:11\", \"src/App.tsx:21:9\", \"src/App.tsx:20:7\" ], \"baseVersion\": \"ec54c7bab04581e4c2b5507f7d44d669d1ba7cbf\" }"
       - region "指着说" [ref=e72]:
         - paragraph [ref=e73]: POINT & SPEAK
         - heading "指着说" [level=2] [ref=e74]
@@ -146,31 +146,31 @@ Received: false
         - generic [ref=e79]:
           - generic [ref=e80]:
             - strong [ref=e81]: 候选已就绪
-            - code [ref=e82]: 2dc25a07
+            - code [ref=e82]: 080ba401
           - combobox "查看任务" [ref=e83]:
-            - option "2dc25a07 · 候选已就绪" [selected]
-            - option "e4784a04 · 候选已就绪"
-            - option "4ff00912 · 候选已就绪"
-            - option "53f3cc8f · 候选已就绪"
-            - option "375c7b94 · 候选已就绪"
-            - option "84f53905 · 候选已就绪"
-            - option "2c7e7330 · 候选已就绪"
-            - option "72f15fdc · 候选已就绪"
-            - option "b222f044 · 失败"
-            - option "852c2d3f · 失败"
-            - option "90f27301 · 失败"
-            - option "3f1ad1b7 · 已取消"
-            - option "1eb82543 · 失败"
-            - option "1070edb5 · 候选已就绪"
-            - option "63883cd3 · 候选已就绪"
-            - option "1214f819 · 候选已就绪"
-            - option "f27fe49e · 候选已就绪"
-            - option "a37aa96a · 候选已就绪"
-            - option "91a9451e · 候选已就绪"
-            - option "53982124 · 候选已就绪"
-            - option "55506dc6 · 候选已就绪"
-            - option "249188e1 · 候选已就绪"
-            - option "e8d606f1 · 候选已就绪"
+            - option "080ba401 · 候选已就绪" [selected]
+            - option "fd79b23d · 候选已就绪"
+            - option "8704dcad · 候选已就绪"
+            - option "2b812323 · 候选已就绪"
+            - option "879e6d43 · 候选已就绪"
+            - option "30bdd0ed · 候选已就绪"
+            - option "8cd1d658 · 候选已就绪"
+            - option "0d24b242 · 候选已就绪"
+            - option "b5145727 · 失败"
+            - option "bacee2ea · 失败"
+            - option "04b6ded7 · 失败"
+            - option "8a81cabd · 已取消"
+            - option "a8b1722d · 失败"
+            - option "ab7a1482 · 候选已就绪"
+            - option "70651c3c · 候选已就绪"
+            - option "3c364f6f · 候选已就绪"
+            - option "e7dcf6c9 · 候选已就绪"
+            - option "9e0c4590 · 候选已就绪"
+            - option "fa95974f · 候选已就绪"
+            - option "34fe5ec5 · 候选已就绪"
+            - option "00386348 · 候选已就绪"
+            - option "cf399ca3 · 候选已就绪"
+            - option "e1e946fc · 候选已就绪"
           - paragraph [ref=e84]: 改按钮
           - list [ref=e85]:
             - listitem [ref=e86]: 任务已排队

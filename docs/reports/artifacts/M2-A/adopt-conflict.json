@@ -1,11 +1,11 @@
 {
-  "baseVersion": "d6e12d18ffd8853516293bff3594fd5ab6b819e9",
+  "baseVersion": "8e5d0b5f40d3a347b50f8441f81e0a2e0a57164a",
   "first": {
-    "id": "a37aa96a25b3451c918f479c4709fdc7",
+    "id": "9e0c45900e5c4629b07554cfbf517826",
     "decision": "adopted"
   },
   "second": {
-    "id": "91a9451e993643838817e4e88a830339",
+    "id": "fa95974f66684a5dbfccda0a6b7a91fd",
     "status": 409,
     "code": "MERGE_CONFLICT",
     "decision": "discarded"

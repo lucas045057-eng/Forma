@@ -135,12 +135,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8247,
+                      "duration": 7320,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T13:06:49.110Z",
+                      "startTime": "2026-11-13T13:27:01.407Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -169,12 +169,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5170,
+                      "duration": 4404,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T13:06:57.610Z",
+                      "startTime": "2026-11-13T13:27:08.909Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -203,12 +203,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3897,
+                      "duration": 3102,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-13T13:07:02.789Z",
+                      "startTime": "2026-11-13T13:27:13.320Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -224,15 +224,172 @@
           ]
         }
       ]
+    },
+    {
+      "title": "02-round3.spec.ts",
+      "file": "02-round3.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M2-B 回合 3",
+          "file": "02-round3.spec.ts",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "R1：点 A 后再点 B，B 的版本号未回来前不能提交 A",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 420058,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 420000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 420000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 420000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts",
+                            "column": 16,
+                            "line": 69
+                          },
+                          "message": "Error: page.waitForTimeout: Target page, context or browser has been closed\n\n  67 |\n  68 |     release!();\n> 69 |     await page.waitForTimeout(1200);\n     |                ^\n  70 |     const kindAfter = await page.getByTestId('pick-state').getAttribute('data-kind');\n  71 |     const disabledAfter = await page.getByTestId('generate-candidate').isDisabled();\n  72 |     await page.getByTestId('generate-candidate').click();\n    at E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts:69:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:27:16.514Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-R1：点-A-后再点-B，B-的版本号未回来前不能提交-A-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-R1：点-A-后再点-B，B-的版本号未回来前不能提交-A-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-R1：点-A-后再点-B，B-的版本号未回来前不能提交-A-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "c642de1a81310a1502c0-c29aaba5198bbc398b48",
+              "file": "02-round3.spec.ts",
+              "line": 45,
+              "column": 3
+            },
+            {
+              "title": "STALE_SELECTION：点选后页面被改过，提交时提示重新点选",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 420000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 31113,
+                      "error": {
+                        "message": "Error: 页面变化后没有任何提示\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                        "stack": "Error: 页面变化后没有任何提示\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts:113:36",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts",
+                          "column": 36,
+                          "line": 113
+                        },
+                        "snippet": " \u001b[90m 111 |\u001b[39m     writeArtifactFrom(\u001b[32m'round3-stale-hint.json'\u001b[39m\u001b[33m,\u001b[39m { noticed\u001b[33m,\u001b[39m text\u001b[33m,\u001b[39m tasks\u001b[33m,\u001b[39m bodyText\u001b[33m:\u001b[39m (\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'main'\u001b[39m)\u001b[33m.\u001b[39minnerText())\u001b[33m.\u001b[39mslice(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m \u001b[35m400\u001b[39m) })\u001b[33m;\u001b[39m\n \u001b[90m 112 |\u001b[39m     expect(restoreTemplate()\u001b[33m.\u001b[39mclean)\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 113 |\u001b[39m     expect(noticed\u001b[33m,\u001b[39m \u001b[32m'页面变化后没有任何提示'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 114 |\u001b[39m     expect(text)\u001b[33m.\u001b[39mtoContain(\u001b[32m'重新点选'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 115 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 116 |\u001b[39m })\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts",
+                            "column": 36,
+                            "line": 113
+                          },
+                          "message": "Error: 页面变化后没有任何提示\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  111 |     writeArtifactFrom('round3-stale-hint.json', { noticed, text, tasks, bodyText: (await page.locator('main').innerText()).slice(0, 400) });\n  112 |     expect(restoreTemplate().clean).toBe(true);\n> 113 |     expect(noticed, '页面变化后没有任何提示').toBe(true);\n      |                                    ^\n  114 |     expect(text).toContain('重新点选');\n  115 |   });\n  116 | });\n    at E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts:113:36"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T13:34:17.053Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-STALE-SELECTION：点选后页面被改过，提交时提示重新点选-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-STALE-SELECTION：点选后页面被改过，提交时提示重新点选-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-B\\output\\02-round3-M2-B-回合-3-STALE-SELECTION：点选后页面被改过，提交时提示重新点选-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\tests\\e2e\\m2b\\02-round3.spec.ts",
+                        "column": 36,
+                        "line": 113
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "c642de1a81310a1502c0-678a7ebee79866c45027",
+              "file": "02-round3.spec.ts",
+              "line": 89,
+              "column": 3
+            }
+          ]
+        }
+      ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-13T13:06:45.269Z",
-    "duration": 23832.533,
+    "startTime": "2026-11-13T13:26:58.176Z",
+    "duration": 471429.12999999995,
     "expected": 3,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 2,
     "flaky": 0
   }
 }

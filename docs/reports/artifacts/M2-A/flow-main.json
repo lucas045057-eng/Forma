@@ -30,12 +30,12 @@
       "src/App.tsx:21:9",
       "src/App.tsx:20:7"
     ],
-    "baseVersion": "eecc46bc8190fc19d058186e05a7de09fddf1961"
+    "baseVersion": "fe2cb052b69059caec4f08249f3607ba67218ba6"
   },
-  "versionBefore": "eecc46bc8190fc19d058186e05a7de09fddf1961",
-  "versionAfter": "2c28d9cff9b75c10e66a7b488aad3959f294c2c5",
+  "versionBefore": "fe2cb052b69059caec4f08249f3607ba67218ba6",
+  "versionAfter": "14c221aaea5ff98bafd8695a0f166fed83c4dab9",
   "candidate": {
-    "id": "e4784a04317e4bb49ac8dab20a28c27b",
+    "id": "fd79b23ded554703bd1fa2a2db61c072",
     "diff": [
       "src/App.tsx"
     ],

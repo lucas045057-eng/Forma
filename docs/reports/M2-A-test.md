@@ -174,3 +174,23 @@ pnpm test:e2e:m2a      # 21 passed + 2 expected failures（见缺陷）
 - **其余套件未在 `81558a7` 之后重跑**：M0-B 24、M0-A 27、M1-A 7、M1-B 23、M2-B 3 是合并前 `3faa865` 上的结果；本轮只改了 04-sandbox 与报告，但 F2（预览源 Host 白名单）、F3、F4、R1 的合并可能影响它们，**需要下一轮在前述 HEAD 上重跑**。
 - **F1（`src/` 或 `public/` 自身是 junction）e2e 未运行**：本机执行「把作品目录 `src` 整体换成 junction + 复制/删除含 junction 的作品副本」这类 fs 操作时，Playwright worker 与独立 Node 进程（`tests/e2e/m2a/f1-check.mjs`）**都会以 `0xC0000409` 直接崩溃且无输出**；已核查 `node_modules` 未受损（`.pnpm` 252 项、`vite`/`react`/`fastify` 仍在）。该保护路径由实现方 `apps/server/src/work/repo.test.ts` 的用例覆盖（作品目录 `src/public` 根与子项均检查 lstat + realpath，四类写操作 409），本报告不宣称它经过 e2e 验证。
 - **D3（R6）仍存在**：在 `81558a7` 上重跑，`taskkill /T /F` 掉 3001 后端后 30 秒内带 `preview-cache` 的 Vite 进程仍不退出（`isolation-r6.json`）。这与整改报告里“父进程异常退出后预览自动退出”的 IPC 生命周期说明不一致，建议排查 `preview-worker` 在父进程被强杀时的 IPC 断开检测。
+
+---
+
+# 回合 3（第二轮整改回归）
+
+日期：2026-11-13。被测版本 `5377b52`（含 `81558a7` 第二轮整改合并）。新用例：`tests/e2e/m2a/14-fix2-regression.spec.ts`。
+
+| 项 | 结果 | 证据 |
+| --- | --- | --- |
+| **F2 预览源 Host 白名单** | **通过**：`evil.example:5175` / `127.0.0.1:5999`（错误端口）/ `localhost.evil.example:5175` 的 GET 均 **403**，`127.0.0.1:5175` 200；外来 Host 与外来 Origin 的 WebSocket 升级都被断开（无 101 响应） | `round3-f2-preview-host.json` |
+| **F3 旧版本库审计** | **通过**：先正常启动建立版本库，再手工把 `src/deploy.pem` 提交进去，重启后端以**退出码 12** 失败且输出包含 `UNSAFE_TRACKED_FILE` | `round3-f3-audit.json` |
+| **F4 实例锁** | **通过**：同一 `WORK_DATA_DIR` 起第二个后端失败且错误包含 `INSTANCE_LOCKED`，`events.jsonl` 字节不变；正常关闭后重启 seq 不归零 | `round3-f4-instance-lock.json` |
+| **F1 `src/` 自身是 junction** | **未运行**（详见下） | — |
+| R6 / D3 | 仍失败（预期，CodeBuddy 在 `.worktrees/m2d3` 修） | `isolation-r6.json` |
+
+### F1 为什么还是没进 e2e（本轮新查清的部分）
+
+- 回合 2 那个“Node 直接崩”的真凶找到了：**本机 `fs.cpSync` 复制含二进制模型（`public/assets/*.glb`）的目录时会以 `0xC0000409` 杀掉进程**；换成 `copyFileSync` 逐文件复制后，作品副本能正常起后端、`GET /version` 也能拿到合法提交。
+- 但在**作品副本**上提交任务会在“建候选”阶段失败，API 只回 `TASK_FAILED`（不带底层原因），走不到“采用”那一步；在主工作树上把被 Vite 监视的 `src` 整体换成 junction 也不稳定。
+- 结论：F1 的 e2e 仍未验证；它由实现方 `repo.test.ts`（`src/public` 根与子项 lstat+realpath 双重检查、四类写操作 409）覆盖。**附带发现**：任务失败时 API 不暴露建候选失败的具体原因（只有 `TASK_FAILED`），排查这类问题只能靠单测，建议后续在任务事件里带上底层错误码。
