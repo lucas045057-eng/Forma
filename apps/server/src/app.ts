@@ -48,17 +48,25 @@ export async function createApp(options: AppOptions = {}) {
   const releaseWorkLock = await acquireInstanceLock(workDataDirectory);
   // Review N3: everything created after the lock is owned here and released in reverse order,
   // on failed initialisation and on close; one failing cleanup does not skip the others.
-  const closers: Array<() => Promise<unknown>> = [releaseWorkLock];
+  const closers: Array<() => Promise<unknown>> = [];
+  let closeEvents: (() => Promise<void>) | undefined;
+  let closing = false;
   const closeAll = async () => {
+    closing = true;
     let first: unknown;
-    for (const close of closers.splice(0).reverse()) {
+    for (const close of [...closers].reverse()) {
       try { await close(); } catch (error) { first ??= error; }
     }
+    // A failed producer barrier must retain the journal and ownership, even if other
+    // producers stopped successfully. Releasing here would permit a second writer.
     if (first) throw first;
+    await closeEvents?.();
+    await releaseWorkLock();
+    closers.length = 0;
   };
   try {
   const events = new EventLog(workDataDirectory);
-  closers.push(() => events.close());
+  closeEvents = () => events.close();
   await events.init();
   const emit = (event: { type: string }) => events.publish(event as { type: string } & Record<string, unknown>);
   const workRoot = options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url));
@@ -88,10 +96,12 @@ export async function createApp(options: AppOptions = {}) {
   closers.push(() => work.close());
   await work.init();
   await service.init();
+  app.addHook('preClose', async () => { closing = true; });
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
   app.addHook('onRequest', async (request, reply) => {
+    if (closing) throw new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受新请求', 503);
     // DNS-rebinding defence: a page on an attacker's domain that resolves to 127.0.0.1 would
     // otherwise pass the same-origin check below and could spend credits or rewrite the work.
     const host = (request.headers.host ?? '').toLowerCase().replace(/:\d+$/, '');
@@ -193,7 +203,9 @@ export async function createApp(options: AppOptions = {}) {
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
     return work.repo.exclusive(() => scene.adopt(service, request.params.id, 'force' in body && body.force === true));
   });
-  app.addHook('preClose', closeAll);
+  // preClose must not wait for handlers: Fastify drains HTTP after this hook.
+  // Keep admitted handlers and their nested repo operations usable until onClose.
+  app.addHook('onClose', closeAll);
   return { app, service, scene, work, events };
   } catch (error) {
     await closeAll().catch(() => {});

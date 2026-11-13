@@ -300,6 +300,9 @@ export class WorkService {
     this.closing = true;
     for (const controller of this.controllers.values()) controller.abort();
     await this.taskQueue;
+    // Review N4: queued work-tree operations (adopt, revert, 3D write-back) finish before the
+    // event log closes and the lock is released; new ones are refused from here on.
+    await this.repo.drain();
     await this.previews.stopAll();
     await this.writes;
     await this.releaseLock?.();

@@ -32,8 +32,10 @@ export class WorkRepo {
   readonly candidatesDir: string;
   private operations: Promise<unknown> = Promise.resolve();
   private scope = new AsyncLocalStorage<boolean>();
+  private closing = false;
   exclusive<T>(operation: () => Promise<T>): Promise<T> {
     if (this.scope.getStore()) return operation();
+    if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受作品操作', 503));
     const result = this.operations.then(() => this.scope.run(true, operation));
     this.operations = result.catch(() => {});
     return result;
@@ -64,6 +66,8 @@ export class WorkRepo {
     return path.join(this.candidatesDir, id);
   }
   branch(id: string) { this.candidatePath(id); return `candidate/${id}`; }
+  /** Review N4: stop accepting work-tree operations and wait until every queued one has finished. */
+  async drain() { this.closing = true; await this.operations; }
 
   async init() {
     this.workRoot.length; // The work root must already exist; realpath throws otherwise.

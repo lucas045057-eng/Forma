@@ -31,7 +31,9 @@ export class EventLog {
   }
   get last() { return this.seq; }
   subscribe(listener: (event: StudioEvent) => void) { this.subscribers.add(listener); return () => { this.subscribers.delete(listener); }; }
+  private closed = false;
   publish(event: { type: string } & Record<string, unknown>): StudioEvent {
+    if (this.closed) throw new Error('事件日志已关闭，拒绝在关闭后写入事件');
     if (this.failed) throw new Error('Event journal failed; restart required');
     const stamped = structuredClone({ ...event, seq: this.seq + 1, ts: typeof event.ts === 'string' ? event.ts : new Date().toISOString() }) as StudioEvent;
     let fd: number | undefined;
@@ -52,5 +54,5 @@ export class EventLog {
   since(seq: number) { return structuredClone(this.events.filter(event => event.seq > seq)); }
   get oldest() { return this.events[0]?.seq ?? this.seq + 1; }
   async idle() {}
-  async close() { this.subscribers.clear(); }
+  async close() { this.closed = true; this.subscribers.clear(); await this.idle(); }
 }
