@@ -28,6 +28,7 @@ export function affectedSource(card: ApprovalCard, task: Task | undefined, affec
   if (selection?.baseVersion === version && sourceFile(selection.src) === affected) return selection.src;
   if (sourceFile(affected)) return affected;
 }
+export function isImpactPickError(message: string) { return message === '未找到带源码标记的外层容器'; }
 export function impactHighlightMessages(src: string): StudioMessage[] {
   // stop clears bridge hover and its temporary selection; start restores the overlay.
   return [{ type: 'pick:stop' }, { type: 'pick:start' }, { type: 'highlight', payload: { src } }];

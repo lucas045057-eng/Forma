@@ -12,6 +12,7 @@ export function adoptionReason(input: { candidate?: Candidate; run?: CheckRun; v
   if (!candidate || candidate.decision !== 'pending') return '候选已关闭或不存在';
   if (!candidate.candidateCommit?.trim()) return '候选缺少记录，请重新生成';
   if (candidate.baseVersion !== version) return '证明已失效，作品已变化，请重新生成候选';
+  if (!candidate.latestCheckRunId) return '尚未运行检查，请先运行检查';
   if (!run || !associatedRun(candidate, run) || run.mainVersion !== version) return '检查状态不完整或基线不一致';
   if (run.id === rejectedRun) return '检查未通过或证明已失效，请重新检查；候选过期时需重新生成';
   if (run.status !== 'completed' || run.outcome !== 'passed' || run.error) return '检查未全部通过';
@@ -22,7 +23,11 @@ export function adoptionReason(input: { candidate?: Candidate; run?: CheckRun; v
   if (!receipt?.ready || receipt.key !== proofKey(candidate, run, version, epoch)) return '证据尚未全部可读，请刷新检查状态';
   return '';
 }
-export function operationError(kind: string, code?: string) {
+export function refreshError(succeeded: boolean, prior = '') {
+  if (succeeded) return '操作已提交，状态刷新失败，请刷新状态';
+  return prior && prior !== '无法确认服务器状态，请刷新后继续' ? `${prior}；状态刷新失败，请刷新状态` : '无法确认服务器状态，请刷新后继续';
+}
+export function operationError(kind: string, code?: string, status?: number, message?: string) {
   if (kind === 'adopt' && code === 'CHECKS_NOT_PASSED') return '检查未通过或证明已失效，请刷新检查状态；候选过期时需重新生成';
   if ((kind === 'run' || kind === 'rerun') && code === 'STALE_CANDIDATE') return '候选内容或主作品已变化，请重新生成候选';
   if (kind === 'revert' && code === 'NO_ADOPTION') return '暂无可回退的采用记录';
@@ -33,5 +38,6 @@ export function operationError(kind: string, code?: string) {
   if (code === 'NOT_FOUND') return '对象已不存在';
   if (code === 'INVALID_STATE') return '对象已关闭或正在处理';
   if (code === 'STALE_SELECTION') return '页面已变化，请重新点选';
+  if (status !== undefined && status >= 400 && status < 500) return `操作被拒绝：${message || code || '请求不被接受'}`;
   return '无法确认服务器状态，请刷新后继续';
 }
