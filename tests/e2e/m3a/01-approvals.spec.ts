@@ -46,7 +46,7 @@ test.afterEach(async () => {
   while (fixtures.length) {
     const fixture = fixtures.pop()!;
     await fixture.stop().catch(() => {});
-    removeFixture(fixture.root);
+    await removeFixture(fixture.root, [fixture.port, fixture.previewPort]);
   }
 });
 
@@ -304,7 +304,7 @@ test('重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝
     rejected = /createApp rejected|无法读取|Invalid|tasks\.json/i.test(String(error));
   }
   expect(rejected, '损坏 tasks.json 应拒绝启动').toBe(true);
-  removeFixture(f.root);
+  await removeFixture(f.root, [f.port, f.previewPort]);
 });
 
 test('R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览', async () => {
