@@ -61,11 +61,40 @@ export interface Candidate {
   outOfScope: string[];
   checks: Check[];
   decision: 'pending' | 'adopted' | 'discarded';
+  latestCheckRunId?: string;
 }
 export interface Check {
   name: 'build' | 'smoke' | 'occlusion' | 'schema';
   status: 'passed' | 'failed' | 'not_run';
+  runId?: string;
+  message?: string;
   evidence?: string;
+}
+export type CheckName = Check['name'];
+export type CheckStatus = Check['status'];
+export type CheckRunStatus = 'queued' | 'running' | 'completed' | 'cancelled';
+export type CheckOutcome = 'passed' | 'failed' | 'not_run' | 'blocked' | 'cancelled';
+export interface CheckResult {
+  name: CheckName;
+  status: CheckStatus;
+  message?: string;
+  evidence?: string;
+  durationMs?: number;
+}
+export interface CheckRun {
+  id: string;
+  candidateId: string;
+  baseVersion: string;
+  candidateCommit: string;
+  contentDigest: string;
+  mainVersion: string;
+  policyVersion: string;
+  status: CheckRunStatus;
+  checks: CheckResult[];
+  createdAt: string;
+  startedAt?: string;
+  finishedAt?: string;
+  error?: { code: string; message: string };
 }
 export type ApprovalRuleCode = 'shared_component' | 'global_style' | 'out_of_scope' | 'analysis_uncertain';
 export type ApprovalStatus = 'pending' | 'approving' | 'approved' | 'rejected' | 'cancelled' | 'stale' | 'failed';
