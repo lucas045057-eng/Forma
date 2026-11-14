@@ -56,3 +56,13 @@ Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中
 job_3e2be5af只在types报测试expect.poll的intervals字段不兼容，运行测试未开始；改为Vitest支持的interval:200，10s观察预算不变。最终job_044b65b5：types、23/23（19+4）与native全部exit0，0失败/跳过，源码身份不变。真实父进程死亡用例先实际构建并观察esbuild服务，再按PID+创建时间断言worker/后代消失、同场无关Node进程仍存活；JSON保存断言与耗时，但本轮JSON reporter未保存console输出中的具体PID，原件不冒充有原始PID列表。后续正式证据需显式落盘身份表。
 
 原始RED/类型失败/GREEN归档docs/reports/artifacts/M3-B/lifecycle-20261114。只证明已测Windows正常IPC断开回收和单worker取消/超时/异常退出；强制终止失败的异常支路与浏览器后代尚未覆盖。B2主要实现已有定向证据，仍须B3/B4完成后的全量与Claude/Pi独立门禁；尚未宣称M3-B完成。
+
+## 第六批：B3 首批真实浏览器行为
+
+新增只读独立静态源：仅dist、精确Host、GET/HEAD、路径/链接审计、高位loopback保留监听；无API/代理。固定Chromium1440×900、禁service worker、导航前context路由/WebSocket守卫/popup关闭。smoke实际点击并核对购买+1/非空反馈及场景ready或可见fallback；occlusion真实中心+四内缩角点命中，记录disabled/hidden/offscreen与空目标失败。截图/JSON通过父进程artifact回执保存；停止先关闭context/browser/static源再退出。
+
+job_61d9f498：types0，B3十六项全因not_run失败。job_f7291cf5：types0，39项26通过/13失败，原23全过；浏览器初始化被守卫误拦Node数字loopback监听，三项反向状态断言不能当浏览器已执行。实查Node24 net.lookupAndListen及dns.isIP快路径后，仅允许dns.lookup('127.0.0.1')本地数字地址处理，其它DNS/Socket/http/fetch/WebSocket守卫保留。
+
+job_7d959041最终types、39/39（16浏览器+23既有）、native均exit0，0跳过、identityPreserved=true；包括真实模板缺资产fallback、JS未捕获错误、购买失败、主/次控制遮挡、空目标、四种不同loopback源请求被拦且诱饵收到0请求、静态源Host/路径/API与stop端口释放。原件归档browser-initial-20261114。该轮测试会验证PNG签名/大小与JSON证据，但清理夹具后未保留每页PNG/JSON，不声称归档已有这些原件；下一批需显式导出。
+
+这仍是B3子集。service worker/子worker WebSocket、重定向、缺浏览器与取消/超时真实浏览器后代、静态链接替换和证据保留仍需补测；B4持久化/API/采用门禁未实现，无正式E2E/独立验收结论。Node权限不等于OS沙箱，浏览器守卫是应用层策略。

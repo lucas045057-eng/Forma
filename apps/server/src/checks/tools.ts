@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { homedir } from 'node:os';
 
 export const projectRoot = fileURLToPath(new URL('../../../../', import.meta.url));
 export const templateRoot = path.join(projectRoot, 'templates/product-page');
@@ -53,6 +54,8 @@ export function workerPermissions(buildRoot: string): string[] {
     path.join(projectRoot, 'node_modules'), path.join(serverRoot, 'node_modules'), path.join(templateRoot, 'node_modules'),
     path.join(projectRoot, 'package.json'), path.join(projectRoot, 'pnpm-lock.yaml'),
     path.join(serverRoot, 'package.json'), path.join(templateRoot, 'package.json'), ...workspaceRoots,
+    process.platform === 'win32' ? path.join(process.env.LOCALAPPDATA ?? path.join(homedir(), 'AppData/Local'), 'ms-playwright') :
+      path.join(homedir(), '.cache/ms-playwright'),
   ];
   return ['--permission', '--allow-child-process', '--allow-addons', '--max-old-space-size=1024',
     ...reads.map(file => '--allow-fs-read=' + file), '--allow-fs-write=' + buildRoot];

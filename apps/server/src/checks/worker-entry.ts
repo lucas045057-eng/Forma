@@ -12,6 +12,7 @@ const runId = process.argv[2]!;
 let stopping = false;
 let active: Promise<void> | undefined;
 let controller: AbortController | undefined;
+let browserCleanup: ((runId: string) => Promise<void>) | undefined;
 let artifactToken = 0;
 const artifacts = new Map<number, { resolve: (ref: ArtifactRef) => void; reject: (error: unknown) => void }>();
 function send(packet: WorkerPacket) {
@@ -22,6 +23,7 @@ async function shutdown() {
   stopping = true; controller?.abort();
   for (const waiter of artifacts.values()) waiter.reject(new Error('CANCELLED'));
   artifacts.clear();
+  await browserCleanup?.(runId);
   // esbuild owns a service subprocess; stop it before exiting this worker.
   try { const require = createRequire(import.meta.url); const viteRequire = createRequire(require.resolve('vite')); const esbuild = await import(pathToFileURL(viteRequire.resolve('esbuild')).href); esbuild.stop(); } catch { /* not loaded or already stopped */ }
   process.exit(0);
@@ -62,9 +64,11 @@ process.on('message', message => {
       },
     };
     try {
+      const browserModule = packet.name === 'smoke' || packet.name === 'occlusion' ? await import('./browser.ts') : undefined;
+      if (browserModule) browserCleanup = browserModule.stopBrowser;
       const result = packet.name === 'schema' ? await (await import('./schema.ts')).checkSchema(ctx) :
         packet.name === 'build' ? await (await import('./build.ts')).checkBuild(ctx) :
-        { name: packet.name, status: 'not_run' as const, message: '浏览器检查尚未实现（B3）' };
+        await browserModule!.checkBrowser(packet.name, ctx);
       current.signal.throwIfAborted();
       send({ kind: 'result', requestToken: packet.token, result });
     } catch (error) {
