@@ -10,6 +10,9 @@ export default defineConfig({
     headers: { 'Cross-Origin-Resource-Policy': 'same-origin' },
     host: '127.0.0.1', port: Number(process.env.STUDIO_PORT ?? 5173), strictPort: true,
     proxy: {
+      '/health': { target: backend },
+      '/approvals': { target: backend },
+      '/checks': { target: backend },
       '/scene': { target: backend },
       '/assets': { target: backend },
       '/events': { target: backend, ws: true },

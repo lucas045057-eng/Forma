@@ -33,8 +33,14 @@ pre { font: 11px/1.8 Consolas, monospace; white-space: pre-wrap; overflow-wrap: 
 .candidate-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .candidate-title h2 { font-size: 15px; margin: 0 0 8px; }
 .candidate-title span, .candidate-checks { font-size: 11px; color: #9aafbd; }
-.candidate-checks { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-.candidate-checks span { padding: 4px 7px; border: 1px solid #4a5158; border-radius: 4px; }
+.candidate-checks { display: grid; gap: 6px; margin: 8px 0; }
+.candidate-checks [data-testid="check-item"] { padding: 7px; border: 1px solid #4a5158; border-radius: 4px; }
+.check-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.check-actions button { padding: 7px 10px; font-size: 12px; }
+.check-evidence-list img { max-width: 100%; height: auto; }
+.check-evidence-list pre { max-height: 260px; overflow: auto; }
+.check-evidence-list a { color: #a0ede2; }
+.check-evidence-list summary { cursor: pointer; padding: 8px 0; }
 .scope-warning { padding: 8px 10px; color: #ffd39a; background: #4a321e; border: 1px solid #9b6b36; font-size: 12px; }
 .candidate-diff ul { padding-left: 18px; }
 .diff-view { max-height: 240px; overflow: auto; white-space: pre; overflow-wrap: normal; }
@@ -55,5 +61,15 @@ textarea { width: 100%; resize: vertical; padding: 10px; border: 1px solid #4d79
 .task-steps { max-height: 180px; overflow: auto; padding-left: 22px; color: #9aafbd; font-size: 11px; line-height: 1.8; }
 .task-card select, .preview-controls select { max-width: 100%; color: #d7e4ee; background: #14212c; border: 1px solid #4d7986; border-radius: 4px; padding: 6px; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
+.state-sync { display: flex; align-items: center; gap: 12px; padding: 8px 20px; font-size: 12px; }
+.state-sync button { padding: 6px 10px; }
+.approval-panel { margin-top: 24px; border-top: 1px solid #34424d; padding-top: 12px; }
+.approval-card { padding: 12px 0; border-bottom: 1px solid #34424d; font-size: 12px; overflow-wrap: anywhere; }
+.approval-card h3 { font-size: 14px; }
+.approval-card ul { padding-left: 18px; }
+.approval-card li { margin: 8px 0; }
+.approval-card button { padding: 7px 10px; font-size: 12px; }
+.approval-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.approval-panel summary { cursor: pointer; padding: 12px 0; }
 @media (max-width: 900px) { .workspace { grid-template-columns: minmax(0, 1fr) 280px; padding: 10px; gap: 10px; } .inspector { padding: 14px; } }
 @media (max-width: 650px) { .workspace { display: flex; flex-direction: column; height: auto; } .preview-panel { height: 75vh; } .toolbar { padding: 14px; } .connection { display: none; } h1 { font-size: 14px; } }
