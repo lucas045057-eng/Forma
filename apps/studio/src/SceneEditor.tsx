@@ -8,6 +8,7 @@ import { ProductScene, scenePose, sceneRenderSettings } from '@spatial/scene-ren
 import './scene-editor.css';
 import { useEventCenter } from './EventCenter.tsx';
 import { previewOrigin } from './preview-origin.ts';
+import { SceneDraftGuard } from './scene-draft.ts';
 
 function LightHandle({ direction, change }: { direction: Vec3; change: (direction: Vec3) => void }) {
   const dragging = useRef(false);
@@ -59,21 +60,21 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
   const { subscribe, syncReady, status, acquire, awaiting, locked, reload } = useEventCenter();
   const writeBlocked = !syncReady || status !== 'connected' || locked(['work']);
   const currentAt = useRef(at); currentAt.current = at;
-  const loadSequence = useRef(0);
-  const dirty = useRef(false);
+  const draftGuard = useRef(new SceneDraftGuard());
   const mounted = useRef(true);
 
   function applyConfig(config: SceneConfig) {
     const pose = scenePose(config, currentAt.current);
     setSaved(config); setDraft(structuredClone(config.hero)); setRotation(pose.rotation); setLid(pose.parts.lid?.[1] ?? 0);
-    dirty.current = false;
+    draftGuard.current.saved();
   }
-  async function load() {
-    const sequence = ++loadSequence.current;
+  async function load(explicit = false) {
+    const sequence = draftGuard.current.beginLoad(explicit);
+    if (sequence === null) return;
     try {
       const config = await request<SceneConfig>('/scene');
       if (!isSceneConfig(config)) throw new Error('服务返回的场景配置无效');
-      if (mounted.current && sequence === loadSequence.current) { applyConfig(config); setError(''); }
+      if (mounted.current && draftGuard.current.canApply(sequence)) { applyConfig(config); setError(''); }
     } catch (cause) { if (mounted.current) setError(String(cause)); }
   }
   useEffect(() => {
@@ -86,13 +87,13 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       if (event.type === 'state.reload') { void load(); void loadAssets(); }
       if (event.type === 'scene.changed' && isSceneConfig(event.config) && Array.isArray(event.diff)) {
         setLatest(event as unknown as SceneChanged);
-        if (!dirty.current) { ++loadSequence.current; applyConfig(event.config); }
+        if (!draftGuard.current.dirty) { draftGuard.current.invalidate(); applyConfig(event.config); }
       }
     });
-    return () => { mounted.current = false; ++loadSequence.current; unsubscribe(); };
+    return () => { mounted.current = false; draftGuard.current.invalidate(); unsubscribe(); };
   }, [subscribe]);
   useEffect(() => {
-    if (!saved) return;
+    if (!saved || draftGuard.current.dirty) return;
     const pose = scenePose(saved, at);
     setRotation(pose.rotation); setLid(pose.parts.lid?.[1] ?? 0);
   }, [at]);
@@ -106,8 +107,8 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     return () => { active = false; };
   }, [saved?.model]);
 
-  function editHero(update: (hero: SceneConfig['hero']) => SceneConfig['hero']) { dirty.current = true; setCompare(false); setDraft(update); }
-  function editRotation(value: Vec3) { dirty.current = true; setCompare(false); setRotation(value); }
+  function editHero(update: (hero: SceneConfig['hero']) => SceneConfig['hero']) { draftGuard.current.edit(); setCompare(false); setDraft(update); }
+  function editRotation(value: Vec3) { draftGuard.current.edit(); setCompare(false); setRotation(value); }
   const config = useMemo<SceneConfig>(() => {
     if (compare && saved) return saved;
     return { model: saved?.model ?? '', hero: { ...draft, model: { ...draft.model, rotation } }, scroll: [{ at: 0, parts: recognized ? { lid: { offset: [0, lid, 0] } } : {} }] };
@@ -116,9 +117,13 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     if (busy || writeBlocked) return;
     const token = acquire(['work']);
     if (!token) return;
-    setBusy(true); setError(''); ++loadSequence.current;
+    setBusy(true); setError(''); draftGuard.current.invalidate();
     let succeeded = false;
-    try { await work(); succeeded = true; }
+    try {
+      const result = await work();
+      succeeded = true;
+      if (mounted.current) { applyConfig(result.config); setLatest(result); }
+    }
     catch (cause) { if (mounted.current) setError(String(cause)); }
     awaiting(token);
     try { await reload(); }
@@ -131,12 +136,12 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     {writeBlocked && <p role="status">状态待同步或作品操作待确认，请刷新状态后继续。</p>}
     <p>预览滚动位置 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></p>
     <div className="scene-viewport" style={{ width: compare ? size : '100%', aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="scene-viewport" data-loaded={loaded}>
-      {saved && <ProductScene config={config} modelUrl={modelUrl} scrollAt={compare ? at : 0} controls={!compare}
+      {saved && <ProductScene config={config} modelUrl={modelUrl} scrollAt={compare ? at : 0} controls={!compare && !busy && !writeBlocked}
         canvasTestId="scene-canvas" onReady={() => setLoaded(true)} onError={() => { setLoaded(false); setError('3D 模型加载失败'); }}
         fallback={<p>模型尚未就绪</p>}
         onCameraChange={camera => editHero(hero => ({ ...hero, camera }))}
-        onRotationChange={!compare && tool === 'rotate' ? editRotation : undefined}>
-        {!compare && tool === 'light' && <LightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
+        onRotationChange={!compare && !busy && !writeBlocked && tool === 'rotate' ? editRotation : undefined}>
+        {!compare && !busy && !writeBlocked && tool === 'light' && <LightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
       </ProductScene>}
     </div>
     <fieldset disabled={!saved || busy || compare || writeBlocked}>
@@ -147,7 +152,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       <label>主光强度 {draft.lights.key.intensity.toFixed(2)}<input data-testid="scene-key-intensity" type="range" min="0" max="20" step="0.1" value={draft.lights.key.intensity} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, intensity: Number(e.target.value) } } }))}/></label>
       <label>色温 {temperature} K <input data-testid="scene-temperature" type="range" min="2700" max="6500" step="50" value={temperature} onChange={e => { const value = Number(e.target.value); setTemperature(value); editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, color: temperatureToHex(value) } } })); }}/><span>{draft.lights.key.color}</span></label>
       <label>环境光 {draft.lights.ambient.toFixed(2)}<input data-testid="scene-ambient" type="range" min="0" max="20" step="0.1" value={draft.lights.ambient} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, ambient: Number(e.target.value) } }))}/></label>
-      <label>开盖 {lid.toFixed(3)}<input data-testid="scene-lid" type="range" min="0" max="0.15" step="0.001" value={lid} disabled={!recognized} onChange={e => { dirty.current = true; setLid(Number(e.target.value)); }}/></label>
+      <label>开盖 {lid.toFixed(3)}<input data-testid="scene-lid" type="range" min="0" max="0.15" step="0.001" value={lid} disabled={!recognized} onChange={e => { draftGuard.current.edit(); setLid(Number(e.target.value)); }}/></label>
       {!recognized && <p data-testid="scene-parts-warning">未识别部件，开盖关键帧不可用。</p>}
       <button data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
       <button data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
@@ -159,7 +164,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       <button data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>
     </fieldset>
     <fieldset disabled={busy}><legend>与作品画面对照</legend>
-      <button data-testid="scene-load" onClick={() => { setCompare(false); void load(); }}>读取作品配置</button>
+      <button data-testid="scene-load" onClick={() => { setCompare(false); void load(true); }}>读取作品配置</button>
       <label>画布边长 <input data-testid="scene-size" type="number" min="100" max="1600" value={size} onChange={e => setSize(Math.max(100, Math.min(1600, Number(e.target.value) || 400)))}/></label>
       <button data-testid="scene-match-size" onClick={() => setSize(previewSize())}>匹配作品画布尺寸</button>
       <label><input data-testid="scene-compare" type="checkbox" checked={compare} onChange={e => { setCompare(e.target.checked); if (e.target.checked) void load(); }}/>对照模式（已保存配置、当前滚动位置、隐藏手柄）</label>
