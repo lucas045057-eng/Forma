@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   discardCandidate, getVersion, listCandidates, previewFrameSafe, resetMock, restoreTemplate, revertVersion,
-  setScript, waitFor, listTasks, listApprovals, answerApproval, getTask,
+  setScript, waitFor, listApprovals, answerApproval, getTask,
 } from '../m2a/api';
 import { writeArtifactFrom } from './artifact';
 
@@ -46,10 +46,8 @@ async function resolveAwaiting(page: import('@playwright/test').Page, taskId: st
       return false;
     }
     return ['done', 'failed', 'cancelled'].includes(task.status);
-  }, 60_000, 200);
-  const select = page.getByTestId('task-select');
-  await page.waitForTimeout(300);
-  if (await select.count()) await expect(select).toHaveValue(taskId);
+  }, 30_000, 200);
+  await expect(page.getByTestId('task-select')).toHaveValue(taskId);
 }
 
 /** 捕获本次动作创建的精确 task.id，再只处理该任务的卡；不读取/误用上一任务终态。 */

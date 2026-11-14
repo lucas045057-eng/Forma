@@ -1,0 +1,10 @@
+{
+  "job": "job_d309cf00",
+  "command": "node tests/e2e/m3a/run-ui-checkpoint.mjs --run-id run-20261114-m3a-ui-checkpoint",
+  "pid": 69728,
+  "state": "exited",
+  "exitCode": 0,
+  "startedAt": "2026-11-14T09:23:16.000Z",
+  "finishedAt": "2026-11-14T09:25:39.435Z",
+  "wallSeconds": 143
+}

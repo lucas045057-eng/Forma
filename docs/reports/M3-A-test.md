@@ -23,6 +23,14 @@
 - 62 份 refreshed tracked artifacts 已先归档再精确还原；run3 目录保留原失败证据。`M0-A/viewport.json`、`M1-B/undo-empty.json` 曾仅显示 CRLF 行尾状态，工作区/HEAD blob 相同、`--ignore-space-at-eol` 无 diff，已安全还原，不是未知内容变动。
 - 修正后的 checkpoint（完整 M2-B 12 → M3-A 11）将另起后台入口，证据目录 `run-20261114-m3a-ui-checkpoint/`；它只作接线验证，不是最终完整 run4 通过。
 
+## 修正后的 checkpoint（HEAD `a0e25ca`，`run-20261114-m3a-ui-checkpoint`）
+
+- `job_d309cf00` exit 0：完整 M2-B **12/12**、M3-A **11/11**，共 23 通过；原始两份 JSON 每项 expectedStatus=passed、单一 result passed、无 retry/skip/errors。证据：`docs/reports/artifacts/M3-A/run-20261114-m3a-ui-checkpoint/`（含 job 输出/摘要、evidence/summary、两份 JSON、日志、9 份 refreshed artifacts）。
+- 该 checkpoint 使用的是 `a0e25ca` 的 helper，当时仍带有三处附带等待：`waitFor` 预算 `60_000`（原 `30_000`）、新增 `page.waitForTimeout(300)`、以及用 `select.count()` 条件跳过的身份断言。调度核对 diff 后要求收回；这些属于测试接线的附带差异，不是产品修复，也不能因 23 通过忽略。
+- 已收回为：`30_000` 预算；删除 `waitForTimeout(300)`；改为无条件 `expect(page.getByTestId('task-select')).toHaveValue(taskId)`（使用 Playwright 自动等待）。保留精确 `POST /tasks` 202→taskId、按 taskId `getTask` 轮询、只回答本任务 pending 卡、answer 200 校验、实际终态与原有 UI/候选/越界/未检查/取消/重试断言。
+- **更正上轮交付说明**：上轮称“未用 sleep、加超时”与 diff 不符；实际有多出的 60s 与 300ms 等待，现以本段更正，原始 checkpoint 输出/证据保留不改写。
+- 本 checkpoint 只证明该接线可通过，**不是最终完整 run4 结果**；收回附带等待后由新冻结 HEAD 直接启动 run4（typecheck/build/unit 与七套 E2E），不单独重复 checkpoint。
+
 <!-- 历史：第一轮失败记录保留如下 -->
 
 ## 结论：验收未完成，完整回归被单测超时阻断
