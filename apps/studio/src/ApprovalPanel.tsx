@@ -72,7 +72,7 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
       <p data-testid="approval-status" role="status">{labels[card.status]}</p>
       <p className="hint">更新时间：{card.updatedAt}</p>
       {card.baseVersion !== state.version && <p role="status">作品已变化，旧请示不可操作</p>}
-      {lock && <p role="status">{lock.message}</p>}
+      {lock && <p role={lock.phase === 'outcomeUnknown' || lock.message.includes('失败') ? 'alert' : 'status'} data-testid={lock.phase === 'outcomeUnknown' || lock.message.includes('失败') ? 'approval-error' : undefined}>{lock.message}</p>}
       {errors[card.id] && <p role="alert" data-testid="approval-error">{errors[card.id]}</p>}
       <div className="approval-actions">
         <button type="button" data-testid="approval-approve" disabled={!enabled} onClick={() => void decide(card, 0)}>批准本次修改</button>
