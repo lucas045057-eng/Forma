@@ -201,3 +201,67 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && c
 ```
 
 本整改轮结果待调度核对，job id/日志路径及最终固定 HEAD 在回合小结给出；取得 job 后结束且冻结文件。不调用子 Agent、不改 apps/server/packages/templates/锁/Pi tests 或历史证据，不读取真实 .env、不调用付费模型。没有必须的后端或协议变更、没有新增“需批准”项；不宣称应修已经独立复核或正式验收通过。
+
+## C3 独立审查三项应修整改（基于 91134d7）
+
+依据：主树 `fe2dc26` 的 `docs/reports/M3-C-review.md` C3 追加节，只读报告，未合并主树。Claude 已确认 C1-1/C2-1 修复；C3 有条件通过、0 blocker、3 应修。本节记录实现整改，尚待新轮自测结果与独立修后复核，不能作为正式验收结论。上轮 `job_1f28cd58` 的成绩本轮未收到调度确认，不补写未知结果。
+
+### C3-1 场景草稿与在途配置读取
+
+提交 `9444dc8`。新增 Studio 内 `SceneDraftGuard`，SceneEditor 自动 `load()` 在 dirty 时直接返回，资产列表刷新仍照常。每次编辑都会推进修订号，使已经起跑的 GET /scene 无法在之后覆盖新草稿；旧请求错误也不再覆盖新编辑的提示。保存成功使用本次确定写入返回的 config 更新 saved/draft 与 diff，并清掉 dirty、作废此前读请求；保存失败不清 dirty。显式“读取作品配置”允许覆盖，但只在请求成功且之后没有新编辑时应用，失败时保留草稿及 dirty。
+
+场景写入期间禁用画布交互；滚动位置变化也不会重置未保存的旋转/开盖草稿。此处不改场景渲染算法、参数合同或后端预算。控件即使在自动 GET 在途时允许编辑，修订守卫也确保迟到响应不能覆盖它，关闭原首连/重载竞态。
+
+`scene-draft.test.ts` 新增：
+
+- `does not reload a scene draft with unsaved edits`
+- `clears the unsaved flag after a successful save and permits reload`
+- `rejects a scene GET that arrives after editing or saving`
+- `allows explicit read without clearing dirty until it succeeds`
+
+这些验证生产使用的草稿守卫，不冒充 M1 浏览器写回/撤销回归；Pi 仍需验证真实控件、画布及 inspector 布局。
+
+### C3-2 旧 run 的恢复入口
+
+提交 `f7ffaa8`。CandidatePanel 不再用 checkIssues 一刀切封锁恢复操作：有已取得且 id/candidate/commit/baseVersion 关联正确的终态 run，可显式重新检查；活动 run 可取消。不存在 run、关联错配、不同步、实体锁、基线失效或已收到 STALE_CANDIDATE 时保留相应限制。首次检查遇到异常 checkIssue 也保持禁用。
+
+采用门禁不变：checkIssues 仍直接阻止按钮与处理器，不因恢复重跑入口而放宽身份、四项结果或六证据条件。重跑仍只在用户点击时发送 `{rerun:true}`，由后端最终裁决。
+
+`check-render.test.tsx` 新增 `allows explicit rerun for a completed legacy run while adoption stays disabled`：旧 run/空 toolIdentity/无 runId 视图下重跑可用且采用 disabled；同 run 改为活动后只可取消；移除 run 后重跑和取消都 disabled。
+
+### C3-3 重试保持原任务范围
+
+提交 `f2c9136`。`pick-state.ts` 新增 `retrySelection`，PointSpeak 的按钮与提交路径使用同一结果：原任务有 Selection 且基线仍匹配时始终沿用原 Selection，不随当前选中元素变更；旧基线时只接受用户重新点选的同一 src、当前版本 Selection，否则禁重试并提示重新点选。原任务原本无 Selection 时才继续整页重试，即便当前选了元素也不会偷偷缩小范围。pending/failed 点选仍阻止提交。
+
+`pick-state.test.ts` 新增：
+
+- `retries with the original scope instead of the currently picked element`
+- `requires a same-source repick after version change and never silently retries the whole page`
+
+覆盖当前选中其它元素、清空选择、版本变化、同 src 新版重选和点选 pending；不会静默扩大或替换任务范围。
+
+### 建议项采纳与理由
+
+`1a485e6` 处理错误语义与轻量提示整改：
+
+| 项 | 处理与理由 |
+| --- | --- |
+| C3-S1 明确拒绝与未知结果 | 采纳。已知业务码仍用对应文案；其它 ApiError 4xx 显示“操作被拒绝：服务器说明”，只用 React 文本，不执行 HTML；网络/超时/未知 5xx 才用“无法确认”。PointSpeak、候选与请示均接入；后续 GET 失败保留原拒绝原因并追加刷新失败，不把明确拒绝说成结果未知。 |
+| C3-S2 尚未检查文案 | 采纳。无 latestCheckRunId 显示“尚未运行检查，请先运行检查”，与关联错配区分；采用仍禁用。 |
+| C3-S3 影响模式吞真实错误 | 采纳。只有 bridge 明确的“未找到带源码标记的外层容器”选取错误被用于恢复高亮；其它页面 error/rejection 照常显示，不再静默吞掉。现合同没有错误分类字段，使用现有精确文案，不扩 bridge。 |
+| C3-S4 无选取也提示重选 | 采纳。版本变化时仅原 pick 为 ready/pending 才提示重新点选；仍清理旧模式与请求。 |
+| C3-S5 live 清除 checkIssues | 暂不采纳。现有标记混合了 GET 失败与视图不一致，单凭一次 live payload 清除可能提前恢复此前读取失败的候选；保留等待下一次成功 REST 同步重新评估，check.finished/手动刷新可恢复。本次先修显式重跑死路，不扩大故障来源与缓存状态重构。 |
+
+新增测试 `distinguishes definite rejection from unknown network or server outcomes`、`labels an unchecked candidate as not yet checked rather than inconsistent`、`suppresses only pick errors in impact mode, not real page failures`。前者含 MODEL_MISSING/INVALID_TASK、网络、500、拒绝后刷新失败及提交成功后刷新失败的文案断言。
+
+### 冻结验证与独立接点
+
+完成静态 diff 检查后，以最终提交后台串行执行：
+
+```text
+cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && call pnpm build
+```
+
+本轮实际结果待调度读取；固定 HEAD、job id、`orbital/jobs/<job>/output.log` 在回合小结给出。取得 job 即结束且冻结文件，不轮询、不重复起跑。未运行或修改 Pi E2E，真实 M1 写回/撤销、旧检查恢复、失败任务重试范围及既有 C1–C3 浏览器场景仍交 Pi；EventCenter 异步驱动风险与 inspector 布局风险仍在独立测试清单内。
+
+没有新增需批准事项：只改 Studio 与本实现报告；没有后端/协议/模板/锁/依赖/Pi tests 或历史证据变更，没有读取真实 .env、付费模型调用、子 Agent、合并或 push。
