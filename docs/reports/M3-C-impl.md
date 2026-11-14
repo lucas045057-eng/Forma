@@ -262,6 +262,46 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && c
 cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && call pnpm build
 ```
 
-本轮实际结果待调度读取；固定 HEAD、job id、`orbital/jobs/<job>/output.log` 在回合小结给出。取得 job 即结束且冻结文件，不轮询、不重复起跑。未运行或修改 Pi E2E，真实 M1 写回/撤销、旧检查恢复、失败任务重试范围及既有 C1–C3 浏览器场景仍交 Pi；EventCenter 异步驱动风险与 inspector 布局风险仍在独立测试清单内。
+已读取受测 `5edaa22` 的 `job_2adead58` 原件：根 `orbital/jobs/job_2adead58/exit` 为 `0 0`（按 bg-run.cmd 格式，第一项为进程 exit code）；output.log 确认 server 321、shared 68、vite-plugin 20、scene-renderer 5、bridge 1、Studio 12 文件/85 项，共 500 项通过，所有 typecheck/build 均 Done。归类：这轮全量单测/类型/构建自测通过，无失败；并非 UI 接线或正式验收通过。原轮不重复运行。未运行或修改 Pi E2E，真实 M1 写回/撤销、旧检查恢复、失败任务重试范围及既有 C1–C3 浏览器场景仍交 Pi；EventCenter 异步驱动风险与 inspector 布局风险仍在独立测试清单内。
 
 没有新增需批准事项：只改 Studio 与本实现报告；没有后端/协议/模板/锁/依赖/Pi tests 或历史证据变更，没有读取真实 .env、付费模型调用、子 Agent、合并或 push。
+
+## Pi 接线冒烟整改：Studio 开发反代缺失（基于 5edaa22）
+
+归类：真实产品侧接线缺陷，不是测试或环境问题。Pi 在隔离验收树记录 `/approvals` 返回 Vite SPA HTML，导致首份关键快照 JSON 解析失败、syncReady 持续 false；`/checks` 同样未代理。原件与独立说明位于 Pi 的 `docs/reports/artifacts/M3-C/prep/dev-proxy-missing-approvals-checks.json`、`smoke-open-studio-timeout-error-context.md` 及 `M3-C-test-preparation.md` §7，本轮未改这些原件。
+
+修复提交 `052b64d`：仅在 `apps/studio/vite.config.ts` 按既有写法增加 `/approvals`、`/checks`、`/health` 三个 `target: backend` 代理键。`/health` 是对照后端路由时发现的另一遗漏。未更改 origin/CORS/WS 安全设置，未把预览内容接回 Studio 同源。
+
+### 路由核对清单
+
+逐项只读对照 `apps/server/src/app.ts`、其调用的 `checks/routes.ts`，并核对 `index.ts` 的独立预览监听器：
+
+| 主后端前缀 | 已注册路径 / 方法 | 代理核对 |
+| --- | --- | --- |
+| /health | GET /health | 本次补齐 |
+| /approvals | GET /approvals；GET、POST /approvals/:id | 本次补齐 |
+| /checks | GET /checks/:id；POST /checks/:id/cancel；GET /checks/:id/artifacts/:name | 本次补齐，包含六份证据读取 |
+| /events | WS /events；GET /events/history | 已有，保留 ws:true |
+| /tasks | GET、POST /tasks；GET /tasks/:id；POST /tasks/:id/cancel | 已有 |
+| /candidates | GET /candidates、/candidates/:id；POST /candidates/:id/adopt、/discard、/checks | 已有，检查发起走此键 |
+| /version | GET /version；POST /version/revert | 已有 |
+| /scene | GET、PUT /scene；POST /scene/undo | 已有 |
+| /assets | GET /assets、/assets/:id、/assets/:id/model.glb；POST /assets/lux3d、/assets/lux3d/import、/assets/:id/adopt | 已有 |
+
+主应用及注册模块未发现其它未代理 API 前缀。`/preview/main/`、`/preview/c/:id/` 与 HMR 由独立 preview-origin 监听器提供，按分源合同不增加到 Studio 代理。agent/assets 的 mock-server 是独立测试上游，不是主后端注册 API，也不代理其模型接口或 /__stats。
+
+新增 `apps/studio/src/dev-proxy.test.ts`：`routes Studio API requests and check evidence through the real Vite proxy instead of SPA fallback`。使用实际 Vite 配置中的代理键，只有 target 替换成本轮动态端口的 loopback HTTP stub，启动真实 Vite server；从 Studio 地址验证列表/详情/历史 GET、批准/取消/发起检查 POST、证据 JSON 与 PNG 字节转发。关闭 envFile，不读真实 .env，不启动模型或 Pi 后端，不修改 Pi tests；这是接线集成自测，不冒充真实后端与 UI 独立验收。两服务器在 finally 关闭。
+
+### m2b 采用路径兼容性（实现核对）
+
+结论：实现仍允许 `tests/e2e/m2b/01-ui.spec.ts:124-128` 的路径通过，无须通过 Studio 的“运行检查”按钮重新开一轮。该用例先取 pending 候选，经 `ensureChecksPassed`（m2a/api.ts 转调 m3b/checks.ts）使用真实后端检查 API，等待 completed/passed 并核对 run 后再点 candidate-adopt；未伪造检查结果。
+
+Studio 不要求检查由 UI 发起：check.finished 触发权威快照，或首连/重连恢复已有 latestCheckRunId；GET /checks/:id 获取已持久 run，终态自动 GET 六份证据，核 MIME/字节/hash 后生成当前同步代次回执。候选仍 pending、基线/身份/四结果/证据均一致且无锁时，adoptionReason 返回空字符串，按钮 enabled。`/checks` 代理补齐后，这些请求可以到达主后端。仅有后端 outcome passed 并不跳过六证据可读条件；点击仍需等待 UI 同步与证据读取完成。
+
+本结论是实现及测试步骤的只读兼容性判断，不是 m2b 实跑通过；浏览器等待时序、超时预算和采用后的页面效果仍由 Pi 在新冻结提交正式回归确认。本轮没有修改、重跑 Pi 的 m2b 测试。
+
+### 本次验证与边界
+
+上轮 `job_2adead58` exit 0 已在 C3 三项整改节补录，不重跑旧轮。它的单测没有开发反代接线覆盖，所以与本次 Pi 的真实产品缺陷并不矛盾。
+
+本次新增接线集成自测随新冻结版本通过根 bg.cmd 串行运行 `pnpm test`、`pnpm typecheck`、`pnpm build`；结果待核对，job id 与日志路径在回合小结给出。取得 job 即结束、冻结文件，不轮询。只改 Studio 与实现报告，不改后端/协议/模板/锁/Pi tests 和历史证据，无需新增批准。
