@@ -4,7 +4,7 @@ import { writeArtifact } from './artifact';
 import { BACKEND_BASE } from './env';
 import { checkRun } from './support';
 import {
-  cleanup, countRequests, dropSockets, gateReason, mainFrame, openStudio,
+  cleanup, countRequests, dropSockets, ensurePicked, gateReason, mainFrame, openStudio,
   overlayTotal, pendingCandidates, waitCandidate, waitChecksPassed, waitEvidenceReady,
 } from './support';
 
@@ -25,7 +25,8 @@ test.afterAll(() => { expect(api.restoreTemplate().clean).toBe(true); });
 async function localCandidate(page: Page, instruction = '把首屏文案改掉', old = '一份给自己，也给生活的温柔礼物。', next = '给自己一份安静的礼物。') {
   await api.resetMock();
   await api.setScript([[{ name: 'replace_in_file', args: { path: 'src/App.tsx', old, new: next } }], [{ name: 'finish', args: { summary: '局部文案已修改' } }]] as never);
-  // 没有选取也能提交（整页任务），保持与 M2 一致的入口
+  // 必须先选一个 App.tsx 内的元素：无选取的提交算整页/越范围，会先请示，拿不到“无请示的局部改动”。
+  await ensurePicked(page);
   const taskId = await (async () => {
     const [response] = await Promise.all([
       page.waitForResponse((item) => item.request().method() === 'POST' && new URL(item.url()).pathname === '/tasks', { timeout: 30_000 }),

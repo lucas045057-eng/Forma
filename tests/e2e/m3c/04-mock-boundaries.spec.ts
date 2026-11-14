@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import * as api from '../m2a/api';
 import { writeArtifact } from './artifact';
 import {
-  BACKEND_BASE, cleanup, createAwaitingCard, openStudio, runChecksViaApi, waitCandidate,
+  BACKEND_BASE, cleanup, createAwaitingCard, ensurePicked, openStudio, runChecksViaApi, waitCandidate,
 } from './support';
 
 /**
@@ -26,6 +26,8 @@ async function localCandidate(page: Page, instruction: string, old: string, next
     [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old, new: next } }],
     [{ name: 'finish', args: { summary: '局部文案已修改' } }],
   ] as never);
+  // 先选一个 App.tsx 内的元素，否则提交算越范围，会先请示。
+  await ensurePicked(page);
   const [response] = await Promise.all([
     page.waitForResponse((item) => item.request().method() === 'POST' && new URL(item.url()).pathname === '/tasks', { timeout: 30_000 }),
     (async () => {
