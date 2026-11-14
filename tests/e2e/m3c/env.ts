@@ -19,5 +19,9 @@ export const ASSETS = path.join(M3C_DATA, 'assets');
 export const SCENE_HISTORY = path.join(M3C_DATA, 'scene-history');
 export const GUARD_LOG = path.join(M3C_DATA, 'net-guard.log');
 
-/** 证据根目录：每轮 run 由 full-regression/正式入口用 --output 与 JSON 报告定向覆盖。 */
-export const ARTIFACT_DIR = path.join(process.cwd(), 'docs', 'reports', 'artifacts', 'M3-C');
+/** 证据根目录：默认写到 docs/reports/artifacts/M3-C/（手工调试）；
+ *  正式轮由 tests/e2e/m3c/full-regression.mjs 用 M3C_ARTIFACT_DIR 定向到本轮 run 目录，
+ *  这样每轮的结构化中间证据与轮目录同生同灭，不会把下一轮的干净基线弄脏。 */
+export const ARTIFACT_DIR = process.env.M3C_ARTIFACT_DIR
+  ? path.resolve(process.env.M3C_ARTIFACT_DIR)
+  : path.join(process.cwd(), 'docs', 'reports', 'artifacts', 'M3-C');

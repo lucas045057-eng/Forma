@@ -26,9 +26,38 @@ tests/e2e/m3c/01-approval.spec.ts               # real：请示与影响模式�
 tests/e2e/m3c/02-checks-adopt.spec.ts           # real：真实检查、证据、采用门禁、采用/回退（8 例）
 tests/e2e/m3c/03-failures.spec.ts               # real：真实构建/运行/遮挡失败（3 例）
 tests/e2e/m3c/04-mock-boundaries.spec.ts        # mock：截断/迟到/响应丢失/缺证据/409/恶意文本（8 例）
+tests/e2e/m3c/full-regression.mjs               # 正式轮入口（与 M3-B 同形状，12 步；见 §3.1）
 ```
 
 另有一处**测试配置**改动：`playwright.config.ts` 的 `testIgnore` 增加 `**/m3c/**`，否则 M0-B 的默认 `testDir: './tests/e2e'` 递归收集会把本套件一起收进来（这是 M0-B 早年踩过的老问题）。
+
+## 3.1 正式轮入口（第 12 步）与总例数
+
+新增 `tests/e2e/m3c/full-regression.mjs`，与 M3-B 的 `tests/e2e/m3b/full-regression.mjs` **同形状**，只把证据根换成 M3-C、并多一个第 12 步：
+
+```
+typecheck → build → unit → e2e-m0b → e2e-m0a → e2e-m1a → e2e-m1b
+          → e2e-m2a → e2e-m2b → e2e-m3a → e2e-m3b → e2e-m3c（新增）
+```
+
+为什么另起一份而不改 M3-B 那份：M3-B 的 runner 字节是**已验收冻结**的一部分（`docs/reports/M3-B-test.md` run6 的入口），改它会动已收口证据的身份。同形守卫全部保留，并对新步骤同样生效：
+
+- 顺序执行、首败即停；
+- 每套独立 `--output` 与 `PLAYWRIGHT_JSON_OUTPUT_NAME`（不覆写历史 JSON），三层状态判据 + 每例恰好 1 条 result + retry/skip/flaky/errors 全 0；
+- 身份基线（产品 + `tests/e2e` + `playwright*.ts` + 锁的真实字节）逐步 before/after 对照；
+- 被刷新的已跟踪证据先归档新字节、再按 blob 还原；起跑前就脏则拒绝覆盖；
+- **基线脏就 exit 3、一步不跑**的入口快速失败；
+- 完成屏障（只认 close + 日志写完）。
+
+M3-C 套件自己的结构化中间证据（`writeArtifact`）通过 `M3C_ARTIFACT_DIR` 定向到**本轮 run 目录**（`<OUT>/m3c-artifacts/`），不写回 `docs/reports/artifacts/M3-C/` 根目录，避免把下一轮的干净基线弄脏。
+
+第一次 `--collect` 实跑（`regression/2026-11-14T20-08-48-946Z-collect`，9/9 步 `ok=true`）固定了正式轮的总例数：
+
+| 套件 | m0b | m0a | m1a | m1b | m2a | m2b | m3a | m3b | **m3c（新）** | 合计 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 例数 | 24 | 27 | 7 | 23 | 35 | 12 | 11 | 7 | **27** | **173** |
+
+即正式轮 = typecheck + build + 全量单测 + **173** 个 E2E。与 M3-B 的 146 相比只多 m3c 的 27，其余八套一个没变。
 
 ## 3. `--list` 实测（不预编造数字）
 
@@ -90,11 +119,11 @@ node node_modules/@playwright/test/cli.js test -c playwright.m3c.config.ts --lis
 ## 6. 现在还缺什么才能跑正式全量（如实列出）
 
 1. **最终冻结提交号**：当前基线是 `5edaa22`（C3 三条应修的整改提交）。但 §7 发现了一个**前置实现缺陷**（Studio 开发服缺 `/approvals` 与 `/checks` 反代），必须由实现者先修；修完后冻结号会变，本套件要在新的 HEAD 上重新 `--list` 并复核断言（尤其 C3-1 场景草稿、C3-2 旧记录重跑、C3-3 重试范围三处修法）。
-2. **真实后端进程重启**：本套件由 `playwright.m3c.config.ts` 的 `webServer` 拥有后端进程，测试内无法合法重启它。当前用“页面重载 + 只读刷新”覆盖持久恢复；真实进程重启由 M3-A 的 `15-n4-shutdown` 证据支撑。若要自证，需要一个由 Pi 自己的 launcher 管理 4 个服务并暴露重启钩子的入口——建议在正式轮之前决定是“引用 M3-A 证据”还是“加这个入口”，不默认略过。
-3. **`version.changed` 的实测口径**：读实现后确认 `PUT /scene`（M1 场景写回）只发 `scene.changed`，**不发** `version.changed`；`version.changed` 来自 adopt/revert/snapshot。因此“M1 写回后旧基线失效”这一条按可执行语义拆成两例：①采用造成的 `version.changed` 让旧候选门禁立即失效（真断言）；②M1 写回后门禁不被放宽（未检查的候选仍不可采用）。若验收要求“场景写回也必须让旧证明失效”，那是实现/合同问题，需要调度判定，不能由测试改断言凑绿。
+2. **真实后端进程重启 —— 已定（调度 2026-11-15）**：**不为套件新增 launcher 入口**。正式轮用“页面重载 + 只读刷新”覆盖持久恢复；真实进程重启**引用 M3-A 已通过的 `15-n4-shutdown` 证据**，报告里明确写“由既有证据支撑、本轮未新执行”，不计入本套件新覆盖。
+3. **`version.changed` 的实测口径 —— 已定（调度 2026-11-15）**：接受两例拆分，**不扩合同**。读实现确认 `PUT /scene`（M1 场景写回）只发 `scene.changed`、不发 `version.changed`；`version.changed` 来自 adopt/revert/snapshot。因此：①采用造成的 `version.changed` 让旧候选门禁立即失效（真断言）；②M1 写回后门禁不被放宽（未检查的候选仍不可采用）。该局限如实写进正式报告，另由 Codex 在设计文档补一段“场景写回是否需要让旧检查证明失效”的语义确认（不改实现）。
 4. **M2 回归兼容性**：`tests/e2e/m2b/01-ui.spec.ts` 的采用步骤先走真实 checks API 再点界面按钮；C3 下采用还要求六份证据回执就绪，Playwright 的可操作性等待预期能覆盖，但必须在正式轮里实测确认（这是 Claude 复核里点名要 Pi 确认的点）。
-5. **既有八套 + 新套件的同一轮跑法**：正式轮建议沿用 M3-B 的 `full-regression.mjs` 形状（顺序执行、首败即停、每套独立 `--output`/JSON、证据先归档后按 blob 还原），把 m3c 作为第 12 步加入；这需要调度批准改测试工具（不改断言）。
-6. **定向自证**：harness 接线已用一个真实用例冒烟（见 §7），其余 26 例尚未执行。正式轮之前建议至少把 01/02 各跑一遍，避免把“从未跑过的断言”当验收。
+5. **既有八套 + 新套件的同一轮跑法 —— 已定并落地**：调度已批准把 m3c 作为第 12 步接进同形状 runner；Pi 写成 `tests/e2e/m3c/full-regression.mjs`（不改 M3-B 已冻结那份），总例数由 `--collect` 固定为 **173**（见 §3.1）。
+6. **定向自证**：harness 接线冒烟已撞出 §7 的实现缺陷（不是断言写错）；反代修完、拿到新冻结提交后，正式轮之前建议至少把 01/02 各跑一遍，避免把“从未跑过的断言”当验收。
 
 ## 7. 本轮已做的接线冒烟（不是验收）——**冒烟直接撞出一个实现缺陷**
 
