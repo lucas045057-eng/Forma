@@ -50,17 +50,17 @@ function Evidence({ runId, refs, enabled, binding, onEvidence }: { runId: string
   </div>;
 }
 
-export default function CheckPanel({ candidate, run, syncReady, syncEpoch, version, onEvidence, gateReason }: {
+export default function CheckPanel({ candidate, run, syncReady, syncEpoch, version, onEvidence, gateReason, proofRejected = false }: {
   candidate: Candidate; run?: CheckRun; syncReady: boolean; syncEpoch: number; version: string;
-  onEvidence?: (key: string, ready: boolean) => void; gateReason?: string;
+  onEvidence?: (key: string, ready: boolean) => void; gateReason?: string; proofRejected?: boolean;
 }) {
   const view = checkView(candidate, run);
   const refs = evidenceRefs(candidate, run);
-  const stale = candidate.baseVersion !== version || (!!run && run.mainVersion !== version);
+  const stale = proofRejected || candidate.baseVersion !== version || (!!run && run.mainVersion !== version);
   const binding = proofKey(candidate, run, version, syncEpoch);
   const key = JSON.stringify([binding, syncReady]);
   return <div className="candidate-checks" data-testid="candidate-checks">
-    <p role="status" data-testid="check-run-status" data-run-id={candidate.latestCheckRunId ?? ''} data-candidate-id={candidate.id}>{syncReady ? view.label : '状态待同步'}{stale ? ' · 证明已失效' : ''}</p>
+    <p role="status" data-testid="check-run-status" data-run-id={candidate.latestCheckRunId ?? ''} data-candidate-id={candidate.id}>{stale ? '历史检查结果 · 证明已失效' : syncReady ? view.label : '状态待同步'}</p>
     {!candidate.candidateCommit && <p role="alert">候选缺少记录，请重新生成</p>}
     {candidate.latestCheckRunId && !view.complete && <p role="alert" data-testid="check-error">检查状态不完整</p>}
     {view.rows.map(row => <div key={row.name} data-testid="check-item" data-check-name={row.name} data-status={row.status}>

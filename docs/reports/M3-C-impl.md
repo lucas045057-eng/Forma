@@ -82,8 +82,60 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm --filter @spatial/studio test &&
 - 待 Pi real UI：loopback mock Agent 生成候选后真实运行四检查、观察 check.updated、读取六证据；真实构建/页面运行/遮挡失败；取消、重启、断线完成恢复；三候选/同候选多轮切换及浏览器 fetch/object URL 释放行为。
 - 待 Pi mock UI：schema failed、缺浏览器/预算/持久化错误、缺 run/跨候选/重复 Check、产物缺失/404/hash 不符、迟到详情与响应丢失。已有单测仅对纯函数、mock fetch 与静态 React 输出作证。
 - 保留冻结 testid：check-run/rerun/cancel、check-run-status、check-item、check-evidence、check-error、candidate-gate-reason；关联 run/candidate/name/status/hash 属性按合同提供；原 candidate/preview testid 保留。
-- C3 共同门禁尚未实现，采用与回退始终 disabled。尚未完成 Pi 独立测试、Claude Code 独立审查和 M3-C 全量验收；本卡不宣称这些结果。
+- C2 交付时 C3 共同门禁尚未实现，采用与回退始终 disabled；C3 后续接入见下节。尚未完成 Pi 独立测试、Claude Code 独立审查和 M3-C 全量验收。
 
 ### 需批准
 
 无后端/协议变更请求；未修改 apps/server、packages、templates、依赖清单、锁、Pi E2E 或历史证据，未读取真实 .env、访问 staging 或调用付费模型。
+
+## C3 — 门禁与失败态 UI
+
+状态：C1–C3 实现已接通；C3 冻结后的全量单测/typecheck/build 待后台结果，尚未独立测试、审查或正式验收。基线 `974ffa2`，同一 `.worktrees/m3c` / `feat/m3c-approval`。`9124f7e` 补录调度已确认的 C2 自测结果。
+
+### 分步提交、文件与原因
+
+- `16ce0c4`：`adoption-gate.ts` / `adoption-gate.test.ts` 实现采用门禁参数表和操作相关错误文案；`mutation-locks.ts` 提供同步占锁、写请求结束后等待新权威同步才解锁的策略。该步未开放采用。
+- `1baa587`：`CandidatePanel.tsx`、`CheckPanel.tsx` 将证据读取完成凭据与完整门禁联通，完成后才开放采用/回退；`EventCenter.tsx` 统一管理跨面板实体锁与作品锁；`ApprovalPanel.tsx` / `PointSpeak.tsx` 接入共享任务锁、未知结果恢复及终态拒绝；`App.tsx` 在版本变化后清除旧选取与迟到版本请求；`SceneEditor.tsx` 的写入/撤回/模型采用接入同一作品锁并在写后权威重读，场景渲染/参数/后端合同不变；`api.ts` 加有限的前端等待；更新 Studio 静态渲染测试以反映 C3 回退语义。
+- 收尾：采用按钮层测试真实 disabled 和阻断回调；候选/任务快照与事件最小可展示结构校验，损坏关键事件触发权威刷新；`m2-state.test.ts` 的候选 fixture 补齐真实合同字段（原断言不变），增加损坏 payload 用例。最终固定 HEAD 随回合小结交调度。
+
+### 采用门禁与证据生命周期
+
+采用需同时满足：连接且同步就绪、无实体/作品操作锁；候选 pending、有 commit、基线等于当前作品；latest run 的 id/candidateId/commit/baseVersion/mainVersion 全匹配；run completed + outcome passed、无 error、digest/policy/toolIdentity 非空；candidate/run 各恰好四项 passed，runId 与 evidence hash 相符；六份必需产物唯一、名称/MIME/大小/hash 合法、四主证据 hash 对应；六份 GET 已在当前候选/run/作品版本/同步代次下核验可读。按钮与点击处理器均检查同一门禁，事件处理器还同步占锁，不能仅靠 disabled 防双击。
+
+证据凭据绑定候选与 run 全部当前内容、作品版本及 syncEpoch，任一变化即不匹配。切候选、操作起点、重跑、失步及组件卸载使旧凭据失效；迟到旧凭据即便回调也无法满足新 key。任一读取失败关闭门禁。界面只说明前端已就绪，不声称排除了外部字节篡改；采用时后端仍在锁内做最终检查，无新 canAdopt 字段/旁路/强制采用。
+
+`CHECKS_NOT_PASSED` 只作为 adopt 的失效证明路径：立即封住该 run，显示“检查未通过或证明已失效”，只 GET 刷新、不自动 POST；普通刷新不恢复被拒证明，需新 run（或基线失效时重新生成）。`STALE_CANDIDATE` 只在运行/重跑检查的解析路径提示重新生成并关闭旧入口。采用不依赖 STALE_CANDIDATE/MERGE_CONFLICT。回退不推断本地历史，由服务器 NO_ADOPTION 明示“暂无可回退的采用记录”。
+
+### 互斥与失败恢复
+
+- 运行/重跑/取消/采用/撤回同步占用 candidate 锁；请示回答与任务取消共享 task 锁，另有 approval 锁；采用/回退/场景写回共用 work 锁。其它任务不因持久 pending 请示而被封锁。检查正在运行本身不是请求锁，用户仍可显式撤回该候选。
+- 锁存在 EventCenter 生命周期内，组件关闭也不丢失。POST 未结束时，任何早到 GET 都不能解锁；POST 结束后只有更新同步代次成功才能解锁。断线/刷新失败继续关闭操作，提示刷新，不自动重发写请求。
+- POST 成功与后续 GET 失败分别处理：显示“操作已提交，状态刷新失败，请刷新状态”，不诱导再点。STALE_APPROVAL/已回答/非 pending 封住旧回答；APPROVAL_LIMIT 提供待处理卡片链接；未知错误按安全文本呈现。
+- 为避免无限等待，Studio 普通 API/场景请求最多等待 60 秒、关键快照 GET 20 秒、证据组读取 30 秒；这些只结束客户端等待并进入结果未知/刷新路径，不调整后端运行器预算，不取消/重放后端操作，不把超时定性为产品失败。
+- version.changed 首先关闭同步写门禁，再恢复权威版本；旧基线采用不可用，旧 Selection 清除，迟到选取版本 GET 不能复活旧选择。保持精确 origin/source 消息校验、当前/候选分源、候选不可选取、对比/滚动/diff 与单 WS。
+
+### 自测与待核对结果
+
+已完成静态 `git diff --check` 与改动范围核对。新增门禁参数表覆盖不同步/断线/锁、关闭候选、commit/基线/关联缺失或错配、非完成/非 passed、错误、身份缺失、失败/未运行/缺失/重复检查、runId/hash 不匹配、缺失/重复产物、不可读/旧代次凭据及后端拒绝证明。每个负向组检验采用按钮 disabled，直接调用按钮回调两次仍为零提交回调；正向组只在全部前提满足时启用。共享锁测试覆盖双取锁、作品互斥、早到 GET 不解锁和正确代次释放；这些不是浏览器真实 POST 次数证据。
+
+C3 验证按任务卡使用全量单测，拟由根 `orbital/bin/bg.cmd` 单次启动：
+
+```text
+cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && call pnpm build
+```
+
+取得 job 即结束回合并冻结文件。当前结果待核对，不预填通过数量；固定 HEAD、job id 与根日志路径在回合小结给出，由调度读取（无 ORBITAL_SESSION_ID 自动回调）。不重跑 C2 已确认作业，不运行 Pi E2E。
+
+### C1–C3 整体未覆盖与独立交接
+
+Pi real UI（真实 Studio/后端/持久文件/WS/Chromium，模型仅 loopback mock）：完整三按钮选取→共享修改→请示三处 overlay→批准→候选→四检查→六证据→采用→回退；批准不重调模型、拒绝无候选；检查真实构建/运行/遮挡失败；未检查门禁；取消与运行中撤回；刷新/合法服务重启/断线恢复；双击及键盘仅一次真实 POST；M1 写回旧候选失效；三候选/多 run 切换；场景写回与作品决策互斥；分源/滚动/diff/单 WS 回归。
+
+Pi mock UI：schema failed（不篡改后端造公共不可达路径）；缺浏览器/预算/持久化错误；缺项/重复项/关联错配/损坏 payload；404、缺失/篡改证据及未知 MIME；旧 GET/socket/证据请求迟到、历史截断/序号倒退/缓冲溢出；POST 响应丢失、成功后刷新失败；CHECKS_NOT_PASSED 与 STALE_CANDIDATE 各自路径；NO_ADOPTION、STALE_APPROVAL/已回答竞态。纯函数/mock fetch/静态 React 测试不替代真实 UI 或运行器失败证据。
+
+Claude Code 重点：门禁真值表与证据 key 生命周期、跨面板/卸载后的锁、非原子快照重读、迟到响应与终态回滚、后端拒绝证明不能复用、M1 接线与 M2 选取回归、错误安全文本与 TOCTOU 边界。现有 bridge 无命中回执，任意草稿坐标无法保证精确 DOM 定位的限制仍保留。
+
+尚未执行冻结同一产品身份的原八套 146 例与新 M3-C UI 套件；新增例数由 Pi --list 固定。未创建/修改 Pi 的 tests、配置或正式证据。调度须在独立审查整改与独立验收之后决定集成收口，不能把三张实现卡完成表述为 M3-C 验收通过。
+
+### 需调度批准
+
+无必须的后端/协议变更或待拍板事项。没有修改 apps/server、packages、templates、锁/依赖、Pi E2E 或历史证据，没有读取真实 .env、调用付费模型、合并、push 或删除 worktree。

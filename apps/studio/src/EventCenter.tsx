@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Candidate, CheckRun, Task } from '@spatial/shared';
 import { associatedRun, consistentChecks, isCheckRun } from './check-state.ts';
-import { emptyM2State, contiguousReplay, reduceM2Event, type IncomingEvent, type M2State } from './m2-state.ts';
+import { emptyM2State, contiguousReplay, reduceM2Event, isCandidate, isTask, type IncomingEvent, type M2State } from './m2-state.ts';
 import { isApproval, sortApprovals } from './approval-state.ts';
 import { MutationLocks } from './mutation-locks.ts';
 
@@ -98,7 +98,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
             json<Task[]>('/tasks'), json<Candidate[]>('/candidates'), json<{ version: string }>('/version'), json<unknown[]>('/approvals'),
           ]);
           if (!valid(generation, operation)) return;
-          if (!Array.isArray(tasks) || !Array.isArray(candidates) || typeof version.version !== 'string' || !Array.isArray(approvals) || !approvals.every(isApproval)) throw new Error('持久状态格式不完整');
+          if (!Array.isArray(tasks) || !tasks.every(isTask) || !Array.isArray(candidates) || !candidates.every(isCandidate) || typeof version.version !== 'string' || !Array.isArray(approvals) || !approvals.every(isApproval)) throw new Error('持久状态格式不完整');
           const latest = await Promise.all([...new Set(candidates.map(candidate => candidate.latestCheckRunId).filter((id): id is string => !!id))].map(async id => {
             const run = await json<unknown>(`/checks/${encodeURIComponent(id)}`);
             if (!isCheckRun(run) || run.id !== id) throw new Error('检查状态不完整，请刷新状态');
@@ -138,7 +138,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           syncing = false;
           initialized = false;
           liveReady.current = false;
-      setSyncReady(false);
+          setSyncReady(false);
           setSyncError(cause instanceof Error ? cause.message : '状态同步失败');
         }
         throw cause;
@@ -181,6 +181,10 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           startSync();
           return;
         }
+        const malformed = (event.type === 'task.updated' && !isTask(event.task)) ||
+          (['candidate.ready', 'candidate.closed'].includes(event.type) && !isCandidate(event.candidate)) ||
+          (['approval.requested', 'approval.resolved'].includes(event.type) && !isApproval(event.approval));
+        if (malformed) { buffer.push(event); startSync(); return; }
         const next = reduceM2Event(currentState, event);
         if (event.type === 'check.updated' && (!isCheckRun(event.run) || next.candidates.some(candidate => candidate.latestCheckRunId && !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) {
           buffer.push(event);
@@ -202,7 +206,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
         readyReceived = false;
         initialized = false;
         liveReady.current = false;
-      setSyncReady(false);
+        setSyncReady(false);
         setStatus('reconnecting');
         retry = window.setTimeout(connect, 1000);
       };

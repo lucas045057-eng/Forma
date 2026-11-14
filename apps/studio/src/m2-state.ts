@@ -15,7 +15,24 @@ function object(value: unknown): Record<string, unknown> | undefined {
   return typeof value === 'object' && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
 }
 
-/** Merge one trusted backend event; malformed or unrelated payloads leave state unchanged. */
+export function isCandidate(value: unknown): value is Candidate {
+  const candidate = object(value);
+  return !!candidate && ['id', 'baseVersion', 'branch', 'previewUrl'].every(key => typeof candidate[key] === 'string') &&
+    ['pending', 'adopted', 'discarded'].includes(String(candidate.decision)) &&
+    ['candidateCommit', 'latestCheckRunId'].every(key => candidate[key] === undefined || typeof candidate[key] === 'string') &&
+    Array.isArray(candidate.diff) && candidate.diff.every(item => object(item) && typeof item.path === 'string' && typeof item.patch === 'string') &&
+    Array.isArray(candidate.outOfScope) && candidate.outOfScope.every(item => typeof item === 'string') &&
+    Array.isArray(candidate.checks) && candidate.checks.every(item => object(item) && typeof item.name === 'string' && typeof item.status === 'string');
+}
+export function isTask(value: unknown): value is Task {
+  const task = object(value);
+  return !!task && typeof task.id === 'string' && typeof task.instruction === 'string' &&
+    ['queued', 'running', 'awaiting_approval', 'done', 'failed', 'cancelled'].includes(String(task.status)) &&
+    Array.isArray(task.events) && task.events.every(event => object(event) && typeof event.message === 'string' && typeof event.sequence === 'number') &&
+    (task.error === undefined || (!!object(task.error) && typeof object(task.error)!.code === 'string' && typeof object(task.error)!.message === 'string'));
+}
+
+/** Merge one backend event; malformed or unrelated payloads leave state unchanged. */
 export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
   if (event.type === 'approval.requested' || event.type === 'approval.resolved') {
     if (!isApproval(event.approval)) return state;
@@ -34,7 +51,7 @@ export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
   }
   if (event.type === 'task.updated') {
     const task = object(event.task);
-    if (typeof task?.id !== 'string' || typeof task.status !== 'string' || !Array.isArray(task.events)) return state;
+    if (!isTask(task)) return state;
     const old = state.tasks.find(item => item.id === task.id);
     const terminal = ['done', 'failed', 'cancelled'];
     if (old && terminal.includes(old.status) && !terminal.includes(task.status)) return state;
@@ -42,7 +59,7 @@ export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
   }
   if (event.type === 'candidate.ready' || event.type === 'candidate.closed') {
     const candidate = object(event.candidate);
-    if (typeof candidate?.id !== 'string' || typeof candidate.decision !== 'string' || !Array.isArray(candidate.diff)) return state;
+    if (!isCandidate(candidate)) return state;
     const old = state.candidates.find(item => item.id === candidate.id);
     if (old && old.decision !== 'pending' && candidate.decision === 'pending') return state;
     const value = candidate as unknown as Candidate;

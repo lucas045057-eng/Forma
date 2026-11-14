@@ -11,7 +11,7 @@ describe('M2 state reduction', () => {
     state = reduceM2Event(state, event(2, { task: { ...task, status: 'done', candidateId: 'c1' } }));
     expect(state.tasks).toHaveLength(1);
     expect(state.tasks[0].status).toBe('done');
-    state = reduceM2Event(state, { type: 'candidate.ready', seq: 3, candidate: { id: 'c1', decision: 'pending', diff: [] } });
+    state = reduceM2Event(state, { type: 'candidate.ready', seq: 3, candidate: { id: 'c1', decision: 'pending', baseVersion: 'v', branch: 'c1', previewUrl: '/preview/c1/', diff: [], outOfScope: [], checks: [] } });
     state = reduceM2Event(state, { type: 'version.changed', seq: 4, version: 'abc' });
     expect(state.candidates[0].id).toBe('c1');
     expect(state.version).toBe('abc');
@@ -19,6 +19,8 @@ describe('M2 state reduction', () => {
   it('ignores malformed and unrelated events', () => {
     expect(reduceM2Event(emptyM2State, event(1, { task: { id: 'broken' } }))).toBe(emptyM2State);
     expect(reduceM2Event(emptyM2State, { type: 'scene.changed', seq: 1 })).toBe(emptyM2State);
+    expect(reduceM2Event(emptyM2State, { type: 'candidate.ready', seq: 1, candidate: { id: 'bad', decision: 'pending', diff: [null] } })).toBe(emptyM2State);
+    expect(reduceM2Event(emptyM2State, event(2, { task: { ...task, events: [{ sequence: 1, message: {} }] } }))).toBe(emptyM2State);
   });
 });
 
