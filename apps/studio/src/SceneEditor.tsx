@@ -32,7 +32,7 @@ function LightHandle({ direction, change }: { direction: Vec3; change: (directio
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(60_000) });
   const result = await response.json();
   if (!response.ok) throw new Error(`${result.error?.message ?? '场景请求失败'}${result.error?.fields ? `：${JSON.stringify(result.error.fields)}` : ''}`);
   return result as T;
@@ -56,7 +56,8 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
   const [tool, setTool] = useState<'camera' | 'rotate' | 'light'>('camera');
   const [temperature, setTemperature] = useState(4000);
   const [size, setSize] = useState(400);
-  const { subscribe } = useEventCenter();
+  const { subscribe, syncReady, status, acquire, awaiting, locked, reload } = useEventCenter();
+  const writeBlocked = !syncReady || status !== 'connected' || locked(['work']);
   const currentAt = useRef(at); currentAt.current = at;
   const loadSequence = useRef(0);
   const dirty = useRef(false);
@@ -112,14 +113,22 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     return { model: saved?.model ?? '', hero: { ...draft, model: { ...draft.model, rotation } }, scroll: [{ at: 0, parts: recognized ? { lid: { offset: [0, lid, 0] } } : {} }] };
   }, [saved, draft, rotation, lid, recognized, compare]);
   async function action(work: () => Promise<SceneChanged>) {
+    if (busy || writeBlocked) return;
+    const token = acquire(['work']);
+    if (!token) return;
     setBusy(true); setError(''); ++loadSequence.current;
-    try { const result = await work(); if (mounted.current) { applyConfig(result.config); setLatest(result); } }
+    let succeeded = false;
+    try { await work(); succeeded = true; }
     catch (cause) { if (mounted.current) setError(String(cause)); }
+    awaiting(token);
+    try { await reload(); }
+    catch { if (mounted.current) setError(succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续'); }
     finally { if (mounted.current) setBusy(false); }
   }
   const modelUrl = saved?.model ? `${previewOrigin}/preview/main${saved.model}` : '';
   return <section className="scene-editor" data-testid="scene-panel">
     <header><h2>3D 场景编辑</h2><button data-testid="scene-close" onClick={onClose}>关闭</button></header>
+    {writeBlocked && <p role="status">状态待同步或作品操作待确认，请刷新状态后继续。</p>}
     <p>预览滚动位置 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></p>
     <div className="scene-viewport" style={{ width: compare ? size : '100%', aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="scene-viewport" data-loaded={loaded}>
       {saved && <ProductScene config={config} modelUrl={modelUrl} scrollAt={compare ? at : 0} controls={!compare}
@@ -130,7 +139,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
         {!compare && tool === 'light' && <LightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
       </ProductScene>}
     </div>
-    <fieldset disabled={!saved || busy || compare}>
+    <fieldset disabled={!saved || busy || compare || writeBlocked}>
       <legend>调整场景</legend>
       <label>工具 <select data-testid="scene-tool" value={tool} onChange={e => setTool(e.target.value as typeof tool)}><option value="camera">相机轨道</option><option value="rotate">旋转模型</option><option value="light">主光方向手柄</option></select></label>
       <p className="hint">拖动视口调相机；选择旋转显示旋转环；主光工具可拖动黄色球面手柄。</p>
@@ -143,8 +152,8 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       <button data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
       <button data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
     </fieldset>
-    <button data-testid="scene-undo" disabled={busy || !saved} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
-    <fieldset disabled={busy || !saved}><legend>采用模型</legend>
+    <button data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
+    <fieldset disabled={busy || !saved || writeBlocked}><legend>采用模型</legend>
       <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id}{a.metrics?.webReady === false ? '（超过网页门槛）' : ''}</option>)}</select>
       <label><input type="checkbox" data-testid="scene-force-adopt" checked={force} onChange={e => setForce(e.target.checked)}/>允许采用超过网页门槛的模型</label>
       <button data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>

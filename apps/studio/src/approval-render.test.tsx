@@ -5,7 +5,7 @@ import { emptyM2State } from './m2-state.ts';
 import ApprovalPanel from './ApprovalPanel.tsx';
 import CandidatePanel from './CandidatePanel.tsx';
 
-const center = vi.hoisted(() => ({ state: {} as typeof emptyM2State, syncReady: true, status: 'connected', reload: vi.fn() }));
+const center = vi.hoisted(() => ({ state: {} as typeof emptyM2State, syncReady: true, status: 'connected', syncEpoch: 1, locked: vi.fn(() => false), acquire: vi.fn(), awaiting: vi.fn(), reload: vi.fn() }));
 vi.mock('./EventCenter.tsx', () => ({ useEventCenter: () => center }));
 const card: ApprovalCard = { id: 'a', taskId: 't', question: '允许修改？', reason: '<script>reason</script>', options: [{ label: '批准', impact: '发布' }, { label: '拒绝', impact: '丢弃' }], affected: ['src/Button.tsx'], evidence: ['<img onerror=alert(1)>'], status: 'pending', ruleCodes: ['shared_component'], ruleVersion: '1', baseVersion: 'v1', contentDigest: 'digest', createdAt: '2026-01-01', updatedAt: '2026-01-01' };
 beforeEach(() => {
@@ -32,7 +32,7 @@ it('uses real disabled attributes while unsynchronized and for terminal cards', 
   expect(render()).toMatch(/data-testid="approval-approve" disabled=""/);
   expect(render()).toContain('候选发布后请运行检查');
 });
-it('C1 never exposes an enabled adoption entry even for a pending candidate', () => {
+it('an unchecked pending candidate never exposes an enabled adoption entry', () => {
   center.state.candidates = [{ id: 'c', baseVersion: 'v1', branch: 'c', previewUrl: '/preview/c/', decision: 'pending', checks: [], diff: [], outOfScope: [] }];
   const html = renderToStaticMarkup(<CandidatePanel selectedId="c" onSelect={() => {}} mode="current" onMode={() => {}}>preview</CandidatePanel>);
   expect(html).toMatch(/data-testid="candidate-adopt" disabled=""/);

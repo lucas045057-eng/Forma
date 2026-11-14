@@ -71,7 +71,7 @@ export function evidenceRefs(candidate: Candidate, run: CheckRun | undefined) {
     const name = (Object.keys(primaryEvidence) as CheckName[]).find(name => primaryEvidence[name] === ref.name);
     if (!name) return true;
     const checks = run!.checks.filter(check => check.name === name);
-    const candidates = candidate.checks.filter(check => check.name === name);
+    const candidates = candidate.checks.filter(check => check?.name === name);
     return checks.length === 1 && candidates.length === 1 && checks[0].evidence === ref.hash && candidates[0].evidence === ref.hash && candidates[0].runId === run!.id;
   });
 }

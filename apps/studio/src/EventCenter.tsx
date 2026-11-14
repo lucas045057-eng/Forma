@@ -3,6 +3,7 @@ import type { Candidate, CheckRun, Task } from '@spatial/shared';
 import { associatedRun, consistentChecks, isCheckRun } from './check-state.ts';
 import { emptyM2State, contiguousReplay, reduceM2Event, type IncomingEvent, type M2State } from './m2-state.ts';
 import { isApproval, sortApprovals } from './approval-state.ts';
+import { MutationLocks } from './mutation-locks.ts';
 
 export type CenterEvent = { type: string; seq?: number; ts?: string } & Record<string, unknown>;
 type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting';
@@ -15,10 +16,13 @@ interface EventCenterValue {
   lastSeq: number;
   subscribe: (listener: (event: CenterEvent) => void) => () => void;
   reload: () => Promise<void>;
+  acquire: (keys: string[]) => symbol | undefined;
+  awaiting: (token: symbol) => void;
+  locked: (keys: string[]) => boolean;
 }
 const EventCenterContext = createContext<EventCenterValue | null>(null);
 async function json<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(20_000), cache: 'no-store' });
   if (!response.ok) throw new Error(`请求失败：${response.status}`);
   return response.json() as Promise<T>;
 }
@@ -31,6 +35,21 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
   const [syncError, setSyncError] = useState('');
   const [lastSeq, setLastSeq] = useState(0);
   const [syncEpoch, setSyncEpoch] = useState(0);
+  const liveReady = useRef(false);
+  const epochRef = useRef(0);
+  const locks = useRef(new MutationLocks());
+  const [, setLockRevision] = useState(0);
+  const locked = useCallback((keys: string[]) => locks.current.blocked(keys), []);
+  const acquire = useCallback((keys: string[]) => {
+    if (!liveReady.current) return;
+    const token = locks.current.acquire(keys);
+    if (token) setLockRevision(value => value + 1);
+    return token;
+  }, []);
+  const awaiting = useCallback((token: symbol) => {
+    locks.current.awaiting(token, epochRef.current);
+    setLockRevision(value => value + 1);
+  }, []);
   const listeners = useRef(new Set<(event: CenterEvent) => void>());
   const reloadRef = useRef<() => Promise<void>>(async () => { throw new Error('事件尚未连接'); });
   const reload = useCallback(() => reloadRef.current(), []);
@@ -59,8 +78,9 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     async function synchronize(anchor = seq) {
       const generation = connection;
       const operation = ++request;
-      setSyncEpoch(value => value + 1);
+      setSyncEpoch(++epochRef.current);
       syncing = true;
+      liveReady.current = false;
       setSyncReady(false);
       setSyncError('');
       try {
@@ -105,6 +125,8 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           syncing = false;
           initialized = true;
           setStatus('connected');
+          liveReady.current = true;
+          locks.current.synchronized(epochRef.current);
           setSyncReady(true);
           for (const event of events) notify(event);
           notify({ type: 'state.reload' });
@@ -115,7 +137,8 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
         if (!disposed && generation === connection && operation === request) {
           syncing = false;
           initialized = false;
-          setSyncReady(false);
+          liveReady.current = false;
+      setSyncReady(false);
           setSyncError(cause instanceof Error ? cause.message : '状态同步失败');
         }
         throw cause;
@@ -130,6 +153,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
       initialized = false;
       buffer = [];
       overflow = false;
+      liveReady.current = false;
       setSyncReady(false);
       const active = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/events`);
       socket = active;
@@ -177,7 +201,8 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
         syncing = false;
         readyReceived = false;
         initialized = false;
-        setSyncReady(false);
+        liveReady.current = false;
+      setSyncReady(false);
         setStatus('reconnecting');
         retry = window.setTimeout(connect, 1000);
       };
@@ -185,6 +210,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     connect();
     return () => {
       disposed = true;
+      liveReady.current = false;
       ++request;
       ++connection;
       if (retry !== undefined) clearTimeout(retry);
@@ -193,7 +219,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <EventCenterContext.Provider value={{ state, status, syncReady, syncError, syncEpoch, lastSeq, subscribe, reload }}>{children}</EventCenterContext.Provider>;
+  return <EventCenterContext.Provider value={{ state, status, syncReady, syncError, syncEpoch, lastSeq, subscribe, reload, acquire, awaiting, locked }}>{children}</EventCenterContext.Provider>;
 }
 export function useEventCenter() {
   const value = useContext(EventCenterContext);

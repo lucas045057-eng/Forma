@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { Selection, Task } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
+import { operationError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import { canSubmit, pickHint, submittedSelection, type PickState } from './pick-state.ts';
 
@@ -10,8 +11,8 @@ const statusLabels: Record<Task['status'], string> = {
 
 export default function PointSpeak({ pick, blocked = false }: { pick: PickState; blocked?: boolean }) {
   const selection = submittedSelection(pick);
-  const { state, reload, syncReady } = useEventCenter();
-  const submittable = canSubmit(pick) && !blocked && syncReady;
+  const { state, reload, syncReady, status, acquire, awaiting, locked } = useEventCenter();
+  const submittable = canSubmit(pick) && !blocked && syncReady && status === 'connected' && !locked(['task:create']) && (!selection || selection.baseVersion === state.version);
   const [instruction, setInstruction] = useState('');
   const [activeId, setActiveId] = useState('');
   const [busy, setBusy] = useState(false);
@@ -20,15 +21,20 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
 
   async function submit(text: string, picked: Selection | null) {
     if (!text.trim() || busy || !submittable) return;
+    if (picked && picked.baseVersion !== state.version) { setError('页面已变化，请重新点选'); return; }
+    const token = acquire(['task:create']);
+    if (!token) return;
     setBusy(true); setError('');
+    let succeeded = false;
     try {
       const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
       setActiveId(task.id);
-      await reload();
-    } catch (cause) {
-      if (cause instanceof ApiError && cause.code === 'STALE_SELECTION') setError('页面已变化，请重新点选');
-      else setError(cause instanceof Error ? cause.message : '任务提交失败');
-    } finally { setBusy(false); }
+      succeeded = true;
+    } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined)); }
+    awaiting(token);
+    try { await reload(); }
+    catch { setError(succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续'); }
+    finally { setBusy(false); }
   }
   function keyboard(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
@@ -37,9 +43,16 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     }
   }
   async function cancel(task: Task) {
+    if (!syncReady || busy || !['queued', 'running', 'awaiting_approval'].includes(task.status)) return;
+    const token = acquire([`task:${task.id}`]);
+    if (!token) return;
     setBusy(true); setError('');
-    try { await api(`/tasks/${encodeURIComponent(task.id)}/cancel`, mutation('POST')); await reload(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : '取消失败'); }
+    let succeeded = false;
+    try { await api(`/tasks/${encodeURIComponent(task.id)}/cancel`, mutation('POST')); succeeded = true; }
+    catch (cause) { setError(operationError('cancel', cause instanceof ApiError ? cause.code : undefined)); }
+    awaiting(token);
+    try { await reload(); }
+    catch { setError(succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续'); }
     finally { setBusy(false); }
   }
 
@@ -51,7 +64,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     </label>
     <p className="hint"><span data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span> Ctrl/⌘ + Enter 提交。</p>
     <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
-    {error && <p className="error" data-testid="task-action-error" role="alert">{error}</p>}
+    {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}
     {active && <div className="task-card" data-testid="task-card">
       <div className="task-heading"><strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong><code>{active.id.slice(0, 8)}</code></div>
       {state.tasks.length > 1 && <select aria-label="查看任务" data-testid="task-select" value={active.id} onChange={event => setActiveId(event.target.value)}>
@@ -59,9 +72,9 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
       </select>}
       <p className="task-instruction">{active.instruction}</p>
       <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
-      {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy} onClick={() => void cancel(active)}>取消任务</button>}
+      {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy || !syncReady || locked([`task:${active.id}`])} onClick={() => void cancel(active)}>取消任务</button>}
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
-      {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy || !submittable} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, active.selection ?? null); }}>重试</button>}
+      {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy || !submittable} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, selection); }}>重试</button>}
     </div>}
   </section>;
 }
