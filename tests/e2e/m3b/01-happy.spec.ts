@@ -4,7 +4,7 @@ import path from 'node:path';
 import {
   REQUIRED_ARTIFACTS, CHECK_ORDER, adoptCandidate, assertPassedRun, getCandidate, history, readArtifact, revertVersion, sha256, startChecks,
 } from './checks';
-import { summarizeRun, writeArtifact } from './artifact';
+import { summarizeRun, writeArtifact, writeEvidenceBytes } from './artifact';
 import {
   createCandidate, disposeAllFixtures, getVersion, resetMock, setScript, startAndWatch, startFixture, startMockAgent, type Fixture,
 } from './fixture';
@@ -89,6 +89,8 @@ test('四项真实检查通过 → 证据可读 → 采用 → 回退', async ()
     expect(response.headers['cache-control']).toBe('no-store');
     expect(response.headers['x-content-type-options']).toBe('nosniff');
     expect(response.headers['content-type']).toBe(ref.mime);
+    // 原样落盘一份缓存字节，供事后脱离服务重算 sha256（不改断言，只多存一份证据）。
+    writeEvidenceBytes('evidence-01-happy', ref.name, response.bytes);
     artifactChecks.push({ name: ref.name, bytes: ref.bytes, mime: ref.mime, hash: ref.hash });
   }
   for (const required of REQUIRED_ARTIFACTS) {

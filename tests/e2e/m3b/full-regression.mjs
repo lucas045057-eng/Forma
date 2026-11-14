@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * M3-B 验收用的完整回归顺序入口（本分支只准备，不正式启动）。
+ * M3-B 正式验收用的完整回归顺序入口。
  *
  *   node tests/e2e/m3b/full-regression.mjs --collect     # 只收集（各套件 --list），不跑构建/单测/服务
  *   node tests/e2e/m3b/full-regression.mjs               # 真正按顺序跑（首败即停）
+ *
+ * 证据固定落在 docs/reports/artifacts/M3-B/formal-20261115/regression/<RUN_ID>/。
  *
  * 顺序：pnpm typecheck → pnpm build → pnpm test（全量单测）→ 旧七套 E2E → M3-B。
  *
@@ -27,7 +29,8 @@ import {
 const ROOT = process.cwd();
 const MODE = process.argv.includes('--collect') ? 'collect' : 'full';
 const RUN_ID = `${new Date().toISOString().replace(/[:.]/g, '-')}-${MODE}`;
-const OUT = join(ROOT, 'docs', 'reports', 'artifacts', 'M3-B', 'full-regression', RUN_ID);
+// 正式验收（2026-11-15）的证据根目录；与 acceptance-precheck/ 分开，不混用。
+const OUT = join(ROOT, 'docs', 'reports', 'artifacts', 'M3-B', 'formal-20261115', 'regression', RUN_ID);
 const PLAYWRIGHT_CLI = join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js');
 const EVIDENCE_DIR = 'docs/reports/artifacts';
 

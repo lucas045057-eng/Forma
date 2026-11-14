@@ -1,10 +1,10 @@
 {
-  "at": "2026-11-14T15:42:46.593Z",
-  "head": "ed8a168fe237a43d5245d943d05ab5cd0fb98c50",
+  "at": "2026-11-14T16:19:50.846Z",
+  "head": "6e5c7b4b5558a79196b1a69d2300321460cf2ef0",
   "worktreeDirty": [
-    "M tests/e2e/m3b/full-regression.mjs",
-    "?? tests/e2e/m3b/runner-support.mjs",
-    "?? tests/e2e/m3b/verify-runner-support.mjs"
+    "M tests/e2e/m3b/01-happy.spec.ts",
+    "M tests/e2e/m3b/artifact.ts",
+    "M tests/e2e/m3b/full-regression.mjs"
   ],
   "helper": "tests/e2e/m3b/runner-support.mjs",
   "data": {

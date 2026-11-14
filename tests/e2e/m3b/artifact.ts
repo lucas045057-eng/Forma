@@ -1,14 +1,26 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-/** 本分支的验收准备证据目录；正式 Pi 验收会另建目录，不复用这里。 */
-export const ARTIFACT_DIR = path.join(process.cwd(), 'docs', 'reports', 'artifacts', 'M3-B', 'acceptance-precheck');
+/**
+ * 正式 Pi 验收的证据目录（2026-11-15 那一轮）。本轮固定写到这里，
+ * 不再与 `acceptance-precheck/`（验收准备）混用；下次正式验收改这里的日期即可。
+ */
+export const FORMAL_RUN_ID = 'formal-20261115';
+export const ARTIFACT_DIR = path.join(process.cwd(), 'docs', 'reports', 'artifacts', 'M3-B', FORMAL_RUN_ID, 'checks');
 
 export function writeArtifact(name: string, data: unknown): string {
   mkdirSync(ARTIFACT_DIR, { recursive: true });
   const file = path.join(ARTIFACT_DIR, name);
   writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
   return file;
+}
+
+/** 原样落盘一份接口取回的证据字节（不改内容，便于事后逐字节复算 sha256）。 */
+export function writeEvidenceBytes(dir: string, name: string, bytes: Buffer): string {
+  const target = path.join(ARTIFACT_DIR, dir, name);
+  mkdirSync(path.dirname(target), { recursive: true });
+  writeFileSync(target, bytes);
+  return target;
 }
 
 /** 只保留可归档的检查摘要，不把整份 run 的原始证据内联进报告。 */
