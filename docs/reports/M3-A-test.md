@@ -31,6 +31,14 @@
 - **更正上轮交付说明**：上轮称“未用 sleep、加超时”与 diff 不符；实际有多出的 60s 与 300ms 等待，现以本段更正，原始 checkpoint 输出/证据保留不改写。
 - 本 checkpoint 只证明该接线可通过，**不是最终完整 run4 结果**；收回附带等待后由新冻结 HEAD 直接启动 run4（typecheck/build/unit 与七套 E2E），不单独重复 checkpoint。
 
+## 第四轮（HEAD `e6b177f`，`run-20261114-m3a-4`）与 E2E 端口接线修正
+
+- `job_d7e19d77` exit 1，约 110 秒：typecheck/build 通过；`unit` 在 `apps/server/src/agent/client.test.ts:62` 失败（期望 `AGENT_PROTOCOL`，实际 `AGENT_UPSTREAM`，文件 238ms）；server **178/179**，其余已执行包 shared68/plugin20/renderer5/bridge1 通过，实际执行通过合计 **272**；**Studio 7 与七套 E2E 未调度**。不写 `280-1=279`。证据 `run-20261114-m3a-4/`。
+- run4 没有记录该次初始化的端口/cause，不能据此断言失败一定由低位禁用端口导致，也不把历史资产偶发问题的唯一根因自动关闭。已合并的 a0f10a8 修改了实现侧测试夹具（高位/有界候选）；其 289 单测是参考，不是本轮独立结果。
+- **E2E harness 仍有同类风险**：`tests/e2e/m0a/harness.ts::freePort()` 原来 `listen(0)`，其返回值被 `waitForHttp`、沙箱后端、预览源、fixture 与浏览器消费。已最小修正为：仅 loopback 尝试 **20000–65535** 随机候选，最多 32 次；只有 `EADDRINUSE` 与 win32 绑定 `EACCES` 进入下一候选，其它绑定/关闭错误直接停止并保留原因；每次完成自己的 server 错误监听与释放；接口仍是 `Promise<number>` 与“绑定后释放、子进程接手”的合同，不声称消除释放窗口。
+- 接线审计：`tests/e2e` 中仅该处使用 `listen(0)`；其余外部服务/浏览器监听通过 `freePort()` 消费，或使用测试显式固定的 3001/4011/5173/5174 等既定端口。未改生产内部 preview worker 的端口逻辑，也未改 `waitForHttp` 超时、服务启停、测试预算、断言或 Playwright 收集排除。
+- 本轮未单独用探针把 freePort 当作通过；端口修正由 run5 的实际服务启动/端口交接验证。
+
 <!-- 历史：第一轮失败记录保留如下 -->
 
 ## 结论：验收未完成，完整回归被单测超时阻断

@@ -1,0 +1,20 @@
+{
+  "runId": "run-20261114-m3a-4",
+  "job": "job_d7e19d77",
+  "head": "e6b177ff42547c0089842667ec75e6f962d01d55",
+  "status": "failed",
+  "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "refreshedArtifacts": 0,
+  "unit": {
+    "executedPassed": 272,
+    "failed": 1,
+    "studioNotRun": true
+  },
+  "e2eStarted": false,
+  "notes": [
+    "typecheck/build passed",
+    "unit failed at agent/client.test.ts:62 with AGENT_UPSTREAM vs AGENT_PROTOCOL",
+    "no E2E started"
+  ]
+}

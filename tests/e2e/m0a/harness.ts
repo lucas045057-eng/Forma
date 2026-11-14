@@ -26,14 +26,30 @@ export interface Child {
 }
 
 export async function freePort(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => {
-      const address = server.address() as net.AddressInfo;
-      server.close(() => resolve(address.port));
+  // Windows 的 TCP 随机范围包含 Node fetch 禁用的低位端口（例如 6000），
+  // 仅在本机 loopback 的高位范围取候选；绑定后立即释放，子进程接手（仍存在释放窗口）。
+  let lastCode = '';
+  for (let attempt = 0; attempt < 32; attempt += 1) {
+    const candidate = 20000 + Math.floor(Math.random() * 45536);
+    const result = await new Promise<{ ok: true; port: number } | { ok: false; error: NodeJS.ErrnoException }>((resolve) => {
+      const server = net.createServer();
+      const onError = (error: NodeJS.ErrnoException) => resolve({ ok: false, error });
+      server.once('error', onError);
+      server.listen(candidate, '127.0.0.1', () => {
+        server.off('error', onError);
+        server.close((error) => {
+          if (error) resolve({ ok: false, error });
+          else resolve({ ok: true, port: candidate });
+        });
+      });
     });
-  });
+    if (result.ok) return result.port;
+    lastCode = result.error.code ?? '';
+    // 仅“该候选被占用”或 Windows 绑定被 ACL 拒绝（EACCES）可以换下一个；其它错误停止。
+    if (lastCode === 'EADDRINUSE' || (process.platform === 'win32' && lastCode === 'EACCES')) continue;
+    throw result.error;
+  }
+  throw new Error(`freePort: 32 个高位候选均不可用（最后一次 ${lastCode || 'unknown'}）`);
 }
 
 export async function waitForHttp(url: string, timeoutMs = 40_000): Promise<void> {
