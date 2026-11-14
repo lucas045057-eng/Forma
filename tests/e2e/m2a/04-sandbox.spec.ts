@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, symlinkSync } from 'node:fs
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { M2A_DATA, WORK_ROOT } from './env';
-import { adoptCandidate, appText, candidateDir, getCandidate, mockStats, pickSelection, restoreTemplate, setScript, submitTask, waitForTask } from './api';
+import { adoptCandidate, appText, candidateDir, ensureChecksPassed, getCandidate, mockStats, pickSelection, restoreTemplate, setScript, submitTask, waitForTask } from './api';
 import { writeArtifactFrom } from './artifact';
 
 /**
@@ -125,6 +125,9 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
 
     makeJunction();
     const before = appText();
+    // M3-B：先拿到一次完整的真实检查绿灯，再验证链接检查仍然先拦住采用（门禁不会放行不安全工作树）
+    const checksBeforeLink = await ensureChecksPassed(candidate.id);
+    expect(checksBeforeLink.outcome).toBe('passed');
     const adopted = await adoptCandidate(candidate.id);
     const targetEntries = readdirSync(targetPath);
 

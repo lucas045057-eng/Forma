@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
-  adoptCandidate, appText, discardCandidate, getCandidate, getVersion, git, pickSelection, resetMock, restoreTemplate,
+  adoptCandidate, appText, discardCandidate, ensureChecksPassed, getCandidate, getVersion, git, pickSelection, resetMock, restoreTemplate,
   revertVersion, setScript, submitTask, waitForTask,
 } from './api';
 import { writeArtifactFrom } from './artifact';
@@ -37,13 +37,19 @@ test.describe('采用冲突', () => {
     expect(a.baseVersion, '两个候选不是基于同一版本').toBe(b.baseVersion);
     expect(a.baseVersion).toBe(versionBefore);
 
+    // M3-B：两个候选都要先拿到各自的真实检查绿灯（同一基线版本各跑一次）
+    expect((await ensureChecksPassed(a.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
+    expect((await ensureChecksPassed(b.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
+
     expect((await adoptCandidate(a.id)).status, '第一个候选采用失败').toBe(200);
     const afterFirst = appText();
     expect(afterFirst).toContain('马上购买');
 
     const conflict = await adoptCandidate(b.id);
     expect(conflict.status, JSON.stringify(conflict.body)).toBe(409);
-    expect((conflict.body as any).error.code).toBe('MERGE_CONFLICT');
+    // M3-B 语义变化：采用前先比对主版本，B 的绿灯属于旧基线，所以先被 STALE_CANDIDATE 拒绝；
+    // 旧的 MERGE_CONFLICT 分支已不可能从公共 API 走到（实现侧保留作为内部兜底）。
+    expect((conflict.body as any).error.code).toBe('STALE_CANDIDATE');
 
     // 主线没有变化，也没有半合并状态
     expect(appText(), '冲突后主线被改动了').toBe(afterFirst);

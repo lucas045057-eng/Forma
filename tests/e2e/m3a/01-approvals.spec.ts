@@ -9,6 +9,7 @@ import {
   history, http, jsonRequest, listApprovals, listCandidates, listTasks, mockStats, removeFixture, resetMock,
   selection, setScript, sleep, startBackendFixture, startMockAgent, submit, waitFor, waitTask, type Fixture,
 } from './fixture';
+import { ensureChecksPassed } from '../m3b/checks';
 
 const LOCAL = [
   [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '一份给自己，也给生活的温柔礼物。', new: '给自己一份安静的礼物。' } }],
@@ -139,6 +140,8 @@ test('共享 Button：批准前私有、不公开候选/预览；批准不增加
   expect(events.filter((event: any) => event.type === 'approval.requested')).toHaveLength(1);
   expect(events.filter((event: any) => event.type === 'approval.resolved')).toHaveLength(1);
   expect(events.filter((event: any) => event.type === 'candidate.ready' && event.candidate?.id === task.id)).toHaveLength(1);
+  // M3-B：采用前跑真实四项检查（M3-A 原断言不变）
+  expect((await ensureChecksPassed(f.base, task.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
   const adopted = await adoptCandidate(f.base, task.id);
   expect(adopted.status).toBe(200);
   expect(await readFile(path.join(f.workRoot, 'src/components/Button.tsx'), 'utf8')).not.toBe(beforeButton);

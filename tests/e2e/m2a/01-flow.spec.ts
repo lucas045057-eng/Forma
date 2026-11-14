@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
-  adoptCandidate, appText, candidateDir, collectEvents, discardCandidate, getCandidate, getVersion, history, listCandidates, listTasks, openCandidatePreview, openMainPreview, pickSelection,
+  adoptCandidate, appText, candidateDir, collectEvents, discardCandidate, ensureChecksPassed, getCandidate, getVersion, history, listCandidates, listTasks, openCandidatePreview, openMainPreview, pickSelection,
   previewFetch, resetMock, restoreTemplate, revertVersion, setScript, submitTask, waitFor, waitForTask,
 } from './api';
 import { existsSync } from 'node:fs';
@@ -72,6 +72,10 @@ test.describe('指着说闭环（后端）', () => {
       await page.screenshot({ path: `${process.cwd()}/.data/pi-m2a-candidate.png` });
 
       // 采用
+      // M3-B：先跑真实四项检查并等本次 run 终态；没通过就不能采用（不是 mock passed 标签）
+      const checkRun = await ensureChecksPassed(candidateId);
+      expect(checkRun.checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
+      expect((await getCandidate(candidateId)).body.latestCheckRunId).toBe(checkRun.id);
       const adopted = await adoptCandidate(candidateId);
       expect(adopted.status, JSON.stringify(adopted.body)).toBe(200);
       const versionAfter = (await getVersion()).body.version;
