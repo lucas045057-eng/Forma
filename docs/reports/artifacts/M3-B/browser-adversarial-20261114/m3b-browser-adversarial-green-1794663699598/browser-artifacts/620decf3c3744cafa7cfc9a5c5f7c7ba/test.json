@@ -1,0 +1,4 @@
+{
+  "test": "blocks websocket access to a different loopback origin before it reaches the server",
+  "runId": "620decf3c3744cafa7cfc9a5c5f7c7ba"
+}

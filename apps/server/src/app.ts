@@ -11,8 +11,11 @@ import { SceneService, SceneError } from './scene/service.ts';
 import { AssetService } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
-import { WorkService } from './work/service.ts';
+import { WorkService, type WorkServiceOptions } from './work/service.ts';
 import { WorkError } from './work/repo.ts';
+import { registerCheckRoutes } from './checks/routes.ts';
+import { ArtifactError } from './checks/artifacts.ts';
+import { SnapshotError } from './checks/snapshot.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
@@ -33,6 +36,8 @@ export interface AppOptions {
   agentTimeoutMs?: number;
   agentMaxRounds?: number;
   previewStartTimeoutMs?: number;
+  /** Internal construction only; no HTTP request can override the checker. */
+  checks?: WorkServiceOptions['checks'];
   logger?: boolean;
 }
 
@@ -86,6 +91,7 @@ export async function createApp(options: AppOptions = {}) {
   const work = new WorkService({
     workRoot, directory: workDataDirectory, emit, lockHeld: true,
     previewStartTimeoutMs: options.previewStartTimeoutMs,
+    checks: options.checks,
     agent: {
       baseUrl: options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL,
       apiKey: options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY,
@@ -116,6 +122,8 @@ export async function createApp(options: AppOptions = {}) {
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
     if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
     if (error instanceof AssetError) {
       return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : 400).send({ error: { code: error.code, message: error.message } });
     }
@@ -168,6 +176,7 @@ export async function createApp(options: AppOptions = {}) {
   app.get<{ Params: { id: string } }>('/candidates/:id', async request => work.getCandidate(request.params.id));
   app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => work.adopt(request.params.id));
   app.post<{ Params: { id: string } }>('/candidates/:id/discard', async request => work.discard(request.params.id));
+  registerCheckRoutes(app, work);
 
   // Preview content is served exclusively by the separate preview-origin listener.
 

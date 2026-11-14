@@ -91,3 +91,7 @@
 ## 独立交付门禁
 
 CodeBuddy 完成 B1–B4 后，Claude Code 独立审查上述 Review Focus、实际源码执行/网络/文件边界、digest/采用竞态与N4恢复；整改通过后由 Codex 合并冻结。Pi 独立验证成功以及编译/运行/遮挡/Schema四故障、取消/超时/缺浏览器/重启、证据读取和采用拒绝，再迁移旧 E2E 走真实检查并跑完整回归。M3-C UI 未开始前旧UI仍不可采用是该阶段的可见限制，不能偷偷移除后端门禁换取旧用例绿灯。
+
+### B3 当前模板的 worker 策略补充
+
+当前模板无需 dedicated/shared/service worker，因此浏览器检查统一禁止它们创建。静态源worker-src none作为底层策略，导航前构造器/注册入口守卫记录被阻断尝试，检查失败。不能仅凭Playwright主页面路由声称覆盖任意worker内部WebSocket。未来依赖worker的模板需重新设计并独立验证；本阶段不外推通用页面支持。

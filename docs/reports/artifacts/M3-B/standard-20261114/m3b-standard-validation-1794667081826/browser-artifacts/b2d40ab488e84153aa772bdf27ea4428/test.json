@@ -1,0 +1,4 @@
+{
+  "test": "serves only build output on a separate static origin and releases it on stop",
+  "runId": "b2d40ab488e84153aa772bdf27ea4428"
+}

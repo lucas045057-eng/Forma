@@ -271,10 +271,30 @@ export class WorkRepo {
     for (const file of changedFiles) hash.update(await this.inCandidate(id, ['diff', '--no-color', '--unified=3', base, '--', file]).then(result => result.stdout));
     return { changedFiles, diff, contentDigest: hash.digest('hex') };
   }
-  async candidateCommit(id: string) {
+  async candidateCommit(id: string, options: { clean?: boolean; expectedCommit?: string } = {}) {
     const result = await this.main(['rev-parse', '--verify', this.branch(id)], true);
     if (result.code !== 0) throw new WorkError('NOT_FOUND', '私有草稿分支不存在', 404);
-    return result.stdout.trim();
+    const commit = result.stdout.trim();
+    if (options.expectedCommit !== undefined && commit !== options.expectedCommit) {
+      throw new WorkError('STALE_CANDIDATE', '候选分支不再对应待检查的提交', 409);
+    }
+    if (options.clean) {
+      const directory = this.candidatePath(id);
+      await this.assertNoLinks(directory);
+      const common = (await this.inCandidate(id, ['rev-parse', '--git-common-dir'])).stdout.trim();
+      if (path.relative(await realpath(this.gitDir), await realpath(path.resolve(directory, common))) !== '') {
+        throw new WorkError('STALE_CANDIDATE', '候选工作树不属于本作品版本库', 409);
+      }
+      const head = (await this.inCandidate(id, ['rev-parse', '--verify', 'HEAD'])).stdout.trim();
+      if (head !== commit) throw new WorkError('STALE_CANDIDATE', '候选工作树HEAD与分支提交不一致', 409);
+      await this.auditTree(commit);
+      const status = await this.inCandidate(id, ['-c', 'core.fsmonitor=false', 'status', '--porcelain', '--untracked-files=all']);
+      const ignored = await this.inCandidate(id, ['ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', 'src', 'public']);
+      if (status.stdout.length || ignored.stdout.length) {
+        throw new WorkError('STALE_CANDIDATE', '候选包含未提交或被忽略的输入，不能使用旧提交检查', 409);
+      }
+    }
+    return commit;
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
   async commitCandidate(id: string, message: string) {

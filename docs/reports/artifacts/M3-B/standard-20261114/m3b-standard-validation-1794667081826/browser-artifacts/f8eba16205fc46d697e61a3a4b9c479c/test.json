@@ -1,0 +1,4 @@
+{
+  "test": "fails on an uncaught page error even when the purchase UI exists",
+  "runId": "f8eba16205fc46d697e61a3a4b9c479c"
+}

@@ -1,0 +1,4 @@
+{
+  "test": "records a blocked service worker attempt before its script can contact another origin",
+  "runId": "6282472a03bd4c21b1a726cd99757964"
+}

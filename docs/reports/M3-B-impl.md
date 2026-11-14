@@ -1,0 +1,138 @@
+# M3-B 实现交付记录（进行中，尚未验收）
+
+## 接手与第一批边界修正
+
+用户2026-11-14“那你来吧”授权Codex接手M3-B实现；Claude独立审查、Pi独立验收不变。基线为CodeBuddy部分提交 `6e44961b6e145da9aa367e8b4ca8eaffa39c1a13`。原B2草稿和debug-build.mjs保留；主目录 `.data/m3b-codebuddy-handoff-6e44961/` 有六份草稿的逐字节备份/hash与429作业原输出。
+
+已修正候选根/父路径与快照目标junction跟随、证据写入编号/路径边界、真正并发start的保存await窗口、drain后的新准入、损坏持久记录只验证数组，以及11MiB模型被10MiB上限误拒绝。文件读改为单句柄有界读取，快照目标必须为空；复制核对预期摘要、源字节及复制后源/目标。单文件上限32MiB，总量仍50MiB，文件数500；超限显式失败。证据日志有界截断，JSON超限拒绝，列表复用安全读取，删除统一验证runId。
+
+原重启测试曾造出 `Check.status=running`，与共享类型/检查合同不符。现以run.running、build.not_run表达未完成，保留SERVICE_RESTARTED/已通过项/不重跑断言，并断言未完成项有原因。没有新增生产旁路。
+
+## 已实际验证
+
+- RED `job_78e7093e`：35项执行，原27通过、新8失败、0跳过。证据 `.data/m3b-takeover-red-1794655373672/`，identityPreserved=true。
+- 第一批修正后 `job_f4561135`：exit0，35/35通过、0失败/跳过。证据 `.data/m3b-takeover-green-1794655848940/`（tests.json、tests.log、evidence.json；含文件SHA256/Git blob、命令、PID、时间、HEAD/status前后），identityPreserved=true。
+- 此次是在6e44961加本批未提交文件上验证，不声称在后续提交HEAD上重新跑过。
+
+## 第二批：内容、证据、持久化与中止语义
+
+已加入完整快照摘要预检和工具身份，主版本过期先拒绝；去重包含candidate/base/main/policy/完整摘要。运行器分别记录status/outcome，阶段结果必须匹配阶段名、登记实际证据并核对hash。公开查询只见已经持久化的快照，失败的终态保存使内存绿灯失效、停止新准入，wait/drain返回PERSISTENCE_FAILED。取消与deadline区分，迟到成功/证据不能写回；准备与分段文件读取检查signal。生产executor仍需真实子进程及stop屏障，不把Promise层验证冒充进程回收证明。
+
+- RED `job_76bcb9b4`：44项，原35通过/新增9失败，0跳过，源码身份一致；`.data/m3b-reliability-red-1794656282121/`。
+- `job_28b40490`：44/44回归通过、0失败/跳过；随后基础模块定向typecheck仅预算数组推断TS18048，exit2，原生导入未调度；`.data/m3b-reliability-green-1794657083984/`。
+- 只补预算数组的readonly tuple类型注解（as const），不改预算/判断。`job_31832add`：基础模块定向typecheck、原生Node导入均exit0；`.data/m3b-foundation-types-native-1794657398639/`。SHA验证撤销注解后等于44项受测源码，其余受测文件字节不变；新运行前后身份一致，没有重复宣称44项在新提交上执行。
+- 上述五轮原始实现证据归档于 `docs/reports/artifacts/M3-B/foundation-20261114/`（manifest逐文件SHA256、局部.gitattributes保留原字节）。属于实现阶段证据，不替代Pi独立验收。
+
+## 第三批：Git身份、跨候选串行与持久层适配
+
+`WorkRepo.candidateCommit(id,{clean:true,expectedCommit})`新增严格模式：确认预期分支提交、common gitdir、工作树HEAD、commit与路径审计，并拒绝未提交/ignored输入。不传选项保持原审批使用的语义。CheckRunner按candidateId重新解析并冻结输入，开始/结束都复核，单个执行队列在stop确认后释放名额；排队取消/超时可独立持久化终态。提供所属CheckStateStore适配，启用时不再竞争写check-runs.json，留给后端实际tasks.json接入。
+
+- RED `job_b65e0f3c`：十一项真实临时Git/调度/store用例，2通过/9目标失败，0跳过；`.data/m3b-scheduler-red-1794658032674/`。
+- GREEN `job_675d2ed6`：**63/63**（此前44、新调度11、既有repo8）通过、0失败/跳过；基础模块定向typecheck和原生Node导入均exit0，前后源码身份一致；`.data/m3b-scheduler-green-1794658761281/`。
+- 原始证据归档 `docs/reports/artifacts/M3-B/scheduler-20261114/`，保留RED和GREEN，不把后续提交HEAD当作重新受测。
+
+### 当前仍未完成
+
+Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中止、Git提交绑定和单实例跨候选串行已有上述实现验证，尚未独立复审关闭。真实受控worker的强制中止/父进程退出与后代清理、实际tasks.json/事件/API、浏览器及采用门禁仍待完成；固定worker内真实Vite已通过下述十九项子集；不能称B1/B2或整个M3-B通过。
+
+本批没有运行完整typecheck/build/单测或正式E2E，没有读取真实.env/ASKS，也未启动模型/Lux3D/浏览器/网络服务。正式交付仍需后续完整验证、独立复审及Pi验收。
+
+## 第四批：冻结输入的真实 Schema / Vite worker（B2 子集）
+
+固定Node入口worker-entry，无任意shell/worker路径；最小环境剔除provider配置、NODE_OPTIONS与VITE变量。父进程审计快照路径并管理证据落盘/ref，子进程只接收冻结buildRoot；Node文件权限只允许快照和明确工具根。Schema读冻结配置并返回实际schema.json摘要；Vite使用固定HTML/React/PostCSS与JSON字符串tsconfigRaw，关闭env/config自动发现，固定工作区范围，候选模块只被编译。AST/解析路径/CSS资源边界拒绝raw越界、Node内建与网络导入。工具依赖仅精确声明已有Vite7.3.7、React插件5.2.0与Playwright1.65.0，离线frozen安装通过。
+
+- RED job_af6388e3：十四项全部目标行为失败，identityPreserved=true。
+- 中间失败原件保留：两次14/19权限失败、workspace修正后14/19、HTML单例失败、19/19后DNS类型失败、types与19/19后验证探针同步throw捕获失败。没有将失败轮改写为通过。
+- job_cdb84423：定向types0、19/19实际通过、0跳过；native导入完成但DNS探针同步拒绝未被.then捕获导致该步骤1。
+- 仅修探针兼容同步throw/异步reject。job_48a1e8a2：native导入与DNS callback/promisify/promises全部拒绝验证0，unchangedFromPassedRun=true、identityPreserved=true；逐文件SHA证明生产源码/测试/包锁均与上一轮types/19项通过状态一致。未重复声称在本次提交HEAD全量重跑。
+- 原件归档docs/reports/artifacts/M3-B/worker-20261114，各目录evidence包含具体命令/时间/PID/退出与源码SHA/Git blob；manifest与局部.gitattributes保留字节。
+
+这不是OS级安全沙箱：可信Node工具仍有addons/child-process权限，Node网络守卫属于应用层防线。十九项包含实际worker取消并确认退出，但父进程死亡、esbuild后代/异常退出/超时/强制终止仍需补测；B2尚未完成。B3真实浏览器、B4集成、全量验证与Claude/Pi独立门禁均未完成，smoke/occlusion仍not_run。未读真实.env/ASKS，未启动付费模型/Lux3D。
+
+## 第五批：worker 生命周期与 stop 等待者
+
+四项新增测试先RED：job_1bd6b2e3为3通过/1失败，失败为不abort仅stop时进程已退出但调用方Promise未终结。stop现捕获待完成请求与首个终止原因，在实际exited后拒绝，停止期间close/send/ready故障不抢先覆盖CANCELLED/TIMEOUT。
+
+job_3e2be5af只在types报测试expect.poll的intervals字段不兼容，运行测试未开始；改为Vitest支持的interval:200，10s观察预算不变。最终job_044b65b5：types、23/23（19+4）与native全部exit0，0失败/跳过，源码身份不变。真实父进程死亡用例先实际构建并观察esbuild服务，再按PID+创建时间断言worker/后代消失、同场无关Node进程仍存活；JSON保存断言与耗时，但本轮JSON reporter未保存console输出中的具体PID，原件不冒充有原始PID列表。后续正式证据需显式落盘身份表。
+
+原始RED/类型失败/GREEN归档docs/reports/artifacts/M3-B/lifecycle-20261114。只证明已测Windows正常IPC断开回收和单worker取消/超时/异常退出；强制终止失败的异常支路与浏览器后代尚未覆盖。B2主要实现已有定向证据，仍须B3/B4完成后的全量与Claude/Pi独立门禁；尚未宣称M3-B完成。
+
+## 第六批：B3 首批真实浏览器行为
+
+新增只读独立静态源：仅dist、精确Host、GET/HEAD、路径/链接审计、高位loopback保留监听；无API/代理。固定Chromium1440×900、禁service worker、导航前context路由/WebSocket守卫/popup关闭。smoke实际点击并核对购买+1/非空反馈及场景ready或可见fallback；occlusion真实中心+四内缩角点命中，记录disabled/hidden/offscreen与空目标失败。截图/JSON通过父进程artifact回执保存；停止先关闭context/browser/static源再退出。
+
+job_61d9f498：types0，B3十六项全因not_run失败。job_f7291cf5：types0，39项26通过/13失败，原23全过；浏览器初始化被守卫误拦Node数字loopback监听，三项反向状态断言不能当浏览器已执行。实查Node24 net.lookupAndListen及dns.isIP快路径后，仅允许dns.lookup('127.0.0.1')本地数字地址处理，其它DNS/Socket/http/fetch/WebSocket守卫保留。
+
+job_7d959041最终types、39/39（16浏览器+23既有）、native均exit0，0跳过、identityPreserved=true；包括真实模板缺资产fallback、JS未捕获错误、购买失败、主/次控制遮挡、空目标、四种不同loopback源请求被拦且诱饵收到0请求、静态源Host/路径/API与stop端口释放。原件归档browser-initial-20261114。该轮测试会验证PNG签名/大小与JSON证据，但清理夹具后未保留每页PNG/JSON，不声称归档已有这些原件；下一批需显式导出。
+
+这仍是B3子集。service worker/子worker WebSocket、重定向、缺浏览器与取消/超时真实浏览器后代、静态链接替换和证据保留仍需补测；B4持久化/API/采用门禁未实现，无正式E2E/独立验收结论。Node权限不等于OS沙箱，浏览器守卫是应用层策略。
+
+## 第七批：浏览器 worker 绕过与证据原件
+
+adversarial RED job_f1f301f4：types0，新增五项3过/2失败，原16筛选未运行。service worker虽被Playwright禁用但检查错误返回passed；专用worker内WS不受原routeWebSocket策略覆盖。主页面跳转、静态目录替换junction、浏览器安装根不可读的失败证据三项通过。
+
+当前模板没有dedicated/shared/service worker依赖，现明确采用禁止创建策略：静态源CSP worker-src none，导航前锁定构造器/注册入口并记录attempt，原生CSP违规也进入blockedRequests。子worker WS用例按此策略验证创建即拒绝、failed/证据/诱饵0请求，未伪称在worker内部逐包拦截。代价是未来依赖worker的页面需重新设计，本阶段只支持既定模板。
+
+job_d5d6f767：types0、44/44（浏览器21+既有23）与native0、0跳过，identityPreserved=true。原件browser-adversarial-20261114保存两轮全部evidence/tests/log及实际browser-artifacts（固定报告/PNG与test/runId映射），manifest逐文件SHA。已人工查看真实模板smoke.png：1440×900首屏、可见商品占位和购买入口，反馈已加入购物袋；报告Chromium158.0.8127.18、fallback可见、0→1、pageErrors/blockedRequests为空。PNG属于实际检查，不是UI设计稿。
+
+浏览器资源取消/超时/父死亡后的Chromium进程身份与端口回收尚需补测；B4未实现，完整typecheck/build/单测与独立Claude/Pi门禁未完成。没有真实模型或Lux3D调用。
+
+## 第八批：实际 Chromium / 端口 / 父死亡原件
+
+job_68cc8540：types0，8项7过/1失败；timeout测试8s预算晚于浏览器5s内部等待，得到正常smoke.failed而非父deadline拒绝。仅将测试阶段预算缩短到4s使父deadline先触发，生产默认30s和全部资源/错误码断言不变。
+
+job_468fc844：types0、8/8通过、0失败/跳过、identityPreserved=true。生产代码与44项通过的4b8f905无差异，仅生命周期测试/父夹具扩展。实际观测worker、esbuild、Chromium与后代PID/创建时间，取消和缩短deadline后remaining为空、静态监听URL无法连接、lateArtifacts=0；浏览器父死亡后owned子树为空、静态源关闭，同场decoy保持存活；IPC stop被忽略时确实强制结束自有worker。两轮原件含process-artifacts与实际检查报告/截图，归档browser-resources-20261114，有逐文件manifest。
+
+B2/B3主要实现与定向证据现具备，进入B4实际WorkService/tasks.json/事件/API/采用门禁。仍未做全仓typecheck/build/单测、独立Claude复审与Pi正式E2E，不将定向实现测试称为整阶段验收。Windows进程证据不外推跨平台；强制回收命令自身失败的保锁处理仍要在集成与独立审查中核对。
+
+## 第九批：B4 WorkService 第一组集成
+
+运行记录由WorkService所属store写入tasks.json，不再单独check-runs.json；候选记录生成提交，旧无提交证明的候选需重新生成。store同repo锁内复核最终通过身份/六份证据，保存成功后更新公开durable视图再发check事件。CheckCompletionInvalidated把完成时过期转为可持久failed，不误报成永久I/O故障。start/get/cancel/artifact内部方法已接入；HTTP尚未接线。
+
+adopt同repo锁中快照主作品后核对最新run、完整输入摘要、candidate commit/base/main/policy/tools、四passed、各阶段报告hash及两张截图引用；任一不符409 CHECKS_NOT_PASSED。撤回/自动裁剪先标retiring封检查准入，在repo锁外停止检查，再锁内保存撤回意图并清理；审批发布后的裁剪移到答复锁外。关闭先封准入/启动checker drain，等任务与trim/checker屏障后再drain repo、关preview、放锁。
+
+RED job_91b1f5f0：types0，十项全部目标失败。GREEN job_d1db8079：types0，89/89实际通过、0失败/跳过、identityPreserved=true（新10项、B1四套55项、work approvals23及routes1）。原件归档work-integration-20261114。集成测试用内部构造参数注入产生实际artifact ref的受控executor，不能称其为真实浏览器E2E；HTTP不提供覆盖入口。
+
+保存故障/完成时失效/跨候选与裁剪竞态、HTTP接口与鉴权/关闭、旧直接adopt单测及Pi E2E迁移仍待完成。完整标准typecheck/build/单测、Claude独立复审与Pi正式验收未完成，不称B4或M3-B通过。
+
+## 第十批：B4 保存 / 发布 / 并发故障验证
+
+job_e295fcc8：定向types0；新增九项全部实际通过，原十项按testNamePattern筛选未执行（JSON total19/pass9/pending10），源码身份不变。生产与83759a9无差异。覆盖初始保存失败不执行/不发事件，终态保存或事件发布失败不给绿灯并保留锁，完成后candidate/evidence变化转为持久failed且不误报I/O故障，失败重跑不复用旧绿，跨候选串行/释放资源先于下一执行，主动检查中自动裁剪先取消，终态保存阻塞时公开状态不提前completed。原件work-faults-20261114。
+
+故障测试先断言正常close拒绝PERSISTENCE_FAILED、第二实例INSTANCE_LOCKED；之后仅测试夹具用明确清理路径等待无进程executor屏障再释放自己锁，不是生产HTTP旁路或放宽关闭保锁规则。当前没有重跑完整十九项，不能写19/19。
+
+HTTP接口、真实HTTP并发关闭/证据响应、旧直接采用单测与Pi E2E迁移、完整回归和独立审查仍待完成。
+
+## 第十一批：检查 HTTP 与真实 HTTP 关闭排空
+
+四个固定接口已接线：POST /candidates/:id/checks、GET /checks/:id、POST /checks/:id/cancel、GET /checks/:id/artifacts/:name。启动只允许原始JSON布尔rerun；取消仅空对象/无body，preValidation在任何schema转换前拒绝其它字段。固定文件名/已登记ref读取、MIME/no-store/nosniff/ETag，变更证据409；Host/Origin及关闭准入沿用全局门禁。AppOptions.checks仅内部构造注入，不可由HTTP覆盖。
+
+RED job_c56a177b：types0，四项因路由缺失404全部目标失败。GREEN job_2fe1026f：全server types0、33/33实际通过、0跳过、原生app/routes/service导入0、identityPreserved=true（HTTP4、work集成19、旧approval routes1、events-lock9）。原件check-http-20261114。
+
+其中真实loopback HTTP测试证明cancel handler已准入后与app.close并发，响应cancelled、状态与check.finished落盘、在排空前第二实例锁拒绝、完成关闭后可重新拿锁、无晚到文件/事件写入。测试客户明确connection:close排除闲置keepalive等待；生产超时/keepalive未改。
+
+旧直接adopt单测迁移、默认真实检查器从WorkService到采用/回退链、标准全仓验证与独立Claude/Pi门禁仍待完成，不将内部executor测试冒充真实完整集成。
+
+## 第十二批：标准全仓与默认真实检查闭环
+
+旧service、M2 API、recovery-fix三处采用流程保留原断言，新增未检查409、显式检查与真实artifact引用，再继续采用/回退/恢复并发；构造参数注入的测试executor只验证门禁协议，不称真实编译。三处扩展的真实Git工作流明确15s测试预算，其余预算/业务时限未改。底层WorkRepo原语不承担Service门禁，原Git测试保持。
+
+job_50ea6887一次标准顺序运行（4m31s）：pnpm typecheck、pnpm build、pnpm test、编译产物app/worker/routes的原生Node导入均exit0/signal=null。六包实际416/416：shared68、plugin20、bridge1、renderer5、server315、Studio7，无失败/跳过。每步前后全部受管源码SHA256/Git blob、HEAD/status一致。受测身份是b4b64c7加记录中的五个未提交测试/辅助文件，并非声称在随后提交HEAD重跑。原件、逐步命令/PID/时间/退出、测试日志、浏览器/进程证据、运行入口及SHA256 manifest归档standard-20261114。
+
+新增默认真实WorkService测试不覆盖checks参数：实际模板src经Schema、可信Vite、Chromium四检查，HTTP读取六份证据后采用并回退；模型只调用一次受控替身，旧开发预览被stub，真正检查静态源与浏览器未替换。完整流程11.469s；四项检查均passed，逐份核对六份artifact的字节数/SHA256。已查看实际1440×900截图：改后标题、可见商品fallback、购买入口与已加入购物袋反馈；Chromium158.0.8127.18、购买0→1、pageErrors/blockedRequests均空。测试证明检查静态源不可再访问、临时快照已删、采用后文字变化、回退精确恢复基线。只复制模板src，未复制真实.env或二进制资产，fallback结论不冒充真实GLB加载。
+
+全量包括进程生命周期断言与原始资源证据；完成后只读进程核对未发现本worktree的checks/worker-entry残留。没有修改tests/e2e，没有新增付费调用。本轮是实现侧标准验证，Claude对最终固定HEAD的独立审查、Pi迁移旧套件并执行完整E2E仍待完成；M3-C UI未实现，不能宣称M3-B独立验收或项目全部完成。
+
+## 第十三批：独立审查 S-1 / S-2 整改
+
+Claude任务因五小时限额未正常返回，但主线已保存针对4fcc302的M3-B-review.md：旧B1问题逐项关闭、0 blocker/2 should-fix/12 suggestions。保留报告与其本人loopback RTC探针原件，不能把调度中断写成整改后独立复核通过。S-1本人探针实际收到4个STUN UDP包且smoke错误通过；S-2是代码核查出的强杀失败无界等待，审查人未实际触发。两项都先写回归。
+
+RED job_41d4ca04：types0，实际执行五项1过4失败，旧40项筛选未运行、identity一致。两个RTC构造用例错误passed；两个强杀失败用例12s虚拟时钟后仍pending；WorkService清理错误/关闭保锁用例已过。没有以收集或类型失败冒充目标RED。
+
+S-1：导航前锁定标准与webkit前缀RTCPeerConnection，记录webrtc尝试并抛SecurityError；Chromium增加disable_non_proxied_udp策略，与无代理启动选项配合。真实UDP监听回归保存构造名称、端口、包数及blockedRequests，不把HTTP/WS守卫外推为任意UDP拦截。当前模板无需WebRTC，策略是禁用能力，不支持需要RTC的页面。
+
+S-2：2s正常stop等待后，强杀命令最多等3s，再最多3s确认真实close；退出仍未确认时，最多1.5s只读查询Windows PID/创建时间诊断（查询失败可缺失，不用新观测PID再发kill）。失败缓存为CLEANUP_FAILED，调用者也收到错误，不把强杀命令exit0当作worker已退出。IPC异步回调观察stop拒绝以防unhandled rejection，runner最终资源屏障仍等待同一失败Promise、拒绝新检查并保留实例锁。父进程保存带hash的runner.log，只有固定诊断字段；日志写失败会在终态错误中说明。spawnedAt是父进程观测时间，与查询到的OS创建时间分别记录。没有放宽业务120s/30s/180s预算，也不声称OS不可终止的进程已被清理。
+
+GREEN job_7b9f65ed（4m58s）：标准pnpm typecheck/build/test与compiled native imports四步骤全部exit0/signal=null，每步源码身份一致。实际422/422：shared68、plugin20、bridge1、renderer5、server321、Studio7，无失败/跳过。新增六项包含两种RTC真实Chromium/UDP零包、三种fake transport+fake clock终止故障（拒绝/命令成功但没退出/命令不回调）、WorkService取消明确失败/关闭保锁。原有真实进程生命周期与默认真实检查→采用→回退也在本轮实际通过，后者11.796s；六份证据字节数/hash复核。结束后只读查询无本worktree检查worker残留。
+
+归档review-fixes-20261114含RED/GREEN、逐步命令/PID/时间/身份/日志、UDP观测、实际浏览器/进程/默认闭环证据、审查报告与审查人探针、逐文件manifest。受测身份为4fcc302加记录的六个源码/测试文件，不声称随后提交HEAD重跑。Claude对整改的独立复核仍待额度恢复（返回信息指向Asia/Shanghai 00:10）；12项建议尚未升级/关闭。Pi可以在独立分支准备验收接线，但复核整改通过前不合并、不宣称正式验收；M3-C/M4仍按既定门禁后续推进。

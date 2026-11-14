@@ -1,0 +1,86 @@
+{
+  "purpose": "takeover baseline and RED regression; failures expected and not product acceptance",
+  "command": [
+    "E:\\Node\\node.exe",
+    "E:\\空间化AI工作台\\.worktrees\\m3b\\node_modules\\.pnpm\\vitest@3.2.7_@types+node@24.19.2\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "src/checks/snapshot.test.ts",
+    "src/checks/handoff.test.ts",
+    "--reporter=json",
+    "--outputFile",
+    "E:\\空间化AI工作台\\.worktrees\\m3b\\.data\\m3b-takeover-red-1794655373672\\tests.json"
+  ],
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\apps\\server",
+  "pid": 43236,
+  "startedAt": "2026-11-14T11:22:53.961Z",
+  "finishedAt": "2026-11-14T11:22:55.271Z",
+  "code": 1,
+  "signal": null,
+  "before": {
+    "head": "6e44961b6e145da9aa367e8b4ca8eaffa39c1a13",
+    "status": "M apps/server/src/checks/snapshot.ts\n?? apps/server/src/checks/build.test.ts\n?? apps/server/src/checks/build.ts\n?? apps/server/src/checks/handoff.test.ts\n?? apps/server/src/checks/schema.ts\n?? apps/server/src/checks/worker.ts\n?? debug-build.mjs",
+    "hashes": {
+      "apps/server/src/checks/snapshot.ts": {
+        "sha256": "4e16ff9400c8adc4b1bea30429a01565e417eeb7c00c6340fb55e6453aed98e6",
+        "gitBlob": "1a937c62dbfd32ad1b3543e012b046102cb0c4bb"
+      },
+      "apps/server/src/checks/runner.ts": {
+        "sha256": "9b2f5b33acd69f9cf12409134a50ab8c9efb4cfd20bf77ce336390d74b902168",
+        "gitBlob": "a0a3d6c5051436b0425006aff7b8d1c112cf6138"
+      },
+      "apps/server/src/checks/artifacts.ts": {
+        "sha256": "989ed17cf2d89810ace5bd79adc4438b9fe469b306760a63a3ad8fdc51ea0000",
+        "gitBlob": "2fa4780a7e8717d4825b9673755b66690114da13"
+      },
+      "apps/server/src/checks/snapshot.test.ts": {
+        "sha256": "5f1120b433163aa0648b8a9c0925ac2018f7851998feedceccd9bef3a738a649",
+        "gitBlob": "935b7326b8154af4b601ce8a2953d880b6c13ad5"
+      },
+      "apps/server/src/checks/handoff.test.ts": {
+        "sha256": "fbabe91b158c221b5de84abea80a3812ae43cbe80bc455f14c814e9745b635c1",
+        "gitBlob": "e5d74cb5bef10a3b1faf31206e2620d53b21f9cd"
+      },
+      "pnpm-lock.yaml": {
+        "sha256": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "gitBlob": "03efd75a1ca0e362a1514679d730c44a3aa8fee8"
+      }
+    }
+  },
+  "after": {
+    "head": "6e44961b6e145da9aa367e8b4ca8eaffa39c1a13",
+    "status": "M apps/server/src/checks/snapshot.ts\n?? apps/server/src/checks/build.test.ts\n?? apps/server/src/checks/build.ts\n?? apps/server/src/checks/handoff.test.ts\n?? apps/server/src/checks/schema.ts\n?? apps/server/src/checks/worker.ts\n?? debug-build.mjs",
+    "hashes": {
+      "apps/server/src/checks/snapshot.ts": {
+        "sha256": "4e16ff9400c8adc4b1bea30429a01565e417eeb7c00c6340fb55e6453aed98e6",
+        "gitBlob": "1a937c62dbfd32ad1b3543e012b046102cb0c4bb"
+      },
+      "apps/server/src/checks/runner.ts": {
+        "sha256": "9b2f5b33acd69f9cf12409134a50ab8c9efb4cfd20bf77ce336390d74b902168",
+        "gitBlob": "a0a3d6c5051436b0425006aff7b8d1c112cf6138"
+      },
+      "apps/server/src/checks/artifacts.ts": {
+        "sha256": "989ed17cf2d89810ace5bd79adc4438b9fe469b306760a63a3ad8fdc51ea0000",
+        "gitBlob": "2fa4780a7e8717d4825b9673755b66690114da13"
+      },
+      "apps/server/src/checks/snapshot.test.ts": {
+        "sha256": "5f1120b433163aa0648b8a9c0925ac2018f7851998feedceccd9bef3a738a649",
+        "gitBlob": "935b7326b8154af4b601ce8a2953d880b6c13ad5"
+      },
+      "apps/server/src/checks/handoff.test.ts": {
+        "sha256": "fbabe91b158c221b5de84abea80a3812ae43cbe80bc455f14c814e9745b635c1",
+        "gitBlob": "e5d74cb5bef10a3b1faf31206e2620d53b21f9cd"
+      },
+      "pnpm-lock.yaml": {
+        "sha256": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "gitBlob": "03efd75a1ca0e362a1514679d730c44a3aa8fee8"
+      }
+    }
+  },
+  "identityPreserved": true,
+  "counts": {
+    "total": 35,
+    "passed": 27,
+    "failed": 8,
+    "pending": 0
+  }
+}

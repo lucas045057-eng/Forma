@@ -1,0 +1,47 @@
+$ pnpm -r build
+Scope: 7 of 8 workspace projects
+packages/shared build$ tsc --noEmit false --declaration --outDir dist
+packages/vite-plugin-source-tag build$ tsc --noEmit false --declaration --outDir dist
+packages/shared build: Done
+packages/vite-plugin-source-tag build: Done
+apps/server build$ tsc --noEmit false --rewriteRelativeImportExtensions --outDir dist
+packages/bridge build$ tsc --noEmit false --declaration --outDir dist
+packages/scene-renderer build$ tsc --noEmit false --declaration --outDir dist
+packages/bridge build: Done
+packages/scene-renderer build: Done
+apps/server build: Done
+apps/studio build$ vite build
+templates/product-page build$ vite build
+apps/studio build: vite v7.3.7 building client environment for production...
+apps/studio build: transforming...
+templates/product-page build: vite v7.3.7 building client environment for production...
+templates/product-page build: transforming...
+apps/studio build: ✓ 610 modules transformed.
+templates/product-page build: ✓ 602 modules transformed.
+apps/studio build: rendering chunks...
+apps/studio build: computing gzip size...
+apps/studio build: dist/index.html                           0.38 kB │ gzip:   0.30 kB
+apps/studio build: (!) Some chunks are larger than 500 kB after minification. Consider:
+apps/studio build: - Using dynamic import() to code-split the application
+apps/studio build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+apps/studio build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+apps/studio build: dist/assets/SceneEditor-DcJ0pRlM.css      0.98 kB │ gzip:   0.48 kB
+apps/studio build: dist/assets/AssetPanel-NUtWbqd3.css       1.32 kB │ gzip:   0.60 kB
+apps/studio build: dist/assets/index-CGfCeaXV.css            4.51 kB │ gzip:   1.53 kB
+apps/studio build: dist/assets/AssetPanel-B97MjQgN.js        4.51 kB │ gzip:   2.16 kB
+apps/studio build: dist/assets/SceneEditor-ECPGP1PJ.js       9.49 kB │ gzip:   3.97 kB
+apps/studio build: dist/assets/index-feZyhjH7.js           242.09 kB │ gzip:  76.55 kB
+apps/studio build: dist/assets/scene-config-C-bg_ieE.js  1,001.59 kB │ gzip: 270.42 kB
+apps/studio build: ✓ built in 2.70s
+apps/studio build: Done
+templates/product-page build: rendering chunks...
+templates/product-page build: computing gzip size...
+templates/product-page build: dist/index.html                     0.41 kB │ gzip:   0.32 kB
+templates/product-page build: dist/assets/index-BUtqthIO.css      3.01 kB │ gzip:   1.25 kB
+templates/product-page build: dist/assets/index-DViBMyQI.js   1,232.74 kB │ gzip: 343.10 kB
+templates/product-page build: (!) Some chunks are larger than 500 kB after minification. Consider:
+templates/product-page build: - Using dynamic import() to code-split the application
+templates/product-page build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+templates/product-page build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+templates/product-page build: ✓ built in 3.38s
+templates/product-page build: Done

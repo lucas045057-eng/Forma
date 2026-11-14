@@ -1,0 +1,139 @@
+{
+  "candidateId": "145aaa9c906a43edb0be84474aac2dd6",
+  "runId": "fcd85517a02c452a9530fd36163d1bd6",
+  "run": {
+    "id": "fcd85517a02c452a9530fd36163d1bd6",
+    "candidateId": "145aaa9c906a43edb0be84474aac2dd6",
+    "candidateCommit": "a29b38fe0ed82a9c419605eed1f4664850eaa3ce",
+    "baseVersion": "c95b6183f41f4afa22adf67239af5ea1ec8d833b",
+    "mainVersion": "c95b6183f41f4afa22adf67239af5ea1ec8d833b",
+    "contentDigest": "16db9dcd07bf61d3f79057d02644ac25948d793e1df4b338f91d14b3bb44ff70",
+    "toolIdentity": "ce5121ae171e7fc7f4b841db35cee56615f9474f97f431cec544f0e6c5b5e183",
+    "policyVersion": "m3b-v2",
+    "status": "completed",
+    "outcome": "passed",
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 139120,
+        "hash": "bc67a1c37f0c28206749491538987d0bd917d882f8b5c4559636096ee5674773"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 326,
+        "hash": "c863e6cda732e738c207476d8b0fa06106e531c6cb1e1cc42c834ef000741644"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 139120,
+        "hash": "bc67a1c37f0c28206749491538987d0bd917d882f8b5c4559636096ee5674773"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "578a5ca51b6ff3fb4cdc0787ce6e2ca7fadae48d79b29ceda0b545fb95dc17bc"
+      }
+    ],
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 13
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3863
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "c863e6cda732e738c207476d8b0fa06106e531c6cb1e1cc42c834ef000741644",
+        "durationMs": 916
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "578a5ca51b6ff3fb4cdc0787ce6e2ca7fadae48d79b29ceda0b545fb95dc17bc",
+        "durationMs": 117
+      }
+    ],
+    "createdAt": "2026-11-14T14:41:36.641Z",
+    "startedAt": "2026-11-14T14:41:36.644Z",
+    "finishedAt": "2026-11-14T14:41:43.345Z"
+  },
+  "adopted": {
+    "version": "0a48d5fc943bd5abe6790792594302f6eb0e446b",
+    "candidate": {
+      "id": "145aaa9c906a43edb0be84474aac2dd6",
+      "taskId": "145aaa9c906a43edb0be84474aac2dd6",
+      "candidateCommit": "a29b38fe0ed82a9c419605eed1f4664850eaa3ce",
+      "baseVersion": "c95b6183f41f4afa22adf67239af5ea1ec8d833b",
+      "branch": "candidate/145aaa9c906a43edb0be84474aac2dd6",
+      "previewUrl": "/preview/c/145aaa9c906a43edb0be84474aac2dd6/",
+      "createdAt": "2026-11-14T14:41:36.102Z",
+      "diff": [
+        {
+          "path": "src/App.tsx",
+          "patch": "diff --git a/src/App.tsx b/src/App.tsx\nindex c9ef103..293ee71 100644\n--- a/src/App.tsx\n+++ b/src/App.tsx\n@@ -20,7 +20,7 @@ export default function App() {\n       <section id=\"home\" className=\"hero\">\r\n         <div className=\"hero-copy\">\r\n           <p className=\"eyebrow\">A LITTLE SPACE TO BREATHE</p>\r\n-          <h1>给生活，<br/>留一点香气。</h1>\r\n+          <h1>给生活一点松弛，<br/>留一点香气。</h1>\r\n           <p className=\"intro\">把森林的温柔带回家。<br/>木间 · 雪松无火香薰，让每一次回家都值得期待。</p>\r\n           <div className=\"price\">¥ 168 <span> / 100 mL · 雪松与佛手柑</span></div>\r\n           <div className=\"actions\">\r\n"
+        }
+      ],
+      "outOfScope": [],
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 13,
+          "runId": "fcd85517a02c452a9530fd36163d1bd6"
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+          "durationMs": 3863,
+          "runId": "fcd85517a02c452a9530fd36163d1bd6"
+        },
+        {
+          "name": "smoke",
+          "status": "passed",
+          "evidence": "c863e6cda732e738c207476d8b0fa06106e531c6cb1e1cc42c834ef000741644",
+          "durationMs": 916,
+          "runId": "fcd85517a02c452a9530fd36163d1bd6"
+        },
+        {
+          "name": "occlusion",
+          "status": "passed",
+          "evidence": "578a5ca51b6ff3fb4cdc0787ce6e2ca7fadae48d79b29ceda0b545fb95dc17bc",
+          "durationMs": 117,
+          "runId": "fcd85517a02c452a9530fd36163d1bd6"
+        }
+      ],
+      "decision": "adopted",
+      "latestCheckRunId": "fcd85517a02c452a9530fd36163d1bd6"
+    }
+  },
+  "reverted": {
+    "version": "4146d9ceeb671b468cbbb1d06b782aea03a689bd",
+    "reverted": "0a48d5fc943bd5abe6790792594302f6eb0e446b"
+  },
+  "modelCalls": 1
+}

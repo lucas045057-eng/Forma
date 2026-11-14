@@ -1,0 +1,4 @@
+{
+  "test": "fails with evidence when its worker cannot access the installed browser",
+  "runId": "2723e37a9e104cf9a3c228c311a4b028"
+}

@@ -1,0 +1,31 @@
+{
+  "state": "reclaimed",
+  "worker": {
+    "pid": 41452,
+    "parent": 9672,
+    "created": "2026-11-14T14:40:38.2888550Z",
+    "name": "node.exe"
+  },
+  "descendants": [
+    {
+      "pid": 64876,
+      "parent": 41452,
+      "created": "2026-11-14T14:40:38.2923630Z",
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 37348,
+      "parent": 41452,
+      "created": "2026-11-14T14:40:38.7484420Z",
+      "name": "esbuild.exe"
+    }
+  ],
+  "remaining": [],
+  "decoy": {
+    "pid": 36844,
+    "parent": 14264,
+    "created": "2026-11-14T14:40:40.4011100Z",
+    "name": "node.exe"
+  },
+  "decoyAlive": true
+}

@@ -1,0 +1,11 @@
+file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m3b/apps/server/src/checks/network-guard.ts:9
+  const denied = ()        => { throw Object.assign(new Error('CHECK_NETWORK_DENIED: 检查进程不允许出站连接'), { code: 'CHECK_NETWORK_DENIED' }); };
+                                                    ^
+
+Error: CHECK_NETWORK_DENIED: 检查进程不允许出站连接
+    at Object.denied (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m3b/apps/server/src/checks/network-guard.ts:9:53)
+    at file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m3b/.data/m3b-worker-native.mjs:13:27 {
+  code: 'CHECK_NETWORK_DENIED'
+}
+
+Node.js v24.14.1
