@@ -124,7 +124,7 @@ C3 验证按任务卡使用全量单测，拟由根 `orbital/bin/bg.cmd` 单次�
 cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && call pnpm build
 ```
 
-取得 job 即结束回合并冻结文件。当前结果待核对，不预填通过数量；固定 HEAD、job id 与根日志路径在回合小结给出，由调度读取（无 ORBITAL_SESSION_ID 自动回调）。不重跑 C2 已确认作业，不运行 Pi E2E。
+调度已核对受测 `d09ce49` 的 `job_bb7581ad` exit 0：server 321、shared 68、vite-plugin 20、scene-renderer 5、bridge 1，Studio 10 个测试文件全部 passed；typecheck 与 build Done。原件为根 `orbital/jobs/job_bb7581ad/output.log`。这里只补录自测实况，不代表独立验收通过，不重复启动这轮验证。
 
 ### C1–C3 整体未覆盖与独立交接
 
