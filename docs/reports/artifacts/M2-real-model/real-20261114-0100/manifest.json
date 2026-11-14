@@ -1,0 +1,29 @@
+{
+  "head": "865e3b2f820e411bc54fd9be193ccdb1099d57e9",
+  "mode": "real",
+  "run": "real-20261114-0100",
+  "job": "job_e27011e4",
+  "status": "passed",
+  "passed": 10,
+  "total": 10,
+  "complete": true,
+  "mainTemplateClean": true,
+  "roundsTotal": 40,
+  "taskDurationMs": {
+    "min": 11293,
+    "max": 13937,
+    "sum": 128043
+  },
+  "caseWallDurationMs": {
+    "min": 19150,
+    "max": 21829,
+    "sum": 206997
+  },
+  "runDurationMs": 213495,
+  "usage": "未提供（CodingAgent 客户端未暴露上游 usage）",
+  "limits": [
+    "仅当前模板十题",
+    "不验证第三方实际内部模型身份",
+    "F1 根 junction、历史孤儿清理、偶发单测根因仍未覆盖"
+  ]
+}

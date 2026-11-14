@@ -1,0 +1,10 @@
+{
+  "job": "job_e27011e4",
+  "command": "node tests/e2e/real-model/run.mjs --mode real --run-id real-20261114-0100",
+  "pid": 52448,
+  "state": "exited",
+  "exitCode": 0,
+  "startedAt": "2026-11-14T04:04:46.000Z",
+  "finishedAt": "2026-11-14T04:08:22.036Z",
+  "wallSeconds": 216
+}

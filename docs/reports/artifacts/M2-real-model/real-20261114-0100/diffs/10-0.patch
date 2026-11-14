@@ -1,0 +1,13 @@
+diff --git a/src/scene.config.json b/src/scene.config.json
+index 51e7b1f..1e0669c 100644
+--- a/src/scene.config.json
++++ b/src/scene.config.json
+@@ -3,7 +3,7 @@
+   "hero": {
+     "camera": { "position": [1.6, 1.1, 1.6], "target": [0, 0.5, 0], "fov": 35 },
+     "model": { "rotation": [0, 0.52, 0], "scale": 1 },
+-    "lights": { "key": { "intensity": 3, "color": "#ffd9a8", "direction": [3, 5, 4] }, "ambient": 1.2 }
++    "lights": { "key": { "intensity": 3, "color": "#ffd9a8", "direction": [3, 5, 4] }, "ambient": 0.8 }
+   },
+   "scroll": [
+     { "at": 0, "model": { "rotation": [0, 0.52, 0] }, "parts": { "lid": { "offset": [0, 0, 0] } } },

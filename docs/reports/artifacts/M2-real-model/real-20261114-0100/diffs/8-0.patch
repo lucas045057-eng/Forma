@@ -1,0 +1,13 @@
+diff --git a/src/style.css b/src/style.css
+index 48aab21..663b711 100644
+--- a/src/style.css
++++ b/src/style.css
+@@ -12,7 +12,7 @@ h1 { font: 48px/1.4 Georgia, "SimSun", serif; letter-spacing: 3px; margin: 22px
+ .price { font-size: 26px; margin: 28px 0; }
+ .price span { font-size: 11px; color: #82715c; }
+ .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+-.button { border: 1px solid #756044; background: #756044; color: #fffaf0; border-radius: 3px; padding: 14px 25px; cursor: pointer; font: inherit; font-size: 13px; }
++.button { border: 1px solid #756044; background: #756044; color: #fffaf0; border-radius: 12px; padding: 14px 25px; cursor: pointer; font: inherit; font-size: 13px; }
+ .button:hover { filter: brightness(.92); }
+ .button-secondary { background: transparent; color: #756044; }
+ .fine-print { font-size: 10px; color: #9e8b74; margin-top: 20px; }

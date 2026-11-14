@@ -1,0 +1,13 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index c9ef103..5a8f368 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -24,7 +24,7 @@ export default function App() {
+           <p className="intro">把森林的温柔带回家。<br/>木间 · 雪松无火香薰，让每一次回家都值得期待。</p>
+           <div className="price">¥ 168 <span> / 100 mL · 雪松与佛手柑</span></div>
+           <div className="actions">
+-            <Button data-testid="buy-button" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>立即购买</Button>
++            <Button data-testid="buy-button" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>加入购物袋</Button>
+             <Button className="button-secondary" data-testid="save-button" onClick={() => setAction('已收藏这缕香气（演示）')}>收藏香气</Button>
+           </div>
+           <p className="fine-print">一份给自己，也给生活的温柔礼物。</p>

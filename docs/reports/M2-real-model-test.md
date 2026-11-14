@@ -2,15 +2,15 @@
 
 - 日期：2026-11-14（Asia/Shanghai）
 - 实现基线：`b167907`（已独立审查）；mock 成品回归归档 `b40425c`（运行冻结 `86416ce`）
-- 服务与模型：`https://xfastapi.ai/v1` + `gpt-6.1-sol`（用户新提供）；本轮**尚未发送任何付费对话请求**
+- 服务与模型：`https://xfastapi.ai/v1` + `gpt-6.1-sol`（用户新提供）；真实十题已由调度执行（见下文），归档阶段未再发送任何付费请求
 - 方案：`docs/design/M2-real-model-acceptance.md` 固定十题，顺序/指令/断言不变；10 题串行、无自动重试/补跑，每题最多 16 轮 / 180 秒
 - 真实运行冻结 HEAD：本轮测试/launcher/报告提交（`a950407` 之后仅测试与文档；完整 hash 见交回消息与 `run.json` 的 `head`）
 
-## 当前状态：准备与 mock 接线完成，真实十题未开始
+## 当前状态：真实十题已完成（10/10）
 
-- 本轮只改测试/launcher/报告：新增专用 Playwright 配置、隔离 fixture、固定十题 spec、后台顺序入口与网络守卫白名单。
-- **mock 接线结果：10/10 通过**（`docs/reports/artifacts/M2-real-model/mock-wiring-20261114/`，loopback mock、假 key，未用真实额度）；并加了三组故障探针证明门禁能失败（`fault-probes-20261114/`）。这只证明测试接线可用，**不是真实模型成绩，也不能用来预判通过**。
-- 真实十题由调度在本轮提交后从后台启动；结果未回前不得写“通过”。
+- 调度已在冻结 HEAD **`865e3b2`** 上执行 `job_e27011e4`：**exit 0、3m36s**；`results.mode=real`、`complete=true`、`notStarted=false`、`securityStop=false`、**10/10 passed**，达到固定 8/10 门槛。此后未再调用付费模型，也不补跑。
+- 本轮只做结果核对与归档；旧 mock 接线证据与故障探针保留，不覆盖。真实结果与 mock 成绩严格分开。
+- 真实十题证据：`docs/reports/artifacts/M2-real-model/real-20261114-0100/`；每题的指令/顺序/判据与 `M2-real-model-acceptance.md` 一致。
 
 ## 凭据与服务隔离
 
@@ -75,7 +75,35 @@
 
 - 任务 JSON 中未出现 Authorization/Bearer/key 形态字符串；mock 证据目录不包含截图（临时 probe 截图已清理，真实运行会保存每题截图）。
 
-## 真实执行命令（调度启动，不由本轮发付费请求）
+## 真实运行结果（job_e27011e4，10/10）
+
+- 冻结 HEAD `865e3b2f820e411bc54fd9be193ccdb1099d57e9`；job `job_e27011e4`，exit 0，job wall 216s（3m36s）；`run.json` 的 runner 计时 213 495ms，Playwright 一条封装十题的测试 `expected=1/unexpected=0/skipped=0`（**不是十条 Playwright 测试**）。
+- 每题 task `done`，rounds=4；十题合计 **40 轮**（来自任务事件 `请求编码模型（第 n/16 轮）`，不是账单用量）。模型任务耗时（task createdAt→updatedAt）**11 293–13 937ms**，合计 128 043ms；题目 wall（含点选/预览/采用/回退）19 150–21 829ms，合计 206 997ms，与全 run 213 495ms 区分。
+
+| # | 选中 src | rounds | 模型任务 ms | 题目 wall ms | base→adopt→revert（前 8 位） | 结果 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `src/components/Button.tsx:5:5`（3 实例） | 4 | 13 189 | 20 964 | 08a630a3→b400ba09→66786c2c | passed |
+| 2 | `src/App.tsx:23:11` | 4 | 11 293 | 19 228 | 6ec9bf4c→bb7aa3df→d49cfb31 | passed |
+| 3 | `src/App.tsx:25:11` | 4 | 13 314 | 21 344 | ae906a40→665f21df→a511524c | passed |
+| 4 | `src/App.tsx:18:9` | 4 | 13 937 | 21 829 | 272873fd→b23ba824→159072b0 | passed |
+| 5 | `src/App.tsx:30:11` | 4 | 11 367 | 19 150 | b279aa7e→a49d6547→17b33ba3 | passed |
+| 6 | `src/App.tsx:24:11` | 4 | 13 654 | 21 783 | bb7a0567→f9eabe21→8160686d | passed |
+| 7 | `src/components/Button.tsx:5:5`（3 实例，actions 祖先） | 4 | 12 663 | 20 464 | dff06b99→6a24a463→e8c955b8 | passed |
+| 8 | `src/components/Button.tsx:5:5`（3 实例） | 4 | 13 433 | 21 406 | c96410a4→f3041c5d→e7869d6a | passed |
+| 9 | `src/App.tsx:41:15`（3 条卖点） | 4 | 11 837 | 19 577 | 960a4a35→e39f2844→3936d7e4 | passed |
+| 10 | `src/components/ProductHero.tsx:33:10` | 4 | 13 356 | 21 252 | 4ec10d2b→69b1af68→fbd384fd | passed |
+
+逐题证据核对（全部成立）：
+- 固定原指令与顺序一致；每题的 `selection.src/baseVersion`、taskId/会话、candidate id 均记录，diff 分别落在 `src/App.tsx`、`src/style.css`、`src/scene.config.json`（完整 patch 在 `diffs/`，10 个文件 sha256 与 JSON 记录一致）。
+- 采用前主 frame 快照仍等于基线，`workDigest` 与 `scene.config.json` 原字节未变；采用/回退版本均变化；回退后 `workDigest` 与基线相同，scene 配置恢复。
+- 候选四项 `checks` 全 `not_run`，UI 也全 `not_run` 且不显示“通过”；页面/iframe 未捕获异常在基线、候选、采用阶段均为空（`new*Errors=[]`）。
+- 行为题：1 购买计数 0→1；4 点击导航后 hash=#details；8 购买计数 0→1，save/gift 仍显示“已收藏这缕香气（演示）”“已选择礼盒装（演示）”。
+- 守卫：每题 markerActive=true，blocked/blockedAfter 为空；`unsafePaths/diffSecret/recordSecret` 为空；每题结束后 3001/5174/5175 端口空闲；无本轮身份的 preview/Vite/node 残留。
+- 主模板与 tracked tree 干净，`mainTemplateClean=true`；生产相对 `b167907` 无差异。截图 40 张（每题 baseline/candidate/adopted/reverted），均在证据目录。
+- 模型请求发往配置的 `xfastapi.ai`、model 字段 `gpt-6.1-sol`；第三方实际内部模型身份不可由本地测试验证，本报告不作此声称。usage 客户端未暴露，记“未提供”，**40 轮不是账单用量，不猜价**。
+- 证据已扫描无 Authorization/Bearer/key 形态字符串；后端只读 `.env` 三个 Agent 字段传给自身进程，preview/Vite 不带编码凭据，Lux3D 固定不可用 loopback。
+
+## 真实执行记录（已执行，结果已归档）
 
 在 `E:\空间化AI工作台` 根目录：
 
@@ -83,14 +111,14 @@
 orbital\coordination\m2-takeover\bg-root.cmd "node tests/e2e/real-model/run.mjs --mode real --run-id real-20261114-0100"
 ```
 
-- 运行入口会检查 3001/5173/5174/5175 空闲，并只校验 `.env` 三个字段名存在（不打印值），然后启动 Studio 与固定十题；凭据只进后端 env。真实模式强制 10 题与 8/10 门槛，忽略 `--limit`/`--only-results` 等降低范围的参数。
-- 证据目录：`docs/reports/artifacts/M2-real-model/real-20261114-0100/`（`run.json`、`results.json`、`playwright.json`、`run.log`、每题 JSON/完整 diff/截图/logs）。
-- 判定：十题全部完成且至少 **8/10** 通过才可判 M2 过关；少于 8 题不得补跑/换题。上游 401/403 若发生在已提交真实任务之后，按该题真实失败计入，不标“未开始”；只有首个真实任务提交前的启动/配置失败才是“未开始”。越界路径、守卫记录越界请求或凭据形态出现时安全停止并标 `security-failed`，不继续十题、不报通过。
-- 本报告不预写通过；实跑结果由后台通知后归档。
+- 命令已由调度执行；入口检查 3001/5173/5174/5175 空闲、只校验 `.env` 三个字段名存在（不打印值），然后启动 Studio 与固定十题；真实模式强制 10 题/8 门槛，忽略 `--limit`/`--only-results`。
+- 证据目录：`docs/reports/artifacts/M2-real-model/real-20261114-0100/`（`run.json`、`results.json`、`playwright.json`、`run.log`、`job-summary.json`、`job-output.log`、每题 JSON/完整 diff/截图/logs、manifest）。
+- 结果：10/10 passed，达到固定 8/10 门槛；十题全部完成、结果全部归档、无 expected-failed/skip/retry。未发生安全停止；上游 401/403 只会在已提交任务后计入失败，本轮无此情况。
+- M2 的正式收口由调度在核对归档后决定；本轮不启动 M3，也不再进行任何付费测试。
 
 ## 未覆盖与边界
 
-- 本轮没有真实模型请求，工具调用兼容性尚未验证；`x-opencode-session` 是现有实现，按真实实现验收。
+- 本轮真实十题只针对当前模板的固定案例；不能外推到其他页面、其他模型或未来版本。工具调用兼容性已按 xfastapi 真实实现跑通 10/10，但不能据此声称第三方内部模型身份或账单用量。
 - 服务用量/价格未提供，不估算费用；极限 160 轮请求，实际逐条记录。
 - 十题只针对当前模板源码与固定指令；不做浏览器 Firefox/WebKit/触屏。
 - F1 根 junction 正式 E2E、历史重启孤儿清理、资产偶发单测唯一根因仍按 `M2-final-regression.md` 保留为未覆盖。
