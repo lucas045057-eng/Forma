@@ -1,0 +1,75 @@
+{
+  "root": "E:\\空间化AI工作台\\.worktrees\\m3a",
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m3a\\apps\\server",
+  "before": {
+    "head": "012d9a65b4242cad2407a40c34614b2d162c8032",
+    "status": "",
+    "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f"
+  },
+  "command": [
+    "E:\\Node\\node.exe",
+    "E:\\空间化AI工作台\\.worktrees\\m3a\\node_modules\\.pnpm\\vitest@3.2.7_@types+node@24.19.2\\node_modules\\vitest\\vitest.mjs",
+    "run",
+    "--minWorkers=1",
+    "--maxWorkers=2",
+    "--reporter=verbose",
+    "--reporter=json",
+    "--outputFile",
+    "E:\\空间化AI工作台\\.worktrees\\m3a\\.data\\codex-heavy-completion-1794645516415\\vitest.json",
+    "--testNamePattern",
+    "combines rules into one card and enforces the three-pending-card limit|persists stale main approvals, releases capacity and rejects repeated answers consistently|keeps at most three pending candidates and cleans up the oldest",
+    "--testTimeout=15000"
+  ],
+  "machine": {
+    "availableParallelism": 28,
+    "cpus": 28,
+    "platform": "win32",
+    "node": "v24.14.1"
+  },
+  "workers": {
+    "min": 1,
+    "max": 2
+  },
+  "startedAt": "2026-11-14T08:38:36.418Z",
+  "report": "vitest.json",
+  "purpose": "Observe natural completion only; not acceptance and no committed timeout change",
+  "diagnosticOnly": true,
+  "pid": 6352,
+  "elapsedMs": 12478,
+  "exitCode": 0,
+  "signal": null,
+  "finishedAt": "2026-11-14T08:38:48.898Z",
+  "after": {
+    "head": "012d9a65b4242cad2407a40c34614b2d162c8032",
+    "status": "",
+    "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f"
+  },
+  "identityPreserved": true,
+  "counts": {
+    "total": 179,
+    "passed": 3,
+    "failed": 0,
+    "pending": 176,
+    "todo": 0,
+    "assertions": 179
+  },
+  "heavy": [
+    {
+      "name": "combines rules into one card and enforces the three-pending-card limit",
+      "status": "passed",
+      "duration": 4353.0662999999995
+    },
+    {
+      "name": "persists stale main approvals, releases capacity and rejects repeated answers consistently",
+      "status": "passed",
+      "duration": 5081.612700000001
+    },
+    {
+      "name": "keeps at most three pending candidates and cleans up the oldest",
+      "status": "passed",
+      "duration": 5691.2913
+    }
+  ],
+  "assertionsPassed": true,
+  "passed": true
+}

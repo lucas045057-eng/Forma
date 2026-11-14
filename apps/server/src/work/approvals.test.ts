@@ -158,7 +158,7 @@ it('combines rules into one card and enforces the three-pending-card limit', asy
     expect(f.work.listApprovals()).toHaveLength(3);
     expect(await f.work.repo.candidateExists(overflow.id)).toBe(false);
   } finally { await cleanup(f); }
-});
+}, 15_000); // Four complete real-Git workflows, including the rejected overflow.
 
 it('binds answers to the exact draft digest and current main version', async () => {
   const f = await fixture();
@@ -550,7 +550,7 @@ it.each(['draft', 'main'])('persists stale %s approvals, releases capacity and r
     expect(saved.approvals.find((item: { id: string }) => item.id === card.id).status).toBe('stale');
     expect(f.published.filter(event => event.type === 'approval.resolved')).toHaveLength(1);
   } finally { await cleanup(f); }
-});
+}, 15_000); // Four complete real-Git workflows, plus stale cleanup and persistence.
 
 it('serializes approve, reject and cancel so only one terminal transition wins', async () => {
   const f = await fixture();

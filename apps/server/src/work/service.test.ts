@@ -134,7 +134,7 @@ it('keeps at most three pending candidates and cleans up the oldest', async () =
     await f.work.discard(ids[1]);
     expect(f.work.getCandidate(ids[1]).decision).toBe('discarded');
   } finally { await cleanup(f); }
-});
+}, 15_000); // Four complete real-Git workflows, including eviction and cleanup.
 
 it('cancels a running task and removes its candidate directory', async () => {
   const f = await fixture('success', 250);

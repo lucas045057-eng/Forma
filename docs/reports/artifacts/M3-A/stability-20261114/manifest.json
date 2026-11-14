@@ -1,0 +1,72 @@
+[
+    {
+        "path":  ".gitattributes",
+        "sha256":  "8ae2bc563b0b4b3695c4ef7050f72dffff29d468200f54312d3f445dd8f5783a",
+        "bytes":  82
+    },
+    {
+        "path":  "codex-stability-validation.mjs",
+        "sha256":  "26dbf46e5629292fe8e3e00ff8981354e789ff9ccd9ea43fa4a35f10a8b47625",
+        "bytes":  4555
+    },
+    {
+        "path":  "codex-worker-control.mjs",
+        "sha256":  "1c4c60f1b782713d115502549f815c5a868bbe48996296f9a08202c5cf9932ce",
+        "bytes":  5402
+    },
+    {
+        "path":  "completion-diagnostic/evidence.json",
+        "sha256":  "4f789850436ce638c4c101a7fff4392215103e720320d3d7713a5f173c913744",
+        "bytes":  2353
+    },
+    {
+        "path":  "completion-diagnostic/server-test.log",
+        "sha256":  "796443a6b9b2b58844d4d206e6b7eb2f32b69cbf4c8dd8bf13d1b2caa978df63",
+        "bytes":  19397
+    },
+    {
+        "path":  "completion-diagnostic/vitest.json",
+        "sha256":  "2611af63779ec7b71951daf3951ad11acf5fcf32b7d6d369ca2c251f4d154334",
+        "bytes":  49468
+    },
+    {
+        "path":  "controlled-original-budget/evidence.json",
+        "sha256":  "3432486c03214e802ef594c6c2b3557be5cfa86070e91a85c306d3a239ca2a42",
+        "bytes":  1912
+    },
+    {
+        "path":  "controlled-original-budget/server-test.log",
+        "sha256":  "35a8273c4adeb1281844ddf3273e9006d4c97073d7f4c87a42ac37011c86a3bb",
+        "bytes":  15588
+    },
+    {
+        "path":  "controlled-original-budget/vitest.json",
+        "sha256":  "43fc9f2d6e3cb7186851f29cec945e0c44cb1933ec1a1ebf9d56e5c05d212905",
+        "bytes":  57346
+    },
+    {
+        "path":  "standard-validation/build.log",
+        "sha256":  "0e202c48146d9efaff0f0654b7b143af1a0479b4edc8c4202ac8bd87d170a015",
+        "bytes":  3205
+    },
+    {
+        "path":  "standard-validation/evidence.json",
+        "sha256":  "c3f6f7102b09ddfd520f00ead2799b3ea112960fefdf72fba3b0a72a2dc01482",
+        "bytes":  7687
+    },
+    {
+        "path":  "standard-validation/job-output.log",
+        "sha256":  "6522deb29810a8b8a61941f52a79f9abc1a1e3808ebadf4b11be301e48cb23f7",
+        "bytes":  46084
+    },
+    {
+        "path":  "standard-validation/test.log",
+        "sha256":  "3a0b7819d165c7c0d16e9adeb16c2bbd9081d982c29dd7f4b37f0a4fed76df09",
+        "bytes":  39516
+    },
+    {
+        "path":  "standard-validation/typecheck.log",
+        "sha256":  "b3871f426d908eb4bcc00e4b6bc6c981fae57ee007b90dc8c6061e1350b2b4a8",
+        "bytes":  737
+    }
+]

@@ -1,0 +1,22 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 3h ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 505ms using pnpm v11.17.0
+$ pnpm -r typecheck
+Scope: 7 of 8 workspace projects
+packages/shared typecheck$ tsc
+packages/vite-plugin-source-tag typecheck$ tsc
+packages/shared typecheck: Done
+packages/vite-plugin-source-tag typecheck: Done
+apps/server typecheck$ tsc
+packages/scene-renderer typecheck$ tsc
+packages/bridge typecheck$ tsc
+packages/bridge typecheck: Done
+packages/scene-renderer typecheck: Done
+apps/server typecheck: Done
+apps/studio typecheck$ tsc
+templates/product-page typecheck$ tsc
+templates/product-page typecheck: Done
+apps/studio typecheck: Done

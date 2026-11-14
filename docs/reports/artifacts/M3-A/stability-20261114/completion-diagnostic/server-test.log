@@ -1,0 +1,189 @@
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3a/apps/server
+
+ ↓ src/work/service.test.ts > drains an admitted direct submit before close returns (selection=false)
+ ↓ src/work/service.test.ts > drains an admitted direct submit before close returns (selection=true)
+ ↓ src/work/service.test.ts > validates source paths, commits, line ranges and stale selections before enqueueing
+ ↓ src/work/service.test.ts > runs one task, records checks and scope, then adopts and reverts the work version
+ ↓ src/work/service.test.ts > holds changes outside the selected file and its ancestors for approval
+ ↓ src/work/approvals.test.ts > holds a shared edit in private staging, then approves exactly that draft without another model call
+ ↓ src/work/approvals.test.ts > rejects and cancels awaiting tasks with staging cleanup and no public candidate
+ ↓ src/work/approvals.test.ts > releases the task queue while awaiting and allows a later local task
+ ✓ src/work/approvals.test.ts > combines rules into one card and enforces the three-pending-card limit 4353ms
+ ↓ src/work/approvals.test.ts > binds answers to the exact draft digest and current main version
+ ↓ src/work/approvals.test.ts > hard-fails package changes instead of offering an approval card
+ ↓ src/work/approvals.test.ts > preserves a pending card and its staging across restart without approving it
+ ↓ src/work/approvals.test.ts > recovers a persisted approval after the commit without creating a second commit or public event
+ ↓ src/work/approvals.test.ts > rolls back a new card when its first durable save fails before cleanup
+ ↓ src/work/approvals.test.ts > does not broadcast or publish when persisting an approval answer fails
+ ↓ src/work/approvals.test.ts > drains an admitted direct answer before close and refuses later answers
+ ↓ src/work/approvals.test.ts > isolates preview Error to its approval and permits another card and restart
+ ↓ src/work/approvals.test.ts > isolates preview AbortError to its approval and permits another card and restart
+ ↓ src/work/approvals.test.ts > recovers a committed approval with a failing preview without preventing startup
+ ↓ src/work/approvals.test.ts > resumes failed-preview cleanup after terminal save failure without restarting preview
+ ↓ src/work/approvals.test.ts > retains stale cleanup intent across save failure and restart
+ ↓ src/work/approvals.test.ts > retains stale cleanup intent across cleanup failure and restart
+ ↓ src/work/approvals.test.ts > recovers another card before cancel, including repeated cleanup failure
+ ↓ src/work/approvals.test.ts > recovers another card before cancel, including repeated terminal-save failure
+ ↓ src/work/approvals.test.ts > uses the recovered state when cancelling the same target after a terminal-save failure
+ ↓ src/work/approvals.test.ts > persists stale draft approvals, releases capacity and rejects repeated answers consistently
+ ✓ src/work/service.test.ts > keeps at most three pending candidates and cleans up the oldest 5691ms
+ ↓ src/work/service.test.ts > cancels a running task and removes its candidate directory
+ ↓ src/work/service.test.ts > marks an interrupted running task as failed and retryable after restart
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "1e5" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "0" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "01" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId " 1" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "1 " without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "1\n" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "1\r\n" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "1.5" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "+1" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "12345678901234567890" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId 0 without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId -1 without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId 1.5 without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId 9007199254740992 without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId null without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId true without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId "123" without upstream queries
+ ↓ src/task-id.test.ts > rejects invalid raw taskId {"id":"123"} without upstream queries
+ ↓ src/task-id.test.ts > accepts valid raw taskId "123" without losing precision
+ ↓ src/task-id.test.ts > accepts valid raw taskId "9007199254740992" without losing precision
+ ↓ src/task-id.test.ts > accepts valid raw taskId "9999999999999999999" without losing precision
+ ↓ src/task-id.test.ts > accepts valid raw taskId 456 without losing precision
+ ↓ src/task-id.test.ts > accepts valid raw taskId 9007199254740991 without losing precision
+ ↓ src/approvals/policy.test.ts > allows an App-only copy edit on the real template with CSS and JSON?raw imports
+ ↓ src/approvals/policy.test.ts > still detects the real shared Button with instances=1 and valid leaf resources
+ ↓ src/approvals/policy.test.ts > reports a genuinely missing local import on the real template
+ ↓ src/approvals/policy.test.ts > resolves queried source imports without losing shared evidence
+ ↓ src/approvals/policy.test.ts > detects deletion of a referenced leaf resource: src/style.css
+ ↓ src/approvals/policy.test.ts > detects deletion of a referenced leaf resource: src/scene.config.json
+ ↓ src/approvals/policy.test.ts > does not ignore an existing local reference that escapes src
+ ↓ src/approvals/policy.test.ts > does not treat a resource created only in the draft as present in the baseline
+ ↓ src/approvals/policy.test.ts > detects three same-file Button JSX uses despite one import and instances=1
+ ↓ src/approvals/policy.test.ts > resolves imported aliases when counting shared JSX uses
+ ↓ src/approvals/policy.test.ts > resolves default exports and named re-export barrels
+ ↓ src/approvals/policy.test.ts > does not label an App-only copy edit as a shared Button edit
+ ↓ src/approvals/policy.test.ts > uses conservative UI instance evidence only for the changed selected file
+ ↓ src/approvals/policy.test.ts > requires approval for global CSS and scene config, but not module CSS alone
+ ↓ src/approvals/policy.test.ts > requires approval for out-of-scope edits and for every nonempty edit without selection
+ ↓ src/approvals/policy.test.ts > does not turn baseline read failures into a new-file pass
+ ↓ src/approvals/policy.test.ts > treats a genuinely new file in a valid baseline as absent without uncertainty
+ ↓ src/approvals/policy.test.ts > keeps baseline shared evidence when the draft cannot be parsed
+ ↓ src/approvals/policy.test.ts > fails closed on parse errors and dynamic imports
+ ↓ src/events-lock.test.ts > keeps the event log inside the work-data lock and continues seq after a graceful restart (review F4)
+ ↓ src/events-lock.test.ts > releases the work-data lock when a constructor throws after it was taken (review N3)
+ ↓ src/events-lock.test.ts > drains queued work-tree operations before the log closes and the lock is released (review N4)
+ ↓ src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+ ↓ src/events-lock.test.ts > drains admitted HTTP submit before task files, journal and lock close
+ ↓ src/events-lock.test.ts > drains admitted HTTP selection before task files, journal and lock close
+ ↓ src/events-lock.test.ts > drains admitted HTTP cancel before task files, journal and lock close
+ ↓ src/events-lock.test.ts > drains an admitted real HTTP approval before closing the journal and releasing the lock
+ ↓ src/events-lock.test.ts > retains ownership and journal if a producer fails to stop, while stopping other producers
+ ↓ src/work/repo.test.ts > snapshots disk edits, adopts a candidate and reverts the merge without rewriting history
+ ↓ src/work/repo.test.ts > includes untracked files in pendingDiff and binds exact content without committing
+ ↓ src/work/repo.test.ts > aborts a conflicting adoption without changing the main worktree
+ ↓ src/work/repo.test.ts > refuses snapshot, candidates, adopt and revert while the work tree contains a junction (D2)
+ ↓ src/work/repo.test.ts > refuses when src/ or public/ itself is a junction (review F1)
+ ↓ src/work/repo.test.ts > refuses an existing clean repository that already tracks a forbidden file (review F3)
+ ↓ src/work/repo.test.ts > does not abort an interrupted merge through a junctioned src/ at startup (review N1)
+ ↓ src/work/repo.test.ts > audits paths containing tabs, newlines and spaces as whole names (review N2)
+ ↓ src/work/recovery-fix.test.ts > only snapshots permitted work files and serializes concurrent snapshots
+ ↓ src/work/recovery-fix.test.ts > recovers a committed adoption from durable intent without merging twice
+ ↓ src/assets/recovery.test.ts > processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL
+ ↓ src/assets/recovery.test.ts > detects missing ready models on restart and allows re-import
+ ↓ src/assets/recovery.test.ts > never repeats a paid request after upstream accepts it but loses the response
+ ↓ src/assets/recovery.test.ts > does not resubmit after taskId persistence fails, even after restart
+ ↓ src/assets/recovery.test.ts > app.close stops drip work and persists a restartable record
+ ↓ src/assets/recovery.test.ts > app.close stops timeout work and persists a restartable record
+ ↓ src/assets/recovery.test.ts > rejects truncated mock output without publishing a model
+ ↓ src/m2-api.test.ts > exposes the M2 task/candidate/version flow and durable event replay without exposing the agent key
+ ↓ src/approvals/routes.test.ts > exposes approvals without exposing private candidates and accepts only raw JSON 0/1
+ ↓ src/work/fs-boundary.test.ts > serves work and candidate modules but denies workspace sentinel files via @fs
+ ✓ src/work/approvals.test.ts > persists stale main approvals, releases capacity and rejects repeated answers consistently 5082ms
+ ↓ src/work/approvals.test.ts > serializes approve, reject and cancel so only one terminal transition wins
+ ↓ src/scene/service.test.ts > serializes concurrent writes, persists history and pops undo without toggling
+ ↓ src/scene/service.test.ts > rejects schema, extra fields and unordered frames without changing file/history
+ ↓ src/scene/service.test.ts > rejects traversal and junctions before touching outside content
+ ↓ src/scene/service.test.ts > replays a durable interrupted intent and retains correct undo stack
+ ↓ src/scene/service.test.ts > HTTP returns field errors, accepts config without coercion, and enforces origins
+ ↓ src/scene/service.test.ts > adopts only ready assets, requires force and copies metadata with undo
+ ↓ src/scene/service.test.ts > bounds the persisted journal and undo stack
+ ↓ src/scene/service.test.ts > refuses requests addressed to a non-loopback host name unless explicitly allowed
+ ↓ src/app.test.ts > runs the mock import through HTTP, processing and model serving; rejects invalid inputs and foreign origins
+ ↓ src/isolation.test.ts > rejects preview-origin mutations before any task or paid upstream work, and exposes no API on preview listener
+ ↓ src/isolation.test.ts > repairs torn event tails before appending and never broadcasts on disk failure
+ ↓ src/work/preview-recovery.test.ts > handles spawn failure and closes a preview when its owning parent is killed
+ ↓ src/assets/service.test.ts > asset idempotency and polling > concurrent and restarted submissions use one paid task; conflicting input is rejected
+ ↓ src/assets/service.test.ts > asset idempotency and polling > does not resubmit when the remote creation result is unknown
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles failed without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles cancelled without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles expired403 without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles expired404 without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles unknown without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > handles timeout without creating a task during import
+ ↓ src/assets/service.test.ts > asset idempotency and polling > rejects unsafe IDs and internal downloads, and wraps part-split on the shared task endpoint
+ ↓ src/assets/process-isolated.test.ts > publishes model and parts only after successful worker exit
+ ↓ src/assets/process-isolated.test.ts > kills and waits for a timed-out worker, removes its staging and preserves outer files
+ ↓ src/assets/process-isolated.test.ts > cancels a running worker without publishing partial artifacts
+ ↓ src/assets/process-isolated.test.ts > rejects invalid input in the worker and cleans staging
+ ↓ src/assets/download.test.ts > enforces total time during a continuous drip and leaves no partial file
+ ↓ src/assets/download.test.ts > includes a stuck DNS lookup in the total budget
+ ↓ src/assets/download.test.ts > does not reset the total budget on redirects
+ ↓ src/assets/download.test.ts > rejects redirect target https://10.0.0.1/model.glb before connecting
+ ↓ src/assets/download.test.ts > rejects redirect target https://[::1]/model.glb before connecting
+ ↓ src/assets/download.test.ts > rejects redirect target https://[::ffff:127.0.0.1]/model.glb before connecting
+ ↓ src/assets/download.test.ts > rejects mixed public/private DNS answers
+ ↓ src/assets/download.test.ts > rejects truncated GLB and oversized body without publishing
+ ↓ src/assets/download.test.ts > enforces the production 100 MiB bound from response headers
+ ↓ src/assets/download.test.ts > uses unique temporaries and preserves the old final file on failed publication
+ ↓ src/assets/download.test.ts > aborts while publishing and removes only its own temporary
+ ↓ src/agent/client.test.ts > runs OpenAI-compatible tool calls with a stable session and writes only through the sandbox
+ ↓ src/agent/client.test.ts > returns an attempted path escape to the model without creating the outside file
+ ↓ src/agent/client.test.ts > enforces the total timeout and supports cancellation
+ ↓ src/agent/client.test.ts > fails closed on upstream errors, missing tool calls and insecure remote configuration
+ ↓ src/assets/mock-server.test.ts > isolated Lux3D mock contract > requires an exact raw key for every Lux3D route and keeps stats public and minimal
+ ↓ src/assets/mock-server.test.ts > isolated Lux3D mock contract > rejects malformed generation bodies without creating a task
+ ↓ src/assets/mock-server.test.ts > isolated Lux3D mock contract > validates part split separately from generation
+ ↓ src/assets/mock-server.test.ts > isolated Lux3D mock contract > accepts text, image, part split, list and get with a configured key
+ ↓ src/assets/mock-server.test.ts > isolated Lux3D mock contract > serves a truncated GLB whose header still declares the full length
+ ↓ src/assets/instance-lock.test.ts > refuses a second instance before it can clean the temporary files of the first
+ ↓ src/assets/instance-lock.test.ts > replaces locks left by dead or unreadable owners
+ ↓ src/agent/limits.test.ts > rejects Windows device/ambiguous paths and case variants of invalid scene configuration
+ ↓ src/agent/limits.test.ts > rejects oversized responses and overlong tool batches before writes
+ ↓ src/agent/limits.test.ts > does not finish a tool batch after its overall deadline
+ ↓ src/assets/process-model.test.ts > normalizes world-space geometry and preserves textured material through meshopt decoding
+ ↓ src/assets/process-model.test.ts > rejects models without scene geometry
+ ↓ src/assets/process-model.test.ts > rejects external buffers URIs before resolving resources
+ ↓ src/assets/process-model.test.ts > rejects external images URIs before resolving resources
+ ↓ src/work/preview-origin.test.ts > forwards the Vite HMR socket of the main work and of a running candidate, and nothing else (D1)
+ ↓ src/work/preview-origin.test.ts > refuses requests addressed to a foreign host name, for HTTP and WebSocket alike (review F2)
+ ↓ src/work/preview.test.ts > proxies only GET and HEAD to the selected loopback preview port
+ ↓ src/events.test.ts > continues sequence numbers across restarts and replays only newer events
+ ↓ src/events.test.ts > skips a torn final line and reports when history has been truncated
+ ↓ src/assets/lux3d.test.ts > rejects unsafe upstream http://example.com before any request
+ ↓ src/assets/lux3d.test.ts > rejects unsafe upstream http://10.0.0.1 before any request
+ ↓ src/assets/lux3d.test.ts > rejects unsafe upstream ftp://example.com before any request
+ ↓ src/assets/lux3d.test.ts > rejects unsafe upstream https://user:secret@example.com before any request
+ ↓ src/assets/lux3d.test.ts > accepts secure or loopback configuration http://127.0.0.1:4010
+ ↓ src/assets/lux3d.test.ts > accepts secure or loopback configuration http://localhost:4010
+ ↓ src/assets/lux3d.test.ts > accepts secure or loopback configuration http://[::1]:4010
+ ↓ src/assets/lux3d.test.ts > accepts secure or loopback configuration https://example.com
+ ↓ src/assets/lux3d.test.ts > aborts an in-flight task query without waiting for the upstream timeout
+ ↓ src/agent/tools.test.ts > reads and replaces source but refuses escapes, configuration writes and oversized content
+ ↓ src/agent/tools.test.ts > rejects writes through a junction even when the normalized path stays under src
+ ↓ src/agent/tools.test.ts > validates JSON and scene configuration before writing
+ ↓ src/assets/cleanup.test.ts > cleans only owned temporary files before startup, retaining assets and unrelated files
+ ↓ src/assets/parts.test.ts > infers parts from bounds and preserves world transforms when grouping the lid
+ ↓ src/assets/parts.test.ts > leaves names and hierarchy unchanged when cap or reeds cannot be inferred
+ ↓ src/assets/parts.test.ts > refuses non-upright remaining geometry without partial renaming
+ ↓ src/assets/parts.test.ts > marks only pipeline-confirmed parts and strips forged markers from unrecognized models
+
+ Test Files  2 passed | 28 skipped (30)
+      Tests  3 passed | 176 skipped (179)
+   Start at  16:38:36
+   Duration  12.10s (transform 335ms, setup 0ms, collect 4.44s, tests 15.13s, environment 3ms, prepare 1.58s)
+
+JSON report written to E:/空间化AI工作台/.worktrees/m3a/.data/codex-heavy-completion-1794645516415/vitest.json
