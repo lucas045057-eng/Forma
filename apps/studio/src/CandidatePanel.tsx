@@ -8,6 +8,9 @@ import { activeRun, associatedRun } from './check-state.ts';
 import { adoptionReason, operationError, type EvidenceReceipt } from './adoption-gate.ts';
 
 export type PreviewMode = 'current' | 'candidate' | 'compare';
+export function AdoptButton({ reason, onAdopt }: { reason: string; onAdopt: () => void }) {
+  return <button type="button" data-testid="candidate-adopt" disabled={!!reason} onClick={() => { if (!reason) onAdopt(); }}>采用此候选</button>;
+}
 export function Diff({ candidate }: { candidate: Candidate }) {
   return <div className="candidate-diff" data-testid="candidate-diff">
     <h3>改动文件</h3>
@@ -69,7 +72,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     const token = acquire(keys);
     if (!token) return;
     clearEvidence();
-    setErrors(previous => ({ ...previous, [id]: '' }));
+    setErrors(previous => ({ ...previous, [id]: '', work: '' }));
     let succeeded = false;
     try {
       const url = kind === 'revert' ? '/version/revert' : kind === 'cancel' ? `/checks/${encodeURIComponent(run!.id)}/cancel` :
@@ -113,7 +116,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     {selected && <section className="candidate-details" data-testid="candidate-details">
       <div className="candidate-title"><h2>候选 {selected.id.slice(0, 8)}</h2><span>待定候选 {pending.length}/3</span></div>
       {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
-      <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} gateReason={reason || '前端检查与证据已就绪，采用时仍由服务器最终核对'}/>
+      <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '前端检查与证据已就绪，采用时仍由服务器最终核对'}/>
       <div className="check-actions">
         {!selected.latestCheckRunId ? <button type="button" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button> : <button type="button" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
         <button type="button" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
@@ -121,7 +124,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
       </div>
       <Diff candidate={selected}/>
       <div className="candidate-actions">
-        <button type="button" data-testid="candidate-adopt" disabled={!!reason} onClick={() => void action('adopt')}>采用此候选</button>
+        <AdoptButton reason={reason} onAdopt={() => void action('adopt')}/>
         <button type="button" data-testid="candidate-discard" disabled={busy || !ready} onClick={() => void action('discard')}>撤回候选</button>
       </div>
     </section>}

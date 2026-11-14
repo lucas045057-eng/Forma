@@ -33,6 +33,11 @@ it('disables rerun during active checks; ordered rows retain failure and blocked
   center.syncReady = false;
   expect(render()).toMatch(/data-testid="check-cancel" disabled=""/);
 });
+it('marks a backend-rejected proof as invalid historical results', () => {
+  const html = renderToStaticMarkup(<CheckPanel candidate={candidate} syncReady syncEpoch={1} version="v1" proofRejected/>);
+  expect(html).toContain('历史检查结果 · 证明已失效');
+  expect(html).not.toContain('全部检查通过');
+});
 it('never renders evidence href from an unverified hash or a foreign run', () => {
   const run = { id: 'run001', candidateId: 'other', checks: [], status: 'completed' } as unknown as CheckRun;
   const html = renderToStaticMarkup(<CheckPanel candidate={{ ...candidate, latestCheckRunId: run.id }} run={run} syncReady syncEpoch={1} version="v1"/>);

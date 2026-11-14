@@ -1,4 +1,6 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { AdoptButton } from './CandidatePanel.tsx';
 import type { Candidate, CheckRun } from '@spatial/shared';
 import { adoptionReason, operationError, proofKey } from './adoption-gate.ts';
 import { MutationLocks } from './mutation-locks.ts';
@@ -25,12 +27,27 @@ const cases: [string, (input: Input) => void][] = [
   ['missing artifact', x => { x.run.artifacts!.pop(); }], ['duplicate artifact', x => { x.run.artifacts!.push(x.run.artifacts![0]); }],
   ['unreadable', x => { x.receipt.ready = false; }], ['old epoch', x => { x.epoch++; }], ['server rejected proof', x => { x.rejectedRun = x.run.id; }],
 ];
-it('enables only the fully bound, current and readable proof', () => { expect(adoptionReason(allowed())).toBe(''); });
+it('enables only the fully bound, current and readable proof', () => {
+  const reason = adoptionReason(allowed());
+  expect(reason).toBe('');
+  const submit = vi.fn();
+  const button = AdoptButton({ reason, onAdopt: submit });
+  expect(renderToStaticMarkup(button)).not.toContain('disabled');
+  button.props.onClick();
+  expect(submit).toHaveBeenCalledOnce();
+});
 it.each(cases)('blocks adoption: %s', (_name, change) => {
   const input = allowed(); change(input);
   // Even a fabricated read receipt cannot bypass any structural condition.
   if (!['old epoch', 'unreadable'].includes(_name)) input.receipt.key = proofKey(input.candidate, input.run, input.version, input.epoch);
-  expect(adoptionReason(input)).not.toBe('');
+  const reason = adoptionReason(input);
+  expect(reason).not.toBe('');
+  const submit = vi.fn();
+  const button = AdoptButton({ reason, onAdopt: submit });
+  expect(renderToStaticMarkup(button)).toContain('disabled=""');
+  button.props.onClick();
+  button.props.onClick();
+  expect(submit).not.toHaveBeenCalled();
 });
 it('rejects a missing run or a receipt from another candidate', () => {
   expect(adoptionReason({ ...allowed(), run: undefined })).not.toBe('');
