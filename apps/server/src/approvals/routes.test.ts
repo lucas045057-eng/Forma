@@ -30,7 +30,10 @@ it('exposes approvals without exposing private candidates and accepts only raw J
   try {
     const baseVersion = (await instance.app.inject('/version')).json().version;
     const created = await instance.app.inject({ method: 'POST', url: '/tasks', payload: { instruction: 'shared', selection: {
-      src: 'src/components/Button.tsx:1:1', baseVersion, cid: 'Button', bbox: [0, 0, 1, 1], styles: {}, instances: 1, ancestors: [],
+      src: 'src/components/Button.tsx:1:1', baseVersion, cid: 'Button', bbox: [0, 0, 1, 1], instances: 1, ancestors: [],
+      styles: { display: 'inline-block', position: 'static', color: 'rgb(0, 0, 0)', backgroundColor: 'rgba(0, 0, 0, 0)',
+        fontSize: '16px', fontFamily: 'Arial', fontWeight: '400', lineHeight: '16px', padding: '0px', margin: '0px',
+        borderRadius: '0px', width: '10px', height: '10px' },
     } } });
     const taskId = created.json().id;
     await instance.work.idle();

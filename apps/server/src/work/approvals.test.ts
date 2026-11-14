@@ -9,6 +9,7 @@ import { WorkService } from './service.ts';
 import { WorkRepo } from './repo.ts';
 
 function agentSpy() { return vi.spyOn(CodingAgent.prototype, 'run'); }
+function saveSpy(work: WorkService) { return vi.spyOn(work as unknown as { save: () => Promise<void> }, 'save'); }
 const agentOptions = { baseUrl: 'http://127.0.0.1:1', apiKey: 'mock-only', model: 'mock-coder' };
 let agent: ReturnType<typeof agentSpy>;
 let modelCalls = 0;
@@ -49,7 +50,10 @@ async function fixture() {
 }
 
 function selection(baseVersion: string, src = 'src/components/Button.tsx:1:1'): Selection {
-  return { src, baseVersion, cid: 'Button', bbox: [0, 0, 10, 10], styles: {} as Selection['styles'], instances: 1, ancestors: [] };
+  const styles: Selection['styles'] = { display: 'inline-block', position: 'static', color: 'rgb(0, 0, 0)',
+    backgroundColor: 'rgba(0, 0, 0, 0)', fontSize: '16px', fontFamily: 'Arial', fontWeight: '400', lineHeight: '16px',
+    padding: '0px', margin: '0px', borderRadius: '0px', width: '10px', height: '10px' };
+  return { src, baseVersion, cid: 'Button', bbox: [0, 0, 10, 10], styles, instances: 1, ancestors: [] };
 }
 
 async function cleanup(f: Awaited<ReturnType<typeof fixture>>) {
@@ -245,6 +249,34 @@ it('recovers a persisted approval after the commit without creating a second com
   } finally { await rm(f.directory, { recursive: true, force: true }); }
 });
 
+it('rolls back a new card when its first durable save fails before cleanup', async () => {
+  const f = await fixture();
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { entered = resolve; });
+  let save: ReturnType<typeof saveSpy> | undefined;
+  try {
+    agent.mockImplementationOnce(async ({ root }) => {
+      entered(); await gate;
+      await writeFile(path.join(root, 'src/components/Button.tsx'), 'export function Button() { return <button>保存失败</button>; }\n');
+      return { summary: 'shared save failure', written: ['src/components/Button.tsx'] };
+    });
+    const task = await f.work.submit('shared save failure', selection(f.baseVersion));
+    await started;
+    save = saveSpy(f.work).mockRejectedValueOnce(new Error('injected first card save failure'));
+    release();
+    await f.work.idle();
+    expectStatus(f.work, task.id, 'failed');
+    expect(f.work.listApprovals()).toEqual([]);
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(await f.work.repo.candidateExists(task.id)).toBe(false);
+    expect(f.published.some(event => event.type === 'approval.requested' || event.type === 'candidate.ready')).toBe(false);
+    const saved = JSON.parse(await readFile(path.join(f.directory, 'data', 'tasks.json'), 'utf8'));
+    expect(saved.approvals).toEqual([]);
+    expect(saved.tasks[0].status).toBe('failed');
+  } finally { release(); save?.mockRestore(); await cleanup(f); }
+});
+
 it('does not broadcast or publish when persisting an approval answer fails', async () => {
   const f = await fixture();
   try {
@@ -260,6 +292,36 @@ it('does not broadcast or publish when persisting an approval answer fails', asy
     expect(f.previewStarts).toEqual([]);
     expect(f.published.some(event => event.type === 'approval.resolved' || event.type === 'candidate.ready')).toBe(false);
   } finally { await cleanup(f); }
+});
+
+it('drains an admitted direct answer before close and refuses later answers', async () => {
+  const f = await fixture();
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const accepted = new Promise<void>(resolve => { entered = resolve; });
+  let closing: Promise<void> | undefined;
+  try {
+    const task = await f.work.submit('shared direct close', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const pendingDiff = f.work.repo.pendingDiff.bind(f.work.repo);
+    vi.spyOn(f.work.repo, 'pendingDiff').mockImplementationOnce(async (...args) => { entered(); await gate; return pendingDiff(...args); });
+    const answer = f.work.answerApproval(card.id, 0);
+    await accepted;
+    let closed = false;
+    closing = f.work.close().then(() => { closed = true; });
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toMatchObject({ code: 'SERVICE_CLOSING' });
+    expect(closed).toBe(false);
+    release();
+    expect((await answer).task.status).toBe('done');
+    await closing;
+    expectStatus(f.work, task.id, 'done');
+    const saved = await readFile(path.join(f.directory, 'data', 'tasks.json'), 'utf8');
+    const events = JSON.stringify(f.published);
+    await f.work.idle();
+    expect(await readFile(path.join(f.directory, 'data', 'tasks.json'), 'utf8')).toBe(saved);
+    expect(JSON.stringify(f.published)).toBe(events);
+  } finally { release(); await closing; await cleanup(f); }
 });
 
 it('serializes approve, reject and cancel so only one terminal transition wins', async () => {

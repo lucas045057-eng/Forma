@@ -64,7 +64,7 @@ export class WorkService {
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
     // These mutations can await work outside the repo queue. Register admission
     // synchronously so close cannot miss a submit that has not enqueued its task yet.
-    for (const name of ['submit', 'cancel', 'answerApproval', 'finalizeApprovedTask']) {
+    for (const name of ['submit', 'cancel', 'answerApproval']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => {
         if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
@@ -321,10 +321,19 @@ export class WorkService {
             affected: evaluation.affected, evidence: evaluation.evidence, status: 'pending', ruleCodes: evaluation.ruleCodes,
             ruleVersion: 'm3a-v1', baseVersion: base, contentDigest: pending.contentDigest, createdAt: now, updatedAt: now, summary: result.summary,
           };
+          const previousEvents = [...task.events], previousUpdatedAt = task.updatedAt;
           this.state.approvals.push(card);
           task.status = 'awaiting_approval';
           task.error = undefined;
-          await this.append(task, `模型已生成私有草稿，需批准后才能发布；规则：${evaluation.ruleCodes.join('、')}`);
+          try {
+            await this.append(task, `模型已生成私有草稿，需批准后才能发布；规则：${evaluation.ruleCodes.join('、')}`);
+          } catch (error) {
+            // The first durable card save failed: do not leave a pending card pointing at the
+            // staging that the outer task failure path is about to remove.
+            this.state.approvals = this.state.approvals.filter(item => item.id !== card.id);
+            task.status = 'running'; task.events = previousEvents; task.updatedAt = previousUpdatedAt;
+            throw error;
+          }
           this.options.emit({ type: 'approval.requested', approval: this.publicApproval(card) });
         });
         return;
