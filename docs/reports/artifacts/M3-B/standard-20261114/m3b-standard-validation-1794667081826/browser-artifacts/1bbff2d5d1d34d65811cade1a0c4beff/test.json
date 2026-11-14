@@ -1,0 +1,4 @@
+{
+  "test": "blocks popup access to a different loopback origin before it reaches the server",
+  "runId": "1bbff2d5d1d34d65811cade1a0c4beff"
+}

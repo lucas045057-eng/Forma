@@ -1,0 +1,425 @@
+$ pnpm --filter @spatial/vite-plugin-source-tag --filter @spatial/server --filter @spatial/bridge --filter @spatial/shared --filter @spatial/scene-renderer --filter @spatial/studio test
+Scope: 6 of 8 workspace projects
+packages/vite-plugin-source-tag test$ vitest run
+packages/shared test$ vitest run
+packages/shared test:  RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3b/packages/shared
+packages/vite-plugin-source-tag test:  RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3b/packages/vite-plugin-source-tag
+packages/shared test:  ✓ src/scene-edit.test.ts (5 tests) 3ms
+packages/shared test:  ✓ src/scene-config.test.ts (63 tests) 11ms
+packages/shared test:  Test Files  2 passed (2)
+packages/shared test:       Tests  68 passed (68)
+packages/shared test:    Start at  22:38:52
+packages/shared test:    Duration  492ms (transform 68ms, setup 0ms, collect 170ms, tests 14ms, environment 0ms, prepare 318ms)
+packages/shared test: Done
+packages/vite-plugin-source-tag test:  ✓ src/reserved-jsx-r2.test.ts (3 tests) 404ms
+packages/vite-plugin-source-tag test:    ✓ 保留属性内含 JSX（R2） > data-src={<span/>} 时外层 <div> 必须标记自己的位置  400ms
+packages/vite-plugin-source-tag test:  ✓ src/component-name.test.ts (8 tests) 405ms
+packages/vite-plugin-source-tag test:    ✓ 组件名归属（S3） > 保存 JSX 的大写变量不被当作组件  395ms
+packages/vite-plugin-source-tag test:  ✓ src/index.test.ts (9 tests) 373ms
+packages/vite-plugin-source-tag test:    ✓ source tags > uses original opening angle bracket locations, including CRLF and Unicode  362ms
+packages/vite-plugin-source-tag test:  Test Files  3 passed (3)
+packages/vite-plugin-source-tag test:       Tests  20 passed (20)
+packages/vite-plugin-source-tag test:    Start at  22:38:52
+packages/vite-plugin-source-tag test:    Duration  965ms (transform 59ms, setup 0ms, collect 471ms, tests 1.18s, environment 0ms, prepare 383ms)
+packages/vite-plugin-source-tag test: Done
+apps/server test$ vitest run
+packages/bridge test$ node --test src/index.test.mjs
+packages/scene-renderer test$ vitest run
+packages/scene-renderer test:  RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3b/packages/scene-renderer
+apps/server test:  RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3b/apps/server
+packages/scene-renderer test:  ✓ src/pose.test.ts (5 tests) 4ms
+packages/scene-renderer test:  Test Files  1 passed (1)
+packages/scene-renderer test:       Tests  5 passed (5)
+packages/scene-renderer test:    Start at  22:38:54
+packages/scene-renderer test:    Duration  375ms (transform 47ms, setup 0ms, collect 101ms, tests 4ms, environment 0ms, prepare 101ms)
+packages/scene-renderer test: Done
+packages/bridge test: ✔ capture isolation, real click selection, restoration and idle overlay without #root (700.1996ms)
+packages/bridge test: ℹ tests 1
+packages/bridge test: ℹ suites 0
+packages/bridge test: ℹ pass 1
+packages/bridge test: ℹ fail 0
+packages/bridge test: ℹ cancelled 0
+packages/bridge test: ℹ skipped 0
+packages/bridge test: ℹ todo 0
+packages/bridge test: ℹ duration_ms 1236.8973
+packages/bridge test: Done
+apps/server test:  ✓ src/work/approvals.test.ts (23 tests) 58323ms
+apps/server test:    ✓ holds a shared edit in private staging, then approves exactly that draft without another model call  2092ms
+apps/server test:    ✓ rejects and cancels awaiting tasks with staging cleanup and no public candidate  2331ms
+apps/server test:    ✓ releases the task queue while awaiting and allows a later local task  2485ms
+apps/server test:    ✓ combines rules into one card and enforces the three-pending-card limit  4026ms
+apps/server test:    ✓ binds answers to the exact draft digest and current main version  3200ms
+apps/server test:    ✓ hard-fails package changes instead of offering an approval card  1223ms
+apps/server test:    ✓ preserves a pending card and its staging across restart without approving it  1483ms
+apps/server test:    ✓ recovers a persisted approval after the commit without creating a second commit or public event  2187ms
+apps/server test:    ✓ rolls back a new card when its first durable save fails before cleanup  1434ms
+apps/server test:    ✓ does not broadcast or publish when persisting an approval answer fails  1531ms
+apps/server test:    ✓ drains an admitted direct answer before close and refuses later answers  2033ms
+apps/server test:    ✓ isolates preview Error to its approval and permits another card and restart  3198ms
+apps/server test:    ✓ isolates preview AbortError to its approval and permits another card and restart  3132ms
+apps/server test:    ✓ recovers a committed approval with a failing preview without preventing startup  2219ms
+apps/server test:    ✓ resumes failed-preview cleanup after terminal save failure without restarting preview  2334ms
+apps/server test:    ✓ retains stale cleanup intent across save failure and restart  1798ms
+apps/server test:    ✓ retains stale cleanup intent across cleanup failure and restart  1810ms
+apps/server test:    ✓ recovers another card before cancel, including repeated cleanup failure  3683ms
+apps/server test:    ✓ recovers another card before cancel, including repeated terminal-save failure  3242ms
+apps/server test:    ✓ uses the recovered state when cancelling the same target after a terminal-save failure  2146ms
+apps/server test:    ✓ persists stale draft approvals, releases capacity and rejects repeated answers consistently  4230ms
+apps/server test:    ✓ persists stale main approvals, releases capacity and rejects repeated answers consistently  4493ms
+apps/server test:    ✓ serializes approve, reject and cancel so only one terminal transition wins  2010ms
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 0ms init-start
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 353ms init
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 365ms listen
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 399ms accepted
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 399ms preClose
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 400ms second-instance-rejected
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 406ms new-request-rejected
+apps/server test: [n4-http] 406ms gate-released
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 719ms old-response
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 722ms file-and-event-before-unlock
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 724ms closing-resolved
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 724ms closing-awaited
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 724ms restart-start
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 903ms restart-ready
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 911ms restart-closed
+apps/server test: [n4-http] 911ms finally-enter
+apps/server test: [n4-http] 911ms finally-gate-released
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 911ms finally-closed
+apps/server test: stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [n4-http] 916ms finally-cleaned
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/work/checks.test.ts (19 tests) 66605ms
+apps/server test:    ✓ refuses adopt before checks while preserving the candidate and main bytes  1877ms
+apps/server test:    ✓ persists runs with tasks before check events and adopts only the exact evidenced draft  4464ms
+apps/server test:    ✓ deduplicates simultaneous starts on one candidate  3524ms
+apps/server test:    ✓ refuses reuse after candidate input bytes change  3688ms
+apps/server test:    ✓ requires regeneration after main advances and does not adopt a formerly green run  3891ms
+apps/server test:    ✓ refuses adopt when a recorded artifact changes on disk  3611ms
+apps/server test:    ✓ cancels an active check before discarding its candidate without a repo-lock deadlock  2557ms
+apps/server test:    ✓ drains checks before close and refuses later start/cancel without late events  2429ms
+apps/server test:    ✓ recovers interrupted saved checks as failed without rerunning them  3477ms
+apps/server test:    ✓ migrates missing run storage without trusting legacy candidate green labels  1956ms
+apps/server test:    ✓ does not execute or emit when the check start save fails and retains ownership  2101ms
+apps/server test:    ✓ withholds green state and events when the terminal save fails  3317ms
+apps/server test:    ✓ blocks adoption and retains the lock when check publication fails after saving  3243ms
+apps/server test:    ✓ rejects completion when candidate changes after execution but before publication  3603ms
+apps/server test:    ✓ rejects completion when evidence changes after execution but before publication  3205ms
+apps/server test:    ✓ uses the latest failed rerun instead of falling back to an older green result  4069ms
+apps/server test:    ✓ serializes check execution across candidates and releases resources before starting the next  5884ms
+apps/server test:    ✓ trims an actively checked oldest candidate only after cancellation and cleanup  6388ms
+apps/server test:    ✓ does not expose an uncommitted terminal run while its durable save is blocked  3321ms
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:40616) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/events-lock.test.ts (9 tests) 9378ms
+apps/server test:    ✓ keeps the event log inside the work-data lock and continues seq after a graceful restart (review F4)  1032ms
+apps/server test:    ✓ releases the work-data lock when a constructor throws after it was taken (review N3)  734ms
+apps/server test:    ✓ drains queued work-tree operations before the log closes and the lock is released (review N4)  734ms
+apps/server test:    ✓ drains an admitted real HTTP snapshot before unlock and preserves nested repo calls  918ms
+apps/server test:    ✓ drains admitted HTTP submit before task files, journal and lock close  1015ms
+apps/server test:    ✓ drains admitted HTTP selection before task files, journal and lock close  1469ms
+apps/server test:    ✓ drains admitted HTTP cancel before task files, journal and lock close  933ms
+apps/server test:    ✓ drains an admitted real HTTP approval before closing the journal and releasing the lock  2237ms
+apps/server test:    ✓ retains ownership and journal if a producer fails to stop, while stopping other producers  304ms
+apps/server test:  ✓ src/approvals/policy.test.ts (19 tests) 15078ms
+apps/server test:    ✓ allows an App-only copy edit on the real template with CSS and JSON?raw imports  1018ms
+apps/server test:    ✓ still detects the real shared Button with instances=1 and valid leaf resources  916ms
+apps/server test:    ✓ reports a genuinely missing local import on the real template  956ms
+apps/server test:    ✓ resolves queried source imports without losing shared evidence  907ms
+apps/server test:    ✓ detects deletion of a referenced leaf resource: src/style.css  949ms
+apps/server test:    ✓ detects deletion of a referenced leaf resource: src/scene.config.json  967ms
+apps/server test:    ✓ does not ignore an existing local reference that escapes src  1057ms
+apps/server test:    ✓ does not treat a resource created only in the draft as present in the baseline  942ms
+apps/server test:    ✓ detects three same-file Button JSX uses despite one import and instances=1  677ms
+apps/server test:    ✓ resolves imported aliases when counting shared JSX uses  631ms
+apps/server test:    ✓ resolves default exports and named re-export barrels  739ms
+apps/server test:    ✓ does not label an App-only copy edit as a shared Button edit  664ms
+apps/server test:    ✓ uses conservative UI instance evidence only for the changed selected file  641ms
+apps/server test:    ✓ requires approval for global CSS and scene config, but not module CSS alone  612ms
+apps/server test:    ✓ requires approval for out-of-scope edits and for every nonempty edit without selection  755ms
+apps/server test:    ✓ does not turn baseline read failures into a new-file pass  593ms
+apps/server test:    ✓ treats a genuinely new file in a valid baseline as absent without uncertainty  665ms
+apps/server test:    ✓ keeps baseline shared evidence when the draft cannot be parsed  645ms
+apps/server test:    ✓ fails closed on parse errors and dynamic imports  741ms
+apps/server test:  ✓ src/checks/scheduler.test.ts (11 tests) 20237ms
+apps/server test:    ✓ accepts a clean candidate whose worktree and expected commit match  1511ms
+apps/server test:    ✓ rejects tracked source edits which were never committed to the checked candidate  1434ms
+apps/server test:    ✓ rejects a tracked public asset changed outside the candidate commit  1460ms
+apps/server test:    ✓ rejects an unexpected new branch commit instead of relabelling it as the expected commit  1609ms
+apps/server test:    ✓ rejects a clean detached HEAD which differs from the candidate branch  1472ms
+apps/server test:    ✓ resolves each candidate separately rather than checking the first root under a second id  2630ms
+apps/server test:    ✓ rejects a resolver which returns another candidate identity  1454ms
+apps/server test:    ✓ serializes execution and resource ownership across two different candidates  3228ms
+apps/server test:    ✓ cancels a queued candidate without waiting for another candidate or starting its executor  2164ms
+apps/server test:    ✓ persists through the owning state store without creating a competing check-runs.json  1856ms
+apps/server test:    ✓ rejects start when the owning state store cannot durably accept the queued run  1418ms
+apps/server test: stdout | src/checks/worker-lifecycle.test.ts > parent death reclaims the real compiler process tree without killing an unrelated process
+apps/server test: LIFECYCLE_OWNED_IDENTITIES {"parentPid":9672,"worker":{"pid":41452,"parent":9672,"created":"2026-11-14T14:40:38.2888550Z","name":"node.exe"},"descendants":[{"pid":64876,"parent":41452,"created":"2026-11-14T14:40:38.2923630Z","name":"conhost.exe"},{"pid":37348,"parent":41452,"created":"2026-11-14T14:40:38.7484420Z","name":"esbuild.exe"}],"decoy":{"pid":36844,"parent":14264,"created":"2026-11-14T14:40:40.4011100Z","name":"node.exe"}}
+apps/server test: stdout | src/checks/worker-lifecycle.test.ts > parent death reclaims the real compiler process tree without killing an unrelated process
+apps/server test: LIFECYCLE_RECLAIMED {"workerPid":41452,"descendantPids":[64876,37348],"decoyPid":36844,"decoyAlive":true}
+apps/server test: stdout | src/checks/worker-lifecycle.test.ts > parent death reclaims the real browser process tree without killing an unrelated process
+apps/server test: LIFECYCLE_OWNED_IDENTITIES {"parentPid":36648,"worker":{"pid":14352,"parent":36648,"created":"2026-11-14T14:40:42.5117850Z","name":"node.exe"},"descendants":[{"pid":67024,"parent":14352,"created":"2026-11-14T14:40:42.5153310Z","name":"conhost.exe"},{"pid":16912,"parent":14352,"created":"2026-11-14T14:40:43.0069160Z","name":"esbuild.exe"},{"pid":30032,"parent":14352,"created":"2026-11-14T14:40:43.6876010Z","name":"chrome-headless-shell.exe"},{"pid":57880,"parent":30032,"created":"2026-11-14T14:40:43.7410150Z","name":"chrome-headless-shell.exe"},{"pid":31968,"parent":30032,"created":"2026-11-14T14:40:43.7506100Z","name":"chrome-headless-shell.exe"},{"pid":12132,"parent":30032,"created":"2026-11-14T14:40:43.7598850Z","name":"chrome-headless-shell.exe"}],"decoy":{"pid":46688,"parent":14264,"created":"2026-11-14T14:40:45.4622160Z","name":"node.exe"}}
+apps/server test: stdout | src/checks/worker-lifecycle.test.ts > parent death reclaims the real browser process tree without killing an unrelated process
+apps/server test: LIFECYCLE_RECLAIMED {"workerPid":14352,"descendantPids":[67024,16912,30032,57880,31968,12132],"decoyPid":46688,"decoyAlive":true}
+apps/server test:  ✓ src/checks/worker-lifecycle.test.ts (8 tests) 21646ms
+apps/server test:    ✓ parent death reclaims the real compiler process tree without killing an unrelated process  4185ms
+apps/server test:    ✓ parent death reclaims the real browser process tree without killing an unrelated process  5012ms
+apps/server test:    ✓ reclaims actual Chromium and its static listener after a renderer loop cancel  2523ms
+apps/server test:    ✓ reclaims actual Chromium and its static listener after a renderer loop timeout  5532ms
+apps/server test:    ✓ force-stops only its owned real worker when the IPC stop message is ignored  3809ms
+apps/server test: (node:39472) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/checks/browser-boundary.test.ts (21 tests) 58966ms
+apps/server test:    ✓ runs real Chromium smoke and occlusion against one built static page with evidence  2085ms
+apps/server test:    ✓ checks the real product template with its explicit missing-asset fallback  5584ms
+apps/server test:    ✓ fails on an uncaught page error even when the purchase UI exists  2053ms
+apps/server test:    ✓ fails smoke when 'purchase count does not increment'  1985ms
+apps/server test:    ✓ fails smoke when 'purchase feedback is empty'  1964ms
+apps/server test:    ✓ fails smoke when 'fallback is not visible'  1904ms
+apps/server test:    ✓ fails a covered purchase center using real hit testing  1907ms
+apps/server test:    ✓ fails a covered secondary control even when the purchase button is usable  1938ms
+apps/server test:    ✓ rejects an empty interactive target set  1949ms
+apps/server test:    ✓ records disabled and offscreen exclusions without counting them as passing targets  1960ms
+apps/server test:    ✓ blocks fetch access to a different loopback origin before it reaches the server  2117ms
+apps/server test:    ✓ blocks websocket access to a different loopback origin before it reaches the server  2067ms
+apps/server test:    ✓ blocks popup access to a different loopback origin before it reaches the server  2000ms
+apps/server test:    ✓ blocks worker access to a different loopback origin before it reaches the server  6442ms
+apps/server test:    ✓ continues checking the actual build bytes after the live candidate changes  2279ms
+apps/server test:    ✓ serves only build output on a separate static origin and releases it on stop  2102ms
+apps/server test:    ✓ records a blocked service worker attempt before its script can contact another origin  2132ms
+apps/server test:    ✓ rejects a worker-based WebSocket attempt at worker creation  6523ms
+apps/server test:    ✓ blocks top-level navigation to another loopback origin with failure evidence  6572ms
+apps/server test:    ✓ rejects a static directory replaced by a junction after the browser starts  2122ms
+apps/server test:    ✓ fails with evidence when its worker cannot access the installed browser  1282ms
+apps/server test: (node:39472) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:39472) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:39472) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/checks/routes.test.ts (4 tests) 13811ms
+apps/server test:    ✓ exposes fixed check endpoints and serves hash-verified artifacts with safe headers  4413ms
+apps/server test:    ✓ rejects raw coercions and extra fields before admission and applies Host Origin and private-staging guards  4324ms
+apps/server test:    ✓ cancels exactly the addressed run and rejects cancel body overrides before mutating it  2500ms
+apps/server test:    ✓ drains an admitted real HTTP check cancellation before closing the event journal and releasing its lock  2573ms
+apps/server test:  ✓ src/checks/worker-boundary.test.ts (14 tests) 12186ms
+apps/server test:    ✓ builds an HTML page and real JavaScript using trusted tools without candidate node_modules  1148ms
+apps/server test:    ✓ builds the real product template including shared scene-renderer sources  4586ms
+apps/server test:    ✓ does not execute mutable candidate configs or package scripts  1136ms
+apps/server test:    ✓ excludes both candidate .env and parent VITE variables from the browser bundle  1233ms
+apps/server test:    ✓ fails closed on 'syntax errors'  725ms
+apps/server test:    ✓ fails closed on 'raw imports outside the snapshot'  568ms
+apps/server test:    ✓ fails closed on 'CSS reads outside the snapshot'  553ms
+apps/server test:    ✓ fails closed on 'Node builtin imports in candidate sou…'  561ms
+apps/server test:    ✓ fails closed on 'network CSS imports'  584ms
+apps/server test:    ✓ cancels its owned worker and confirms exit before stop returns  374ms
+apps/server test:  ✓ src/checks/snapshot.test.ts (27 tests) 825ms
+apps/server test: warning: in the working copy of 'src/deploy.pem', LF will be replaced by CRLF the next time Git touches it
+apps/server test:  ✓ src/work/repo.test.ts (8 tests) 9724ms
+apps/server test:    ✓ snapshots disk edits, adopts a candidate and reverts the merge without rewriting history  1863ms
+apps/server test:    ✓ includes untracked files in pendingDiff and binds exact content without committing  1506ms
+apps/server test:    ✓ aborts a conflicting adoption without changing the main worktree  1659ms
+apps/server test:    ✓ refuses snapshot, candidates, adopt and revert while the work tree contains a junction (D2)  1105ms
+apps/server test:    ✓ refuses when src/ or public/ itself is a junction (review F1)  889ms
+apps/server test:    ✓ refuses an existing clean repository that already tracks a forbidden file (review F3)  787ms
+apps/server test:    ✓ does not abort an interrupted merge through a junctioned src/ at startup (review N1)  1347ms
+apps/server test:    ✓ audits paths containing tabs, newlines and spaces as whole names (review N2)  567ms
+apps/server test: (node:35680) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:35680) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:35680) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:35680) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/scene/service.test.ts (8 tests) 1930ms
+apps/server test:    ✓ HTTP returns field errors, accepts config without coercion, and enforces origins  466ms
+apps/server test:    ✓ adopts only ready assets, requires force and copies metadata with undo  395ms
+apps/server test:    ✓ bounds the persisted journal and undo stack  401ms
+apps/server test:    ✓ refuses requests addressed to a non-loopback host name unless explicitly allowed  583ms
+apps/server test:  ✓ src/checks/reliability.test.ts (9 tests) 283ms
+apps/server test: (node:19432) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:19432) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:19432) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/assets/recovery.test.ts (7 tests) 5197ms
+apps/server test:    ✓ processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL  2351ms
+apps/server test:    ✓ detects missing ready models on restart and allows re-import  401ms
+apps/server test:    ✓ app.close stops drip work and persists a restartable record  1072ms
+apps/server test:    ✓ app.close stops timeout work and persists a restartable record  1063ms
+apps/server test:  ✓ src/assets/download.test.ts (11 tests) 255ms
+apps/server test:  ✓ src/work/service.test.ts (8 tests) 16218ms
+apps/server test:    ✓ drains an admitted direct submit before close returns (selection=false)  556ms
+apps/server test:    ✓ drains an admitted direct submit before close returns (selection=true)  763ms
+apps/server test:    ✓ validates source paths, commits, line ranges and stale selections before enqueueing  1342ms
+apps/server test:    ✓ runs one task, records checks and scope, then adopts and reverts the work version  4857ms
+apps/server test:    ✓ holds changes outside the selected file and its ancestors for approval  1484ms
+apps/server test:    ✓ keeps at most three pending candidates and cleans up the oldest  5801ms
+apps/server test:    ✓ cancels a running task and removes its candidate directory  813ms
+apps/server test:    ✓ marks an interrupted running task as failed and retryable after restart  602ms
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > concurrent and restarted submissions use one paid task; conflicting input is rejected
+apps/server test: [asset-test fixture] { port: '33539', scenario: 'success' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > does not resubmit when the remote creation result is unknown
+apps/server test: [asset-test fixture] { port: '64369', scenario: 'success' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles failed without creating a task during import
+apps/server test: [asset-test fixture] { port: '35705', scenario: 'failed' }
+apps/server test:  ✓ src/checks/handoff.test.ts (8 tests) 164ms
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles cancelled without creating a task during import
+apps/server test: [asset-test fixture] { port: '23853', scenario: 'cancelled' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles expired403 without creating a task during import
+apps/server test: [asset-test fixture] { port: '21006', scenario: 'expired403' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles expired404 without creating a task during import
+apps/server test: [asset-test fixture] { port: '22816', scenario: 'expired404' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles unknown without creating a task during import
+apps/server test: [asset-test fixture] { port: '27268', scenario: 'unknown' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > handles timeout without creating a task during import
+apps/server test: [asset-test fixture] { port: '30228', scenario: 'timeout' }
+apps/server test: stdout | src/assets/service.test.ts > asset idempotency and polling > rejects unsafe IDs and internal downloads, and wraps part-split on the shared task endpoint
+apps/server test: [asset-test fixture] { port: '60623', scenario: 'success' }
+apps/server test:  ✓ src/assets/service.test.ts (9 tests) 399ms
+apps/server test: stdout | src/assets/process-model.test.ts > normalizes world-space geometry and preserves textured material through meshopt decoding
+apps/server test: prune: Removed types... Accessor (3)
+apps/server test: stdout | src/assets/process-model.test.ts > normalizes world-space geometry and preserves textured material through meshopt decoding
+apps/server test: prune: Removed types... Accessor (2)
+apps/server test:  ✓ src/assets/process-model.test.ts (4 tests) 103ms
+apps/server test:  ✓ src/test-support/fetch-listener.test.ts (8 tests) 80ms
+apps/server test: (node:22716) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/work/recovery-fix.test.ts (2 tests) 8057ms
+apps/server test:    ✓ only snapshots permitted work files and serializes concurrent snapshots  2399ms
+apps/server test:    ✓ recovers a committed adoption from durable intent without merging twice  5657ms
+apps/server test:  ✓ src/work/preview-origin.test.ts (2 tests) 45ms
+apps/server test: (node:47816) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/approvals/routes.test.ts (1 test) 2459ms
+apps/server test:    ✓ exposes approvals without exposing private candidates and accepts only raw JSON 0/1  2458ms
+apps/server test:  ✓ src/assets/mock-server.test.ts (5 tests) 134ms
+apps/server test:  ✓ src/work/checks-real.test.ts (1 test) 11469ms
+apps/server test:    ✓ uses the default real checks through HTTP before adopting and reverting the actual template  11469ms
+apps/server test:  ✓ src/assets/parts.test.ts (4 tests) 6ms
+apps/server test:  ✓ src/agent/client.test.ts (4 tests) 229ms
+apps/server test: (node:43904) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/assets/process-isolated.test.ts (4 tests) 359ms
+apps/server test: (node:53192) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/isolation.test.ts (2 tests) 485ms
+apps/server test:    ✓ rejects preview-origin mutations before any task or paid upstream work, and exposes no API on preview listener  457ms
+apps/server test:  ✓ src/checks/build.test.ts (5 tests) 198ms
+apps/server test:  ✓ src/work/fs-boundary.test.ts (1 test) 2035ms
+apps/server test:    ✓ serves work and candidate modules but denies workspace sentinel files via @fs  2035ms
+apps/server test:  ✓ src/agent/limits.test.ts (3 tests) 73ms
+apps/server test:  ✓ src/agent/tools.test.ts (3 tests) 17ms
+apps/server test:  ✓ src/m2-api.test.ts (1 test) 4788ms
+apps/server test:    ✓ exposes the M2 task/candidate/version flow and durable event replay without exposing the agent key  4787ms
+apps/server test:  ✓ src/work/preview-recovery.test.ts (1 test) 414ms
+apps/server test:    ✓ handles spawn failure and closes a preview when its owning parent is killed  414ms
+apps/server test: stdout | src/assets/lux3d.test.ts > aborts an in-flight task query without waiting for the upstream timeout
+apps/server test: [lux3d-test fixture] { port: 27927 }
+apps/server test: stderr | src/assets/lux3d.test.ts > aborts an in-flight task query without waiting for the upstream timeout
+apps/server test: [lux3d-test transport] { port: 27927, error: 'This operation was aborted', cause: undefined }
+apps/server test:  ✓ src/assets/lux3d.test.ts (9 tests) 28ms
+apps/server test:  ✓ src/assets/instance-lock.test.ts (2 tests) 120ms
+apps/server test:  ✓ src/events.test.ts (2 tests) 33ms
+apps/server test: (node:36528) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  ✓ src/app.test.ts (1 test) 1095ms
+apps/server test:    ✓ runs the mock import through HTTP, processing and model serving; rejects invalid inputs and foreign origins  1095ms
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/work/preview.test.ts (1 test) 40ms
+apps/server test:  ✓ src/assets/cleanup.test.ts (1 test) 11ms
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:52000) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  ✓ src/task-id.test.ts (24 tests) 18574ms
+apps/server test:    ✓ rejects invalid raw taskId "1e5" without upstream queries  842ms
+apps/server test:    ✓ rejects invalid raw taskId "0" without upstream queries  789ms
+apps/server test:    ✓ rejects invalid raw taskId "01" without upstream queries  759ms
+apps/server test:    ✓ rejects invalid raw taskId " 1" without upstream queries  778ms
+apps/server test:    ✓ rejects invalid raw taskId "1 " without upstream queries  776ms
+apps/server test:    ✓ rejects invalid raw taskId "1\n" without upstream queries  782ms
+apps/server test:    ✓ rejects invalid raw taskId "1\r\n" without upstream queries  755ms
+apps/server test:    ✓ rejects invalid raw taskId "1.5" without upstream queries  756ms
+apps/server test:    ✓ rejects invalid raw taskId "" without upstream queries  751ms
+apps/server test:    ✓ rejects invalid raw taskId "+1" without upstream queries  778ms
+apps/server test:    ✓ rejects invalid raw taskId "12345678901234567890" without upstream queries  768ms
+apps/server test:    ✓ rejects invalid raw taskId 0 without upstream queries  784ms
+apps/server test:    ✓ rejects invalid raw taskId -1 without upstream queries  759ms
+apps/server test:    ✓ rejects invalid raw taskId 1.5 without upstream queries  781ms
+apps/server test:    ✓ rejects invalid raw taskId 9007199254740992 without upstream queries  742ms
+apps/server test:    ✓ rejects invalid raw taskId null without upstream queries  771ms
+apps/server test:    ✓ rejects invalid raw taskId true without upstream queries  787ms
+apps/server test:    ✓ rejects invalid raw taskId "123" without upstream queries  772ms
+apps/server test:    ✓ rejects invalid raw taskId {"id":"123"} without upstream queries  766ms
+apps/server test:    ✓ accepts valid raw taskId "123" without losing precision  792ms
+apps/server test:    ✓ accepts valid raw taskId "9007199254740992" without losing precision  769ms
+apps/server test:    ✓ accepts valid raw taskId "9999999999999999999" without losing precision  764ms
+apps/server test:    ✓ accepts valid raw taskId 456 without losing precision  782ms
+apps/server test:    ✓ accepts valid raw taskId 9007199254740991 without losing precision  766ms
+apps/server test:  ✓ src/test-support/http-get.test.ts (1 test) 23ms
+apps/server test:  Test Files  43 passed (43)
+apps/server test:       Tests  315 passed (315)
+apps/server test:    Start at  22:38:54
+apps/server test:    Duration  196.15s (transform 450ms, setup 0ms, collect 6.17s, tests 362.10s, environment 4ms, prepare 2.23s)
+apps/server test: Done
+apps/studio test$ vitest run
+apps/studio test:  RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3b/apps/studio
+apps/studio test:  ✓ src/m2-state.test.ts (4 tests) 2ms
+apps/studio test:  ✓ src/pick-state.test.ts (1 test) 1ms
+apps/studio test:  ✓ src/diff.test.ts (1 test) 2ms
+apps/studio test:  ✓ src/diff-render.test.tsx (1 test) 5ms
+apps/studio test:  Test Files  4 passed (4)
+apps/studio test:       Tests  7 passed (7)
+apps/studio test:    Start at  22:42:10
+apps/studio test:    Duration  438ms (transform 98ms, setup 0ms, collect 338ms, tests 11ms, environment 1ms, prepare 379ms)
+apps/studio test: Done

@@ -112,3 +112,13 @@ RED job_c56a177b：types0，四项因路由缺失404全部目标失败。GREEN j
 其中真实loopback HTTP测试证明cancel handler已准入后与app.close并发，响应cancelled、状态与check.finished落盘、在排空前第二实例锁拒绝、完成关闭后可重新拿锁、无晚到文件/事件写入。测试客户明确connection:close排除闲置keepalive等待；生产超时/keepalive未改。
 
 旧直接adopt单测迁移、默认真实检查器从WorkService到采用/回退链、标准全仓验证与独立Claude/Pi门禁仍待完成，不将内部executor测试冒充真实完整集成。
+
+## 第十二批：标准全仓与默认真实检查闭环
+
+旧service、M2 API、recovery-fix三处采用流程保留原断言，新增未检查409、显式检查与真实artifact引用，再继续采用/回退/恢复并发；构造参数注入的测试executor只验证门禁协议，不称真实编译。三处扩展的真实Git工作流明确15s测试预算，其余预算/业务时限未改。底层WorkRepo原语不承担Service门禁，原Git测试保持。
+
+job_50ea6887一次标准顺序运行（4m31s）：pnpm typecheck、pnpm build、pnpm test、编译产物app/worker/routes的原生Node导入均exit0/signal=null。六包实际416/416：shared68、plugin20、bridge1、renderer5、server315、Studio7，无失败/跳过。每步前后全部受管源码SHA256/Git blob、HEAD/status一致。受测身份是b4b64c7加记录中的五个未提交测试/辅助文件，并非声称在随后提交HEAD重跑。原件、逐步命令/PID/时间/退出、测试日志、浏览器/进程证据、运行入口及SHA256 manifest归档standard-20261114。
+
+新增默认真实WorkService测试不覆盖checks参数：实际模板src经Schema、可信Vite、Chromium四检查，HTTP读取六份证据后采用并回退；模型只调用一次受控替身，旧开发预览被stub，真正检查静态源与浏览器未替换。完整流程11.469s；四项检查均passed，逐份核对六份artifact的字节数/SHA256。已查看实际1440×900截图：改后标题、可见商品fallback、购买入口与已加入购物袋反馈；Chromium158.0.8127.18、购买0→1、pageErrors/blockedRequests均空。测试证明检查静态源不可再访问、临时快照已删、采用后文字变化、回退精确恢复基线。只复制模板src，未复制真实.env或二进制资产，fallback结论不冒充真实GLB加载。
+
+全量包括进程生命周期断言与原始资源证据；完成后只读进程核对未发现本worktree的checks/worker-entry残留。没有修改tests/e2e，没有新增付费调用。本轮是实现侧标准验证，Claude对最终固定HEAD的独立审查、Pi迁移旧套件并执行完整E2E仍待完成；M3-C UI未实现，不能宣称M3-B独立验收或项目全部完成。

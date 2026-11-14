@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { WorkRepo } from './repo.ts';
 import { WorkService } from './service.ts';
+import { createMockCheckOptions } from '../test-support/check-executor.ts';
 
 it('only snapshots permitted work files and serializes concurrent snapshots', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'repo-safe-'));
@@ -59,15 +60,20 @@ it('recovers a committed adoption from durable intent without merging twice', as
     await repo.commitCandidate('example2', 'second edit');
     await service.close();
     const saved = JSON.parse(await readFile(path.join(directory, 'tasks.json'), 'utf8'));
-    saved.candidates.push({ id: 'example2', decision: 'pending' });
+    saved.candidates.push({ id: 'example2', decision: 'pending', baseVersion: nextBase,
+      candidateCommit: await repo.candidateCommit('example2'), branch: repo.branch('example2'), previewUrl: '',
+      createdAt: new Date().toISOString(), diff: await repo.diff('example2', nextBase), outOfScope: [], checks: [] });
     await writeFile(path.join(directory, 'tasks.json'), JSON.stringify(saved));
-    const resumed = new WorkService({ workRoot, directory, agent: {}, emit: event => ({ ...event, seq: 2, ts: 'now' }) });
+    const resumed = new WorkService({ workRoot, directory, agent: {}, checks: createMockCheckOptions(), emit: event => ({ ...event, seq: 2, ts: 'now' }) });
     try {
       await resumed.init();
+      await expect(resumed.adopt('example2')).rejects.toMatchObject({ code: 'CHECKS_NOT_PASSED' });
+      const checked = await resumed.startChecks('example2');
+      await vi.waitFor(() => expect(resumed.getCheckRun(checked.id).outcome).toBe('passed'), { timeout: 8000 });
       const operations = await Promise.allSettled([resumed.adopt('example2'), resumed.discard('example2'), resumed.version()]);
       expect(operations.map(result => result.status)).toEqual(['fulfilled', 'rejected', 'fulfilled']);
       expect(resumed.getCandidate('example2').decision).toBe('adopted');
       expect(await readFile(path.join(workRoot, 'src/App.tsx'), 'utf8')).toBe('second');
     } finally { await resumed.close(); }
   } finally { await service.close(); await rm(root, { recursive: true, force: true }); }
-});
+}, 15_000); // Recovery, explicit check proof and concurrent adoption/discard use real Git.

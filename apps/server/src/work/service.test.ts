@@ -7,6 +7,7 @@ import { createCodingAgentMock, type CodingAgentMock, type MockScenario } from '
 import type { StudioEvent } from '../events.ts';
 import { WorkService } from './service.ts';
 import { listenForFetch } from '../test-support/fetch-listener.ts';
+import { createMockCheckOptions } from '../test-support/check-executor.ts';
 
 async function fixture(scenario: MockScenario = 'success', delayMs?: number) {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-m2-'));
@@ -17,6 +18,7 @@ async function fixture(scenario: MockScenario = 'success', delayMs?: number) {
   const { mock, baseUrl } = await listenForFetch(() => createCodingAgentMock({ scenario, delayMs }));
   const published: StudioEvent[] = [];
   const work = new WorkService({
+    checks: createMockCheckOptions(),
     workRoot, directory: path.join(directory, 'data'), emit: event => { const stamped = { ...event, seq: published.length + 1, ts: new Date().toISOString() } as StudioEvent; published.push(stamped); return stamped; },
     agent: { baseUrl, apiKey: 'mock-only', model: 'mock-coder', timeoutMs: delayMs ? 80 : 2000 },
   });
@@ -90,6 +92,9 @@ it('runs one task, records checks and scope, then adopts and reverts the work ve
     expect(candidate.checks.map(check => check.status)).toEqual(['not_run', 'not_run', 'not_run', 'not_run']);
     expect(await readFile(path.join(f.workRoot, 'src', 'App.tsx'), 'utf8')).toContain('立即购买');
     expect(await readFile(path.join(f.work.repo.candidatePath(task.id), 'src', 'App.tsx'), 'utf8')).toContain('马上购买');
+    await expect(f.work.adopt(task.id)).rejects.toMatchObject({ code: 'CHECKS_NOT_PASSED' });
+    const checked = await f.work.startChecks(task.id);
+    await vi.waitFor(() => expect(f.work.getCheckRun(checked.id).outcome).toBe('passed'), { timeout: 8000 });
     const adopted = await f.work.adopt(task.id);
     expect(adopted.version).not.toBe(base);
     expect(await readFile(path.join(f.workRoot, 'src', 'App.tsx'), 'utf8')).toContain('马上购买');
@@ -100,7 +105,7 @@ it('runs one task, records checks and scope, then adopts and reverts the work ve
     expect(f.published.some(event => event.type === 'candidate.ready')).toBe(true);
     expect(f.published.some(event => event.type === 'version.changed')).toBe(true);
   } finally { await cleanup(f); }
-});
+}, 15_000); // Task + explicit check proof + adoption + revert are real Git workflows.
 
 it('holds changes outside the selected file and its ancestors for approval', async () => {
   const f = await fixture();
