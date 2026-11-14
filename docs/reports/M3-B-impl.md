@@ -76,3 +76,11 @@ adversarial RED job_f1f301f4：types0，新增五项3过/2失败，原16筛选�
 job_d5d6f767：types0、44/44（浏览器21+既有23）与native0、0跳过，identityPreserved=true。原件browser-adversarial-20261114保存两轮全部evidence/tests/log及实际browser-artifacts（固定报告/PNG与test/runId映射），manifest逐文件SHA。已人工查看真实模板smoke.png：1440×900首屏、可见商品占位和购买入口，反馈已加入购物袋；报告Chromium158.0.8127.18、fallback可见、0→1、pageErrors/blockedRequests为空。PNG属于实际检查，不是UI设计稿。
 
 浏览器资源取消/超时/父死亡后的Chromium进程身份与端口回收尚需补测；B4未实现，完整typecheck/build/单测与独立Claude/Pi门禁未完成。没有真实模型或Lux3D调用。
+
+## 第八批：实际 Chromium / 端口 / 父死亡原件
+
+job_68cc8540：types0，8项7过/1失败；timeout测试8s预算晚于浏览器5s内部等待，得到正常smoke.failed而非父deadline拒绝。仅将测试阶段预算缩短到4s使父deadline先触发，生产默认30s和全部资源/错误码断言不变。
+
+job_468fc844：types0、8/8通过、0失败/跳过、identityPreserved=true。生产代码与44项通过的4b8f905无差异，仅生命周期测试/父夹具扩展。实际观测worker、esbuild、Chromium与后代PID/创建时间，取消和缩短deadline后remaining为空、静态监听URL无法连接、lateArtifacts=0；浏览器父死亡后owned子树为空、静态源关闭，同场decoy保持存活；IPC stop被忽略时确实强制结束自有worker。两轮原件含process-artifacts与实际检查报告/截图，归档browser-resources-20261114，有逐文件manifest。
+
+B2/B3主要实现与定向证据现具备，进入B4实际WorkService/tasks.json/事件/API/采用门禁。仍未做全仓typecheck/build/单测、独立Claude复审与Pi正式E2E，不将定向实现测试称为整阶段验收。Windows进程证据不外推跨平台；强制回收命令自身失败的保锁处理仍要在集成与独立审查中核对。

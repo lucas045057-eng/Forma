@@ -1,0 +1,50 @@
+{
+  "state": "launched",
+  "worker": {
+    "pid": 48108,
+    "parent": 14132,
+    "created": "2026-11-14T13:49:21.3137690Z",
+    "name": "node.exe"
+  },
+  "descendants": [
+    {
+      "pid": 47668,
+      "parent": 48108,
+      "created": "2026-11-14T13:49:21.3177070Z",
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 6048,
+      "parent": 48108,
+      "created": "2026-11-14T13:49:21.7824370Z",
+      "name": "esbuild.exe"
+    },
+    {
+      "pid": 50872,
+      "parent": 48108,
+      "created": "2026-11-14T13:49:22.0278320Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 70468,
+      "parent": 50872,
+      "created": "2026-11-14T13:49:22.0789050Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 49072,
+      "parent": 50872,
+      "created": "2026-11-14T13:49:22.0884690Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 52344,
+      "parent": 50872,
+      "created": "2026-11-14T13:49:22.0996870Z",
+      "name": "chrome-headless-shell.exe"
+    }
+  ],
+  "urls": [
+    "http://127.0.0.1:43918/"
+  ]
+}
