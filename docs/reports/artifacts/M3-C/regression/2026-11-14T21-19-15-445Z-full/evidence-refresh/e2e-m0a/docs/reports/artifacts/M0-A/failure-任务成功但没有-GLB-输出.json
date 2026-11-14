@@ -1,0 +1,37 @@
+{
+  "case": {
+    "name": "任务成功但没有 GLB 输出",
+    "stub": "no-glb",
+    "status": "failed",
+    "code": "NO_GLB"
+  },
+  "submitted": {
+    "id": "190758f9-0689-4d4f-a1d0-37dfb3ee9ec5",
+    "status": "polling",
+    "createdAt": "2026-11-14T21:24:40.502Z",
+    "updatedAt": "2026-11-14T21:24:40.513Z",
+    "taskId": "7770001"
+  },
+  "finalAsset": {
+    "id": "190758f9-0689-4d4f-a1d0-37dfb3ee9ec5",
+    "status": "failed",
+    "createdAt": "2026-11-14T21:24:40.502Z",
+    "updatedAt": "2026-11-14T21:24:40.516Z",
+    "taskId": "7770001",
+    "error": {
+      "code": "NO_GLB",
+      "message": "任务成功但没有 GLB 输出，请使用 outputFormat: glb 创建任务"
+    }
+  },
+  "elapsedMs": 18,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 1
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 1
+    }
+  }
+}

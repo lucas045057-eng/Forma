@@ -1,0 +1,146 @@
+{
+  "results": [
+    {
+      "id": "%2e%2e%2fpackage.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2fpackage.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2f%2e%2e%2fpackage.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2f%2e%2e%2fpackage.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "..%5C..%5CWindows%5Cwin.ini",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "..%5C..%5CWindows%5Cwin.ini",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2Fetc%2Fpasswd",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2Fetc%2Fpasswd",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "C%3A%5CWindows%5Cwin.ini",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "C%3A%5CWindows%5Cwin.ini",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "index.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "index.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2findex.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2findex.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "a%00b",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "a%00b",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "xxxxxxxxxxxx…(200)",
+      "suffix": "",
+      "status": 414,
+      "leaked": []
+    },
+    {
+      "id": "xxxxxxxxxxxx…(200)",
+      "suffix": "/model.glb",
+      "status": 414,
+      "leaked": []
+    },
+    {
+      "id": "lux3d-9000001%2F..%2Findex.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "lux3d-9000001%2F..%2Findex.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2f%2e%2e%2f%2e%2e%2fpackage.json",
+      "suffix": "",
+      "status": 404,
+      "leaked": []
+    },
+    {
+      "id": "%2e%2e%2f%2e%2e%2f%2e%2e%2fpackage.json",
+      "suffix": "/model.glb",
+      "status": 404,
+      "leaked": []
+    }
+  ],
+  "failures": [],
+  "unknown": {
+    "status": 404,
+    "body": {
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "资产不存在"
+      }
+    }
+  }
+}

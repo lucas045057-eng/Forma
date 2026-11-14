@@ -1,0 +1,76 @@
+{
+  "round": "2026-11-14T21-19-15-445Z-full",
+  "job": "job_c0d8c9bf",
+  "stopReason": "第 8 步 e2e-m1b 失败（5 例 unexpected），首败即停；第 9-12 步（m2b/m3a/m3b/m3c）未执行",
+  "testedIdentity": {
+    "head": "70ad8d482990d682d74171516c11ad8d2c68d801",
+    "frozen": "0860fbb5dd44f23ab9f99e9827d949e50b86b141",
+    "headApps": "66e7ec7776b4d67a3d494cbd03652e127d1fd4f8",
+    "frozenApps": "66e7ec7776b4d67a3d494cbd03652e127d1fd4f8",
+    "productDiffLines": 0,
+    "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+    "identityDigest": "126be4809497"
+  },
+  "steps": {
+    "typecheck": "ok=true",
+    "build": "ok=true",
+    "unit": "ok=true",
+    "e2e-m0b": "ok=true (24/24, archived 21)",
+    "e2e-m0a": "ok=true (27/27, archived 28)",
+    "e2e-m1a": "ok=true (7/7, archived 7)",
+    "e2e-m1b": "ok=false code=1 (exp=18 / unexpected=5 / skipped=0 / flaky=0, archived 22)"
+  },
+  "failures": [
+    {
+      "spec": "01-consistency.spec.ts › ① 出厂配置：Studio 对照视口与作品页同尺寸画面一致，且用的是作品当前配置",
+      "metric": { "alignedChangedRatio": 0.005291005291005291, "threshold": 0.005, "alignedShift": { "x": 0, "y": 0 }, "meanAbsDiff": 2.818 },
+      "notes": "backing 尺寸 378/378 相等、对齐位移为 0（最佳对齐就是零位移），只差在 0.5291% vs 0.5%"
+    },
+    {
+      "spec": "01-consistency.spec.ts › ② 经 Studio 改动并经 PUT /scene 写入明显不同的相机后，两边仍然一致",
+      "metric": { "alignedChangedRatio": 0.005291005291005291, "threshold": 0.005, "alignedShift": { "x": 0, "y": 0 } }
+    },
+    {
+      "spec": "01-consistency.spec.ts › ③ 滚动到 at≈0.6（开盖姿态）时两边仍然一致",
+      "metric": { "alignedChangedRatio": 0.005291005291005291, "threshold": 0.005, "alignedShift": { "x": 0, "y": 0 } }
+    },
+    {
+      "spec": "04-keyframe.spec.ts › 记为此处关键帧：写入 at≈0.55 的 lid=0.12，视口在该位置的开盖量与配置一致",
+      "metric": { "measuredShiftPx": 0, "expectedShiftPx": 15.74, "modelHeightPx": 378, "configUpdateMs": 6 },
+      "evidence": "evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-write.json",
+      "notes": "活动的是 **Studio 视口**（captureStudioCanvas）；配置已落到 scene.config.json（frames 里 at=0.54944、lid=[0,0.12,0]），但视口画面位移 0px"
+    },
+    {
+      "spec": "07-fixes.spec.ts › R2：识别失败但源模型自带 lid/spatialPart 的 GLB，处理后不再被开盖轨道移动",
+      "metric": { "factoryShiftPx": 0, "factoryExpectedPx": 45.36, "factoryRatio": 0, "fakeShiftPx": 0 },
+      "evidence": "evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-r2-lid-gating.json",
+      "notes": "同样量 Studio 视口；出厂模型（diffuser-4969889.glb）滚到 at=0.6 时应当开盖 ≈45px，实测 0px；fake 场景期望 0 也确实是 0（该项断言本身通过）"
+    }
+  ],
+  "classification": {
+    "verdict": "产品侧可疑回归（Studio 场景视口），不是测试断言问题、不是入口/环境错误",
+    "whyProductSide": [
+      "受测产品字节与 0860fbb 完全一致（HEAD:apps=0860fbb:apps，apps/packages/templates/lock 差异 0 行），排除了合入失误",
+      "这些用例是 M1 验收遗留的既有断言（本轮未改一行）；同一台机器、同一套 fallback 素材下，M3-B run6 的 m1b 是 23/23 全过",
+      "相对 M3-B run6 的唯一代码增量是 M3-C 的 apps/studio 改动（packages/ 与 templates/ 零差异），而失败集中在 Studio 3D 视口与场景配置的联动上",
+      "画面几何完全对齐（backing 378=378、对齐位移 0），说明不是尺寸/DPR/裁剪问题，而是**姿态不随配置更新**：lid offset 写了、视口不动",
+      "Claude 复核已把这条列为 M1 风险并要求 Pi 在完整回归里关注：`m1b/01-consistency` 像素比较、`m1b/04-keyframe` 覆写、`m1b/03-undo`；本轮实测正是前两项"
+    ],
+    "notYetProven": [
+      "具体是哪一处 Studio 改动导致（C3-1 的 dirty 保护是否让对照模式 load 被跳过；Claude 建议 #5 提到的“每次同步窗口控件卸载重挂”是否重建了 3D 场景并丢配置；或 state.reload 不再驱动视口）——需要实现侧读代码定位",
+      "page 与 Studio 在 at≈0.6 时画面差仅 0.5291%，说明**两边都没动**（若只有视口不动、页面动了，差异会远大于阈值）；即 lid offset 在本轮整条链路上没有产生可见效果，需要确认是渲染层还是配置应用层"
+    ]
+  },
+  "preservedOriginals": {
+    "runDir": "docs/reports/artifacts/M3-C/regression/2026-11-14T21-19-15-445Z-full",
+    "m1bLog": "e2e-m1b.log",
+    "m1bJson": "e2e-m1b-results.json",
+    "m1bOutput": "e2e-m1b-output/**（失败截图与 error-context.md）",
+    "refreshedEvidence": "evidence-refresh/e2e-m1b/**（22 份被刷新的 M1-B 证据新字节，已按 blob 还原工作区）",
+    "deletedOrAltered": "无。失败轮原件全部保留，未删除、未改写"
+  },
+  "notDone": [
+    "没有重跑该轮，也没有把任何断言放宽（阈值 <0.5%、位移 >50% 期望值都是 M1 验收原有判据）",
+    "第 9-12 步未执行（首败即停），m2b 的采用时序观察点本轮没有数据"
+  ]
+}

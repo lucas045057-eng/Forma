@@ -1,0 +1,38 @@
+{
+  "case": {
+    "name": "轮询超时",
+    "mock": "timeout",
+    "timeoutMs": 1200,
+    "status": "failed",
+    "code": "POLL_TIMEOUT"
+  },
+  "submitted": {
+    "id": "cf9d5f4a-0126-40c2-a529-0106eec2eb78",
+    "status": "polling",
+    "createdAt": "2026-11-14T21:24:28.878Z",
+    "updatedAt": "2026-11-14T21:24:28.889Z",
+    "taskId": "9000001"
+  },
+  "finalAsset": {
+    "id": "cf9d5f4a-0126-40c2-a529-0106eec2eb78",
+    "status": "failed",
+    "createdAt": "2026-11-14T21:24:28.878Z",
+    "updatedAt": "2026-11-14T21:24:30.092Z",
+    "taskId": "9000001",
+    "error": {
+      "code": "POLL_TIMEOUT",
+      "message": "等待 Lux3D 超过 15 分钟；可使用原任务编号重新导入查询，勿重复生成"
+    }
+  },
+  "elapsedMs": 1248,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 20
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 20
+    }
+  }
+}

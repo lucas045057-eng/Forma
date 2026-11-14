@@ -1,0 +1,60 @@
+{
+  "containsPlaintext": false,
+  "entry": {
+    "id": "47f0d1e2-e3df-4c02-be2b-2b52ae769fa5",
+    "status": "ready",
+    "createdAt": "2026-11-14T21:24:46.311Z",
+    "updatedAt": "2026-11-14T21:24:47.259Z",
+    "keyHash": "c4a74a7486264c6f2d343261b1f6c7bf19aa90eb4723de22e12ab491bee313cf",
+    "fingerprint": "634c290e30e1f2fe07599fc542ad47bf46b5cc0ee9467451414dc77a57da4b77",
+    "taskId": "9000006",
+    "deadline": 1794691516314,
+    "metrics": {
+      "before": {
+        "bytes": 13345788,
+        "vertices": 117010
+      },
+      "after": {
+        "bytes": 983560,
+        "vertices": 85436
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 520,
+      "bounds": {
+        "min": [
+          -0.15895565660573138,
+          0,
+          -0.16475417340617085
+        ],
+        "max": [
+          0.15895565660573138,
+          1,
+          0.16475417340617085
+        ]
+      }
+    },
+    "modelUrl": "/assets/47f0d1e2-e3df-4c02-be2b-2b52ae769fa5/model.glb?revision=de4765c7-5155-42c8-89b8-b64cead7f4f8"
+  }
+}

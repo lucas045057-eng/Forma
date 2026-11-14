@@ -1,0 +1,39 @@
+{
+  "at": 0.549,
+  "configUpdateMs": 6,
+  "interpolatedBefore": 0.07836426,
+  "expectedShiftPx": 15.738309719999997,
+  "measuredShiftPx": 0,
+  "modelHeightPx": 378,
+  "ratio": 0,
+  "consistencyAtFrame": {
+    "changed": 0.005291005291005291,
+    "visibleHeight": 279
+  },
+  "frames": [
+    {
+      "at": 0,
+      "lid": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "at": 0.5494505494505495,
+      "lid": [
+        0,
+        0.12,
+        0
+      ]
+    },
+    {
+      "at": 0.6,
+      "lid": [
+        0,
+        0.08,
+        0
+      ]
+    }
+  ]
+}
