@@ -68,7 +68,7 @@ export interface Check {
   evidence?: string;
 }
 export type ApprovalRuleCode = 'shared_component' | 'global_style' | 'out_of_scope' | 'analysis_uncertain';
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'stale';
+export type ApprovalStatus = 'pending' | 'approving' | 'approved' | 'rejected' | 'cancelled' | 'stale' | 'failed';
 export interface ApprovalCard {
   id: string;
   taskId: string;

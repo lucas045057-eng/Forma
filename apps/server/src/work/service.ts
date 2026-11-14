@@ -18,7 +18,7 @@ interface StoredTask extends Task {
 }
 interface StoredCandidate extends Candidate { taskId: string; createdAt: string }
 interface StoredApproval extends ApprovalCard { summary: string }
-interface ApprovalIntent { kind: 'approve' | 'reject' | 'cancel'; id: string; taskId: string; before: string; contentDigest: string }
+interface ApprovalIntent { kind: 'approve' | 'reject' | 'cancel' | 'preview_failed' | 'stale'; id: string; taskId: string; before: string; contentDigest: string }
 interface Adoption { mergeCommit: string; candidateId: string; at: string }
 interface State {
   tasks: StoredTask[];
@@ -142,20 +142,33 @@ export class WorkService {
     if (!intent) return;
     const card = this.approval(intent.id), task = this.task(intent.taskId);
     if (intent.kind === 'approve') { await this.finalizeApprovedTask(task.id); return; }
+    if (intent.kind === 'preview_failed' || intent.kind === 'stale') await this.save();
     await this.previews.stop(task.id);
     await this.repo.removeCandidate(task.id);
-    card.status = intent.kind === 'reject' ? 'rejected' : 'cancelled';
+    const previousCard = clone(card), previousTask = clone(task);
+    const failed = intent.kind === 'preview_failed' || intent.kind === 'stale';
+    card.status = intent.kind === 'preview_failed' ? 'failed' : intent.kind === 'stale' ? 'stale' : intent.kind === 'reject' ? 'rejected' : 'cancelled';
     card.updatedAt = new Date().toISOString();
-    if (task.status !== 'cancelled') {
-      task.status = 'cancelled';
-      task.error = { code: intent.kind === 'reject' ? 'APPROVAL_REJECTED' : 'TASK_CANCELLED', message: intent.kind === 'reject' ? '用户拒绝并丢弃本次修改' : '用户取消任务' };
-      task.updatedAt = card.updatedAt;
-      task.events.push({ type: 'task.updated', ts: card.updatedAt, sequence: task.events.length + 1, message: task.error.message });
-    }
+    task.status = failed ? 'failed' : 'cancelled';
+    task.error = intent.kind === 'preview_failed' ? { code: 'PREVIEW_FAILED', message: '候选预览启动失败，本次草稿已丢弃，请重新提交任务' }
+      : intent.kind === 'stale' ? { code: 'STALE_APPROVAL', message: '草稿或主作品版本已变化，不能继续批准' }
+      : { code: intent.kind === 'reject' ? 'APPROVAL_REJECTED' : 'TASK_CANCELLED', message: intent.kind === 'reject' ? '用户拒绝并丢弃本次修改' : '用户取消任务' };
+    task.updatedAt = card.updatedAt;
+    task.events.push({ type: 'task.updated', ts: card.updatedAt, sequence: task.events.length + 1, message: task.error.message });
     this.state.approvalIntent = undefined;
-    try { await this.save(); } catch (error) { this.state.approvalIntent = intent; throw error; }
+    try { await this.save(); } catch (error) {
+      Object.assign(card, previousCard); Object.assign(task, previousTask);
+      this.state.approvalIntent = intent; throw error;
+    }
     this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
     this.options.emit({ type: 'task.updated', task: clone(task) });
+  }
+
+  private async failApproval(card: StoredApproval, kind: 'preview_failed' | 'stale') {
+    // Persist the cleanup decision before removing the only draft. A failed terminal save
+    // can then resume cleanup without retrying the preview or requiring the removed files.
+    this.state.approvalIntent = { kind, id: card.id, taskId: card.taskId, before: card.baseVersion, contentDigest: card.contentDigest };
+    await this.recoverApprovalIntent();
   }
 
   /** Publish only the already-generated draft named by a durable approval intent. */
@@ -174,24 +187,22 @@ export class WorkService {
     const head = await this.repo.head();
     const pending = await this.repo.pendingDiff(taskId, intent.before);
     if (head !== intent.before || pending.contentDigest !== intent.contentDigest || card.contentDigest !== intent.contentDigest || card.baseVersion !== intent.before) {
-      await this.previews.stop(taskId);
-      await this.repo.removeCandidate(taskId);
-      card.status = 'stale'; card.updatedAt = new Date().toISOString();
-      task.status = 'failed'; task.error = { code: 'STALE_APPROVAL', message: '草稿或主作品版本已变化，不能继续批准' };
-      task.updatedAt = card.updatedAt;
-      task.events.push({ type: 'task.updated', ts: card.updatedAt, sequence: task.events.length + 1, message: task.error.message });
-      this.state.approvalIntent = undefined;
-      try { await this.save(); } catch (error) { this.state.approvalIntent = intent; throw error; }
-      this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
-      this.options.emit({ type: 'task.updated', task: clone(task) });
+      await this.failApproval(card, 'stale');
       return { approval: this.publicApproval(card), task: clone(task) };
     }
     const controller = new AbortController();
     this.controllers.set(taskId, controller);
     try {
       await this.repo.commitCandidate(taskId, card.summary);
-      const previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
-      controller.signal.throwIfAborted();
+      let previewUrl: string;
+      try {
+        previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
+        controller.signal.throwIfAborted();
+      } catch {
+        await this.failApproval(card, 'preview_failed');
+        return { approval: this.publicApproval(card), task: clone(task) };
+      }
+      const previousTask = clone(task), previousCard = clone(card), previousCandidates = clone(this.state.candidates);
       let candidate = this.state.candidates.find(item => item.id === taskId);
       if (!candidate) {
         const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
@@ -205,7 +216,12 @@ export class WorkService {
       }
       card.status = 'approved'; card.updatedAt = new Date().toISOString();
       this.state.approvalIntent = undefined;
-      try { await this.save(); } catch (error) { this.state.approvalIntent = intent; throw error; }
+      try { await this.save(); } catch (error) {
+        Object.assign(task, previousTask); Object.assign(card, previousCard);
+        this.state.candidates = previousCandidates; this.state.approvalIntent = intent;
+        await this.previews.stop(taskId);
+        throw error;
+      }
       this.options.emit({ type: 'task.updated', task: clone(task) });
       this.options.emit({ type: 'candidate.ready', candidate: clone(candidate) });
       this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
@@ -388,6 +404,7 @@ export class WorkService {
     return this.repo.exclusive(async () => {
       await this.recoverApprovalIntent();
       const card = this.approval(id), task = this.task(card.taskId);
+      if (card.status === 'stale') throw new WorkError('STALE_APPROVAL', '请示已过期，请重新生成任务', 409);
       if (card.answer) {
         if (card.answer.option === option) return { approval: this.publicApproval(card), task: clone(task) };
         throw new WorkError('APPROVAL_ALREADY_ANSWERED', '请示已经以另一选项回答，不能重放或覆盖', 409);
@@ -396,12 +413,15 @@ export class WorkService {
       if (option === 0) {
         const head = await this.snapshot();
         const pending = await this.repo.pendingDiff(task.id, card.baseVersion);
-        if (head !== card.baseVersion || pending.contentDigest !== card.contentDigest) throw new WorkError('STALE_APPROVAL', '草稿摘要或主作品版本已变化，请重新生成任务', 409);
+        if (head !== card.baseVersion || pending.contentDigest !== card.contentDigest) {
+          await this.failApproval(card, 'stale');
+          throw new WorkError('STALE_APPROVAL', '草稿摘要或主作品版本已变化，请重新生成任务', 409);
+        }
       }
       const index = this.state.approvals.findIndex(item => item.id === id);
       const previous = clone(card);
       const now = new Date().toISOString();
-      card.answer = { option, at: now }; card.updatedAt = now; card.status = option === 0 ? 'approved' : 'rejected';
+      card.answer = { option, at: now }; card.updatedAt = now; card.status = option === 0 ? 'approving' : 'rejected';
       this.state.approvalIntent = { kind: option === 0 ? 'approve' : 'reject', id, taskId: task.id, before: card.baseVersion, contentDigest: card.contentDigest };
       try { await this.save(); }
       catch (error) { this.state.approvals[index] = previous; this.state.approvalIntent = undefined; throw error; }

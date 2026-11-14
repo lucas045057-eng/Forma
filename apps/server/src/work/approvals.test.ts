@@ -324,6 +324,160 @@ it('drains an admitted direct answer before close and refuses later answers', as
   } finally { release(); await closing; await cleanup(f); }
 });
 
+it.each(['Error', 'AbortError'])('isolates preview %s to its approval and permits another card and restart', async name => {
+  const f = await fixture();
+  try {
+    const first = await f.work.submit('shared A', selection(f.baseVersion));
+    await f.work.idle();
+    const second = await f.work.submit('shared B', selection(f.baseVersion));
+    await f.work.idle();
+    const [a, b] = f.work.listApprovals();
+    const start = vi.spyOn(f.work.previews, 'start').mockRejectedValueOnce(Object.assign(new Error('private preview diagnostic'), { name }));
+    const response = await f.work.answerApproval(a.id, 0);
+    expect(response.approval.status).toBe('failed');
+    expect(response.task).toMatchObject({ status: 'failed', error: { code: 'PREVIEW_FAILED' } });
+    expect(JSON.stringify(response)).not.toContain('private preview diagnostic');
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(await f.work.repo.candidateExists(first.id)).toBe(false);
+    expect(f.published.filter(event => event.type === 'candidate.ready')).toEqual([]);
+    expect(await f.work.answerApproval(a.id, 0)).toEqual(response);
+    expect(start).toHaveBeenCalledTimes(1);
+    expect((await f.work.answerApproval(b.id, 1)).task.status).toBe('cancelled');
+    expectStatus(f.work, second.id, 'cancelled');
+    expect(modelCalls).toBe(2);
+    await f.work.close();
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    const restartStart = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not replay failed preview'));
+    try {
+      await restarted.init();
+      expect(restarted.getApproval(a.id).status).toBe('failed');
+      expectStatus(restarted, first.id, 'failed');
+      expect(restarted.getApproval(b.id).status).toBe('rejected');
+      expect(restartStart).not.toHaveBeenCalled();
+      expect(modelCalls).toBe(2);
+    } finally { await restarted.close(); }
+  } finally { await cleanup(f); }
+});
+
+it('recovers a committed approval with a failing preview without preventing startup', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared recovery preview failure', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    await f.work.close();
+    const file = path.join(f.directory, 'data', 'tasks.json');
+    const saved = JSON.parse(await readFile(file, 'utf8'));
+    saved.approvals[0].answer = { option: 0, at: new Date().toISOString() };
+    saved.approvals[0].status = 'approved';
+    saved.approvalIntent = { kind: 'approve', id: card.id, taskId: task.id, before: f.baseVersion, contentDigest: card.contentDigest };
+    await writeFile(file, JSON.stringify(saved));
+    const repo = new WorkRepo({ workRoot: f.workRoot, dataDirectory: path.join(f.directory, 'data') });
+    await repo.commitCandidate(task.id, saved.approvals[0].summary);
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('recovery preview failure'));
+    try {
+      await restarted.init();
+      expect(restarted.getApproval(card.id).status).toBe('failed');
+      expect(restarted.getTask(task.id)).toMatchObject({ status: 'failed', error: { code: 'PREVIEW_FAILED' } });
+      expect(restarted.listCandidates()).toEqual([]);
+      expect(JSON.parse(await readFile(file, 'utf8')).approvalIntent).toBeUndefined();
+      expect(f.published.filter(event => event.type === 'candidate.ready')).toEqual([]);
+      expect(modelCalls).toBe(1);
+    } finally { await restarted.close(); }
+  } finally { await cleanup(f); }
+});
+
+it('resumes failed-preview cleanup after terminal save failure without restarting preview', async () => {
+  const f = await fixture();
+  let save: ReturnType<typeof saveSpy> | undefined;
+  try {
+    const task = await f.work.submit('shared terminal failure', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const originalSave = f.work['save'].bind(f.work);
+    vi.spyOn(f.work.previews, 'start').mockImplementationOnce(async () => {
+      save = saveSpy(f.work).mockImplementationOnce(originalSave).mockRejectedValueOnce(new Error('terminal disk failure'));
+      throw new Error('preview fault');
+    });
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toThrow('terminal disk failure');
+    save?.mockRestore();
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(f.published.some(event => event.type === 'approval.resolved' || event.type === 'candidate.ready')).toBe(false);
+    const saved = JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8'));
+    expect(saved.approvalIntent.kind).toBe('preview_failed');
+    await f.work.close();
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    const preview = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not start'));
+    try {
+      await restarted.init();
+      expect(restarted.getApproval(card.id).status).toBe('failed');
+      expectStatus(restarted, task.id, 'failed');
+      expect(preview).not.toHaveBeenCalled();
+      expect(modelCalls).toBe(1);
+    } finally { await restarted.close(); }
+  } finally { save?.mockRestore(); await cleanup(f); }
+});
+
+it.each(['save', 'cleanup'])('retains stale cleanup intent across %s failure and restart', async failure => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared stale failure', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    await writeFile(path.join(f.work.repo.candidatePath(task.id), 'src/components/Button.tsx'), 'export const changed = 1;');
+    const fault = failure === 'save' ? saveSpy(f.work).mockRejectedValueOnce(new Error('stale save failure'))
+      : vi.spyOn(f.work.repo, 'removeCandidate').mockRejectedValueOnce(new Error('stale cleanup failure'));
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toThrow(`stale ${failure} failure`);
+    fault.mockRestore();
+    expect(await f.work.repo.candidateExists(task.id)).toBe(true);
+    expect(f.work.getApproval(card.id).status).toBe('pending');
+    expect(f.published.some(event => event.type === 'approval.resolved')).toBe(false);
+    if (failure === 'save') {
+      await expect(f.work.answerApproval(card.id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL' });
+    }
+    await f.work.close();
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    try {
+      await restarted.init();
+      expect(restarted.getApproval(card.id).status).toBe('stale');
+      expect(await restarted.repo.candidateExists(task.id)).toBe(false);
+      expectStatus(restarted, task.id, 'failed');
+      expect(modelCalls).toBe(1);
+    } finally { await restarted.close(); }
+  } finally { await cleanup(f); }
+});
+
+it.each(['draft', 'main'])('persists stale %s approvals, releases capacity and rejects repeated answers consistently', async changed => {
+  const f = await fixture();
+  try {
+    for (let index = 0; index < 3; index++) {
+      await f.work.submit(`shared ${index}`, selection(f.baseVersion));
+      await f.work.idle();
+    }
+    const card = f.work.listApprovals()[0];
+    if (changed === 'draft') {
+      await writeFile(path.join(f.work.repo.candidatePath(card.taskId), 'src/components/Button.tsx'), 'export function Button() { return <button>changed</button>; }\n');
+    } else {
+      await writeFile(path.join(f.workRoot, 'src/style.css'), 'button { color: red; }\n');
+    }
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL', status: 409 });
+    expect(f.work.getApproval(card.id).status).toBe('stale');
+    expect(f.work.getTask(card.taskId)).toMatchObject({ status: 'failed', error: { code: 'STALE_APPROVAL' } });
+    expect(await f.work.repo.candidateExists(card.taskId)).toBe(false);
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(f.work.listApprovals().filter(item => item.status === 'pending')).toHaveLength(2);
+    for (const option of [0, 1] as const) await expect(f.work.answerApproval(card.id, option)).rejects.toMatchObject({ code: 'STALE_APPROVAL', status: 409 });
+    const next = await f.work.submit('shared replacement', selection((await f.work.version()).version));
+    await f.work.idle();
+    expectStatus(f.work, next.id, 'awaiting_approval');
+    expect(f.work.listApprovals().filter(item => item.status === 'pending')).toHaveLength(3);
+    const saved = JSON.parse(await readFile(path.join(f.directory, 'data', 'tasks.json'), 'utf8'));
+    expect(saved.approvals.find((item: { id: string }) => item.id === card.id).status).toBe('stale');
+    expect(f.published.filter(event => event.type === 'approval.resolved')).toHaveLength(1);
+  } finally { await cleanup(f); }
+});
+
 it('serializes approve, reject and cancel so only one terminal transition wins', async () => {
   const f = await fixture();
   try {
