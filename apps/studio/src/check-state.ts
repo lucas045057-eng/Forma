@@ -62,7 +62,7 @@ export function safeArtifact(value: unknown): value is CheckArtifact {
   return value.mime.split(';')[0].trim().toLowerCase() === expected && Number.isSafeInteger(value.bytes) && Number(value.bytes) >= 0 && Number(value.bytes) <= 2 * 1024 * 1024 && typeof value.hash === 'string' && /^[a-f0-9]{64}$/.test(value.hash);
 }
 export function evidenceRefs(candidate: Candidate, run: CheckRun | undefined) {
-  if (!associatedRun(candidate, run) || !Array.isArray(run!.artifacts)) return [];
+  if (!associatedRun(candidate, run) || !Array.isArray(run!.artifacts) || !Array.isArray(candidate.checks)) return [];
   return run!.artifacts!.filter(safeArtifact).filter(ref => {
     if (run!.artifacts!.filter(other => other?.name === ref.name).length !== 1) return false;
     const name = (Object.keys(primaryEvidence) as CheckName[]).find(name => primaryEvidence[name] === ref.name);
