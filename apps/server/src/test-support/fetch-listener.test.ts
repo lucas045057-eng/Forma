@@ -28,8 +28,25 @@ it('closes a listener whose bind collided before allocating a new one', async ()
   expect(available.listen).toHaveBeenCalledExactlyOnceWith({ host: '127.0.0.1', port: 20001 });
 });
 
-it('propagates a bind error other than an occupied port after cleaning up', async () => {
-  const error = Object.assign(new Error('denied'), { code: 'EACCES' });
+it('reallocates Windows-reserved ports while preserving permission errors on other platforms', async () => {
+  const error = Object.assign(new Error('reserved by the operating system'), { code: 'EACCES' });
+  const reserved = { listen: vi.fn(async () => { throw error; }), close: vi.fn(async () => {}) };
+  const available = { listen: vi.fn(async () => 'http://127.0.0.1:20001'), close: vi.fn(async () => {}) };
+  const instances = [reserved, available];
+  const ports = [20000, 20001];
+  const allocating = listenForFetch(async () => instances.shift()!, () => ports.shift()!);
+  if (process.platform === 'win32') {
+    expect((await allocating).mock).toBe(available);
+    expect(available.listen).toHaveBeenCalledExactlyOnceWith({ host: '127.0.0.1', port: 20001 });
+  } else {
+    await expect(allocating).rejects.toBe(error);
+    expect(available.listen).not.toHaveBeenCalled();
+  }
+  expect(reserved.close).toHaveBeenCalledOnce();
+});
+
+it('propagates a bind error other than an unavailable candidate after cleaning up', async () => {
+  const error = Object.assign(new Error('I/O failure'), { code: 'EIO' });
   const mock = { listen: vi.fn(async () => { throw error; }), close: vi.fn(async () => {}) };
   const create = vi.fn(async () => mock);
   await expect(listenForFetch(create, () => 20000)).rejects.toBe(error);
