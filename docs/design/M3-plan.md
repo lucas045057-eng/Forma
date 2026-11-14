@@ -85,7 +85,7 @@
 
 事件新增approval.requested、approval.resolved、check.started、check.finished，沿用全局seq及补拉；数据先持久再广播。Task状态沿用已有awaiting_approval。ApprovalCard扩展status、ruleCodes、baseVersion、contentDigest等，已有M2数据迁移时缺失approvals视为空数组；损坏记录不得悄悄重置。
 
-## M3-A 任务卡：后端请示状态机（现在派 CodeBuddy）
+## M3-A 任务卡：后端请示状态机（已独立验收）
 
 **Files:**
 - Create `apps/server/src/approvals/policy.ts`、`policy.test.ts`：实际diff的静态风险判断。
@@ -101,25 +101,25 @@
 - `finalizeApprovedTask(taskId)`：无新模型请求的幂等发布路径；批准意图和已存在的候选身份一致时返回原结果，不重复发布。
 
 ### Task A1：风险策略与可审计证据
-- [ ] 先写失败单测：三次Button引用（同文件一次import）命中shared；别名引用同样命中；把instances伪为1仍拦；全局CSS命中；out-of-scope及无选择命中；App内单一文案改动不因Button共享而误命中shared。
-- [ ] 用现有TypeScript AST/文件解析完成最小策略。需要运行时声明时只用本地现有TypeScript 5.9.3，不引入不明传递依赖、线上下载或新的解析服务；无法分析时请示并说明原因。
-- [ ] 定向测试证明策略先红后绿；提交一次清晰中文commit。
+- [x] 先写失败单测：三次Button引用（同文件一次import）命中shared；别名引用同样命中；把instances伪为1仍拦；全局CSS命中；out-of-scope及无选择命中；App内单一文案改动不因Button共享而误命中shared。
+- [x] 用现有TypeScript AST/文件解析完成最小策略。需要运行时声明时只用本地现有TypeScript 5.9.3，不引入不明传递依赖、线上下载或新的解析服务；无法分析时请示并说明原因。
+- [x] 定向测试证明策略先红后绿；提交一次清晰中文commit。
 
 ### Task A2：私有草稿、卡片与批准/拒绝
-- [ ] 先写mock Agent集成单测：共享圆角产生awaiting_approval，公开候选列表为空、preview404、adopt404/409、原作品不变；批准后一次candidate.ready且模型调用次数不增加；拒绝无候选、staging清理。
-- [ ] 在commitCandidate/preview.start之前接策略，保存草稿/卡与任务状态；等待卡不占住taskQueue，下一条安全局部任务仍可运行。
-- [ ] 同时覆盖多规则一张卡、最多3张等待卡、cancel awaiting、幂等同答/相反答409、回答时草稿和主版本变化409；批准不能带出src或修改package.json。
-- [ ] 完成路由和共享类型，字段schema严格；旧数据迁移与新事件写盘顺序保持。定向验证并提交。
+- [x] 先写mock Agent集成单测：共享圆角产生awaiting_approval，公开候选列表为空、preview404、adopt404/409、原作品不变；批准后一次candidate.ready且模型调用次数不增加；拒绝无候选、staging清理。
+- [x] 在commitCandidate/preview.start之前接策略，保存草稿/卡与任务状态；等待卡不占住taskQueue，下一条安全局部任务仍可运行。
+- [x] 同时覆盖多规则一张卡、最多3张等待卡、cancel awaiting、幂等同答/相反答409、回答时草稿和主版本变化409；批准不能带出src或修改package.json。
+- [x] 完成路由和共享类型，字段schema严格；旧数据迁移与新事件写盘顺序保持。定向验证并提交。
 
 ### Task A3：崩溃恢复与关闭边界
-- [ ] 先写失败测试：等待卡重启仍等待且不误删staging；批准意图落盘后进程中断能幂等恢复；完成commit但状态尚未落盘不重复commit/事件；磁盘保存失败不广播“已批准/已完成”。
-- [ ] 并发 approve/reject/cancel，以及HTTP延迟回答与close竞态：只有一个终局，停止所有生产者前不关日志/放锁；关闭不等待用户，不能回退N4合同。
-- [ ] 完成恢复与取消清理，只动本任务文件/链接；验证上述案例并提交。
+- [x] 先写失败测试：等待卡重启仍等待且不误删staging；批准意图落盘后进程中断能幂等恢复；完成commit但状态尚未落盘不重复commit/事件；磁盘保存失败不广播“已批准/已完成”。
+- [x] 并发 approve/reject/cancel，以及HTTP延迟回答与close竞态：只有一个终局，停止所有生产者前不关日志/放锁；关闭不等待用户，不能回退N4合同。
+- [x] 完成恢复与取消清理，只动本任务文件/链接；验证上述案例并提交。
 
 ### Task A4：冻结交付
-- [ ] 独立worktree先跑baseline（由调度bootstrap完成）；完成后typecheck/build/完整单测。所有长验证走后台通知，首个失败即停；不重复五轮全量，除非有新不稳定证据。
-- [ ] 写M3-A-impl报告：提交、API、规则覆盖/保守边界、迁移/恢复、mock证据、Pi需要的接点、未运行项、自启PID/端口清理。不可称正式e2e已过。
-- [ ] 固定HEAD、工作树干净，交回调度，不自行合并。完整验证未结束时报告“待结果”，收到通知后再补交付。
+- [x] 独立worktree先跑baseline（由调度bootstrap完成）；完成后typecheck/build/完整单测。所有长验证走后台通知，首个失败即停；不重复五轮全量，除非有新不稳定证据。
+- [x] 写M3-A-impl报告：提交、API、规则覆盖/保守边界、迁移/恢复、mock证据、Pi需要的接点、未运行项、自启PID/端口清理。不可称正式e2e已过。
+- [x] 固定HEAD、工作树干净，交回调度，不自行合并。完整验证未结束时报告“待结果”，收到通知后再补交付。
 
 ## M3-B / M3-C 后续任务（不要在 M3-A 抢做）
 
@@ -130,3 +130,13 @@ M3-C：ApprovalPanel与EventCenter持久补拉、受影响位置高亮、批准/
 ## M3 最终过关标准
 
 共享组件/全局CSS/越范围修改必须由后端暂停，未批准无公开候选；批准仅针对精确草稿且不重复模型调用；拒绝、取消、重启与并发不绕过。四项检查有真实成功及失败证据，未运行如实标注，失败/未运行采用被拒。原M0–M2回归不倒退、N4排空不回退、无凭据/进程泄漏；实现、Pi验收与Claude Code独立审查全部通过后才收口。未开M4、不自动重跑真实模型十题。
+
+## M3-A 收口（2026-11-14）
+
+M3-A 后端请示已通过实现、独立审查与 Pi 正式验收。上述 A1–A4 已完成；实现/整改/稳定性记录见 M3-A-impl、M3-A-fix-impl、M3-A-stability-impl、M3-A-mock-port-impl，独立审查见 M3-A-review、M3-A-stability-review、M3-A-mock-port-review。所有报告在 docs/reports/。
+
+最终受测 HEAD 为 `40cc46b411fb6f8a648a189a2c1d0d1586e7f9d1`，Pi 归档提交为 `c6c8ffe627ee4e9e361d429950d4f7eca37c975f`。job_9ce21099 exit 0，12m14s：typecheck/build、289 单测及七套 E2E 139/139 实际通过，无 expected-failed/skip/retry/flaky 或顶层 errors。原始证据在 `docs/reports/artifacts/M3-A/run-20261114-m3a-6/`；正式报告 `docs/reports/M3-A-test.md`。归档提交相对受测版本的 apps/packages/templates/锁文件无差异。
+
+每步 HEAD、锁和产品摘要一致；62 份被刷新的旧证据先快照再还原，端口与本轮进程已清理。run1–5 和 checkpoint 的失败/修正链保留。RR1 跨卡故障没有独立 E2E（实现单测与独立审查已覆盖）；历史偶发问题唯一根因未关闭。检查仍为 not_run，本轮为 mock 门槛，不能宣称整个 M3 或项目完成。
+
+按持续授权进入 M3-B，具体任务见 `docs/design/M3-B-plan.md`；CodeBuddy 实现、Claude Code 独立审查、Pi 独立验收，M3-C 随后进行。
