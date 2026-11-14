@@ -317,3 +317,44 @@ test('M1 场景写回：写入落盘并使旧候选证明失效（采用仍关�
     ambientAfter: reread.hero.lights.ambient, adoptDisabled: await page.getByTestId('candidate-adopt').isDisabled(),
   });
 });
+
+test('M1 场景写回后不刷新就直接采用：界面无可采用窗口，绕过界面直打接口也被 409 拒绝', async ({ page }) => {
+  await openStudio(page);
+  const { candidate } = await localCandidate(page, '把首屏文案改成“写回后越权采用”');
+
+  // 先真的把检查跑绿、六份证据读完，让采用确实可用（否则下面的“关灯”不可信）。
+  await page.getByTestId('check-run').click();
+  await waitChecksPassed(page);
+  await waitEvidenceReady(page);
+  expect(await page.getByTestId('candidate-adopt').isDisabled(), '检查通过且证据就绪后采用仍被禁用').toBe(false);
+
+  // M1 场景写回（真实 PUT /scene），作品版本随即变化。
+  const scene = (await api.getScene()).body;
+  const written = structuredClone(scene);
+  written.hero.lights.ambient = Number((scene.hero.lights.ambient + 0.1).toFixed(2));
+  expect((await api.putScene(written)).status, 'M1 场景写回失败').toBe(200);
+  expect((await api.getVersion()).body.version, '场景写回没有产生新版本').not.toBe(candidate.baseVersion);
+
+  // **不点刷新**，连续采样 2 秒：不允许出现任何一瞬“可采用”。
+  const samples: boolean[] = [];
+  for (let index = 0; index < 20; index += 1) {
+    samples.push(await page.getByTestId('candidate-adopt').isDisabled());
+    await page.waitForTimeout(100);
+  }
+  expect(samples.every(Boolean), `场景写回后曾出现可采用窗口：${JSON.stringify(samples)}`).toBe(true);
+  await expect(page.getByTestId('candidate-gate-reason')).toContainText('证明已失效');
+
+  // 前端不是唯一防线：绕过界面直接打接口，后端必须在锁内拒绝（不靠 UI disabled）。
+  const direct = await page.evaluate(async (id: string) => {
+    const response = await fetch(`/candidates/${id}/adopt`, { method: 'POST' });
+    return { status: response.status, body: await response.json().catch(() => null) };
+  }, candidate.id);
+  expect(direct.status, JSON.stringify(direct.body)).toBe(409);
+  expect((direct.body as { error?: { code?: string } })?.error?.code, JSON.stringify(direct.body)).toBe('CHECKS_NOT_PASSED');
+  expect((await api.listCandidates()).body.find((item: { id: string }) => item.id === candidate.id)?.decision, '绕过面居然真的采用了').toBe('pending');
+
+  writeArtifact('m3c-m1-writeback-no-bypass.json', {
+    samples, directStatus: direct.status, directCode: (direct.body as { error?: { code?: string } })?.error?.code,
+    gateReason: await gateReason(page),
+  });
+});
