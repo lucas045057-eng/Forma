@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { adoptCandidate, getCandidate, httpJson, readArtifact } from './checks';
+import { adoptCandidate, getCandidate, httpJson, readArtifact, startChecks } from './checks';
 import { summarizeRun, writeArtifact } from './artifact';
 import {
   createCandidate, disposeAllFixtures, getTask, getVersion, listCandidatesApi, resetMock, selection, setScript,
@@ -78,7 +78,7 @@ function expectStoppedAfter(run: { checks: Array<{ name: string; status: string;
   }
 }
 
-test('build / 运行错误 / 遮挡三类真实故障让检查失败，且沙箱拒绝写坏场景配置', async () => {
+test('build / 运行错误 / 遮挡三类真实故障让检查失败，且两道守卫拒绝造出坏场景配置', async () => {
   test.setTimeout(600_000);
   const root = path.join(process.cwd(), '.data', `m3b-faults-${Date.now().toString(36)}`);
   const fixture = await startFixture({ root });
@@ -120,6 +120,10 @@ test('build / 运行错误 / 遮挡三类真实故障让检查失败，且沙箱
       configUnchanged: after === before,
       configStillValidJson: true,
       taskSnapshotAt: task.body?.updatedAt ?? null,
+      // 任务 API 只暴露 NO_CHANGES（工具层报错不会回写到任务记录），
+      // “工具层为何拒绝”由代码位置坐实：apps/server/src/agent/tools.ts:86-89。
+      toolGuardSource: 'apps/server/src/agent/tools.ts:86-89（store 校验 scene.config.json 必须合法 JSON 且符合 isSceneConfig）',
+      observedErrorSurface: 'task.error 仅 code/message，不含 ToolError 文本',
     };
   }
 
@@ -182,7 +186,45 @@ test('build / 运行错误 / 遮挡三类真实故障让检查失败，且沙箱
     expect((await httpJson(`${fixture.base}/candidates/${created.candidateId}/discard`, { method: 'POST' })).status).toBe(200);
   }
 
-  // 四类故障之后服务仍然健康：再起一个正常候选并跑通四项（不是复用旧绿灯）
+  /* ---------------- schema-B：绕过 Agent 直改候选工作树 → 检查拒绝建 run ---------------- */
+  {
+    const created = await createCandidate(fixture, [
+      [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '立即购买', new: '马上购买' } }],
+      [{ name: 'finish', args: { summary: 'B 正常小改动' } }],
+    ], { instruction: 'B：正常小改动' });
+    const viewBefore = (await getCandidate(fixture.base, created.candidateId)).body;
+    expect(viewBefore.checks.map((check: any) => check.status)).toEqual(['not_run', 'not_run', 'not_run', 'not_run']);
+    expect(viewBefore.latestCheckRunId ?? null).toBeNull();
+
+    const candidateConfig = path.join(fixture.dataDir, 'candidates', created.candidateId, 'src', 'scene.config.json');
+    expect(existsSync(candidateConfig), `候选工作树里没有场景配置：${candidateConfig}`).toBe(true);
+    const original = readFileSync(candidateConfig);
+    writeFileSync(candidateConfig, '{broken by acceptance test', 'utf8');
+
+    // 候选工作树带未提交改动 → 产品在候选解析阶段就拒绝（repo.ts:294 的 clean 检查），不会建 run。
+    const rejected = await startChecks(fixture.base, created.candidateId);
+    expect(rejected.status, rejected.text.slice(0, 300)).toBe(409);
+    const rejectedCode = (rejected.body as any)?.error?.code;
+    expect(rejectedCode, `拒绝码不符：${rejected.text.slice(0, 200)}`).toBe('STALE_CANDIDATE');
+    const viewAfter = (await getCandidate(fixture.base, created.candidateId)).body;
+    expect(viewAfter.latestCheckRunId ?? null, '被拒的检查竟然创建了 run').toBeNull();
+    expect(viewAfter.checks.map((check: any) => check.status), '被拒的检查改了候选视图').toEqual(['not_run', 'not_run', 'not_run', 'not_run']);
+
+    // 还原候选字节后同一候选可以正常检查：证明守卫针对的是“脏工作树”，不是把候选弄坏了。
+    writeFileSync(candidateConfig, original);
+    const { run } = await startAndWatch(fixture, created.candidateId, { timeoutMs: 300_000 });
+    expect(run.outcome, `还原后仍不能检查：${JSON.stringify(run.checks)}`).toBe('passed');
+
+    results.schemaGuardOnCandidateTree = {
+      rejected: { status: rejected.status, code: rejectedCode, message: (rejected.body as any)?.error?.message ?? null },
+      runCreatedWhileRejected: false,
+      restoredRun: summarizeRun(run),
+      note: 'SNAPSHOT_MISMATCH（runner.ts:246/417）是解析与开跑之间的 TOCTOU 守卫，靠 HTTP 造不出来；这里命中的是 repo.ts:294 的候选工作树 clean 检查。',
+    };
+    expect((await httpJson(`${fixture.base}/candidates/${created.candidateId}/discard`, { method: 'POST' })).status).toBe(200);
+  }
+
+  // 故障之后服务仍然健康：再起一个正常候选并跑通四项（不是复用旧绿灯）
   const healthy = await startAndWatch(fixture, (await createCandidate(fixture, [
     [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '立即购买', new: '马上购买' } }],
     [{ name: 'finish', args: { summary: '回到正常改动' } }],
