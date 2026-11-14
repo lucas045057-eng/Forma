@@ -122,3 +122,17 @@ job_50ea6887一次标准顺序运行（4m31s）：pnpm typecheck、pnpm build、
 新增默认真实WorkService测试不覆盖checks参数：实际模板src经Schema、可信Vite、Chromium四检查，HTTP读取六份证据后采用并回退；模型只调用一次受控替身，旧开发预览被stub，真正检查静态源与浏览器未替换。完整流程11.469s；四项检查均passed，逐份核对六份artifact的字节数/SHA256。已查看实际1440×900截图：改后标题、可见商品fallback、购买入口与已加入购物袋反馈；Chromium158.0.8127.18、购买0→1、pageErrors/blockedRequests均空。测试证明检查静态源不可再访问、临时快照已删、采用后文字变化、回退精确恢复基线。只复制模板src，未复制真实.env或二进制资产，fallback结论不冒充真实GLB加载。
 
 全量包括进程生命周期断言与原始资源证据；完成后只读进程核对未发现本worktree的checks/worker-entry残留。没有修改tests/e2e，没有新增付费调用。本轮是实现侧标准验证，Claude对最终固定HEAD的独立审查、Pi迁移旧套件并执行完整E2E仍待完成；M3-C UI未实现，不能宣称M3-B独立验收或项目全部完成。
+
+## 第十三批：独立审查 S-1 / S-2 整改
+
+Claude任务因五小时限额未正常返回，但主线已保存针对4fcc302的M3-B-review.md：旧B1问题逐项关闭、0 blocker/2 should-fix/12 suggestions。保留报告与其本人loopback RTC探针原件，不能把调度中断写成整改后独立复核通过。S-1本人探针实际收到4个STUN UDP包且smoke错误通过；S-2是代码核查出的强杀失败无界等待，审查人未实际触发。两项都先写回归。
+
+RED job_41d4ca04：types0，实际执行五项1过4失败，旧40项筛选未运行、identity一致。两个RTC构造用例错误passed；两个强杀失败用例12s虚拟时钟后仍pending；WorkService清理错误/关闭保锁用例已过。没有以收集或类型失败冒充目标RED。
+
+S-1：导航前锁定标准与webkit前缀RTCPeerConnection，记录webrtc尝试并抛SecurityError；Chromium增加disable_non_proxied_udp策略，与无代理启动选项配合。真实UDP监听回归保存构造名称、端口、包数及blockedRequests，不把HTTP/WS守卫外推为任意UDP拦截。当前模板无需WebRTC，策略是禁用能力，不支持需要RTC的页面。
+
+S-2：2s正常stop等待后，强杀命令最多等3s，再最多3s确认真实close；退出仍未确认时，最多1.5s只读查询Windows PID/创建时间诊断（查询失败可缺失，不用新观测PID再发kill）。失败缓存为CLEANUP_FAILED，调用者也收到错误，不把强杀命令exit0当作worker已退出。IPC异步回调观察stop拒绝以防unhandled rejection，runner最终资源屏障仍等待同一失败Promise、拒绝新检查并保留实例锁。父进程保存带hash的runner.log，只有固定诊断字段；日志写失败会在终态错误中说明。spawnedAt是父进程观测时间，与查询到的OS创建时间分别记录。没有放宽业务120s/30s/180s预算，也不声称OS不可终止的进程已被清理。
+
+GREEN job_7b9f65ed（4m58s）：标准pnpm typecheck/build/test与compiled native imports四步骤全部exit0/signal=null，每步源码身份一致。实际422/422：shared68、plugin20、bridge1、renderer5、server321、Studio7，无失败/跳过。新增六项包含两种RTC真实Chromium/UDP零包、三种fake transport+fake clock终止故障（拒绝/命令成功但没退出/命令不回调）、WorkService取消明确失败/关闭保锁。原有真实进程生命周期与默认真实检查→采用→回退也在本轮实际通过，后者11.796s；六份证据字节数/hash复核。结束后只读查询无本worktree检查worker残留。
+
+归档review-fixes-20261114含RED/GREEN、逐步命令/PID/时间/身份/日志、UDP观测、实际浏览器/进程/默认闭环证据、审查报告与审查人探针、逐文件manifest。受测身份为4fcc302加记录的六个源码/测试文件，不声称随后提交HEAD重跑。Claude对整改的独立复核仍待额度恢复（返回信息指向Asia/Shanghai 00:10）；12项建议尚未升级/关闭。Pi可以在独立分支准备验收接线，但复核整改通过前不合并、不宣称正式验收；M3-C/M4仍按既定门禁后续推进。

@@ -184,6 +184,21 @@ async function assertFaultRetainsOwnership(f:Awaited<ReturnType<typeof fixture>>
   const second=new WorkService(f.options);
   await expect(second.init()).rejects.toMatchObject({code:'INSTANCE_LOCKED'});
 }
+it('reports cleanup failure on cancel and close, rejects new checks and retains the instance lock',async()=>{
+  const f=await fixture(),c=await candidate(f);f.allowPoisonedCleanup=true;
+  let started!:()=>void;const running=new Promise<void>(resolve=>{started=resolve;});
+  f.hook(async(_name,ctx)=>{started();await new Promise<void>(resolve=>ctx.signal.addEventListener('abort',()=>resolve(),{once:true}));});
+  f.options.checks.executor.stop=async()=>{throw Object.assign(new Error('injected unconfirmed termination'),{code:'CLEANUP_FAILED',pid:123456789});};
+  const run=await f.work.startChecks(c.id);await running;
+  await expect(f.work.cancelCheckRun(run.id)).rejects.toMatchObject({code:'CLEANUP_FAILED'});
+  expect(f.work.getCheckRun(run.id).outcome).toBe('failed');
+  const diagnostic=JSON.parse((await f.work.readCheckArtifact(run.id,'runner.log')).buffer.toString());
+  expect(diagnostic).toMatchObject({code:'CLEANUP_FAILED',pid:123456789,exitConfirmed:false});
+  await expect(f.work.startChecks(c.id,{rerun:true})).rejects.toMatchObject({code:'CLEANUP_FAILED'});
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+  await expect(f.work.close()).rejects.toMatchObject({code:'CLEANUP_FAILED'});
+  const second=new WorkService(f.options);await expect(second.init()).rejects.toMatchObject({code:'INSTANCE_LOCKED'});
+},15000);
 it('does not execute or emit when the check start save fails and retains ownership',async()=>{
   const f=await fixture(),c=await candidate(f);f.allowPoisonedCleanup=true;
   const published=f.published.length;

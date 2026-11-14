@@ -1,0 +1,52 @@
+{
+  "state": "reclaimed",
+  "worker": {
+    "pid": 43912,
+    "parent": 12772,
+    "created": "2026-11-14T15:11:22.7421350Z",
+    "name": "node.exe"
+  },
+  "descendants": [
+    {
+      "pid": 27324,
+      "parent": 43912,
+      "created": "2026-11-14T15:11:22.7454340Z",
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 44040,
+      "parent": 43912,
+      "created": "2026-11-14T15:11:23.2302250Z",
+      "name": "esbuild.exe"
+    },
+    {
+      "pid": 70196,
+      "parent": 43912,
+      "created": "2026-11-14T15:11:23.4835390Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 57232,
+      "parent": 70196,
+      "created": "2026-11-14T15:11:23.5354870Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 17672,
+      "parent": 70196,
+      "created": "2026-11-14T15:11:23.5451470Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 26724,
+      "parent": 70196,
+      "created": "2026-11-14T15:11:23.5566130Z",
+      "name": "chrome-headless-shell.exe"
+    }
+  ],
+  "urls": [
+    "http://127.0.0.1:25195/"
+  ],
+  "remaining": [],
+  "lateArtifacts": 0
+}

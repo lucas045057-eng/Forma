@@ -1,0 +1,4 @@
+{
+  "test": "rejects a worker-based WebSocket attempt at worker creation",
+  "runId": "a33351c330d84f59bc625333bbb896b9"
+}

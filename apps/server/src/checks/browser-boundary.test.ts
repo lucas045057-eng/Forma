@@ -3,6 +3,7 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/pr
 import childProcess from 'node:child_process';
 import { syncBuiltinESMExports } from 'node:module';
 import { request } from 'node:http';
+import { createSocket } from 'node:dgram';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -67,6 +68,22 @@ async function trap(){
   const t=await listenHttpForFetch((_req,res)=>{requests++;res.writeHead(200,{'content-type':'text/plain'});res.end('TEST_ONLY_BACKEND_CANARY');});
   traps.push(t);return {url:t.baseUrl,get requests(){return requests;}};
 }
+it.each(['RTCPeerConnection','webkitRTCPeerConnection'])('blocks %s before a real loopback STUN packet can leave Chromium',async(name)=>{
+  const udp=createSocket('udp4');let packets=0;udp.on('message',()=>{packets++;});
+  await new Promise<void>((resolve,reject)=>{udp.once('error',reject);udp.bind(0,'127.0.0.1',resolve);});
+  try{
+    const address=udp.address();
+    const f=await fixture(app({effect:`try {const rtc=new window[${JSON.stringify(name)}]({iceServers:[{urls:'stun:127.0.0.1:${address.port}'}]});rtc.createDataChannel('probe');void rtc.createOffer().then(offer=>rtc.setLocalDescription(offer));}catch{}`}));
+    const result=await f.executor.smoke(f.ctx),data=await report(f,'smoke');
+    if(process.env.CHECK_BROWSER_EVIDENCE_DIR){
+      const target=path.join(process.env.CHECK_BROWSER_EVIDENCE_DIR,'network-probes');await mkdir(target,{recursive:true});
+      await writeFile(path.join(target,f.ctx.runId+'.json'),JSON.stringify({constructor:name,runId:f.ctx.runId,udpPort:address.port,receivedPackets:packets,status:result.status,blockedRequests:data.blockedRequests},null,2));
+    }
+    expect(result.status,JSON.stringify(data)).toBe('failed');
+    expect(data.blockedRequests.some((entry:{kind:string})=>entry.kind==='webrtc')).toBe(true);
+    expect(packets,'the real UDP decoy must receive zero packets').toBe(0);
+  }finally{await new Promise<void>(resolve=>udp.close(()=>resolve()));}
+},30000);
 it('runs real Chromium smoke and occlusion against one built static page with evidence',async()=>{
   const f=await fixture();
   const smoke=await f.executor.smoke(f.ctx);expect(smoke.status,smoke.message).toBe('passed');

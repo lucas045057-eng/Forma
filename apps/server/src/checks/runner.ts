@@ -435,11 +435,24 @@ export class CheckRunner {
       try {
         await executor?.stop?.(run.id);
         await cleanupSnapshot(buildRoot);
-      } catch {
+      } catch (error) {
         this.resourceFault = new WorkError('CLEANUP_FAILED', '检查资源未确认清理，拒绝关闭或继续检查', 503);
         run.outcome = 'failed';
         run.error = { code: this.resourceFault.code, message: this.resourceFault.message };
         run.checks[3] = { name: 'occlusion', status: 'failed', message: this.resourceFault.message };
+        const details = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+        const observed = details.observedProcess && typeof details.observedProcess === 'object' ? details.observedProcess as Record<string, unknown> : {};
+        // Parent-owned diagnostic, outside the now-closed phase artifact channel.
+        const diagnostic = { code: 'CLEANUP_FAILED', exitConfirmed: false,
+          pid: Number.isSafeInteger(details.pid) ? details.pid : undefined,
+          spawnedAt: typeof details.spawnedAt === 'string' && Number.isFinite(Date.parse(details.spawnedAt)) ? details.spawnedAt : undefined,
+          observedProcess: Number.isSafeInteger(observed.pid) && typeof observed.createdAt === 'string' && Number.isFinite(Date.parse(observed.createdAt)) ? { pid: observed.pid, createdAt: observed.createdAt } : undefined,
+          terminationCode: typeof details.terminationCode === 'string' ? details.terminationCode.replace(/[^A-Z0-9_]/gi, '').slice(0, 80) : 'UNCONFIRMED',
+        };
+        try {
+          const ref = await writeArtifact(this.options.dataDirectory, run.id, 'runner.log', JSON.stringify(diagnostic));
+          run.artifacts = [...(run.artifacts ?? []).filter(item => item.name !== ref.name), ref];
+        } catch { run.error.message += '；清理诊断保存失败'; }
       }
     }
     if (this.fault) throw this.fault;

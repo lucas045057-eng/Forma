@@ -13,11 +13,53 @@ const fault = (code: string, message: string) => Object.assign(new Error(message
 const cancelled = () => fault('CANCELLED', '检查被取消');
 interface Session {
   child: ChildProcess; root: string; digest: string; ready: Promise<void>; exited: Promise<void>;
-  dead: boolean; stopping: boolean; stop?: Promise<void>; output: string;
+  dead: boolean; stopping: boolean; stop?: Promise<void>; output: string; spawnedAt: string;
   pending?: { token: number; ctx: CheckContext; name: CheckName; resolve: (result: CheckResult) => void; reject: (error: unknown) => void; refs: Set<string> };
 }
 export function workerScriptPath() {
   return fileURLToPath(new URL(import.meta.url.endsWith('.ts') ? './worker-entry.ts' : './worker-entry.js', import.meta.url));
+}
+
+/** The deadline also bounds a failed/hung termination command, not just child exit. */
+async function within<T>(operation: Promise<T>, milliseconds: number, expired: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try { return await Promise.race([operation, new Promise<T>(resolve => { timer = setTimeout(() => resolve(expired), milliseconds); })]); }
+  finally { if (timer) clearTimeout(timer); }
+}
+const errorCode = (error: unknown) => record(error) && typeof error.code === 'string' ? error.code.replace(/[^A-Z0-9_]/gi, '').slice(0, 80) : 'TERMINATION_ERROR';
+async function terminate(s: Session): Promise<string | undefined> {
+  if (!s.child.pid) return 'PID_UNAVAILABLE';
+  if (process.platform === 'win32') {
+    const command = new Promise<string | undefined>(resolve => {
+      try { execFile('taskkill.exe', ['/T', '/F', '/PID', String(s.child.pid)], { windowsHide: true, timeout: 3000, maxBuffer: 8192 }, error => resolve(error ? errorCode(error) : undefined)); }
+      catch (error) { resolve(errorCode(error)); }
+    });
+    return within(command, 3000, 'TERMINATION_COMMAND_TIMEOUT');
+  }
+  try { process.kill(-s.child.pid, 'SIGKILL'); return undefined; }
+  catch {
+    try { return s.child.kill('SIGKILL') ? undefined : 'SIGNAL_NOT_SENT'; }
+    catch (error) { return errorCode(error); }
+  }
+}
+async function observedProcess(s: Session): Promise<{ pid: number; createdAt: string } | undefined> {
+  if (process.platform !== 'win32' || !s.child.pid) return undefined;
+  const pid = s.child.pid;
+  const query = new Promise<{ pid: number; createdAt: string } | undefined>(resolve => {
+    try {
+      execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
+        "Get-CimInstance Win32_Process -Filter 'ProcessId=" + pid + "' | Select-Object @{n='pid';e={$_.ProcessId}},@{n='createdAt';e={$_.CreationDate.ToUniversalTime().ToString('o')}} | ConvertTo-Json -Compress"],
+      { windowsHide: true, timeout: 1500, maxBuffer: 8192 }, (error, stdout) => {
+        if (error) { resolve(undefined); return; }
+        try {
+          const value: unknown = JSON.parse(stdout);
+          resolve(record(value) && value.pid === pid && typeof value.createdAt === 'string' && Number.isFinite(Date.parse(value.createdAt)) ? { pid, createdAt: value.createdAt } : undefined);
+        } catch { resolve(undefined); }
+      });
+    } catch { resolve(undefined); }
+  });
+  // Diagnostic only; never use a newly observed PID to issue another kill.
+  return within(query, 1500, undefined);
 }
 
 /** Only fixed trusted code is executable. The parent alone owns evidence persistence. */
@@ -32,21 +74,26 @@ export function createRealExecutor(): CheckExecutor {
     const pending = s.pending;
     s.stop = (async () => {
       if (s.dead) { pending?.reject(reason); return; }
-      s.child.send({ kind: 'stop' }, () => {});
-      const timer = setTimeout(() => {
-        if (s.dead || !s.child.pid) return;
-        if (process.platform === 'win32') {
-          execFile('taskkill.exe', ['/T', '/F', '/PID', String(s.child.pid)], { windowsHide: true }, () => {});
-        } else {
-          try { process.kill(-s.child.pid, 'SIGKILL'); } catch { s.child.kill('SIGKILL'); }
+      try {
+        try { s.child.send({ kind: 'stop' }, () => {}); } catch { /* Disconnected IPC still needs the exit/force barrier. */ }
+        if (!await within(s.exited.then(() => true), 2000, false)) {
+          const terminationCode = await terminate(s);
+          if (!await within(s.exited.then(() => true), 3000, false)) {
+            throw Object.assign(fault('CLEANUP_FAILED', '检查进程未确认退出，拒绝继续检查或释放实例锁'), {
+              pid: s.child.pid, spawnedAt: s.spawnedAt, observedProcess: await observedProcess(s),
+              terminationCode: terminationCode ?? 'EXIT_NOT_CONFIRMED', exitConfirmed: false,
+            });
+          }
         }
-      }, 2000);
-      try { await s.exited; } finally { clearTimeout(timer); }
-      // Release the waiter after actual exit, including callers that only invoke stop().
-      pending?.reject(reason);
+        // Release callers only after confirmed exit. Failed stop stays rejected.
+        pending?.reject(reason);
+      } catch (error) { pending?.reject(error); throw error; }
     })();
     return s.stop;
   }
+  // Async IPC handlers cannot return a rejection. The cached stop promise remains
+  // authoritative and is awaited again by the runner's resource/lock barrier.
+  const requestStop = (runId: string) => { void stop(runId).catch(() => {}); };
   async function session(ctx: CheckContext): Promise<Session> {
     if (!/^[a-f0-9]{32}$/.test(ctx.runId)) throw fault('WORKER_PROTOCOL', '非法运行编号');
     const existing = sessions.get(ctx.runId);
@@ -70,7 +117,7 @@ export function createRealExecutor(): CheckExecutor {
     const ready = new Promise<void>((resolve, reject) => { acceptReady = resolve; rejectReady = reject; });
     void ready.catch(() => {});
     const exited = new Promise<void>(resolve => { acceptExit = resolve; });
-    const s: Session = { child, root: ctx.buildRoot, digest: ctx.snapshot.digest, ready, exited, dead: false, stopping: false, output: '' };
+    const s: Session = { child, root: ctx.buildRoot, digest: ctx.snapshot.digest, ready, exited, dead: false, stopping: false, output: '', spawnedAt: new Date().toISOString() };
     sessions.set(ctx.runId, s);
     const collect = (data: Buffer) => { s.output = (s.output + data.toString('utf8')).slice(-6000); };
     child.stdout?.on('data', collect); child.stderr?.on('data', collect);
@@ -96,13 +143,13 @@ export function createRealExecutor(): CheckExecutor {
             if (s.pending !== p || p.ctx.signal.aborted || s.stopping) return;
             p.refs.add(ref.hash);
             child.send({ kind: 'artifact-result', token: message.token, ref }, () => {});
-          } catch { p.reject(fault('ARTIFACT_FAILED', '检查证据保存失败')); await stop(ctx.runId); }
+          } catch { p.reject(fault('ARTIFACT_FAILED', '检查证据保存失败')); requestStop(ctx.runId); }
         })();
       } else if (message.kind === 'result') {
         const result = message.result;
         if (!record(result) || result.name !== p.name || !['passed', 'failed', 'not_run', 'cancelled'].includes(String(result.status)) ||
           (result.status === 'passed' && (typeof result.evidence !== 'string' || !p.refs.has(result.evidence)))) {
-          p.reject(fault('WORKER_PROTOCOL', '检查结果或证据身份无效')); void stop(ctx.runId);
+          p.reject(fault('WORKER_PROTOCOL', '检查结果或证据身份无效')); requestStop(ctx.runId);
         } else p.resolve(result as unknown as CheckResult);
       } else if (message.kind === 'error') {
         p.reject(fault('WORKER_FAILED', typeof message.message === 'string' ? message.message.slice(0, 600) : '检查进程失败'));
@@ -140,7 +187,7 @@ export function createRealExecutor(): CheckExecutor {
           snapshot: ctx.snapshot, buildTimeoutMs: ctx.buildTimeoutMs, browserTimeoutMs: ctx.browserTimeoutMs }, error => {
           if (error && !s.stopping) finish(error);
         });
-      }, error => { if (!s.stopping) { finish(error); void stop(ctx.runId); } });
+      }, error => { if (!s.stopping) { finish(error); requestStop(ctx.runId); } });
     });
   }
   return { schema: ctx => run('schema', ctx), build: ctx => run('build', ctx),

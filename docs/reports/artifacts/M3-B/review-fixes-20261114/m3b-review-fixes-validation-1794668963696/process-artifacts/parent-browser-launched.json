@@ -1,0 +1,55 @@
+{
+  "state": "launched",
+  "parentPid": 63500,
+  "worker": {
+    "pid": 21952,
+    "parent": 63500,
+    "created": "2026-11-14T15:11:17.6950280Z",
+    "name": "node.exe"
+  },
+  "descendants": [
+    {
+      "pid": 14492,
+      "parent": 21952,
+      "created": "2026-11-14T15:11:17.6985610Z",
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 43704,
+      "parent": 21952,
+      "created": "2026-11-14T15:11:18.2137830Z",
+      "name": "esbuild.exe"
+    },
+    {
+      "pid": 46680,
+      "parent": 21952,
+      "created": "2026-11-14T15:11:18.9417090Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 14552,
+      "parent": 46680,
+      "created": "2026-11-14T15:11:18.9957960Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 28956,
+      "parent": 46680,
+      "created": "2026-11-14T15:11:19.0045730Z",
+      "name": "chrome-headless-shell.exe"
+    },
+    {
+      "pid": 35088,
+      "parent": 46680,
+      "created": "2026-11-14T15:11:19.0163900Z",
+      "name": "chrome-headless-shell.exe"
+    }
+  ],
+  "decoy": {
+    "pid": 69552,
+    "parent": 12772,
+    "created": "2026-11-14T15:11:20.6585030Z",
+    "name": "node.exe"
+  },
+  "url": "http://127.0.0.1:47125/"
+}

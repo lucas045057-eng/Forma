@@ -1,0 +1,13 @@
+{
+  "constructor": "webkitRTCPeerConnection",
+  "runId": "c4e37affaa834a4fa3ca2cfd031cfad5",
+  "udpPort": 49433,
+  "receivedPackets": 0,
+  "status": "failed",
+  "blockedRequests": [
+    {
+      "kind": "webrtc",
+      "url": "http://127.0.0.1:45796/"
+    }
+  ]
+}

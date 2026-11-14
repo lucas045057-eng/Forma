@@ -1,0 +1,4 @@
+{
+  "test": "blocks RTCPeerConnection before a real loopback STUN packet can leave Chromium",
+  "runId": "2d586058b32342b29d3b6abfc92a3ba4"
+}

@@ -1,0 +1,10 @@
+{
+  "state": "reclaimed",
+  "worker": {
+    "pid": 21212,
+    "parent": 12772,
+    "created": "2026-11-14T15:11:31.1698340Z",
+    "name": "node.exe"
+  },
+  "remaining": []
+}

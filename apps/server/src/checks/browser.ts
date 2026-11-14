@@ -17,7 +17,7 @@ async function initialize(ctx:CheckContext):Promise<Session>{
   try{
     browser=await chromium.launch({headless:true,timeout:Math.min(15000,ctx.browserTimeoutMs),
       downloadsPath:path.join(ctx.buildRoot,'.tmp/downloads'),
-      args:['--no-proxy-server','--disable-background-networking','--disable-component-update','--disable-sync','--disable-domain-reliability']});
+      args:['--no-proxy-server','--force-webrtc-ip-handling-policy=disable_non_proxied_udp','--disable-background-networking','--disable-component-update','--disable-sync','--disable-domain-reliability']});
     const context=await browser.newContext({viewport,deviceScaleFactor:1,serviceWorkers:'block',acceptDownloads:false});
     const pageErrors:string[]=[],blockedRequests:{kind:string;url:string}[]=[];
     const blocked=(kind:string,url:string)=>{if(blockedRequests.length<100)blockedRequests.push({kind,url:urlForEvidence(url)});};
@@ -25,7 +25,7 @@ async function initialize(ctx:CheckContext):Promise<Session>{
     // browser request/WebSocket interception does not cover every worker target.
     await context.exposeBinding('__spatialChecksBlocked', (_source, payload: unknown) => {
       if (payload && typeof payload === 'object' && 'kind' in payload && 'url' in payload &&
-          ['worker','sharedworker','serviceworker'].includes(String(payload.kind)) && typeof payload.url === 'string') {
+          ['worker','sharedworker','serviceworker','webrtc'].includes(String(payload.kind)) && typeof payload.url === 'string') {
         blocked(String(payload.kind), payload.url);
       }
     });
@@ -38,6 +38,13 @@ async function initialize(ctx:CheckContext):Promise<Session>{
       for(const [name,kind] of [['Worker','worker'],['SharedWorker','sharedworker']]) {
         Object.defineProperty(globalThis,name,{configurable:false,writable:false,value:class {
           constructor(url:unknown){throw deny(kind,url);}
+        }});
+      }
+      // Route/WS interception cannot see STUN/TURN. This template needs no RTC;
+      // deny both constructor names before candidate code runs in every frame.
+      for(const name of ['RTCPeerConnection','webkitRTCPeerConnection']) {
+        Object.defineProperty(globalThis,name,{configurable:false,writable:false,value:class {
+          constructor(){throw deny('webrtc',location.href);}
         }});
       }
       if('serviceWorker' in navigator) Object.defineProperty(navigator.serviceWorker,'register',{

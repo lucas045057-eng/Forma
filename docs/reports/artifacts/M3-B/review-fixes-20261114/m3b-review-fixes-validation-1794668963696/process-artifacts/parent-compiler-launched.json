@@ -1,0 +1,30 @@
+{
+  "state": "launched",
+  "parentPid": 68440,
+  "worker": {
+    "pid": 33788,
+    "parent": 68440,
+    "created": "2026-11-14T15:11:13.4556730Z",
+    "name": "node.exe"
+  },
+  "descendants": [
+    {
+      "pid": 67396,
+      "parent": 33788,
+      "created": "2026-11-14T15:11:13.4595920Z",
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 43340,
+      "parent": 33788,
+      "created": "2026-11-14T15:11:13.9578540Z",
+      "name": "esbuild.exe"
+    }
+  ],
+  "decoy": {
+    "pid": 49936,
+    "parent": 12772,
+    "created": "2026-11-14T15:11:15.5439580Z",
+    "name": "node.exe"
+  }
+}

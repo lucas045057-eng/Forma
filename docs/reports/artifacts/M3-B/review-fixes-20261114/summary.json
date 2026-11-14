@@ -1,0 +1,134 @@
+{
+  "job": "job_7b9f65ed",
+  "testedHead": "4fcc30221d53b6efd4353aa16f71ea6bcb42bfbc",
+  "testedStatus": " M apps/server/src/checks/browser-boundary.test.ts\n M apps/server/src/checks/browser.ts\n M apps/server/src/checks/runner.ts\n M apps/server/src/checks/worker.ts\n M apps/server/src/work/checks.test.ts\n?? apps/server/src/checks/worker-stop-failure.test.ts\n?? debug-build.mjs\n",
+  "unit": {
+    "shared": 68,
+    "plugin": 20,
+    "bridge": 1,
+    "renderer": 5,
+    "server": 321,
+    "studio": 7,
+    "total": 422,
+    "failed": 0,
+    "skipped": 0
+  },
+  "steps": [
+    {
+      "name": "pnpm-typecheck",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm.cmd typecheck"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\",
+      "pid": 36932,
+      "startedAt": "2026-11-14T15:09:33.425Z",
+      "finishedAt": "2026-11-14T15:09:43.283Z",
+      "code": 0,
+      "signal": null,
+      "identityPreserved": true
+    },
+    {
+      "name": "pnpm-build",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm.cmd build"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\",
+      "pid": 66704,
+      "startedAt": "2026-11-14T15:09:47.966Z",
+      "finishedAt": "2026-11-14T15:10:00.306Z",
+      "code": 0,
+      "signal": null,
+      "identityPreserved": true
+    },
+    {
+      "name": "pnpm-test",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm.cmd test"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\",
+      "pid": 34936,
+      "startedAt": "2026-11-14T15:10:04.959Z",
+      "finishedAt": "2026-11-14T15:14:06.108Z",
+      "code": 0,
+      "signal": null,
+      "identityPreserved": true
+    },
+    {
+      "name": "compiled-native-import",
+      "command": [
+        "E:\\Node\\node.exe",
+        "E:\\空间化AI工作台\\.worktrees\\m3b\\.data\\m3b-compiled-native.mjs"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\",
+      "pid": 17844,
+      "startedAt": "2026-11-14T15:14:11.102Z",
+      "finishedAt": "2026-11-14T15:14:16.306Z",
+      "code": 0,
+      "signal": null,
+      "identityPreserved": true
+    }
+  ],
+  "identityPreserved": true,
+  "defaultReal": {
+    "runId": "c285c7dafa5e4b4f9947eea1840e5a1f",
+    "outcome": "passed",
+    "modelCalls": 1,
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 139120,
+        "hash": "bc67a1c37f0c28206749491538987d0bd917d882f8b5c4559636096ee5674773"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 326,
+        "hash": "f80add2b15e2d52461621cacf9087f4b60e11286e7f258a8dde70f1794799ba0"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 139120,
+        "hash": "bc67a1c37f0c28206749491538987d0bd917d882f8b5c4559636096ee5674773"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "b1c029a3d985be9719a37b678ef97b03245fd1d80ee2ea0031affb29e92b0d24"
+      }
+    ]
+  },
+  "limitations": [
+    "Implementation validation only; Claude review and Pi E2E acceptance pending",
+    "Actual schema/Vite/Chromium, fake coding-agent and stubbed M2 dev preview",
+    "Missing binary model uses visible fallback; no paid provider calls",
+    "Tested 4fcc302 plus recorded six source/test edits, not a future commit",
+    "Application guards are not an OS sandbox; Windows Chromium only"
+  ]
+}
