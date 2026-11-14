@@ -53,8 +53,9 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
     expect(seen).toHaveLength(15);
   } finally {
     try {
-      studio?.httpServer?.closeAllConnections();
-      await studio?.close();
+      const httpServer = studio?.httpServer as unknown as { closeAllConnections?: () => void } | null | undefined;
+      try { httpServer?.closeAllConnections?.(); }
+      finally { await studio?.close(); }
     } finally {
       try {
         upstream.closeAllConnections();
