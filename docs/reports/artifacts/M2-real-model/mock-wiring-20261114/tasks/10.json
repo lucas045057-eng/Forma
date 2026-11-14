@@ -1,0 +1,729 @@
+{
+  "id": 10,
+  "title": "3D 展示环境光 ambient 0.8",
+  "instruction": "把这个 3D 场景的环境光强度改成 0.8，模型、相机、主光和滚动开盖配置都不要改。",
+  "selector": "[data-testid=\"product-scene\"]",
+  "mode": "mock",
+  "agentSource": "loopback agent-mock",
+  "taskStartedAt": "2026-11-14T03:43:36.575Z",
+  "workDigest": {
+    "baseline": "5b628b58552456aceb7df7dc5032e33687699dc5c61d8cbebe848e624483edf6",
+    "afterRevert": "5b628b58552456aceb7df7dc5032e33687699dc5c61d8cbebe848e624483edf6"
+  },
+  "baselineVersion": "b4d006bc4515a78f529a387048584412222fa56d",
+  "baselineSnapshot": {
+    "brand": "木间MUJIAN / SCENT & LIVING",
+    "eyebrow": "A LITTLE SPACE TO BREATHE",
+    "h1": "给生活，留一点香气。",
+    "h1Tag": "H1",
+    "h1Style": {
+      "font-size": "48px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "67.2px",
+      "letter-spacing": "3px",
+      "font-family": "Georgia, SimSun, serif",
+      "font-weight": "400"
+    },
+    "intro": "把森林的温柔带回家。木间 · 雪松无火香薰，让每一次回家都值得期待。",
+    "introStyle": {
+      "font-size": "14px",
+      "color": "rgb(130, 113, 92)",
+      "line-height": "28px",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "price": "¥ 168 / 100 mL · 雪松与佛手柑",
+    "priceSpan": "/ 100 mL · 雪松与佛手柑",
+    "priceStyle": {
+      "font-size": "26px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "normal",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "navText": "关于这缕香气",
+    "navHref": "#details",
+    "fine": "一份给自己，也给生活的温柔礼物。",
+    "detailsH2": "不必远行，也能亲近自然。",
+    "footer": "木间 MUJIAN · 留一隅安静，给自己。",
+    "actionsGap": "12px",
+    "actionsDisplay": "flex",
+    "buttons": {
+      "buy-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      },
+      "save-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(117, 96, 68)",
+        "fontSize": "13px"
+      },
+      "gift-button": {
+        "width": 156,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      }
+    },
+    "buttonTexts": {
+      "buy-button": "立即购买",
+      "save-button": "收藏香气",
+      "gift-button": "为重要的人选一份"
+    },
+    "benefits": [
+      {
+        "title": "让呼吸慢下来",
+        "h3Size": "16px",
+        "text": "雪松与佛手柑，像雨后走进一片安静的森林。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让角落有温度",
+        "h3Size": "16px",
+        "text": "琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让日常有仪式",
+        "h3Size": "16px",
+        "text": "读书、休息、等一杯茶，让淡淡香气陪你片刻。",
+        "pSize": "12px"
+      }
+    ],
+    "purchases": "0",
+    "actionStatus": "",
+    "sceneState": "ready",
+    "sceneCanvas": true
+  },
+  "baselineSceneConfig": {
+    "model": "/assets/diffuser-4969889.glb",
+    "hero": {
+      "camera": {
+        "position": [
+          1.6,
+          1.1,
+          1.6
+        ],
+        "target": [
+          0,
+          0.5,
+          0
+        ],
+        "fov": 35
+      },
+      "model": {
+        "rotation": [
+          0,
+          0.52,
+          0
+        ],
+        "scale": 1
+      },
+      "lights": {
+        "key": {
+          "intensity": 3,
+          "color": "#ffd9a8",
+          "direction": [
+            3,
+            5,
+            4
+          ]
+        },
+        "ambient": 1.2
+      }
+    },
+    "scroll": [
+      {
+        "at": 0,
+        "model": {
+          "rotation": [
+            0,
+            0.52,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "at": 0.6,
+        "model": {
+          "rotation": [
+            0,
+            1.8,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0.08,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "selection": {
+    "src": "src/components/ProductHero.tsx:33:10",
+    "cid": "ProductHero",
+    "text": "",
+    "bbox": [
+      551.8125,
+      182.984375,
+      416.390625,
+      416.390625
+    ],
+    "styles": {
+      "display": "block",
+      "position": "relative",
+      "color": "rgb(72, 58, 45)",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "fontSize": "16px",
+      "fontFamily": "\"Microsoft YaHei\", sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "padding": "0px",
+      "margin": "0px",
+      "borderRadius": "48% 48% 6px 6px",
+      "width": "416.391px",
+      "height": "416.391px"
+    },
+    "instances": 1,
+    "ancestors": [
+      "src/App.tsx:20:7",
+      "src/App.tsx:15:5"
+    ],
+    "note": "outer-container",
+    "baseVersion": "b4d006bc4515a78f529a387048584412222fa56d"
+  },
+  "taskId": "18f48b0c0eda4d26926ce2e8f948a36c",
+  "session": "18f48b0c0eda4d26926ce2e8f948a36c",
+  "submittedAt": "2026-11-14T03:43:40.324Z",
+  "task": {
+    "id": "18f48b0c0eda4d26926ce2e8f948a36c",
+    "status": "done",
+    "error": null,
+    "rounds": 2,
+    "roundsLimit": 16,
+    "budgetMs": 180000,
+    "createdAt": "2026-11-14T03:43:40.314Z",
+    "updatedAt": "2026-11-14T03:43:42.187Z",
+    "usage": "未提供（CodingAgent 客户端未暴露上游 usage）",
+    "steps": [
+      "任务已排队",
+      "开始校验选中对象并创建候选版本",
+      "候选目录已创建，编码 Agent 开始工作",
+      "请求编码模型（第 1/16 轮）",
+      "执行工具 write_file",
+      "请求编码模型（第 2/16 轮）",
+      "执行工具 finish",
+      "编码 Agent 已完成修改",
+      "候选已提交，改动 1 个文件；正在启动预览",
+      "环境光强度已改为 0.8"
+    ]
+  },
+  "taskDurationMs": 1873,
+  "candidate": {
+    "id": "18f48b0c0eda4d26926ce2e8f948a36c",
+    "baseVersion": "b4d006bc4515a78f529a387048584412222fa56d",
+    "previewUrl": "/preview/c/18f48b0c0eda4d26926ce2e8f948a36c/",
+    "diff": [
+      {
+        "path": "src/scene.config.json",
+        "patch": "diff --git a/src/scene.config.json b/src/scene.config.json\nindex 51e7b1f..5c568c2 100644\n--- a/src/scene.config.json\n+++ b/src/scene.config.json\n@@ -1,12 +1,78 @@\n-{\r\n-  \"model\": \"/assets/diffuser-4969889.glb\",\r\n-  \"hero\": {\r\n-    \"camera\": { \"position\": [1.6, 1.1, 1.6], \"target\": [0, 0.5, 0], \"fov\": 35 },\r\n-    \"model\": { \"rotation\": [0, 0.52, 0], \"scale\": 1 },\r\n-    \"lights\": { \"key\": { \"intensity\": 3, \"color\": \"#ffd9a8\", \"direction\": [3, 5, 4] }, \"ambient\": 1.2 }\r\n-  },\r\n-  \"scroll\": [\r\n-    { \"at\": 0, \"model\": { \"rotation\": [0, 0.52, 0] }, \"parts\": { \"lid\": { \"offset\": [0, 0, 0] } } },\r\n-    { \"at\": 0.6, \"model\": { \"rotation\": [0, 1.8, 0] }, \"parts\": { \"lid\": { \"offset\": [0, 0.08, 0] } } }\r\n-  ]\r\n-}\r\n+{\n+  \"model\": \"/assets/diffuser-4969889.glb\",\n+  \"hero\": {\n+    \"camera\": {\n+      \"position\": [\n+        1.6,\n+        1.1,\n+        1.6\n+      ],\n+      \"target\": [\n+        0,\n+        0.5,\n+        0\n+      ],\n+      \"fov\": 35\n+    },\n+    \"model\": {\n+      \"rotation\": [\n+        0,\n+        0.52,\n+        0\n+      ],\n+      \"scale\": 1\n+    },\n+    \"lights\": {\n+      \"key\": {\n+        \"intensity\": 3,\n+        \"color\": \"#ffd9a8\",\n+        \"direction\": [\n+          3,\n+          5,\n+          4\n+        ]\n+      },\n+      \"ambient\": 0.8\n+    }\n+  },\n+  \"scroll\": [\n+    {\n+      \"at\": 0,\n+      \"model\": {\n+        \"rotation\": [\n+          0,\n+          0.52,\n+          0\n+        ]\n+      },\n+      \"parts\": {\n+        \"lid\": {\n+          \"offset\": [\n+            0,\n+            0,\n+            0\n+          ]\n+        }\n+      }\n+    },\n+    {\n+      \"at\": 0.6,\n+      \"model\": {\n+        \"rotation\": [\n+          0,\n+          1.8,\n+          0\n+        ]\n+      },\n+      \"parts\": {\n+        \"lid\": {\n+          \"offset\": [\n+            0,\n+            0.08,\n+            0\n+          ]\n+        }\n+      }\n+    }\n+  ]\n+}\n"
+      }
+    ],
+    "outOfScope": [
+      "src/scene.config.json"
+    ],
+    "checks": [
+      {
+        "name": "build",
+        "status": "not_run"
+      },
+      {
+        "name": "smoke",
+        "status": "not_run"
+      },
+      {
+        "name": "occlusion",
+        "status": "not_run"
+      },
+      {
+        "name": "schema",
+        "status": "not_run"
+      }
+    ]
+  },
+  "candidateSnapshot": {
+    "brand": "木间MUJIAN / SCENT & LIVING",
+    "eyebrow": "A LITTLE SPACE TO BREATHE",
+    "h1": "给生活，留一点香气。",
+    "h1Tag": "H1",
+    "h1Style": {
+      "font-size": "48px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "67.2px",
+      "letter-spacing": "3px",
+      "font-family": "Georgia, SimSun, serif",
+      "font-weight": "400"
+    },
+    "intro": "把森林的温柔带回家。木间 · 雪松无火香薰，让每一次回家都值得期待。",
+    "introStyle": {
+      "font-size": "14px",
+      "color": "rgb(130, 113, 92)",
+      "line-height": "28px",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "price": "¥ 168 / 100 mL · 雪松与佛手柑",
+    "priceSpan": "/ 100 mL · 雪松与佛手柑",
+    "priceStyle": {
+      "font-size": "26px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "normal",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "navText": "关于这缕香气",
+    "navHref": "#details",
+    "fine": "一份给自己，也给生活的温柔礼物。",
+    "detailsH2": "不必远行，也能亲近自然。",
+    "footer": "木间 MUJIAN · 留一隅安静，给自己。",
+    "actionsGap": "12px",
+    "actionsDisplay": "flex",
+    "buttons": {
+      "buy-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      },
+      "save-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(117, 96, 68)",
+        "fontSize": "13px"
+      },
+      "gift-button": {
+        "width": 156,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      }
+    },
+    "buttonTexts": {
+      "buy-button": "立即购买",
+      "save-button": "收藏香气",
+      "gift-button": "为重要的人选一份"
+    },
+    "benefits": [
+      {
+        "title": "让呼吸慢下来",
+        "h3Size": "16px",
+        "text": "雪松与佛手柑，像雨后走进一片安静的森林。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让角落有温度",
+        "h3Size": "16px",
+        "text": "琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让日常有仪式",
+        "h3Size": "16px",
+        "text": "读书、休息、等一杯茶，让淡淡香气陪你片刻。",
+        "pSize": "12px"
+      }
+    ],
+    "purchases": "0",
+    "actionStatus": "",
+    "sceneState": "ready",
+    "sceneCanvas": true
+  },
+  "screenshots": {
+    "candidate": "screenshots\\10-candidate.png",
+    "adopted": "screenshots\\10-adopted.png",
+    "reverted": "screenshots\\10-reverted.png"
+  },
+  "candidateSceneConfig": {
+    "model": "/assets/diffuser-4969889.glb",
+    "hero": {
+      "camera": {
+        "position": [
+          1.6,
+          1.1,
+          1.6
+        ],
+        "target": [
+          0,
+          0.5,
+          0
+        ],
+        "fov": 35
+      },
+      "model": {
+        "rotation": [
+          0,
+          0.52,
+          0
+        ],
+        "scale": 1
+      },
+      "lights": {
+        "key": {
+          "intensity": 3,
+          "color": "#ffd9a8",
+          "direction": [
+            3,
+            5,
+            4
+          ]
+        },
+        "ambient": 0.8
+      }
+    },
+    "scroll": [
+      {
+        "at": 0,
+        "model": {
+          "rotation": [
+            0,
+            0.52,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "at": 0.6,
+        "model": {
+          "rotation": [
+            0,
+            1.8,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0.08,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "adoptedVersion": "408d3043f47402ad1eda1ecc1ee6c34b83a9d9df",
+  "adoptedSnapshot": {
+    "brand": "木间MUJIAN / SCENT & LIVING",
+    "eyebrow": "A LITTLE SPACE TO BREATHE",
+    "h1": "给生活，留一点香气。",
+    "h1Tag": "H1",
+    "h1Style": {
+      "font-size": "48px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "67.2px",
+      "letter-spacing": "3px",
+      "font-family": "Georgia, SimSun, serif",
+      "font-weight": "400"
+    },
+    "intro": "把森林的温柔带回家。木间 · 雪松无火香薰，让每一次回家都值得期待。",
+    "introStyle": {
+      "font-size": "14px",
+      "color": "rgb(130, 113, 92)",
+      "line-height": "28px",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "price": "¥ 168 / 100 mL · 雪松与佛手柑",
+    "priceSpan": "/ 100 mL · 雪松与佛手柑",
+    "priceStyle": {
+      "font-size": "26px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "normal",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "navText": "关于这缕香气",
+    "navHref": "#details",
+    "fine": "一份给自己，也给生活的温柔礼物。",
+    "detailsH2": "不必远行，也能亲近自然。",
+    "footer": "木间 MUJIAN · 留一隅安静，给自己。",
+    "actionsGap": "12px",
+    "actionsDisplay": "flex",
+    "buttons": {
+      "buy-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      },
+      "save-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(117, 96, 68)",
+        "fontSize": "13px"
+      },
+      "gift-button": {
+        "width": 156,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      }
+    },
+    "buttonTexts": {
+      "buy-button": "立即购买",
+      "save-button": "收藏香气",
+      "gift-button": "为重要的人选一份"
+    },
+    "benefits": [
+      {
+        "title": "让呼吸慢下来",
+        "h3Size": "16px",
+        "text": "雪松与佛手柑，像雨后走进一片安静的森林。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让角落有温度",
+        "h3Size": "16px",
+        "text": "琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让日常有仪式",
+        "h3Size": "16px",
+        "text": "读书、休息、等一杯茶，让淡淡香气陪你片刻。",
+        "pSize": "12px"
+      }
+    ],
+    "purchases": "0",
+    "actionStatus": "",
+    "sceneState": "ready",
+    "sceneCanvas": true
+  },
+  "adoptedSceneConfig": {
+    "model": "/assets/diffuser-4969889.glb",
+    "hero": {
+      "camera": {
+        "position": [
+          1.6,
+          1.1,
+          1.6
+        ],
+        "target": [
+          0,
+          0.5,
+          0
+        ],
+        "fov": 35
+      },
+      "model": {
+        "rotation": [
+          0,
+          0.52,
+          0
+        ],
+        "scale": 1
+      },
+      "lights": {
+        "key": {
+          "intensity": 3,
+          "color": "#ffd9a8",
+          "direction": [
+            3,
+            5,
+            4
+          ]
+        },
+        "ambient": 0.8
+      }
+    },
+    "scroll": [
+      {
+        "at": 0,
+        "model": {
+          "rotation": [
+            0,
+            0.52,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "at": 0.6,
+        "model": {
+          "rotation": [
+            0,
+            1.8,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0.08,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "revertedVersion": "b509bf24c0365a439f74e468e44769a41ffcbf18",
+  "revertedSnapshot": {
+    "brand": "木间MUJIAN / SCENT & LIVING",
+    "eyebrow": "A LITTLE SPACE TO BREATHE",
+    "h1": "给生活，留一点香气。",
+    "h1Tag": "H1",
+    "h1Style": {
+      "font-size": "48px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "67.2px",
+      "letter-spacing": "3px",
+      "font-family": "Georgia, SimSun, serif",
+      "font-weight": "400"
+    },
+    "intro": "把森林的温柔带回家。木间 · 雪松无火香薰，让每一次回家都值得期待。",
+    "introStyle": {
+      "font-size": "14px",
+      "color": "rgb(130, 113, 92)",
+      "line-height": "28px",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "price": "¥ 168 / 100 mL · 雪松与佛手柑",
+    "priceSpan": "/ 100 mL · 雪松与佛手柑",
+    "priceStyle": {
+      "font-size": "26px",
+      "color": "rgb(72, 58, 45)",
+      "line-height": "normal",
+      "letter-spacing": "normal",
+      "font-family": "\"Microsoft YaHei\", sans-serif",
+      "font-weight": "400"
+    },
+    "navText": "关于这缕香气",
+    "navHref": "#details",
+    "fine": "一份给自己，也给生活的温柔礼物。",
+    "detailsH2": "不必远行，也能亲近自然。",
+    "footer": "木间 MUJIAN · 留一隅安静，给自己。",
+    "actionsGap": "12px",
+    "actionsDisplay": "flex",
+    "buttons": {
+      "buy-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      },
+      "save-button": {
+        "width": 104,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgba(0, 0, 0, 0)",
+        "color": "rgb(117, 96, 68)",
+        "fontSize": "13px"
+      },
+      "gift-button": {
+        "width": 156,
+        "height": 47,
+        "radius": "3px",
+        "background": "rgb(117, 96, 68)",
+        "color": "rgb(255, 250, 240)",
+        "fontSize": "13px"
+      }
+    },
+    "buttonTexts": {
+      "buy-button": "立即购买",
+      "save-button": "收藏香气",
+      "gift-button": "为重要的人选一份"
+    },
+    "benefits": [
+      {
+        "title": "让呼吸慢下来",
+        "h3Size": "16px",
+        "text": "雪松与佛手柑，像雨后走进一片安静的森林。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让角落有温度",
+        "h3Size": "16px",
+        "text": "琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。",
+        "pSize": "12px"
+      },
+      {
+        "title": "让日常有仪式",
+        "h3Size": "16px",
+        "text": "读书、休息、等一杯茶，让淡淡香气陪你片刻。",
+        "pSize": "12px"
+      }
+    ],
+    "purchases": "0",
+    "actionStatus": "",
+    "sceneState": "ready",
+    "sceneCanvas": true
+  },
+  "result": "passed",
+  "durationMs": 8989
+}

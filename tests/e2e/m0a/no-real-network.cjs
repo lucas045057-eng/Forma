@@ -10,6 +10,21 @@ const net = require('node:net');
 const fs = require('node:fs');
 
 const LOG = process.env.PI_NET_GUARD_LOG || '';
+// 只允许显式列出的真实编码服务域名及其解析出的地址；默认不开放任何非回环目标。
+const ALLOW_HOSTS = (process.env.PI_NET_GUARD_ALLOW || '')
+  .split(',').map((value) => value.trim().toLowerCase()).filter(Boolean);
+const allowedAddresses = new Set();
+
+function hostAllowed(host) {
+  const value = String(host === undefined || host === null ? '' : host).toLowerCase().replace(/^\[|\]$/g, '');
+  return loopback(value) || ALLOW_HOSTS.some((allowed) => value === allowed || value.endsWith(`.${allowed}`));
+}
+
+function rememberAddress(value) {
+  if (typeof value === 'string') { allowedAddresses.add(value); return; }
+  if (Array.isArray(value)) { for (const entry of value) rememberAddress(entry && entry.address); return; }
+  if (value && typeof value === 'object' && typeof value.address === 'string') allowedAddresses.add(value.address);
+}
 
 function loopback(host) {
   const value = String(host === undefined || host === null ? '' : host).toLowerCase().replace(/^\[|\]$/g, '');
@@ -35,17 +50,28 @@ function blocked(kind, detail) {
 const originalLookup = dns.lookup;
 dns.lookup = function lookup(hostname, options, callback) {
   if (loopback(hostname)) return originalLookup.apply(this, arguments);
+  if (!hostAllowed(hostname)) {
+    const done = typeof options === 'function' ? options : callback;
+    const error = blocked('dns.lookup', hostname);
+    if (typeof done === 'function') { process.nextTick(() => done(error)); return; }
+    throw error;
+  }
   const done = typeof options === 'function' ? options : callback;
-  const error = blocked('dns.lookup', hostname);
-  if (typeof done === 'function') { process.nextTick(() => done(error)); return; }
-  throw error;
+  const wrapped = function (error, address, family) {
+    if (!error) rememberAddress(address);
+    if (typeof done === 'function') done(error, address, family);
+  };
+  return typeof options === 'function'
+    ? originalLookup.call(this, hostname, wrapped)
+    : originalLookup.call(this, hostname, options, wrapped);
 };
 
 const dnsPromises = require('node:dns/promises');
 const originalPromiseLookup = dnsPromises.lookup;
 dnsPromises.lookup = function lookup(hostname, options) {
   if (loopback(hostname)) return originalPromiseLookup.call(this, hostname, options);
-  return Promise.reject(blocked('dns.promises.lookup', hostname));
+  if (!hostAllowed(hostname)) return Promise.reject(blocked('dns.promises.lookup', hostname));
+  return originalPromiseLookup.call(this, hostname, options).then((result) => { rememberAddress(result); return result; });
 };
 
 // 自证：启动器会检查这个标记，证明守卫真的加载进了被测后端进程（而不是“没装上所以日志为空”）
@@ -59,7 +85,7 @@ net.Socket.prototype.connect = function connect() {
   const host = typeof first === 'object' && first !== null
     ? (first.host || first.hostname)
     : (typeof args[1] === 'string' ? args[1] : undefined);
-  if (host && !loopback(host)) throw blocked('net.Socket.connect', host);
+  if (host && !loopback(host) && !hostAllowed(host) && !allowedAddresses.has(host)) throw blocked('net.Socket.connect', host);
   return originalConnect.apply(this, args);
 };
 

@@ -56,6 +56,7 @@ try {
     codingAgentApiKey: process.env.CODING_AGENT_API_KEY,
     codingAgentModel: process.env.CODING_AGENT_MODEL,
     agentTimeoutMs: process.env.AGENT_TIMEOUT_MS ? Number(process.env.AGENT_TIMEOUT_MS) : undefined,
+    agentMaxRounds: process.env.AGENT_MAX_ROUNDS ? Number(process.env.AGENT_MAX_ROUNDS) : undefined,
     previewStartTimeoutMs: process.env.PREVIEW_START_TIMEOUT_MS ? Number(process.env.PREVIEW_START_TIMEOUT_MS) : undefined,
     logger: false,
   }));

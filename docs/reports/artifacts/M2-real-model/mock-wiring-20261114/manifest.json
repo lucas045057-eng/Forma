@@ -1,0 +1,24 @@
+{
+  "head": "a9504076bf6ebdb179169d27e14f3234a88e3986",
+  "mode": "mock",
+  "run": "_probe-mock-full",
+  "note": "loopback mock 接线验证；不是真实模型成绩，未使用真实 key/额度",
+  "startedAt": "2026-11-14T03:42:09.489Z",
+  "finishedAt": "2026-11-14T03:43:46.085Z",
+  "passed": 10,
+  "total": 10,
+  "roundsPerCase": 2,
+  "screenshots": "生成于临时 probe 目录（每例 candidate/adopted/reverted），未随本目录提交；任务 JSON 已记录路径",
+  "files": [
+    "1.json",
+    "10.json",
+    "2.json",
+    "3.json",
+    "4.json",
+    "5.json",
+    "6.json",
+    "7.json",
+    "8.json",
+    "9.json"
+  ]
+}
