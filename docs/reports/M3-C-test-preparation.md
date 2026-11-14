@@ -198,7 +198,7 @@ Unexpected token '<', "<!doctype "... is not valid JSON
 | `02-checks-adopt.spec.ts` | **9/9 passed**（8 例一轮 + 新增无绕过例单跑 2 例） | 2.8m + 24.5s | 文案断言、取消语义、`data-run-id` 竞态、场景写回断言、新增“写回后不刷新也不可采用” |
 | `03-failures.spec.ts` | **3/3 passed** | 33.9s | 构建失败需先过请示；前后缀断言改成语义断言 |
 | `04-mock-boundaries.spec.ts` | **8/8 passed** | 1.1m | “迟到响应”改写成真正的旧代次迟到，而不是让服务器说谎 |
-| **整套（同一次 Playwright 调用）** | **27 passed**（exit 0） | 3.7m | 与正式轮第 12 步同形，确认文件间无相互干扰；日志 `orbital/jobs/job_d4cd3a32` |
+| **整套（同一次 Playwright 调用）** | **28 passed**（exit 0） | 4.0m | 与正式轮第 12 步同形，确认文件间无相互干扰；日志 `orbital/jobs/job_c32a43d8` |
 
 ### 9.1 自证过程中确认的三个产品事实（不是缺陷，但要记下来）
 
