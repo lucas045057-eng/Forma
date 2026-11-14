@@ -1,5 +1,6 @@
 import type { ApprovalCard, Candidate, CheckRun, Task } from '@spatial/shared';
 import { isApproval, mergeApproval } from './approval-state.ts';
+import { isCheckRun, mergeRun } from './check-state.ts';
 
 export interface M2State { tasks: Task[]; candidates: Candidate[]; version: string; approvals: ApprovalCard[]; runs: Record<string, CheckRun> }
 export const emptyM2State: M2State = { tasks: [], candidates: [], version: '', approvals: [], runs: {} };
@@ -21,10 +22,14 @@ export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
     return { ...state, approvals: mergeApproval(state.approvals, event.approval) };
   }
   if (event.type === 'check.started' || event.type === 'check.updated' || event.type === 'check.finished') {
-    const run = object(event.run);
-    if (typeof run?.id !== 'string' || typeof run.candidateId !== 'string' || !Array.isArray(run.checks)) return state;
-    const next = { ...state, runs: { ...state.runs, [run.id]: run as unknown as CheckRun } };
+    const run = event.run;
+    if (!isCheckRun(run)) return state;
+    const merged = mergeRun(state.runs[run.id], run);
+    const next = { ...state, runs: { ...state.runs, [run.id]: merged } };
     const candidate = object(event.candidate);
+    const current = state.candidates.find(item => item.id === run.candidateId);
+    // Latest pointers come from REST. An older run event can never select itself.
+    if (merged !== run || current?.latestCheckRunId !== run.id || candidate?.latestCheckRunId !== run.id) return next;
     return candidate?.id === run.candidateId ? reduceM2Event(next, { ...event, type: 'candidate.ready' }) : next;
   }
   if (event.type === 'task.updated') {

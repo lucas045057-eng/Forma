@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { Candidate, Task } from '@spatial/shared';
+import type { Candidate, CheckRun, Task } from '@spatial/shared';
+import { associatedRun, consistentChecks, isCheckRun } from './check-state.ts';
 import { emptyM2State, contiguousReplay, reduceM2Event, type IncomingEvent, type M2State } from './m2-state.ts';
 import { isApproval, sortApprovals } from './approval-state.ts';
 
@@ -10,6 +11,7 @@ interface EventCenterValue {
   status: ConnectionStatus;
   syncReady: boolean;
   syncError: string;
+  syncEpoch: number;
   lastSeq: number;
   subscribe: (listener: (event: CenterEvent) => void) => () => void;
   reload: () => Promise<void>;
@@ -28,6 +30,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
   const [syncReady, setSyncReady] = useState(false);
   const [syncError, setSyncError] = useState('');
   const [lastSeq, setLastSeq] = useState(0);
+  const [syncEpoch, setSyncEpoch] = useState(0);
   const listeners = useRef(new Set<(event: CenterEvent) => void>());
   const reloadRef = useRef<() => Promise<void>>(async () => { throw new Error('事件尚未连接'); });
   const reload = useCallback(() => reloadRef.current(), []);
@@ -55,6 +58,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     async function synchronize(anchor = seq) {
       const generation = connection;
       const operation = ++request;
+      setSyncEpoch(value => value + 1);
       syncing = true;
       setSyncReady(false);
       setSyncError('');
@@ -74,14 +78,25 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           ]);
           if (!valid(generation, operation)) return;
           if (!Array.isArray(tasks) || !Array.isArray(candidates) || typeof version.version !== 'string' || !Array.isArray(approvals) || !approvals.every(isApproval)) throw new Error('持久状态格式不完整');
+          const latest = await Promise.all([...new Set(candidates.map(candidate => candidate.latestCheckRunId).filter((id): id is string => !!id))].map(async id => {
+            const run = await json<unknown>(`/checks/${encodeURIComponent(id)}`);
+            if (!isCheckRun(run) || run.id !== id) throw new Error('检查状态不完整，请刷新状态');
+            return run;
+          }));
+          if (!valid(generation, operation)) return;
+          const runs: Record<string, CheckRun> = Object.fromEntries(latest.map(run => [run.id, run]));
           const replay = await history(anchor);
           if (!valid(generation, operation)) return;
           if (overflow || replay.truncated || replay.oldest > anchor + 1 || replay.current < anchor) continue;
           const ordered = contiguousReplay([...replay.events, ...buffer], anchor, replay.current);
           if (!ordered) continue;
           const { events, cursor } = ordered;
-          const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs: {} };
-          setState(events.reduce(reduceM2Event, snapshot));
+          const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs };
+          const next = events.reduce(reduceM2Event, snapshot);
+          // A run started during the non-atomic snapshot requires fresh latest pointers.
+          if (events.some(event => event.type === 'check.started' && isCheckRun(event.run) && !runs[event.run.id])) continue;
+          if (next.candidates.some(candidate => candidate.latestCheckRunId && (!associatedRun(candidate, next.runs[candidate.latestCheckRunId]) || !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) continue;
+          setState(next);
           seq = cursor;
           setLastSeq(seq);
           buffer = [];
@@ -134,7 +149,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (event.seq <= seq) return;
-        if (event.seq !== seq + 1 || event.type === 'version.changed') {
+        if (event.seq !== seq + 1 || event.type === 'version.changed' || event.type === 'check.started' || event.type === 'check.finished') {
           buffer.push(event);
           // Disable gates immediately; the triggering event is retained for replay.
           startSync();
@@ -169,7 +184,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <EventCenterContext.Provider value={{ state, status, syncReady, syncError, lastSeq, subscribe, reload }}>{children}</EventCenterContext.Provider>;
+  return <EventCenterContext.Provider value={{ state, status, syncReady, syncError, syncEpoch, lastSeq, subscribe, reload }}>{children}</EventCenterContext.Provider>;
 }
 export function useEventCenter() {
   const value = useContext(EventCenterContext);
