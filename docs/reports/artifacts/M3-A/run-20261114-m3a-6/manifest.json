@@ -1,0 +1,494 @@
+{
+  "runId": "run-20261114-m3a-6",
+  "job": "job_9ce21099",
+  "head": "40cc46b411fb6f8a648a189a2c1d0d1586e7f9d1",
+  "status": "passed",
+  "productionDigest": "1ca2eb882b9edd9bbe05ebd403f93430da57b3775ce4415b999829234edafea9",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "refreshedArtifacts": 62,
+  "unit": {
+    "total": 289
+  },
+  "e2e": {
+    "total": 139
+  },
+  "files": [
+    {
+      "file": "e2e-verification.json",
+      "bytes": 378,
+      "sha256": "1ddff28d0e1d4da0779de1b0779a89e8ce3d54e7fcb36f4b6d3069c8e0ef4170"
+    },
+    {
+      "file": "evidence.json",
+      "bytes": 30302,
+      "sha256": "7208abd90ef07b3405638e1164cadefc3dd6a83cb7fde7dadbcfb4018d1aae36"
+    },
+    {
+      "file": "job-output.log",
+      "bytes": 18451,
+      "sha256": "6a66328a817ed4c7da647c1e78d01dd02e55387f0994cdb3cf16445818463677"
+    },
+    {
+      "file": "job-summary.json",
+      "bytes": 321,
+      "sha256": "b5021dfc3df5726a9c99f5d597cd15c9d2af772e60f8d5d8f26863223601c03e"
+    },
+    {
+      "file": "logs\\01-typecheck.log",
+      "bytes": 582,
+      "sha256": "6b59cc52f399cb6cca73785da8499bf1880e858fdd6feac232043671d3aea06d"
+    },
+    {
+      "file": "logs\\02-build.log",
+      "bytes": 3938,
+      "sha256": "397cb93e4a60362a36ce5918687f727ffdd52067c26e4401ec1e25fc59d4fe77"
+    },
+    {
+      "file": "logs\\03-unit.log",
+      "bytes": 48032,
+      "sha256": "7363fc863984703bc99f1e81ddd685ea46b5c28d7df353557bfb054bacebb095"
+    },
+    {
+      "file": "logs\\04-e2e-m0b.log",
+      "bytes": 5154,
+      "sha256": "8544cd2e6267eb089ddd5f5478a390b86751bd1f26cd8870857e17fec8de71db"
+    },
+    {
+      "file": "logs\\05-e2e-m0a.log",
+      "bytes": 5150,
+      "sha256": "996063eea1542fec0dc6824d15da0c1717e2b27a26aab4ea512034f593540b29"
+    },
+    {
+      "file": "logs\\06-e2e-m1a.log",
+      "bytes": 1707,
+      "sha256": "f93dd4b914c91c120dc82687845a6028247076b0171a92ab3586efd5f41d0f76"
+    },
+    {
+      "file": "logs\\07-e2e-m1b.log",
+      "bytes": 4257,
+      "sha256": "ba97d3909c22e0fcbd9473efd099c4d897916173cb8a97604b6a8204a12807d9"
+    },
+    {
+      "file": "logs\\08-e2e-m2a.log",
+      "bytes": 6396,
+      "sha256": "e49991a8d87dd2fc62f934a30723f452dddaf63666d12aa2de38ba66b1ad3561"
+    },
+    {
+      "file": "logs\\09-e2e-m2b.log",
+      "bytes": 2663,
+      "sha256": "17bc9f9c9eba6ca7198d1d797eb4a5e1ed5d70e2b72f4835c5c36c98a423196a"
+    },
+    {
+      "file": "logs\\10-e2e-m3a.log",
+      "bytes": 1861,
+      "sha256": "14acb812aa6a9404190235f032cf367831c3593b82b9aaa0e4d250709edcf841"
+    },
+    {
+      "file": "output\\e2e-m0a\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m0b\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m0b\\m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium\\attachments\\case8-deterministic-ast-json-ce639b9e4ca49819a43962326b8267a3b6ac7ac7.json",
+      "bytes": 1964,
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "file": "output\\e2e-m0b\\m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium\\attachments\\case1-random-sample-json-e9c5553a58799d28a0a328afd225c5b7ad762e03.json",
+      "bytes": 12037,
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "file": "output\\e2e-m1a\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m1b\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m2a\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m2b\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "output\\e2e-m3a\\.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-create-返回-HTTP-500-结果不明-.json",
+      "bytes": 918,
+      "sha256": "7609dbbcb925ad82e3a055771dbc2d490e68edfd1a4cc6081c287f91f1f38886"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-任务取消-status-6.json",
+      "bytes": 827,
+      "sha256": "403a62413cda2fc38ea70fc667e2da5763c7b1392ea36dfa3fe4cc5f4733d695"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-任务失败-status-4.json",
+      "bytes": 809,
+      "sha256": "eea613a40d329ccc015a063f386cc79f500afb0f19575f56758b50a55aa47bee"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-任务成功但没有-GLB-输出.json",
+      "bytes": 855,
+      "sha256": "6fac3256bd2a1ba26916867af73fc5307ce41019996334f1e178e44614e7a786"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-并发超限-create-返回-c-错误码-.json",
+      "bytes": 1018,
+      "sha256": "4466abed3a30900ff11a39d30f4b8b448f8ed9abf32cbeb788086ac7f3c3266a"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-未知任务状态.json",
+      "bytes": 813,
+      "sha256": "2d9b6563822ef9eab5925151f1da7e67a154d51ce8db1778401c3bb24d32ac99"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-结果-URL-过期-403.json",
+      "bytes": 951,
+      "sha256": "dbc1c1f9e216cade31125e5f996876fd614d58d1d6ed858ad9490f6cd3d76530"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-结果-URL-过期-404.json",
+      "bytes": 951,
+      "sha256": "055547bd735ffe126badb295c1433dd187407c2da59d416fe5ae3fceba247570"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\failure-轮询超时.json",
+      "bytes": 892,
+      "sha256": "f502d47886a8ea162d9326d79615694a3c7d9051a9d9492467adb77c0bc0ecdf"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\guard-selftest.json",
+      "bytes": 197,
+      "sha256": "5b2e41a52638ac77136e0633e81e4a7558be64d055d898868edad6c004a8187d"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\idempotency-concurrent.json",
+      "bytes": 557,
+      "sha256": "c75d7282e58d528bf2d5749ebf33cab774e3890078585a8154d5f6b1ed217a28"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\idempotency-sequential.json",
+      "bytes": 556,
+      "sha256": "0543ab0b9d6257b62573828d2329c3f88e295cd9dd7ec2ea00ca16d4f025d46f"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\idempotency-unclear.json",
+      "bytes": 512,
+      "sha256": "fa676d96719b9968f049853a0c0993e585dd9fc33f31f1b33598beead28db32c"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\image-to-3d.json",
+      "bytes": 1627,
+      "sha256": "8506d7589d0d44e1f1e89d8fe3d3d645d3bd01b8c65bdda1c5580e43b227b042"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\import.json",
+      "bytes": 3403,
+      "sha256": "8cda4e2c860dc5077d5697db47b05e0560f54fcd5cd0d534d43094788f49ef6a"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\pipeline.json",
+      "bytes": 6092,
+      "sha256": "73451526f72ed519ca8beab1779b819b294f4cc0549bf621fb367b4e08fb57bf"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\review-r1-leftover-temp.json",
+      "bytes": 1346,
+      "sha256": "58a45c51a50eaa431b95ec62e267664f614974d535fa1d9549c8cc3e8ac59a02"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\review-r2-drip-timeout.json",
+      "bytes": 375,
+      "sha256": "534cb1f5368fd1913a1df4d1d983a8c02937f3e67639e8cc0bcdb58974536a4b"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\review-r2-resume.json",
+      "bytes": 1737,
+      "sha256": "d9977a5618183b6775b6d075ee70875edaf196c18d6a09a79d374a728f1aeee7"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\review-r3-model-missing.json",
+      "bytes": 484,
+      "sha256": "8e7947e21010d4b58a225be2653562a29a84c9b19acbeac6ef63790539d359a2"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\review-s3-http-base.json",
+      "bytes": 630,
+      "sha256": "4b84df8e1f36bc9734a57e2775dcb699be44e0f91c9931f9ad40df12eed21d0c"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\security-idempotency-hash.json",
+      "bytes": 1558,
+      "sha256": "1aaf4f55286347e3c6a3ed35592a9178e2a62341ff4f209b43d830f14cbee4db"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-A\\security-key-leak.json",
+      "bytes": 391,
+      "sha256": "cc8dd628914aa5fe3d596737d45936c640ff3b4f507a3b0f4ceea5ab52230c1b"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-B\\case3-shared-button.json",
+      "bytes": 868,
+      "sha256": "f892f0772beea2b73b1f70853a97937c3ccd0af2c67f4e2975cbd53eb4cfe3f5"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-B\\case4-map-list.json",
+      "bytes": 917,
+      "sha256": "5d3220e2e6465fcda20ef299f64b75ac04c9cdc988dd82fe08f5e5ac38425440"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-B\\case5-outer-container.json",
+      "bytes": 969,
+      "sha256": "c1c6ea9b3ab95c58ca72f0b43bc2605ca1a4264961eda23ca281e6543fe96cbf"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M0-B\\case6-ancestors.json",
+      "bytes": 1008,
+      "sha256": "6b20fd9a0c847d5412e2bd1dcc3bb361baffba638993cab63d2612bdf2c84e59"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-A\\parts.json",
+      "bytes": 5701,
+      "sha256": "fff4940ee1b84e45c532a45bc6c1da80605f15c7d99802c960dab53b0b81adf7"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\adopt-primary.json",
+      "bytes": 338,
+      "sha256": "aec6d37062e810eb9c4e83a6af7d5b3bf410578207ca5850aee87759a333c321"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\consistency-after-edit.json",
+      "bytes": 7457,
+      "sha256": "740542fcc12a8ed4d758b35ca227f24c2032ede4fde28b7480488630d0d96c95"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\keyframe-write.json",
+      "bytes": 566,
+      "sha256": "b27e23a0e9db13f7474841d33aadb03e2d805ab933a1f1c4aa67d1dbd9105747"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\undo-api.json",
+      "bytes": 38,
+      "sha256": "55346bf2e03f9e8f6de0be827fb6231cdeb392b02ac6941f756e21dbfaa2621d"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\undo-ui.json",
+      "bytes": 99,
+      "sha256": "5fb2e4635e915ea0378c801ed2622c039eae94e9aa13fdd173cf959d1213f6f9"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\writeback-hero.json",
+      "bytes": 2085,
+      "sha256": "f10254f75f9504cb572fedf818f9c42c7e4050ad678e99b479c8b0aa7766e8b6"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M1-B\\writeback-keyframe.json",
+      "bytes": 882,
+      "sha256": "b539fa6cf1c5727501602940bb4e64526dac8e8f55f0ceb8b5e0c3ec72cc0d44"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\adopt-conflict.json",
+      "bytes": 296,
+      "sha256": "5f1658a1f3ec4ac88372fca6d5ea95646ba5c40341d318348979b0a78860520e"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\adopt-once.json",
+      "bytes": 77,
+      "sha256": "ebe3b7b5e5c2e0a686f8c0a04fddc9d9777cb27ccc8dffe456bfc3e6a0b6a582"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\candidate-limit.json",
+      "bytes": 2201,
+      "sha256": "7bef71e16f8e79f906634e5a9b72192009bcf6619ced79dd4f2fe0dcbc8453d0"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\d1-candidate-preview.json",
+      "bytes": 282,
+      "sha256": "fe55c970c5fec873086b1bfb7f69dd8206f27035cfd63b5f2c9a2bfa2f45c419"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\discard.json",
+      "bytes": 143,
+      "sha256": "8b17ee9644bbae959c77fab702f985bcaa05ea589bee3eac334f0f584f4b574a"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\events-replay.json",
+      "bytes": 108,
+      "sha256": "ca6cc3ff6cacd4de1ac25eab4f1ada5e9b7d92f74503885fa51040b351c2f452"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\failure-timeout.json",
+      "bytes": 136,
+      "sha256": "d8130ad65dc4268dbb4577c133a77b0b1912a0ee90680cd26ed2266ecc27567b"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\flow-main.json",
+      "bytes": 1563,
+      "sha256": "3c3ac2823f975fb9a1fbefd74ae2d6fa64936a02538bea83af25e08b2f466712"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\isolation-r6-attributed-multi-candidate-pid-kill.json",
+      "bytes": 8343,
+      "sha256": "9e36d75a90c36e1b8d9a26e975b69a9bc32076b695b9c64cac8d3dd828a4374e"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\isolation-r6-attributed-negative-control.json",
+      "bytes": 24401,
+      "sha256": "c9051ea73c063da8187f9d68b399ce5c99fa29c4aea521e3351609871caff4c0"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\isolation-r6-attributed-pid-kill.json",
+      "bytes": 3592,
+      "sha256": "ea2c9f1eb540eb95ba0515f9347b320438a5acca75f2f3573759c03adf17a150"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\isolation-r6-attributed-startup-window-pid-kill.json",
+      "bytes": 4078,
+      "sha256": "cf6bdfbe0e285b809cff469ca559ceb2aa46203b1da13f0502ed15b963aeaaed"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\isolation-r6-attributed-tree-kill.json",
+      "bytes": 4221,
+      "sha256": "778a2797579fd0201528ec9bebba2d184d6e44d5d74778770e9aaeeb9e07b6b7"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\preview-origin.json",
+      "bytes": 333,
+      "sha256": "41f005de1c153e283d8a70b3d0384094d63c5d7d8e7e3c76d9e378207c0ad19d"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\selection-invalid.json",
+      "bytes": 1087,
+      "sha256": "68ed3645a99b48f3b1443d8c3a518557d0d3961727184e3dd0a0a9168bbb9a4c"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\selection-stale.json",
+      "bytes": 106,
+      "sha256": "f740ddd024fa238cee54a7b537cb655d2a268f33bda4cd6e565185e96aa893ab"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\selection-valid.json",
+      "bytes": 100,
+      "sha256": "40fd1a0ffa9661b086dee56263f34074da53b530ea4bad0c9cb5e0b4ce6a78b2"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-A\\takeover-n4-shutdown-b167907.json",
+      "bytes": 5017,
+      "sha256": "1343169be0fe151e19d0787406181f4c9445163237fa01a24b564c17750d8152"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\m2b-ui-flow.json",
+      "bytes": 931,
+      "sha256": "02f7b8c77c3915930a0fc4aac824afe7654ed4c64f5d7c653d3e2bcd8dd921df"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-candidates-switch.json",
+      "bytes": 1389,
+      "sha256": "1ca1c1308cda167c4901b52f0627a083da9e3dcb10bee40c4bebdd907914f72d"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-events-reconnect.json",
+      "bytes": 289,
+      "sha256": "6422a89c9262a93413ee2d9f59f1ceb09d6bd4b6e7b4536d154624a585ca0b9e"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-events-truncated.json",
+      "bytes": 316,
+      "sha256": "a3e2f11ea68a675a4b220a4f0acc8d6681e9a6e44f742c56307e543740814d49"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-r1-failed.json",
+      "bytes": 488,
+      "sha256": "c07865972c6c57c7cd64c3bb95596a968281297f0dee107ba25c7d2386a9c0a8"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-r1-pending.json",
+      "bytes": 445,
+      "sha256": "588f8aea48631ea5bca28100c552c58196df31c131e3f0b7e708a7988d1ba718"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-single-connection.json",
+      "bytes": 275,
+      "sha256": "6428d4bcb8bd2e0f04b721fca6d2e99d08c365e8a1eeafbc78aacc191268cd31"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-stale-different-file.json",
+      "bytes": 2309,
+      "sha256": "4492a204b5eceb2e02ed61b89865c0695e2e0fbda2946da6f64b8dabd18df2d3"
+    },
+    {
+      "file": "refreshed-artifacts\\docs\\reports\\artifacts\\M2-B\\takeover-stale-same-file.json",
+      "bytes": 2495,
+      "sha256": "3482ed973c50ac20348bfefa3e86b6c03a9b7f805a4b0b8816a302b617b5c377"
+    },
+    {
+      "file": "reports\\e2e-m0a.json",
+      "bytes": 37788,
+      "sha256": "6f185be351dd6b54d4c4942823b1fb1843e7637ecefb8458a35e8e3780892d89"
+    },
+    {
+      "file": "reports\\e2e-m0b.json",
+      "bytes": 35547,
+      "sha256": "837e2ee6fdb7b3be9e45083e90f65da68df27142361335ceb811ffe1598a52b4"
+    },
+    {
+      "file": "reports\\e2e-m1a.json",
+      "bytes": 11572,
+      "sha256": "cd69c8adbd1c86b8fdfcac5352de5c22122e9f4da3e4be537ba4317485951569"
+    },
+    {
+      "file": "reports\\e2e-m1b.json",
+      "bytes": 33396,
+      "sha256": "d14271a76cd6086104676ac97c51e165658f48b44b34c7da453558f04bb0ae22"
+    },
+    {
+      "file": "reports\\e2e-m2a.json",
+      "bytes": 56086,
+      "sha256": "450ca19a53178d41d0c9004597e86856de6ede279f316323416d80cb778e792a"
+    },
+    {
+      "file": "reports\\e2e-m2b.json",
+      "bytes": 18464,
+      "sha256": "e1395fa02ddb2bda683456a8740dad133d796ccb93d195991bc41d832d0bfdd3"
+    },
+    {
+      "file": "reports\\e2e-m3a.json",
+      "bytes": 21473,
+      "sha256": "799c9b8b09ca9a4d38ceed3c52cc1795d8755c15b0198af1f918434acbd8e20d"
+    },
+    {
+      "file": "summary.json",
+      "bytes": 2935,
+      "sha256": "ad632c39fcb647a54982cceb91b907415b24048b09a841ce13f063320c1243e9"
+    },
+    {
+      "file": "unit-summary.json",
+      "bytes": 269,
+      "sha256": "dcea948b88fbd3c9f371a6d5cbeacc1b274e5d966315d8de42bd6605639fe17a"
+    }
+  ],
+  "note": "run6 十步全部 exit0；本 manifest 记录归档文件 SHA256；不含 manifest 自身",
+  "credentialScan": {
+    "matches": 1,
+    "file": "refreshed-artifacts/docs/reports/artifacts/M0-A/security-key-leak.json",
+    "reason": "旧 M0-A 安全用例的字段名 authorizationHeader 与假值 sentinel=mock-only；leaks 为空，无真实凭据",
+    "action": "保留原证据，未输出匹配内容"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "suites": {
+    "M0-B": 24,
+    "M0-A": 27,
+    "M1-A": 7,
+    "M1-B": 23,
+    "M2-A": 35,
+    "M2-B": 12,
+    "M3-A": 11
+  },
+  "total": 139,
+  "expectedFailed": 0,
+  "skipped": 0,
+  "flaky": 0,
+  "retries": 0,
+  "topLevelErrors": 0,
+  "note": "逐份原始 JSON 核对：每项 expectedStatus=passed、单一 result passed、无 errors/retry/skip"
+}

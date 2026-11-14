@@ -1,0 +1,24 @@
+{
+  "asset": {
+    "id": "5f9237a9-f593-4cf9-ba99-21f222c14186",
+    "status": "submit_unknown",
+    "createdAt": "2026-11-14T10:26:25.661Z",
+    "updatedAt": "2026-11-14T10:26:25.664Z",
+    "error": {
+      "code": "UPSTREAM_UNAVAILABLE",
+      "message": "Lux3D 请求未确认，请查询已有任务，不要自动重复生成"
+    }
+  },
+  "statsBefore": {
+    "creates": 1,
+    "gets": 3
+  },
+  "afterRestart": {
+    "creates": 0,
+    "gets": 0
+  },
+  "afterAgain": {
+    "creates": 0,
+    "gets": 0
+  }
+}

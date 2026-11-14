@@ -5,6 +5,17 @@
 - 基线门禁：`git merge-base --is-ancestor 012d9a65… HEAD` 成功；`apps/packages/templates` 与 `pnpm-lock.yaml` 相对 `012d9a6` 无差异
 - 运行：`job_b10ae204`，exit 1，约 86 秒；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-1/`
 
+## 最终结果：M3-A 后端验收通过（mock 门槛）
+
+- 冻结 HEAD：**`40cc46b411fb6f8a648a189a2c1d0d1586e7f9d1`**；`job_9ce21099` exit 0、**12m14s**；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-6/`。
+- 十步全部 exit 0、signal null、failed=false：typecheck 5650ms、build 8529ms、unit 95666ms；**289 单测**（shared 68、plugin 20、bridge 1、renderer 5、server 188、Studio 7，全部实际执行）；七套 E2E **139/139**（M0-B 24、M0-A 27、M1-A 7、M1-B 23、M2-A 35、M2-B 12、M3-A 11）。
+- 逐份原始 JSON 核对：每项 expectedStatus=passed、单一 result passed、retry=0、skip=0、expected-failed=0、顶层 errors=[]；各步前后 HEAD、锁 SHA256 `48263def…527f`、产品摘要 `1ca2eb88…fea9` 与 productionStatus 空一致。
+- M2-A/M2-B 的审批语义迁移（无 selection/越界先卡后真实回答）在本轮同一 HEAD 一并通过；没有用 run3/checkpoint/实现方旧结果拼接。
+- 本轮范围仍为 M3-A 后端；M3-B 真实四检查与 M3-C UI 未实现，候选 checks 仍 `not_run`；RR1 跨卡恢复故障无独立 E2E（实现单测/独立审查覆盖）；run4 的低位端口/cause 未被记录，历史资产偶发问题的唯一根因仍未关闭。
+- 全部为 mock/Fake key/loopback/出站守卫；未读真实 `.env`/ASKS，未调用真实模型/Lux3D。证据扫描仅命中旧 M0-A `security-key-leak.json` 的字段名与 `mock-only` 假值（`leaks` 为空），无真实凭据，未输出匹配内容。M3-A 正式设计收口由 Codex 调度负责，本报告只给出独立测试结论。
+
+历史：run1–5、checkpoint 的失败/修正证据均保留在各自目录与本报告下方条目，未改写为“从未失败”。
+
 ## 第二轮（HEAD `6c86101`，`run-20261114-m3a-2`）
 
 - `job_e3cfdb4a` exit 1，约 103 秒；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-2/`。
