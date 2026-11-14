@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterEach, expect, it } from 'vitest';
 import { computeSnapshot, copyAudited } from './snapshot.ts';
 import { writeArtifact } from './artifacts.ts';
-import { CheckRunner, type CheckExecutor } from './runner.ts';
+import { CheckRunner, type CheckExecutor, type CheckContext, type CheckResult } from './runner.ts';
 
 const directories: string[] = [];
 const runners: CheckRunner[] = [];
@@ -28,11 +28,15 @@ async function runnerFixture() {
   let schemaCalls = 0;
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
+  const passed = async (name: CheckResult['name'], ctx: CheckContext): Promise<CheckResult> => {
+    const ref = await ctx.writeArtifact(name === 'build' ? 'build.log' : `${name}.json`, JSON.stringify({ testDouble: true, name }));
+    return { name, status: 'passed', evidence: ref.hash };
+  };
   const executor: CheckExecutor = {
-    schema: async () => { schemaCalls++; await gate; return { name: 'schema', status: 'passed' }; },
-    build: async () => ({ name: 'build', status: 'passed' }),
-    smoke: async () => ({ name: 'smoke', status: 'passed' }),
-    occlusion: async () => ({ name: 'occlusion', status: 'passed' }),
+    schema: async ctx => { schemaCalls++; await gate; return passed('schema', ctx); },
+    build: async ctx => passed('build', ctx),
+    smoke: async ctx => passed('smoke', ctx),
+    occlusion: async ctx => passed('occlusion', ctx),
   };
   const options = {
     dataDirectory: path.join(f.directory, 'data'), candidatePath: f.candidate,

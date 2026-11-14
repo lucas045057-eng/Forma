@@ -90,12 +90,16 @@ export interface CheckRun {
   mainVersion: string;
   policyVersion: string;
   status: CheckRunStatus;
+  outcome?: CheckOutcome;
+  toolIdentity?: string;
+  artifacts?: CheckArtifact[];
   checks: CheckResult[];
   createdAt: string;
   startedAt?: string;
   finishedAt?: string;
   error?: { code: string; message: string };
 }
+export interface CheckArtifact { name: string; mime: string; bytes: number; hash: string }
 export type ApprovalRuleCode = 'shared_component' | 'global_style' | 'out_of_scope' | 'analysis_uncertain';
 export type ApprovalStatus = 'pending' | 'approving' | 'approved' | 'rejected' | 'cancelled' | 'stale' | 'failed';
 export interface ApprovalCard {

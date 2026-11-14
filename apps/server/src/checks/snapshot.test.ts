@@ -183,11 +183,14 @@ function makeExecutor(results: Partial<Record<string, CheckResult>>): CheckExecu
     occlusion: { name: 'occlusion', status: 'passed' },
   };
   const merged = { ...defaults, ...results };
+  const phase = (name: CheckResult['name']) => async (ctx: CheckContext): Promise<CheckResult> => {
+    const result = merged[name]!;
+    if (result.status !== 'passed') return result;
+    const ref = await ctx.writeArtifact(name === 'build' ? 'build.log' : `${name}.json`, JSON.stringify({ testDouble: true, name }));
+    return { ...result, evidence: ref.hash };
+  };
   return {
-    schema: async () => merged.schema!,
-    build: async () => merged.build!,
-    smoke: async () => merged.smoke!,
-    occlusion: async () => merged.occlusion!,
+    schema: phase('schema'), build: phase('build'), smoke: phase('smoke'), occlusion: phase('occlusion'),
   };
 }
 
@@ -200,7 +203,7 @@ async function makeRunner(dir: string, opts?: { executor?: CheckExecutor; candid
     candidatePath,
     candidateCommit: opts?.candidateCommit ?? 'abc123',
     baseVersion: 'base456',
-    contentDigest: opts?.contentDigest ?? 'digest789',
+    contentDigest: opts?.contentDigest ?? (await computeSnapshot(candidatePath)).digest,
     mainVersion: 'base456',
     executor: opts?.executor,
     buildTimeoutMs: 1000,

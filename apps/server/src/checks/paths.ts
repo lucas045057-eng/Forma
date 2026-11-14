@@ -19,7 +19,8 @@ export async function assertPlainPath(target: string, denied: () => Error, allow
 }
 
 /** Read a regular file through one bounded handle, checking its path again afterwards. */
-export async function readPlainFile(file: string, maxBytes: number, denied: () => Error, tooLarge: () => Error): Promise<Buffer> {
+export async function readPlainFile(file: string, maxBytes: number, denied: () => Error, tooLarge: () => Error, signal?: AbortSignal): Promise<Buffer> {
+  signal?.throwIfAborted();
   await assertPlainPath(file, denied);
   const handle = await open(file, 'r');
   try {
@@ -29,6 +30,7 @@ export async function readPlainFile(file: string, maxBytes: number, denied: () =
     const chunks: Buffer[] = [];
     let total = 0;
     for (;;) {
+      signal?.throwIfAborted();
       const chunk = Buffer.alloc(Math.min(64 * 1024, maxBytes + 1 - total));
       const { bytesRead } = await handle.read(chunk);
       if (!bytesRead) break;
@@ -37,6 +39,7 @@ export async function readPlainFile(file: string, maxBytes: number, denied: () =
       chunks.push(chunk.subarray(0, bytesRead));
     }
     await assertPlainPath(file, denied);
+    signal?.throwIfAborted();
     const linked = await lstat(file);
     if (!linked.isFile() || linked.dev !== opened.dev || linked.ino !== opened.ino) throw denied();
     return Buffer.concat(chunks, total);

@@ -36,6 +36,7 @@ export interface SnapshotResult {
   digest: string;
   totalBytes: number;
 }
+export interface SnapshotOptions { toolIdentity?: string; signal?: AbortSignal }
 
 export class SnapshotError extends Error {
   code: string;
@@ -47,11 +48,13 @@ export class SnapshotError extends Error {
  * Refuses symlinks, junctions, hidden/dot files, forbidden patterns, and paths
  * that escape the root via realpath comparison.
  */
-async function walk(root: string, dir: string, relative: string, entries: SnapshotEntry[]): Promise<void> {
+async function walk(root: string, dir: string, relative: string, entries: SnapshotEntry[], options: SnapshotOptions): Promise<void> {
+  options.signal?.throwIfAborted();
   let items;
   try { items = await readdir(dir, { withFileTypes: true }); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
   for (const item of items.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
+    options.signal?.throwIfAborted();
     const abs = path.join(dir, item.name);
     const rel = relative ? `${relative}/${item.name}` : item.name;
     // At the root level, only descend into src and public — skip everything else
@@ -73,7 +76,7 @@ async function walk(root: string, dir: string, relative: string, entries: Snapsh
     if (info.isDirectory()) {
       // Only descend into src and public — refuse anything else.
       if (rel === 'src' || rel === 'public' || rel.startsWith('src/') || rel.startsWith('public/')) {
-        await walk(root, abs, rel, entries);
+        await walk(root, abs, rel, entries, options);
       }
       continue;
     }
@@ -82,7 +85,7 @@ async function walk(root: string, dir: string, relative: string, entries: Snapsh
     if (entries.length >= MAX_FILES) throw new SnapshotError('SNAPSHOT_LIMIT', `快照文件数超过上限 ${MAX_FILES}`);
     const content = await readPlainFile(abs, MAX_BYTES,
       () => new SnapshotError('UNSAFE_PATH', `快照拒绝链接或特殊文件：${rel}`),
-      () => new SnapshotError('SNAPSHOT_LIMIT', `文件 ${rel} 超过单文件上限 ${MAX_BYTES} 字节`));
+      () => new SnapshotError('SNAPSHOT_LIMIT', `文件 ${rel} 超过单文件上限 ${MAX_BYTES} 字节`), options.signal);
     const hash = createHash('sha256').update(content).digest('hex');
     entries.push({ path: rel, bytes: content.byteLength, hash });
   }
@@ -92,12 +95,14 @@ async function walk(root: string, dir: string, relative: string, entries: Snapsh
  * Compute the identity digest of a candidate tree. Covers every audited file's
  * path, byte length, and content hash in sorted order — NOT just changed files.
  */
-export async function computeSnapshot(candidateRoot: string): Promise<SnapshotResult> {
+export async function computeSnapshot(candidateRoot: string, options: SnapshotOptions = {}): Promise<SnapshotResult> {
+  options.signal?.throwIfAborted();
   await assertPlainPath(candidateRoot, () => new SnapshotError('UNSAFE_PATH', '候选根目录或其父目录包含链接'));
   const realRoot = await realpath(candidateRoot);
   const entries: SnapshotEntry[] = [];
-  await walk(realRoot, realRoot, '', entries);
+  await walk(realRoot, realRoot, '', entries, options);
   const hasher = createHash('sha256');
+  hasher.update(JSON.stringify(['m3b-snapshot-v2', options.toolIdentity ?? ''])).update('\n');
   let totalBytes = 0;
   for (const entry of entries) {
     totalBytes += entry.bytes;
@@ -112,8 +117,8 @@ export async function computeSnapshot(candidateRoot: string): Promise<SnapshotRe
  * Re-computes the snapshot after copy to detect any mid-copy tampering.
  * Refuses to copy node_modules — the build root links trusted dependencies separately.
  */
-export async function copyAudited(candidateRoot: string, dest: string, expectedDigest?: string): Promise<SnapshotResult> {
-  const before = await computeSnapshot(candidateRoot);
+export async function copyAudited(candidateRoot: string, dest: string, expectedDigest?: string, options: SnapshotOptions = {}): Promise<SnapshotResult> {
+  const before = await computeSnapshot(candidateRoot, options);
   if (expectedDigest !== undefined && before.digest !== expectedDigest) throw new SnapshotError('SNAPSHOT_MISMATCH', '候选内容与待检查摘要不一致');
   const denied = () => new SnapshotError('UNSAFE_PATH', '复制路径包含链接或特殊文件');
   await assertPlainPath(dest, denied, true);
@@ -122,20 +127,21 @@ export async function copyAudited(candidateRoot: string, dest: string, expectedD
   if ((await readdir(dest)).length) throw new SnapshotError('UNSAFE_PATH', '检查快照目标必须为空目录');
   const realDest = await realpath(dest);
   for (const entry of before.entries) {
+    options.signal?.throwIfAborted();
     const srcFile = path.join(candidateRoot, entry.path);
     const destFile = path.join(realDest, entry.path);
     await mkdir(path.dirname(destFile), { recursive: true });
     const content = await readPlainFile(srcFile, MAX_BYTES, denied,
-      () => new SnapshotError('SNAPSHOT_LIMIT', '复制源文件超过上限'));
+      () => new SnapshotError('SNAPSHOT_LIMIT', '复制源文件超过上限'), options.signal);
     if (content.length !== entry.bytes || createHash('sha256').update(content).digest('hex') !== entry.hash) {
       throw new SnapshotError('SNAPSHOT_MISMATCH', '复制期间候选文件发生变化');
     }
     await assertPlainPath(destFile, denied, true);
-    await writeAtomic(destFile, content);
+    await writeAtomic(destFile, content, options.signal);
   }
   // Re-read the copied tree and verify the digest matches.
-  const after = await computeSnapshot(realDest);
-  const sourceAfter = await computeSnapshot(candidateRoot);
+  const after = await computeSnapshot(realDest, options);
+  const sourceAfter = await computeSnapshot(candidateRoot, options);
   if (after.digest !== before.digest || sourceAfter.digest !== before.digest) throw new SnapshotError('SNAPSHOT_MISMATCH', '复制前后内容摘要不一致，可能中途被篡改');
   return after;
 }
