@@ -16,6 +16,8 @@
  *   run 起点建立统一 baseline，每步 before/after 都与 baseline 对照，不一致即本步失败并停止；
  * - 历史证据：本步被刷新的 tracked 证据先归档新字节与哈希，再按 blob 还原；
  *   步骤开始前就已脏（归属不明）的证据文件一律不覆盖，直接判失败；
+ * - 入口自检：baseline 采集完若证据目录已经脏，直接中止并记为入口失败（exit 3），
+ *   不再等 16 分钟跑到末步才被归档守卫拒绝（2026-11-15 run4 就是这样白跑一趟）；
  * - 完成屏障：只以 close + 日志写完为结束；spawn ENOENT 之类只有 error/close 也会结束并记录；
  * - git 全部带 `-c core.longpaths=true`，非零退出直接失败；环境按白名单构造，不继承/不打印整个 process.env。
  */
@@ -218,6 +220,22 @@ const manifest = {
 };
 writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`[full-regression] mode=${MODE} out=${relative(ROOT, OUT)} identity=${baseline.identity.digest.slice(0, 12)} lock=${baseline.identity.lock.slice(0, 12)}`);
+
+// 入口失败快速判据（只影响测试工具，不动产品与断言）：起跑前证据目录已脏，
+// 末步一定会因为“归属不明”拒绝归档，所以这里直接中止，记为入口失败而不是产品失败。
+if (baseline.dirty.size > 0) {
+  const dirty = [...baseline.dirty].sort();
+  manifest.entryFailure = {
+    kind: 'entry', abort: 'evidenceDirtyAtStart', exitCode: 3,
+    message: `起跑前 ${EVIDENCE_DIR} 已脏（${dirty.length} 项，归属不明），末步必然拒绝归档`, dirty,
+  };
+  writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  appendFileSync(join(OUT, 'manifest.log'), `entry-failure evidenceDirtyAtStart=${dirty.length}\n`);
+  console.error(`[full-regression] 入口失败（不是产品失败）：${manifest.entryFailure.message}`);
+  for (const file of dirty) console.error(`  dirty: ${file}`);
+  console.error('[full-regression] 先把这些证据归档/还原到干净基线再重跑；本轮不执行任何步骤。');
+  process.exit(3);
+}
 
 for (const step of steps()) {
   console.log(`[full-regression] ${step.name} …`);
