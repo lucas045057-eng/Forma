@@ -102,3 +102,13 @@ job_e295fcc8：定向types0；新增九项全部实际通过，原十项按testN
 故障测试先断言正常close拒绝PERSISTENCE_FAILED、第二实例INSTANCE_LOCKED；之后仅测试夹具用明确清理路径等待无进程executor屏障再释放自己锁，不是生产HTTP旁路或放宽关闭保锁规则。当前没有重跑完整十九项，不能写19/19。
 
 HTTP接口、真实HTTP并发关闭/证据响应、旧直接采用单测与Pi E2E迁移、完整回归和独立审查仍待完成。
+
+## 第十一批：检查 HTTP 与真实 HTTP 关闭排空
+
+四个固定接口已接线：POST /candidates/:id/checks、GET /checks/:id、POST /checks/:id/cancel、GET /checks/:id/artifacts/:name。启动只允许原始JSON布尔rerun；取消仅空对象/无body，preValidation在任何schema转换前拒绝其它字段。固定文件名/已登记ref读取、MIME/no-store/nosniff/ETag，变更证据409；Host/Origin及关闭准入沿用全局门禁。AppOptions.checks仅内部构造注入，不可由HTTP覆盖。
+
+RED job_c56a177b：types0，四项因路由缺失404全部目标失败。GREEN job_2fe1026f：全server types0、33/33实际通过、0跳过、原生app/routes/service导入0、identityPreserved=true（HTTP4、work集成19、旧approval routes1、events-lock9）。原件check-http-20261114。
+
+其中真实loopback HTTP测试证明cancel handler已准入后与app.close并发，响应cancelled、状态与check.finished落盘、在排空前第二实例锁拒绝、完成关闭后可重新拿锁、无晚到文件/事件写入。测试客户明确connection:close排除闲置keepalive等待；生产超时/keepalive未改。
+
+旧直接adopt单测迁移、默认真实检查器从WorkService到采用/回退链、标准全仓验证与独立Claude/Pi门禁仍待完成，不将内部executor测试冒充真实完整集成。
