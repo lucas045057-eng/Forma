@@ -56,3 +56,11 @@ Claude Code 已另完成对固定 `25c33a8` 的复核（`job_391aa28d`），见 
 原件 `.worktrees/m3a/.data/m3a-validation-1794641716227/` 另存归档 [implementation-012d9a6/evidence.json](artifacts/M3-A/implementation-012d9a6/evidence.json)，包括20份步骤日志、作业输出和SHA256清单。原261项通过、25c33a8失败的两个归档保留，没有覆盖或将跳过步骤补成通过。
 
 Claude Code 最终复核作业 `job_25d6d6c0` 尚待交回，范围是 RR1 与基线读取优化；Pi 尚未在合并后独立验收。未使用真实模型或 Lux3D，本结果不是 M3 整体过关；M3-B/C 尚未实现。进程清理与正式浏览器回归由后续验收按身份核对，不能仅由 exit0推断。
+
+## 集成门禁核对
+
+随后 Claude Code 的 `job_25d6d6c0` 交回：固定 `012d9a6` 的 RR1 关闭、基线读取优化可接受，代码审查转为通过，没有新阻断或应修；建议 S1–S6、RS1、RS2 保留。独立报告已在 `844cf97` 提交。结合本页核验的完整全量证据，两项集成门禁满足。
+
+调度本地合并 `feat/m3a-approvals`，合并提交 **`4310ffb77295a14a5a27f304d4671aa061beeb4d`**，无冲突。核对 `git diff --exit-code 012d9a6 HEAD -- apps packages templates pnpm-lock.yaml` 为空，合并产品树和锁与被验证/审查版本一致，主线 tracked 工作树干净。没有在合并时删除实现 worktree 或覆盖未入库诊断。
+
+接下来由 Pi 在主线冻结版本做独立 M3-A 验收与旧套件审批语义迁移/回归。正式通过以其实际报告为准，不将本次本地合并或源码一致核对当成合并后 E2E 通过；M3-B/C仍未实现。
