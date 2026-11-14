@@ -312,4 +312,4 @@ export async function startAndWatch(fixture: Fixture, candidateId: string, optio
   return { started: started.body, run, probe };
 }
 
-export { getCheckRun, waitCheckRun, startChecks, getCandidate };
+export { getCheckRun, waitCheckRun, startChecks, getCandidate, sleep };

@@ -1,17 +1,24 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { adoptCandidate, getCandidate, httpJson, readArtifact } from './checks';
 import { summarizeRun, writeArtifact } from './artifact';
 import {
-  createCandidate, disposeAllFixtures, startAndWatch, startFixture, startMockAgent, type Fixture,
+  createCandidate, disposeAllFixtures, getTask, getVersion, listCandidatesApi, resetMock, selection, setScript,
+  startAndWatch, startFixture, startMockAgent, waitTask, type Fixture,
 } from './fixture';
 
 /**
- * 四类真实故障（独立验收准备）：
- * schema（场景配置坏） / build（编译错误） / 运行错误（页面未捕获异常） / 遮挡（交互元素被盖住）。
- * 每类都跑真实检查，断言"前序失败停止后续 + 下游 not_run 有原因 + 采用被拒"。
+ * 真实故障与故障面边界：
+ * build（编译错误）/ 运行错误（页面未捕获异常）/ 遮挡（交互元素被盖住）三类真故障分别让检查失败；
+ * 第四类 schema 故障（非法场景配置）**在 HTTP 支持面上不可达**：
+ * 沙箱（apps/server/src/agent/tools.ts:86-89）拒写非法 scene.config.json，
+ * 绕过 Agent 直改候选又会被 checks/runner.ts:246 的 SNAPSHOT_MISMATCH 拦住；
+ * 所以这里改成断言“沙箱确实拒绝造出坏配置”（任务 NO_CHANGES、无候选、磁盘文件未变），
+ * INVALID_JSON 路径由实现侧 worker-boundary.test.ts 直接改 buildRoot 覆盖。
  */
 
+/** 试图把场景配置写坏：产品沙箱应当拒绝，因此永远产不出候选。 */
 const SCHEMA_FAULT = [
   [{ name: 'write_file', args: { path: 'src/scene.config.json', content: '{"hero": {"lights": ' } }],
   [{ name: 'finish', args: { summary: '写坏场景配置' } }],
@@ -71,7 +78,7 @@ function expectStoppedAfter(run: { checks: Array<{ name: string; status: string;
   }
 }
 
-test('四类真实故障分别让检查失败，采用被拒，服务仍可继续', async () => {
+test('build / 运行错误 / 遮挡三类真实故障让检查失败，且沙箱拒绝写坏场景配置', async () => {
   test.setTimeout(600_000);
   const root = path.join(process.cwd(), '.data', `m3b-faults-${Date.now().toString(36)}`);
   const fixture = await startFixture({ root });
@@ -79,23 +86,41 @@ test('四类真实故障分别让检查失败，采用被拒，服务仍可继�
 
   const results: Record<string, unknown> = {};
 
-  /* ---------------- schema ---------------- */
+  /* ---------------- schema：故障面不可达（沙箱拒绝） ---------------- */
   {
-    const created = await createCandidate(fixture, SCHEMA_FAULT, { instruction: '把场景配置写坏' });
-    const { run } = await startAndWatch(fixture, created.candidateId, { timeoutMs: 300_000 });
-    expect(run.status).toBe('completed');
-    expect(run.outcome).toBe('failed');
-    expectStoppedAfter(run, 0, 'schema');
-    const schema = JSON.parse((await readArtifact(fixture.base, run.id, 'schema.json')).text);
-    expect(schema.status).toBe('failed');
-    expect(schema.error).toBe('INVALID_JSON');
-    const view = (await getCandidate(fixture.base, created.candidateId)).body;
-    expect(view.checks.map((check: any) => check.status)).toEqual(['failed', 'not_run', 'not_run', 'not_run']);
-    const adopt = await adoptCandidate(fixture.base, created.candidateId);
-    expect(adopt.status).toBe(409);
-    expect((adopt.body as any)?.error?.code).toBe('CHECKS_NOT_PASSED');
-    results.schema = { run: summarizeRun(run), evidence: schema, adopt: { status: adopt.status, code: (adopt.body as any)?.error?.code } };
-    expect((await httpJson(`${fixture.base}/candidates/${created.candidateId}/discard`, { method: 'POST' })).status).toBe(200);
+    const configPath = path.join(fixture.workRoot, 'src', 'scene.config.json');
+    const before = readFileSync(configPath, 'utf8');
+    expect(() => JSON.parse(before), '初始场景配置本身不是合法 JSON，前提不成立').not.toThrow();
+    const candidatesBefore = (await listCandidatesApi(fixture.base)).body.length;
+
+    const base = (await getVersion(fixture.base)).body.version;
+    await resetMock();
+    await setScript(SCHEMA_FAULT);
+    const submitted = await httpJson<any>(`${fixture.base}/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction: '把场景配置写坏', selection: selection(base, 'src/App.tsx:30:11') }),
+    });
+    expect(submitted.status).toBe(202);
+    const task = await getTask(fixture.base, submitted.body.id);
+    const settled = await waitTask(fixture.base, submitted.body.id, 120_000);
+    // 沙箱拒绝写入非法配置 → Agent 没有任何文件改动 → 任务以 NO_CHANGES 失败，不产出候选。
+    expect(settled.status, `任务不是 failed：${JSON.stringify(settled).slice(0, 400)}`).toBe('failed');
+    expect(settled.error?.code, `错误码不是 NO_CHANGES：${JSON.stringify(settled.error)}`).toBe('NO_CHANGES');
+    expect(settled.candidateId ?? null, '沙箱本应拒绝，却产出了候选').toBeNull();
+    expect((await listCandidatesApi(fixture.base)).body.length, '候选列表里多了一个候选').toBe(candidatesBefore);
+    // 磁盘上的场景配置一字未动，且仍然是合法 JSON。
+    const after = readFileSync(configPath, 'utf8');
+    expect(after, '场景配置被写坏了').toBe(before);
+    expect(() => JSON.parse(after)).not.toThrow();
+    results.schemaUnreachable = {
+      taskStatus: settled.status,
+      error: settled.error ?? null,
+      candidateCreated: Boolean(settled.candidateId),
+      configUnchanged: after === before,
+      configStillValidJson: true,
+      taskSnapshotAt: task.body?.updatedAt ?? null,
+    };
   }
 
   /* ---------------- build ---------------- */

@@ -124,10 +124,20 @@ test('同身份幂等、显式 rerun、严格请求体、证据篡改与过期�
   appendFileSync(path.join(fixture.workRoot, 'src', 'App.tsx'), '\n// 验收准备：主作品直接改一行\n', 'utf8');
   const versionAfter = (await getVersion(fixture.base)).body.version;
   expect(versionAfter, '主作品没有产生新版本，过期用例不成立').not.toBe(versionBefore);
+  // 两条路径的错误码不同，都必须覆盖：
+  // 1) 旧候选重新 startChecks → 候选解析阶段先比主版本 → STALE_CANDIDATE；
+  // 2) 直接 adopt → service.ts 把「证明失效」统一归一 → CHECKS_NOT_PASSED。
+  const restartStale = await startChecks(fixture.base, createdB.candidateId);
+  expect(restartStale.status, restartStale.text.slice(0, 300)).toBe(409);
+  expect((restartStale.body as any)?.error?.code).toBe('STALE_CANDIDATE');
   const adoptedStale = await adoptCandidate(fixture.base, createdB.candidateId);
   expect(adoptedStale.status, adoptedStale.text.slice(0, 300)).toBe(409);
-  expect((adoptedStale.body as any)?.error?.code).toBe('STALE_CANDIDATE');
-  record.stale = { runId: run3.id, versionBefore, versionAfter, status: adoptedStale.status, code: (adoptedStale.body as any)?.error?.code };
+  expect((adoptedStale.body as any)?.error?.code).toBe('CHECKS_NOT_PASSED');
+  record.stale = {
+    runId: run3.id, versionBefore, versionAfter,
+    restartChecks: { status: restartStale.status, code: (restartStale.body as any)?.error?.code },
+    adopt: { status: adoptedStale.status, code: (adoptedStale.body as any)?.error?.code },
+  };
 
   /* ---------- 不存在的东西 ---------- */
   const unknownRun = await getCheckRun(fixture.base, 'ffffffffffffffff');
