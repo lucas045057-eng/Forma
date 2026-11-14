@@ -3,7 +3,7 @@ import type { Selection, Task } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
 import { operationError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
-import { canSubmit, pickHint, submittedSelection, type PickState } from './pick-state.ts';
+import { canSubmit, pickHint, retrySelection, submittedSelection, type PickState } from './pick-state.ts';
 
 const statusLabels: Record<Task['status'], string> = {
   queued: '排队中', running: '执行中', awaiting_approval: '等待请示', done: '候选已就绪', failed: '失败', cancelled: '已取消',
@@ -12,15 +12,17 @@ const statusLabels: Record<Task['status'], string> = {
 export default function PointSpeak({ pick, blocked = false }: { pick: PickState; blocked?: boolean }) {
   const selection = submittedSelection(pick);
   const { state, reload, syncReady, status, acquire, awaiting, locked } = useEventCenter();
-  const submittable = canSubmit(pick) && !blocked && syncReady && status === 'connected' && !locked(['task:create']) && (!selection || selection.baseVersion === state.version);
+  const writable = !blocked && syncReady && status === 'connected' && !locked(['task:create']);
+  const submittable = canSubmit(pick) && writable && (!selection || selection.baseVersion === state.version);
   const [instruction, setInstruction] = useState('');
   const [activeId, setActiveId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const active = state.tasks.find(task => task.id === activeId) ?? state.tasks[0];
 
-  async function submit(text: string, picked: Selection | null) {
-    if (!text.trim() || busy || !submittable) return;
+  const retryPlan = retrySelection(active?.selection, pick, state.version);
+  async function submit(text: string, picked: Selection | null, retry = false) {
+    if (!text.trim() || busy || !(retry ? writable && retryPlan.allowed : submittable)) return;
     if (picked && picked.baseVersion !== state.version) { setError('页面已变化，请重新点选'); return; }
     const token = acquire(['task:create']);
     if (!token) return;
@@ -74,7 +76,10 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
       <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
       {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy || !syncReady || locked([`task:${active.id}`])} onClick={() => void cancel(active)}>取消任务</button>}
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
-      {(active.status === 'failed' || active.status === 'cancelled') && <button type="button" data-testid="task-retry" disabled={busy || !submittable} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, selection); }}>重试</button>}
+      {(active.status === 'failed' || active.status === 'cancelled') && <>
+        {retryPlan.reason && <p role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
+        <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
+      </>}
     </div>}
   </section>;
 }
