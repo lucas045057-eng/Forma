@@ -333,7 +333,7 @@ cd /d .worktrees\m3c && set CI=true&& node apps/studio/verify-proxy-isolation.mj
 3. 记录 `[port-check]` 的 before-full-test 证据后执行 `pnpm test`；全量结束再验证该端口仍为 Vite 服务并记录 after-full-test，然后依次 `pnpm typecheck`、`pnpm build`。
 4. 关闭本脚本创建的 Vite，记录 `[cleanup] owned Studio listening=false`，清理本脚本缓存。若使用的是外部 Vite，明确记录未拥有监听器，原服务保持运行。任何命令失败也走 finally。
 
-本回合启动前的只读端口检查未发现 5173 监听；脚本将在单文件通过后建立占用，并以作业内的前后探针作为真正“端口被占仍通过”的证据。本轮结果尚待后台作业完成后调度读取，不预写“单文件通过”或“占用端口仍全绿”。最终提交、job id 与日志路径在回合小结给出；取得 job 后立即结束、不轮询。
+本回合初次只读检查未发现 5173 监听；冻结后的起跑前复查已发现 5173 被 PID 40308 监听。脚本会在单文件通过后确认已有 Vite 占用，若期间释放则自行建立占用，并以作业内的前后探针作为真正“端口被占仍通过”的证据。本轮结果尚待后台作业完成后调度读取，不预写“单文件通过”或“占用端口仍全绿”。最终提交、job id 与日志路径在回合小结给出；取得 job 后立即结束、不轮询。
 
 ### 其它测试的固定端口盘点
 
