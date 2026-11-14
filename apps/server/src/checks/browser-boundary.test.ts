@@ -1,9 +1,11 @@
 ﻿import { randomUUID } from 'node:crypto';
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
+import childProcess from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
 import { request } from 'node:http';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { createRealExecutor } from './worker.ts';
 import { copyAudited } from './snapshot.ts';
 import { readArtifact, writeArtifact } from './artifacts.ts';
@@ -12,9 +14,18 @@ import { listenHttpForFetch } from '../test-support/fetch-listener.ts';
 
 const owned:{directory:string;ctx:CheckContext;executor:CheckExecutor;controller:AbortController}[]=[];
 const traps:Awaited<ReturnType<typeof listenHttpForFetch>>[]=[];
-afterEach(async()=>{
-  for(const f of owned.splice(0)){f.controller.abort();await f.executor.stop?.(f.ctx.runId);await rm(f.directory,{recursive:true,force:true});}
+afterEach(async(test)=>{
+  for(const f of owned.splice(0)){
+    f.controller.abort();await f.executor.stop?.(f.ctx.runId);
+    if(process.env.CHECK_BROWSER_EVIDENCE_DIR){
+      const target=path.join(process.env.CHECK_BROWSER_EVIDENCE_DIR,f.ctx.runId);await mkdir(target,{recursive:true});
+      await cp(path.join(f.directory,'check-artifacts',f.ctx.runId),target,{recursive:true}).catch(error=>{if(error.code!=='ENOENT')throw error;});
+      await writeFile(path.join(target,'test.json'),JSON.stringify({test:test.task.name,runId:f.ctx.runId},null,2));
+    }
+    await rm(f.directory,{recursive:true,force:true});
+  }
   for(const trap of traps.splice(0)){trap.server.closeAllConnections();await new Promise<void>(resolve=>trap.server.close(()=>resolve()));}
+  vi.restoreAllMocks();syncBuiltinESMExports();
 });
 function app(options:{effect?:string;buy?:string;extra?:string;scene?:string}={}){
   return `import {useEffect,useState} from 'react';
@@ -26,7 +37,7 @@ return <main><h1>Browser fixture</h1>
 <output data-testid="action-status" data-purchases={count}>{feedback}</output>
 ${options.extra??''}</main>}`;
 }
-async function fixture(source=app(),realTemplate=false){
+async function fixture(source=app(),realTemplate=false,publicFiles:Record<string,string>={}){
   const directory=await mkdtemp(path.join(tmpdir(),'m3b-browser-'));
   const candidateRoot=path.join(directory,'candidate');await mkdir(path.join(candidateRoot,'src'),{recursive:true});
   if(realTemplate)await cp(new URL('../../../../templates/product-page/src/',import.meta.url),path.join(candidateRoot,'src'),{recursive:true});
@@ -34,6 +45,9 @@ async function fixture(source=app(),realTemplate=false){
     await writeFile(path.join(candidateRoot,'src/main.tsx'),"import {createRoot} from 'react-dom/client';import App from './App';createRoot(document.getElementById('root')!).render(<App/>);");
     await writeFile(path.join(candidateRoot,'src/App.tsx'),source);
     await writeFile(path.join(candidateRoot,'src/scene.config.json'),await readFile(new URL('../../../../templates/product-page/src/scene.config.json',import.meta.url)));
+  }
+  for(const [name,content] of Object.entries(publicFiles)){
+    const file=path.join(candidateRoot,'public',name);await mkdir(path.dirname(file),{recursive:true});await writeFile(file,content);
   }
   const buildRoot=path.join(directory,'snapshot'),snapshot=await copyAudited(candidateRoot,buildRoot),controller=new AbortController();
   const executor=createRealExecutor();
@@ -151,5 +165,52 @@ it('serves only build output on a separate static origin and releases it on stop
   expect((await get(url,'/','attacker.invalid')).status).toBe(403);
   await f.executor.stop?.(f.ctx.runId);
   await expect(get(url,'/')).rejects.toBeDefined();
+},30000);
+
+
+it('records a blocked service worker attempt before its script can contact another origin',async()=>{
+  const backend=await trap();
+  const f=await fixture(app({effect:"navigator.serviceWorker.register('/sw.js').catch(()=>{});"}),false,{
+    'sw.js':"self.addEventListener('install',()=>{fetch("+JSON.stringify(backend.url+'/tasks')+").catch(()=>{});});"
+  });
+  const result=await f.executor.smoke(f.ctx);expect(result.status).toBe('failed');
+  expect((await report(f,'smoke')).blockedRequests.some((item:any)=>item.kind==='serviceworker')).toBe(true);
+  expect(backend.requests).toBe(0);
+},30000);
+it('rejects a worker-based WebSocket attempt at worker creation',async()=>{
+  const backend=await trap();
+  const workerCode='new WebSocket('+JSON.stringify(backend.url.replace('http:','ws:')+'/events')+');';
+  const f=await fixture(app({effect:'new Worker(URL.createObjectURL(new Blob(['+JSON.stringify(workerCode)+"],{type:'text/javascript'})));"}));
+  const result=await f.executor.smoke(f.ctx);expect(result.status).toBe('failed');
+  expect((await report(f,'smoke')).blockedRequests.some((item:any)=>item.kind==='worker')).toBe(true);
+  expect(backend.requests).toBe(0);
+},30000);
+it('blocks top-level navigation to another loopback origin with failure evidence',async()=>{
+  const backend=await trap();
+  const f=await fixture(app({effect:'window.location.replace('+JSON.stringify(backend.url+'/tasks')+');'}));
+  const result=await f.executor.smoke(f.ctx);expect(result.status).toBe('failed');
+  expect(result.evidence).toMatch(/^[a-f0-9]{64}$/);
+  expect((await report(f,'smoke')).blockedRequests.length).toBeGreaterThan(0);
+  expect(backend.requests).toBe(0);
+},30000);
+it('rejects a static directory replaced by a junction after the browser starts',async()=>{
+  const f=await fixture();expect((await f.executor.smoke(f.ctx)).status).toBe('passed');
+  const external=path.join(f.directory,'private');await mkdir(external);await writeFile(path.join(external,'canary.json'),'TEST_ONLY_STATIC_CANARY');
+  await symlink(external,path.join(f.ctx.buildRoot,'dist','attack'),'junction');
+  const result=await get((await report(f,'smoke')).url,'/attack/canary.json');
+  expect(result.status).toBe(403);expect(result.body).not.toContain('TEST_ONLY_STATIC_CANARY');
+},30000);
+it('fails with evidence when its worker cannot access the installed browser',async()=>{
+  const original=childProcess.spawn.bind(childProcess);
+  vi.spyOn(childProcess,'spawn').mockImplementation(((command:unknown,...args:unknown[])=>{
+    if(command===process.execPath && Array.isArray(args[0]) && args[0].some(arg=>String(arg).includes('worker-entry.'))){
+      args[0]=args[0].filter(arg=>!String(arg).includes('ms-playwright'));
+    }
+    return Reflect.apply(original,childProcess,[command,...args]);
+  }) as typeof childProcess.spawn);
+  syncBuiltinESMExports();
+  const f=await fixture();const result=await f.executor.smoke(f.ctx);
+  expect(result.status).toBe('failed');expect(result.evidence).toMatch(/^[a-f0-9]{64}$/);
+  expect((await report(f,'smoke')).error).toMatch(/browser|restricted|ACCESS_DENIED|Executable/i);
 },30000);
 

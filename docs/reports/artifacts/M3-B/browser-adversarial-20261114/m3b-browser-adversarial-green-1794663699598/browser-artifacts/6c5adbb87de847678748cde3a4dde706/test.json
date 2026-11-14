@@ -1,0 +1,4 @@
+{
+  "test": "blocks worker access to a different loopback origin before it reaches the server",
+  "runId": "6c5adbb87de847678748cde3a4dde706"
+}

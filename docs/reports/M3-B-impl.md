@@ -66,3 +66,13 @@ job_61d9f498：types0，B3十六项全因not_run失败。job_f7291cf5：types0�
 job_7d959041最终types、39/39（16浏览器+23既有）、native均exit0，0跳过、identityPreserved=true；包括真实模板缺资产fallback、JS未捕获错误、购买失败、主/次控制遮挡、空目标、四种不同loopback源请求被拦且诱饵收到0请求、静态源Host/路径/API与stop端口释放。原件归档browser-initial-20261114。该轮测试会验证PNG签名/大小与JSON证据，但清理夹具后未保留每页PNG/JSON，不声称归档已有这些原件；下一批需显式导出。
 
 这仍是B3子集。service worker/子worker WebSocket、重定向、缺浏览器与取消/超时真实浏览器后代、静态链接替换和证据保留仍需补测；B4持久化/API/采用门禁未实现，无正式E2E/独立验收结论。Node权限不等于OS沙箱，浏览器守卫是应用层策略。
+
+## 第七批：浏览器 worker 绕过与证据原件
+
+adversarial RED job_f1f301f4：types0，新增五项3过/2失败，原16筛选未运行。service worker虽被Playwright禁用但检查错误返回passed；专用worker内WS不受原routeWebSocket策略覆盖。主页面跳转、静态目录替换junction、浏览器安装根不可读的失败证据三项通过。
+
+当前模板没有dedicated/shared/service worker依赖，现明确采用禁止创建策略：静态源CSP worker-src none，导航前锁定构造器/注册入口并记录attempt，原生CSP违规也进入blockedRequests。子worker WS用例按此策略验证创建即拒绝、failed/证据/诱饵0请求，未伪称在worker内部逐包拦截。代价是未来依赖worker的页面需重新设计，本阶段只支持既定模板。
+
+job_d5d6f767：types0、44/44（浏览器21+既有23）与native0、0跳过，identityPreserved=true。原件browser-adversarial-20261114保存两轮全部evidence/tests/log及实际browser-artifacts（固定报告/PNG与test/runId映射），manifest逐文件SHA。已人工查看真实模板smoke.png：1440×900首屏、可见商品占位和购买入口，反馈已加入购物袋；报告Chromium158.0.8127.18、fallback可见、0→1、pageErrors/blockedRequests为空。PNG属于实际检查，不是UI设计稿。
+
+浏览器资源取消/超时/父死亡后的Chromium进程身份与端口回收尚需补测；B4未实现，完整typecheck/build/单测与独立Claude/Pi门禁未完成。没有真实模型或Lux3D调用。

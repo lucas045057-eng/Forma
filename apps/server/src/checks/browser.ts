@@ -21,6 +21,29 @@ async function initialize(ctx:CheckContext):Promise<Session>{
     const context=await browser.newContext({viewport,deviceScaleFactor:1,serviceWorkers:'block',acceptDownloads:false});
     const pageErrors:string[]=[],blockedRequests:{kind:string;url:string}[]=[];
     const blocked=(kind:string,url:string)=>{if(blockedRequests.length<100)blockedRequests.push({kind,url:urlForEvidence(url)});};
+    // This template has no worker dependency. Deny worker creation itself because
+    // browser request/WebSocket interception does not cover every worker target.
+    await context.exposeBinding('__spatialChecksBlocked', (_source, payload: unknown) => {
+      if (payload && typeof payload === 'object' && 'kind' in payload && 'url' in payload &&
+          ['worker','sharedworker','serviceworker'].includes(String(payload.kind)) && typeof payload.url === 'string') {
+        blocked(String(payload.kind), payload.url);
+      }
+    });
+    await context.addInitScript(() => {
+      const notify=(globalThis as unknown as {__spatialChecksBlocked:(value:{kind:string;url:string})=>Promise<void>}).__spatialChecksBlocked;
+      const deny=(kind:string,url:unknown) => {
+        void notify({kind,url:String(url)}).catch(()=>{});
+        return new DOMException('Worker creation is disabled during checks','SecurityError');
+      };
+      for(const [name,kind] of [['Worker','worker'],['SharedWorker','sharedworker']]) {
+        Object.defineProperty(globalThis,name,{configurable:false,writable:false,value:class {
+          constructor(url:unknown){throw deny(kind,url);}
+        }});
+      }
+      if('serviceWorker' in navigator) Object.defineProperty(navigator.serviceWorker,'register',{
+        configurable:false,writable:false,value:(url:unknown)=>Promise.reject(deny('serviceworker',url)),
+      });
+    });
     await context.route('**/*',async route=>{
       const request=route.request();
       const url=new URL(request.url());
@@ -33,6 +56,9 @@ async function initialize(ctx:CheckContext):Promise<Session>{
     let primary:Page|undefined;
     context.on('page',page=>{
       page.on('pageerror',error=>{if(pageErrors.length<50)pageErrors.push(safe(error.message));});
+      page.on('console',message=>{
+        if(message.type()==='error' && /worker-src/.test(message.text())) blocked('worker-policy',page.url());
+      });
       if(primary && page!==primary){blocked('popup',page.url());void page.close().catch(()=>{});}
     });
     const page=await context.newPage();primary=page;

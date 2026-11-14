@@ -37,7 +37,8 @@ export async function startStaticOrigin(buildRoot: string): Promise<StaticOrigin
         const data = await handle.readFile();
         const after = await lstat(file);
         if (after.isSymbolicLink() || after.ino !== stat.ino || after.dev !== stat.dev) return fail(response,403);
-        response.writeHead(200,{'content-type':type,'content-length':data.length,'cache-control':'no-store','x-content-type-options':'nosniff'});
+        response.writeHead(200,{'content-type':type,'content-length':data.length,'cache-control':'no-store','x-content-type-options':'nosniff',
+          'content-security-policy': "worker-src 'none'"});
         response.end(request.method === 'HEAD' ? undefined : data);
       } finally { await handle.close(); }
     } catch(error) {
