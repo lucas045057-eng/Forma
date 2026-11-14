@@ -3,7 +3,7 @@ import path from 'node:path';
 import { adoptCandidate, getCandidate, httpJson, readArtifact } from './checks';
 import { summarizeRun, writeArtifact } from './artifact';
 import {
-  createCandidate, removeFixture, startAndWatch, startFixture, startMockAgent, type Fixture,
+  createCandidate, disposeAllFixtures, startAndWatch, startFixture, startMockAgent, type Fixture,
 } from './fixture';
 
 /**
@@ -52,11 +52,10 @@ const fixtures: Fixture[] = [];
 test.beforeAll(async () => { mock = await startMockAgent(); });
 test.afterAll(async () => { await mock.stop(); });
 test.afterEach(async () => {
-  while (fixtures.length) {
-    const fixture = fixtures.pop()!;
-    await fixture.stop().catch(() => {});
-    removeFixture(fixture.root);
-  }
+  // 收尾也要有证据：先优雅关闭，失败才显式 fallback 强杀；端口/目录/进程身份都记下来，
+  // 任何一项不干净都让用例失败，而不是 stop().catch(()=>{}) 后删目录继续绿灯。
+  const { failures } = await disposeAllFixtures(fixtures, 'disposals-02-faults.json');
+  expect(failures, `夹具收尾不干净：${JSON.stringify(failures)}`).toEqual([]);
 });
 
 test.describe.configure({ mode: 'serial' });

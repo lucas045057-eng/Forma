@@ -1,15 +1,15 @@
 {
-  "candidateId": "be79b060c6684be2ba6d124a5ebf02ec",
-  "versionBefore": "321750f5b414f1c0054ecf754b9188042d47d370",
-  "versionAfter": "2622a5c7b58b552a249c905cd28cd232ed4640e0",
+  "candidateId": "8b4a7335aa7f40e78df2fe8825a10b3d",
+  "versionBefore": "32feecff5a66a6a35eb0e13e16b8db67dd38fa38",
+  "versionAfter": "ec6fcc53e565d318f63382041efe9f0b97424980",
   "run": {
-    "id": "448432e5fa184c5296269d228b98a8f6",
+    "id": "1c4492281c0a4962bd3b706472416bcd",
     "status": "completed",
     "outcome": "passed",
     "policyVersion": "m3b-v2",
-    "createdAt": "2026-11-14T15:31:25.007Z",
-    "finishedAt": "2026-11-14T15:31:31.467Z",
-    "durationMs": 6460,
+    "createdAt": "2026-11-14T15:37:02.792Z",
+    "finishedAt": "2026-11-14T15:37:09.130Z",
+    "durationMs": 6338,
     "checks": [
       {
         "name": "schema",
@@ -21,19 +21,19 @@
         "name": "build",
         "status": "passed",
         "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
-        "durationMs": 3672
+        "durationMs": 3562
       },
       {
         "name": "smoke",
         "status": "passed",
-        "evidence": "71e41b567a6549b16033baaa33c46ed292e754947161387bb2c82b433643cee3",
-        "durationMs": 884
+        "evidence": "c1d5a708cbf25e726f3d2792545c6d756ded3c2120d59013aad9c9e82fc2bdc2",
+        "durationMs": 894
       },
       {
         "name": "occlusion",
         "status": "passed",
-        "evidence": "0b15752c4c6a2f80d4344960caa3e6e75d2fe066d996afff5a51327143e18011",
-        "durationMs": 93
+        "evidence": "892985f8038839807a488b5bdf71121ceb6de6e186c1b69d60f8988f28e2496d",
+        "durationMs": 90
       }
     ],
     "artifacts": [
@@ -59,7 +59,7 @@
         "name": "smoke.json",
         "mime": "application/json; charset=utf-8",
         "bytes": 324,
-        "hash": "71e41b567a6549b16033baaa33c46ed292e754947161387bb2c82b433643cee3"
+        "hash": "c1d5a708cbf25e726f3d2792545c6d756ded3c2120d59013aad9c9e82fc2bdc2"
       },
       {
         "name": "occlusion.png",
@@ -71,7 +71,7 @@
         "name": "occlusion.json",
         "mime": "application/json; charset=utf-8",
         "bytes": 2717,
-        "hash": "0b15752c4c6a2f80d4344960caa3e6e75d2fe066d996afff5a51327143e18011"
+        "hash": "892985f8038839807a488b5bdf71121ceb6de6e186c1b69d60f8988f28e2496d"
       }
     ]
   },
@@ -98,7 +98,7 @@
       "name": "smoke.json",
       "bytes": 324,
       "mime": "application/json; charset=utf-8",
-      "hash": "71e41b567a6549b16033baaa33c46ed292e754947161387bb2c82b433643cee3"
+      "hash": "c1d5a708cbf25e726f3d2792545c6d756ded3c2120d59013aad9c9e82fc2bdc2"
     },
     {
       "name": "occlusion.png",
@@ -110,7 +110,7 @@
       "name": "occlusion.json",
       "bytes": 2717,
       "mime": "application/json; charset=utf-8",
-      "hash": "0b15752c4c6a2f80d4344960caa3e6e75d2fe066d996afff5a51327143e18011"
+      "hash": "892985f8038839807a488b5bdf71121ceb6de6e186c1b69d60f8988f28e2496d"
     }
   ],
   "artifactRejections": {
@@ -127,7 +127,7 @@
       "width": 1440,
       "height": 900
     },
-    "url": "http://127.0.0.1:59261/",
+    "url": "http://127.0.0.1:24612/",
     "browserVersion": "158.0.8127.18",
     "scene": {
       "state": "ready",

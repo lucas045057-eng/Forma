@@ -123,11 +123,13 @@ test.describe('Agent 沙箱边界（D2 修复后）', () => {
     const candidate = (await getCandidate(task.candidateId!)).body;
     expect(candidate.diff.map((entry) => entry.path)).toContain('src/link-out/escape.ts');
 
-    makeJunction();
-    const before = appText();
-    // M3-B：先拿到一次完整的真实检查绿灯，再验证链接检查仍然先拦住采用（门禁不会放行不安全工作树）
+    // M3-B：必须先拿到一次完整的真实检查绿灯（startChecks 会在锁内审计主作品，链接注入后会被正确拒绝），
+    // 再做链接注入，验证链接检查仍然先拦住采用（门禁不会放行不安全工作树）。
     const checksBeforeLink = await ensureChecksPassed(candidate.id);
     expect(checksBeforeLink.outcome).toBe('passed');
+
+    makeJunction();
+    const before = appText();
     const adopted = await adoptCandidate(candidate.id);
     const targetEntries = readdirSync(targetPath);
 
