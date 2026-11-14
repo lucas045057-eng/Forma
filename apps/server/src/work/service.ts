@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir } from 'node:fs/promises';
 import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
-import type { ApprovalCard, Candidate, Check, Selection, Task } from '@spatial/shared';
+import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task } from '@spatial/shared';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { CodingAgent, CodingAgentError, type CodingAgentOptions } from '../agent/client.ts';
 import { Sandbox, ToolError } from '../agent/tools.ts';
@@ -10,6 +10,11 @@ import type { StudioEvent } from '../events.ts';
 import { PreviewManager, previewBase } from './preview.ts';
 import { WorkRepo, WorkError } from './repo.ts';
 import { evaluateApproval } from '../approvals/policy.ts';
+import { CheckRunner, CheckCompletionInvalidated, CHECK_ORDER, POLICY_VERSION, type CheckCandidateInput, type CheckExecutor } from '../checks/runner.ts';
+import { computeSnapshot } from '../checks/snapshot.ts';
+import { createRealExecutor } from '../checks/worker.ts';
+import { getCheckToolsIdentity } from '../checks/tools.ts';
+import { readArtifact, validateArtifactName } from '../checks/artifacts.ts';
 
 interface StoredTask extends Task {
   createdAt: string;
@@ -25,6 +30,7 @@ interface State {
   candidates: StoredCandidate[];
   adoptions: Adoption[];
   approvals: StoredApproval[];
+  checkRuns: CheckRun[];
   intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string };
   approvalIntent?: ApprovalIntent;
 }
@@ -37,6 +43,8 @@ export interface WorkServiceOptions {
   agent: CodingAgentOptions;
   emit: (event: { type: string } & Record<string, unknown>) => StudioEvent;
   previewStartTimeoutMs?: number;
+  /** Internal construction seam only; HTTP requests cannot override tools/executors. */
+  checks?: { executor?: CheckExecutor; toolIdentity?: string | (() => Promise<string>); buildTimeoutMs?: number; browserTimeoutMs?: number; runTimeoutMs?: number };
 }
 
 const checks = (): Check[] => ['build', 'smoke', 'occlusion', 'schema'].map(name => ({ name: name as Check['name'], status: 'not_run' }));
@@ -48,7 +56,14 @@ export class WorkService {
   readonly previews: PreviewManager;
   private readonly options: WorkServiceOptions;
   private readonly file: string;
-  private state: State = { tasks: [], candidates: [], adoptions: [], approvals: [] };
+  private state: State = { tasks: [], candidates: [], adoptions: [], approvals: [], checkRuns: [] };
+  private readonly checkRunner: CheckRunner;
+  private checkViews = new Map<string, { checks: Check[]; latestCheckRunId?: string }>();
+  private durableCheckRuns: CheckRun[] = [];
+  private checkFault?: WorkError;
+  private retiring = new Set<string>();
+  private retirements = new Map<string, Promise<void>>();
+  private trims: Promise<void> = Promise.resolve();
   private writes: Promise<void> = Promise.resolve();
   private taskQueue: Promise<void> = Promise.resolve();
   private controllers = new Map<string, AbortController>();
@@ -61,20 +76,29 @@ export class WorkService {
     this.file = path.join(options.directory, 'tasks.json');
     this.repo = new WorkRepo({ workRoot: options.workRoot, dataDirectory: options.directory });
     this.previews = new PreviewManager({ workRoot: options.workRoot, cacheDirectory: path.join(options.directory, 'preview-cache'), startTimeoutMs: options.previewStartTimeoutMs });
+    this.checkRunner = new CheckRunner({
+      dataDirectory: options.directory, executor: options.checks?.executor ?? createRealExecutor(),
+      buildTimeoutMs: options.checks?.buildTimeoutMs, browserTimeoutMs: options.checks?.browserTimeoutMs, runTimeoutMs: options.checks?.runTimeoutMs,
+      resolveCandidate: (id, signal) => this.resolveCheckCandidate(id, signal),
+      store: { load: async () => clone(this.state.checkRuns), save: runs => this.saveCheckRuns(runs) },
+    });
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
     // These mutations can await work outside the repo queue. Register admission
     // synchronously so close cannot miss a submit that has not enqueued its task yet.
-    for (const name of ['submit', 'cancel', 'answerApproval']) {
+    for (const name of ['submit', 'cancel', 'answerApproval', 'startChecks', 'cancelCheckRun', 'discard']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => {
         if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
-        const pending = operation(...args);
+        const pending = operation(...args).then(async result => {
+          if (name === 'answerApproval' || name === 'cancel') await this.trimCandidates();
+          return result;
+        });
         this.inFlight.add(pending);
         void pending.then(() => this.inFlight.delete(pending), () => this.inFlight.delete(pending));
         return pending;
       };
     }
-    for (const name of ['version', 'validateSelection', 'adopt', 'discard', 'revert', 'trimCandidates']) {
+    for (const name of ['version', 'validateSelection', 'adopt', 'revert']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => this.repo.exclusive(async () => { await this.recoverIntent(); return operation(...args); });
     }
@@ -87,8 +111,9 @@ export class WorkService {
     try {
       const saved = JSON.parse(await readFile(this.file, 'utf8')) as State;
       if (!Array.isArray(saved.tasks) || !Array.isArray(saved.candidates) || !Array.isArray(saved.adoptions) ||
-        (saved.approvals !== undefined && !Array.isArray(saved.approvals))) throw new Error('invalid state');
-      this.state = { ...saved, approvals: saved.approvals ?? [] };
+        (saved.approvals !== undefined && !Array.isArray(saved.approvals)) ||
+        (saved.checkRuns !== undefined && !Array.isArray(saved.checkRuns))) throw new Error('invalid state');
+      this.state = { ...saved, approvals: saved.approvals ?? [], checkRuns: saved.checkRuns ?? [] };
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取 M2/M3 任务状态 tasks.json'); }
     for (const task of this.state.tasks) {
       if (task.status === 'awaiting_approval' && !this.state.approvals.some(card => card.taskId === task.id)) throw new Error('等待请示的任务缺少对应卡片，拒绝自动清理或发布');
@@ -114,6 +139,12 @@ export class WorkService {
       }
     }
     if (recovered) await this.save();
+    await this.checkRunner.init();
+    this.syncCandidateChecks(this.state.checkRuns);
+    this.captureCheckViews();
+    this.durableCheckRuns = clone(this.state.checkRuns);
+    await this.save();
+    await this.trimCandidates();
   }
 
   private async recoverIntent() {
@@ -206,10 +237,10 @@ export class WorkService {
       let candidate = this.state.candidates.find(item => item.id === taskId);
       if (!candidate) {
         const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
-        candidate = { id: taskId, taskId, baseVersion: intent.before, branch: this.repo.branch(taskId), previewUrl,
+        candidate = { id: taskId, taskId, candidateCommit: await this.repo.candidateCommit(taskId), baseVersion: intent.before, branch: this.repo.branch(taskId), previewUrl,
           createdAt: new Date().toISOString(), diff: pending.diff, outOfScope: pending.changedFiles.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending' };
         this.state.candidates.push(candidate);
-      } else candidate.previewUrl = previewUrl;
+      } else { candidate.previewUrl = previewUrl; candidate.candidateCommit ??= await this.repo.candidateCommit(taskId); }
       if (task.status !== 'done') {
         task.status = 'done'; task.candidateId = taskId; task.error = undefined; task.updatedAt = new Date().toISOString();
         task.events.push({ type: 'task.updated', ts: task.updatedAt, sequence: task.events.length + 1, message: card.summary });
@@ -225,9 +256,127 @@ export class WorkService {
       this.options.emit({ type: 'task.updated', task: clone(task) });
       this.options.emit({ type: 'candidate.ready', candidate: clone(candidate) });
       this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
-      await this.trimCandidates();
       return { approval: this.publicApproval(card), task: clone(task) };
     } finally { this.controllers.delete(taskId); }
+  }
+
+  private async toolsIdentity() {
+    const configured = this.options.checks?.toolIdentity;
+    return typeof configured === 'function' ? configured() : configured ?? getCheckToolsIdentity();
+  }
+
+  private async resolveCheckCandidate(id: string, signal?: AbortSignal): Promise<CheckCandidateInput> {
+    return this.repo.exclusive(async () => {
+      signal?.throwIfAborted();
+      await this.recoverIntent();
+      const candidate = this.candidate(id);
+      if (candidate.decision !== 'pending' || this.retiring.has(id)) throw new WorkError('INVALID_STATE', '候选已关闭或正在撤回', 409);
+      if (!candidate.candidateCommit) throw new WorkError('LEGACY_CANDIDATE', '旧候选缺少生成提交记录，请重新生成候选', 409);
+      const mainVersion = await this.snapshot();
+      if (mainVersion !== candidate.baseVersion) throw new WorkError('STALE_CANDIDATE', '主作品版本已变化，请重新生成候选', 409);
+      const candidateCommit = await this.repo.candidateCommit(id, { clean: true, expectedCommit: candidate.candidateCommit });
+      const toolIdentity = await this.toolsIdentity();
+      const snapshot = await computeSnapshot(this.repo.candidatePath(id), { toolIdentity, signal });
+      return { candidateId: id, candidatePath: this.repo.candidatePath(id), candidateCommit, baseVersion: candidate.baseVersion,
+        mainVersion, toolIdentity, contentDigest: snapshot.digest };
+    });
+  }
+
+  private syncCandidateChecks(runs: CheckRun[]) {
+    for (const candidate of this.state.candidates) {
+      const run = runs.filter(item => item.candidateId === candidate.id).at(-1);
+      candidate.latestCheckRunId = run?.id;
+      candidate.checks = run && run.policyVersion === POLICY_VERSION && run.toolIdentity ?
+        run.checks.map(check => ({ ...clone(check), runId: run.id })) : checks();
+    }
+  }
+  private captureCheckViews() {
+    this.checkViews = new Map(this.state.candidates.map(candidate => [candidate.id, {
+      checks: clone(candidate.checks), latestCheckRunId: candidate.latestCheckRunId,
+    }]));
+  }
+  private publicCandidate(candidate: StoredCandidate): Candidate {
+    const result = clone(candidate), view = this.checkViews.get(candidate.id);
+    result.checks = view ? clone(view.checks) : checks();
+    result.latestCheckRunId = view?.latestCheckRunId;
+    try { this.checkRunner.assertHealthy(); }
+    catch { result.checks = checks().map(check => ({ ...check, message: '检查状态或资源未能可靠完成' })); }
+    return result;
+  }
+
+  private async validatePassedRun(run: CheckRun) {
+    if (this.checkFault || run.status !== 'completed' || run.outcome !== 'passed' || run.error ||
+        run.policyVersion !== POLICY_VERSION || run.checks.length !== 4 ||
+        !run.checks.every((check, index) => check.name === CHECK_ORDER[index] && check.status === 'passed')) throw new WorkError('INVALID_CHECK_PROOF', '检查证明不完整', 409);
+    const input = await this.resolveCheckCandidate(run.candidateId);
+    if (input.candidateCommit !== run.candidateCommit || input.baseVersion !== run.baseVersion ||
+        input.mainVersion !== run.mainVersion || input.contentDigest !== run.contentDigest || input.toolIdentity !== run.toolIdentity) {
+      throw new WorkError('STALE_CANDIDATE', '检查证明不对应当前完整输入', 409);
+    }
+    const refs = run.artifacts ?? [];
+    if (new Set(refs.map(ref => ref.name)).size !== refs.length) throw new WorkError('INVALID_CHECK_PROOF', '证据引用重复', 409);
+    for (const name of ['schema.json', 'build.log', 'smoke.json', 'smoke.png', 'occlusion.json', 'occlusion.png']) {
+      const ref = refs.find(item => item.name === name);
+      if (!ref) throw new WorkError('INVALID_CHECK_PROOF', '缺少实际检查证据', 409);
+      await readArtifact(this.options.directory, run.id, name, ref);
+    }
+    for (const check of run.checks) {
+      const ref = refs.find(item => item.name === (check.name === 'build' ? 'build.log' : check.name + '.json'));
+      if (!check.evidence || check.evidence !== ref?.hash) throw new WorkError('INVALID_CHECK_PROOF', '检查结果摘要与证据不符', 409);
+    }
+  }
+
+  private async saveCheckRuns(runs: CheckRun[]) {
+    return this.repo.exclusive(async () => {
+      const previousRuns = this.state.checkRuns;
+      // Validate terminal publication in the same repo critical section as the save.
+      for (const run of runs) {
+        const previous = previousRuns.find(item => item.id === run.id);
+        if (run.status === 'completed' && run.outcome === 'passed' && !(previous?.status === 'completed' && previous.outcome === 'passed')) {
+          try { await this.validatePassedRun(run); }
+          catch (error) { throw new CheckCompletionInvalidated(run.id, error instanceof WorkError ? error.code : 'CHECK_EVIDENCE_INVALID'); }
+        }
+      }
+      const previousViews = this.state.candidates.map(candidate => ({ candidate, checks: candidate.checks, latestCheckRunId: candidate.latestCheckRunId }));
+      this.state.checkRuns = clone(runs);
+      this.syncCandidateChecks(runs);
+      try { await this.save(); }
+      catch (error) {
+        this.state.checkRuns = previousRuns;
+        for (const previous of previousViews) { previous.candidate.checks = previous.checks; previous.candidate.latestCheckRunId = previous.latestCheckRunId; }
+        this.checkFault = new WorkError('PERSISTENCE_FAILED', '检查状态未能可靠落盘，拒绝采用与新检查', 503);
+        throw error;
+      }
+      this.captureCheckViews();
+      this.durableCheckRuns = clone(runs);
+      for (const run of runs) {
+        const previous = previousRuns.find(item => item.id === run.id);
+        if (JSON.stringify(previous) === JSON.stringify(run)) continue;
+        const terminal = run.status === 'completed' || run.status === 'cancelled';
+        const previousTerminal = previous?.status === 'completed' || previous?.status === 'cancelled';
+        const type = terminal && !previousTerminal ? 'check.finished' : !previous ? 'check.started' : 'check.updated';
+        this.options.emit({ type, run: clone(run), candidate: this.state.candidates.some(candidate => candidate.id === run.candidateId) ? this.getCandidate(run.candidateId) : undefined });
+      }
+    });
+  }
+
+  async startChecks(id: string, options?: { rerun?: boolean }) {
+    if (this.checkFault) throw this.checkFault;
+    return this.checkRunner.startChecks(id, options);
+  }
+  getCheckRun(id: string) {
+    try { this.checkRunner.assertHealthy(); }
+    catch { return this.checkRunner.getRun(id); }
+    const run = this.durableCheckRuns.find(item => item.id === id);
+    if (!run) throw new WorkError('NOT_FOUND', '检查运行不存在', 404);
+    return clone(run);
+  }
+  async cancelCheckRun(id: string) { return this.checkRunner.cancelChecks(id); }
+  async readCheckArtifact(id: string, name: string) {
+    validateArtifactName(name);
+    const run = this.getCheckRun(id), ref = run.artifacts?.find(item => item.name === name);
+    if (!ref) throw new WorkError('NOT_FOUND', '运行没有该证据', 404);
+    return readArtifact(this.options.directory, id, name, ref);
   }
 
   private save() {
@@ -357,7 +506,7 @@ export class WorkService {
       const changed = await this.repo.commitCandidate(id, result.summary);
       const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
       const candidate: StoredCandidate = {
-        id, taskId: id, baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),
+        id, taskId: id, candidateCommit: await this.repo.candidateCommit(id), baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),
         diff: pending.diff, outOfScope: changed.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending',
       };
       await this.append(task, `候选已提交，改动 ${changed.length} 个文件；正在启动预览`);
@@ -394,8 +543,8 @@ export class WorkService {
 
   listTasks() { return clone(this.state.tasks); }
   getTask(id: string) { return clone(this.task(id)); }
-  listCandidates() { return clone(this.state.candidates); }
-  getCandidate(id: string) { return clone(this.candidate(id)); }
+  listCandidates() { return this.state.candidates.map(candidate => this.publicCandidate(candidate)); }
+  getCandidate(id: string) { return this.publicCandidate(this.candidate(id)); }
   listApprovals(): ApprovalCard[] { return this.state.approvals.map(card => this.publicApproval(card)); }
   getApproval(id: string): ApprovalCard { return this.publicApproval(this.approval(id)); }
 
@@ -457,24 +606,55 @@ export class WorkService {
     });
   }
 
-  private async trimCandidates() {
-    const pending = this.state.candidates.filter(candidate => candidate.decision === 'pending');
-    while (pending.length > 3) {
-      const oldest = pending.shift()!;
-      await this.closeCandidate(oldest, '超过最多 3 个待定候选，自动撤回最早版本');
-    }
+  private trimCandidates() {
+    const operation = this.trims.then(async () => {
+      for (;;) {
+        const oldest = await this.repo.exclusive(async () => {
+          const pending = this.state.candidates.filter(candidate => candidate.decision === 'pending');
+          return pending.length > 3 ? pending[0] : undefined;
+        });
+        if (!oldest) return;
+        await this.closeCandidate(oldest, '超过最多 3 个待定候选，自动撤回最早版本');
+      }
+    });
+    this.trims = operation.catch(() => {});
+    return operation;
   }
-  private async closeCandidate(candidate: StoredCandidate, reason: string) {
-    this.state.intent = { kind: 'discard', id: candidate.id, before: await this.repo.head() };
-    await this.save();
-    await this.recoverIntent();
-    this.options.emit({ type: 'candidate.closed', candidate: clone(candidate), reason });
+  private closeCandidate(candidate: StoredCandidate, reason: string): Promise<void> {
+    const existing = this.retirements.get(candidate.id);
+    if (existing) return existing;
+    const operation = (async () => {
+      await this.repo.exclusive(async () => { await this.recoverIntent(); this.retiring.add(candidate.id); });
+      // Never wait for checker final saves while holding the mutex they need.
+      for (const run of this.checkRunner.runsFor(candidate.id)) {
+        if (run.status === 'running' || run.status === 'queued') await this.checkRunner.cancelChecks(run.id);
+      }
+      await this.repo.exclusive(async () => {
+        await this.recoverIntent();
+        if (candidate.decision !== 'pending') return;
+        this.state.intent = { kind: 'discard', id: candidate.id, before: await this.repo.head() };
+        await this.save();
+        await this.recoverIntent();
+        this.options.emit({ type: 'candidate.closed', candidate: this.publicCandidate(candidate), reason });
+        this.retiring.delete(candidate.id);
+      });
+    })();
+    this.retirements.set(candidate.id, operation);
+    void operation.finally(() => this.retirements.delete(candidate.id)).catch(() => {});
+    return operation;
   }
 
   async adopt(id: string) {
     const candidate = this.candidate(id);
     if (candidate.decision !== 'pending') throw new WorkError('INVALID_STATE', '只有待定候选可以采用', 409);
     await this.snapshot();
+    try {
+      this.checkRunner.assertHealthy();
+      if (this.checkFault || this.retiring.has(id)) throw new Error('check unavailable');
+      const latest = this.state.checkRuns.filter(run => run.candidateId === id).at(-1);
+      if (!latest || candidate.latestCheckRunId !== latest.id) throw new Error('missing check run');
+      await this.validatePassedRun(latest);
+    } catch { throw new WorkError('CHECKS_NOT_PASSED', '当前候选没有完整有效的四项检查证明，请重新检查或生成候选', 409); }
     this.state.intent = { kind: 'adopt', id, before: await this.repo.head() };
     await this.save();
     const mergeCommit = await this.repo.adopt(id);
@@ -490,8 +670,12 @@ export class WorkService {
   }
 
   async discard(id: string) {
-    const candidate = this.candidate(id);
-    if (candidate.decision !== 'pending') throw new WorkError('INVALID_STATE', '只有待定候选可以撤回', 409);
+    const candidate = await this.repo.exclusive(async () => {
+      await this.recoverIntent();
+      const candidate = this.candidate(id);
+      if (candidate.decision !== 'pending') throw new WorkError('INVALID_STATE', '只有待定候选可以撤回', 409);
+      return candidate;
+    });
     await this.closeCandidate(candidate, '用户撤回候选版本');
     return clone(candidate);
   }
@@ -513,8 +697,12 @@ export class WorkService {
   async close() {
     this.closing = true;
     for (const controller of this.controllers.values()) controller.abort();
+    const checksStopped = this.checkRunner.drain();
+    void checksStopped.catch(() => {});
     await Promise.allSettled([...this.inFlight]);
     await this.taskQueue;
+    await this.trims;
+    await checksStopped;
     // Review N4: queued work-tree operations (adopt, revert, 3D write-back) finish before the
     // event log closes and the lock is released; new ones are refused from here on.
     await this.repo.drain();

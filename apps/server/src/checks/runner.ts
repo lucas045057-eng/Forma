@@ -18,6 +18,16 @@ export const DEFAULT_RUN_TIMEOUT_MS = 180_000;
 export const POLICY_VERSION = 'm3b-v2';
 export const CHECK_ORDER: CheckName[] = ['schema', 'build', 'smoke', 'occlusion'];
 
+/** The owning store can reject a terminal green result under its publication lock. */
+export class CheckCompletionInvalidated extends WorkError {
+  runId: string;
+  reasonCode: string;
+  constructor(runId: string, reasonCode = 'STALE_CANDIDATE') {
+    super('CHECK_COMPLETION_INVALIDATED', '检查完成时候选身份或证据已变化，不能发布通过结果', 409);
+    this.runId = runId; this.reasonCode = reasonCode;
+  }
+}
+
 export interface CheckExecutor {
   schema(ctx: CheckContext): Promise<CheckResult>;
   build(ctx: CheckContext): Promise<CheckResult>;
@@ -169,7 +179,19 @@ export class CheckRunner {
     });
     this.writes = operation.then(() => {}, () => {});
     try { await operation; }
-    catch { this.poison(); throw this.fault; }
+    catch (error) {
+      if (error instanceof CheckCompletionInvalidated) {
+        const run = this.runs.find(item => item.id === error.runId);
+        if (run && run.outcome === 'passed') {
+          run.status = 'completed'; run.outcome = 'failed';
+          run.error = { code: error.reasonCode, message: error.message };
+          run.finishedAt = new Date().toISOString();
+          run.checks[3] = { name: 'occlusion', status: 'failed', message: error.message };
+          await this.save(); return;
+        }
+      }
+      this.poison(); throw this.fault;
+    }
   }
 
   private identity(run: Pick<CheckRun, 'candidateId' | 'candidateCommit' | 'baseVersion' | 'mainVersion' | 'policyVersion' | 'contentDigest' | 'toolIdentity'>) {
@@ -302,6 +324,10 @@ export class CheckRunner {
     const run = (this.fault ? this.runs : this.durable).find(item => item.id === id);
     if (!run) throw new WorkError('NOT_FOUND', '检查运行不存在', 404);
     return copy(run);
+  }
+  assertHealthy() {
+    if (this.fault) throw this.fault;
+    if (this.resourceFault) throw this.resourceFault;
   }
   runsFor(candidateId: string): CheckRun[] { return copy((this.fault ? this.runs : this.durable).filter(run => run.candidateId === candidateId)); }
   latestCompleted(candidateId: string): CheckRun | undefined {

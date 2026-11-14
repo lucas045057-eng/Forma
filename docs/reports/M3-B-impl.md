@@ -84,3 +84,13 @@ job_68cc8540：types0，8项7过/1失败；timeout测试8s预算晚于浏览器5
 job_468fc844：types0、8/8通过、0失败/跳过、identityPreserved=true。生产代码与44项通过的4b8f905无差异，仅生命周期测试/父夹具扩展。实际观测worker、esbuild、Chromium与后代PID/创建时间，取消和缩短deadline后remaining为空、静态监听URL无法连接、lateArtifacts=0；浏览器父死亡后owned子树为空、静态源关闭，同场decoy保持存活；IPC stop被忽略时确实强制结束自有worker。两轮原件含process-artifacts与实际检查报告/截图，归档browser-resources-20261114，有逐文件manifest。
 
 B2/B3主要实现与定向证据现具备，进入B4实际WorkService/tasks.json/事件/API/采用门禁。仍未做全仓typecheck/build/单测、独立Claude复审与Pi正式E2E，不将定向实现测试称为整阶段验收。Windows进程证据不外推跨平台；强制回收命令自身失败的保锁处理仍要在集成与独立审查中核对。
+
+## 第九批：B4 WorkService 第一组集成
+
+运行记录由WorkService所属store写入tasks.json，不再单独check-runs.json；候选记录生成提交，旧无提交证明的候选需重新生成。store同repo锁内复核最终通过身份/六份证据，保存成功后更新公开durable视图再发check事件。CheckCompletionInvalidated把完成时过期转为可持久failed，不误报成永久I/O故障。start/get/cancel/artifact内部方法已接入；HTTP尚未接线。
+
+adopt同repo锁中快照主作品后核对最新run、完整输入摘要、candidate commit/base/main/policy/tools、四passed、各阶段报告hash及两张截图引用；任一不符409 CHECKS_NOT_PASSED。撤回/自动裁剪先标retiring封检查准入，在repo锁外停止检查，再锁内保存撤回意图并清理；审批发布后的裁剪移到答复锁外。关闭先封准入/启动checker drain，等任务与trim/checker屏障后再drain repo、关preview、放锁。
+
+RED job_91b1f5f0：types0，十项全部目标失败。GREEN job_d1db8079：types0，89/89实际通过、0失败/跳过、identityPreserved=true（新10项、B1四套55项、work approvals23及routes1）。原件归档work-integration-20261114。集成测试用内部构造参数注入产生实际artifact ref的受控executor，不能称其为真实浏览器E2E；HTTP不提供覆盖入口。
+
+保存故障/完成时失效/跨候选与裁剪竞态、HTTP接口与鉴权/关闭、旧直接adopt单测及Pi E2E迁移仍待完成。完整标准typecheck/build/单测、Claude独立复审与Pi正式验收未完成，不称B4或M3-B通过。

@@ -54,6 +54,7 @@ export interface Task {
 }
 export interface Candidate {
   id: string;
+  candidateCommit?: string;
   baseVersion: string;
   branch: string;
   previewUrl: string;
