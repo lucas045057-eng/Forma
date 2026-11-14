@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import * as api from '../m2a/api';
 import { writeArtifact } from './artifact';
-import { BUILD_FAULT, RUNTIME_FAULT, OCCLUSION_FAULT, cleanup, openStudio, waitCandidate } from './support';
+import { BUILD_FAULT, RUNTIME_FAULT, OCCLUSION_FAULT, cleanup, ensurePicked, openStudio, waitCandidate } from './support';
 
 /**
  * M3-C real UI · 三类真实故障（不是 mock）：构建失败、页面运行错误、交互遮挡。
@@ -20,6 +20,8 @@ test.afterAll(() => { expect(api.restoreTemplate().clean).toBe(true); });
 async function localCandidate(page: Page, script: unknown[][], instruction: string) {
   await api.resetMock();
   await api.setScript(script as never);
+  // 先选一个 App.tsx 内的元素，否则提交算越范围，会先请示。
+  await ensurePicked(page);
   const [response] = await Promise.all([
     page.waitForResponse((item) => item.request().method() === 'POST' && new URL(item.url()).pathname === '/tasks', { timeout: 30_000 }),
     (async () => {

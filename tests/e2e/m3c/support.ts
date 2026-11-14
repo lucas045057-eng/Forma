@@ -93,18 +93,37 @@ export async function mainFrame(page: Page): Promise<Frame> {
 
 /** 真实点选首屏“立即购买”按钮（Button.tsx 的共享实例之一），拿到真实 Selection。 */
 export async function pickSharedButton(page: Page): Promise<api.SelectionLike> {
+  return pickElement(page, '[data-testid="buy-button"]');
+}
+
+/** 真实点选任意 CSS 选择器对应的元素，返回 Selection（含 instances / src / baseVersion）。 */
+export async function pickElement(page: Page, selector: string): Promise<api.SelectionLike> {
   await page.getByTestId('pick-toggle').click();
   const frame = await mainFrame(page);
-  const target = frame.locator('[data-testid="buy-button"]').first();
+  const target = frame.locator(selector).first();
   await target.scrollIntoViewIfNeeded();
   const box = await target.boundingBox();
-  if (!box) throw new Error('找不到 buy-button');
+  if (!box) throw new Error(`找不到或不可点击：${selector}`);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   const panel = page.locator('[data-testid="selection-json"]');
   await panel.waitFor({ state: 'visible', timeout: 30_000 });
   const selection = JSON.parse(await panel.innerText()) as api.SelectionLike;
   await page.getByTestId('pick-toggle').click();
   return selection;
+}
+
+/**
+ * 保证当前有一个 ready 的 Selection，默认选被改的那句文案本身（`.fine-print`，App.tsx 内唯一实例）。
+ *
+ * 为什么不随便选：
+ * - **无选取**的提交算整页/越范围，会先请示；
+ * - 选 `benefits` 里的 `<li>` 会报 instances=3（同一个 JSX 生成点），命中 `shared_component` 也会请示。
+ * 所以“想拿无请示的局部改动”时必须选到 App.tsx 里唯一的那个元素。
+ */
+export async function ensurePicked(page: Page, selector = '.fine-print'): Promise<void> {
+  const kind = await page.getByTestId('pick-state').getAttribute('data-kind');
+  if (kind === 'ready') return;
+  await pickElement(page, selector);
 }
 
 export async function selectionText(page: Page): Promise<string> {
