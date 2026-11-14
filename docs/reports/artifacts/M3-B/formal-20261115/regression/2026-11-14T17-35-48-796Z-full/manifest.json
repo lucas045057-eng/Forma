@@ -1,0 +1,1927 @@
+{
+  "runId": "2026-11-14T17-35-48-796Z-full",
+  "mode": "full",
+  "startedAt": "2026-11-14T17:35:49.147Z",
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance",
+  "node": "v24.14.1",
+  "pid": 43352,
+  "playwrightCli": "node_modules\\@playwright\\test\\cli.js",
+  "envKeys": [
+    "PATH",
+    "Path",
+    "PATHEXT",
+    "SystemRoot",
+    "SystemDrive",
+    "WINDIR",
+    "ComSpec",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "LOCALAPPDATA",
+    "APPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "HOME",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+    "PROCESSOR_IDENTIFIER",
+    "OS",
+    "PNPM_HOME",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "npm_config_cache",
+    "npm_config_store_dir"
+  ],
+  "baseline": {
+    "identity": {
+      "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+      "branch": "test/m3b-acceptance",
+      "files": 253,
+      "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+      "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "dirty": []
+    },
+    "evidence": {},
+    "dirty": {}
+  },
+  "evidenceDirtyAtStart": [],
+  "steps": [
+    {
+      "step": "typecheck",
+      "command": "pnpm typecheck",
+      "pid": 35220,
+      "startedAt": "2026-11-14T17:35:49.148Z",
+      "finishedAt": "2026-11-14T17:35:54.691Z",
+      "durationMs": 5899,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\typecheck.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "build",
+      "command": "pnpm build",
+      "pid": 43928,
+      "startedAt": "2026-11-14T17:35:55.048Z",
+      "finishedAt": "2026-11-14T17:36:02.970Z",
+      "durationMs": 8299,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\build.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "unit",
+      "command": "pnpm test",
+      "pid": 45184,
+      "startedAt": "2026-11-14T17:36:03.348Z",
+      "finishedAt": "2026-11-14T17:39:27.114Z",
+      "durationMs": 204119,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\unit.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m0b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m0b-output",
+      "pid": 53616,
+      "startedAt": "2026-11-14T17:39:27.468Z",
+      "finishedAt": "2026-11-14T17:40:25.850Z",
+      "durationMs": 61433,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m0b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+          "beforeSha256": "7e36269e6f87448c56e5930ae154f586aecff56391cab6a2c46d302f06ca3de0",
+          "afterSha256": "bb031a6a998e48c683b16a4c53f5c4ce86b2f3c1fe1f71608ff4777332f96441",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+          "archivedBytes": 41,
+          "headBlobId": "1d3a61b65f93f939429f548aca6080ad089fa296",
+          "restoredObjectId": "1d3a61b65f93f939429f548aca6080ad089fa296",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-mutation-missing-tag.json",
+          "beforeSha256": "9885fc31bfb6a1389bd747fdad2d75603e6fbf4412cf3315a87886b73ed0e980",
+          "afterSha256": "a57f9e3ab757d453fa17b71129b6d09dd05185d8aacb9981460c718edebe611c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-missing-tag.json",
+          "archivedBytes": 611,
+          "headBlobId": "8698db0b6b16fc053958d5db6c8aecbca2e83dea",
+          "restoredObjectId": "8698db0b6b16fc053958d5db6c8aecbca2e83dea",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-mutation-same-tag.json",
+          "beforeSha256": "90c801c0ceb06fe69c5e3a952ab15fec6163bcbe604b32973dc75f17134784c3",
+          "afterSha256": "f5bc7fc74d7d5284ecde5b63e4f6153043f41755123e4c0bbeab39d288667a91",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-same-tag.json",
+          "archivedBytes": 1535,
+          "headBlobId": "8029cab880f3c3f537f1ceb2a4bfa3245e91979d",
+          "restoredObjectId": "8029cab880f3c3f537f1ceb2a4bfa3245e91979d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1a-pointer-events.json",
+          "beforeSha256": "f9bfe6e6cb9e1d2888cd9e76445efdc1056122553daf8a52cc49979df48ee52e",
+          "afterSha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1a-pointer-events.json",
+          "archivedBytes": 207,
+          "headBlobId": "217f5d354960a750dba82839ad83cd69475c714c",
+          "restoredObjectId": "217f5d354960a750dba82839ad83cd69475c714c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1b-form-submit.json",
+          "beforeSha256": "f9bfe6e6cb9e1d2888cd9e76445efdc1056122553daf8a52cc49979df48ee52e",
+          "afterSha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1b-form-submit.json",
+          "archivedBytes": 207,
+          "headBlobId": "217f5d354960a750dba82839ad83cd69475c714c",
+          "restoredObjectId": "217f5d354960a750dba82839ad83cd69475c714c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1c-link.json",
+          "beforeSha256": "8bbda2adae6b90b01944c97028169ed207ab1e2984b399d1bee6ae8f14e88777",
+          "afterSha256": "a8da4701b792871d0f1a2709f5fa0e6aa93ae0ce4c4b3cb75e231a6f1fdc2ead",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1c-link.json",
+          "archivedBytes": 32,
+          "headBlobId": "b8e4403de9d29f10b8f938831d3747a0aba91e00",
+          "restoredObjectId": "b8e4403de9d29f10b8f938831d3747a0aba91e00",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1d-restore.json",
+          "beforeSha256": "92fb6423104b9787cb332a16c89ee41505dd6a2e07fe132021928ba84e877108",
+          "afterSha256": "26a9944cec4eb19e750c71624a44b20c60c785928c5c4d6844d77777769c95d8",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1d-restore.json",
+          "archivedBytes": 420,
+          "headBlobId": "87a523b29d41bb4dc5a3840eff8cc097f1dbbc40",
+          "restoredObjectId": "87a523b29d41bb4dc5a3840eff8cc097f1dbbc40",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1e-contextmenu-dblclick.json",
+          "beforeSha256": "cb6219fbe10e796e41345f6fd209098bd6ec834d6b25a5d3e84d9193a671cd5c",
+          "afterSha256": "df20c597f148c3d002269cac270df17fa6bca17ecc0ffa5b5b68da9dd678000d",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1e-contextmenu-dblclick.json",
+          "archivedBytes": 420,
+          "headBlobId": "4af0d46097a96e55d967b53b022639004e9cbef4",
+          "restoredObjectId": "4af0d46097a96e55d967b53b022639004e9cbef4",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1f-space.json",
+          "beforeSha256": "d27264965c4c58868cdcfc97dc0974d8743b9d39a0221953f394a274daeb8efc",
+          "afterSha256": "4e81130cb5f6bfa124799b6bd82113ac19bec446bf08cbfd5334482fddf58dd9",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1f-space.json",
+          "archivedBytes": 420,
+          "headBlobId": "163fffdbaeb00ca0a3febb1914f10a46fb1605c1",
+          "restoredObjectId": "163fffdbaeb00ca0a3febb1914f10a46fb1605c1",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-r1g-hover-scroll.json",
+          "beforeSha256": "5fc77a07b4e132c8def24f75161e0fecb3af4d999a999fc2dc878661742f62ac",
+          "afterSha256": "49ad741a07a916d14c77153cca6028b47a51ea9c19b9de950096fceba996ec0c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1g-hover-scroll.json",
+          "archivedBytes": 94,
+          "headBlobId": "c1987a279cb734a95603bb6264a87cb9b9580282",
+          "restoredObjectId": "c1987a279cb734a95603bb6264a87cb9b9580282",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-s4a-bridge-source.json",
+          "beforeSha256": "03eaeba918c81ca555ee7d7aff38415c3c7a50e02e18d934389cf37c1d718de0",
+          "afterSha256": "9729291e0244649813f851f600879ed56826656acda2dd83559766d11f20ece3",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4a-bridge-source.json",
+          "archivedBytes": 23,
+          "headBlobId": "3c3cb7ef091f5be379d9895f4ced20f099010c91",
+          "restoredObjectId": "3c3cb7ef091f5be379d9895f4ced20f099010c91",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-s4c-studio-payload-guard.json",
+          "beforeSha256": "1dcf07965e9594d563596473281dc67447f56e2511e5b3897f813bda2440b5db",
+          "afterSha256": "3fa86b2b54a53b20f408023c5e4fb2e4f540bf87f1ebdf261bff6b70398e67ef",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4c-studio-payload-guard.json",
+          "archivedBytes": 964,
+          "headBlobId": "1b72535680d801360a31854a56e78fdb728169fc",
+          "restoredObjectId": "1b72535680d801360a31854a56e78fdb728169fc",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case-s4d-bridge-guard.json",
+          "beforeSha256": "a37492d8fca2ef883cec1c92f83f7aa4cdf1f8434e48eed526acf259dd23e46e",
+          "afterSha256": "af0fe39aa07d194e089bda1733bc5ffc96d742efe4d56523b28f7aaf57cd65c4",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4d-bridge-guard.json",
+          "archivedBytes": 42,
+          "headBlobId": "df0ccfa256a02431ddbd01dfc2cfe1fe4d9ef891",
+          "restoredObjectId": "df0ccfa256a02431ddbd01dfc2cfe1fe4d9ef891",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case1-random-sample.json",
+          "beforeSha256": "0e0546ac4a1ad8982ce794005f1584467dad8627727c4729a79a17cca4118caf",
+          "afterSha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case1-random-sample.json",
+          "archivedBytes": 12037,
+          "headBlobId": "9e79e379d07ae0b927bfe88eab56b13f81aea2ba",
+          "restoredObjectId": "9e79e379d07ae0b927bfe88eab56b13f81aea2ba",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case3-shared-button.json",
+          "beforeSha256": "db053595d45521652456881a1d116002a87a50170db7c5f156cb182b092d2508",
+          "afterSha256": "b8bdbe6182cac61c55475bb76af63c839d359e76558a2c926fc9830821394c59",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case3-shared-button.json",
+          "archivedBytes": 868,
+          "headBlobId": "cac47726d531d07506589a80a82a3f4ad970572c",
+          "restoredObjectId": "cac47726d531d07506589a80a82a3f4ad970572c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case4-map-list.json",
+          "beforeSha256": "7c7670ed6f2a5ede8ef8eb983a78a347fbe7db22437bc53f109465abe153ccc9",
+          "afterSha256": "977a3252e3500780c890e0a1cc314d0b4f7aabe0a7e6d610706f5b31a23c8f54",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case4-map-list.json",
+          "archivedBytes": 917,
+          "headBlobId": "c001b67b156a7bf10babc543ec52806fe946f19c",
+          "restoredObjectId": "c001b67b156a7bf10babc543ec52806fe946f19c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case5-outer-container.json",
+          "beforeSha256": "9d3e175f6eb585afefaf318253152670f622758aeb13ce16ed0d0758275baf63",
+          "afterSha256": "a6d8f1cc1b099910c38c48a29b1cef63a20f3623ee9488349b3a099840f673e3",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case5-outer-container.json",
+          "archivedBytes": 969,
+          "headBlobId": "624441df7b021837fb28f17b70a275be63452862",
+          "restoredObjectId": "624441df7b021837fb28f17b70a275be63452862",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case6-ancestors.json",
+          "beforeSha256": "7bd39707dc03bedf7dab53bc4c8563312be84007706cadbe12cb4fff52e29d37",
+          "afterSha256": "0d50cdd5a4bb5bddc2864ef29ca1dd5ff0a1774f5bc97826de1a724f5db1a692",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case6-ancestors.json",
+          "archivedBytes": 1008,
+          "headBlobId": "0aa255e3942ce1a65d0e1c3dc8ce6c9f6533651c",
+          "restoredObjectId": "0aa255e3942ce1a65d0e1c3dc8ce6c9f6533651c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case7-origin-check.json",
+          "beforeSha256": "f9b9bb172eea53c8ea0a7e4e04e564d5adf4d2db9b08ec5259855a7e75b3c597",
+          "afterSha256": "6f052bd224500abf9cf5641daaa7e8d40a934a781c4b344187e02cc9584f5ae1",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case7-origin-check.json",
+          "archivedBytes": 247,
+          "headBlobId": "33601e35413e140fca7949af0f8b6fec96999b99",
+          "restoredObjectId": "33601e35413e140fca7949af0f8b6fec96999b99",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case8-deterministic-ast.json",
+          "beforeSha256": "89df81aafff6a33bf4502e78e39a704d170df33f398ef4c9cafc42cf12d80c8e",
+          "afterSha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case8-deterministic-ast.json",
+          "archivedBytes": 1964,
+          "headBlobId": "d1881a56820b90b501d4ece2837ce481d58932e3",
+          "restoredObjectId": "d1881a56820b90b501d4ece2837ce481d58932e3",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-B/case9-completeness.json",
+          "beforeSha256": "87dc3b10be362bf67472da42344018c6833b635f7ea0cca0db655e8ab48a36f8",
+          "afterSha256": "9379a21c0a48843d66195fc7f63de2c792800644a8447404793661a90b897cc4",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case9-completeness.json",
+          "archivedBytes": 1766,
+          "headBlobId": "639f070cc01f1e05e4498c0f13d40c69f1282187",
+          "restoredObjectId": "639f070cc01f1e05e4498c0f13d40c69f1282187",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 9,
+          "specs": 24,
+          "tests": 24,
+          "results": 24,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:39:28.200Z",
+          "duration": 57637.202999999994,
+          "expected": 24,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m0a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m0a.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m0a-output",
+      "pid": 32996,
+      "startedAt": "2026-11-14T17:40:28.903Z",
+      "finishedAt": "2026-11-14T17:41:46.147Z",
+      "durationMs": 80999,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m0a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+          "beforeSha256": "7a6752d8de26e12068511ff0c023570897bba3e2491fc5761f84422202557537",
+          "afterSha256": "e265e6138c8eaa27af248ee724fa698491c38e54b880014e29a956f247e605de",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+          "archivedBytes": 918,
+          "headBlobId": "d023e4a73f067a123f9884fa4f8c4e3a43d4863d",
+          "restoredObjectId": "d023e4a73f067a123f9884fa4f8c4e3a43d4863d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+          "beforeSha256": "d08bc2aaec7926340d933a6ab76a8a37c5a0c628ecbf45c25cd6e9aff32a573c",
+          "afterSha256": "58425294767cf7cacacd4c32386df2df052a32c821813d8bf471cb801cb2ccd7",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+          "archivedBytes": 827,
+          "headBlobId": "9ed43eeb58d2bc98e3e90a3409da08cf7637844b",
+          "restoredObjectId": "9ed43eeb58d2bc98e3e90a3409da08cf7637844b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+          "beforeSha256": "6cbf30b3816fb51a4ad43e457ee1c699d7159e3444f3a7c4f6c0b81f4f156848",
+          "afterSha256": "97ff628b2ffa13a0fa599d15898612514b495e4a5e459763891d1411fe93a44c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+          "archivedBytes": 809,
+          "headBlobId": "991099d4702cf98a72349b64da1788723dd1142e",
+          "restoredObjectId": "991099d4702cf98a72349b64da1788723dd1142e",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+          "beforeSha256": "b630043acf5ef50e85636e9c60edf32564d77c7ac9931634c18f5ab776894a6e",
+          "afterSha256": "9dcf1402e99ae5d199bb44ae00000f0fe9306428d699263ecce770e7e82ebff6",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+          "archivedBytes": 855,
+          "headBlobId": "6982676431d1b9f9348b35e423927771dd93432f",
+          "restoredObjectId": "6982676431d1b9f9348b35e423927771dd93432f",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
+          "beforeSha256": "116fe5058a04fbcf463d5f96d96b21646c6a741e294270364ff68566ae504c82",
+          "afterSha256": "f47c1008439be285031b84c9859a9ac3f8b4a60453840af0fcf6e0abcd5d76da",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
+          "archivedBytes": 1018,
+          "headBlobId": "cc4d415da6fc71d52d0498ed56ca509dc35fa1e6",
+          "restoredObjectId": "cc4d415da6fc71d52d0498ed56ca509dc35fa1e6",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+          "beforeSha256": "7dc5a663d3b39e49c3827c59cb50711a893de992c4479804f4a21e1be09794c6",
+          "afterSha256": "3e1faf57f0792770e045fccba805be4b1cfd17f5fde66ae3a4e64b023c26fbb1",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+          "archivedBytes": 813,
+          "headBlobId": "277be315c3be9bbbe85a2800b6534a98b6d55432",
+          "restoredObjectId": "277be315c3be9bbbe85a2800b6534a98b6d55432",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
+          "beforeSha256": "49ae8ae9408067b9b5d3ead23492be512d858284d9ec555b3b0cb13ee4618d99",
+          "afterSha256": "69adbc73dc7898c40c590195edefcaf5355bb02e202d74d97975950e8eff7edd",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
+          "archivedBytes": 951,
+          "headBlobId": "1e9e5417998488738bc762cbb1d27764ecf59412",
+          "restoredObjectId": "1e9e5417998488738bc762cbb1d27764ecf59412",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-结果-URL-过期-404.json",
+          "beforeSha256": "6f8072cd983bf684856faf1b60d6bf599828eac9f267652b4ffd42cdcd63ca66",
+          "afterSha256": "c945d36aaa0d202a953dda790a73960baa4f09d9e9d671bb4fdb2e887ae1cf36",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-404.json",
+          "archivedBytes": 951,
+          "headBlobId": "68092d459554fca80e6b35445a6794f025836e77",
+          "restoredObjectId": "68092d459554fca80e6b35445a6794f025836e77",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/failure-轮询超时.json",
+          "beforeSha256": "bba254ab4bbd0a54e421d33180087b94ba2b10a7c69a8e88f03044f193b6873c",
+          "afterSha256": "1f629e1275729ee616af6e31d6e1c7bce31a53a43160e4102ceea5b92cce56ea",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-轮询超时.json",
+          "archivedBytes": 892,
+          "headBlobId": "e00a8b3fe11137b1dc11ca7325deb3766c028055",
+          "restoredObjectId": "e00a8b3fe11137b1dc11ca7325deb3766c028055",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/guard-selftest.json",
+          "beforeSha256": "ad32fa99a9be8568b9c5e2929a9e5f20166c8e3e3ffa2fafefded3f277873c08",
+          "afterSha256": "5604d1322932468dea597efbf560206ed9aae104377c4a08a9a07e4fbf191409",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/guard-selftest.json",
+          "archivedBytes": 197,
+          "headBlobId": "2d8c0d4bc8a9bb31b88dbbb55beb7606bd18e79c",
+          "restoredObjectId": "2d8c0d4bc8a9bb31b88dbbb55beb7606bd18e79c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/idempotency-concurrent.json",
+          "beforeSha256": "50817a2317fcd66a3c7140e905a5ea2f0c7a428ae320e0824de410ad3427ef22",
+          "afterSha256": "090990b3b3dc2c963c6d6acc84dd51adb2782fc519c5f7e8afcc8afb78d2a018",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-concurrent.json",
+          "archivedBytes": 557,
+          "headBlobId": "a80e8f6fd413d54c6a73ace582215bb40a5962b6",
+          "restoredObjectId": "a80e8f6fd413d54c6a73ace582215bb40a5962b6",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/idempotency-conflict.json",
+          "beforeSha256": "aa499e1e6c9372dece60b311b8667f6faa31a1d47c13c3908e04a6fa6f4850e7",
+          "afterSha256": "af5b336057bbbeeaa9fbb91a4031d83c54236d159e22c2af0eb55a638e4c5b5a",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-conflict.json",
+          "archivedBytes": 291,
+          "headBlobId": "2f180d3471c04f9791514cdfe8e958517c07785d",
+          "restoredObjectId": "2f180d3471c04f9791514cdfe8e958517c07785d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/idempotency-sequential.json",
+          "beforeSha256": "49ac720a78f6c0cc0da8b9c57bca547b9468356413187622ef7cb4b7fbe20f7a",
+          "afterSha256": "bfa2514be3c4f322dcdf60874353dbf2e52424f7dc751c76d41f404f689f95c1",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-sequential.json",
+          "archivedBytes": 556,
+          "headBlobId": "255ffc710cf03af08c5cb24624e3a2ab9dd1b7ec",
+          "restoredObjectId": "255ffc710cf03af08c5cb24624e3a2ab9dd1b7ec",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/idempotency-unclear.json",
+          "beforeSha256": "2c8896fff420a2b87adcc213e32364a9aac480aa2701110370b76af62baed782",
+          "afterSha256": "ae83c578112b4f3010a2d278b4a0151feb3259fc57034846c2f5dcf22b44ad87",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-unclear.json",
+          "archivedBytes": 512,
+          "headBlobId": "d85fe4930608e507d7b4190b4acfcf1b36d9bcf7",
+          "restoredObjectId": "d85fe4930608e507d7b4190b4acfcf1b36d9bcf7",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/image-to-3d.json",
+          "beforeSha256": "01d1f6729801c9b77f9b8526ec2cfb25c274749f4d2041e481c557de634718b8",
+          "afterSha256": "e79e8424f120610211a98a749c256a46257964a111307fcc04f90fa7d2386d31",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/image-to-3d.json",
+          "archivedBytes": 1627,
+          "headBlobId": "0f489213b13e5cd1210baa8763f6fb1be33ef077",
+          "restoredObjectId": "0f489213b13e5cd1210baa8763f6fb1be33ef077",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/import.json",
+          "beforeSha256": "c1919f2988c7de65e964282dfcbe20edf72cc98782888c254a63dfee6ec7cfd2",
+          "afterSha256": "0f61584f96a75cb788e8de3c7ef19b833578d2de7ae7b44d190229766e22b4a7",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/import.json",
+          "archivedBytes": 3403,
+          "headBlobId": "3c17b9209a11cb58bb671afbb2b3d0d721a408a4",
+          "restoredObjectId": "3c17b9209a11cb58bb671afbb2b3d0d721a408a4",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/pipeline.json",
+          "beforeSha256": "18791988219c65e0e9415ffe3fc8caa09180c06438842df5a42f35a60ec2c095",
+          "afterSha256": "f025e5bf959da330f4c6c2b292164f98e9873f45588b8e51ef28c492aa186571",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/pipeline.json",
+          "archivedBytes": 6118,
+          "headBlobId": "d82a92588ac2becff211f6d033399fc5ce298abf",
+          "restoredObjectId": "d82a92588ac2becff211f6d033399fc5ce298abf",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/review-r1-leftover-temp.json",
+          "beforeSha256": "6c72f3638c36318ab7a66a3029f65734e90e5f29d36ace4d66dd5f287e92a8f0",
+          "afterSha256": "83895b9fe23c4dfe9ff9500e04db805a3c6c619a9c1fbad61db4c2b14c6e03db",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r1-leftover-temp.json",
+          "archivedBytes": 1346,
+          "headBlobId": "4637ddcff14150c0c41a8be5e555f0cf62b215ee",
+          "restoredObjectId": "4637ddcff14150c0c41a8be5e555f0cf62b215ee",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/review-r2-drip-timeout.json",
+          "beforeSha256": "bcc1236f1426b81d80ed6e82c1eaedef1f55a6b15bc6cb92c00809e788c83792",
+          "afterSha256": "a162b3115939c18f943ab28eea867c2ce5a27ab8be57b168393770e60198e25f",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-drip-timeout.json",
+          "archivedBytes": 375,
+          "headBlobId": "0b0a3f4cca51c8b760319134a6d1909b86750cd2",
+          "restoredObjectId": "0b0a3f4cca51c8b760319134a6d1909b86750cd2",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/review-r2-resume.json",
+          "beforeSha256": "d5ed450d1db7c5d7a7342a9a81bc2991c5f1c5ad5075cbdc37c37a212f97ba3b",
+          "afterSha256": "b278a29dabb57236a53319c9c5b0cac5c846bbb3b9d77f11a7089a28c796bb00",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-resume.json",
+          "archivedBytes": 1737,
+          "headBlobId": "d7edbe2b210507e24f7c91ac8b101285bd8a6e22",
+          "restoredObjectId": "d7edbe2b210507e24f7c91ac8b101285bd8a6e22",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/review-r3-model-missing.json",
+          "beforeSha256": "9205b7c74d8c70a68a44807e18f167ebc45d8f15d798fb01c10556b1232cc9fc",
+          "afterSha256": "2624525d2a7030d9cd0807318cc7e6ba574b1d79159fb6630a00bd493d56315c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r3-model-missing.json",
+          "archivedBytes": 484,
+          "headBlobId": "99bd6fd04d22ff26ea2b6132742eb8c02282c456",
+          "restoredObjectId": "99bd6fd04d22ff26ea2b6132742eb8c02282c456",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/review-s3-http-base.json",
+          "beforeSha256": "6bdc5ff3fd0409beb8b3022b71e1a28058d4c8aafc742643a2b41355ef1e09b4",
+          "afterSha256": "fc55fe59cf1111b95272275a9565502d8513d4768edcd1d4ed9aaa30f73890ac",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-s3-http-base.json",
+          "archivedBytes": 656,
+          "headBlobId": "6eb22d8238ee656518f59054d47d0115918c7861",
+          "restoredObjectId": "6eb22d8238ee656518f59054d47d0115918c7861",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/security-idempotency-hash.json",
+          "beforeSha256": "5758d2832d847bbdc2d1a8122df8e1c3bb5360aae65dbb4087e7ed3bfb3b2935",
+          "afterSha256": "5ab45ba69bd7e6fd6ca48b1af813c291bd5badefeac75118ee74e6b9746e7860",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-idempotency-hash.json",
+          "archivedBytes": 1558,
+          "headBlobId": "db230c687e39c49fdd164d490569c74e5e6ca79d",
+          "restoredObjectId": "db230c687e39c49fdd164d490569c74e5e6ca79d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/security-key-leak.json",
+          "beforeSha256": "761cd5c9a3590f11a2792cbde145fb760eeb59ea281e14612ffab1570b8abdb7",
+          "afterSha256": "33a8fd9a24d4089f9bc86382a151faa34ac6ddd393259c7e9a2e0b33b51d6ccb",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-key-leak.json",
+          "archivedBytes": 391,
+          "headBlobId": "b8507074cee205969254c991412d96491ea00c8f",
+          "restoredObjectId": "b8507074cee205969254c991412d96491ea00c8f",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/security-origin.json",
+          "beforeSha256": "aeedc6aa33d2a372b9a0c8d77698f2b7a26c3a1bcbe81cbfe7181bbb7297d3c0",
+          "afterSha256": "fdc53672d42bdfe79d819dde6ee7dc8742a04713a2e141bdd497d17b8521f603",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-origin.json",
+          "archivedBytes": 195,
+          "headBlobId": "7a142782e91da9556ce6108dde02274375148d01",
+          "restoredObjectId": "7a142782e91da9556ce6108dde02274375148d01",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/security-traversal.json",
+          "beforeSha256": "9c4153501b08c4479a2a261b17fc548bbd8c0f2606f7e772c24b857fec47d225",
+          "afterSha256": "f40d5391bbe8dfb64dec25d61197254acb4044f1c03a80ecc4257d98a92b8bda",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-traversal.json",
+          "archivedBytes": 2740,
+          "headBlobId": "aa9fece80963a5c6bbb6d80efff2cbb1103fc506",
+          "restoredObjectId": "aa9fece80963a5c6bbb6d80efff2cbb1103fc506",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/viewport-rotated.png",
+          "beforeSha256": "9135ad71e3c6451369e322ef10669efad8acfd5907e15b9cb9efdfee8d38cbf8",
+          "afterSha256": "40355ed5c7d2a00800db2d516da4b13f35a3e99abebda82fafab56b1899b8095",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/viewport-rotated.png",
+          "archivedBytes": 133498,
+          "headBlobId": "43827daf26c9a6c139c556f006590a19d64a3864",
+          "restoredObjectId": "43827daf26c9a6c139c556f006590a19d64a3864",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M0-A/viewport.json",
+          "beforeSha256": "4e2c4fd503f4d9036c123d39c4c7ca31c298bfd01ca74891869e0ad20ea09712",
+          "afterSha256": "d7a17dbc94d31661ff264606b5a2d1bb1f9f0b608fd29b5fe17e6fc50fe1f349",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/viewport.json",
+          "archivedBytes": 555,
+          "headBlobId": "a9c1107e713cb813d20d032427eb6325dfd603df",
+          "restoredObjectId": "a9c1107e713cb813d20d032427eb6325dfd603df",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 13,
+          "specs": 27,
+          "tests": 27,
+          "results": 27,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:40:29.665Z",
+          "duration": 76470.069,
+          "expected": 27,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m1a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m1a.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m1a-output",
+      "pid": 20104,
+      "startedAt": "2026-11-14T17:41:49.902Z",
+      "finishedAt": "2026-11-14T17:42:33.289Z",
+      "durationMs": 44673,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m1a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M1-A/consistency.json",
+          "beforeSha256": "166a6b8f47349fd9d0e3bc0c5249740a40906274b50c11d4a4249a61836d6a09",
+          "afterSha256": "8fdc484869a451c13a57ed8db990359bb8ecf04f036e65ab545414fa9df8f2cc",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/consistency.json",
+          "archivedBytes": 6751,
+          "headBlobId": "65564610d42ac23fbd496a41bf71204d6aa75d0b",
+          "restoredObjectId": "65564610d42ac23fbd496a41bf71204d6aa75d0b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/fallback.json",
+          "beforeSha256": "0b65b1374899d20be7fb8074fbc3db47f99f23a21a916c8317e8c34450815f22",
+          "afterSha256": "c7c2998bdd34e853cd9a8072e91d0a1db6420007acf64e2dba9b178e6cfe9977",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/fallback.json",
+          "archivedBytes": 3942,
+          "headBlobId": "3abe8d6c2dd0f3164d322a11dc24758ae145fa5a",
+          "restoredObjectId": "3abe8d6c2dd0f3164d322a11dc24758ae145fa5a",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/invalid-config.json",
+          "beforeSha256": "0e3c65d3359b9793707e06f4222544524fb23197bbd5646928d11ca23009524c",
+          "afterSha256": "dcc03e4d88aa15f1e66f0699fa7dafc5029353b6da3e10deb22d3cb596f96aa8",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/invalid-config.json",
+          "archivedBytes": 1050,
+          "headBlobId": "94cf98bec1e9400eccad958997f6052e07d79dac",
+          "restoredObjectId": "94cf98bec1e9400eccad958997f6052e07d79dac",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/parts-single-mesh.json",
+          "beforeSha256": "49f25d39469c206392eb7e39be985f21de9017e7b994b48e7deec76682ee6159",
+          "afterSha256": "8aec43d33766fcc08170f416ad1d68183fa6a5777867826495910fc823b59e02",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/parts-single-mesh.json",
+          "archivedBytes": 2563,
+          "headBlobId": "1d71be2b6c5cdc94d5bb9e376cb01c4e754fafe8",
+          "restoredObjectId": "1d71be2b6c5cdc94d5bb9e376cb01c4e754fafe8",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/parts.json",
+          "beforeSha256": "d8a94621d7068fe5834ec14d2edfc68e61e8e5a38f814685ef63cdf352e61617",
+          "afterSha256": "1cfb403f62174d8fb4ca20d535ab400d2fc6f8a044688f315dae6aef5259cc8f",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/parts.json",
+          "archivedBytes": 5729,
+          "headBlobId": "73ad2f601b4e9afe0ab8732a2ef3a819b6310daf",
+          "restoredObjectId": "73ad2f601b4e9afe0ab8732a2ef3a819b6310daf",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/resource-release.json",
+          "beforeSha256": "e083d4b14dde735bdb6a5347bd74c2978250b87e7812009aee67fa6648ea8d38",
+          "afterSha256": "aa4ba20cdf4b271960617c2e9f93d509e14c8b89869dd8b597f5716bcaeeb4cf",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/resource-release.json",
+          "archivedBytes": 1098,
+          "headBlobId": "4a4d88d5e6aa5409c49eb38411fc1971b3fa5728",
+          "restoredObjectId": "4a4d88d5e6aa5409c49eb38411fc1971b3fa5728",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-A/scroll-lid.json",
+          "beforeSha256": "af776eb9346ad67671f554b9dd125306af476171f8039546a5c8b77a3e5595df",
+          "afterSha256": "30ff7780f13d557274aa225de7cbc2decbd365c0bb39e79f8bd2ac0334db873c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/scroll-lid.json",
+          "archivedBytes": 1590,
+          "headBlobId": "6f687cb546cf7053d482c41e651a8587436ed5d7",
+          "restoredObjectId": "6f687cb546cf7053d482c41e651a8587436ed5d7",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 5,
+          "specs": 7,
+          "tests": 7,
+          "results": 7,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:41:50.644Z",
+          "duration": 42632.03,
+          "expected": 7,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m1b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m1b.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m1b-output",
+      "pid": 66596,
+      "startedAt": "2026-11-14T17:42:34.575Z",
+      "finishedAt": "2026-11-14T17:44:07.587Z",
+      "durationMs": 96070,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m1b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M1-B/adopt-guard.json",
+          "beforeSha256": "de348a5acff70beaace3456200e40f32b629145b31289cc6a9bd5c5fcb7262c6",
+          "afterSha256": "c610746c438d04c4cda54ff3fc40612509fc017597f4260b98b0807fc9e42dc4",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-guard.json",
+          "archivedBytes": 170,
+          "headBlobId": "a40cfd595ceca080a19257e9abd8ecc2e87fdb43",
+          "restoredObjectId": "a40cfd595ceca080a19257e9abd8ecc2e87fdb43",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/adopt-primary.json",
+          "beforeSha256": "f4fde70271eb1fe50c397fc9ea36f3404d13690bb57d4cbe60159c6773d48489",
+          "afterSha256": "194bfb2de211aa62920274a1ffd8da8f8b814e28815e025224f93a65b977880c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-primary.json",
+          "archivedBytes": 338,
+          "headBlobId": "f60d603ef62de260f33340b61cf969be330b447a",
+          "restoredObjectId": "f60d603ef62de260f33340b61cf969be330b447a",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/adopt-sandbox-ok.json",
+          "beforeSha256": "b0be9bce8ba55dd5323213f089e48ce1a76af8719aac9a40fdab8c21284c0b25",
+          "afterSha256": "4b67b25dd04ca8c8ce8bb4620c2b5d1842c70c0bb0167fb2dae3bbe8138f4ab9",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-sandbox-ok.json",
+          "archivedBytes": 2445,
+          "headBlobId": "531bcc50a071dbb5e2a304e48066d97e33a8020b",
+          "restoredObjectId": "531bcc50a071dbb5e2a304e48066d97e33a8020b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/api-concurrent.json",
+          "beforeSha256": "b0ea1b512367e71dd4457a1b4f06bf1f375d6ba326613f97f1c8ab3ff9282cef",
+          "afterSha256": "41eec58947e8205355d3ad4148990beb3a438f26824ce5467a1401a5731f6da9",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-concurrent.json",
+          "archivedBytes": 77,
+          "headBlobId": "4e6a7210ac6be4a25b9e639c5e4f5fd75b3d2291",
+          "restoredObjectId": "4e6a7210ac6be4a25b9e639c5e4f5fd75b3d2291",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/api-invalid-page.json",
+          "beforeSha256": "82596f30269ca18acecf00ba9ad3c28099890c8ce8d3f3abed404d16b875071f",
+          "afterSha256": "01cf71fff8f0faf8de8118dacfbea78a0ccf4fe46454d5f41613a1d99bae55ec",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-invalid-page.json",
+          "archivedBytes": 172,
+          "headBlobId": "ec9e666e1f357cb51ece498eb76c82e744e34eb5",
+          "restoredObjectId": "ec9e666e1f357cb51ece498eb76c82e744e34eb5",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/api-invalid.json",
+          "beforeSha256": "48364573db7f599ee437ae6745f6559ada53d58980f5d732dcf3d1b268c50e8f",
+          "afterSha256": "2d8a56ca95400a63d49b5909fe281029281268e9ac5627323d060b4f8d909c31",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-invalid.json",
+          "archivedBytes": 947,
+          "headBlobId": "3198faffca8c3fc9ac4d9a12e6f7635e8ced4d23",
+          "restoredObjectId": "3198faffca8c3fc9ac4d9a12e6f7635e8ced4d23",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/api-paths.json",
+          "beforeSha256": "3041cfabbbd236d07fc0da4f545c9f7f9faab0de7348c07fc2a66aaebc93f0df",
+          "afterSha256": "5ee0b7fa74ccaa5d044577f7ee1e2b752aa718217568a0aa612efd7c70c8390b",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-paths.json",
+          "archivedBytes": 628,
+          "headBlobId": "bbbea3e042844525aa3d7336e7893f7952ab6dc2",
+          "restoredObjectId": "bbbea3e042844525aa3d7336e7893f7952ab6dc2",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/consistency-after-edit.json",
+          "beforeSha256": "ece0c8126a692225ae8b9d5b48d00c7e0068c460499a7390611b9faf47857554",
+          "afterSha256": "6fda6f090a60f424c56690fae6b9e888b27e0dd869e80f8975524178d4cba3cb",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-after-edit.json",
+          "archivedBytes": 7457,
+          "headBlobId": "71103d4d3e219a2232f1e58d023ee132bef482e7",
+          "restoredObjectId": "71103d4d3e219a2232f1e58d023ee132bef482e7",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/consistency-canvas-content.json",
+          "beforeSha256": "24fdd512a7bc41885ca3e65b72f6a49040a383e15b298cf6348302f1f49196fc",
+          "afterSha256": "147a882425c990eea1a4e003a4243a170f32fa969e33265efd53f9f2c58e201e",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-canvas-content.json",
+          "archivedBytes": 382,
+          "headBlobId": "6ad73fecea333dc0057dbeb76821dda520955ae0",
+          "restoredObjectId": "6ad73fecea333dc0057dbeb76821dda520955ae0",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/consistency-default.json",
+          "beforeSha256": "7a03ed9c94f8331d28fe8818616d2d12002689457532d450c74b3aca1af2b3f2",
+          "afterSha256": "abe9c2803e38f1cd82f704404c97bc14c276dfa2314b539e03ca5efc18dfaa57",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-default.json",
+          "archivedBytes": 6887,
+          "headBlobId": "3692450b4401814de0f991bbe994bd2918256837",
+          "restoredObjectId": "3692450b4401814de0f991bbe994bd2918256837",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/consistency-scroll-06.json",
+          "beforeSha256": "c288df6ce47fefd17e99e2bf9b965cf012d95583d0c98bfe94284044ea8f9d60",
+          "afterSha256": "e93d2f3ff7ad2b63b953400fba1fa1fd7f56b01e968a7982224ed0ad32a83d41",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-scroll-06.json",
+          "archivedBytes": 5643,
+          "headBlobId": "5913d282da87a6ce5aca7251f8ddd8ecc8d533e5",
+          "restoredObjectId": "5913d282da87a6ce5aca7251f8ddd8ecc8d533e5",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/fix-b1-host.json",
+          "beforeSha256": "fa007fca6aad34f3f2420f2fe8aa956a5683b1568a5358ac519367bacbaa6eb9",
+          "afterSha256": "86d5e11a05f0e52389394c4c35a53a6080655a660e584258597cef45f578b43b",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-b1-host.json",
+          "archivedBytes": 246,
+          "headBlobId": "84570533088807e7f4fe584ad5153b52ac7d633b",
+          "restoredObjectId": "84570533088807e7f4fe584ad5153b52ac7d633b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/fix-r2-lid-gating.json",
+          "beforeSha256": "d159bbebd4eadc558a05903b14b8457851772e69ab8df6b3e09ab40f8bb56e27",
+          "afterSha256": "15c298d455b33a3cf5a9eb8b2a2f64bb798774f5c557da5d67584e3e45c5f847",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-r2-lid-gating.json",
+          "archivedBytes": 241,
+          "headBlobId": "ef722e245b9da27ef73f4d8368874723a3dfab00",
+          "restoredObjectId": "ef722e245b9da27ef73f4d8368874723a3dfab00",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/fix-r3-instance-lock.json",
+          "beforeSha256": "2b630e63f7fe82535cb7b7727fbca778abafdc469d082803a3ac564a64711b84",
+          "afterSha256": "18c25590ddad7c35d66ce7ddeac490fb43e63545463d7ccfb114e8d8e6de9986",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-r3-instance-lock.json",
+          "archivedBytes": 172,
+          "headBlobId": "5ecbfb94d46acc6ee0e817ddfa3e3b2a3ed3fe52",
+          "restoredObjectId": "5ecbfb94d46acc6ee0e817ddfa3e3b2a3ed3fe52",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/fix-s1-unwrap.json",
+          "beforeSha256": "033feb1fa59a64411517a7add44bc424ca680560b01bc6dbdbe9478a00f26c47",
+          "afterSha256": "5a589019fb18e9b7038fa1aba6b4779edbfa07526b8d0bc5115af864c6a037c0",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-s1-unwrap.json",
+          "archivedBytes": 118,
+          "headBlobId": "895eb4bc1359488f0334c53c40df3cfa67ffaed7",
+          "restoredObjectId": "895eb4bc1359488f0334c53c40df3cfa67ffaed7",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/keyframe-overwrite.json",
+          "beforeSha256": "ac2e2aada2488cd332dbaeb51355eabf61ad2aa6bf36f76f3e88b5283ab1e26e",
+          "afterSha256": "623ff080362f8b43ffa9135ee2d275e5e8f1c5c27d43f762d928aa2a96d4ff5c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-overwrite.json",
+          "archivedBytes": 311,
+          "headBlobId": "c5488839fa3e37aeaecba587d145842ff08db0b0",
+          "restoredObjectId": "c5488839fa3e37aeaecba587d145842ff08db0b0",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/keyframe-scroll-shipped.json",
+          "beforeSha256": "02cdb55a42c90e6151bed7a1a04af92ddd0842c012e317ba0f1ecbcc5c4b1ea4",
+          "afterSha256": "7280c37db3d1059cf7e73666437ac1545b58709c2ff96e5862ed93ed26924a62",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-scroll-shipped.json",
+          "archivedBytes": 246,
+          "headBlobId": "6c7bbd1dff641eb9f989cefc4637df626769f9fa",
+          "restoredObjectId": "6c7bbd1dff641eb9f989cefc4637df626769f9fa",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/keyframe-write.json",
+          "beforeSha256": "68fd6f486c6383106f319b688d2eec4a72a3c7000e12757e0301bb3617208b99",
+          "afterSha256": "25ed3973ad51fa6580ca1c78a7d45eb02119f69711ad2e3fbf3c2ec2f6b153cc",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-write.json",
+          "archivedBytes": 566,
+          "headBlobId": "9100cc6b808e32081a9c570c82102234b09eb8d8",
+          "restoredObjectId": "9100cc6b808e32081a9c570c82102234b09eb8d8",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/undo-api.json",
+          "beforeSha256": "7a494f8c107459e49fa98a5cff472d990cf7c15b9319b4134f2208bac42ee544",
+          "afterSha256": "24cada555fc8a0a31fa44b360908cca12a2b2549289e262d166a5a50e0b2f501",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-api.json",
+          "archivedBytes": 36,
+          "headBlobId": "863714020eb6b065566323f264d6d73c8f7bfe43",
+          "restoredObjectId": "863714020eb6b065566323f264d6d73c8f7bfe43",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/undo-empty.json",
+          "beforeSha256": "aab2c5f5a7248fe32e923c7ed05710d52579ee46b08b20b92040278260728374",
+          "afterSha256": "fbe80cab47efbc175093e39fa9b280fe6a876789033ced5e12386c7031cb1721",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-empty.json",
+          "archivedBytes": 194,
+          "headBlobId": "c5e55bbd21c92942edf4cc9bb2f82a9488486654",
+          "restoredObjectId": "c5e55bbd21c92942edf4cc9bb2f82a9488486654",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/undo-ui.json",
+          "beforeSha256": "43c24e41f52ca303f9b0b27abc603717824f9d4647faf78a1c308b8796a7f2a6",
+          "afterSha256": "7dd24191fe6c72ae13d536b6cb55c3445595b78eda0a51fb21fcacc63b28778b",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-ui.json",
+          "archivedBytes": 99,
+          "headBlobId": "02036b7cd883c5157151444a5b5d0286b28ee76d",
+          "restoredObjectId": "02036b7cd883c5157151444a5b5d0286b28ee76d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/writeback-hero.json",
+          "beforeSha256": "27895433343d0f73881afbcbb5934a1dde5714e903d29f0328eb06b0a2a41853",
+          "afterSha256": "8700ca3219a93caa8e2fdfb1a669b2092c7fec4200f369acf55b5191aca7a9fe",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/writeback-hero.json",
+          "archivedBytes": 2113,
+          "headBlobId": "02a447a1d74420b3a09a282adba2897a6f77cca1",
+          "restoredObjectId": "02a447a1d74420b3a09a282adba2897a6f77cca1",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M1-B/writeback-keyframe.json",
+          "beforeSha256": "4300ad35a8b47e680adea1afedec7c1a4d7dc72f008e6945270a395ef35a3fe9",
+          "afterSha256": "fa5215dd1e3c4128783567aa0041f1d7374dd8abc9f457478f4d1dcb5c4a040c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/writeback-keyframe.json",
+          "archivedBytes": 882,
+          "headBlobId": "ef33d49044e9ee287c3f59e74dbdb0fae7fc6ca4",
+          "restoredObjectId": "ef33d49044e9ee287c3f59e74dbdb0fae7fc6ca4",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 14,
+          "specs": 23,
+          "tests": 23,
+          "results": 23,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:42:35.325Z",
+          "duration": 92248.79100000001,
+          "expected": 23,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m2a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m2a.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m2a-output",
+      "pid": 69148,
+      "startedAt": "2026-11-14T17:44:10.646Z",
+      "finishedAt": "2026-11-14T17:47:52.321Z",
+      "durationMs": 226235,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m2a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M2-A/adopt-conflict.json",
+          "beforeSha256": "c04536f2faf6c16c2aab257efa9299e6258478bd0e3384d2d8fa51f329203460",
+          "afterSha256": "10ffba10a0dd44a2813ff12e0c1975c9c7d2751d6496a75df9bc0f4395173d31",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/adopt-conflict.json",
+          "archivedBytes": 408,
+          "headBlobId": "86de7bfb0abf559ae0217ff8a1353e9f9df4dee6",
+          "restoredObjectId": "86de7bfb0abf559ae0217ff8a1353e9f9df4dee6",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/adopt-once.json",
+          "beforeSha256": "2f10962023a1803cc3096bb1d14c5365b194dbf071ff06328a4584db6a12de9a",
+          "afterSha256": "0a25fb40db2ffe5a373ead9f3d69a4b057be9969436e12383be1d5e88bd08947",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/adopt-once.json",
+          "archivedBytes": 77,
+          "headBlobId": "ac1cf941c232cfc032ab6e23129c377659c44743",
+          "restoredObjectId": "ac1cf941c232cfc032ab6e23129c377659c44743",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/candidate-limit-closed.json",
+          "beforeSha256": "52b4fb7309eb09a1b784ee9b2a9166b2099dc234165d6220b5913c7bf9e578f6",
+          "afterSha256": "b1f2bfaa17d2727a763bea109d4d004e2ca0fdb2a35d4d3b4696be665446058c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/candidate-limit-closed.json",
+          "archivedBytes": 76,
+          "headBlobId": "34c772794077ca3a3f00175c6e72b267640f048f",
+          "restoredObjectId": "34c772794077ca3a3f00175c6e72b267640f048f",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/candidate-limit.json",
+          "beforeSha256": "d49ba140b4e06abef05b13e11e3b1362ab2bb02b6c812343f544b3f379898c59",
+          "afterSha256": "db382361bac7152a39e9ab212be8419a9546824dcaa4effd3a89f77908aa1e4d",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/candidate-limit.json",
+          "archivedBytes": 2201,
+          "headBlobId": "87748987fd8d51f87a5a0e8bcf9772cfcd5a91b1",
+          "restoredObjectId": "87748987fd8d51f87a5a0e8bcf9772cfcd5a91b1",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/d1-candidate-preview.json",
+          "beforeSha256": "c3529fee7f9ea3e51ad4580a88957636511f4eec4d03a6e433cc784a53154c41",
+          "afterSha256": "639741bc8e98e50014a3b769075312606a8326c383c2a14bb9e9722148557106",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/d1-candidate-preview.json",
+          "archivedBytes": 282,
+          "headBlobId": "821ab5f4469a16aea347da120b5413961fbb2cf2",
+          "restoredObjectId": "821ab5f4469a16aea347da120b5413961fbb2cf2",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/discard.json",
+          "beforeSha256": "6de1f4539ab38b47e6a71365582343ca597fb0bc986ef710c808c4085f621e21",
+          "afterSha256": "450ff11bae91c8ba6016c7985febc9c24fe376a5cc746a31ae85af7623d2a8a0",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/discard.json",
+          "archivedBytes": 143,
+          "headBlobId": "fcd663e1b4c24095da1e0b21b99806f70e060100",
+          "restoredObjectId": "fcd663e1b4c24095da1e0b21b99806f70e060100",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/events-replay.json",
+          "beforeSha256": "8912395d7b745f8086b0c761afccc35234625d6f89422ff0d0b473178e852bf9",
+          "afterSha256": "b56d46226b1f48b4e2bb6dc529c8e956326aa19878fcf6e9e86dba7e662cb129",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/events-replay.json",
+          "archivedBytes": 108,
+          "headBlobId": "006deb35ace58341a60cfbafe3b5da90005e05fc",
+          "restoredObjectId": "006deb35ace58341a60cfbafe3b5da90005e05fc",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/events-restart.json",
+          "beforeSha256": "240a4bf3a34514c42a7c3babb534d5f22db9b8170286d5dea7f90e5f7fca5396",
+          "afterSha256": "632c638d4c7f99f8188fa423014f00d8009616c0c939270546c10eb053e793bc",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/events-restart.json",
+          "archivedBytes": 126,
+          "headBlobId": "241596a6df14f64bb027e70127edeb725e9d0b40",
+          "restoredObjectId": "241596a6df14f64bb027e70127edeb725e9d0b40",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/failure-cancel.json",
+          "beforeSha256": "2f7dfae0b33fee61e3144a4846aa01fd993d242406a5f415193a78b66c0d2c1e",
+          "afterSha256": "b86cbf97d57859a3c697b514f70eb0a0c4b09840b9e80583f597ce7271e17c08",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-cancel.json",
+          "archivedBytes": 112,
+          "headBlobId": "74bff80bfbce5cf53d3f1ed547102906deaf37e2",
+          "restoredObjectId": "74bff80bfbce5cf53d3f1ed547102906deaf37e2",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/failure-no-changes.json",
+          "beforeSha256": "8dee46161c898c6279198e4f3c5ad3c08e939a655d86cd1228de591b344cf181",
+          "afterSha256": "e58f4df13cefa557033abd8664a4b624520f7b7fdd5bfec0e85ca746e108ee06",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-no-changes.json",
+          "archivedBytes": 130,
+          "headBlobId": "98dc6054bbf9caca9e42e14d5f7d910ae5a08c70",
+          "restoredObjectId": "98dc6054bbf9caca9e42e14d5f7d910ae5a08c70",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/failure-protocol.json",
+          "beforeSha256": "d295cd238a1f4ea8d9161b6f3917ce94e25deb0dde74f31f0afafc26cdda5800",
+          "afterSha256": "3ac5316cbeb5255eeda0d8c92546e5314c51df49e12fb376fc9ba848f24b20f3",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-protocol.json",
+          "archivedBytes": 142,
+          "headBlobId": "c6f935ce5884db62cf28bc2aad303e9b80991db7",
+          "restoredObjectId": "c6f935ce5884db62cf28bc2aad303e9b80991db7",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/failure-timeout.json",
+          "beforeSha256": "1ee09e129e7af3d54353a2f18e2719df51beeccfac8b3fc45e886a68e9754bd6",
+          "afterSha256": "a127621a924d6efafd7052d8e053363d11797a3423cf332fc87e9cd189c292bd",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-timeout.json",
+          "archivedBytes": 136,
+          "headBlobId": "e44386e59b51bc8cec0de6ad9a3639661a5cf25d",
+          "restoredObjectId": "e44386e59b51bc8cec0de6ad9a3639661a5cf25d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/failure-upstream.json",
+          "beforeSha256": "4139be6ccb7e1c8926b8010db9c08fbefec697b27dd4f68a3906082220fa8848",
+          "afterSha256": "42fa3fcdc0c2b45bb37717f264aecef6a15e081c48e4d10646ba614bd92fbe32",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-upstream.json",
+          "archivedBytes": 124,
+          "headBlobId": "300087d8cc1349c0ba3c6ec7190ea1ad08157281",
+          "restoredObjectId": "300087d8cc1349c0ba3c6ec7190ea1ad08157281",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/flow-main.json",
+          "beforeSha256": "cf96d32265ecd360aaad555551e8175cba6ed4f07ac52c0500f6cec1ae4d3e88",
+          "afterSha256": "d28e977b2063e7ddeebfe2e8539111f873028a2b66b689bed59909afaaa8550e",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/flow-main.json",
+          "archivedBytes": 1627,
+          "headBlobId": "a2271b51ea8c4d642cd4bb5c3bb75171c539da17",
+          "restoredObjectId": "a2271b51ea8c4d642cd4bb5c3bb75171c539da17",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/flow-out-of-scope.json",
+          "beforeSha256": "4231142a8b9611215d2d61ec3b66fa92d9a09a6b0f7ac4916bf8036caff8438e",
+          "afterSha256": "88e872eed95cbebd50515253fbb09c8b87b739a4ebdd204f9d07d4d61d9e64fd",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/flow-out-of-scope.json",
+          "archivedBytes": 129,
+          "headBlobId": "91a30f0cb6e16f5a900348c947cf0264ad21641b",
+          "restoredObjectId": "91a30f0cb6e16f5a900348c947cf0264ad21641b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-b1.json",
+          "beforeSha256": "55160e4b528a57caa914d3e6ddcd1dd1b824eed5ec7f597cca5b61e2b22a9753",
+          "afterSha256": "fd63b8f9a3cdeec469cded63eb68924362948754143eabe336d6db0572bf7577",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-b1.json",
+          "archivedBytes": 681,
+          "headBlobId": "57afb8e52abcdd23ae76ec9716043070f905da9e",
+          "restoredObjectId": "57afb8e52abcdd23ae76ec9716043070f905da9e",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-b2.json",
+          "beforeSha256": "214d1c2507405329dc2cce538c0b9866b2d655d77e48a35507749fcbf046ef7d",
+          "afterSha256": "a2c7ce1e7518a3eb54d31281ee4d6d17092fb11b4b425a32f961a77752c666eb",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-b2.json",
+          "archivedBytes": 530,
+          "headBlobId": "2ab756c63e431cffbf722e68b048b808d73ad747",
+          "restoredObjectId": "2ab756c63e431cffbf722e68b048b808d73ad747",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r1.json",
+          "beforeSha256": "31c01e225e7944e5c6627b9aebe38f84414e768f755a5e2aec57d1f87ac74944",
+          "afterSha256": "577c3525eb23082de904ee61abb34625d896b6fdb0c82410ffaa33d13783dffb",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r1.json",
+          "archivedBytes": 367,
+          "headBlobId": "4d116e2ae528ba836e866c7adc8bb31cf7ea69f3",
+          "restoredObjectId": "4d116e2ae528ba836e866c7adc8bb31cf7ea69f3",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-multi-candidate-pid-kill.json",
+          "beforeSha256": "d14abac76329ace0157e00ed45cd5020bec4f7c422dbaaae9054610b30189a44",
+          "afterSha256": "b3db7809d0f43798ef009c96f3be1e857072c02ea15db41d3a98386c8d50b1fd",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-multi-candidate-pid-kill.json",
+          "archivedBytes": 8329,
+          "headBlobId": "615ad9ed90fb43b494203db04f1bda8f028378c4",
+          "restoredObjectId": "615ad9ed90fb43b494203db04f1bda8f028378c4",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-negative-control.json",
+          "beforeSha256": "b99dee03ce83c252b3348ff88bec84b047df4706f8d86cca15a9581c6e37d12d",
+          "afterSha256": "d0714a08d656a9d506242aaee044e72cbee4d364749cb79955ff7b67e56dffa7",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-negative-control.json",
+          "archivedBytes": 24455,
+          "headBlobId": "5b3470e334e29ff3ed9fc4b3ff7e16ff3d599614",
+          "restoredObjectId": "5b3470e334e29ff3ed9fc4b3ff7e16ff3d599614",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-pid-kill.json",
+          "beforeSha256": "cd59f0cdc08a3c502ed7e81522fe1c321047e383aac34d4f4bf97492b03fb6a1",
+          "afterSha256": "ef38ecddf32a4897d18a784206c59eb11c6b83901b914181d3c5c1be9e6f1d21",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-pid-kill.json",
+          "archivedBytes": 3594,
+          "headBlobId": "ebcdbe9109a962dfaca155f7ebd4caaa3a2c0066",
+          "restoredObjectId": "ebcdbe9109a962dfaca155f7ebd4caaa3a2c0066",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-startup-window-pid-kill.json",
+          "beforeSha256": "701715293589e478a992a07e657f9b73a2045ffe953cd005a343bfecd34db843",
+          "afterSha256": "5f95e203f7a145a817e4d4fbb62f4ab3462c6caaf044b8f0b8e9b380a941cc88",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-startup-window-pid-kill.json",
+          "archivedBytes": 4109,
+          "headBlobId": "70e368e008393daed32d041c350dbfabfc9bf9a5",
+          "restoredObjectId": "70e368e008393daed32d041c350dbfabfc9bf9a5",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-tree-kill.json",
+          "beforeSha256": "05b6752ebe4eea75b63f9d8b3247e04c96d17712159ecdffddae74ad8aa850cb",
+          "afterSha256": "380baa2aae05acaf62559b12e871912dc9a921170ac551bd68fac7cd648fb59d",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-tree-kill.json",
+          "archivedBytes": 4256,
+          "headBlobId": "a26afb997cf5ea22dd01cf7e62dad33827d37c0b",
+          "restoredObjectId": "a26afb997cf5ea22dd01cf7e62dad33827d37c0b",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/preview-origin.json",
+          "beforeSha256": "b78b3d9e4093376b39b0e044cb58b7d2ba67b38db7cc5da377dc27e78a1075db",
+          "afterSha256": "fa7509853a6f637a879463b87c78ef393d5cbb6da6d219eb0eec09e116281d76",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/preview-origin.json",
+          "archivedBytes": 333,
+          "headBlobId": "e4cdf5364764a6d8beeed8a839a8cfc92ee7b71c",
+          "restoredObjectId": "e4cdf5364764a6d8beeed8a839a8cfc92ee7b71c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/resources.json",
+          "beforeSha256": "f90810b46bf7e12e83500b09744436461e4e587cb9205e4f35d65a27eb3f5384",
+          "afterSha256": "16c84f765c7e0afd3494bba79dc77f02b4e7d9bdbb3ffb71dd075730da51dbb9",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/resources.json",
+          "archivedBytes": 176,
+          "headBlobId": "8dc49231fb294c59de68ac8615ce6d6eff91f9d7",
+          "restoredObjectId": "8dc49231fb294c59de68ac8615ce6d6eff91f9d7",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/round3-f2-preview-host.json",
+          "beforeSha256": "70bc6336393547fef739c6c26907b80d05b32c9ab4c4417e0d18e6efb1dbb0b5",
+          "afterSha256": "06788b175fa96567ab96ebb071ddcf610270b9f6729d3a0f46b33ec7c17b1d5f",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f2-preview-host.json",
+          "archivedBytes": 192,
+          "headBlobId": "ea88922fddf9bf0780fb4b81ab10a66c4a7ecb2c",
+          "restoredObjectId": "ea88922fddf9bf0780fb4b81ab10a66c4a7ecb2c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/round3-f3-audit.json",
+          "beforeSha256": "ae281af0eb7571c1c8ae2a386ebaea692ec29cbdd87b4ae1ace03e0b90194936",
+          "afterSha256": "28264ff176a441bf4cb82e37b31d34a5736a88bc45bff98a31282a0e0c3f4075",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f3-audit.json",
+          "archivedBytes": 52,
+          "headBlobId": "4623c60979a691a112222b60a78d3384e8919f3a",
+          "restoredObjectId": "4623c60979a691a112222b60a78d3384e8919f3a",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/round3-f4-instance-lock.json",
+          "beforeSha256": "6ab82b89142871d8fa2e6c430b51db888962c768ffbe7e65d21f1139f3b7462f",
+          "afterSha256": "1669b8ba5b496f3e2c50ae56bbeef3cc419b7e2a65a773cbfb9a5c678af44a85",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f4-instance-lock.json",
+          "archivedBytes": 84,
+          "headBlobId": "d2f3d7c897afa1e0a25cdfdb2dac319634e84812",
+          "restoredObjectId": "d2f3d7c897afa1e0a25cdfdb2dac319634e84812",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/sandbox-adopt-unsafe.json",
+          "beforeSha256": "8a5840b8112e6f2529d1d88f1cd76f7e84fb7e1eced72277d6165bf73ff0e215",
+          "afterSha256": "0b4d7175363736207bc77279fc8cb0555e61124e2889ec9a3712a9916b996871",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox-adopt-unsafe.json",
+          "archivedBytes": 132,
+          "headBlobId": "ff2a7ec255175c0779a79e9a75c52cc7d5c5f870",
+          "restoredObjectId": "ff2a7ec255175c0779a79e9a75c52cc7d5c5f870",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/sandbox-unsafe-work-tree.json",
+          "beforeSha256": "f8753b4e9230334739607f690e734a5c9561cb2b718a1704052d4a6e307dd6b9",
+          "afterSha256": "c0666d41558621fdd0ec4533cfd7ed456662ef58878981bf675e2e59794d5e98",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox-unsafe-work-tree.json",
+          "archivedBytes": 332,
+          "headBlobId": "2111b67472613bce0317913c3ae621795d9b5a97",
+          "restoredObjectId": "2111b67472613bce0317913c3ae621795d9b5a97",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/sandbox.json",
+          "beforeSha256": "2317551a41be2921fd7190ce69101b49090dde21ad1adcd5555009290e31571c",
+          "afterSha256": "7caf2b54dbba24e531e0df8cb5b4c1170f9ebac112de1af0971ccf637158dcef",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox.json",
+          "archivedBytes": 402,
+          "headBlobId": "0bc11fc96db64aeb705686681bd59528d7079ca6",
+          "restoredObjectId": "0bc11fc96db64aeb705686681bd59528d7079ca6",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/selection-invalid.json",
+          "beforeSha256": "4e81ed1aebc0178ce0fc8fe25d940d6f6e5bd6adfdb650accacbb55daf0857a9",
+          "afterSha256": "acf1825d1962df980e0b5b30345320bc9909dcde747b0de353db08630e830b23",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-invalid.json",
+          "archivedBytes": 1087,
+          "headBlobId": "ed7b6267ca24b13c2b27b671e1a76e20a7089db8",
+          "restoredObjectId": "ed7b6267ca24b13c2b27b671e1a76e20a7089db8",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/selection-stale.json",
+          "beforeSha256": "026c7a82791df9eb106f9645ce0df69dbff3f4d89528e681019c9c279df29007",
+          "afterSha256": "fdc4d87bbbe7d23ce401376105b9d51c80bef359e4f2fd909e9771c16ae4b58f",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-stale.json",
+          "archivedBytes": 106,
+          "headBlobId": "b26dc5be91ce9c62aba3b360d3a33780e0d9b245",
+          "restoredObjectId": "b26dc5be91ce9c62aba3b360d3a33780e0d9b245",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/selection-valid.json",
+          "beforeSha256": "1075195d52cb42e89776a3fd48b2f6e2cf47d09994d741e598d736ac4ab833f7",
+          "afterSha256": "01575401f455059219e58e8c96f102adde71eae2226ba6653b077b33627c967d",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-valid.json",
+          "archivedBytes": 100,
+          "headBlobId": "d77bf315df5d84f82c135d526b5577ccbdbc68a5",
+          "restoredObjectId": "d77bf315df5d84f82c135d526b5577ccbdbc68a5",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-A/takeover-n4-shutdown-b167907.json",
+          "beforeSha256": "c23a3d3ab18808b45b5ec3834beb56e1a2bdfe78f3bf657c359f2389eea6058b",
+          "afterSha256": "e235334005cfdfdeb0be7b6f2547237d7257e571ea90bd6df672a55135d8da9c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/takeover-n4-shutdown-b167907.json",
+          "archivedBytes": 5018,
+          "headBlobId": "00399595e12d927dda468bdd7fd95fabe74c7028",
+          "restoredObjectId": "00399595e12d927dda468bdd7fd95fabe74c7028",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 28,
+          "specs": 35,
+          "tests": 35,
+          "results": 35,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:44:11.374Z",
+          "duration": 220934.87,
+          "expected": 35,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m2b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m2b.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m2b-output",
+      "pid": 22768,
+      "startedAt": "2026-11-14T17:47:56.883Z",
+      "finishedAt": "2026-11-14T17:49:16.486Z",
+      "durationMs": 81371,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m2b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [
+        {
+          "file": "docs/reports/artifacts/M2-B/m2b-ui-cancel-retry.json",
+          "beforeSha256": "df83390188c14de1e267519ffba609fa63743f37724f217aa585f1e32830b700",
+          "afterSha256": "2f1922043d4f22bf7a3b9e5c117fa15ddffd6abe1d63c762f606eefff5e50571",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-cancel-retry.json",
+          "archivedBytes": 23,
+          "headBlobId": "4ab802a2302c291962b4f937f87c119f2dc3ebb5",
+          "restoredObjectId": "4ab802a2302c291962b4f937f87c119f2dc3ebb5",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/m2b-ui-flow.json",
+          "beforeSha256": "c4bf99fce6ba7eded71234cdfec345bc2eb3661ac4f58d12be90d0b9c5c4ddb9",
+          "afterSha256": "75fb6ab13b3b57a665366dc9926ae27cdb0f73447d70e6340b054429834402e4",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-flow.json",
+          "archivedBytes": 931,
+          "headBlobId": "21eaa4225bd1125adbd15a5fb120450b2582e7b0",
+          "restoredObjectId": "21eaa4225bd1125adbd15a5fb120450b2582e7b0",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/m2b-ui-out-of-scope.json",
+          "beforeSha256": "9d0b9b73e2dbedfeba3c5663ea9d887399aac9cdb59057f322be7f6c39cc194b",
+          "afterSha256": "5174edde40d7011274672a40a69562b5ac2d2d4cd554fa491a2b67980d232b7d",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-out-of-scope.json",
+          "archivedBytes": 146,
+          "headBlobId": "df66d20b8b2849ace5e5264dd6f82b170ba4b68d",
+          "restoredObjectId": "df66d20b8b2849ace5e5264dd6f82b170ba4b68d",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-candidates-switch.json",
+          "beforeSha256": "8ced83aaad9c46350555d8b3e760e3bf6f7d9b55a49afb01f423b1d978d7f0c6",
+          "afterSha256": "5449a7b38e492312eac3d1038f34cd591c8dbbce8fd9056332c61b2bf5373feb",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-candidates-switch.json",
+          "archivedBytes": 1389,
+          "headBlobId": "da12e7c5169ee6d1c3edf489cf28f9ff6257dc32",
+          "restoredObjectId": "da12e7c5169ee6d1c3edf489cf28f9ff6257dc32",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-events-reconnect.json",
+          "beforeSha256": "029059648ec1d0ddbbeee3cef79a1cabc60d7d93609080f663cf290e7ef9f32b",
+          "afterSha256": "29079c66ffad15c3385ed657013dcf0bc560794e5c8db617c5b69e900df27a2f",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-events-reconnect.json",
+          "archivedBytes": 291,
+          "headBlobId": "57f5dc8a400c20c0a149c15fb93e27c9db3fc220",
+          "restoredObjectId": "57f5dc8a400c20c0a149c15fb93e27c9db3fc220",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+          "beforeSha256": "6f2d1227f76b5d85ce10a117f156f23f59201c1228cdf450648a95d04cbf930d",
+          "afterSha256": "5b2dfefa009619f239e66269327e496026ef73663e28160e370b6d7f19b22a6c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+          "archivedBytes": 316,
+          "headBlobId": "82cb7d17d27c1f225bec8e7adc7edbd7006d4e6a",
+          "restoredObjectId": "82cb7d17d27c1f225bec8e7adc7edbd7006d4e6a",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-r1-failed.json",
+          "beforeSha256": "a1a8eac204d4a448ebd5c444193a5e3508d7da7e143aebb514d6271d27db9d27",
+          "afterSha256": "574bbfe501fe5070d58334982df1d3459ab6a7f8afb36e39cab06d154c79177c",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-failed.json",
+          "archivedBytes": 488,
+          "headBlobId": "44b7b676780fe32613d246f176447297a183fcd9",
+          "restoredObjectId": "44b7b676780fe32613d246f176447297a183fcd9",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-r1-pending.json",
+          "beforeSha256": "893945b7600bf43511e53071ec165c04e1448abd258fdc0ab280611b7d402018",
+          "afterSha256": "6d196a01bf9869e2c9580a7bc041c6c55719fc0c583abeb9d0755889e5999900",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-pending.json",
+          "archivedBytes": 445,
+          "headBlobId": "d0d26445e06de25b5d11c72d19e32641570b7372",
+          "restoredObjectId": "d0d26445e06de25b5d11c72d19e32641570b7372",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-r1-retry.json",
+          "beforeSha256": "beb97652b92b085b7d004a13d9b1ad1ed4dbbb7ab0557ffe6c811eb6b6426133",
+          "afterSha256": "d0d2dbefbb2647423bf4f443b252340fe05df2302c83775d98ddb2c73c5fd185",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-retry.json",
+          "archivedBytes": 76,
+          "headBlobId": "b85ec6190bdc9d90490be2490163936c62d35828",
+          "restoredObjectId": "b85ec6190bdc9d90490be2490163936c62d35828",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-single-connection.json",
+          "beforeSha256": "b9c4353fe7debba58be2edc5edc2cb92d88de8234c36d9482b07d38c50ffd462",
+          "afterSha256": "685f7bf533c4b3233a1fea66430ddf57f23c6e9f1e61b9405a099008dc65e83a",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-single-connection.json",
+          "archivedBytes": 275,
+          "headBlobId": "bf01ea6ecdd09a883ce9bc157ed5b6ef655e9470",
+          "restoredObjectId": "bf01ea6ecdd09a883ce9bc157ed5b6ef655e9470",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-stale-different-file.json",
+          "beforeSha256": "1713f9940cdbadd128caafdca553ab77a9456d6f6021c7d2e4c67daaaae9c15c",
+          "afterSha256": "704b7dc90331f0b93dcc429aadbc7d8bf6ece5e3c205ea9c37c94baa1f1b95dd",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-stale-different-file.json",
+          "archivedBytes": 2309,
+          "headBlobId": "86920b5c9ebfa681dea60e0e7a3b8ed615e9065c",
+          "restoredObjectId": "86920b5c9ebfa681dea60e0e7a3b8ed615e9065c",
+          "statusClean": true
+        },
+        {
+          "file": "docs/reports/artifacts/M2-B/takeover-stale-same-file.json",
+          "beforeSha256": "e3ea993c339e491e908bc3b9b21f401fefe11da65076e60481f5a602c8b481e9",
+          "afterSha256": "48babc05233d1a3236f2f19f6409a8388190d6bea1439b5c3995f6b4b140ead1",
+          "archivedTo": "docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T17-35-48-796Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-stale-same-file.json",
+          "archivedBytes": 2495,
+          "headBlobId": "b3789903cf4e0e03474240222dcab2523f951882",
+          "restoredObjectId": "b3789903cf4e0e03474240222dcab2523f951882",
+          "statusClean": true
+        }
+      ],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": true,
+        "problems": [],
+        "counts": {
+          "suites": 4,
+          "specs": 12,
+          "tests": 12,
+          "results": 12,
+          "projects": [
+            "chromium"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:47:57.597Z",
+          "duration": 78878.99699999999,
+          "expected": 12,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      "ok": true
+    },
+    {
+      "step": "e2e-m3a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m3a.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m3a-output",
+      "pid": 52984,
+      "startedAt": "2026-11-14T17:49:18.255Z",
+      "finishedAt": "2026-11-14T17:50:05.866Z",
+      "durationMs": 47933,
+      "code": 1,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-35-48-796Z-full\\e2e-m3a.log",
+      "identityStable": false,
+      "identityProblems": [
+        "退出码 1（signal=null）",
+        "报告核对失败：stats.unexpected=1（必须为 0）",
+        "报告核对失败：stats.skipped=4（必须为 0）",
+        "报告核对失败：spec 未通过：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局",
+        "报告核对失败：test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+        "报告核对失败：results[0].status=failed（要求 passed）：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+        "报告核对失败：results[0] 带错误信息：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+        "报告核对失败：test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 主作品版本变化 → 批准 409 STALE_APPROVAL，卡片 stale/任务 failed/名额释放/重复回答稳定 409 [(default)]",
+        "报告核对失败：results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 主作品版本变化 → 批准 409 STALE_APPROVAL，卡片 stale/任务 failed/名额释放/重复回答稳定 409 [(default)]",
+        "报告核对失败：test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝启动而非静默重置 [(default)]",
+        "报告核对失败：results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝启动而非静默重置 [(default)]",
+        "报告核对失败：test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览 [(default)]",
+        "报告核对失败：results[0].status=skipped（要求 passed）：01-approvals.spec.ts › R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览 [(default)]",
+        "报告核对失败：test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 别名/default/barrel 的共享组件仍请示；无绝对路径/跨源保护不回退 [(default)]",
+        "报告核对失败：results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 别名/default/barrel 的共享组件仍请示；无绝对路径/跨源保护不回退 [(default)]",
+        "报告核对失败：stats.expected=6 与实际 test 记录数 11 不一致"
+      ],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "0e1494cadd5df2dbce2f360eb6a3743cc22029a3",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "0fa9ebd58e8f0cff04fb8eac577fe791b91d5bfb43586c84cef952890633778f",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "report": {
+        "ok": false,
+        "problems": [
+          "stats.unexpected=1（必须为 0）",
+          "stats.skipped=4（必须为 0）",
+          "spec 未通过：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局",
+          "test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+          "results[0].status=failed（要求 passed）：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+          "results[0] 带错误信息：01-approvals.spec.ts › option 只接受原始 JSON 0/1；同答幂等、反答 409、取消/并发只有一终局 [(default)]",
+          "test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 主作品版本变化 → 批准 409 STALE_APPROVAL，卡片 stale/任务 failed/名额释放/重复回答稳定 409 [(default)]",
+          "results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 主作品版本变化 → 批准 409 STALE_APPROVAL，卡片 stale/任务 failed/名额释放/重复回答稳定 409 [(default)]",
+          "test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝启动而非静默重置 [(default)]",
+          "results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝启动而非静默重置 [(default)]",
+          "test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览 [(default)]",
+          "results[0].status=skipped（要求 passed）：01-approvals.spec.ts › R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览 [(default)]",
+          "test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：01-approvals.spec.ts › 别名/default/barrel 的共享组件仍请示；无绝对路径/跨源保护不回退 [(default)]",
+          "results[0].status=skipped（要求 passed）：01-approvals.spec.ts › 别名/default/barrel 的共享组件仍请示；无绝对路径/跨源保护不回退 [(default)]",
+          "stats.expected=6 与实际 test 记录数 11 不一致"
+        ],
+        "counts": {
+          "suites": 1,
+          "specs": 11,
+          "tests": 11,
+          "results": 11,
+          "projects": [
+            "(default)"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T17:49:18.955Z",
+          "duration": 46898.852,
+          "expected": 6,
+          "skipped": 4,
+          "unexpected": 1,
+          "flaky": 0
+        }
+      },
+      "ok": false
+    }
+  ]
+}

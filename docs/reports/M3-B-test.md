@@ -2,6 +2,8 @@
 
 **结论：M3-B 验收不通过。**
 
+> 上面这句是 run#3（2026-11-14T16:43:45Z）的初判。整改之后又跑了两轮全量，两轮都不作通过判定：**run4** 末步 `e2e-m3b` 的测试 7/7 全过，但归档守卫判定 7 份已跟踪证据起跑前就已脏、拒绝覆盖（入口/卫生问题）；**run5** 在第 10 步 `e2e-m3a` 上因验收 harness 的 Windows 拆除竞态 `EPERM` 失败（测试侧问题）。四轮的完整时间线、失败归类与证据路径见 §5、§13–§16。
+
 失败集中在 M3-B 自己新写的 3 个用例（`02-faults` / `03-gate` / `04-lifecycle`），**三例的根因都在验收分支（`test/m3b-acceptance`）的测试侧，未发现产品代码缺陷**：
 其中 1 例是导入写错（`sleep` 未从 `fixture.ts` 导出）、1 例断言与已定语义相反（`adopt` 的过期候选错误码）、1 例的故障前提在产品设计上不可达（沙箱拒绝写入非法 `scene.config.json`）。
 受影响的产品行为本身没有一处被证伪：旧七套 E2E 139/139、typecheck、build、全量单测 422/422 全部实际通过。
@@ -132,7 +134,7 @@ run#2 证据：`.data/pi-m0a/assets/index.json` 里 10 条记录全是 `"error":
 | `checks/` | 各 spec 的结构化证据：`happy-path.json`、`disposals-{01-happy,02-faults,03-gate,04-lifecycle}.json` |
 | `checks/evidence-01-happy/` | 01-happy 运行中通过 HTTP 取回并**原样落盘**的六份检查证据：`schema.json` 99B、`build.log` 386B、`smoke.png` 105,365B、`smoke.json` 324B、`occlusion.png` 105,365B、`occlusion.json` 2,718B |
 | `regression/<run>/` | 每轮 run 的 `manifest.json`/`manifest.log`、各步日志、Playwright JSON 与 `--output` 目录（含失败截图/`error-context.md`）、`evidence-refresh/`（被刷新的 tracked 证据新字节） |
-| `sha256-manifest.json` | 全目录逐文件 sha256 与字节数（275 个文件，1,864,605 字节），外加下述三项复查结果 |
+| `sha256-manifest.json` | 全目录逐文件 sha256 与字节数（run#3 收口时 275 个文件 / 1,864,605 字节；追加整改轮、run4、run5 之后为 611 个文件 / 3,701,541 字节，见 §16），外加下述三项复查结果 |
 
 独立复算（`node tests/e2e/m3b/finalize-evidence.mjs`，exit 0，`problems: []`）：
 
@@ -171,3 +173,115 @@ run#2 证据：`.data/pi-m0a/assets/index.json` 里 10 条记录全是 `"error":
 ## 12. 一句话总结
 
 受测产品字节（`6f6ff49` = `0f3a734` = HEAD `65e2e0b`，`apps` 树 id 一致）在 typecheck、build、422 项单测与旧七套 139 项 E2E 上全部通过；M3-B 自身 7 例中 1 例通过、3 例失败、3 例被跳过，三例失败的根因全部在验收分支的测试侧（导入错误 / 断言与已定语义相反 / 故障前提不可达），**未发现产品缺陷**。因此 **M3-B 验收不通过**，等整改后重跑同口径完整回归。
+
+---
+
+## 13. 整改轮（`a9c1ef0` + `f708423`，M3-B 自身 7/7 实跑）
+
+§6 的三处测试侧缺陷已在验收分支修掉，**产品代码零改动**：
+
+| 提交 | 内容 |
+| --- | --- |
+| `a9c1ef0` | ① `04-lifecycle` 的 `TypeError`：`fixture.ts` 补导出 `sleep`（它本来就从 `./checks` 引入）；② `03-gate` 的过期候选断言改成 `adopt → CHECKS_NOT_PASSED`，并把本该覆盖的正向断言（旧候选重新 `startChecks → STALE_CANDIDATE`）补进同一用例；③ `02-faults` 的 schema 子场景改成断言**真实边界**（任务 `failed` / `error.code=NO_CHANGES` / 不产出候选 / 主作品 `scene.config.json` 一字未动且仍是合法 JSON） |
+| `f708423` | 按整改要求 B 补上「绕过 agent 直改候选」的第二道守卫：直接往候选工作树写非法 `scene.config.json` 再 `startChecks → 409 STALE_CANDIDATE`、不建 run、候选视图仍四项 `not_run`；还原字节后同一候选可正常检查并 `passed`（证明守卫针对脏工作树，不是把候选弄坏） |
+
+迭代实跑（`pnpm test:e2e:m3b`）：**7 passed，0 retry / 0 skip**，报告 `ok=true`（7 tests / 7 results / `stats.expected=7`，其余三项为 0，131.4s，startTime `2026-11-14T17:02:37Z`）。
+报告原件：`regression/iteration-20261115/evidence-refresh/acceptance-precheck/playwright-results.json`（随 `a9c1ef0` 入库，`f708423` 的 7/7 是同口径复跑）。
+
+**必须记录的偏差（不调整断言去迎合）**：`02-faults` 里「绕过 agent 直改候选后 `startChecks`」实测命中 **409 `STALE_CANDIDATE`**（候选工作树 clean 检查，`apps/server/src/work/repo.ts:294`），不是 §6.1 推测的 `SNAPSHOT_MISMATCH`。后者是「解析与开跑之间」的 TOCTOU 守卫（`apps/server/src/checks/runner.ts:246/417`），HTTP 面造不出来，本轮**如实标为不可达**，不假装已覆盖。
+
+## 14. run4（job_05f1f133，`2026-11-14T17-09-38-289Z-full`）——末步归档守卫拒绝覆盖，**不作通过判定**
+
+| 项 | 值 |
+| --- | --- |
+| 起止 | 2026-11-14T17:09:38Z → 17:25:56Z |
+| 受测 HEAD / 身份 / 锁 | `f708423` / `6bac79842167` / `67af36b7a1b8` |
+| `evidenceDirtyAtStart` | **非空**（7 份已跟踪 checks 证据 + 6 份未跟踪证据 + 中止轮目录 `2026-11-14T17-05-27-078Z-full/`） |
+
+前十步全部 `ok=true`（typecheck 5.5s / build 7.7s / unit 422 passed 194.0s / m0b 24 / m0a 27 / m1a 7 / m1b 23 / m2a 35 / m2b 12 / m3a 11）。末步 `e2e-m3b`：进程 `code=0`，Playwright 报告 `ok=true`（**7/7，expected 7 / unexpected 0 / skipped 0 / flaky 0，0 retry**），但这一步 `ok=false`、`identityStable=false`、`evidenceArchived=0`，`identityProblems` 是 7 条「证据文件在本步开始前就已脏（归属不明），拒绝覆盖」。
+
+**归类：入口/卫生失败，不是产品失败，也不能算通过。** 起因是整改迭代时直接跑 `pnpm test:e2e:m3b`，把 `checks/` 里 7 份已跟踪证据写脏，run4 起跑时没有还原，末步守卫按设计拒绝覆盖。
+
+处置（不删任何字节）：run4 末步**实际写出**的 17 份 `checks/` 证据整份归档到 `regression/2026-11-14T17-09-38-289Z-full/e2e-m3b-checks/`（含 README 写清归属）；7 份已跟踪证据按 blob 还原（`rev-parse HEAD:<path>` vs `hash-object --path` 逐个对象 id 一致 + `git status` 为空）；6 份未跟踪证据移出 `checks/`（字节已归档）。中止轮 `2026-11-14T17-05-27-078Z-full`（只跑到 typecheck/build/unit，无 `-results.json`）原件保留入库，**不作轮次证据**。
+
+同时给 `full-regression.mjs` 加了起跑前快速失败：基线采集后若 `evidenceDirtyAtStart` 非空，写 `manifest.entryFailure{kind:'entry',abort:'evidenceDirtyAtStart',exitCode:3}` 并 `exit 3`，一步不跑（run4 就是这样白等了 16 分钟）。只改测试工具，不动产品、不动断言、不动判据；`runner-support.mjs` 未改，`verify-runner-support.mjs` 仍 9/9。
+
+## 15. run5（job_f0b6ab29，`2026-11-14T17-35-48-796Z-full`）——`e2e-m3a` 验收 harness 拆除竞态，第 10 步失败
+
+| 项 | 值 |
+| --- | --- |
+| 起止 | 2026-11-14T17:35:48Z → 17:50:08Z（14m19s，exit 1） |
+| 受测 HEAD / 身份 / 锁 | `0e1494ca`（run4 证据归档 + 快速失败两个提交）/ `0fa9ebd58e8f` / `67af36b7a1b8` |
+| `evidenceDirtyAtStart` | `[]`（快速失败未触发，基线干净） |
+| 产品树 | `git rev-parse HEAD:apps` = `6f6ff49:apps` = `0f3a734:apps` = **`adeb7396b6e5`**；`git diff 6f6ff49 -- apps packages templates` 与 `-- pnpm-lock.yaml` 均 0 行 |
+
+| 步骤 | 结果 | 用例数 | 耗时 |
+| --- | --- | --- | --- |
+| typecheck | 通过 | — | 5.9s |
+| build | 通过 | — | 8.3s |
+| unit | 通过 | **422 passed**（server 321 / shared 68 / vite-plugin-source-tag 20 / studio 7 / scene-renderer 5 / bridge 1） | 204.1s |
+| e2e-m0b | 通过 | 24/24 | 61.4s（21 份证据归档还原） |
+| e2e-m0a | 通过 | 27/27 | 81.0s（28 份） |
+| e2e-m1a | 通过 | 7/7 | 44.7s（7 份） |
+| e2e-m1b | 通过 | 23/23 | 96.1s（23 份） |
+| e2e-m2a | 通过 | 35/35 | 226.2s（35 份） |
+| e2e-m2b | 通过 | 12/12 | 81.4s（12 份） |
+| **e2e-m3a** | **不通过** | 11 收集：**6 passed / 1 failed / 4 did not run** | 47.9s |
+| e2e-m3b | 未执行（首败即停） | — | — |
+
+**失败原件**：`regression/2026-11-14T17-35-48-796Z-full/` 的 `e2e-m3a.log`、`e2e-m3a-results.json`、`e2e-m3a-output/01-approvals-option-…-t终局/error-context.md`。
+
+```
+Error: EPERM, Permission denied: \\?\C:\Users\Admin\AppData\Local\Temp\m3a-e2e-5E02Ss\data
+    at tests/e2e/m3a/fixture.ts:66 → removeFixture()
+    at tests/e2e/m3a/01-approvals.spec.ts:49  （test.afterEach）
+```
+
+判据核对：`stats.expected=6 / unexpected=1 / skipped=4 / flaky=0`；4 个 skip 是 `test.describe.configure({ mode: 'serial' })`（该文件第 92 行）在第一例失败后的 **did not run**，不是用例主动 skip；该例**用例体的断言全部跑完并通过**（失败发生在 `afterEach` 的 `removeFixture`，堆栈不在任何 `expect` 上），失败的 `e2e-m3a` 报告 `ok=false` 是判据的应有结论。
+
+**归类：测试侧（验收 harness 的 Windows 拆除竞态），不是产品缺陷，也不是入口失败。** 依据：
+
+1. 失败点在 `afterEach` 的 `removeFixture`：`rmSync(<tmp>/data, {recursive, maxRetries:5, retryDelay:200})` 抛 `EPERM`，即删 `data` 目录本身时仍有 Windows 句柄未释放（该目录里有 `tasks.json` / `work.git` / `preview-cache`，候选工作树、预览子进程的 cwd 都落在里面）；`maxRetries=5 × 200ms` 只有约 1 秒预算，`fixture.stop()` 只 await 后端父进程的 `exit`，不 await 整棵子进程树释放句柄。
+2. 该例在 run#3（`65e2e0b`）与 run4（`f708423`）上都是 11/11 通过，三轮 `apps` 树 id 完全相同（`adeb7396b6e5`），产品字节一致——同一产品字节两过一败，指向时序而非产品行为。
+3. 该步身份 `baseline = before = after = 0fa9ebd58e8f`、`drift=[]`，`evidenceArchived=0`：产品与证据在这一步内没有任何写入。
+4. 跑完后该临时目录的锁已自动释放（`%TEMP%\m3a-e2e-5E02Ss` 可删除并已清理，属测试夹具临时目录，不是验收证据原件）；九个默认端口无监听、无残留进程。
+
+因此 run5 **不作通过判定**（4 例未执行 + M3-B 套件未执行，覆盖不完整）。按「不重跑到绿为止」的要求，本轮**没有**再跑一轮；下一步是先修 harness 拆除逻辑再跑 run6，判据不放宽。
+
+## 16. 总结论（截至 2026-11-15 run5）
+
+**M3-B 正式验收仍未通过，但四轮的失败都已定位到验收侧（测试/harness/证据卫生），没有一条指向产品缺陷。**
+
+| 轮次 | 目录 | 失败点 | 归类 |
+| --- | --- | --- | --- |
+| run#1 | `2026-11-14T16-20-27-242Z-full` | `e2e-m0b` 浏览器路径尾空格 | 入口环境错误 |
+| run#2 | `2026-11-14T16-25-33-369Z-full` | `e2e-m0a` 缺未跟踪素材 `fallback/` | 环境缺输入 |
+| run#3 | `2026-11-14T16-43-45-146Z-full` | `e2e-m3b` 3 例测试侧缺陷 | 测试侧 |
+| 整改轮 | `iteration-20261115`（报告原件） | 无（7/7，0 retry/skip） | — |
+| run4 | `2026-11-14T17-09-38-289Z-full` | 末步证据归属守卫拒绝归档（测试 7/7 全过） | 入口/证据卫生 |
+| run5 | `2026-11-14T17-35-48-796Z-full` | `e2e-m3a` 第 7 例 `afterEach` 拆除 EPERM | 测试侧（harness 竞态） |
+
+**证据与复算（`node tests/e2e/m3b/finalize-evidence.mjs`，exit 0，`problems: []`）**：611 个文件 / 3,701,541 字节逐文件 sha256 清单在 `docs/reports/artifacts/M3-B/formal-20261115/sha256-manifest.json`。
+
+六份检查证据复算（落盘字节 → sha256，全部与 `checks/happy-path.json` 记录一致）：
+
+| 文件 | 字节 | sha256 |
+| --- | --- | --- |
+| `schema.json` | 99 | `38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0` |
+| `build.log` | 386 | `68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b` |
+| `smoke.json` | 324 | `aa971c683e98d4cbb082e2c6e7e7613608b5780935526dbbd3f89f97b6adb366` |
+| `occlusion.json` | 2,718 | `3f8e44fc0f3a0e2a2a2aa102b081412cebd6fe8ac89926be8c75f15a2d6a9ef3` |
+| `smoke.png` | 105,365 | `87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039` |
+| `occlusion.png` | 105,365 | `87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039` |
+
+同一轮还独立复查了 26 份 Playwright JSON：run#3 的 8 份中 7 份通过、`e2e-m3b` 失败（`1/3/3`，与 §6 一致）；run4 的 8 份报告全部 `ok=true`（含 `e2e-m3b` 的 7/7）——这与 run4 步骤 `ok=false` 不矛盾：报告没问题，是证据归属守卫拒收；run5 的 7 份通过、`e2e-m3a` 失败（`6/1/4`，与 §15 一致）；run#1/run#2 确实是失败原件；4 份 `disposals-*.json` 收尾干净。`smoke.png` 与 `occlusion.png` 字节数相同（这在本项目里是已记录过的现象，不是复制错误）。
+
+`sha256-manifest.json` 只覆盖 `checks/` 与 `regression/` 的归档字节；`regression/2026-11-14T17-09-38-289Z-full/e2e-m3b-checks/` 里的 run4 末步证据已补进该清单。
+
+**run6 的整改前置（测试侧，不改断言、不改产品）**：
+1. `tests/e2e/m3a/fixture.ts` 的 `removeFixture` 把 `maxRetries:5/retryDelay:200` 换掉有界等待（例如最长 30s、间隔 250ms），并在最终失败时把「卡住的路径 + `data` 目录内容快照 + 当时端口/进程表」写进 artifact，不再丢一句裸 `EPERM`；
+2. `fixture.stop()` 之后再等一次句柄释放：至少等到该 fixture 的端口不再监听（`tests/e2e/m0a/harness.ts` 已有 `waitPortFree`），并确认 `data/work.git`、`data/preview-cache` 可删；
+3. 修好后按同一口径全量跑 **run6**（八套 146 例 + 快速失败守卫），判据与 §3 完全一致。
+
+**保留下来的既有建议（与 run5 无关，继续有效）**：M0-A harness 在启动 mock/fixture 前断言 `MOCK_FIXTURE` 存在（缺失立即以输入缺失失败，而不是每例挂 60–120s 超时后再报），并评估把该素材换成入库的小体积 fixture——**不改 M0-A 测试断言**；`full-regression.mjs` 起跑前还应打印并断言 `PLAYWRIGHT_BROWSERS_PATH` 无首尾空白（run#1 那类错误可以一行拦下）。
+
