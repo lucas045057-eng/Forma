@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-14T16:58:04.819Z",
+  "records": [
+    {
+      "root": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\.data\\m3b-gate-mwgnfg8w",
+      "pid": 35184,
+      "startTime": "2026-11-14T16:57:35.7599485Z",
+      "graceful": {
+        "code": 0,
+        "forced": false,
+        "outputTail": "s deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.\n(Use `node --trace-warnings ...` to show where the warning was created)\npi-m2a backend ready on 31811 (workRoot=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\.data\\m3b-gate-mwgnfg8w\\work)\npi-m2a backend graceful close requested\n"
+      },
+      "ports": {
+        "base": "http://127.0.0.1:31811",
+        "preview": "http://127.0.0.1:24531"
+      },
+      "stillListening": [],
+      "dirRemoved": true,
+      "problems": []
+    }
+  ],
+  "failures": []
+}

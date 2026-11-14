@@ -1,0 +1,77 @@
+# e2e-m3b: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m3b-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m3b.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\空间化AI工作台\.worktrees\m3b-acceptance\docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output
+# started=2026-11-14T16:57:18.104Z
+
+Running 7 tests using 1 worker
+
+  ok 1 tests\e2e\m3b\01-happy.spec.ts:37:1 › 四项真实检查通过 → 证据可读 → 采用 → 回退 (12.6s)
+  x  2 tests\e2e\m3b\02-faults.spec.ts:74:1 › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 (2.6s)
+  x  3 tests\e2e\m3b\03-gate.spec.ts:38:1 › 同身份幂等、显式 rerun、严格请求体、证据篡改与过期候选 (29.1s)
+  x  4 tests\e2e\m3b\04-lifecycle.spec.ts:38:1 › 取消运行中的检查：run 变 cancelled，未完成项 not_run，不能采用 (4.7s)
+  -  5 tests\e2e\m3b\04-lifecycle.spec.ts:74:1 › 后端被强杀后重启：运行中的检查变为 SERVICE_RESTARTED，不自动重跑、不能采用
+  -  6 tests\e2e\m3b\04-lifecycle.spec.ts:116:1 › 两个候选的检查串行：后一个在排队，不并行也不交错
+  -  7 tests\e2e\m3b\04-lifecycle.spec.ts:158:1 › 缺浏览器：schema/build 通过，smoke 如实失败，occlusion not_run
+
+
+  1) tests\e2e\m3b\02-faults.spec.ts:74:1 › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 ──────────────────────────────
+
+    Error: 任务没有产出候选：{"id":"f3d316dd9e5d423b9af87b8d3137c254","instruction":"把场景配置写坏","selection":{"src":"src/App.tsx:30:11","baseVersion":"9fef7424df3e9d4d5ec2672fd914354245351d9b","cid":"Node","text":"","bbox":[0,0,10,10],"styles":{"display":"inline-block","position":"static","color":"rgb(0, 0, 0)","backgroundColor":"rgba(0, 0, 0, 0)","fontSize":"16px","fontFamily":"Arial","fontWeight":"400","lineHeight":"16px","padding":"0px","margin":"0px","borderRadius":"0px","width":"10px","height":"10px"},"instances":1,"ancestors":[]},"status":"failed","events":[{"type":"task.updated","ts":"2026-11-14T16:57:33.906Z","sequen
+
+       at fixture.ts:286
+
+      284 |   if (submitted.status !== 202) throw new Error(`提交任务失败：${submitted.status} ${submitted.text.slice(0, 400)}`);
+      285 |   const task = await waitTask(fixture.base, submitted.body.id, options.timeoutMs);
+    > 286 |   if (task.status !== 'done' || !task.candidateId) throw new Error(`任务没有产出候选：${JSON.stringify(task).slice(0, 600)}`);
+          |                                                          ^
+      287 |   const candidate = await getCandidate(fixture.base, task.candidateId);
+      288 |   return { taskId: task.id, candidateId: task.candidateId, task, candidate: candidate.body };
+      289 | }
+        at createCandidate (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m3b\fixture.ts:286:58)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m3b\02-faults.spec.ts:84:21
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\02-faults-四类真实故障分别让检查失败，采用被拒，服务仍可继续\error-context.md
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\02-faults-四类真实故障分别让检查失败，采用被拒，服务仍可继续\error-context.md
+
+  2) tests\e2e\m3b\03-gate.spec.ts:38:1 › 同身份幂等、显式 rerun、严格请求体、证据篡改与过期候选 ───────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "STALE_CANDIDATE"
+    Received: "CHECKS_NOT_PASSED"
+
+      127 |   const adoptedStale = await adoptCandidate(fixture.base, createdB.candidateId);
+      128 |   expect(adoptedStale.status, adoptedStale.text.slice(0, 300)).toBe(409);
+    > 129 |   expect((adoptedStale.body as any)?.error?.code).toBe('STALE_CANDIDATE');
+          |                                                   ^
+      130 |   record.stale = { runId: run3.id, versionBefore, versionAfter, status: adoptedStale.status, code: (adoptedStale.body as any)?.error?.code };
+      131 |
+      132 |   /* ---------- 不存在的东西 ---------- */
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m3b\03-gate.spec.ts:129:51
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\03-gate-同身份幂等、显式-rerun、严格请求体、证据篡改与过期候选\error-context.md
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\03-gate-同身份幂等、显式-rerun、严格请求体、证据篡改与过期候选\error-context.md
+
+  3) tests\e2e\m3b\04-lifecycle.spec.ts:38:1 › 取消运行中的检查：run 变 cancelled，未完成项 not_run，不能采用 ──────────
+
+    TypeError: (0 , _fixture.sleep) is not a function
+
+      58 |   // 取消后再等：不能晚写 passed 或晚出证据
+      59 |   const snapshotAfter = JSON.stringify(run.checks);
+    > 60 |   await sleep(3000);
+         |         ^
+      61 |   const later = (await getCheckRun(fixture.base, started.body.id)).body;
+      62 |   expect(JSON.stringify(later.checks)).toBe(snapshotAfter);
+      63 |   expect(later.status).toBe('cancelled');
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m3b\04-lifecycle.spec.ts:60:9
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\04-lifecycle-取消运行中的检查：run-变-cancelled，未完成项-not-run，不能采用\error-context.md
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-43-45-146Z-full\e2e-m3b-output\04-lifecycle-取消运行中的检查：run-变-cancelled，未完成项-not-run，不能采用\error-context.md
+
+  3 failed
+    tests\e2e\m3b\02-faults.spec.ts:74:1 › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 ───────────────────────────────
+    tests\e2e\m3b\03-gate.spec.ts:38:1 › 同身份幂等、显式 rerun、严格请求体、证据篡改与过期候选 ────────────────────────────
+    tests\e2e\m3b\04-lifecycle.spec.ts:38:1 › 取消运行中的检查：run 变 cancelled，未完成项 not_run，不能采用 ───────────
+  3 did not run
+  1 passed (52.1s)

@@ -1,0 +1,87 @@
+{
+  "head": "54cfb45d1d949def19a0ae34b26e20a7932d8b27",
+  "selectionRaw": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "text": "立即购买",
+    "bbox": [
+      61.796875,
+      520.375,
+      104,
+      47
+    ],
+    "styles": {
+      "display": "block",
+      "position": "static",
+      "color": "rgb(255, 250, 240)",
+      "backgroundColor": "rgb(117, 96, 68)",
+      "fontSize": "13px",
+      "fontFamily": "\"Microsoft YaHei\", sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "padding": "14px 25px",
+      "margin": "0px",
+      "borderRadius": "3px",
+      "width": "104px",
+      "height": "47px"
+    },
+    "instances": 3,
+    "ancestors": [
+      "src/App.tsx:26:11",
+      "src/App.tsx:21:9",
+      "src/App.tsx:20:7"
+    ],
+    "baseVersion": "54cfb45d1d949def19a0ae34b26e20a7932d8b27"
+  },
+  "postedSelection": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "text": "立即购买",
+    "bbox": [
+      61.796875,
+      520.375,
+      104,
+      47
+    ],
+    "styles": {
+      "display": "block",
+      "position": "static",
+      "color": "rgb(255, 250, 240)",
+      "backgroundColor": "rgb(117, 96, 68)",
+      "fontSize": "13px",
+      "fontFamily": "\"Microsoft YaHei\", sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "padding": "14px 25px",
+      "margin": "0px",
+      "borderRadius": "3px",
+      "width": "104px",
+      "height": "47px"
+    },
+    "instances": 3,
+    "ancestors": [
+      "src/App.tsx:26:11",
+      "src/App.tsx:21:9",
+      "src/App.tsx:20:7"
+    ],
+    "baseVersion": "54cfb45d1d949def19a0ae34b26e20a7932d8b27"
+  },
+  "hashesBefore": {
+    "button": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412",
+    "app": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+  },
+  "hashesAfter": {
+    "button": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412",
+    "app": "3c69c0559f9474ab44116bd5b6d777acd6a5a398a552e5f0a0cceb056c285c47"
+  },
+  "status": 202,
+  "taskStatus": "done",
+  "versionAfter": "7e4d2d5c0a7ddd2aa836b8b07a4f78f36cab4def",
+  "candidate": {
+    "id": "55829cfc844341c0b21ba1e62eca21b5",
+    "baseVersion": "7e4d2d5c0a7ddd2aa836b8b07a4f78f36cab4def",
+    "diff": [
+      "src/App.tsx"
+    ]
+  }
+}

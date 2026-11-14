@@ -1,0 +1,17 @@
+{
+  "first": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "baseVersion": "041709abdf1d4fa7726b14e7fcb979ea70d6a2e2"
+  },
+  "second": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "baseVersion": "041709abdf1d4fa7726b14e7fcb979ea70d6a2e2"
+  },
+  "version": "041709abdf1d4fa7726b14e7fcb979ea70d6a2e2",
+  "pendingTasksPosted": 0,
+  "tasksBefore": 5,
+  "tasksAfter": 5,
+  "versionRequestsSeen": 1
+}

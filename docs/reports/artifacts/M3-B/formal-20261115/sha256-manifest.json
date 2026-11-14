@@ -1,0 +1,1772 @@
+{
+  "generatedAt": "2026-11-14T16:59:47.004Z",
+  "dir": "docs/reports/artifacts/M3-B/formal-20261115",
+  "fileCount": 275,
+  "totalBytes": 1864605,
+  "evidence": [
+    {
+      "name": "schema.json",
+      "recordedHash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+      "actualHash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+      "recordedBytes": 99,
+      "actualBytes": 99,
+      "match": true
+    },
+    {
+      "name": "build.log",
+      "recordedHash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+      "actualHash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+      "recordedBytes": 386,
+      "actualBytes": 386,
+      "match": true
+    },
+    {
+      "name": "smoke.png",
+      "recordedHash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "actualHash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "recordedBytes": 105365,
+      "actualBytes": 105365,
+      "match": true
+    },
+    {
+      "name": "smoke.json",
+      "recordedHash": "aa971c683e98d4cbb082e2c6e7e7613608b5780935526dbbd3f89f97b6adb366",
+      "actualHash": "aa971c683e98d4cbb082e2c6e7e7613608b5780935526dbbd3f89f97b6adb366",
+      "recordedBytes": 324,
+      "actualBytes": 324,
+      "match": true
+    },
+    {
+      "name": "occlusion.png",
+      "recordedHash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "actualHash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "recordedBytes": 105365,
+      "actualBytes": 105365,
+      "match": true
+    },
+    {
+      "name": "occlusion.json",
+      "recordedHash": "3f8e44fc0f3a0e2a2a2aa102b081412cebd6fe8ac89926be8c75f15a2d6a9ef3",
+      "actualHash": "3f8e44fc0f3a0e2a2a2aa102b081412cebd6fe8ac89926be8c75f15a2d6a9ef3",
+      "recordedBytes": 2718,
+      "actualBytes": 2718,
+      "match": true
+    }
+  ],
+  "reports": [
+    {
+      "run": "2026-11-14T16-20-27-242Z-full",
+      "file": "2026-11-14T16-20-27-242Z-full/e2e-m0b-results.json",
+      "ok": false,
+      "counts": {
+        "suites": 9,
+        "specs": 24,
+        "tests": 24,
+        "results": 24,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:24:06.133Z",
+        "duration": 9717.517,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 22,
+        "flaky": 0
+      },
+      "problems": [
+        "stats.unexpected=22（必须为 0）",
+        "spec 未通过：m0b-known-issues.spec.ts › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器",
+        "test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：m0b-known-issues.spec.ts › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 [chromium]",
+        "results[0].status=failed（要求 passed）：m0b-known-issues.spec.ts › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 [chromium]",
+        "results[0] 带错误信息：m0b-known-issues.spec.ts › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 [chromium]",
+        "spec 未通过：m0b-known-issues.spec.ts › R1b 单输入框表单的回车隐式提交不应触发"
+      ]
+    },
+    {
+      "run": "2026-11-14T16-25-33-369Z-full",
+      "file": "2026-11-14T16-25-33-369Z-full/e2e-m0a-results.json",
+      "ok": false,
+      "counts": {
+        "suites": 13,
+        "specs": 27,
+        "tests": 27,
+        "results": 27,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:30:01.807Z",
+        "duration": 737770.272,
+        "expected": 17,
+        "skipped": 0,
+        "unexpected": 10,
+        "flaky": 0
+      },
+      "problems": [
+        "stats.unexpected=10（必须为 0）",
+        "spec 未通过：01-pipeline.spec.ts › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready",
+        "test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：01-pipeline.spec.ts › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready [chromium]",
+        "results[0].status=failed（要求 passed）：01-pipeline.spec.ts › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready [chromium]",
+        "results[0] 带错误信息：01-pipeline.spec.ts › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready [chromium]",
+        "spec 未通过：01-pipeline.spec.ts › 3. 图生 3D 与参数校验：img 走同一条 mock 链路，非法请求被拒"
+      ]
+    },
+    {
+      "run": "2026-11-14T16-25-33-369Z-full",
+      "file": "2026-11-14T16-25-33-369Z-full/e2e-m0b-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 9,
+        "specs": 24,
+        "tests": 24,
+        "results": 24,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:29:02.971Z",
+        "duration": 55519.827000000005,
+        "expected": 24,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m0a-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 13,
+        "specs": 27,
+        "tests": 27,
+        "results": 27,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:48:01.738Z",
+        "duration": 69294.531,
+        "expected": 27,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m0b-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 9,
+        "specs": 24,
+        "tests": 24,
+        "results": 24,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:47:03.230Z",
+        "duration": 55362.088,
+        "expected": 24,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m1a-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 5,
+        "specs": 7,
+        "tests": 7,
+        "results": 7,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:49:14.953Z",
+        "duration": 43232.590000000004,
+        "expected": 7,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m1b-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 14,
+        "specs": 23,
+        "tests": 23,
+        "results": 23,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:49:59.821Z",
+        "duration": 90298.865,
+        "expected": 23,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m2a-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 28,
+        "specs": 35,
+        "tests": 35,
+        "results": 35,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:51:33.479Z",
+        "duration": 200665.584,
+        "expected": 35,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m2b-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 4,
+        "specs": 12,
+        "tests": 12,
+        "results": 12,
+        "projects": [
+          "chromium"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:54:58.823Z",
+        "duration": 73512.491,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m3a-results.json",
+      "ok": true,
+      "counts": {
+        "suites": 1,
+        "specs": 11,
+        "tests": 11,
+        "results": 11,
+        "projects": [
+          "(default)"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:56:14.522Z",
+        "duration": 63281.278,
+        "expected": 11,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "problems": []
+    },
+    {
+      "run": "2026-11-14T16-43-45-146Z-full",
+      "file": "2026-11-14T16-43-45-146Z-full/e2e-m3b-results.json",
+      "ok": false,
+      "counts": {
+        "suites": 4,
+        "specs": 7,
+        "tests": 7,
+        "results": 7,
+        "projects": [
+          "(default)"
+        ]
+      },
+      "stats": {
+        "startTime": "2026-11-14T16:57:18.691Z",
+        "duration": 52057.104999999996,
+        "expected": 1,
+        "skipped": 3,
+        "unexpected": 3,
+        "flaky": 0
+      },
+      "problems": [
+        "stats.unexpected=3（必须为 0）",
+        "stats.skipped=3（必须为 0）",
+        "spec 未通过：02-faults.spec.ts › 四类真实故障分别让检查失败，采用被拒，服务仍可继续",
+        "test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：02-faults.spec.ts › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 [(default)]",
+        "results[0].status=failed（要求 passed）：02-faults.spec.ts › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 [(default)]",
+        "results[0] 带错误信息：02-faults.spec.ts › 四类真实故障分别让检查失败，采用被拒，服务仍可继续 [(default)]"
+      ]
+    }
+  ],
+  "disposals": [
+    {
+      "file": "disposals-01-happy.json",
+      "records": 1,
+      "failures": [],
+      "clean": true,
+      "pids": [
+        25524
+      ],
+      "ports": [
+        {
+          "base": "http://127.0.0.1:54747",
+          "preview": "http://127.0.0.1:34710"
+        }
+      ]
+    },
+    {
+      "file": "disposals-02-faults.json",
+      "records": 1,
+      "failures": [],
+      "clean": true,
+      "pids": [
+        14728
+      ],
+      "ports": [
+        {
+          "base": "http://127.0.0.1:26655",
+          "preview": "http://127.0.0.1:25860"
+        }
+      ]
+    },
+    {
+      "file": "disposals-03-gate.json",
+      "records": 1,
+      "failures": [],
+      "clean": true,
+      "pids": [
+        35184
+      ],
+      "ports": [
+        {
+          "base": "http://127.0.0.1:31811",
+          "preview": "http://127.0.0.1:24531"
+        }
+      ]
+    },
+    {
+      "file": "disposals-04-lifecycle.json",
+      "records": 1,
+      "failures": [],
+      "clean": true,
+      "pids": [
+        11420
+      ],
+      "ports": [
+        {
+          "base": "http://127.0.0.1:35287",
+          "preview": "http://127.0.0.1:32301"
+        }
+      ]
+    }
+  ],
+  "problems": [],
+  "files": [
+    {
+      "path": "checks/disposals-01-happy.json",
+      "bytes": 965,
+      "sha256": "72974a45edba8e3c032b6ef6258720b0240a5e6582bd0d9786a19a95089244b2"
+    },
+    {
+      "path": "checks/disposals-02-faults.json",
+      "bytes": 965,
+      "sha256": "94848d51cde7a1a14ffeab02cf2490f94e9f30537554cd066cdbcd935f558147"
+    },
+    {
+      "path": "checks/disposals-03-gate.json",
+      "bytes": 963,
+      "sha256": "ef86858b1c018da4c6cc8a394d9dc03c79926b5b90fd4c98570ab9383f83be68"
+    },
+    {
+      "path": "checks/disposals-04-lifecycle.json",
+      "bytes": 965,
+      "sha256": "470252f4091f33f68bd5ec4a7942e73524ada748c6333e934ccfc27f77ee5b76"
+    },
+    {
+      "path": "checks/evidence-01-happy/build.log",
+      "bytes": 386,
+      "sha256": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+    },
+    {
+      "path": "checks/evidence-01-happy/occlusion.json",
+      "bytes": 2718,
+      "sha256": "3f8e44fc0f3a0e2a2a2aa102b081412cebd6fe8ac89926be8c75f15a2d6a9ef3"
+    },
+    {
+      "path": "checks/evidence-01-happy/occlusion.png",
+      "bytes": 105365,
+      "sha256": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+    },
+    {
+      "path": "checks/evidence-01-happy/schema.json",
+      "bytes": 99,
+      "sha256": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+    },
+    {
+      "path": "checks/evidence-01-happy/smoke.json",
+      "bytes": 324,
+      "sha256": "aa971c683e98d4cbb082e2c6e7e7613608b5780935526dbbd3f89f97b6adb366"
+    },
+    {
+      "path": "checks/evidence-01-happy/smoke.png",
+      "bytes": 105365,
+      "sha256": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+    },
+    {
+      "path": "checks/happy-path.json",
+      "bytes": 5818,
+      "sha256": "f785a64fe141281e5d1857dbfe0cfd2fd29fc80c458decb59bbc16c4bdaeaca1"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m0a.log",
+      "bytes": 4235,
+      "sha256": "b56ee0350b09bccdb2f8764286c27ac9637667584d133fefbf02d2576eafe478"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m0b.log",
+      "bytes": 4370,
+      "sha256": "e289e3f28c4e0dcbc381cf793ba2c6b4b6f247e9d3c02013ffb7b17b1a3ee42e"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m1a.log",
+      "bytes": 1197,
+      "sha256": "bf0f5bedf5de9971650f04d68fbc9165116807e2b773314b7b8364e9a49872a4"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m1b.log",
+      "bytes": 3422,
+      "sha256": "5a262f6d273dcbf52f93a8de754723e3a4f842a87f4b07002fef91cd4c1c663f"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m2a.log",
+      "bytes": 5322,
+      "sha256": "13fae14ad5832b444f86f1623a7e75ac6e73740980dc961a2478916fda04a3c3"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m2b.log",
+      "bytes": 2048,
+      "sha256": "dbfba966675dffcf4a22c439e5cabe438e86b9949d1013f487f12974da8dbb5d"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m3a.log",
+      "bytes": 1617,
+      "sha256": "301dfc589b211052713d9dfcc01d1517a2a43cbf9e60af494cb34d792b9ba07c"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/collect-m3b.log",
+      "bytes": 1019,
+      "sha256": "5d88e6bcf9bc2a7a80a21183ace42f5e70582f5e24cb44c1da3c997338724eae"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/manifest.json",
+      "bytes": 19188,
+      "sha256": "55a9f62433364873267768fc3670d24e1160a2f2f68041f72323f2cb5c1e42ed"
+    },
+    {
+      "path": "regression/2026-11-14T16-19-53-076Z-collect/manifest.log",
+      "bytes": 376,
+      "sha256": "0edaefe478b6da35f6294493e0bd1aa1c890212f3535d85dafd4576ca990b9e7"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/build.log",
+      "bytes": 3955,
+      "sha256": "03b6bf9dce2dbc4eb0f168fee4038b6a4519ba9f54ba4b56425b84609ae0ab4e"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/.last-run.json",
+      "bytes": 1125,
+      "sha256": "0f2fe48e0b27afdd01d1144f813282581d18e861e6941e1f36a619c7b12e02e5"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-113b0-选取期间悬停高亮与滚动仍然正常（拦截不误伤移动-滚动）-chromium/error-context.md",
+      "bytes": 1405,
+      "sha256": "f30270906f3b7c107883431caba70afadec68cdd26c58936b57a7b172ba9316b"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-3379e-的业务行为-R1b-单输入框表单的回车隐式提交不应触发-chromium/error-context.md",
+      "bytes": 1376,
+      "sha256": "d1e11444944badeca480b8f64489caf10148ae08b2875d2d95ebce2503e866fd"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-46db7-R1c-选取模式下链接不跳转，退出选取后链接恢复可跳转-chromium/error-context.md",
+      "bytes": 1394,
+      "sha256": "f27ffddadc85deb59c536ea1e9623e253eebeae243defa1e8bc4ac97d9679aea"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-9e8e4-mousedown-mouseup-不应触达业务监听器-chromium/error-context.md",
+      "bytes": 1402,
+      "sha256": "e70ed9ec634a338a578f168780543504138bbeac0ec80b51225616e84883e7b6"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-aaa10-ce-激活被拦截，退出选取后按钮可被-Space-激活-chromium/error-context.md",
+      "bytes": 1406,
+      "sha256": "c3bd852597b7e06e97069c2385889e07e60adda459dc7b143816ffe053dddc87"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-f3614-R1e-选取模式下右键菜单与双击被拦截，退出选取后恢复-chromium/error-context.md",
+      "bytes": 1395,
+      "sha256": "8c90392cb2f1a92bcff4145724590b503ce252e55fa8e9318cfa2e68915d5f2a"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-known-issues-R1-选取模式不得-f85b2-pointer-mouse-click-监听器完全恢复-chromium/error-context.md",
+      "bytes": 1386,
+      "sha256": "528a76e38ee181ac2d37ce1709f00df40118e12ada40e223d9f4023d8ddcecb1"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-message-guard-S4-消息来源与-2214e-略畸形-highlight-与未知-Studio-消息-chromium/error-context.md",
+      "bytes": 1349,
+      "sha256": "0f5f86351bbd8fc761fd92ddc645ade08bce82397d41261ac55356142605a0a1"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-message-guard-S4-消息来源与-2a7b4-urce-不是-parent-的-pick-start-chromium/error-context.md",
+      "bytes": 1344,
+      "sha256": "272275ae6bdfee06702c71de47646e5e25f5fb51acd19983e7cc1ab74c0e119f"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-message-guard-S4-消息来源与-7ca62-rce-正确时-bridge-会进入选取模式并拦截点击-chromium/error-context.md",
+      "bytes": 1364,
+      "sha256": "b5cd6b7764d799c0c4511ce4b20bf7752405f82bb1b82eb565c6c2375c0859b9"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-message-guard-S4-消息来源与-fae07-状非法的-pick-result（合法对照必须被接受）-chromium/error-context.md",
+      "bytes": 1369,
+      "sha256": "178ef3b29b88a415fd940a5f30c5cb9080de3db5a6518f154bbf2d15c6b99f88"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-mutation-check-变异验证（R3-1c321-li-不再注入-data-src，完整性校验必须报出来-chromium/error-context.md",
+      "bytes": 1397,
+      "sha256": "72757334f9ac5708b9bdb9e3a969ee06cef3c2b241be662c8e96c34acdaeff6a"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-mutation-check-变异验证（R3-f1bff-标：所有-span-统一指向同一个错误位置，必须被抓到-chromium/error-context.md",
+      "bytes": 1403,
+      "sha256": "0c1dfbad4cef50d102d20291c5d660cd3c8bce5f9068b3d620ada59a19e37918"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium/error-context.md",
+      "bytes": 1369,
+      "sha256": "aa90270fc214d955d50c5bd563a3ae29d812735222d6218149987fd3c39e0f8a"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-1530c-——AST-位置集合与运行时-DOM-标记集合互相对照-chromium/error-context.md",
+      "bytes": 1370,
+      "sha256": "abff1573a4b73a9135aca724eac6bd69b773ff4cff7fd002df8b68a4b4999fb6"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-25598-素归到最近标记外层并带-outer-container-chromium/error-context.md",
+      "bytes": 1360,
+      "sha256": "6c000de141db33d182dd48d41a367985606be69f1f5c0d47e3e25dd6672b71e6"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-2a15e-t-被-Studio-忽略（bridge-侧同样校验）-chromium/error-context.md",
+      "bytes": 1358,
+      "sha256": "cae515c7748e02c6c228570f3a231857a6e52fe2cae08204df014201870ac9b5"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-2：选取模式下点击不触发原行为，退出选取后恢复-chromium/error-context.md",
+      "bytes": 1346,
+      "sha256": "dded1fa2a105848251770b6b1c6daadda3be44a520b4f52a599b0a84aaff7895"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium/error-context.md",
+      "bytes": 1357,
+      "sha256": "091353673290b372fc4651d163a9e287a8987d20ca1cbd573c66e3be772f9502"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-a9d34-的卖点列表项被标注为多实例且-instances-正确-chromium/error-context.md",
+      "bytes": 1352,
+      "sha256": "0fc699076f9b9930f15ee8075ceb5bce5ae97d931598022c17b0d01b7420d650"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-c4b92-tors-最多-3-层且每项都是合法-data-src-chromium/error-context.md",
+      "bytes": 1335,
+      "sha256": "27f088dd3dadc1d66ccd4f5580805bcbe48942efd8bd98ca7c45ec86921db08a"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-e18f7-on-的-instances-与高亮框数量一致（≥3）-chromium/error-context.md",
+      "bytes": 1345,
+      "sha256": "a0b6f88d740cb7629e8fabf85bc26235f0e9c8a8cdbb792306aba3101532cc89"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b-results.json",
+      "bytes": 115888,
+      "sha256": "faf45ad86d2cbbee6cb896c049a90796e654e4a47e9495e522eb5aa9b9263042"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/e2e-m0b.log",
+      "bytes": 41103,
+      "sha256": "304baf2c78fda3523d223de59786f69d262ccf6594eef27e3ecc85231528774c"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+      "bytes": 41,
+      "sha256": "bb031a6a998e48c683b16a4c53f5c4ce86b2f3c1fe1f71608ff4777332f96441"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/manifest.json",
+      "bytes": 40810,
+      "sha256": "8cad01067a8b42f656861dda0c41b00089e9fb0856021bbe4fa23bb7abfb53ff"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/manifest.log",
+      "bytes": 174,
+      "sha256": "f6e95cc98fb2c1a9cf5e4bd8f8f3d278b54fc7efb14a1ae66c104026734f9b3b"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/typecheck.log",
+      "bytes": 603,
+      "sha256": "fc1e66ac35e0067ae6e2e435ad94952b615268aa7c81e8105abd3c4e70b67f4f"
+    },
+    {
+      "path": "regression/2026-11-14T16-20-27-242Z-full/unit.log",
+      "bytes": 64293,
+      "sha256": "0d2cb59dfe413f01bc0be17368d3506acdd72c5cd9337a7e7443dc0bf9fe9f5d"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/build.log",
+      "bytes": 3955,
+      "sha256": "6921e7797605ab4f9b17e751eafdf9bd9d5818917a7b6f6342c9559b51e24c52"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/.last-run.json",
+      "bytes": 537,
+      "sha256": "0759f4b45084f16b07854a1a6f398c2b750ed1a84c9cb0751b288bb03b0592f0"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/01-pipeline-M0-A-主链路（全程-mo-64d97-1-3-→-下载-→-处理-→-asset-ready-chromium/error-context.md",
+      "bytes": 10648,
+      "sha256": "ca2907481c148773fc040d7452a1bb2dabfa3fec9f28aa95adac9e44bbfe5e76"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/01-pipeline-M0-A-主链路（全程-mo-708ef-数校验：img-走同一条-mock-链路，非法请求被拒-chromium/error-context.md",
+      "bytes": 10653,
+      "sha256": "1d80e064aa64e43f01c05cb4ed6aeb6d7b95364800010891628e878ac6cfd573"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/02-idempotency-M0-A-幂等与「结果-97874-明：不自动重发，同键再提交也不重发，只能查询远端后导入-chromium/error-context.md",
+      "bytes": 10681,
+      "sha256": "2fdf1d03d3c278fd66a5a47839fbd24dee4267b78880bc1994d184b3ec91647d"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/02-idempotency-M0-A-幂等与「结果不明不重发」-1-同一幂等键顺序提交两次：只创建一次，返回同一条资产-chromium/error-context.md",
+      "bytes": 10660,
+      "sha256": "b07aa1879c1c4d3a93a10aaab6fdae949cbe8cc2abbf2af8bcb3d0cc00df429f"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/02-idempotency-M0-A-幂等与「结果不明不重发」-2-同一幂等键并发提交两次：只创建一个远端任务-chromium/error-context.md",
+      "bytes": 10648,
+      "sha256": "ff7bac59b1294798b46f26a8f8ba24483a7bf08576aa11260566e74999bda652"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/04-import-M0-A-导入已有任务（零额度）-导入一个已完成任务：只查询不创建，处理后可下载模型-chromium/error-context.md",
+      "bytes": 10597,
+      "sha256": "57e83aec524b2872aef0f4fb0f4269970f3e7c02f3e31db0c8f705afffb24810"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/05-security-M0-A-路径穿越与密钥泄露-2-响应、模型下载与-WebSocket-事件里都不含上游-key-chromium/error-context.md",
+      "bytes": 10587,
+      "sha256": "9f689c287ff37a842101ab1e82cddc8244605bd16ccfc01a1ceb7fe7bb6a3fd9"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/05-security-M0-A-路径穿越与密钥泄露-4-幂等键本身不落盘成明文（索引里只有哈希）-chromium/error-context.md",
+      "bytes": 10631,
+      "sha256": "933ae578affdae1cc026c03dca143235004c98d5bd33b52f521e2c7a1c7d78b0"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/06-viewport-Studio-3D-视口：加载处理后模型、画布非空、可拖动旋转、无运行错误-chromium/error-context.md",
+      "bytes": 5121,
+      "sha256": "ff6949c84ef16ca0b0ad3c2ad87f42cd64563fe354099249baef738704399c99"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/06-viewport-Studio-3D-视口：加载处理后模型、画布非空、可拖动旋转、无运行错误-chromium/test-failed-1.png",
+      "bytes": 22689,
+      "sha256": "1eefc9d9914d0d90f610852e12de368864f2a26c6305fb28fca7eeda4fa6ea11"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/07-review-fixes-M0-A-审查整改回-08e66-失：视口报错-→-重新导入-→-画布恢复（不新建任务）-chromium/error-context.md",
+      "bytes": 16440,
+      "sha256": "5283f69485fe85d74fd7b2cd1ad22f9242123e30dc96a4b6b77cd54dd75e89e4"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-output/07-review-fixes-M0-A-审查整改回-08e66-失：视口报错-→-重新导入-→-画布恢复（不新建任务）-chromium/test-failed-1.png",
+      "bytes": 22722,
+      "sha256": "165e6c8b114f6e5fa310084258f953212a1ca3190ec83c1b26f5daac251372cd"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a-results.json",
+      "bytes": 82208,
+      "sha256": "3605bd667f7bdd2c13e2868fad4f93ba94746b67c91ce40f6a2b6f9ca818adcf"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0a.log",
+      "bytes": 21509,
+      "sha256": "5e88a0e7ed7bad9784972735058018380168b5cf9b2d5a81a4ea8c6022002cc4"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0b-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium/attachments/case8-deterministic-ast-json-550580a20097d4324266e14cefa9f27427f1fd53.json",
+      "bytes": 1964,
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium/attachments/case1-random-sample-json-30fffba12b688c5de1721879e5497d4d388d88f0.json",
+      "bytes": 12037,
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0b-results.json",
+      "bytes": 36111,
+      "sha256": "50ef51a21092d6095e548afc3c8c8d5e37f790cd7053a1d0669204813e11b455"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/e2e-m0b.log",
+      "bytes": 5462,
+      "sha256": "28335b884598bf5c46f372f69b5aedc10e9c15d7b136b596d0b9551357291bf1"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+      "bytes": 918,
+      "sha256": "cecb288b29f07d307e508478352947ad4a5d12237571bea75fb646b2be50fd6c"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+      "bytes": 827,
+      "sha256": "661d5554dfa802fa874a7f90b86874ed8e8ff6b2bad26f91a83e1f5e78226979"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+      "bytes": 809,
+      "sha256": "77bc43ad8c2539380e53fc9977f643844cb39041cfdcccecbe26dba9c7f20dd0"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+      "bytes": 855,
+      "sha256": "8b42187de0d899de509b0c21cc8a1ab8990daa4657f4e1454cb315e17ba77ea8"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
+      "bytes": 1018,
+      "sha256": "ea120e9ee306207a4e3c7cecc62aacf33cb3541ee6a737f1469cc548446e1e65"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+      "bytes": 813,
+      "sha256": "3c246cc806065df7b26c1b627dc1e43ac14fb65ac5604bde967b565901e5f61e"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
+      "bytes": 951,
+      "sha256": "f23b1edc5eaa6980d129a9da8143df14deb1234b1cfe91da495d2994e29f88a8"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-404.json",
+      "bytes": 951,
+      "sha256": "cac8d8ce9ca337bbe116417c60c0679e5db00ec13b5cc7401efdb3782fe87dae"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-轮询超时.json",
+      "bytes": 892,
+      "sha256": "f884ac9e4d4b81de32ab72288032708332a927223945a5644de402e890d1044c"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/guard-selftest.json",
+      "bytes": 197,
+      "sha256": "095cb91a8bac3b80f00952ffe8209bf2767b525fb441267fc0e9d90e50c4cfbe"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-conflict.json",
+      "bytes": 291,
+      "sha256": "af5b336057bbbeeaa9fbb91a4031d83c54236d159e22c2af0eb55a638e4c5b5a"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r1-leftover-temp.json",
+      "bytes": 1346,
+      "sha256": "f559b4167d61662cde573c29a1874f689fe1ac57c100db0b317b75efdc789311"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-drip-timeout.json",
+      "bytes": 375,
+      "sha256": "85f967b16443f82c02803449e141c83f5e085a23177672e3f756f6a60bb04edd"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-resume.json",
+      "bytes": 1737,
+      "sha256": "6d691ce2028c5c0632b974d26620a8cddc99694d8beac526c100572f5a69af78"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-s3-http-base.json",
+      "bytes": 656,
+      "sha256": "97df4e397d326f80617746c037b73b9fce875371d59724bdebee9aac64049841"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-origin.json",
+      "bytes": 195,
+      "sha256": "fdc53672d42bdfe79d819dde6ee7dc8742a04713a2e141bdd497d17b8521f603"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-traversal.json",
+      "bytes": 2740,
+      "sha256": "f40d5391bbe8dfb64dec25d61197254acb4044f1c03a80ecc4257d98a92b8bda"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+      "bytes": 41,
+      "sha256": "bb031a6a998e48c683b16a4c53f5c4ce86b2f3c1fe1f71608ff4777332f96441"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-missing-tag.json",
+      "bytes": 611,
+      "sha256": "a57f9e3ab757d453fa17b71129b6d09dd05185d8aacb9981460c718edebe611c"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-same-tag.json",
+      "bytes": 1535,
+      "sha256": "f5bc7fc74d7d5284ecde5b63e4f6153043f41755123e4c0bbeab39d288667a91"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1a-pointer-events.json",
+      "bytes": 207,
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1b-form-submit.json",
+      "bytes": 207,
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1c-link.json",
+      "bytes": 32,
+      "sha256": "a8da4701b792871d0f1a2709f5fa0e6aa93ae0ce4c4b3cb75e231a6f1fdc2ead"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1d-restore.json",
+      "bytes": 420,
+      "sha256": "26a9944cec4eb19e750c71624a44b20c60c785928c5c4d6844d77777769c95d8"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1e-contextmenu-dblclick.json",
+      "bytes": 420,
+      "sha256": "df20c597f148c3d002269cac270df17fa6bca17ecc0ffa5b5b68da9dd678000d"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1f-space.json",
+      "bytes": 420,
+      "sha256": "4e81130cb5f6bfa124799b6bd82113ac19bec446bf08cbfd5334482fddf58dd9"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1g-hover-scroll.json",
+      "bytes": 94,
+      "sha256": "49ad741a07a916d14c77153cca6028b47a51ea9c19b9de950096fceba996ec0c"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4a-bridge-source.json",
+      "bytes": 23,
+      "sha256": "9729291e0244649813f851f600879ed56826656acda2dd83559766d11f20ece3"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4c-studio-payload-guard.json",
+      "bytes": 964,
+      "sha256": "3fa86b2b54a53b20f408023c5e4fb2e4f540bf87f1ebdf261bff6b70398e67ef"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4d-bridge-guard.json",
+      "bytes": 42,
+      "sha256": "af0fe39aa07d194e089bda1733bc5ffc96d742efe4d56523b28f7aaf57cd65c4"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case1-random-sample.json",
+      "bytes": 12037,
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case3-shared-button.json",
+      "bytes": 868,
+      "sha256": "4119fb3a76796975d8f31e5bec370ee778dc0f3071a5fec3d8df58733c748253"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case4-map-list.json",
+      "bytes": 917,
+      "sha256": "b6eed75cd2c62d8806b2f4e320e6ccabcad52ad5628d6ac00cc43efcbc355446"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case5-outer-container.json",
+      "bytes": 969,
+      "sha256": "56fe5ba27409944413d707643c118db0d667399167910dacc9e21a8af47ed218"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case6-ancestors.json",
+      "bytes": 1008,
+      "sha256": "5db614cd8cc4184eaadf78a326bb82e80dc5e132a28638548d09ecccf2c6ff16"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case7-origin-check.json",
+      "bytes": 247,
+      "sha256": "6f052bd224500abf9cf5641daaa7e8d40a934a781c4b344187e02cc9584f5ae1"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case8-deterministic-ast.json",
+      "bytes": 1964,
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case9-completeness.json",
+      "bytes": 1766,
+      "sha256": "9379a21c0a48843d66195fc7f63de2c792800644a8447404793661a90b897cc4"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/manifest.json",
+      "bytes": 51635,
+      "sha256": "f4ce955070ed5345270788c40a1a2be9f55eff3147684f0a8ce15a7017fd40ec"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/manifest.log",
+      "bytes": 222,
+      "sha256": "f3674e13932a191891894fb9e89cd5c1a2c5a322ed4479696e1754802a104824"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/typecheck.log",
+      "bytes": 603,
+      "sha256": "bfcad00b6aefafaaff33c133cd5f4446d1d5969aca215bdc6910d906fb3c057c"
+    },
+    {
+      "path": "regression/2026-11-14T16-25-33-369Z-full/unit.log",
+      "bytes": 64291,
+      "sha256": "28dd0c397b9d341a19e0c22413dc40827c64c10e41b419ca7571d61f458b9077"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/build.log",
+      "bytes": 3955,
+      "sha256": "f961706da1db7ee7b28bff6b5f2404dd3a7cdf3a97d79362132505ee5e81e543"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0a-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0a-results.json",
+      "bytes": 38200,
+      "sha256": "f48989e68cfd6a775c0b7acbbc0e72f577e43e027e1c47d90b06396d22433bb8"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0a.log",
+      "bytes": 5506,
+      "sha256": "df3de0f2bb38825a906f0c12e79c0a54b1811e1b2e98e939adccb1597fac6457"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0b-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium/attachments/case8-deterministic-ast-json-550580a20097d4324266e14cefa9f27427f1fd53.json",
+      "bytes": 1964,
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0b-output/m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium/attachments/case1-random-sample-json-30fffba12b688c5de1721879e5497d4d388d88f0.json",
+      "bytes": 12037,
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0b-results.json",
+      "bytes": 36102,
+      "sha256": "649b2e352072b2fe5201f39c0c7885aef4177607f074ea05f2e2a7e33a31396b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m0b.log",
+      "bytes": 5462,
+      "sha256": "7f69da9dab5cdd4b09aa3a7ae4a982032e262bccfd661a793b767618a6c4e295"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1a-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1a-results.json",
+      "bytes": 11989,
+      "sha256": "3be0ad2f2a71275d4051660e5d19c8521f1dca60f3af61feb3af7f3f584f45ba"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1a.log",
+      "bytes": 1920,
+      "sha256": "d71d9d8bffd8f2fbe98fff2be1c2eb72d32db83509a8a27e915aa40d79d48a9b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1b-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1b-results.json",
+      "bytes": 33811,
+      "sha256": "9073cabf06817b55d3fb647e7877bb17900318830ec625a40a5d1af14c9484e9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m1b.log",
+      "bytes": 4584,
+      "sha256": "675ff095be6f39a84d20a575818083bc6bc81daff26c32d193fb4a7863a6e40b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2a-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2a-results.json",
+      "bytes": 56942,
+      "sha256": "91fb17593d5280e0e26a217c45556feb2af6be5c4c40122a27d78128d6c7485f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2a.log",
+      "bytes": 6816,
+      "sha256": "83a7917a572bf946c2d9b7319b0d434770ac863ca7bb3666efa70a5ba45f6ea3"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2b-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2b-results.json",
+      "bytes": 18882,
+      "sha256": "628e760dec408d250d1dc83a1bf12d1822f027653fc00e731f0d31c9a50029a9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m2b.log",
+      "bytes": 2915,
+      "sha256": "1a415fc44ddbfeaf49e3534c91ebb1398d975a4bafe4d14a24007bcc052f385f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3a-output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3a-results.json",
+      "bytes": 22505,
+      "sha256": "1586678eaca42922b257e7f08e7dd53b0ed7b031ab94e0552b5f0e98662abb34"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3a.log",
+      "bytes": 2105,
+      "sha256": "d8b327e47632eb66b495f7911be41b52001297d82232435af85f824dd98482d5"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-output/.last-run.json",
+      "bytes": 341,
+      "sha256": "56b921d3554bada3a9732fbb3e6d6c9486f277c17a4b274f3207bc249ea381e4"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-output/02-faults-四类真实故障分别让检查失败，采用被拒，服务仍可继续/error-context.md",
+      "bytes": 9569,
+      "sha256": "575476abb08f2885dca66ae0524c72b1c5151ae2968a579900d346d4e0af3557"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-output/03-gate-同身份幂等、显式-rerun、严格请求体、证据篡改与过期候选/error-context.md",
+      "bytes": 8871,
+      "sha256": "f7727419cdf585ff869e13714e8159be34e8b24b3d5336dcd55c3ee31bc85646"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-output/04-lifecycle-取消运行中的检查：run-变-cancelled，未完成项-not-run，不能采用/error-context.md",
+      "bytes": 10396,
+      "sha256": "fa049eb1bdcf651b6eddac4a90e0cb1d421244efdc9aa0f8c4dd9d0bb222ff42"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-results.json",
+      "bytes": 30755,
+      "sha256": "e23a754952b5600e8ea5cec22f88a1416f2db8acbd3b7691fe357c92a3c516bb"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/e2e-m3b.log",
+      "bytes": 6816,
+      "sha256": "c98282bd68cb72153aed954ed24fa830ff611f69247aab772ffa4c879db88400"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+      "bytes": 918,
+      "sha256": "3543031e440e5bc45c144e630cb4b5e0fcffe7b989b90ff5bad2bda3c8391cd3"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+      "bytes": 827,
+      "sha256": "121813b0b27c8f6af688d34bc0d7cab4b88f25ffd324a05773a80592d6f7ff32"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+      "bytes": 809,
+      "sha256": "6f6444b5bcd0f95696b2279e560a23d567bde4719682e4bd590d553f1a030870"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+      "bytes": 855,
+      "sha256": "7a652f377072fca88055c263d8256bab2010636aad09f4a69f8f149c2cc2a70e"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
+      "bytes": 1018,
+      "sha256": "8a032e55c445de817a7ac528f82a2dc5f419c5dadafa10296c8dc3ead7532e67"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+      "bytes": 813,
+      "sha256": "0c2d9c1c9ba15ddeaacd2834510203b3e661029c67345f6b4a8f79553b409711"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
+      "bytes": 951,
+      "sha256": "b77e9c670b8cbe2450a21f3f28ec40ca14afe0056e385762a38dcf3ca9cc0179"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-404.json",
+      "bytes": 951,
+      "sha256": "d7352a7e6ec8c34d53eaa6a10a6b07642b1ac5182f1032702440270b9469867f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-轮询超时.json",
+      "bytes": 892,
+      "sha256": "c5518cf0599c10f886fd69ec69caa4d32adbcd5f9acc34d27dd8a5cc00a2d16d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/guard-selftest.json",
+      "bytes": 197,
+      "sha256": "873e71d5e1ab4ca9897022d836e4d81102c7588f06f6afbcf04b90bbd629c9f5"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-concurrent.json",
+      "bytes": 557,
+      "sha256": "5e51443100bb41bd94f494fd7dd5fe7520729f710c3e91cad4002ed56cb548b2"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-conflict.json",
+      "bytes": 291,
+      "sha256": "af5b336057bbbeeaa9fbb91a4031d83c54236d159e22c2af0eb55a638e4c5b5a"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-sequential.json",
+      "bytes": 556,
+      "sha256": "34ecd21418642906565e09711b051567962f93bc0c4397f17359e300351f863c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/idempotency-unclear.json",
+      "bytes": 512,
+      "sha256": "6088975cefe187352a6fd1ef58f1f71aaa07bce1dd26f4867e3be2a188c15664"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/image-to-3d.json",
+      "bytes": 1627,
+      "sha256": "b5017ce220a0492c30435dc23e38d07fc03441186a70c4908e3a44bc7e50b66f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/import.json",
+      "bytes": 3403,
+      "sha256": "f48aa3e7f399af2ea1acc434e22935d213bd271c7a567be7463b2e7fd51b9f0d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/pipeline.json",
+      "bytes": 6099,
+      "sha256": "5728ab3cedf40779d8217a5c6dae61f8b6b0781a9f1ecde0e8dcca515afa3250"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r1-leftover-temp.json",
+      "bytes": 1346,
+      "sha256": "f5e56c92b45ecc6da3f780784ebf49205064fa90553aa3546fa7fcdc770c3f83"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-drip-timeout.json",
+      "bytes": 375,
+      "sha256": "8f108977b0f31a756f9081bdbac6115a15890c35f2288a76384cbc68849ed5a1"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r2-resume.json",
+      "bytes": 1737,
+      "sha256": "543bc037eced2c0250497768fef62d62d92d7538a87bf2283475d83a414d159d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-r3-model-missing.json",
+      "bytes": 484,
+      "sha256": "c6fc6a294b2f59e4cbfd0dc4605c02f0451c7147d701a0b479e2b121facf73ef"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/review-s3-http-base.json",
+      "bytes": 656,
+      "sha256": "04b53242c21e3b17ab3ceed3e591253e2df1ad31f82a392e0cc1986352ef95c7"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-idempotency-hash.json",
+      "bytes": 1558,
+      "sha256": "49bcfe63b16fcb2fb7ea56a3ce63f7d2eef267e5681372b3722568bb78f69604"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-key-leak.json",
+      "bytes": 391,
+      "sha256": "7334d69b68d921a1750afa6fc11cb80019c127af7521613adb9d2063ecba39d3"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-origin.json",
+      "bytes": 195,
+      "sha256": "fdc53672d42bdfe79d819dde6ee7dc8742a04713a2e141bdd497d17b8521f603"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/security-traversal.json",
+      "bytes": 2740,
+      "sha256": "f40d5391bbe8dfb64dec25d61197254acb4044f1c03a80ecc4257d98a92b8bda"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/viewport-rotated.png",
+      "bytes": 133023,
+      "sha256": "58cce16e4f3e107b9b8ef521e6e444f2be03491c93336df1a977d2807395eed7"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/viewport.json",
+      "bytes": 555,
+      "sha256": "dcc46535df5768e0b9ebe7b52320f823da5c73d4242b3c3f7d2515037507188a"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-column-offset.json",
+      "bytes": 41,
+      "sha256": "bb031a6a998e48c683b16a4c53f5c4ce86b2f3c1fe1f71608ff4777332f96441"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-missing-tag.json",
+      "bytes": 611,
+      "sha256": "a57f9e3ab757d453fa17b71129b6d09dd05185d8aacb9981460c718edebe611c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-mutation-same-tag.json",
+      "bytes": 1535,
+      "sha256": "f5bc7fc74d7d5284ecde5b63e4f6153043f41755123e4c0bbeab39d288667a91"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1a-pointer-events.json",
+      "bytes": 207,
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1b-form-submit.json",
+      "bytes": 207,
+      "sha256": "0e33bbf440d64a5a2f4d6adcff0dbd463338584dcea7788e66ceb33a6a58f446"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1c-link.json",
+      "bytes": 32,
+      "sha256": "a8da4701b792871d0f1a2709f5fa0e6aa93ae0ce4c4b3cb75e231a6f1fdc2ead"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1d-restore.json",
+      "bytes": 420,
+      "sha256": "26a9944cec4eb19e750c71624a44b20c60c785928c5c4d6844d77777769c95d8"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1e-contextmenu-dblclick.json",
+      "bytes": 420,
+      "sha256": "df20c597f148c3d002269cac270df17fa6bca17ecc0ffa5b5b68da9dd678000d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1f-space.json",
+      "bytes": 420,
+      "sha256": "4e81130cb5f6bfa124799b6bd82113ac19bec446bf08cbfd5334482fddf58dd9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-r1g-hover-scroll.json",
+      "bytes": 94,
+      "sha256": "49ad741a07a916d14c77153cca6028b47a51ea9c19b9de950096fceba996ec0c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4a-bridge-source.json",
+      "bytes": 23,
+      "sha256": "9729291e0244649813f851f600879ed56826656acda2dd83559766d11f20ece3"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4c-studio-payload-guard.json",
+      "bytes": 964,
+      "sha256": "3fa86b2b54a53b20f408023c5e4fb2e4f540bf87f1ebdf261bff6b70398e67ef"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case-s4d-bridge-guard.json",
+      "bytes": 42,
+      "sha256": "af0fe39aa07d194e089bda1733bc5ffc96d742efe4d56523b28f7aaf57cd65c4"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case1-random-sample.json",
+      "bytes": 12037,
+      "sha256": "e794b9992feb0ebc63b09808dc68288ff598cad9c0a7eaa6169fea293f682402"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case3-shared-button.json",
+      "bytes": 868,
+      "sha256": "fc398eda3a82e01e957574f421f6b923121f66e69908ffe298139b553693c39a"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case4-map-list.json",
+      "bytes": 917,
+      "sha256": "ed018095305ef2ded46eeb678f90d71f88c66cd3a2a7cea3884164f687aed951"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case5-outer-container.json",
+      "bytes": 969,
+      "sha256": "459623a465e842528c88a578d66888e179fa1f8791faa5fa528c6869e7566682"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case6-ancestors.json",
+      "bytes": 1008,
+      "sha256": "bc3df41ced38d7752d112692b80ce479dc78cb309ede0822725d46357bc6e286"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case7-origin-check.json",
+      "bytes": 247,
+      "sha256": "6f052bd224500abf9cf5641daaa7e8d40a934a781c4b344187e02cc9584f5ae1"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case8-deterministic-ast.json",
+      "bytes": 1964,
+      "sha256": "802b8709057f1d6bde3f2fcea7f3255900f94e778dcf19a5d747862e7c85057a"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m0b/docs/reports/artifacts/M0-B/case9-completeness.json",
+      "bytes": 1766,
+      "sha256": "9379a21c0a48843d66195fc7f63de2c792800644a8447404793661a90b897cc4"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/consistency.json",
+      "bytes": 6751,
+      "sha256": "8fdc484869a451c13a57ed8db990359bb8ecf04f036e65ab545414fa9df8f2cc"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/fallback.json",
+      "bytes": 3942,
+      "sha256": "c7c2998bdd34e853cd9a8072e91d0a1db6420007acf64e2dba9b178e6cfe9977"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/invalid-config.json",
+      "bytes": 1050,
+      "sha256": "dcc03e4d88aa15f1e66f0699fa7dafc5029353b6da3e10deb22d3cb596f96aa8"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/parts-single-mesh.json",
+      "bytes": 1469,
+      "sha256": "3da85fa67c6f1ad90ffd4cd42452d1b7f1bd887969e121af9d9e324f5d866a05"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/parts.json",
+      "bytes": 5729,
+      "sha256": "dfa51dcf09dbea4d74bcc585387c5c49570a25e186a925263b382ec8a25d91e0"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/resource-release.json",
+      "bytes": 1098,
+      "sha256": "aa4ba20cdf4b271960617c2e9f93d509e14c8b89869dd8b597f5716bcaeeb4cf"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1a/docs/reports/artifacts/M1-A/scroll-lid.json",
+      "bytes": 1590,
+      "sha256": "30ff7780f13d557274aa225de7cbc2decbd365c0bb39e79f8bd2ac0334db873c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-guard.json",
+      "bytes": 170,
+      "sha256": "c610746c438d04c4cda54ff3fc40612509fc017597f4260b98b0807fc9e42dc4"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-primary.json",
+      "bytes": 338,
+      "sha256": "34b82153e93162d00df27305c73125db4bb23820974d72109329d267401c11ca"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/adopt-sandbox-ok.json",
+      "bytes": 2445,
+      "sha256": "4b67b25dd04ca8c8ce8bb4620c2b5d1842c70c0bb0167fb2dae3bbe8138f4ab9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-concurrent.json",
+      "bytes": 77,
+      "sha256": "41eec58947e8205355d3ad4148990beb3a438f26824ce5467a1401a5731f6da9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-invalid-page.json",
+      "bytes": 172,
+      "sha256": "01cf71fff8f0faf8de8118dacfbea78a0ccf4fe46454d5f41613a1d99bae55ec"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-invalid.json",
+      "bytes": 947,
+      "sha256": "2d8a56ca95400a63d49b5909fe281029281268e9ac5627323d060b4f8d909c31"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/api-paths.json",
+      "bytes": 628,
+      "sha256": "5ee0b7fa74ccaa5d044577f7ee1e2b752aa718217568a0aa612efd7c70c8390b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-after-edit.json",
+      "bytes": 7457,
+      "sha256": "a45fb1d6d34af171bad66070cdbb26bdfd2efeba8f9b6a0d9d59c1d9bed5864b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-canvas-content.json",
+      "bytes": 382,
+      "sha256": "147a882425c990eea1a4e003a4243a170f32fa969e33265efd53f9f2c58e201e"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-default.json",
+      "bytes": 6887,
+      "sha256": "abe9c2803e38f1cd82f704404c97bc14c276dfa2314b539e03ca5efc18dfaa57"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/consistency-scroll-06.json",
+      "bytes": 5643,
+      "sha256": "e93d2f3ff7ad2b63b953400fba1fa1fd7f56b01e968a7982224ed0ad32a83d41"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-b1-host.json",
+      "bytes": 246,
+      "sha256": "86d5e11a05f0e52389394c4c35a53a6080655a660e584258597cef45f578b43b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-r2-lid-gating.json",
+      "bytes": 241,
+      "sha256": "15c298d455b33a3cf5a9eb8b2a2f64bb798774f5c557da5d67584e3e45c5f847"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-r3-instance-lock.json",
+      "bytes": 172,
+      "sha256": "18c25590ddad7c35d66ce7ddeac490fb43e63545463d7ccfb114e8d8e6de9986"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/fix-s1-unwrap.json",
+      "bytes": 118,
+      "sha256": "5a589019fb18e9b7038fa1aba6b4779edbfa07526b8d0bc5115af864c6a037c0"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-overwrite.json",
+      "bytes": 311,
+      "sha256": "623ff080362f8b43ffa9135ee2d275e5e8f1c5c27d43f762d928aa2a96d4ff5c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-scroll-shipped.json",
+      "bytes": 246,
+      "sha256": "7280c37db3d1059cf7e73666437ac1545b58709c2ff96e5862ed93ed26924a62"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/keyframe-write.json",
+      "bytes": 566,
+      "sha256": "e0b7d66fa4f6289a103966a47ed8a7a76240b365f36b5367f7af4261827660fd"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-api.json",
+      "bytes": 36,
+      "sha256": "2382b013ca1636a3db731908fd15f8ac6400150607a0afb8fbc8410b1198e6af"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-empty.json",
+      "bytes": 149,
+      "sha256": "95b6fab4efbe8487f363e596c46824ac8c3aff9f49544a2b0c6cbc171008f06b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/undo-ui.json",
+      "bytes": 99,
+      "sha256": "dc55f7a263349fd415e0535720af334cf7a25f17304d16352ba9cca21e3dbfdc"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/writeback-hero.json",
+      "bytes": 2113,
+      "sha256": "38910407a24666b75ad98305ccbc9d1171bdfb037627f9e752a56544c063436d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m1b/docs/reports/artifacts/M1-B/writeback-keyframe.json",
+      "bytes": 882,
+      "sha256": "b539fa6cf1c5727501602940bb4e64526dac8e8f55f0ceb8b5e0c3ec72cc0d44"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/adopt-conflict.json",
+      "bytes": 408,
+      "sha256": "779f9dea93f22cb6a70fd31f1d8cd5a2606a4ed4b25fbccd61b203096339a98f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/adopt-once.json",
+      "bytes": 77,
+      "sha256": "f32be2f1a6f46e9c6dc92b17a95197e64ac74b0e9a5df423d6c38fb979a6bf7f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/candidate-limit-closed.json",
+      "bytes": 76,
+      "sha256": "b1f2bfaa17d2727a763bea109d4d004e2ca0fdb2a35d4d3b4696be665446058c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/candidate-limit.json",
+      "bytes": 2201,
+      "sha256": "2a00174c346970bef082ce5d82652520c23c4d27ff5a2c18c473fdcd71c4cf88"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/d1-candidate-preview.json",
+      "bytes": 282,
+      "sha256": "fc1121000b636c57a08826f05e792fff932380c1672b4251ffa9135c0d242b04"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/discard.json",
+      "bytes": 143,
+      "sha256": "8188ef7cfbfc02c851a168a36e02d5192bbc99e7a57495c241f90b9e10f1321d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/events-replay.json",
+      "bytes": 108,
+      "sha256": "b56d46226b1f48b4e2bb6dc529c8e956326aa19878fcf6e9e86dba7e662cb129"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/events-restart.json",
+      "bytes": 126,
+      "sha256": "632c638d4c7f99f8188fa423014f00d8009616c0c939270546c10eb053e793bc"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-cancel.json",
+      "bytes": 112,
+      "sha256": "b86cbf97d57859a3c697b514f70eb0a0c4b09840b9e80583f597ce7271e17c08"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-no-changes.json",
+      "bytes": 130,
+      "sha256": "e58f4df13cefa557033abd8664a4b624520f7b7fdd5bfec0e85ca746e108ee06"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-protocol.json",
+      "bytes": 142,
+      "sha256": "3ac5316cbeb5255eeda0d8c92546e5314c51df49e12fb376fc9ba848f24b20f3"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-timeout.json",
+      "bytes": 136,
+      "sha256": "e6baf3c912c25b8e8b92252e1777809ba6ede95666bf7e52a1daf77943eaacec"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/failure-upstream.json",
+      "bytes": 124,
+      "sha256": "42fa3fcdc0c2b45bb37717f264aecef6a15e081c48e4d10646ba614bd92fbe32"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/flow-main.json",
+      "bytes": 1627,
+      "sha256": "483606489e10fab43fb1febb4b5c9ccfab1ad48a2e760959f891b30c085e717c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/flow-out-of-scope.json",
+      "bytes": 129,
+      "sha256": "88e872eed95cbebd50515253fbb09c8b87b739a4ebdd204f9d07d4d61d9e64fd"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-b1.json",
+      "bytes": 681,
+      "sha256": "fd63b8f9a3cdeec469cded63eb68924362948754143eabe336d6db0572bf7577"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-b2.json",
+      "bytes": 530,
+      "sha256": "a2c7ce1e7518a3eb54d31281ee4d6d17092fb11b4b425a32f961a77752c666eb"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r1.json",
+      "bytes": 367,
+      "sha256": "577c3525eb23082de904ee61abb34625d896b6fdb0c82410ffaa33d13783dffb"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-multi-candidate-pid-kill.json",
+      "bytes": 8336,
+      "sha256": "51a3a26a77cdfdd646fefe083c692bfd35de2b440558dfa66bf80b40deb06062"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-negative-control.json",
+      "bytes": 24469,
+      "sha256": "1e8ccd90136b5f3b8543b4ccf2b6cd5d08e92afead635de5133856d2c9d24dbe"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-pid-kill.json",
+      "bytes": 3595,
+      "sha256": "5ec6ec9d4f46504fd3fa16fe2c2ac355d236bcfc6bd0851b2fc9526466cdfd08"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-startup-window-pid-kill.json",
+      "bytes": 4109,
+      "sha256": "aba1afa8802e4d84e02c1b09ff1d03b568c0125ea7a052bba57830a73a5a65bc"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/isolation-r6-attributed-tree-kill.json",
+      "bytes": 4262,
+      "sha256": "70cf224cbbb6b51ba33d72cfa4d4431e9855e5d2329864e0e37fe2d49fccac4c"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/preview-origin.json",
+      "bytes": 333,
+      "sha256": "439a826bc5065bf7ef7d0bd9e1e94754cd36d1e1e686a5f855afc35e4f57e4a5"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/resources.json",
+      "bytes": 176,
+      "sha256": "16c84f765c7e0afd3494bba79dc77f02b4e7d9bdbb3ffb71dd075730da51dbb9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f2-preview-host.json",
+      "bytes": 192,
+      "sha256": "06788b175fa96567ab96ebb071ddcf610270b9f6729d3a0f46b33ec7c17b1d5f"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f3-audit.json",
+      "bytes": 52,
+      "sha256": "28264ff176a441bf4cb82e37b31d34a5736a88bc45bff98a31282a0e0c3f4075"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/round3-f4-instance-lock.json",
+      "bytes": 84,
+      "sha256": "1669b8ba5b496f3e2c50ae56bbeef3cc419b7e2a65a773cbfb9a5c678af44a85"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox-adopt-unsafe.json",
+      "bytes": 132,
+      "sha256": "0b4d7175363736207bc77279fc8cb0555e61124e2889ec9a3712a9916b996871"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox-unsafe-work-tree.json",
+      "bytes": 332,
+      "sha256": "c0666d41558621fdd0ec4533cfd7ed456662ef58878981bf675e2e59794d5e98"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/sandbox.json",
+      "bytes": 402,
+      "sha256": "7caf2b54dbba24e531e0df8cb5b4c1170f9ebac112de1af0971ccf637158dcef"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-invalid.json",
+      "bytes": 1087,
+      "sha256": "bbc6a0a1d0c1e11fd449bae1c05eb8e8034a7a186f553ba2883f8f8a3484cb7e"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-stale.json",
+      "bytes": 106,
+      "sha256": "d88ff02d2668779ab7338a87d0caefbd31982fc5d845a2a9324d6e83d70fd15d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/selection-valid.json",
+      "bytes": 100,
+      "sha256": "97555a3cb4281e139329c0e75084e21044d9e9813fd4c440f68129e6dcfded1d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2a/docs/reports/artifacts/M2-A/takeover-n4-shutdown-b167907.json",
+      "bytes": 5018,
+      "sha256": "d19a4805f3b3419e135c18b8613b40d129e2a7bdb8c45279e5a209316f1f1605"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-cancel-retry.json",
+      "bytes": 23,
+      "sha256": "2f1922043d4f22bf7a3b9e5c117fa15ddffd6abe1d63c762f606eefff5e50571"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-flow.json",
+      "bytes": 931,
+      "sha256": "85d234bbc42f7668f0c4fb852b2c518854879869aa40a2e66fc19d31b0873735"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/m2b-ui-out-of-scope.json",
+      "bytes": 146,
+      "sha256": "5174edde40d7011274672a40a69562b5ac2d2d4cd554fa491a2b67980d232b7d"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-candidates-switch.json",
+      "bytes": 1389,
+      "sha256": "0ff8643d0fb528b00fd4bf0582ede6623900118085ba8a48802e90ba45c9481b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-events-reconnect.json",
+      "bytes": 291,
+      "sha256": "992b7c53b2c5215be0f679efb49cedcd389d91d2399aff03cafb38e865bcc6cb"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+      "bytes": 316,
+      "sha256": "b7e7de1f61e9525c5410bdfbe163c14adb5df3cacc72b9e9886e37b751c6e5d4"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-failed.json",
+      "bytes": 488,
+      "sha256": "8ca22ff89b3a2ac0e1ff3ea24ce0a83954c346b926010f7ac0ffcce1fbb2b8ed"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-pending.json",
+      "bytes": 445,
+      "sha256": "8bc2c9daa122594c3d96649f0c9e2dfe874b1267bda0a35b8872ca1b8ca935c9"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-r1-retry.json",
+      "bytes": 76,
+      "sha256": "d0d2dbefbb2647423bf4f443b252340fe05df2302c83775d98ddb2c73c5fd185"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-single-connection.json",
+      "bytes": 275,
+      "sha256": "d3cc06a35ba0eaaa38a0454a2cf13b33780ae6ba4a89520fd5dd09a67ef032b1"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-stale-different-file.json",
+      "bytes": 2309,
+      "sha256": "e00663a691ca6db00215a8d4552864b8c3adac780b729e9dc5274be8d8ce534b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/evidence-refresh/e2e-m2b/docs/reports/artifacts/M2-B/takeover-stale-same-file.json",
+      "bytes": 2495,
+      "sha256": "66835bacb592874ae80867e8fac2a5184f8bafcdaef5ce19044f2288e749b3b7"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/manifest.json",
+      "bytes": 118089,
+      "sha256": "1b1080ed9b7491ec06ecdaefec207c1802c9504006a50cb950fbbeb715d21e66"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/manifest.log",
+      "bytes": 501,
+      "sha256": "c55d52c2eb32cf790a2cb954ef4e1cd21917feaf8852736f7f8b6645a21e2556"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/typecheck.log",
+      "bytes": 603,
+      "sha256": "355e75e5de6c3e76d103e446cbaefe4d2839a288994acd456ef615b94f31df0b"
+    },
+    {
+      "path": "regression/2026-11-14T16-43-45-146Z-full/unit.log",
+      "bytes": 64284,
+      "sha256": "28460792258374940974bb9b779715d24b0c0085d2a185c7e668e955c1446628"
+    }
+  ]
+}
