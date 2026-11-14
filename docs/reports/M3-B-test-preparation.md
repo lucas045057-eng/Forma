@@ -115,33 +115,67 @@
 
 ## 7. 完整回归入口（本轮未启动）
 
-`tests/e2e/m3b/full-regression.mjs`（按 Codex 复核要求重写）：
+`tests/e2e/m3b/full-regression.mjs` + `tests/e2e/m3b/runner-support.mjs`（按两轮复核要求重写；判据逻辑抽成无副作用模块，可脱离服务单独验证）：
 
 - 顺序：`pnpm typecheck` → `pnpm build` → `pnpm test` → 旧七套 E2E（M0-B/M0-A/M1-A/M1-B/M2-A/M2-B/M3-A）→ M3-B；首败即停、`--retries=0`、不做任何过滤。
-- **身份门禁用真实字节**：已跟踪产品文件逐文件 SHA256 + `pnpm-lock.yaml` SHA256 + 工作区脏/未跟踪状态 + HEAD，逐步前后比较；任一项变化即判该步失败并停止（不再只看 index 摘要）。
-- 所有 git 调用都带 `-c core.longpaths=true`；**非零退出直接抛错**，不把 stderr 当合法输出。
-- `--collect` **只收集**（只跑各套件 `--list`），不再附带 typecheck/build/单测。
-- Playwright 用仓库内 `node_modules/@playwright/test/cli.js`，不用可能触发下载的 `npx`。
-- 每套原始 JSON 与 `outputDir` 定向到本次 run 目录（`PLAYWRIGHT_JSON_OUTPUT_NAME` + `--output=`），跑完解析报告核对
-  `errors / stats.expected / stats.unexpected / stats.skipped / stats.flaky / 每个用例状态与重试`，不只看退出码。
-- 运行环境按显式白名单构造（不继承、不打印整个 `process.env`）；继续 fake key / loopback / 现有出站守卫。
-- 已归档 tracked 证据若被套件刷新，记录并 `git checkout --` 按 blob 还原，结果写进 manifest。
+- **报告判据（三层状态不混）**：`test.expectedStatus === 'passed'`、`test.status === 'expected'`、`results[0].status === 'passed'`；
+  严格要求**恰好一条 result 且 `retry === 0`**（两条都 passed 也拒），拒绝 `skipped / expected-failed / 注解 skip|fixme|fail / errors 非空 / stats.unexpected|skipped|flaky 非零`；
+  递归遍历 `suite.suites`（嵌套 `test.describe` 不漏），按**实际 test 记录**计数（记录 projectName，空串归一为 `(default)`）并与 `stats.expected` 对数。
+- **reporter 显式启用**：执行模式 CLI 传 `--reporter=list,json`（M3-A 配置只有 list，光设 `PLAYWRIGHT_JSON_OUTPUT_NAME` 不会产出 JSON）；
+  收集模式用 `--reporter=list`，避免不必要地刷新历史 JSON。每套 JSON 与 `--output` 都定向到本次 run 目录。
+- **身份门禁用真实字节**：产品 + `tests/e2e` + `playwright*.ts` 配置 + 锁文件，逐文件 SHA256（**含未跟踪但未被忽略**的文件内容），
+  连同 HEAD / 锁 SHA256 / 脏状态组成摘要；run 起点建立统一 baseline，每步 before 与 after 都对照 baseline，偏离即本步失败并停止。
+- **git 调用**一律 `-c core.longpaths=true`，非零退出直接抛错，不把 stderr 当合法身份；不改任何全局 git 配置。
+- **历史证据**：本步被刷新的 tracked 证据先归档新字节（`evidence-refresh/<step>/<path>`）并记录前后 sha256、归档路径、HEAD blob 与还原后对象 id，
+  再按 blob 还原并用 `git hash-object --path` 对 `git rev-parse HEAD:<path>` 校验；**步骤开始前就已脏（归属不明）或出现新的已跟踪证据文件 → 拒绝覆盖、判本步失败**。
+- **完成屏障**：只以 `close` + 日志 stream flush 为结束；spawn `ENOENT` 之类只有 `error/close` 也会结束并把 `spawnError` 写进步骤证据（不再挂在 `exit` 上）。
+- 运行环境按显式白名单构造（不继承、不打印整个 `process.env`）；继续 fake key / loopback / 现有出站守卫；缺浏览器只用隔离 `LOCALAPPDATA`。
+- `--collect` **只收集**：只跑各套件 `--list`，不跑 typecheck/build/单测，也不起任何服务。
 
-## 8. 过程中发现并修正的四件事
+### 7.1 判据与门禁的自验（本轮实际执行）
 
-1. **测试侧错误（非产品缺陷）**：首轮预检 `POST /candidates/:id/checks` 得到 400 `INVALID_INPUT`「检查请求体必须是对象」。
-   原因是助手在“无请求体”时发了空字符串 `body: ''`；产品严格拒绝非对象请求体是正确合同。已改成“真的不发 body”并加注释。
-2. **超长历史证据路径**：见 §1，需要 `core.longpaths`，否则工作树建不出来、`git status` 会误报。
-3. **默认套件会覆写 tracked 证据**：收集时 `docs/reports/artifacts/M0-B/playwright-results.json` 被写成本次 `--list` 的内容。
-   本轮已把刷新后的字节（22220B，sha256 `970cef08…`）另存为 `acceptance-precheck/collection-refresh/m0b-playwright-results.bytes.json`，
-   再按 blob 还原；`collection-verification.json` 记录 head blob（8556B，`2029ec30…`）与还原结果。
-4. **比较还原结果不能用“字节 sha256”**：`core.autocrlf` 会让工作区（CRLF，8840B）与 blob（LF，8556B）字节不同。
-   正确做法是比对 git 归一化对象 id（`git rev-parse HEAD:<path>` 与 `git hash-object --path=<path> <file>`），并要求 `git status` 该路径为空。
-   第一版脚本在这里判了“还原失败”，是校验写法错，不是数据损坏——已改正并把两种数字都留档，避免后人误读。
+`node tests/e2e/m3b/verify-runner-support.mjs` → **9/9 通过**（exit 0，耗时约 2s，不启动任何 E2E/服务/构建）：
 
-## 9. 结论（不含验收声明）
+| 检查 | 数据 |
+| --- | --- |
+| 真实报告判通过 | 用已入库的 `acceptance-precheck/playwright-results.json`（真跑过的 happy 报告） |
+| 嵌套 suites 计数 | 把真实 spec 放进 `suite.suites` 后仍计 1 test/1 result |
+| 失败结果被拒 | `results[0].status='failed'` + `test.status='unexpected'` + `stats.unexpected=1` |
+| skip / expected-failed 被拒 | `status='skipped'`、`expectedStatus='failed'` 两种样本 |
+| 重试被拒 | 追加 `retry=1` 的第二条 result（两条都 passed 也必须拒） |
+| errors / stats 不一致被拒 | `errors` 非空；`stats.expected=2` 而实际 1 条 |
+| 身份四类变化 | 顺序无关但内容相同判等；字节变化、锁变化、未跟踪文件变化各自被发现 |
+| 证据计划 | 本步刷新 → 可归档还原；步骤前已脏 → 冲突（拒绝覆盖）；未变 → 不处理 |
+| spawn 故障有界结束 | 固定不存在的命令：`spawnError='ENOENT'`、`ok=false`、**2ms 返回**（不挂起） |
 
-- 测试侧接线**已就绪**：M3-B 收集 7 例/4 文件，默认 M0-B 收集 24 例/4 文件且已排除 `m3b`/`real-model`；两次收集 exit=0。
-- 一次最小单场景真实检查预检**通过**（1 passed，13.3s，真实 Chromium 与六份证据、收尾证据齐全）。
+证据：`docs/reports/artifacts/M3-B/acceptance-precheck/runner-support-verification.json`（自述性记录：验证时 HEAD `ed8a168` + 当时未提交的三个文件清单）。
+
+## 8. 二轮只读反馈逐项回应
+
+| 反馈项 | 处理 | 位置/证据 |
+| --- | --- | --- |
+| 把 `results.status` 当 `expected` 比较（判据混淆三层状态） | 分三层分别检查：`expectedStatus=passed` / `test.status=expected` / `results[0].status=passed` | `runner-support.mjs#verifyPlaywrightReport`，自验 `real-report-passes` + `failed-result-rejected` |
+| 只遍历顶层 `specs`，漏 nested suites；应按 test/project 计数 | 递归 `flattenSuites`，按 test 记录计数并记录 projectName，与 `stats.expected` 对数 | 自验 `nested-suites-counted` |
+| 单一 retry=1 也要拒，不能只靠数组长度 | 要求 `results.length === 1` 且 `results[i].retry === 0` 且状态 passed | 自验 `retry-rejected` |
+| **M3-A 只配 list reporter**，只设 `PLAYWRIGHT_JSON_OUTPUT_NAME` 不产 JSON | 执行模式显式 `--reporter=list,json`；收集模式 `--reporter=list` | `full-regression.mjs#steps` |
+| `restoreRefreshedEvidence` 直接 checkout，没先归档新字节；已脏/未知归属不得覆盖 | `planEvidenceRestore` 先分类，再归档新字节+哈希+路径+blob 绑定后还原；conflicts/created 一律拒绝覆盖并判失败 | `runner-support.mjs`、`full-regression.mjs#archiveAndRestore`，自验 `evidence-plan` |
+| 身份要含 `tests/e2e` 与 Playwright 配置，run 级统一 baseline，逐步对照；未跟踪文件也要纳入 | 身份路径扩到产品+测试+配置+锁；已跟踪与未跟踪（未忽略）文件都按真实字节 hash；run 起点 baseline，步骤前后都比 | `full-regression.mjs#currentIdentity`，自验 `identity-detection` |
+| `runStep` 只听 exit，ENOENT 只有 error/close 会挂死 | `spawnAndAwait` 以 error/close 结束、close 后等日志 flush；`spawnError` 写入步骤证据 | `runner-support.mjs#spawnAndAwait`，自验 `spawn-enoent-bounded`（2ms） |
+| 不要因为元数据 helper 变动重跑整套 happy/服务 | 本轮只跑 `verify-runner-support.mjs`（2s，无服务无浏览器） | 见 §7.1 |
+
+## 9. 过程中发现并修正的五件事
+
+1. **测试侧错误（非产品缺陷）**：首轮预检 `POST /candidates/:id/checks` 400 `INVALID_INPUT`——助手在“无请求体”时发了空字符串；产品严格拒绝非对象请求体是正确的，已改成“真的不发 body”。
+2. **超长历史证据路径**：需要 `core.longpaths` 才能建工作树与读状态，否则普通 `git status` 误报一条 `M`。
+3. **默认套件会覆写 tracked 证据**：收集会刷新 `docs/reports/artifacts/M0-B/playwright-results.json`；本轮已把刷新后的字节（22220B，sha256 `970cef08…`）另存并归档，再按 blob 还原，过程记入 `collection-verification.json`。
+4. **比较还原结果不能用工作区字节 sha256**：`core.autocrlf` 下工作区 CRLF（8840B）与 blob LF（8556B）字节不同；要用 `git hash-object --path` 对 `git rev-parse HEAD:<path>`，并要求 `git status` 该路径为空。
+5. **自验断言自己写窄了**：真实报告里没配 `projects` 的配置会写出 `projectName: ""`，我却断言必须是 `chromium`；已把空串归一为 `(default)` 并放宽断言到“记录到 1 个 project”。判据本身没问题，是自验口径的问题。
+
+## 10. 结论（不含验收声明）
+
+- 测试侧接线与判据**已就绪**：M3-B 收集 7 例/4 文件，默认 M0-B 收集 24 例/4 文件（已排除 `m3b`/`real-model`）；两次收集 exit=0。
+- 真实检查单场景预检**已通过一次**（1 passed，13.3s，真实 Chromium、六份证据、收尾干净）。该次实跑发生在 `ed8a168` 提交内容对应的套件上；
+  **本轮的 runner 元数据/证据/启动逻辑改动没有被 happy 覆盖**，只由 §7.1 的 9 项自验覆盖——两者边界不混。
 - 其余 6 个 M3-B 用例、以及迁移后的旧七套用例**尚未执行**，本文不声称它们通过。
-- **M3-B 未通过、M3 未完成、项目未完成**，本分支不合并。下一步按原门禁：Claude 修后复核 `6f6ff49` → Codex 合并冻结 → Pi 正式完整回归（含本文全部未执行项）。
+- **M3-B 未通过、M3 未完成、项目未完成**，本分支不合并；Claude 对 `6f6ff49` 的修后独立复核仍未完成。
+  下一步仍是：Claude 修后复核 → Codex 合并冻结 → Pi 正式完整回归（跑 §7 的入口，并覆盖本文所有“未执行/未覆盖”项）。

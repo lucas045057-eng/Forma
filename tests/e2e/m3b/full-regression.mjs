@@ -2,35 +2,37 @@
 /**
  * M3-B 验收用的完整回归顺序入口（本分支只准备，不正式启动）。
  *
- *   node tests/e2e/m3b/full-regression.mjs --collect     # 只做收集验证（--list），不跑任何用例/构建
+ *   node tests/e2e/m3b/full-regression.mjs --collect     # 只收集（各套件 --list），不跑构建/单测/服务
  *   node tests/e2e/m3b/full-regression.mjs               # 真正按顺序跑（首败即停）
  *
  * 顺序：pnpm typecheck → pnpm build → pnpm test（全量单测）→ 旧七套 E2E → M3-B。
  *
- * 硬约束（按 Codex 复核要求）：
- * - 身份门禁用**工作区真实字节**：已跟踪产品文件的逐文件 SHA256 + 锁文件 SHA256 + 工作区脏/未跟踪状态，
- *   每步前后比较，不一致即判该步失败并停止（不是只看 index 摘要）。
- * - 所有 git 调用都带 `-c core.longpaths=true`；任何非零退出都直接失败，不把 stderr 当合法输出。
- * - Playwright 用**本仓库已安装的 CLI**（node_modules/@playwright/test/cli.js），不用 npx（可能触发下载）。
- * - 每个套件的 JSON reporter 与 outputDir 都定向到本次 run 目录，并在跑完后核对
- *   errors / expected / unexpected / skipped / flaky / 每个用例的实际状态；不只看退出码。
- * - 运行环境用显式白名单变量构造，不继承也不打印整个 process.env。
- * - 已归档的 tracked 证据凡是被套件刷新，按 blob 原样还原并在 manifest 里记下来。
+ * 判据与门禁（判据实现见 runner-support.mjs，可脱离本脚本独立验证）：
+ * - 报告：三层状态分别检查（expectedStatus=passed / test.status=expected / results[0].status=passed），
+ *   恰好一条 result、retry=0、拒绝 skip/flaky/errors，递归统计 nested suites 并与 stats.expected 对数；
+ * - 身份：产品 + tests/e2e + Playwright 配置 + 锁文件的**真实字节** SHA256（含未跟踪但未被忽略的文件），
+ *   run 起点建立统一 baseline，每步 before/after 都与 baseline 对照，不一致即本步失败并停止；
+ * - 历史证据：本步被刷新的 tracked 证据先归档新字节与哈希，再按 blob 还原；
+ *   步骤开始前就已脏（归属不明）的证据文件一律不覆盖，直接判失败；
+ * - 完成屏障：只以 close + 日志写完为结束；spawn ENOENT 之类只有 error/close 也会结束并记录；
+ * - git 全部带 `-c core.longpaths=true`，非零退出直接失败；环境按白名单构造，不继承/不打印整个 process.env。
  */
+import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync, createWriteStream } from 'node:fs';
-import path from 'node:path';
+import { dirname, join, relative } from 'node:path';
+import {
+  buildIdentity, evidenceArchiveTarget, identityDiff, planEvidenceRestore, sha256Hex, spawnAndAwait, verifyPlaywrightReport,
+} from './runner-support.mjs';
 
 const ROOT = process.cwd();
 const MODE = process.argv.includes('--collect') ? 'collect' : 'full';
 const RUN_ID = `${new Date().toISOString().replace(/[:.]/g, '-')}-${MODE}`;
-const OUT = path.join(ROOT, 'docs', 'reports', 'artifacts', 'M3-B', 'full-regression', RUN_ID);
-const PLAYWRIGHT_CLI = path.join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js');
+const OUT = join(ROOT, 'docs', 'reports', 'artifacts', 'M3-B', 'full-regression', RUN_ID);
+const PLAYWRIGHT_CLI = join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js');
+const EVIDENCE_DIR = 'docs/reports/artifacts';
 
-const PRODUCT_PATHS = ['apps', 'packages', 'templates', 'package.json', 'pnpm-workspace.yaml'];
+const IDENTITY_PATHS = ['apps', 'packages', 'templates', 'tests/e2e', 'package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml'];
 const LOCK_FILE = 'pnpm-lock.yaml';
-const EVIDENCE_DIR = path.join('docs', 'reports', 'artifacts');
 const E2E_SUITES = [
   { name: 'm0b', config: null },
   { name: 'm0a', config: 'playwright.m0a.config.ts' },
@@ -42,7 +44,6 @@ const E2E_SUITES = [
   { name: 'm3b', config: 'playwright.m3b.config.ts' },
 ];
 
-/** 显式白名单：不继承整个 process.env。 */
 const ENV_KEYS = [
   'PATH', 'Path', 'PATHEXT', 'SystemRoot', 'SystemDrive', 'WINDIR', 'ComSpec', 'COMSPEC',
   'TEMP', 'TMP', 'TMPDIR', 'LOCALAPPDATA', 'APPDATA', 'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'HOME',
@@ -50,181 +51,180 @@ const ENV_KEYS = [
   'PNPM_HOME', 'PLAYWRIGHT_BROWSERS_PATH', 'npm_config_cache', 'npm_config_store_dir',
 ];
 
-function baseEnv(extra = {}) {
+const baseEnv = (extra = {}) => {
   const env = {};
   for (const key of ENV_KEYS) if (process.env[key] !== undefined) env[key] = process.env[key];
   return { ...env, ...extra };
-}
+};
 
 function git(args) {
-  const result = spawnSync('git', ['-c', 'core.longpaths=true', ...args], { cwd: ROOT, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 });
+  const result = spawnSync('git', ['-c', 'core.longpaths=true', ...args], { cwd: ROOT, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
   if (result.status !== 0) {
     throw new Error(`git ${args.join(' ')} 退出码 ${result.status}：${`${result.stdout ?? ''}${result.stderr ?? ''}`.trim().slice(0, 400)}`);
   }
   return `${result.stdout ?? ''}`;
 }
 
-const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
+const splitZ = (text) => text.split('\0').filter(Boolean);
+const readHash = (file) => {
+  const full = join(ROOT, file);
+  return existsSync(full) ? sha256Hex(readFileSync(full)) : 'missing';
+};
 
-function tracked(pathspec) {
-  return git(['ls-files', '-z', '--', ...pathspec]).split('\0').filter(Boolean);
+function playwrightConfigs() {
+  return splitZ(git(['ls-files', '-z', '--', ':(glob)playwright*.ts']));
 }
 
-/** 产品身份：已跟踪产品文件逐字节 SHA256 + 锁文件 SHA256 + 工作区状态。 */
-function productIdentity() {
-  const files = tracked(PRODUCT_PATHS);
-  const lines = files.map((file) => {
-    const full = path.join(ROOT, file);
-    if (!existsSync(full)) return `${file}\0missing`;
-    return `${file}\0${sha256(readFileSync(full))}`;
-  }).sort();
-  const status = git(['status', '--porcelain', '-z', '--untracked-files=all', '--', ...PRODUCT_PATHS]);
-  const lockPath = path.join(ROOT, LOCK_FILE);
-  return {
+/** 当前身份：已跟踪 + 未跟踪（未忽略）文件的真实字节 + 锁 SHA256 + HEAD。 */
+function currentIdentity() {
+  const paths = [...IDENTITY_PATHS, 'playwright.config.ts', ...playwrightConfigs().filter((file) => file.includes('playwright.'))];
+  const tracked = splitZ(git(['ls-files', '-z', '--', ...paths]));
+  const untracked = splitZ(git(['ls-files', '--others', '--exclude-standard', '-z', '--', ...paths]));
+  const entries = [...new Set([...tracked, ...untracked])].map((file) => ({ path: file, hash: readHash(file) }));
+  const dirty = splitZ(git(['status', '--porcelain', '-z', '--untracked-files=all', '--', ...paths]))
+    .map((entry) => entry.replace(/^.../, ''));
+  return buildIdentity({
     head: git(['rev-parse', 'HEAD']).trim(),
     branch: git(['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
-    files: files.length,
-    digest: sha256(Buffer.from(lines.join('\n'))),
-    lock: existsSync(lockPath) ? sha256(readFileSync(lockPath)) : 'missing',
-    dirty: status.split('\0').filter(Boolean), // 未提交/未跟踪的产品路径
-  };
-}
-
-/** 已归档证据的已跟踪文件哈希，用于发现"套件刷新了历史证据"。 */
-function evidenceIdentity() {
-  const files = tracked([EVIDENCE_DIR]);
-  const map = new Map();
-  for (const file of files) {
-    const full = path.join(ROOT, file);
-    map.set(file, existsSync(full) ? sha256(readFileSync(full)) : 'missing');
-  }
-  return map;
-}
-
-/** 被刷新的 tracked 证据按 blob 原样还原（归属明确：只还原 docs/reports/artifacts 下已跟踪文件）。 */
-function restoreRefreshedEvidence(before) {
-  const after = evidenceIdentity();
-  const refreshed = [...after.keys()].filter((file) => before.get(file) !== after.get(file));
-  const untracked = git(['ls-files', '--others', '--exclude-standard', '-z', '--', EVIDENCE_DIR]).split('\0').filter(Boolean);
-  for (const file of refreshed) {
-    const blob = spawnSync('git', ['-c', 'core.longpaths=true', 'checkout', '--', file], { cwd: ROOT, encoding: 'utf8' });
-    if (blob.status !== 0) throw new Error(`还原历史证据 ${file} 失败：${blob.stderr ?? ''}`);
-  }
-  return { refreshed, untracked };
-}
-
-function runStep(step) {
-  return new Promise((resolve) => {
-    const logFile = path.join(OUT, `${step.name}.log`);
-    const stream = createWriteStream(logFile, { flags: 'a' });
-    const before = { product: productIdentity(), evidence: evidenceIdentity() };
-    const startedAt = new Date().toISOString();
-    const startedMs = Date.now();
-    const child = spawn(step.command, step.args, { cwd: ROOT, env: baseEnv(step.env), shell: step.shell === true, windowsHide: true });
-    stream.write(`# ${step.name}: ${step.command} ${step.args.join(' ')}\n# pid=${child.pid} started=${startedAt}\n`);
-    child.stdout.on('data', (chunk) => stream.write(chunk));
-    child.stderr.on('data', (chunk) => stream.write(chunk));
-    child.on('error', (error) => stream.write(`# spawn error: ${String(error)}\n`));
-    child.on('exit', (code, signal) => {
-      const finishedAt = new Date().toISOString();
-      const after = { product: productIdentity(), evidence: evidenceIdentity() };
-      const problems = [];
-      if (before.product.digest !== after.product.digest) problems.push('产品已跟踪文件字节在步骤内发生变化');
-      if (before.product.lock !== after.product.lock) problems.push('锁文件 SHA256 在步骤内发生变化');
-      if (JSON.stringify(before.product.dirty) !== JSON.stringify(after.product.dirty)) problems.push('产品工作区脏/未跟踪状态在步骤内发生变化');
-      if (before.product.head !== after.product.head) problems.push('HEAD 在步骤内发生变化');
-      let restored = { refreshed: [], untracked: [] };
-      try { restored = restoreRefreshedEvidence(before.evidence); } catch (error) { problems.push(String(error)); }
-      stream.end(`\n# exit=${code} signal=${signal} finished=${finishedAt} durationMs=${Date.now() - startedMs}\n# identityProblems=${JSON.stringify(problems)}\n# restoredEvidence=${JSON.stringify(restored)}\n`);
-      resolve({
-        step: step.name, command: `${step.command} ${step.args.join(' ')}`, pid: child.pid,
-        startedAt, finishedAt, durationMs: Date.now() - startedMs, code, signal,
-        log: path.relative(ROOT, logFile), identity: { before: before.product, after: after.product },
-        identityStable: problems.length === 0, identityProblems: problems, restoredEvidence: restored,
-      });
-    });
+    entries,
+    dirty,
+    lockSha: readHash(LOCK_FILE),
   });
 }
 
-/** 读 Playwright JSON reporter 的结果，核对是否真的"全过、无重试、无跳过"。 */
-function verifyPlaywrightJson(file) {
-  if (!existsSync(file)) return { ok: false, problems: [`缺少 JSON 报告：${path.relative(ROOT, file)}`] };
-  const report = JSON.parse(readFileSync(file, 'utf8'));
-  const problems = [];
-  if (Array.isArray(report.errors) && report.errors.length) problems.push(`errors 非空（${report.errors.length}）`);
-  const stats = report.stats ?? {};
-  for (const key of ['unexpected', 'skipped', 'flaky']) if (Number(stats[key] ?? 0) !== 0) problems.push(`stats.${key}=${stats[key]}`);
-  let total = 0;
-  for (const suite of report.suites ?? []) {
-    for (const spec of suite.specs ?? []) {
-      total += 1;
-      if (!spec.ok) problems.push(`用例失败：${spec.title}`);
-      for (const test of spec.tests ?? []) {
-        const statuses = (test.results ?? []).map((result) => result.status);
-        if (statuses.some((status) => status !== 'expected')) problems.push(`用例 ${spec.title} 状态非 expected：${statuses.join(',')}`);
-        if (statuses.length > 1) problems.push(`用例 ${spec.title} 出现重试：${statuses.length} 次`);
-        if (test.status !== 'expected') problems.push(`用例 ${spec.title} test.status=${test.status}`);
-      }
-    }
-  }
-  if (!total) problems.push('没有收集/执行到任何用例');
-  if (Number(stats.expected ?? -1) !== total) problems.push(`stats.expected=${stats.expected} 与实际用例数 ${total} 不一致`);
-  return { ok: problems.length === 0, problems, total, stats };
-}
+const evidenceFiles = () => splitZ(git(['ls-files', '-z', '--', EVIDENCE_DIR]));
+const evidenceHashes = () => new Map(evidenceFiles().map((file) => [file, readHash(file)]));
+const evidenceDirty = () => new Set(splitZ(git(['status', '--porcelain', '-z', '--', EVIDENCE_DIR])).map((entry) => entry.replace(/^.../, '')));
 
 function steps() {
   const e2e = E2E_SUITES.map((suite) => {
+    const name = `${MODE === 'collect' ? 'collect' : 'e2e'}-${suite.name}`;
     const base = [PLAYWRIGHT_CLI, 'test'];
     if (suite.config) base.push('-c', suite.config);
-    const name = `${MODE === 'collect' ? 'collect' : 'e2e'}-${suite.name}`;
+    if (MODE === 'collect') return { name, command: process.execPath, args: [...base, '--list', '--reporter=list'], env: {}, verifyJson: null };
     return {
-      name,
-      command: process.execPath,
-      args: MODE === 'collect'
-        ? [...base, '--list']
-        : [...base, '--retries=0', '--workers=1', `--output=${path.join(OUT, `${name}-output`)}`],
-      env: MODE === 'collect' ? {} : { PLAYWRIGHT_JSON_OUTPUT_NAME: path.join(OUT, `${name}-results.json`), PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH ?? path.join(process.env.LOCALAPPDATA ?? '', 'ms-playwright') },
-      verifyJson: MODE === 'collect' ? null : path.join(OUT, `${name}-results.json`),
+      name, command: process.execPath,
+      args: [...base, '--retries=0', '--workers=1', '--reporter=list,json', `--output=${join(OUT, `${name}-output`)}`],
+      env: {
+        PLAYWRIGHT_JSON_OUTPUT_NAME: join(OUT, `${name}-results.json`),
+        PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH ?? join(process.env.LOCALAPPDATA ?? '', 'ms-playwright'),
+      },
+      verifyJson: join(OUT, `${name}-results.json`),
     };
   });
-  if (MODE === 'collect') return e2e; // 收集模式只收集，不跑 typecheck/build/单测
+  if (MODE === 'collect') return e2e;
   return [
-    { name: 'typecheck', command: 'pnpm', args: ['typecheck'], env: {}, verifyJson: null, shell: true },
-    { name: 'build', command: 'pnpm', args: ['build'], env: {}, verifyJson: null, shell: true },
-    { name: 'unit', command: 'pnpm', args: ['test'], env: {}, verifyJson: null, shell: true },
+    { name: 'typecheck', command: 'pnpm', args: ['typecheck'], env: {}, shell: true, verifyJson: null },
+    { name: 'build', command: 'pnpm', args: ['build'], env: {}, shell: true, verifyJson: null },
+    { name: 'unit', command: 'pnpm', args: ['test'], env: {}, shell: true, verifyJson: null },
     ...e2e,
   ];
 }
 
-mkdirSync(OUT, { recursive: true });
-const manifest = {
-  runId: RUN_ID, mode: MODE, startedAt: new Date().toISOString(), cwd: ROOT, node: process.version, pid: process.pid,
-  playwrightCli: path.relative(ROOT, PLAYWRIGHT_CLI), envKeys: ENV_KEYS, steps: [],
-};
-writeFileSync(path.join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-console.log(`[full-regression] mode=${MODE} out=${path.relative(ROOT, OUT)}`);
+/** 归档被刷新的证据新字节，再按 blob 还原；归属不明则拒绝覆盖。 */
+function archiveAndRestore(stepName, plan, records) {
+  const problems = [];
+  for (const file of plan.conflicts) problems.push(`证据文件在本步开始前就已脏（归属不明），拒绝覆盖：${file}`);
+  for (const file of plan.created) problems.push(`本步出现了新的已跟踪证据文件，需人工确认：${file}`);
+  for (const item of plan.restorable) {
+    const source = join(ROOT, item.file);
+    const target = evidenceArchiveTarget(OUT, stepName, item.file);
+    mkdirSync(dirname(target), { recursive: true });
+    const bytes = readFileSync(source);
+    writeFileSync(target, bytes);
+    const headBlobId = git(['rev-parse', `HEAD:${item.file.replaceAll('\\', '/')}`]).trim();
+    const checkout = spawnSync('git', ['-c', 'core.longpaths=true', 'checkout', '--', item.file], { cwd: ROOT, encoding: 'utf8' });
+    if (checkout.status !== 0) {
+      problems.push(`还原 ${item.file} 失败：${(checkout.stderr ?? '').slice(0, 200)}`);
+      continue;
+    }
+    const restoredId = spawnSync('git', ['-c', 'core.longpaths=true', 'hash-object', `--path=${item.file}`, source], { cwd: ROOT, encoding: 'utf8' }).stdout?.toString().trim();
+    const status = spawnSync('git', ['-c', 'core.longpaths=true', 'status', '--porcelain', '--', item.file], { cwd: ROOT, encoding: 'utf8' }).stdout?.toString() ?? '';
+    if (restoredId !== headBlobId || status.trim() !== '') problems.push(`还原 ${item.file} 未回到 blob（id=${String(restoredId).slice(0, 12)} expected=${headBlobId.slice(0, 12)} status=${status.trim().slice(0, 80)}）`);
+    records.push({
+      file: item.file, beforeSha256: item.beforeHash, afterSha256: item.afterHash,
+      archivedTo: relative(ROOT, target).split('\\').join('/'), archivedBytes: bytes.length,
+      headBlobId, restoredObjectId: restoredId ?? null, statusClean: status.trim() === '',
+    });
+  }
+  return problems;
+}
 
+async function runStep(step, baseline) {
+  const logFile = join(OUT, `${step.name}.log`);
+  const stream = createWriteStream(logFile, { flags: 'a' });
+  const startedAt = new Date().toISOString();
+  const startedMs = Date.now();
+  const before = { identity: currentIdentity(), evidence: evidenceHashes(), dirty: evidenceDirty() };
+  stream.write(`# ${step.name}: ${step.command} ${step.args.join(' ')}\n# started=${startedAt}\n`);
+
+  const spawnResult = await spawnAndAwait(step.command, step.args, {
+    spawn,
+    spawnOptions: { cwd: ROOT, env: baseEnv(step.env), shell: step.shell === true, windowsHide: true },
+    onChild: (child) => {
+      child.stdout?.on('data', (chunk) => stream.write(chunk));
+      child.stderr?.on('data', (chunk) => stream.write(chunk));
+    },
+  });
+  // 日志写完才继续（close 之后再等 stream flush）。
+  await new Promise((resolve) => stream.end(resolve));
+
+  const finishedAt = new Date().toISOString();
+  const after = { identity: currentIdentity(), evidence: evidenceHashes() };
+  const problems = [];
+  if (spawnResult.spawnError) problems.push(`进程启动失败：${spawnResult.spawnError}`);
+  if (spawnResult.code !== 0) problems.push(`退出码 ${spawnResult.code}（signal=${spawnResult.signal}）`);
+  problems.push(...identityDiff(baseline.identity, before.identity).map((item) => `步骤开始前就已偏离基线：${item}`));
+  problems.push(...identityDiff(baseline.identity, after.identity).map((item) => `步骤结束后偏离基线：${item}`));
+
+  const plan = planEvidenceRestore({ before: before.evidence, after: after.evidence, dirtyBefore: before.dirty });
+  const archived = [];
+  try { problems.push(...archiveAndRestore(step.name, plan, archived)); }
+  catch (error) { problems.push(`归档/还原证据失败：${String(error).slice(0, 300)}`); }
+
+  const record = {
+    step: step.name, command: `${step.command} ${step.args.join(' ')}`, pid: spawnResult.pid,
+    startedAt, finishedAt, durationMs: Date.now() - startedMs,
+    code: spawnResult.code, signal: spawnResult.signal, spawnError: spawnResult.spawnError,
+    log: relative(ROOT, logFile), identityStable: problems.length === 0,
+    identityProblems: problems, evidenceArchived: archived,
+    identity: { baseline: baseline.identity, before: before.identity, after: after.identity, drift: identityDiff(baseline.identity, after.identity) },
+  };
+  if (step.verifyJson) {
+    try {
+      record.report = verifyPlaywrightReport(JSON.parse(readFileSync(step.verifyJson, 'utf8')));
+      if (!record.report.ok) problems.push(...record.report.problems.map((item) => `报告核对失败：${item}`));
+    } catch (error) {
+      record.report = { ok: false, problems: [`读取/解析 JSON 报告失败：${String(error).slice(0, 200)}`] };
+      problems.push(`报告核对失败：${record.report.problems[0]}`);
+    }
+  }
+  record.ok = problems.length === 0;
+  return record;
+}
+
+mkdirSync(OUT, { recursive: true });
 if (!existsSync(PLAYWRIGHT_CLI)) {
-  console.error(`[full-regression] 找不到本仓库的 Playwright CLI：${PLAYWRIGHT_CLI}（不用 npx 以免触发下载）`);
+  console.error(`[full-regression] 找不到本仓库的 Playwright CLI：${PLAYWRIGHT_CLI}（不用 npx，避免触发下载）`);
   process.exit(2);
 }
+const baseline = { identity: currentIdentity(), evidence: evidenceHashes(), dirty: evidenceDirty() };
+const manifest = {
+  runId: RUN_ID, mode: MODE, startedAt: new Date().toISOString(), cwd: ROOT, node: process.version, pid: process.pid,
+  playwrightCli: relative(ROOT, PLAYWRIGHT_CLI), envKeys: ENV_KEYS, baseline, evidenceDirtyAtStart: [...baseline.dirty], steps: [],
+};
+writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+console.log(`[full-regression] mode=${MODE} out=${relative(ROOT, OUT)} identity=${baseline.identity.digest.slice(0, 12)} lock=${baseline.identity.lock.slice(0, 12)}`);
 
 for (const step of steps()) {
   console.log(`[full-regression] ${step.name} …`);
-  const record = await runStep(step);
-  if (step.verifyJson) Object.assign(record, { report: verifyPlaywrightJson(step.verifyJson) });
+  const record = await runStep(step, baseline);
   manifest.steps.push(record);
-  writeFileSync(path.join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-  appendFileSync(path.join(OUT, 'manifest.log'), `${record.step} exit=${record.code} identityStable=${record.identityStable} report=${record.report?.ok ?? '-'}\n`);
-  const reportBad = record.report && !record.report.ok;
-  if (record.code !== 0 || !record.identityStable || reportBad) {
-    const reason = [
-      record.code !== 0 ? `exit=${record.code}` : '',
-      record.identityStable ? '' : `身份变化：${record.identityProblems.join('；')}`,
-      reportBad ? `报告核对失败：${record.report.problems.join('；')}` : '',
-    ].filter(Boolean).join(' | ');
-    console.error(`[full-regression] ${record.step} 未通过（${reason}），按规则停止后续步骤；证据 ${record.log}`);
+  writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  appendFileSync(join(OUT, 'manifest.log'), `${record.step} ok=${record.ok} code=${record.code} report=${record.report?.ok ?? '-'} archived=${record.evidenceArchived.length}\n`);
+  if (!record.ok) {
+    console.error(`[full-regression] ${record.step} 未通过：${record.identityProblems.join(' | ')}；证据 ${record.log}`);
     process.exit(1);
   }
 }
-console.log(`[full-regression] 全部 ${manifest.steps.length} 步通过；manifest=${path.relative(ROOT, path.join(OUT, 'manifest.json'))}`);
+console.log(`[full-regression] 全部 ${manifest.steps.length} 步通过；manifest=${relative(ROOT, join(OUT, 'manifest.json'))}`);
