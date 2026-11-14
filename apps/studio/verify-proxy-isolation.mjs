@@ -12,13 +12,21 @@ const studioRoot = fileURLToPath(new URL('.', import.meta.url));
 async function run(command) {
   console.log(`[verify] start ${command}`);
   await new Promise((resolve, reject) => {
+    let outputTail = '';
     const child = process.platform === 'win32'
-      ? spawn('cmd.exe', ['/d', '/s', '/c', command], { cwd: root, stdio: 'inherit' })
-      : spawn('sh', ['-c', command], { cwd: root, stdio: 'inherit' });
+      ? spawn('cmd.exe', ['/d', '/s', '/c', command], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] })
+      : spawn('sh', ['-c', command], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+    for (const [source, destination] of [[child.stdout, process.stdout], [child.stderr, process.stderr]]) {
+      source.setEncoding('utf8');
+      source.on('data', text => {
+        destination.write(text);
+        outputTail = (outputTail + text).slice(-64_000);
+      });
+    }
     child.once('error', reject);
     child.once('close', (code, signal) => {
       console.log(`[verify] end code=${code} signal=${signal ?? 'none'} ${command}`);
-      if (code === 0) resolve(); else reject(new Error(`Validation command failed: ${command}`));
+      if (code === 0) resolve(); else reject(new Error(`Validation command failed: ${command} (code=${code}, signal=${signal ?? 'none'})\n${outputTail.trim() || '(no child output)'}`));
     });
   });
 }
