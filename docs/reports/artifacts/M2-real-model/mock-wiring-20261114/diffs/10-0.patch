@@ -1,0 +1,95 @@
+diff --git a/src/scene.config.json b/src/scene.config.json
+index 51e7b1f..5c568c2 100644
+--- a/src/scene.config.json
++++ b/src/scene.config.json
+@@ -1,12 +1,78 @@
+-{
+-  "model": "/assets/diffuser-4969889.glb",
+-  "hero": {
+-    "camera": { "position": [1.6, 1.1, 1.6], "target": [0, 0.5, 0], "fov": 35 },
+-    "model": { "rotation": [0, 0.52, 0], "scale": 1 },
+-    "lights": { "key": { "intensity": 3, "color": "#ffd9a8", "direction": [3, 5, 4] }, "ambient": 1.2 }
+-  },
+-  "scroll": [
+-    { "at": 0, "model": { "rotation": [0, 0.52, 0] }, "parts": { "lid": { "offset": [0, 0, 0] } } },
+-    { "at": 0.6, "model": { "rotation": [0, 1.8, 0] }, "parts": { "lid": { "offset": [0, 0.08, 0] } } }
+-  ]
+-}
++{
++  "model": "/assets/diffuser-4969889.glb",
++  "hero": {
++    "camera": {
++      "position": [
++        1.6,
++        1.1,
++        1.6
++      ],
++      "target": [
++        0,
++        0.5,
++        0
++      ],
++      "fov": 35
++    },
++    "model": {
++      "rotation": [
++        0,
++        0.52,
++        0
++      ],
++      "scale": 1
++    },
++    "lights": {
++      "key": {
++        "intensity": 3,
++        "color": "#ffd9a8",
++        "direction": [
++          3,
++          5,
++          4
++        ]
++      },
++      "ambient": 0.8
++    }
++  },
++  "scroll": [
++    {
++      "at": 0,
++      "model": {
++        "rotation": [
++          0,
++          0.52,
++          0
++        ]
++      },
++      "parts": {
++        "lid": {
++          "offset": [
++            0,
++            0,
++            0
++          ]
++        }
++      }
++    },
++    {
++      "at": 0.6,
++      "model": {
++        "rotation": [
++          0,
++          1.8,
++          0
++        ]
++      },
++      "parts": {
++        "lid": {
++          "offset": [
++            0,
++            0.08,
++            0
++          ]
++        }
++      }
++    }
++  ]
++}

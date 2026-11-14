@@ -9,7 +9,7 @@
 ## 当前状态：准备与 mock 接线完成，真实十题未开始
 
 - 本轮只改测试/launcher/报告：新增专用 Playwright 配置、隔离 fixture、固定十题 spec、后台顺序入口与网络守卫白名单。
-- **mock 接线结果：10/10 通过**（`docs/reports/artifacts/M2-real-model/mock-wiring-20261114/`，loopback mock、假 key，未用真实额度）。这只证明测试接线可用，**不是真实模型成绩，也不能用来预判通过**。
+- **mock 接线结果：10/10 通过**（`docs/reports/artifacts/M2-real-model/mock-wiring-20261114/`，loopback mock、假 key，未用真实额度）；并加了三组故障探针证明门禁能失败（`fault-probes-20261114/`）。这只证明测试接线可用，**不是真实模型成绩，也不能用来预判通过**。
 - 真实十题由调度在本轮提交后从后台启动；结果未回前不得写“通过”。
 
 ## 凭据与服务隔离
@@ -49,21 +49,31 @@
 
 通用断言（由测试从 DOM/计算样式/JSON/文件实际读取，不把预期发给模型）：
 - 除本题允许的字段外，全部快照键与基线一致（文本、按钮尺寸/颜色/字号、h1/intro/价格/nav/详情/页脚、卖点三条、场景状态等）。
+- 页面/iframe 的 `error`/`unhandledrejection` 与 Playwright `pageerror` 分基线、候选、采用三阶段收集；候选/采用阶段出现**新增**未捕获异常即失败（基线已有异常不掩盖新增）。
+- 点采用前，主 frame 快照必须仍等于基线，作品摘要与 `scene.config.json` 原字节未变（不是只在回退时验证）。
 - 候选和主预览的 3D `product-scene` 均 `data-state=ready`、存在 canvas。
-- 候选四项内建检查仍为 `not_run`（Pi 观测独立记录，不冒充 M3 检查）。
+- 候选 `checks` 与 UI 四项必须全部 `not_run` 且不显示“通过”（Pi 观测独立记录，不冒充 M3 检查）。
 - 采用后隔离作品生效；回退后源码/配置完整摘要与基线一致。
-- 行为题（1/8 点击购买计数，4 点击导航 hash）在候选 iframe 内验证，不改作品。
+- 行为题（1/8 点击购买计数，4 点击导航 hash，8 另验 save/gift 原行为）在候选 iframe 内验证，行为状态单独记录，不混入“非目标内容变化”。
 
 ## 证据字段
 
-每题 JSON（`tasks/<n>.json`）记录：固定指令、selector、真实 selection（src/baseVersion/instances/ancestors）、taskId/会话（与 `x-opencode-session` 同一 task id）、任务状态/错误、轮数（从任务事件 `请求编码模型（第 n/16 轮）`）、任务时长、usage（客户端未暴露 → 记“未提供”）、diff/outOfScope/checks、基线/候选/采用/回退快照、版本变化、作品摘要（基线 vs 回退）、截图路径、行为断言。异常脱敏，不保存 Authorization/完整环境/上游响应体。
+每题 JSON（`tasks/<n>.json`）记录：固定指令、selector、真实 selection（src/baseVersion/instances/ancestors）、taskId/会话（与 `x-opencode-session` 同一 task id）、任务状态/错误、轮数（从任务事件 `请求编码模型（第 n/16 轮）`）、任务时长、usage（客户端未暴露 → 记“未提供”）、diff（完整 patch 另存 `diffs/<n>-*.patch`，JSON 只记 path/bytes/sha256）、outOfScope/checks、基线/候选/采用前/采用/回退快照、阶段错误、版本变化、作品摘要（基线 vs 采用前 vs 回退）、截图（baseline/candidate/adopted/reverted）、guard loaded 标记与日志、必要的后端错误摘要与端口清理结果。异常统一脱敏，不保存 Authorization/完整环境/上游响应体。
 
-## mock 接线验证结果（不是真实成绩）
+## mock 接线与故障探针（不是真实成绩）
 
-- 运行：loopback mock（4011，假 key），10 题顺序执行；`mock-wiring-20261114/results.json` → **10/10 passed**，每题 2 轮、约 9 秒。
-- 逐题 selection 示例：1 → `src/components/Button.tsx:5:5`（instances=3）；10 → `src/components/ProductHero.tsx:33:10`；候选 diff 分别为 `src/App.tsx`、`src/scene.config.json` 等。
-- 采用/回退版本变化均记录；每题 `workDigest.baseline === workDigest.afterRevert`；主模板 `git status` 干净；3001/4011/5173/5174/5175 全部释放。
-- 任务 JSON 中未出现 Authorization/Bearer/key 形态字符串；mock 证据目录不包含截图（临时 probe 截图已清理，真实运行会保存每题 candidate/adopted/reverted 截图）。
+- 补齐门禁后重跑：loopback mock（4011，假 key），10 题顺序执行；`mock-wiring-20261114/results.json` → **10/10 passed**，每题 2 轮、约 9 秒（总计约 106 秒）。
+- 逐题 selection 示例：1 → `src/components/Button.tsx:5:5`（instances=3）；10 → `src/components/ProductHero.tsx:33:10`；候选 diff 分别归到 `src/App.tsx`、`src/scene.config.json` 等，完整 patch 在 `diffs/`。
+- 每题基线截图先生成；采用前主 frame/作品摘要/场景配置不变断言通过；候选 4 项检查均为 `not_run`；采用/回退版本变化与 `workDigest.afterRevert === baseline` 均记录；guard marker active、guard 日志为空；主模板干净、端口释放。
+- 故障探针（`fault-probes-20261114/`，均未发真实请求）：
+
+| 注入 | 预期门禁 | 实测 |
+| --- | --- | --- |
+| 候选阶段未捕获异常 | 新增 pageerror 判失败 | `result=failed`，错误含“新增未捕获脚本异常…probe-uncaught-error” |
+| 采用前手工改作品 `App.tsx` | 采用前 workDigest 判失败 | `result=failed`，错误“采用前作品内容不应被候选修改” |
+| 证据中出现 `Bearer probe-secret-…` | 安全停止、不得通过 | `status=security-failed`、`securityStop=true`、runner exit 1 |
+
+- 任务 JSON 中未出现 Authorization/Bearer/key 形态字符串；mock 证据目录不包含截图（临时 probe 截图已清理，真实运行会保存每题截图）。
 
 ## 真实执行命令（调度启动，不由本轮发付费请求）
 
@@ -73,9 +83,9 @@
 orbital\coordination\m2-takeover\bg-root.cmd "node tests/e2e/real-model/run.mjs --mode real --run-id real-20261114-0100"
 ```
 
-- 运行入口会检查 3001/5173/5174/5175 空闲，并只校验 `.env` 三个字段名存在（不打印值），然后启动 Studio 与固定十题；凭据只进后端 env。
-- 证据目录：`docs/reports/artifacts/M2-real-model/real-20261114-0100/`（`run.json`、`results.json`、`playwright.json`、`run.log`、每题 JSON 与截图）。
-- 判定：十题全部完成且至少 **8/10** 通过才可判 M2 过关；少于 8 题不得补跑/换题，按角色交修复/审查。超时、协议失败、上游故障均计真实失败；若启动/鉴权在首题请求前失败，记“验收未开始”。
+- 运行入口会检查 3001/5173/5174/5175 空闲，并只校验 `.env` 三个字段名存在（不打印值），然后启动 Studio 与固定十题；凭据只进后端 env。真实模式强制 10 题与 8/10 门槛，忽略 `--limit`/`--only-results` 等降低范围的参数。
+- 证据目录：`docs/reports/artifacts/M2-real-model/real-20261114-0100/`（`run.json`、`results.json`、`playwright.json`、`run.log`、每题 JSON/完整 diff/截图/logs）。
+- 判定：十题全部完成且至少 **8/10** 通过才可判 M2 过关；少于 8 题不得补跑/换题。上游 401/403 若发生在已提交真实任务之后，按该题真实失败计入，不标“未开始”；只有首个真实任务提交前的启动/配置失败才是“未开始”。越界路径、守卫记录越界请求或凭据形态出现时安全停止并标 `security-failed`，不继续十题、不报通过。
 - 本报告不预写通过；实跑结果由后台通知后归档。
 
 ## 未覆盖与边界

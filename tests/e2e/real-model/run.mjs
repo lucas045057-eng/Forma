@@ -89,8 +89,14 @@ async function main() {
     REAL_MODEL_MODE: mode,
     REAL_MODEL_RUN_DIR: evidence,
   };
-  if (limit) env.REAL_MODEL_CASE_LIMIT = limit;
-  if (value('--only-results') === '1') env.REAL_MODEL_ONLY_RESULTS = '1';
+  if (mode === 'real') {
+    env.REAL_MODEL_CASE_LIMIT = '10';
+    env.REAL_MODEL_MIN_PASS = '8';
+    delete env.REAL_MODEL_ONLY_RESULTS;
+  } else {
+    if (limit) env.REAL_MODEL_CASE_LIMIT = limit;
+    if (value('--only-results') === '1') env.REAL_MODEL_ONLY_RESULTS = '1';
+  }
 
   log(`starting ${mode} run ${runId}${limit ? ` limit=${limit}` : ''}`);
   const started = Date.now();

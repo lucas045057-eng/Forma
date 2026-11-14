@@ -1,0 +1,13 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index c9ef103..0c782d4 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -20,7 +20,7 @@ export default function App() {
+       <section id="home" className="hero">
+         <div className="hero-copy">
+           <p className="eyebrow">A LITTLE SPACE TO BREATHE</p>
+-          <h1>给生活，<br/>留一点香气。</h1>
++          <h1>把森林，带回家。</h1>
+           <p className="intro">把森林的温柔带回家。<br/>木间 · 雪松无火香薰，让每一次回家都值得期待。</p>
+           <div className="price">¥ 168 <span> / 100 mL · 雪松与佛手柑</span></div>
+           <div className="actions">

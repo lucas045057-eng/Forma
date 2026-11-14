@@ -1,0 +1,13 @@
+diff --git a/src/App.tsx b/src/App.tsx
+index c9ef103..d43c218 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -27,7 +27,7 @@ export default function App() {
+             <Button data-testid="buy-button" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>立即购买</Button>
+             <Button className="button-secondary" data-testid="save-button" onClick={() => setAction('已收藏这缕香气（演示）')}>收藏香气</Button>
+           </div>
+-          <p className="fine-print">一份给自己，也给生活的温柔礼物。</p>
++          <p className="fine-print">给自己一份安静的礼物。</p>
+         </div>
+         <ProductHero/>
+       </section>

@@ -1,15 +1,16 @@
 {
-  "head": "a9504076bf6ebdb179169d27e14f3234a88e3986",
+  "head": "12861a6eb78fb8c1c5430a635cd95979397b7c8c",
   "mode": "mock",
-  "run": "_probe-mock-full",
-  "note": "loopback mock 接线验证；不是真实模型成绩，未使用真实 key/额度",
-  "startedAt": "2026-11-14T03:42:09.489Z",
-  "finishedAt": "2026-11-14T03:43:46.085Z",
+  "run": "_probe-tight5",
+  "note": "最终门禁代码的 loopback mock 接线验证；不是真实模型成绩",
+  "startedAt": "2026-11-14T04:01:35.449Z",
+  "finishedAt": "2026-11-14T04:03:20.053Z",
   "passed": 10,
   "total": 10,
   "roundsPerCase": 2,
-  "screenshots": "生成于临时 probe 目录（每例 candidate/adopted/reverted），未随本目录提交；任务 JSON 已记录路径",
-  "files": [
+  "mainTemplateClean": true,
+  "screenshots": "baseline/candidate/adopted/reverted 截图在临时 probe 目录，未提交；任务 JSON 记录路径",
+  "tasks": [
     "1.json",
     "10.json",
     "2.json",
@@ -20,5 +21,17 @@
     "7.json",
     "8.json",
     "9.json"
+  ],
+  "diffs": [
+    "1-0.patch",
+    "10-0.patch",
+    "2-0.patch",
+    "3-0.patch",
+    "4-0.patch",
+    "5-0.patch",
+    "6-0.patch",
+    "7-0.patch",
+    "8-0.patch",
+    "9-0.patch"
   ]
 }

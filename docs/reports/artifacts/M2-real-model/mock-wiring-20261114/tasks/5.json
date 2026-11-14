@@ -5,12 +5,22 @@
   "selector": ".fine-print",
   "mode": "mock",
   "agentSource": "loopback agent-mock",
-  "taskStartedAt": "2026-11-14T03:42:48.220Z",
+  "taskStartedAt": "2026-11-14T04:02:17.390Z",
   "workDigest": {
     "baseline": "5b628b58552456aceb7df7dc5032e33687699dc5c61d8cbebe848e624483edf6",
     "afterRevert": "5b628b58552456aceb7df7dc5032e33687699dc5c61d8cbebe848e624483edf6"
   },
-  "baselineVersion": "de3749ce0b6674ee7f1335668ca7faa681e7402a",
+  "guard": {
+    "markerActive": true,
+    "marker": {
+      "active": true,
+      "pid": 70204,
+      "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
+    },
+    "blocked": [],
+    "blockedAfter": []
+  },
+  "baselineVersion": "e08892c6cb044cf521dd5d89b64dfdd0c70d7fd6",
   "baselineSnapshot": {
     "brand": "木间MUJIAN / SCENT & LIVING",
     "eyebrow": "A LITTLE SPACE TO BREATHE",
@@ -184,6 +194,22 @@
       }
     ]
   },
+  "errors": {
+    "baseline": [],
+    "pageErrorBaseline": 0,
+    "candidate": [],
+    "newFrameErrors": [],
+    "newPageErrors": [],
+    "adopted": [],
+    "newAdoptedErrors": [],
+    "adoptedPageErrors": []
+  },
+  "screenshots": {
+    "baseline": "screenshots\\5-baseline.png",
+    "candidate": "screenshots\\5-candidate.png",
+    "adopted": "screenshots\\5-adopted.png",
+    "reverted": "screenshots\\5-reverted.png"
+  },
   "selection": {
     "src": "src/App.tsx:30:11",
     "cid": "App",
@@ -215,20 +241,20 @@
       "src/App.tsx:20:7",
       "src/App.tsx:15:5"
     ],
-    "baseVersion": "de3749ce0b6674ee7f1335668ca7faa681e7402a"
+    "baseVersion": "e08892c6cb044cf521dd5d89b64dfdd0c70d7fd6"
   },
-  "taskId": "7098e9440e244ccb8c084fc7a78e40bf",
-  "session": "7098e9440e244ccb8c084fc7a78e40bf",
-  "submittedAt": "2026-11-14T03:42:51.984Z",
+  "taskId": "acb0805a08054c238b49ed3eb470f234",
+  "session": "acb0805a08054c238b49ed3eb470f234",
+  "submittedAt": "2026-11-14T04:02:21.292Z",
   "task": {
-    "id": "7098e9440e244ccb8c084fc7a78e40bf",
+    "id": "acb0805a08054c238b49ed3eb470f234",
     "status": "done",
     "error": null,
     "rounds": 2,
     "roundsLimit": 16,
     "budgetMs": 180000,
-    "createdAt": "2026-11-14T03:42:51.975Z",
-    "updatedAt": "2026-11-14T03:42:53.905Z",
+    "createdAt": "2026-11-14T04:02:21.284Z",
+    "updatedAt": "2026-11-14T04:02:23.243Z",
     "usage": "未提供（CodingAgent 客户端未暴露上游 usage）",
     "steps": [
       "任务已排队",
@@ -243,15 +269,17 @@
       "小字已改"
     ]
   },
-  "taskDurationMs": 1930,
+  "taskDurationMs": 1959,
   "candidate": {
-    "id": "7098e9440e244ccb8c084fc7a78e40bf",
-    "baseVersion": "de3749ce0b6674ee7f1335668ca7faa681e7402a",
-    "previewUrl": "/preview/c/7098e9440e244ccb8c084fc7a78e40bf/",
+    "id": "acb0805a08054c238b49ed3eb470f234",
+    "baseVersion": "e08892c6cb044cf521dd5d89b64dfdd0c70d7fd6",
+    "previewUrl": "/preview/c/acb0805a08054c238b49ed3eb470f234/",
     "diff": [
       {
         "path": "src/App.tsx",
-        "patch": "diff --git a/src/App.tsx b/src/App.tsx\nindex c9ef103..d43c218 100644\n--- a/src/App.tsx\n+++ b/src/App.tsx\n@@ -27,7 +27,7 @@ export default function App() {\n             <Button data-testid=\"buy-button\" onClick={() => { setPurchases(value => value + 1); setAction('已加入购物袋（演示）'); }}>立即购买</Button>\r\n             <Button className=\"button-secondary\" data-testid=\"save-button\" onClick={() => setAction('已收藏这缕香气（演示）')}>收藏香气</Button>\r\n           </div>\r\n-          <p className=\"fine-print\">一份给自己，也给生活的温柔礼物。</p>\r\n+          <p className=\"fine-print\">给自己一份安静的礼物。</p>\r\n         </div>\r\n         <ProductHero/>\r\n       </section>\r\n"
+        "bytes": 732,
+        "sha256": "1b43b6669521dca719fd8c4871d0fff15cd15200246fdd450555f21e6b361c04",
+        "patchFile": "diffs\\5-0.patch"
       }
     ],
     "outOfScope": [],
@@ -369,12 +397,187 @@
     "sceneState": "ready",
     "sceneCanvas": true
   },
-  "screenshots": {
-    "candidate": "screenshots\\5-candidate.png",
-    "adopted": "screenshots\\5-adopted.png",
-    "reverted": "screenshots\\5-reverted.png"
+  "security": {
+    "guardBlocked": 0,
+    "unsafePaths": []
   },
-  "adoptedVersion": "3b563fd58b07d64582614a5ef3f6b9b3e1202834",
+  "preAdopt": {
+    "snapshot": {
+      "brand": "木间MUJIAN / SCENT & LIVING",
+      "eyebrow": "A LITTLE SPACE TO BREATHE",
+      "h1": "给生活，留一点香气。",
+      "h1Tag": "H1",
+      "h1Style": {
+        "font-size": "48px",
+        "color": "rgb(72, 58, 45)",
+        "line-height": "67.2px",
+        "letter-spacing": "3px",
+        "font-family": "Georgia, SimSun, serif",
+        "font-weight": "400"
+      },
+      "intro": "把森林的温柔带回家。木间 · 雪松无火香薰，让每一次回家都值得期待。",
+      "introStyle": {
+        "font-size": "14px",
+        "color": "rgb(130, 113, 92)",
+        "line-height": "28px",
+        "letter-spacing": "normal",
+        "font-family": "\"Microsoft YaHei\", sans-serif",
+        "font-weight": "400"
+      },
+      "price": "¥ 168 / 100 mL · 雪松与佛手柑",
+      "priceSpan": "/ 100 mL · 雪松与佛手柑",
+      "priceStyle": {
+        "font-size": "26px",
+        "color": "rgb(72, 58, 45)",
+        "line-height": "normal",
+        "letter-spacing": "normal",
+        "font-family": "\"Microsoft YaHei\", sans-serif",
+        "font-weight": "400"
+      },
+      "navText": "关于这缕香气",
+      "navHref": "#details",
+      "fine": "一份给自己，也给生活的温柔礼物。",
+      "detailsH2": "不必远行，也能亲近自然。",
+      "footer": "木间 MUJIAN · 留一隅安静，给自己。",
+      "actionsGap": "12px",
+      "actionsDisplay": "flex",
+      "buttons": {
+        "buy-button": {
+          "width": 104,
+          "height": 47,
+          "radius": "3px",
+          "background": "rgb(117, 96, 68)",
+          "color": "rgb(255, 250, 240)",
+          "fontSize": "13px"
+        },
+        "save-button": {
+          "width": 104,
+          "height": 47,
+          "radius": "3px",
+          "background": "rgba(0, 0, 0, 0)",
+          "color": "rgb(117, 96, 68)",
+          "fontSize": "13px"
+        },
+        "gift-button": {
+          "width": 156,
+          "height": 47,
+          "radius": "3px",
+          "background": "rgb(117, 96, 68)",
+          "color": "rgb(255, 250, 240)",
+          "fontSize": "13px"
+        }
+      },
+      "buttonTexts": {
+        "buy-button": "立即购买",
+        "save-button": "收藏香气",
+        "gift-button": "为重要的人选一份"
+      },
+      "benefits": [
+        {
+          "title": "让呼吸慢下来",
+          "h3Size": "16px",
+          "text": "雪松与佛手柑，像雨后走进一片安静的森林。",
+          "pSize": "12px"
+        },
+        {
+          "title": "让角落有温度",
+          "h3Size": "16px",
+          "text": "琥珀色瓶身与木质瓶盖，把自然留在你喜欢的角落。",
+          "pSize": "12px"
+        },
+        {
+          "title": "让日常有仪式",
+          "h3Size": "16px",
+          "text": "读书、休息、等一杯茶，让淡淡香气陪你片刻。",
+          "pSize": "12px"
+        }
+      ],
+      "purchases": "0",
+      "actionStatus": "",
+      "sceneState": "ready",
+      "sceneCanvas": true
+    },
+    "workDigest": "5b628b58552456aceb7df7dc5032e33687699dc5c61d8cbebe848e624483edf6",
+    "sceneConfig": {
+      "model": "/assets/diffuser-4969889.glb",
+      "hero": {
+        "camera": {
+          "position": [
+            1.6,
+            1.1,
+            1.6
+          ],
+          "target": [
+            0,
+            0.5,
+            0
+          ],
+          "fov": 35
+        },
+        "model": {
+          "rotation": [
+            0,
+            0.52,
+            0
+          ],
+          "scale": 1
+        },
+        "lights": {
+          "key": {
+            "intensity": 3,
+            "color": "#ffd9a8",
+            "direction": [
+              3,
+              5,
+              4
+            ]
+          },
+          "ambient": 1.2
+        }
+      },
+      "scroll": [
+        {
+          "at": 0,
+          "model": {
+            "rotation": [
+              0,
+              0.52,
+              0
+            ]
+          },
+          "parts": {
+            "lid": {
+              "offset": [
+                0,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "at": 0.6,
+          "model": {
+            "rotation": [
+              0,
+              1.8,
+              0
+            ]
+          },
+          "parts": {
+            "lid": {
+              "offset": [
+                0,
+                0.08,
+                0
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "adoptedVersion": "b307d930a26dfa83aa28af785ff9fe2df8026922",
   "adoptedSnapshot": {
     "brand": "木间MUJIAN / SCENT & LIVING",
     "eyebrow": "A LITTLE SPACE TO BREATHE",
@@ -470,7 +673,7 @@
     "sceneState": "ready",
     "sceneCanvas": true
   },
-  "revertedVersion": "9b0a2ee451c126f91197a37fe2fb7f97a262a39f",
+  "revertedVersion": "d322ccc13666dfec481093cdcee13abc7fc1719a",
   "revertedSnapshot": {
     "brand": "木间MUJIAN / SCENT & LIVING",
     "eyebrow": "A LITTLE SPACE TO BREATHE",
@@ -567,5 +770,16 @@
     "sceneCanvas": true
   },
   "result": "passed",
-  "durationMs": 8980
+  "durationMs": 9878,
+  "backend": {
+    "outputTail": "(node:70204) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.\n(Use `node --trace-warnings ...` to show where the warning was created)\npi-m2a backend ready on 3001 (workRoot=E:\\空间化AI工作台\\docs\\reports\\artifacts\\M2-real-model\\_probe-tight5\\tasks\\5\\work)\n",
+    "outputBytes": 455
+  },
+  "cleanup": {
+    "portsFree": {
+      "3001": true,
+      "5174": true,
+      "5175": true
+    }
+  }
 }

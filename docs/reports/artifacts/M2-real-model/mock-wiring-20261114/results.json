@@ -1,8 +1,14 @@
 {
   "mode": "mock",
-  "head": "a9504076bf6ebdb179169d27e14f3234a88e3986",
-  "startedAt": "2026-11-14T03:42:09.489Z",
-  "finishedAt": "2026-11-14T03:43:46.085Z",
+  "status": "passed",
+  "notStarted": false,
+  "securityStop": false,
+  "complete": true,
+  "mainTemplateClean": true,
+  "templateStatus": "",
+  "head": "12861a6eb78fb8c1c5430a635cd95979397b7c8c",
+  "startedAt": "2026-11-14T04:01:35.449Z",
+  "finishedAt": "2026-11-14T04:03:20.053Z",
   "moduleSource": "loopback agent-mock",
   "cases": [
     {
@@ -10,100 +16,100 @@
       "title": "首屏立即购买 → 加入购物袋",
       "result": "passed",
       "error": null,
-      "taskId": "610792a60cca4d228bd4904421b5e0c6",
-      "candidate": "610792a60cca4d228bd4904421b5e0c6",
+      "taskId": "62951c88580a404f8743fcfdb6b80067",
+      "candidate": "62951c88580a404f8743fcfdb6b80067",
       "rounds": 2,
-      "durationMs": 9178
+      "durationMs": 9837
     },
     {
       "id": 2,
       "title": "主标题 → 把森林，带回家。",
       "result": "passed",
       "error": null,
-      "taskId": "c9aaf09ce45c4295bf749e75c9a560ac",
-      "candidate": "c9aaf09ce45c4295bf749e75c9a560ac",
+      "taskId": "539cf484bfa74e15bc3262eb2e703431",
+      "candidate": "539cf484bfa74e15bc3262eb2e703431",
       "rounds": 2,
-      "durationMs": 9302
+      "durationMs": 10080
     },
     {
       "id": 3,
       "title": "价格 168 → 198",
       "result": "passed",
       "error": null,
-      "taskId": "ad0cad78995d466dbbfb265a03b07b60",
-      "candidate": "ad0cad78995d466dbbfb265a03b07b60",
+      "taskId": "4e295d626b4d4e67b3ec04ba6d3d3d74",
+      "candidate": "4e295d626b4d4e67b3ec04ba6d3d3d74",
       "rounds": 2,
-      "durationMs": 9273
+      "durationMs": 10080
     },
     {
       "id": 4,
       "title": "导航 → 探索香气",
       "result": "passed",
       "error": null,
-      "taskId": "430bd0a49bfe4a509813be826161a433",
-      "candidate": "430bd0a49bfe4a509813be826161a433",
+      "taskId": "74dd971e13174fbcb9c80c4bfb356ecc",
+      "candidate": "74dd971e13174fbcb9c80c4bfb356ecc",
       "rounds": 2,
-      "durationMs": 9045
+      "durationMs": 10003
     },
     {
       "id": 5,
       "title": "购买按钮下的小字",
       "result": "passed",
       "error": null,
-      "taskId": "7098e9440e244ccb8c084fc7a78e40bf",
-      "candidate": "7098e9440e244ccb8c084fc7a78e40bf",
+      "taskId": "acb0805a08054c238b49ed3eb470f234",
+      "candidate": "acb0805a08054c238b49ed3eb470f234",
       "rounds": 2,
-      "durationMs": 8980
+      "durationMs": 9878
     },
     {
       "id": 6,
       "title": "intro 字号 16px，比例保持 2",
       "result": "passed",
       "error": null,
-      "taskId": "54d504a0aeb94089a544a814e93e49fa",
-      "candidate": "54d504a0aeb94089a544a814e93e49fa",
+      "taskId": "07b53c630da54bcb90bb29dd472958bb",
+      "candidate": "07b53c630da54bcb90bb29dd472958bb",
       "rounds": 2,
-      "durationMs": 9320
+      "durationMs": 10046
     },
     {
       "id": 7,
       "title": "购买/收藏按钮间距 24px",
       "result": "passed",
       "error": null,
-      "taskId": "b98be9f3c49944d8a76838f1198600ab",
-      "candidate": "b98be9f3c49944d8a76838f1198600ab",
+      "taskId": "a2e77d830a2c412e8b87e68503b04500",
+      "candidate": "a2e77d830a2c412e8b87e68503b04500",
       "rounds": 2,
-      "durationMs": 8970
+      "durationMs": 10007
     },
     {
       "id": 8,
       "title": "共享 Button 三处 12px 圆角",
       "result": "passed",
       "error": null,
-      "taskId": "de26e11517e84850bd14b4ae73895349",
-      "candidate": "de26e11517e84850bd14b4ae73895349",
+      "taskId": "a7c0e13d8ba4408d8aba207831d0a1de",
+      "candidate": "a7c0e13d8ba4408d8aba207831d0a1de",
       "rounds": 2,
-      "durationMs": 9204
+      "durationMs": 9901
     },
     {
       "id": 9,
       "title": "三条卖点标题 20px",
       "result": "passed",
       "error": null,
-      "taskId": "704be23acf2f4760a4c51271ce9b56ed",
-      "candidate": "704be23acf2f4760a4c51271ce9b56ed",
+      "taskId": "26bf5794376f416a9740a9621dec13c8",
+      "candidate": "26bf5794376f416a9740a9621dec13c8",
       "rounds": 2,
-      "durationMs": 9442
+      "durationMs": 10005
     },
     {
       "id": 10,
       "title": "3D 展示环境光 ambient 0.8",
       "result": "passed",
       "error": null,
-      "taskId": "18f48b0c0eda4d26926ce2e8f948a36c",
-      "candidate": "18f48b0c0eda4d26926ce2e8f948a36c",
+      "taskId": "6ab3e826b2144554ad71b47d16e77e20",
+      "candidate": "6ab3e826b2144554ad71b47d16e77e20",
       "rounds": 2,
-      "durationMs": 8989
+      "durationMs": 9817
     }
   ],
   "passed": 10,

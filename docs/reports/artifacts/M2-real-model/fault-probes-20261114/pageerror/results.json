@@ -1,0 +1,27 @@
+{
+  "mode": "mock",
+  "status": "failed",
+  "notStarted": false,
+  "securityStop": false,
+  "complete": false,
+  "mainTemplateClean": true,
+  "templateStatus": "",
+  "head": "12861a6eb78fb8c1c5430a635cd95979397b7c8c",
+  "startedAt": "2026-11-14T04:00:01.799Z",
+  "finishedAt": "2026-11-14T04:00:10.002Z",
+  "moduleSource": "loopback agent-mock",
+  "cases": [
+    {
+      "id": 1,
+      "title": "首屏立即购买 → 加入购物袋",
+      "result": "failed",
+      "error": "新增未捕获脚本异常：[{\"stage\":\"candidate\",\"message\":\"probe-uncaught-error\"}]",
+      "taskId": "50938d97a52344b08df3f58def0ff2d9",
+      "candidate": "50938d97a52344b08df3f58def0ff2d9",
+      "rounds": 2,
+      "durationMs": 7458
+    }
+  ],
+  "passed": 0,
+  "total": 1
+}
