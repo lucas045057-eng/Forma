@@ -1,0 +1,428 @@
+{
+  "schemaUnreachable": {
+    "taskStatus": "failed",
+    "error": {
+      "code": "NO_CHANGES",
+      "message": "编码 Agent 没有产生任何文件改动"
+    },
+    "candidateCreated": false,
+    "configUnchanged": true,
+    "configStillValidJson": true,
+    "taskSnapshotAt": "2026-11-14T17:23:56.332Z",
+    "toolGuardSource": "apps/server/src/agent/tools.ts:86-89（store 校验 scene.config.json 必须合法 JSON 且符合 isSceneConfig）",
+    "observedErrorSurface": "task.error 仅 code/message，不含 ToolError 文本"
+  },
+  "build": {
+    "run": {
+      "id": "d71281d6ec3e4a7c9c9816f4055e2c04",
+      "status": "completed",
+      "outcome": "failed",
+      "policyVersion": "m3b-v2",
+      "createdAt": "2026-11-14T17:24:00.409Z",
+      "finishedAt": "2026-11-14T17:24:01.491Z",
+      "durationMs": 1082,
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 9
+        },
+        {
+          "name": "build",
+          "status": "failed",
+          "message": "\u001b[31m[vite:esbuild] Transform failed with 1 error:\nE:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0: ERROR: Unexpected end of file\u001b[39m\nfile: \u001b[36mE:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0\u001b[39m\n\u001b[33m\n\u001b[33mUnexpected end of file\u001b[33m\n51 |    );\n52 |  }\n53 |  \n   |  ^\n\u001b[39m\n\u001b[31m[vite:esbuild] Transform failed with 1 error:\nE:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0: ERROR: Unexpected end of file\u001b[39m\nfile: \u001b[36mE:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0\u001b[39m\n\u001b[33m\n\u001b[33mUnexpected end of file\u001b[33m",
+          "evidence": "f69c658f32e78a81b996fc4b841dbd36ae4f87fac8100fc3882eb9aa9a893e39",
+          "durationMs": 100
+        },
+        {
+          "name": "smoke",
+          "status": "not_run",
+          "message": "前序检查 build 未完成：CHECK_FAILED"
+        },
+        {
+          "name": "occlusion",
+          "status": "not_run",
+          "message": "前序检查 build 未完成：CHECK_FAILED"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "schema.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 99,
+          "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+        },
+        {
+          "name": "build.log",
+          "mime": "text/plain; charset=utf-8",
+          "bytes": 980,
+          "hash": "f69c658f32e78a81b996fc4b841dbd36ae4f87fac8100fc3882eb9aa9a893e39"
+        }
+      ],
+      "error": {
+        "code": "CHECK_FAILED",
+        "message": "build 检查未通过"
+      }
+    },
+    "buildLogHead": [
+      "Vite 7.3.7, React plugin 5.2.0",
+      "\u001b[31m✗\u001b[39m Build failed in 50ms",
+      "BUILD FAILED: \u001b[31m[vite:esbuild] Transform failed with 1 error:",
+      "E:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0: ERROR: Unexpected end of file\u001b[39m",
+      "file: \u001b[36mE:/空间化AI工作台/.worktrees/m3b-acceptance/.data/m3b-faults-mwgodamk/data/check-builds/d71281d6ec3e4a7c9c9816f4055e2c04/src/App.tsx:53:0\u001b[39m",
+      "\u001b[33m"
+    ],
+    "adopt": {
+      "status": 409,
+      "code": "CHECKS_NOT_PASSED"
+    }
+  },
+  "runtime": {
+    "run": {
+      "id": "b6865f35885c4cd095d1e482a8266894",
+      "status": "completed",
+      "outcome": "failed",
+      "policyVersion": "m3b-v2",
+      "createdAt": "2026-11-14T17:24:04.709Z",
+      "finishedAt": "2026-11-14T17:24:10.423Z",
+      "durationMs": 5714,
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 8
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+          "durationMs": 3556
+        },
+        {
+          "name": "smoke",
+          "status": "failed",
+          "message": "UNCAUGHT_PAGE_ERROR",
+          "evidence": "85278f6c58ca7efd05d0cad42e470b166c1ffbdf8d8f46765409ba750c8d96c4",
+          "durationMs": 880
+        },
+        {
+          "name": "occlusion",
+          "status": "not_run",
+          "message": "前序检查 smoke 未完成：CHECK_FAILED"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "schema.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 99,
+          "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+        },
+        {
+          "name": "build.log",
+          "mime": "text/plain; charset=utf-8",
+          "bytes": 386,
+          "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+        },
+        {
+          "name": "smoke.png",
+          "mime": "image/png",
+          "bytes": 105803,
+          "hash": "be33e4428a7ab0d84fb05703fce38187465a052412c1516067127b8165ce6ae0"
+        },
+        {
+          "name": "smoke.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 369,
+          "hash": "85278f6c58ca7efd05d0cad42e470b166c1ffbdf8d8f46765409ba750c8d96c4"
+        }
+      ],
+      "error": {
+        "code": "CHECK_FAILED",
+        "message": "smoke 检查未通过"
+      }
+    },
+    "smoke": {
+      "error": "UNCAUGHT_PAGE_ERROR",
+      "pageErrors": [
+        "probe-runtime"
+      ],
+      "purchases": {
+        "before": 0,
+        "after": 1
+      }
+    },
+    "adopt": {
+      "status": 409,
+      "code": "CHECKS_NOT_PASSED"
+    }
+  },
+  "occlusion": {
+    "run": {
+      "id": "972a6b43364547f9b538c5223486c6aa",
+      "status": "completed",
+      "outcome": "failed",
+      "policyVersion": "m3b-v2",
+      "createdAt": "2026-11-14T17:24:13.528Z",
+      "finishedAt": "2026-11-14T17:24:19.279Z",
+      "durationMs": 5751,
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 8
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+          "durationMs": 3541
+        },
+        {
+          "name": "smoke",
+          "status": "passed",
+          "evidence": "2bf656364a1bab7687e03805e6f3a494f5e7dd1d68c7d0c7cca784a712e2d6ed",
+          "durationMs": 871
+        },
+        {
+          "name": "occlusion",
+          "status": "failed",
+          "message": "INTERACTIVE_TARGET_OCCLUDED",
+          "evidence": "ff757da42252d1bfb75459f60b13d3bd85fb83fe5c4db4ad849e9b98ba6ad755",
+          "durationMs": 60
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "schema.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 99,
+          "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+        },
+        {
+          "name": "build.log",
+          "mime": "text/plain; charset=utf-8",
+          "bytes": 386,
+          "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+        },
+        {
+          "name": "smoke.png",
+          "mime": "image/png",
+          "bytes": 105886,
+          "hash": "dbcf3ea6987a89cca631c3dadd928939d22316362eb4c073e5ee98d02da9917d"
+        },
+        {
+          "name": "smoke.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 324,
+          "hash": "2bf656364a1bab7687e03805e6f3a494f5e7dd1d68c7d0c7cca784a712e2d6ed"
+        },
+        {
+          "name": "occlusion.png",
+          "mime": "image/png",
+          "bytes": 105886,
+          "hash": "dbcf3ea6987a89cca631c3dadd928939d22316362eb4c073e5ee98d02da9917d"
+        },
+        {
+          "name": "occlusion.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 2893,
+          "hash": "ff757da42252d1bfb75459f60b13d3bd85fb83fe5c4db4ad849e9b98ba6ad755"
+        }
+      ],
+      "error": {
+        "code": "CHECK_FAILED",
+        "message": "occlusion 检查未通过"
+      }
+    },
+    "occlusion": {
+      "error": "INTERACTIVE_TARGET_OCCLUDED",
+      "occluded": [
+        {
+          "tag": "a",
+          "rect": {
+            "x": 86.390625,
+            "y": 28,
+            "width": 149.421875,
+            "height": 50
+          },
+          "centerHit": false
+        },
+        {
+          "tag": "a",
+          "rect": {
+            "x": 1275.609375,
+            "y": 44.5,
+            "width": 78,
+            "height": 17
+          },
+          "centerHit": false
+        }
+      ]
+    },
+    "adopt": {
+      "status": 409,
+      "code": "CHECKS_NOT_PASSED"
+    }
+  },
+  "schemaGuardOnCandidateTree": {
+    "rejected": {
+      "status": 409,
+      "code": "STALE_CANDIDATE",
+      "message": "候选包含未提交或被忽略的输入，不能使用旧提交检查"
+    },
+    "runCreatedWhileRejected": false,
+    "restoredRun": {
+      "id": "29252714de8240cc934fae6fb21018d7",
+      "status": "completed",
+      "outcome": "passed",
+      "policyVersion": "m3b-v2",
+      "createdAt": "2026-11-14T17:24:22.820Z",
+      "finishedAt": "2026-11-14T17:24:29.071Z",
+      "durationMs": 6251,
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 16
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+          "durationMs": 3594
+        },
+        {
+          "name": "smoke",
+          "status": "passed",
+          "evidence": "9a10f26c8fdc5bdc173ce24c07078057cc9dfcf5a11a289879655411424f5dc9",
+          "durationMs": 874
+        },
+        {
+          "name": "occlusion",
+          "status": "passed",
+          "evidence": "6e1ce851945cc249d8c2b2c01dfc9fad7875880ebf62ed7016282615c4aaded8",
+          "durationMs": 91
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "schema.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 99,
+          "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+        },
+        {
+          "name": "build.log",
+          "mime": "text/plain; charset=utf-8",
+          "bytes": 386,
+          "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+        },
+        {
+          "name": "smoke.png",
+          "mime": "image/png",
+          "bytes": 105666,
+          "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+        },
+        {
+          "name": "smoke.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 324,
+          "hash": "9a10f26c8fdc5bdc173ce24c07078057cc9dfcf5a11a289879655411424f5dc9"
+        },
+        {
+          "name": "occlusion.png",
+          "mime": "image/png",
+          "bytes": 105666,
+          "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+        },
+        {
+          "name": "occlusion.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 2717,
+          "hash": "6e1ce851945cc249d8c2b2c01dfc9fad7875880ebf62ed7016282615c4aaded8"
+        }
+      ]
+    },
+    "note": "SNAPSHOT_MISMATCH（runner.ts:246/417）是解析与开跑之间的 TOCTOU 守卫，靠 HTTP 造不出来；这里命中的是 repo.ts:294 的候选工作树 clean 检查。"
+  },
+  "recovered": {
+    "run": {
+      "id": "7d7ee8f353bd497b92de7e042b69b338",
+      "status": "completed",
+      "outcome": "passed",
+      "policyVersion": "m3b-v2",
+      "createdAt": "2026-11-14T17:24:32.500Z",
+      "finishedAt": "2026-11-14T17:24:38.593Z",
+      "durationMs": 6093,
+      "checks": [
+        {
+          "name": "schema",
+          "status": "passed",
+          "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+          "durationMs": 9
+        },
+        {
+          "name": "build",
+          "status": "passed",
+          "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+          "durationMs": 3472
+        },
+        {
+          "name": "smoke",
+          "status": "passed",
+          "evidence": "d36f88eb8259f309321e6e7e329f89f5d55d6569645acfefdf38791326fb97be",
+          "durationMs": 875
+        },
+        {
+          "name": "occlusion",
+          "status": "passed",
+          "evidence": "e2c0c5684efc62b9b1f14b66803ba77bc0dd790c21ddfc73a3ac783c6010bef8",
+          "durationMs": 100
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "schema.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 99,
+          "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+        },
+        {
+          "name": "build.log",
+          "mime": "text/plain; charset=utf-8",
+          "bytes": 386,
+          "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+        },
+        {
+          "name": "smoke.png",
+          "mime": "image/png",
+          "bytes": 105666,
+          "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+        },
+        {
+          "name": "smoke.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 324,
+          "hash": "d36f88eb8259f309321e6e7e329f89f5d55d6569645acfefdf38791326fb97be"
+        },
+        {
+          "name": "occlusion.png",
+          "mime": "image/png",
+          "bytes": 105666,
+          "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+        },
+        {
+          "name": "occlusion.json",
+          "mime": "application/json; charset=utf-8",
+          "bytes": 2717,
+          "hash": "e2c0c5684efc62b9b1f14b66803ba77bc0dd790c21ddfc73a3ac783c6010bef8"
+        }
+      ]
+    }
+  }
+}

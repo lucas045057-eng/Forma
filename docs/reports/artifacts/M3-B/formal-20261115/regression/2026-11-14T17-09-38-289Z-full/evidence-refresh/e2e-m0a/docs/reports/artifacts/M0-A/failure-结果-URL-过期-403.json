@@ -1,0 +1,38 @@
+{
+  "case": {
+    "name": "结果 URL 过期 403",
+    "mock": "expired403",
+    "status": "failed",
+    "code": "OUTPUT_URL_EXPIRED",
+    "messageIncludes": "403"
+  },
+  "submitted": {
+    "id": "e5be4801-97ab-47ad-acb8-b65a9b3e4758",
+    "status": "polling",
+    "createdAt": "2026-11-14T17:14:26.420Z",
+    "updatedAt": "2026-11-14T17:14:26.432Z",
+    "taskId": "9000001"
+  },
+  "finalAsset": {
+    "id": "e5be4801-97ab-47ad-acb8-b65a9b3e4758",
+    "status": "failed",
+    "createdAt": "2026-11-14T17:14:26.420Z",
+    "updatedAt": "2026-11-14T17:14:26.560Z",
+    "taskId": "9000001",
+    "error": {
+      "code": "OUTPUT_URL_EXPIRED",
+      "message": "模型下载返回 403：结果 URL 可能已超过 2 小时有效期，请重新查询任务后导入，或创建新任务"
+    }
+  },
+  "elapsedMs": 199,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 3
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 3
+    }
+  }
+}
