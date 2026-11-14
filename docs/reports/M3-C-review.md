@@ -154,19 +154,19 @@
 
 ### 应修
 
-**C3-1 任意一次全量同步都会用服务器配置覆盖场景编辑器里尚未保存的草稿（M1 衔接回归）**
+**C3-1 任意一次全量同步都会用服务器配置覆盖场景编辑器里尚未保存的草稿（M1 衔接回归）** —— **修后复核：已修（`9444dc8`），见末节**
 - 位置：`apps/studio/src/SceneEditor.tsx:86`（`state.reload` → `load()` → `applyConfig` 无条件覆盖、清 `dirty`），配合 `EventCenter.tsx:127`（**每次**成功同步都会发 `state.reload`）与 `:173`（`version.changed`/`check.started`/`check.finished` 都会触发全量同步）。基线里 `state.reload` 只在首连/截断时出现；C1–C3 后它在每次检查开始/结束、每次任何面板写操作后的 `reload()`、每次版本变化时都会出现。
 - 失败情形：
   1. 用户在 3D 场景编辑器里拖了参数还没点"设为首屏"，此时任何候选的检查开始/结束、请示被回答、他处采用/回退，都会把草稿悄悄重置。
   2. 首连时序竞争：`writeBlocked` 让 fieldset 在 `syncReady` 变 true 的同一刻才启用，而同一刻 `state.reload` 触发的 `GET /scene` 正在途中；`m1b/02-writeback` 与 `03-undo` 一启用就 `setSlider` 再保存，若 GET 晚于滑条到达，草稿被覆盖、保存的是原配置，画面不变化而超时。基线中 fieldset 不受同步门禁，这一竞争窗口小得多。
 - 最小修法（只改 SceneEditor）：`state.reload` 分支与 `scene.changed` 分支一致，`if (!dirty.current) { void load(); }`（资产列表照常刷新）；`action()` 写成功后显式 `dirty.current = false`（或像基线一样以本次写入返回的 `config` 调 `applyConfig` 并 `setLatest`，这是 M1 自己写入的确定结果，不属于 M2/M3 实体乐观更新）。补一个"dirty 时收到 state.reload 不覆盖草稿"的单测。
 
-**C3-2 `checkIssue` 同时封住"重新检查"，把后端要求"显式重新检查"的旧记录变成死路**
+**C3-2 `checkIssue` 同时封住"重新检查"，把后端要求"显式重新检查"的旧记录变成死路** —— **修后复核：已修（`f7ffaa8`），见末节**
 - 位置：`apps/studio/src/CandidatePanel.tsx:56`（`canRun` 含 `!checkIssue`）、`:58`（`canCancel` 同理）；来源 `sync-state.ts:28`。
 - 后端可达：`runner.ts:147-151`（基线）把缺 outcome 的旧 run 标为 `LEGACY_CHECK_RECORD`"旧记录缺少完整检查证明，请显式重新检查"；`service.ts:285-291` 对 policyVersion 不符或 toolIdentity 为空的 run 给出无 `runId` 的默认 checks → 前端判为视图不一致 → `checkIssue` → 运行/重跑/取消全部 disabled。用户只能撤回候选重新生成，后端提供的恢复路径在 UI 上不可达。
 - 最小修法：区分"run 读不到（`failed`）"与"run 已读到但视图不一致/旧记录"。后者若 run 为终态，允许 `check-rerun`（仍发 `{rerun:true}`，由后端裁决：故障期间返回 503/`STALE_CANDIDATE` 均已有文案）；若 run 仍活动，允许取消该 run。采用继续由 `checkIssue` 封住。补单测：旧记录/无 runId 视图下 rerun 可用、adopt 仍 disabled。
 
-**C3-3 "重试"不再沿用原任务的选取范围，可能把一次"共享 Button"范围的任务悄悄变成整页任务**
+**C3-3 "重试"不再沿用原任务的选取范围，可能把一次"共享 Button"范围的任务悄悄变成整页任务** —— **修后复核：已修（`f2c9136`），见末节**
 - 位置：`apps/studio/src/PointSpeak.tsx:77`（`submit(active.instruction, selection)`，基线为 `active.selection ?? null`）。
 - 失败情形：`App.tsx:45-56` 在任何版本变化时把 pick 置 none；`canSubmit` 允许 none（"可以提交整体修改"）。于是选中共享 Button 发起的任务失败/取消后，只要期间作品版本变过（或用户没有重新点选），点"重试"就会发出**不带 selection** 的任务——范围、请示策略（out_of_scope/shared_component）与用户原意都变了，且 UI 没有任何提示。若用户点了别的元素，重试会换成新元素的范围。
 - 最小修法：重试时若 `active.selection` 存在：其 `baseVersion===state.version` 则沿用它；否则禁用重试并提示"页面已变化，请重新点选后再重试"（或在用户重新点选同一 src 后用新 Selection）。原任务无 selection 时才按整页提交。
@@ -212,5 +212,53 @@
 | C2 `974ffa2` | 有条件通过 | 0 | 1（C2-1 单候选检查不一致导致全局同步失败） | 是，但 C2-1 须在 C3 冻结前修复并补单测，C3 审查时复核 |
 
 | C3 `91134d7` | 有条件通过 | 0 | 3（C3-1 同步覆盖场景草稿；C3-2 checkIssue 封死重新检查；C3-3 重试丢失选取范围） | 不直接冻结；修完 3 条应修后冻结交 Pi 正式验收 |
+| 修后 `bdb297a` | **通过** | 0 | 0 | 同意合入 master 并交 Pi 正式全量验收（以 `job_b3756ceb` exit 0 为前提） |
 
 C1-1、C2-1 修后复核均确认已修；C1-S3 共享任务锁已落实；采用门禁完整消费了六证据可读性回执并绑定同步代次；`version-revert` 已恢复且由后端判定。C3 三条应修修后需要复核（只看对应 diff 与新增单测即可），之后 0 blocker / 0 应修 + Pi 正式通过才能收口。
+
+---
+
+## 修后复核（`91134d7..bdb297a`）
+
+范围：`git diff 91134d7 bdb297a`（7 个提交：`9444dc8`、`f7ffaa8`、`f2c9136`、`1a485e6`、`5edaa22`、`052b64d`、`bdb297a`；17 文件，仅 `apps/studio` 与实现报告）。`apps/server`、`packages` 相对 `bc615bf` 零差异。只读提交字节，未运行测试；`job_b3756ceb` 结果未纳入。
+
+**总结论：通过**（0 blocker / 0 应修，5 条建议）。C3-1、C3-2、C3-3 三条应修均确认已修，开发反代缺陷确认已修且接线测试有效。**同意把 `bdb297a` 合入 master 并交 Pi 做正式全量验收**，前提是 `job_b3756ceb`（全量单测 + typecheck + build）核对为 exit 0；Pi 的验收树须对齐到与 `bdb297a` 相同的产品字节（核 `HEAD:apps` 树 id），不能以 `d5ff155` 这类临时合并作正式受测身份。
+
+### 逐项复核
+
+| 项 | 结论 | 依据 |
+| --- | --- | --- |
+| **C3-1 场景草稿保护**（`9444dc8`） | **已修** | `scene-draft.ts` `SceneDraftGuard`：`edit()` 置 dirty 并作废修订号；自动 `load()` 在 dirty 时 `beginLoad` 返回 null 直接跳过（`SceneEditor.tsx:87` 的 `state.reload` 走这条）；在途 GET 只有修订号未变才应用，编辑、保存、`scene.changed` 应用、卸载都会作废在途读取。保存：`action` 先 `invalidate()`，成功后用本次返回的 `result.config` 调 `applyConfig`（→ `saved()` 清 dirty）并 `setLatest`，之后再 `reload()`；失败保持 dirty，后续自动同步不会覆盖草稿。保存期间 fieldset 与 OrbitControls/旋转/光源手柄都禁用，不会出现"保存中又编辑"的交错。"检查开始/结束、请示回答、任何写操作抹掉草稿"这条路径已消除。显式"读取作品配置"（`load(true)`）仍可覆盖草稿，属用户主动行为。 |
+| 残留竞态核对 | 无新缺陷 | ① 保存 HTTP 返回前到达的 `scene.changed`：dirty 仍为 true，不覆盖，只更新 `scene-diff`；随后 HTTP 结果应用、清 dirty。② 保存后的 `reload()` → `state.reload` → 非 dirty → GET 应用服务器当前配置（与刚写入一致或更新）。③ 撤销（`/scene/undo`）同走 `action`，返回 `SceneChanged.config`，与基线一致。④ `onCameraChange` 只在 OrbitControls `onEnd`（用户拖动结束）触发（`packages/scene-renderer/src/index.tsx:129-131`），不会在加载时把 dirty 误置 true。 |
+| **C3-2 旧记录重跑**（`f7ffaa8`） | **已修** | `CandidatePanel.tsx:56-58`：有 `latestCheckRunId` 时 `canRun = linked && !activeRun(run)`，不再看 `checkIssue`；`canCancel = linked && activeRun(run)`。`linked` 要求 run 已读到且 id/候选/commit/基线全部匹配，所以读取失败（`runs` 中缺失）或错配的 run 仍禁用；无 run 时仍受 `checkIssue` 约束。采用门禁仍是 `checkIssue \|\| adoptionReason(...)`，未放宽。单测覆盖"终态旧记录可重跑但不可采用、活动 run 可取消、缺失 run 不可操作"。 |
+| **C3-3 重试范围**（`f2c9136`） | **已修** | `pick-state.ts` `retrySelection`：选取 pending/failed 时禁止；原任务无 Selection 才整页重试；原 Selection 基线等于当前版本则沿用原 Selection（忽略当前另选的元素）；版本已变时只接受**同一 src** 且基线为当前版本的新选取，否则禁用并显示"页面已变化，请重新点选 <src> 后再重试"（`task-retry-reason`）。`submit(..., retry=true)` 再次核对基线。不会静默变成整页或其它元素任务。M2-B `01-ui` 的取消/重试用例原任务无 Selection，走整页分支，不受影响。 |
+| **建议项整改**（`1a485e6`） | 已落实 | `operationError`：已列码优先；其余 4xx 显示"操作被拒绝：<服务器 message>"；网络/超时/5xx 才"无法确认服务器状态"。`refreshError` 在刷新失败时把原拒绝原因保留为"<原因>；状态刷新失败，请刷新状态"，三个面板都改为基于原错误合成。影响模式只吞 bridge 的选取错误（`isImpactPickError` 精确匹配"未找到带源码标记的外层容器"，与 bridge 文案一致），页面真实运行错误照常显示。版本变化仅在原先有 ready/pending 选取时提示重选。未运行检查时门禁原因为"尚未运行检查，请先运行检查"。live 不清除 `checkIssues` 未采纳，理由（等待权威 REST 同步，`check.finished` 会触发）成立。 |
+| **开发反代**（`052b64d`） | **已修，清单一致** | `apps/studio/vite.config.ts` 现有九个键：`/health`、`/approvals`、`/checks`、`/scene`、`/assets`、`/events`（ws）、`/tasks`、`/candidates`、`/version`。对 `apps/server/src` 全部路由注册做了前缀统计：主后端（`app.ts` 及其注册的 checks/assets/scene 路由）正好是这九个前缀；另见到的 `/__scenario`、`/__stats`、`/chat`、`/lux3d`、`/output` 只出现在 `agent/mock-server.ts`、`assets/mock-server.ts` 等独立 mock 上游进程和测试里，不属于 Studio 需要反代的主后端；`/preview/*` 由独立预览源提供（`app.ts:181` 注释）。没有其它缺失前缀。 |
+| **接线测试**（`bdb297a`，`dev-proxy.test.ts`） | 有效，未发现架空写法 | ① 直接 import 真实 `vite.config.ts`，只把各代理键的 `target` 替换成本地 HTTP stub，保留键与其余选项；② `root` 指向 `apps/studio`（含 `index.html`），所以缺键时请求会落入 SPA fallback 返回 HTML，`response.json()` 必然失败——这正是 Pi 抓到的原始故障形态；③ stub 回显 `{path, method}`，断言逐字等于请求的 path 与方法，证明请求确实到了上游且路径未被改写；④ 覆盖 11 个 GET（含 `/approvals/:id`、`/checks/:id`、证据 JSON、`/events/history`）、3 个 POST（回答、取消检查、启动检查）和 PNG 证据字节逐字节比对；⑤ `seen` 计数 15 防止被短路。局限：未覆盖 `/events` 的 WebSocket upgrade（Pi 的诊断已实证可用），也不覆盖 `BACKEND_ORIGIN` 环境变量路径；不影响结论。 |
+
+### Blocker / 应修
+
+无。
+
+### 建议（不阻塞冻结）
+
+- **R-S1** `SceneEditor.tsx` 的 `controls={!compare && !busy && !writeBlocked}`：`writeBlocked` 在每次全量同步窗口都会短暂为 true，OrbitControls/旋转环/光源手柄随之卸载再挂载，用户正在拖动时会被打断（草稿本身不会丢）。检查运行期间同步频繁时体验较差。可改为只禁用写入按钮、编辑控件在同步窗口保持可用（草稿已受 dirty 保护）。
+- **R-S2** 检查子系统故障（`checkFault`）时显式重跑会得到 503 `PERSISTENCE_FAILED`，现在显示"无法确认服务器状态"。服务器其实给出了明确原因，建议 5xx 且带 code/message 时显示服务器文案并注明"服务暂不可用"。
+- **R-S3** 有 dirty 草稿时滚动预览不再把旋转/开盖同步到当前位置（`[at]` effect 新增 dirty 判断）。语义上更合理（不吃掉用户的编辑），但这是相对 M1 的行为变化：编辑后再滚动、再"记为此处关键帧"，写入的是编辑值而不是新位置的插值姿态。建议在实现报告里写明。
+- **R-S4** 对照模式勾选时调用的 `load()` 是非显式读取，dirty 时会跳过，对照画面显示的是上次已保存/已应用的配置。可接受，但建议提示"有未保存编辑"。
+- **R-S5** 接线测试可补一个 `/events` WebSocket upgrade 用例，使反代清单的九项全部有自动化覆盖。
+
+### 两个专项判断
+
+**1. SceneEditor 移入 inspector 列对 M1 的风险：仍存在，但程度为"需盯"而非缺陷。**
+- 布局：场景编辑器现在嵌在 `aside.inspector`（`padding: 22px`，`overflow: auto`）里，`.workspace.scene-editing` 的列宽 `minmax(360px, 440px)` 未变，因此编辑器可用内宽比基线少约 44px；非对照模式 `scene-viewport` 为 `width:100%`，Studio 画布变窄。对照模式用显式 `size`（`scene-match-size` 或 pinned）设定像素宽，超出列宽时由 inspector 滚动（基线也会溢出，只是滚动容器从编辑器自身变成了 inspector）。ApprovalPanel 排在编辑器之后，不会把编辑器顶下去。
+- 时序：编辑控件、保存、撤销在同步窗口/在途写入时 disabled；每次写回后 `version.changed` 触发全量同步，紧接着的操作要等按钮重新可用（Playwright 的可操作性等待覆盖）。`scene-diff` 现由 HTTP 结果与 `scene.changed` 共同更新。
+- Pi 正式轮重点盯：`m1b/01-consistency`（`scene-match-size`/pinned 尺寸后对 Studio 画布与预览画布的像素对比、截图是否受 inspector 滚动影响）、`m1b/04-keyframe`（对照模式取图测顶边位移，以及"同 at ±0.02 覆盖"段：首写后立刻 uncheck → 滚动 → `setSlider` → 保存，中间夹一次全量同步）、`m1b/03-undo`（保存后立即点 `scene-undo`，按钮要等同步完成才可用）。若出现失败，先看是否为画布尺寸/可操作性等待问题，再判产品或测试归属。
+
+**2. `m2b/01-ui.spec.ts:128` 采用路径：兼容结论成立。**
+- 链路：helper `ensureChecksPassed` 通过 REST 启动并等到 run 终态 → Studio 收到 `check.started`（触发全量同步，最新指针从 REST 取得）、`check.updated`（实时应用）、`check.finished`（再次全量同步）→ 同步完成后 run 为 completed+passed、四项一致、`checkIssues` 为空 → `Evidence` 在 `syncReady && !busy && 终态` 时挂载，GET 六份证据并逐份核 MIME/大小/SHA-256 → 回执 key 与当前 `proofKey(candidate, run, version, epoch)` 一致 → `candidate-adopt` 变为可用。没有任何一步要求从 UI 发起检查。之前的断言（四项均 `not_run`、文本不含"通过"）在无 run 时也仍成立：门禁文案为"尚未运行检查，请先运行检查"。
+- 正式轮该盯的等待/时序点：
+  1. `candidate-adopt` 的 click 依赖 Playwright 可操作性等待（`playwright.m2b.config.ts` 未设 `actionTimeout`，等待上限是 420s 用例总时长的剩余部分）。前面生成候选与跑四检查已占用较多时间，需在报告中记录"`ensureChecksPassed` 返回 → 按钮 enabled"的实际耗时。
+  2. helper 返回时 UI 可能仍在 `check.finished` 触发的同步中，或 `check.started` 恰好跨越快照窗口触发有界重读（最多 3 次）；任一新同步都会让 epoch 变化、证据回执失效并重新读取六份证据——这是预期的保守行为，只会延长等待，不会失败。
+  3. 若候选面板在此期间出现 `check-error`"检查状态不完整"，说明三次重读都未收敛，属于需要定位的情况（不应出现在正常单候选流程中），不得通过加长等待掩盖。
+  4. 点击后的作品页更新沿用原 60s `waitFor`；采用后 `version.changed` 会再触发一次同步，不影响该断言。
