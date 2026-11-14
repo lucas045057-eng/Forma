@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "total": 280,
+  "packages": {
+    "shared": 68,
+    "plugin": 20,
+    "bridge": 1,
+    "sceneRenderer": 5,
+    "server": 179,
+    "studio": 7
+  },
+  "failed": 0,
+  "skipped": 0,
+  "serverFiles": 30,
+  "focused": {
+    "three-pending-limit": 4630,
+    "stale-draft": 4793,
+    "stale-main": 5251,
+    "four-candidate-cleanup": 5783
+  },
+  "note": "完整标准 pnpm test exit 0；四重点均在15s预算内；原始日志见 logs/03-unit.log"
+}

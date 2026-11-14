@@ -1,0 +1,123 @@
+{
+  "runId": "run-20261114-m3a-3",
+  "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+  "status": "failed",
+  "steps": [
+    {
+      "id": "typecheck",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 5068,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "build",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 7549,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "unit",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 88007,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "e2e-m0b",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 57971,
+      "playwright": {
+        "total": 24,
+        "passed": 24,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m0a",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 80187,
+      "playwright": {
+        "total": 27,
+        "passed": 27,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m1a",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 44076,
+      "playwright": {
+        "total": 7,
+        "passed": 7,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m1b",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 96377,
+      "playwright": {
+        "total": 23,
+        "passed": 23,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m2a",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 199119,
+      "playwright": {
+        "total": 35,
+        "passed": 35,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m2b",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 241931,
+      "playwright": {
+        "total": 12,
+        "passed": 10,
+        "expectedFailed": 0,
+        "unexpected": 2,
+        "skipped": 0
+      },
+      "failed": true
+    }
+  ],
+  "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "productionAfter": {
+    "digest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+    "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+    "status": ""
+  },
+  "refreshedArtifacts": 62
+}

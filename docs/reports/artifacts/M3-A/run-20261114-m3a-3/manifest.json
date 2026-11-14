@@ -1,0 +1,27 @@
+{
+  "runId": "run-20261114-m3a-3",
+  "job": "job_32342e02",
+  "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+  "status": "failed",
+  "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "refreshedArtifacts": 62,
+  "e2e": {
+    "executed": 126,
+    "passed": 126,
+    "failed": 2,
+    "expectedFailed": 0,
+    "skipped": 0,
+    "m3aStarted": false
+  },
+  "failures": [
+    "改动越界时界面给出醒目提示，检查仍显示未检查",
+    "取消与重试：任务可以中途取消，重试后能产出候选"
+  ],
+  "notes": [
+    "typecheck/build/280 unit passed",
+    "M0-B24/M0-A27/M1-A7/M1-B23/M2-A35 passed",
+    "M2-B 10/12, two failures",
+    "M3-A not started"
+  ]
+}

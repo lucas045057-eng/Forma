@@ -1,0 +1,248 @@
+{
+  "submitted": {
+    "status": 202,
+    "asset": {
+      "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+      "status": "polling",
+      "createdAt": "2026-11-14T09:05:55.128Z",
+      "updatedAt": "2026-11-14T09:05:55.142Z",
+      "taskId": "9000001"
+    }
+  },
+  "restStatuses": [
+    "polling",
+    "processing",
+    "ready"
+  ],
+  "finalAsset": {
+    "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+    "status": "ready",
+    "createdAt": "2026-11-14T09:05:55.128Z",
+    "updatedAt": "2026-11-14T09:05:56.139Z",
+    "taskId": "9000001",
+    "metrics": {
+      "before": {
+        "bytes": 13345788,
+        "vertices": 117010
+      },
+      "after": {
+        "bytes": 983560,
+        "vertices": 85436
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 542,
+      "bounds": {
+        "min": [
+          -0.15895565660573138,
+          0,
+          -0.16475417340617085
+        ],
+        "max": [
+          0.15895565660573138,
+          1,
+          0.16475417340617085
+        ]
+      }
+    },
+    "modelUrl": "/assets/3fdf135f-5923-49b0-88d2-9f60c5e44dc3/model.glb?revision=b3f135f6-7e90-4d9a-b2c6-d145bf3c5edf"
+  },
+  "glb": {
+    "header": {
+      "magic": "glTF",
+      "version": 2,
+      "declaredLength": 983560,
+      "actualLength": 983560,
+      "valid": true
+    },
+    "inspected": {
+      "meshes": 1,
+      "materials": 1,
+      "textures": 2,
+      "vertices": 85436,
+      "bounds": {
+        "min": [
+          -0.15895565660573138,
+          0,
+          -0.16475417340617085
+        ],
+        "max": [
+          0.15895565660573138,
+          1,
+          0.16475417340617085
+        ]
+      },
+      "size": [
+        0.31791131321146276,
+        1,
+        0.3295083468123417
+      ],
+      "maxEdge": 1
+    },
+    "bytes": 983560
+  },
+  "events": [
+    {
+      "type": "asset.progress",
+      "ts": "2026-11-14T09:05:55.142Z",
+      "sequence": 1,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "polling",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:55.142Z",
+        "taskId": "9000001"
+      },
+      "seq": 1
+    },
+    {
+      "type": "asset.progress",
+      "ts": "2026-11-14T09:05:55.146Z",
+      "sequence": 2,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "polling",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:55.146Z",
+        "taskId": "9000001"
+      },
+      "seq": 2
+    },
+    {
+      "type": "asset.progress",
+      "ts": "2026-11-14T09:05:55.240Z",
+      "sequence": 3,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "polling",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:55.240Z",
+        "taskId": "9000001"
+      },
+      "seq": 3
+    },
+    {
+      "type": "asset.progress",
+      "ts": "2026-11-14T09:05:55.335Z",
+      "sequence": 4,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "downloading",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:55.335Z",
+        "taskId": "9000001"
+      },
+      "seq": 4
+    },
+    {
+      "type": "asset.progress",
+      "ts": "2026-11-14T09:05:55.393Z",
+      "sequence": 5,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "processing",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:55.393Z",
+        "taskId": "9000001"
+      },
+      "seq": 5
+    },
+    {
+      "type": "asset.ready",
+      "ts": "2026-11-14T09:05:56.139Z",
+      "sequence": 6,
+      "asset": {
+        "id": "3fdf135f-5923-49b0-88d2-9f60c5e44dc3",
+        "status": "ready",
+        "createdAt": "2026-11-14T09:05:55.128Z",
+        "updatedAt": "2026-11-14T09:05:56.139Z",
+        "taskId": "9000001",
+        "metrics": {
+          "before": {
+            "bytes": 13345788,
+            "vertices": 117010
+          },
+          "after": {
+            "bytes": 983560,
+            "vertices": 85436
+          },
+          "webReady": true,
+          "parts": {
+            "recognized": false,
+            "nodes": [
+              {
+                "sourceIndex": 1,
+                "name": "geometry_0",
+                "bounds": {
+                  "min": [
+                    -0.15895565660573138,
+                    0,
+                    -0.16475417340617085
+                  ],
+                  "max": [
+                    0.15895565660573138,
+                    1,
+                    0.16475417340617085
+                  ]
+                }
+              }
+            ],
+            "reason": "Expected body, cap and at least one reed"
+          },
+          "durationMs": 542,
+          "bounds": {
+            "min": [
+              -0.15895565660573138,
+              0,
+              -0.16475417340617085
+            ],
+            "max": [
+              0.15895565660573138,
+              1,
+              0.16475417340617085
+            ]
+          }
+        },
+        "modelUrl": "/assets/3fdf135f-5923-49b0-88d2-9f60c5e44dc3/model.glb?revision=b3f135f6-7e90-4d9a-b2c6-d145bf3c5edf"
+      },
+      "seq": 6
+    }
+  ],
+  "mockStats": {
+    "before": {
+      "creates": 0,
+      "gets": 0
+    },
+    "after": {
+      "creates": 1,
+      "gets": 3
+    }
+  },
+  "guardLog": [],
+  "guardMarker": {
+    "active": true,
+    "pid": 57632,
+    "nodeOptions": "--require E:/空间化AI工作台/tests/e2e/m0a/no-real-network.cjs"
+  }
+}

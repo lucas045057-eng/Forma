@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-11-14T09:21:27.842Z",
+  "testFailures": [
+    {
+      "title": "改动越界时界面给出醒目提示，检查仍显示未检查",
+      "duration": 31010,
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed",
+      "expectedStatus": "passed",
+      "retry": 0
+    },
+    {
+      "title": "取消与重试：任务可以中途取消，重试后能产出候选",
+      "duration": 151465,
+      "error": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveAttribute\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed",
+      "expectedStatus": "passed",
+      "retry": 0
+    }
+  ],
+  "tasks": [
+    {
+      "id": "8cb842937e0946258340042108d06c0c",
+      "status": "done",
+      "createdAt": "2026-11-14T09:12:56.658Z",
+      "candidateId": "8cb842937e0946258340042108d06c0c",
+      "error": null
+    },
+    {
+      "id": "45ec215e507a4b9c87ef7e40719cf461",
+      "status": "awaiting_approval",
+      "createdAt": "2026-11-14T09:13:04.245Z",
+      "candidateId": null,
+      "error": null
+    },
+    {
+      "id": "3a5086e5d0dc4d3eb975d69ab85c9c2e",
+      "status": "cancelled",
+      "createdAt": "2026-11-14T09:13:35.505Z",
+      "candidateId": null,
+      "error": "TASK_CANCELLED"
+    },
+    {
+      "id": "49d180301f5740b5895ab51fed748574",
+      "status": "awaiting_approval",
+      "createdAt": "2026-11-14T09:13:36.190Z",
+      "candidateId": null,
+      "error": null
+    }
+  ],
+  "approvals": [
+    {
+      "id": "72fb4e9ba1a94a91912aba986e38e260",
+      "taskId": "45ec215e507a4b9c87ef7e40719cf461",
+      "status": "pending"
+    },
+    {
+      "id": "678fccc2c2b04862b9f9545ffcd5d32e",
+      "taskId": "49d180301f5740b5895ab51fed748574",
+      "status": "pending"
+    }
+  ],
+  "diagnosis": "旧 resolveAwaiting() 无 taskId，读取 listTasks() 的数组末项；任务用 push 追加但不排序，点击后新 POST 尚未进入列表时，helper 会读到上一任务 done/cancelled 并提前返回，新任务随后 awaiting 却无人回答。证据：out-of-scope 的旧任务 8cb84293 done、新任务 45ec215e awaiting；retry 的旧任务 3a5086e5 cancelled、新任务 49d18030 awaiting，对应两张 pending 卡均未回答。"
+}

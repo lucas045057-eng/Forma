@@ -1,0 +1,968 @@
+{
+  "runId": "run-20261114-m3a-3",
+  "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+  "base": "6c86101b4738634024779af8b51165aafdeb5f51",
+  "startedAt": "2026-11-14T09:03:11.182Z",
+  "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "productionStatus": "",
+  "steps": [
+    {
+      "id": "typecheck",
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-14T09:03:11.286Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:03:16.472Z",
+      "durationMs": 5068,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "failed": false
+    },
+    {
+      "id": "build",
+      "command": "pnpm build",
+      "startedAt": "2026-11-14T09:03:16.570Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:03:24.225Z",
+      "durationMs": 7549,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "failed": false
+    },
+    {
+      "id": "unit",
+      "command": "pnpm test",
+      "startedAt": "2026-11-14T09:03:24.337Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:04:52.448Z",
+      "durationMs": 88007,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m0b",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:04:52.802Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:05:50.875Z",
+      "durationMs": 57971,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:04:53.242Z",
+          "duration": 57617.826,
+          "expected": 24,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 24,
+          "passed": 24,
+          "expectedFailed": 0,
+          "unexpected": 0,
+          "skipped": 0
+        }
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m0a",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m0a.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:05:50.969Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:07:11.257Z",
+      "durationMs": 80187,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:05:51.441Z",
+          "duration": 79799.073,
+          "expected": 27,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 27,
+          "passed": 27,
+          "expectedFailed": 0,
+          "unexpected": 0,
+          "skipped": 0
+        }
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m1a",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m1a.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:07:11.350Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:07:55.537Z",
+      "durationMs": 44076,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:07:11.845Z",
+          "duration": 43675.867999999995,
+          "expected": 7,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 7,
+          "passed": 7,
+          "expectedFailed": 0,
+          "unexpected": 0,
+          "skipped": 0
+        }
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m1b",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m1b.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:07:55.632Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:09:32.116Z",
+      "durationMs": 96377,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:07:56.107Z",
+          "duration": 95992.52500000001,
+          "expected": 23,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 23,
+          "passed": 23,
+          "expectedFailed": 0,
+          "unexpected": 0,
+          "skipped": 0
+        }
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m2a",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m2a.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:09:32.216Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:12:51.443Z",
+      "durationMs": 199119,
+      "exitCode": 0,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:09:32.689Z",
+          "duration": 198736.15399999998,
+          "expected": 35,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 35,
+          "passed": 35,
+          "expectedFailed": 0,
+          "unexpected": 0,
+          "skipped": 0
+        }
+      },
+      "failed": false
+    },
+    {
+      "id": "e2e-m2b",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m2b.config.ts --reporter=list --reporter=json",
+      "startedAt": "2026-11-14T09:12:51.547Z",
+      "before": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "finishedAt": "2026-11-14T09:16:53.587Z",
+      "durationMs": 241931,
+      "exitCode": 1,
+      "signal": null,
+      "after": {
+        "head": "5c044dc42a78c8b7f11a1d8f883a1672ec4c2a35",
+        "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+        "productionStatus": "",
+        "ports": [
+          [
+            3001,
+            true
+          ],
+          [
+            4011,
+            true
+          ],
+          [
+            5173,
+            true
+          ],
+          [
+            5174,
+            true
+          ],
+          [
+            5175,
+            true
+          ]
+        ]
+      },
+      "playwright": {
+        "stats": {
+          "startTime": "2026-11-14T09:12:52.035Z",
+          "duration": 241536.19700000001,
+          "expected": 10,
+          "skipped": 0,
+          "unexpected": 2,
+          "flaky": 0
+        },
+        "counts": {
+          "total": 12,
+          "passed": 10,
+          "expectedFailed": 0,
+          "unexpected": 2,
+          "skipped": 0
+        }
+      },
+      "failed": true
+    }
+  ],
+  "status": "failed",
+  "error": "步骤 e2e-m2b 失败",
+  "finishedAt": "2026-11-14T09:16:54.002Z",
+  "productionAfter": {
+    "digest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+    "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+    "status": ""
+  },
+  "refreshedArtifacts": {
+    "files": [
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+        "sha256": "ac33a1c8b1bf4127f1bd4c4fcbb2c8ed3664780c635e094f83d673e124e2f847"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+        "sha256": "25ac30dc9189e9f616b382aabee38dc6f955c899a9662596455cb1a90908047c"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+        "sha256": "52be304db2d55b31157fbdc1ff8d8119dc98f7d48a67b595deadcad165488b6b"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+        "sha256": "85d6ac62ba975b0af5abef8091dfa57f02607472808020c54242c1ddb2740f43"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
+        "sha256": "0c4c666988af3e0e84710a75f025630c4258a79f74bed4dbe9fc3333bb3e01dd"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+        "sha256": "c69a1f9d38a6a79e83f50e12eabd4f90894ffcd5f86f8865ddb11593b7a57acf"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
+        "sha256": "765b2a34014dab20ff24e05ffaf00b76a9786b8f287a9889a01537be7e4774ab"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-结果-URL-过期-404.json",
+        "sha256": "bcd3a5a8dcae89abc1fcf98fb534b16ec810755503117640e51aa5fcb25ab68e"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/failure-轮询超时.json",
+        "sha256": "5267dccf7dcd583b60eb4bda2f2866e332225a0417a69606943c621a7850d771"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/guard-selftest.json",
+        "sha256": "973928c52f42de137bd64ad2bf7c52f7f1a33b84cd40dc33ac895efabb23e246"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/idempotency-concurrent.json",
+        "sha256": "9fffabd87d991d6b9076f50da50b040a04033f7da9b97eb4834ba6ad98a63754"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/idempotency-sequential.json",
+        "sha256": "f73da920e80281915adae5a11b4dc8dede2eb56d9b2324fda578ac0b39dffe76"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/idempotency-unclear.json",
+        "sha256": "54793c34bcdb569cfb15b262daa6ade99545f85a187f84f5ece3f93336c0fbc8"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/image-to-3d.json",
+        "sha256": "911d838776a0c1500077d9b7b8a98b17369758932b9c4983b20277f4931bf563"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/import.json",
+        "sha256": "49a720fd2a97051fcfc80c7a6232b9b03d213b5e8575d6101e8dd355a40c62ff"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/pipeline.json",
+        "sha256": "befc36cfe4f76e91985d95ac89de893b35989c3bf4a254d39ea51bc529892093"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/review-r1-leftover-temp.json",
+        "sha256": "998e5bfa85cc7cada78b4824dc3e799deb037b93aac7af48bf255d730e7b27a7"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/review-r2-drip-timeout.json",
+        "sha256": "57f430cc6452c4c662a9769bb34fee7270a80174835e64706e1c67ad599f54ee"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/review-r2-resume.json",
+        "sha256": "27889baa3861a32301ea2728c11b5cf00a199105a2b4fe0b441ac2ae8112a0e3"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/review-r3-model-missing.json",
+        "sha256": "b0cb72cd1f3afca4b42b268c75fb8acf0bb6c884cb86eab349a43112affd035d"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/review-s3-http-base.json",
+        "sha256": "74bec78ff9ac0b8241885337f563ac861f2c70cba4821f89522f8acfc179ff92"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/security-idempotency-hash.json",
+        "sha256": "99380c6e6fd301392da7cf78104f355bbb1fd4d2ea28b7911ce899bab394dbb8"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-A/security-key-leak.json",
+        "sha256": "cc6c3f7d01da491c4158f1235d1918ceaa1d8e854671d9d5add1c74c2989bd3f"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-B/case3-shared-button.json",
+        "sha256": "c76b423b5cc87b264f4df860909d53b3e01ed0e0756e02305004b85c758fad07"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-B/case4-map-list.json",
+        "sha256": "52c299fffd4d9754c5ea3f81d247ec174e76f094105784be4327946ffaa5b047"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-B/case5-outer-container.json",
+        "sha256": "f317e9f1b3e8ad6f7917e35934462dd39cce6d5f3ed5dd1e6d7c0ad395e87e46"
+      },
+      {
+        "file": "docs/reports/artifacts/M0-B/case6-ancestors.json",
+        "sha256": "405751910b59030a716cbdab49d57aef017a7f0ac933a24e34781ee27f6c0835"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-A/parts.json",
+        "sha256": "7da5c868730359d2677ab21338c3ed6fb9900cc7e055d7906efda1aa68cbb07b"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/adopt-primary.json",
+        "sha256": "43612a1069e2e8f58476001803dbc2162d96ab3504d7ca37dc5d94410775fe0e"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/consistency-after-edit.json",
+        "sha256": "5320ecdd7e6e331846af633450299bf0bd1af7223dfc0d752f55b14250649c0f"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/keyframe-write.json",
+        "sha256": "e9d2608eedd0f349c5d7e58e401c5142cf00c827d707b862324eb6ee0a2d02e5"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/undo-api.json",
+        "sha256": "0e13d7f96f2c1226be6695bfbd23b8588c85479f2933648e4021342f0796002e"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/undo-ui.json",
+        "sha256": "be76c352ea9b48d2cee67dfe50252974b2b90a761ca6d84bd1002d36b5071b56"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/writeback-hero.json",
+        "sha256": "653b143a6c163793482c79c17592d28c9e7092ccf0e050683732e8515a4b2dad"
+      },
+      {
+        "file": "docs/reports/artifacts/M1-B/writeback-keyframe.json",
+        "sha256": "7ec15acd8f79ed3efd59fe72173e628a1879267cc40dc52b936ca99c93c05753"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/adopt-conflict.json",
+        "sha256": "c9d33c5ac24a82206b20fc1c697b5f1e9582b64c5a1fbf3f4c61e105053274b9"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/adopt-once.json",
+        "sha256": "c160d229a5e7248a3db18eec571c4aff36703b1ba366ca60911783d5bab393a3"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/candidate-limit.json",
+        "sha256": "d6275f972a35ebb20b0784e066e9e242aa8e076abad8ec7fa163d92ffcf26362"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/d1-candidate-preview.json",
+        "sha256": "115114625904741c844379cdad2f471852d8cd720d87ce1a8905ef386e66c5e3"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/discard.json",
+        "sha256": "9da3f4728da2fe7069d8fa2a4690a2887ca443aef52b29c9a35e25e46d4dfdcb"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/events-replay.json",
+        "sha256": "ca6cc3ff6cacd4de1ac25eab4f1ada5e9b7d92f74503885fa51040b351c2f452"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/failure-timeout.json",
+        "sha256": "1d07a6870071dc0b61a95d5d2eb14171c8eca0dd016acc786da65ed793969a4e"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/flow-main.json",
+        "sha256": "323132179ad85b9e0601711e6c3867783e76bfcc3e751146904aa9f996a1d9b6"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-multi-candidate-pid-kill.json",
+        "sha256": "db9d4b7217e3345a7dde9c97280e791ffcc86e4ff394dec8e42084562f6746c6"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-negative-control.json",
+        "sha256": "5481e667415576eab394115711042c2de7fe5ade3b632a4b8a8680d716d040a6"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-pid-kill.json",
+        "sha256": "769b38d752c07de95b84796274a74c1ece07b0d462818990afa6038de2def05f"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-startup-window-pid-kill.json",
+        "sha256": "6b3a9a37593d308bae6a04cfee8ae67c2427cf274f267b4514ceabfea6fa9b5a"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/isolation-r6-attributed-tree-kill.json",
+        "sha256": "d32316b18c0733241a53cefe77b34ea9f2d709af847896c1a1f49945f5ddd393"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/preview-origin.json",
+        "sha256": "945959cd8e56da86fda47498c312a74efe206a87f532706d8de336f83824c7a3"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/selection-invalid.json",
+        "sha256": "c6494e50d2fcfe062db45c6b82c8a37d6adcdfe8434b700d9ff163f48a6fa064"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/selection-stale.json",
+        "sha256": "e2bc37a419816209aada7ddea03bf082e80c0e51bd39da99da110946641a6174"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/selection-valid.json",
+        "sha256": "e1bde902ec1271c59c4bcc235d2c9dbc783cd2c94f112c5c0b15278821b795f5"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-A/takeover-n4-shutdown-b167907.json",
+        "sha256": "f39ffb4e885ecc43647cdf2385b69bee7cdbe27659349a773bca738104a95e07"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/m2b-ui-flow.json",
+        "sha256": "77bf8962824edd63f9420e9468e782e771174f18c6e6426248d9087496437442"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-candidates-switch.json",
+        "sha256": "44b199b4353223a70784baeacf3bc5aa5c86a7a8d5ba0ea92e6bfb98e22c594d"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-events-reconnect.json",
+        "sha256": "ffaf6ae6917d9b325e8ea25695eecb433535ab4caad6c046decd95ab03a49217"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+        "sha256": "6b8a9d90a470c1d99030a99833c8263707dd8d88e3882701c421b4cc00040226"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-r1-failed.json",
+        "sha256": "88fdffa1e9750c4a28862a9fa839a18cacff0eb7ee98e19b16fc3a23c2d18c1e"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-r1-pending.json",
+        "sha256": "e7777395e50217360f64549a232feebd0b52048343b31559f0f4bd38201cd7b6"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-single-connection.json",
+        "sha256": "76685665c12717bd16217defc67d2ce9da6f4d217a7ca97d910882dddcb1d486"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-stale-different-file.json",
+        "sha256": "38570fe65622c4a544c194bb50187854964bfe80f2b744d7ca17f9cec0bdc471"
+      },
+      {
+        "file": "docs/reports/artifacts/M2-B/takeover-stale-same-file.json",
+        "sha256": "fbee7377211f58a12cb422cac9906abde2842a18af09ed42ef6162bd1d728155"
+      }
+    ],
+    "restored": 62
+  }
+}

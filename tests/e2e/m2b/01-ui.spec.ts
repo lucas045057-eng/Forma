@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   discardCandidate, getVersion, listCandidates, previewFrameSafe, resetMock, restoreTemplate, revertVersion,
-  setScript, waitFor, listTasks, listApprovals, answerApproval,
+  setScript, waitFor, listTasks, listApprovals, answerApproval, getTask,
 } from '../m2a/api';
 import { writeArtifactFrom } from './artifact';
 
@@ -35,19 +35,33 @@ async function clearPending(): Promise<void> {
 }
 
 /** M3-A 合同变化：越界/共享任务会先进入 awaiting；M2 旧用例通过 API 真实回答批准后继续原断言。 */
-async function resolveAwaiting(): Promise<void> {
+async function resolveAwaiting(page: import('@playwright/test').Page, taskId: string): Promise<void> {
   await waitFor(async () => {
-    const tasks = (await listTasks()).body;
-    const latest = tasks[tasks.length - 1];
-    if (!latest) return false;
-    if (latest.status === 'awaiting_approval') {
-      for (const card of (await listApprovals()).body.filter((item) => item.taskId === latest.id && item.status === 'pending')) {
-        await answerApproval(card.id, 0);
+    const task = (await getTask(taskId)).body;
+    if (task.status === 'awaiting_approval') {
+      for (const card of (await listApprovals()).body.filter((item) => item.taskId === taskId && item.status === 'pending')) {
+        const answer = await answerApproval(card.id, 0);
+        expect(answer.status, answer.text).toBe(200);
       }
-      return true;
+      return false;
     }
-    return ['done', 'failed', 'cancelled'].includes(latest.status);
-  }, 30_000, 200);
+    return ['done', 'failed', 'cancelled'].includes(task.status);
+  }, 60_000, 200);
+  const select = page.getByTestId('task-select');
+  await page.waitForTimeout(300);
+  if (await select.count()) await expect(select).toHaveValue(taskId);
+}
+
+/** 捕获本次动作创建的精确 task.id，再只处理该任务的卡；不读取/误用上一任务终态。 */
+async function submitAndResolve(page: import('@playwright/test').Page, action: () => Promise<void>): Promise<string> {
+  const [response] = await Promise.all([
+    page.waitForResponse((item) => item.request().method() === 'POST' && new URL(item.url()).pathname === '/tasks', { timeout: 30_000 }),
+    action(),
+  ]);
+  expect(response.status(), await response.text().catch(() => '')).toBe(202);
+  const created = await response.json() as { id: string };
+  await resolveAwaiting(page, created.id);
+  return created.id;
 }
 
 test.describe('M2-B 界面', () => {
@@ -137,8 +151,7 @@ test.describe('M2-B 界面', () => {
     await expect(page.getByTestId('preview-status')).toContainText('预览已连接', { timeout: 60_000 });
     await pickElement(page, 'benefits');
     await page.getByTestId('instruction-input').fill('新增一个样式文件');
-    await page.getByTestId('generate-candidate').click();
-    await resolveAwaiting();
+    await submitAndResolve(page, () => page.getByTestId('generate-candidate').click());
     await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 150_000 });
     await expect(page.getByTestId('candidate-select')).toBeVisible({ timeout: 30_000 });
     await page.getByTestId('preview-candidate').click();
@@ -168,8 +181,7 @@ test.describe('M2-B 界面', () => {
     await expect(page.getByTestId('task-retry')).toBeVisible();
 
     await setScript(SUCCESS);
-    await page.getByTestId('task-retry').click();
-    await resolveAwaiting();
+    await submitAndResolve(page, () => page.getByTestId('task-retry').click());
     await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 150_000 });
     writeArtifactFrom('m2b-ui-cancel-retry.json', { status: 'done' });
     await clearPending();

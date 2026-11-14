@@ -13,6 +13,16 @@
 - 修正：仅在 `playwright.config.ts` 的 `testIgnore` 增加 `**/real-model/**`（保留 m0a/m1a/m1b/m2a/m2b/m3a），并把专用十题限定到独立配置/runner。收集验证 `--list`：exit 0、**24 tests in 4 files**（`m0b-known-issues`、`m0b-message-guard`、`m0b-mutation-check`、`m0b-pick`），不再收集 real-model 或其他阶段；**这只是收集验证，不是 24 条已执行通过**。
 - 本步骤前后 HEAD/锁/生产摘要一致，`refreshedArtifacts=0`；run1、stability、M2 历史证据均未覆盖。正式验收仍未完成，修正后由调度启动 `run-20261114-m3a-3`，结果待返回。
 
+## 第三轮（HEAD `5c044dc`，`run-20261114-m3a-3`）
+
+- `job_32342e02` exit 1，13m44s；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-3/`。
+- typecheck/build/标准 280 单测全部通过；M0-B 24、M0-A 27、M1-A 7、M1-B 23、M2-A 35 全过（116 条）；**M2-B 10/12**，两项失败；**M3-A 未开始**。本轮已执行 E2E 共 126 passed / 2 failed，无 expected-failed/skip/retry；原始 JSON 逐份核对。
+- 两项失败都在 `tests/e2e/m2b/01-ui.spec.ts`：越界提示（31.0s）与取消/重试（151.5s）。任务数据证实：越界用例旧任务 `8cb84293` done、新任务 `45ec215e` awaiting；重试用例旧任务 `3a5086e5` cancelled、新任务 `49d18030` awaiting，两张新卡 `72fb4e9b`/`678fccc2` 均 pending 未回答（`failure-race.json`）。
+- **根因是测试 helper 竞争，不是产品丢候选**：旧 `resolveAwaiting()` 无 taskId，读取 `listTasks()` 的数组末项；任务 push 追加但未排序，点击后新 POST 尚未进入列表时，helper 会读到上一任务 done/cancelled 并提前返回，新任务随后进入 awaiting 却无人回答。
+- 修正只在测试接线：换成 `submitAndResolve(page, action)`，先等待并校验本次精确 `POST /tasks` 202、取 `created.id`；`resolveAwaiting(page, taskId)` 只回答该任务自己的 pending 卡，校验 answer 200，等到该任务真实终态，并校验 Studio `task-select` 的当前 id；保留越界提示/未检查、取消/重试、候选/采用断言，未用 sleep/更高超时/自动批准全部卡。定向复跑两项通过。
+- 62 份 refreshed tracked artifacts 已先归档再精确还原；run3 目录保留原失败证据。`M0-A/viewport.json`、`M1-B/undo-empty.json` 曾仅显示 CRLF 行尾状态，工作区/HEAD blob 相同、`--ignore-space-at-eol` 无 diff，已安全还原，不是未知内容变动。
+- 修正后的 checkpoint（完整 M2-B 12 → M3-A 11）将另起后台入口，证据目录 `run-20261114-m3a-ui-checkpoint/`；它只作接线验证，不是最终完整 run4 通过。
+
 <!-- 历史：第一轮失败记录保留如下 -->
 
 ## 结论：验收未完成，完整回归被单测超时阻断
