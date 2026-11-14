@@ -70,6 +70,8 @@ export class CheckRunner {
   private active: Map<string, { run: CheckRun; controller: AbortController; promise: Promise<CheckRun> }> = new Map();
   private options: CheckRunnerOptions;
   private writes: Promise<void> = Promise.resolve();
+  private admissions: Promise<void> = Promise.resolve();
+  private closing = false;
 
   constructor(options: CheckRunnerOptions) {
     this.options = options;
@@ -81,7 +83,8 @@ export class CheckRunner {
     await mkdir(this.options.dataDirectory, { recursive: true });
     try {
       const saved = JSON.parse(await readFile(this.file, 'utf8')) as PersistedRuns;
-      if (!Array.isArray(saved.runs)) throw new Error('invalid check-runs.json');
+      if (!Array.isArray(saved.runs) || !saved.runs.every(validStoredRun) ||
+        new Set(saved.runs.map(run => run.id)).size !== saved.runs.length) throw new Error('invalid check-runs.json');
       this.runs = saved.runs;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取检查运行状态 check-runs.json');
@@ -141,7 +144,14 @@ export class CheckRunner {
    * Same identity queued/running returns the same run.
    * Same identity completed returns existing result unless { rerun: true }.
    */
-  async startChecks(candidateId: string, opts?: { rerun?: boolean }): Promise<CheckRun> {
+  startChecks(candidateId: string, opts?: { rerun?: boolean }): Promise<CheckRun> {
+    if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '检查服务正在关闭', 503));
+    const operation = this.admissions.then(() => this.startAdmitted(candidateId, opts));
+    this.admissions = operation.then(() => {}, () => {});
+    return operation;
+  }
+
+  private async startAdmitted(candidateId: string, opts?: { rerun?: boolean }): Promise<CheckRun> {
     const existing = this.findActive(candidateId, this.options.candidateCommit, this.options.contentDigest);
     if (existing) return structuredClone(existing);
 
@@ -167,11 +177,14 @@ export class CheckRunner {
     };
 
     this.runs.push(run);
-    await this.save();
+    try { await this.save(); }
+    catch (error) { this.runs = this.runs.filter(item => item.id !== run.id); throw error; }
 
     const controller = new AbortController();
     const promise = this.execute(run, controller);
     this.active.set(runId, { run, controller, promise });
+    // Attach the rejection handler immediately; cleanup must also happen after a failed save.
+    void promise.finally(() => this.active.delete(runId)).catch(() => {});
 
     return structuredClone(run);
   }
@@ -247,7 +260,7 @@ export class CheckRunner {
       // Copy audited files to a trusted build root.
       const buildRoot = path.join(this.artifactsBase, 'check-builds', run.id);
       try {
-        await copyAudited(this.options.candidatePath, buildRoot);
+        snapshot = await copyAudited(this.options.candidatePath, buildRoot, snapshot.digest);
       } catch (error) {
         await cleanupSnapshot(buildRoot);
         return await this.failRun(run, 'COPY_ERROR', `安全复制失败：${error instanceof Error ? error.message : '未知错误'}`, controller.signal.aborted);
@@ -342,9 +355,27 @@ export class CheckRunner {
 
   /** Drain: abort all active runs and wait for them to finish. Called during shutdown. */
   async drain(): Promise<void> {
+    this.closing = true;
+    await this.admissions;
     const active = [...this.active.values()];
     for (const entry of active) entry.controller.abort();
     await Promise.allSettled(active.map(e => e.promise));
     await this.writes;
   }
+}
+
+function validStoredRun(value: unknown): value is CheckRun {
+  if (!value || typeof value !== 'object') return false;
+  const run = value as Record<string, unknown>;
+  for (const field of ['id', 'candidateId', 'baseVersion', 'candidateCommit', 'contentDigest', 'mainVersion', 'policyVersion', 'createdAt']) {
+    if (typeof run[field] !== 'string' || !(run[field] as string).length) return false;
+  }
+  if (!/^[a-z0-9]{6,32}$/.test(run.id as string) || !['queued', 'running', 'completed', 'cancelled'].includes(run.status as string)) return false;
+  if (!Number.isFinite(Date.parse(run.createdAt as string))) return false;
+  if (!Array.isArray(run.checks) || run.checks.length !== CHECK_ORDER.length) return false;
+  return run.checks.every((item: unknown, index: number) => {
+    if (!item || typeof item !== 'object') return false;
+    const check = item as Record<string, unknown>;
+    return check.name === CHECK_ORDER[index] && ['passed', 'failed', 'not_run'].includes(check.status as string);
+  });
 }

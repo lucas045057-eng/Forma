@@ -262,7 +262,7 @@ it('queued/running runs are marked SERVICE_RESTARTED on init, not auto-rerun', a
     status: 'running',
     checks: [
       { name: 'schema', status: 'passed' },
-      { name: 'build', status: 'running' },
+      { name: 'build', status: 'not_run' },
       { name: 'smoke', status: 'not_run' },
       { name: 'occlusion', status: 'not_run' },
     ],
@@ -291,8 +291,9 @@ it('queued/running runs are marked SERVICE_RESTARTED on init, not auto-rerun', a
   expect(runs[0].error?.code).toBe('SERVICE_RESTARTED');
   // The already-passed schema check should retain its result.
   expect(runs[0].checks[0].status).toBe('passed');
-  // The running build check should keep its status but get a message.
-  expect(runs[0].checks[1].status).toBe('running');
+  // Check.status never has a running value; unfinished work remains not_run with a reason.
+  expect(runs[0].checks[1].status).toBe('not_run');
+  expect(runs[0].checks[1].message).toBeTruthy();
   // Unstarted checks should get a message.
   expect(runs[0].checks[2].message).toBeTruthy();
 });
