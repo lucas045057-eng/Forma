@@ -1,128 +1,176 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Candidate, Task } from '@spatial/shared';
-import { emptyM2State, historyTruncated, newEventsInOrder, reduceM2Event, type IncomingEvent, type M2State } from './m2-state.ts';
+import { emptyM2State, contiguousReplay, reduceM2Event, type IncomingEvent, type M2State } from './m2-state.ts';
+import { isApproval, sortApprovals } from './approval-state.ts';
 
 export type CenterEvent = { type: string; seq?: number; ts?: string } & Record<string, unknown>;
 type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting';
 interface EventCenterValue {
   state: M2State;
   status: ConnectionStatus;
+  syncReady: boolean;
+  syncError: string;
   lastSeq: number;
   subscribe: (listener: (event: CenterEvent) => void) => () => void;
   reload: () => Promise<void>;
 }
 const EventCenterContext = createContext<EventCenterValue | null>(null);
-
 async function json<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`请求失败：${response.status}`);
   return response.json() as Promise<T>;
 }
+type History = { events: IncomingEvent[]; current: number; oldest: number; truncated: boolean };
 
 export function EventCenterProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<M2State>(emptyM2State);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
+  const [syncReady, setSyncReady] = useState(false);
+  const [syncError, setSyncError] = useState('');
   const [lastSeq, setLastSeq] = useState(0);
-  const seqRef = useRef(0);
   const listeners = useRef(new Set<(event: CenterEvent) => void>());
-  const mounted = useRef(true);
-  const reloadId = useRef(0);
-  const liveEvents = useRef<IncomingEvent[]>([]);
-
-  const notify = useCallback((event: CenterEvent) => {
-    for (const listener of listeners.current) listener(event);
-  }, []);
-  const reload = useCallback(async () => {
-    const requestId = ++reloadId.current;
-    const startedAt = seqRef.current;
-    const [tasks, candidates, version] = await Promise.all([json<Task[]>('/tasks'), json<Candidate[]>('/candidates'), json<{ version: string }>('/version')]);
-    if (!mounted.current || requestId !== reloadId.current) return;
-    const snapshot = { tasks, candidates, version: version.version };
-    setState(newEventsInOrder(liveEvents.current, startedAt).reduce(reduceM2Event, snapshot));
-    notify({ type: 'state.reload' });
-  }, [notify]);
+  const reloadRef = useRef<() => Promise<void>>(async () => { throw new Error('事件尚未连接'); });
+  const reload = useCallback(() => reloadRef.current(), []);
   const subscribe = useCallback((listener: (event: CenterEvent) => void) => {
     listeners.current.add(listener);
     return () => { listeners.current.delete(listener); };
   }, []);
 
   useEffect(() => {
-    mounted.current = true;
+    let disposed = false;
     let socket: WebSocket | undefined;
     let retry: number | undefined;
+    let connection = 0;
+    let request = 0;
+    let seq = 0;
     let initialized = false;
-    let queue: Promise<void> = Promise.resolve();
+    let syncing = false;
+    let readyReceived = false;
+    let buffer: IncomingEvent[] = [];
+    let overflow = false;
+    const notify = (event: CenterEvent) => { for (const listener of listeners.current) listener(event); };
+    const valid = (generation: number, operation: number) => !disposed && generation === connection && operation === request && socket?.readyState === WebSocket.OPEN;
+    const history = (since: number) => json<History>(`/events/history?since=${since}`);
 
-    const accept = (event: IncomingEvent) => {
-      if (!mounted.current) return;
-      seqRef.current = Math.max(seqRef.current, event.seq);
-      liveEvents.current = [...liveEvents.current.slice(-1999), event];
-      setLastSeq(seqRef.current);
-      setState(previous => reduceM2Event(previous, event));
-      notify(event);
-    };
-    const catchUp = async () => {
-      const since = seqRef.current;
-      const history = await json<{ events: IncomingEvent[]; current: number; oldest: number; truncated: boolean }>(`/events/history?since=${since}`);
-      if (history.truncated || historyTruncated(history.oldest, since)) await reload();
-      else for (const event of newEventsInOrder(history.events, since)) accept(event);
-      if (mounted.current) {
-        seqRef.current = Math.max(seqRef.current, history.current);
-        setLastSeq(seqRef.current);
-      }
-    };
-    const handle = async (value: unknown) => {
-      if (!value || typeof value !== 'object') return;
-      const event = value as CenterEvent;
-      if (event.type === 'ready') {
-        if (seqRef.current === 0 || (typeof event.seq === 'number' && event.seq < seqRef.current)) {
-          seqRef.current = 0;
-          liveEvents.current = [];
-          await reload();
-          if (typeof event.seq === 'number' && Number.isSafeInteger(event.seq)) {
-            seqRef.current = Math.max(seqRef.current, event.seq);
-            setLastSeq(seqRef.current);
+    async function synchronize(anchor = seq) {
+      const generation = connection;
+      const operation = ++request;
+      syncing = true;
+      setSyncReady(false);
+      setSyncError('');
+      try {
+        if (!readyReceived || socket?.readyState !== WebSocket.OPEN) throw new Error('事件连接不可用');
+        // A bounded restart obtains a new server anchor after truncation or overflow.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) {
+            const head = await history(0);
+            if (!valid(generation, operation)) return;
+            anchor = head.current;
+            buffer = [];
+            overflow = false;
           }
-        } else await catchUp();
-        initialized = true;
-        if (mounted.current) setStatus('connected');
-        return;
+          const [tasks, candidates, version, approvals] = await Promise.all([
+            json<Task[]>('/tasks'), json<Candidate[]>('/candidates'), json<{ version: string }>('/version'), json<unknown[]>('/approvals'),
+          ]);
+          if (!valid(generation, operation)) return;
+          if (!Array.isArray(tasks) || !Array.isArray(candidates) || typeof version.version !== 'string' || !Array.isArray(approvals) || !approvals.every(isApproval)) throw new Error('持久状态格式不完整');
+          const replay = await history(anchor);
+          if (!valid(generation, operation)) return;
+          if (overflow || replay.truncated || replay.oldest > anchor + 1 || replay.current < anchor) continue;
+          const ordered = contiguousReplay([...replay.events, ...buffer], anchor, replay.current);
+          if (!ordered) continue;
+          const { events, cursor } = ordered;
+          const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs: {} };
+          setState(events.reduce(reduceM2Event, snapshot));
+          seq = cursor;
+          setLastSeq(seq);
+          buffer = [];
+          syncing = false;
+          initialized = true;
+          setStatus('connected');
+          setSyncReady(true);
+          for (const event of events) notify(event);
+          notify({ type: 'state.reload' });
+          return;
+        }
+        throw new Error('事件历史变化过快或不完整，请刷新状态');
+      } catch (cause) {
+        if (!disposed && generation === connection && operation === request) {
+          syncing = false;
+          initialized = false;
+          setSyncReady(false);
+          setSyncError(cause instanceof Error ? cause.message : '状态同步失败');
+        }
+        throw cause;
       }
-      if (typeof event.seq !== 'number' || !Number.isSafeInteger(event.seq)) return;
-      if (!initialized || event.seq <= seqRef.current) return;
-      if (event.seq > seqRef.current + 1) await catchUp();
-      else accept(event as IncomingEvent);
-    };
-    const connect = () => {
-      if (!mounted.current) return;
-      setStatus(seqRef.current ? 'reconnecting' : 'connecting');
-      socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/events`);
-      socket.onmessage = message => {
-        let parsed: unknown;
-        try { parsed = JSON.parse(String(message.data)); } catch { return; }
-        queue = queue.then(() => handle(parsed)).catch(() => { socket?.close(); });
+    }
+    reloadRef.current = () => synchronize();
+    const startSync = (anchor?: number) => { void synchronize(anchor).catch(() => {}); };
+    function connect() {
+      if (disposed) return;
+      const generation = ++connection;
+      readyReceived = false;
+      initialized = false;
+      buffer = [];
+      overflow = false;
+      setSyncReady(false);
+      const active = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/events`);
+      socket = active;
+      active.onmessage = message => {
+        if (disposed || generation !== connection) return;
+        let event: IncomingEvent;
+        try { event = JSON.parse(String(message.data)); } catch { return; }
+        if (!event || typeof event.type !== 'string' || !Number.isSafeInteger(event.seq) || event.seq < 0) return;
+        if (event.type === 'ready') {
+          readyReceived = true;
+          const anchor = seq === 0 || event.seq < seq ? event.seq : seq;
+          startSync(anchor);
+          return;
+        }
+        if (!readyReceived) return;
+        if (syncing || !initialized) {
+          if (buffer.length >= 2000) { overflow = true; buffer = []; }
+          buffer.push(event);
+          return;
+        }
+        if (event.seq <= seq) return;
+        if (event.seq !== seq + 1 || event.type === 'version.changed') {
+          buffer.push(event);
+          // Disable gates immediately; the triggering event is retained for replay.
+          startSync();
+          return;
+        }
+        seq = event.seq;
+        setLastSeq(seq);
+        setState(previous => reduceM2Event(previous, event));
+        notify(event);
       };
-      socket.onerror = () => socket?.close();
-      socket.onclose = () => {
-        if (!mounted.current) return;
+      active.onerror = () => active.close();
+      active.onclose = () => {
+        if (disposed || generation !== connection) return;
+        ++connection;
+        ++request;
+        syncing = false;
+        readyReceived = false;
+        initialized = false;
+        setSyncReady(false);
         setStatus('reconnecting');
         retry = window.setTimeout(connect, 1000);
       };
-    };
+    }
     connect();
     return () => {
-      mounted.current = false;
+      disposed = true;
+      ++request;
+      ++connection;
       if (retry !== undefined) clearTimeout(retry);
       socket?.close();
-      listeners.current.clear();
+      reloadRef.current = async () => { throw new Error('事件连接已关闭'); };
     };
-  }, [notify, reload]);
+  }, []);
 
-  return <EventCenterContext.Provider value={{ state, status, lastSeq, subscribe, reload }}>
-    {children}
-  </EventCenterContext.Provider>;
+  return <EventCenterContext.Provider value={{ state, status, syncReady, syncError, lastSeq, subscribe, reload }}>{children}</EventCenterContext.Provider>;
 }
-
 export function useEventCenter() {
   const value = useContext(EventCenterContext);
   if (!value) throw new Error('useEventCenter 必须在 EventCenterProvider 内使用');
