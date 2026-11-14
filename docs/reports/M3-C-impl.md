@@ -2,7 +2,7 @@
 
 ## C1 — ApprovalPanel 与事件持久补拉
 
-状态：实现已提交，首次后台自测待执行/核对；不是 C1 测试通过，也不是 M3-C 正式验收通过。
+状态：实现已提交，自测通过（由调度核对后台原始日志）；尚未经 Pi 独立测试与 Claude Code 独立审查，不代表 C1 或 M3-C 正式验收通过。
 
 基线：master `bc615bf`。实现分支 `feat/m3c-approval`，独立树 `.worktrees/m3c`。没有合并、push 或修改主工作树产品文件。
 
@@ -24,13 +24,13 @@
 
 已执行：`git diff --check` 通过；改动范围人工核对仅 Studio 前端/纯函数单测及本报告。未修改后端、shared/bridge、模板、依赖清单、锁、Pi E2E、历史报告证据；未读取真实 .env，未访问 staging 或调用模型。
 
-计划由根 `orbital/bin/bg.cmd` 单次后台启动（拿到 job 立即结束回合，冻结受测文件）：
+已由根 `orbital/bin/bg.cmd` 单次后台执行，受测提交 `886bd99`：
 
 ```text
 cd /d .worktrees\m3c && set CI=true&& call pnpm install --offline --frozen-lockfile && call pnpm --filter @spatial/studio test && call pnpm typecheck && call pnpm build
 ```
 
-新 worktree 没有 node_modules，因此先离线、冻结锁安装；失败属于入口准备问题，未运行的后续检查不记为通过。自测结果待后台完成后如实补录。
+结果：`job_4a6d1a6a`（group `grp_d07a7c9a`）exit 0；Studio `Test Files 6 passed (6)`、`Tests 16 passed (16)`；全仓 `pnpm typecheck`、`pnpm build` 全部 Done。原件：根 `orbital/jobs/job_4a6d1a6a/output.log`。以上由调度读取日志并反馈，本轮不重复起跑。调度同时核对 `886bd99` 仅修改 Studio 与本报告，禁止区域零改动、工作树干净。
 
 新增单测覆盖：请示排序、按 id 归并、终态防回滚、损坏 payload 拒绝、同基线/关联任务/同步门禁、定位降级、模式恢复策略、历史与缓冲乱序去重和缺号拒收；静态 React 渲染检查文本转义、实体 testid、终态/不同步真实 disabled、C1 采用固定 disabled。没有运行 Pi 正式验收套件。
 
