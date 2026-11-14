@@ -260,9 +260,21 @@ function buildDelayedWorkRoot(root: string, delayMs: number): string {
   return workRoot;
 }
 
-async function submitTask(base: string, instruction: string) {
+function testSelection(baseVersion: string, src: string) {
+  return {
+    src, baseVersion, cid: 'probe', text: '', bbox: [0, 0, 10, 10],
+    styles: {
+      display: 'block', position: 'static', color: 'rgb(0, 0, 0)', backgroundColor: 'rgba(0, 0, 0, 0)',
+      fontSize: '10px', fontFamily: 'Arial', fontWeight: '400', lineHeight: '10px', padding: '0px', margin: '0px',
+      borderRadius: '0px', width: '10px', height: '10px',
+    },
+    instances: 1, ancestors: [],
+  };
+}
+
+async function submitTask(base: string, instruction: string, selection?: Record<string, unknown>) {
   const submitted = await http(`${base}/tasks`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ instruction }),
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(selection ? { instruction, selection } : { instruction }),
   });
   expect(submitted.status, submitted.text).toBe(202);
   return submitted.body.id as string;
@@ -272,6 +284,13 @@ async function waitTask(base: string, id: string) {
   let task: any;
   await waitFor(async () => {
     task = (await http(`${base}/tasks/${id}`)).body;
+    if (task.status === 'awaiting_approval') {
+      const cards = (await http(`${base}/approvals`)).body as Array<{ id: string; taskId: string; status: string }>;
+      for (const card of cards.filter((item) => item.taskId === id && item.status === 'pending')) {
+        await http(`${base}/approvals/${card.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ option: 0 }) });
+      }
+      return false;
+    }
     return ['done', 'failed', 'cancelled'].includes(task.status);
   }, 180_000, 300);
   return task;
@@ -597,7 +616,8 @@ test.describe('R6/D3 进程归属复核', () => {
       await resetMock();
       await setScript(SUCCESS('立即购买', '马上购买'));
       const submittedAt = nowMs();
-      const taskId = await submitTask(fixture.base, '启动窗口验证：worker 已产生但预览未 ready 时杀 backend');
+      const startupBase = (await http(`${fixture.base}/version`)).body.version as string;
+      const taskId = await submitTask(fixture.base, '启动窗口验证：worker 已产生但预览未 ready 时杀 backend', testSelection(startupBase, 'src/App.tsx:30:11'));
 
       // 正面对照：必须真的看到 worker 进程存在（PID/PPID/创建时间），而不是“还没创建 worker”。
       let window: { worker: ProcIdentity; ports: number[]; originStatus: number; taskStatus: string; observations: Array<Record<string, unknown>> } | null = null;

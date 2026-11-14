@@ -91,10 +91,20 @@ export async function waitFor(predicate: () => Promise<boolean> | boolean, timeo
 }
 
 /** 轮询任务直到进入终态（done/failed/cancelled）。 */
+export const listApprovals = () => http<any[]>(base('/approvals'));
+export const answerApproval = (id: string, option: 0 | 1) => http(base(`/approvals/${encodeURIComponent(id)}`), json('POST', { option }));
+
+/** M2 旧用例迁移：真实回答 pending 请示（批准）后继续原候选/采用断言；M3-A 专项自己显式回答，不走此 helper。 */
 export async function waitForTask(id: string, timeoutMs = 180_000): Promise<TaskLike> {
   let last: TaskLike | null = null;
   await waitFor(async () => {
     last = (await getTask(id)).body;
+    if (last.status === 'awaiting_approval') {
+      const pending = (await listApprovals()).body.filter((card) => card.taskId === id && card.status === 'pending');
+      for (const card of pending) await answerApproval(card.id, 0);
+      await wait(150);
+      return false;
+    }
     return ['done', 'failed', 'cancelled'].includes(last.status);
   }, timeoutMs, 300);
   return last!;

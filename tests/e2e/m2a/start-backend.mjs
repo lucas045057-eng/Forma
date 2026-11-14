@@ -66,6 +66,18 @@ try {
   process.exit(12);
 }
 try {
+  // 测试专用故障注入（不进入生产 app.ts）：仅在该 launcher 环境变量下替换预览启动。
+  if (process.env.M3A_PREVIEW_FAIL === '1' && work) {
+    work.previews.start = async () => { throw new Error('injected preview failure'); };
+  }
+  if (process.env.M3A_PREVIEW_FAIL_ONCE === '1' && work) {
+    const originalStart = work.previews.start.bind(work.previews);
+    let calls = 0;
+    work.previews.start = async (...args) => {
+      if (calls++ === 0) throw new Error('injected preview failure once');
+      return originalStart(...args);
+    };
+  }
   await listenWithPreview({
     app,
     work,

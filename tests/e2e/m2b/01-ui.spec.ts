@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   discardCandidate, getVersion, listCandidates, previewFrameSafe, resetMock, restoreTemplate, revertVersion,
-  setScript, waitFor,
+  setScript, waitFor, listTasks, listApprovals, answerApproval,
 } from '../m2a/api';
 import { writeArtifactFrom } from './artifact';
 
@@ -32,6 +32,22 @@ async function clearPending(): Promise<void> {
   for (const candidate of (await listCandidates()).body.filter((item) => item.decision === 'pending')) {
     await discardCandidate(candidate.id);
   }
+}
+
+/** M3-A 合同变化：越界/共享任务会先进入 awaiting；M2 旧用例通过 API 真实回答批准后继续原断言。 */
+async function resolveAwaiting(): Promise<void> {
+  await waitFor(async () => {
+    const tasks = (await listTasks()).body;
+    const latest = tasks[tasks.length - 1];
+    if (!latest) return false;
+    if (latest.status === 'awaiting_approval') {
+      for (const card of (await listApprovals()).body.filter((item) => item.taskId === latest.id && item.status === 'pending')) {
+        await answerApproval(card.id, 0);
+      }
+      return true;
+    }
+    return ['done', 'failed', 'cancelled'].includes(latest.status);
+  }, 30_000, 200);
 }
 
 test.describe('M2-B 界面', () => {
@@ -122,7 +138,9 @@ test.describe('M2-B 界面', () => {
     await pickElement(page, 'benefits');
     await page.getByTestId('instruction-input').fill('新增一个样式文件');
     await page.getByTestId('generate-candidate').click();
+    await resolveAwaiting();
     await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 150_000 });
+    await expect(page.getByTestId('candidate-select')).toBeVisible({ timeout: 30_000 });
     await page.getByTestId('preview-candidate').click();
     await page.waitForTimeout(800);
 
@@ -151,6 +169,7 @@ test.describe('M2-B 界面', () => {
 
     await setScript(SUCCESS);
     await page.getByTestId('task-retry').click();
+    await resolveAwaiting();
     await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 150_000 });
     writeArtifactFrom('m2b-ui-cancel-retry.json', { status: 'done' });
     await clearPending();
