@@ -1,0 +1,47 @@
+{
+  "packageResults": {
+    "shared": {
+      "passed": 68,
+      "failed": 0
+    },
+    "vitePluginSourceTag": {
+      "passed": 20,
+      "failed": 0
+    },
+    "sceneRenderer": {
+      "passed": 5,
+      "failed": 0
+    },
+    "bridge": {
+      "passed": 1,
+      "failed": 0,
+      "format": "node:test"
+    },
+    "server": {
+      "passed": 176,
+      "failed": 3,
+      "total": 179
+    },
+    "studio": {
+      "status": "not-run (pnpm first failure stopped before studio test)"
+    }
+  },
+  "failedTests": [
+    {
+      "file": "apps/server/src/work/approvals.test.ts",
+      "name": "combines rules into one card and enforces the three-pending-card limit",
+      "timeoutMs": 5000
+    },
+    {
+      "file": "apps/server/src/work/approvals.test.ts",
+      "name": "persists stale main approvals, releases capacity and rejects repeated answers consistently",
+      "timeoutMs": 5000
+    },
+    {
+      "file": "apps/server/src/work/service.test.ts",
+      "name": "keeps at most three pending candidates and cleans up the oldest",
+      "timeoutMs": 5000
+    }
+  ],
+  "note": "超时只记录失败，不据此判定审批逻辑缺陷；未计算 280-3=277 的通过总数，Studio 与七套 E2E 未运行"
+}

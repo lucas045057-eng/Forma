@@ -1,0 +1,3 @@
+[PASS] typecheck exit=0 5s
+[PASS] build exit=0 7s
+[FAIL] unit exit=1 72s

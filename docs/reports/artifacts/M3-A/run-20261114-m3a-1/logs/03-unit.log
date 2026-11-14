@@ -1,0 +1,362 @@
+# 2026-11-14T08:11:19.467Z pnpm test
+$ pnpm --filter @spatial/vite-plugin-source-tag --filter @spatial/server --filter @spatial/bridge --filter @spatial/shared --filter @spatial/scene-renderer --filter @spatial/studio test
+Scope: 6 of 8 workspace projects
+packages/vite-plugin-source-tag test$ vitest run
+packages/shared test$ vitest run
+packages/shared test: [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/packages/shared[39m
+packages/vite-plugin-source-tag test: [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/packages/vite-plugin-source-tag[39m
+packages/shared test:  [32m✓[39m src/scene-edit.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+packages/shared test:  [32m✓[39m src/scene-config.test.ts [2m([22m[2m63 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+packages/shared test: [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+packages/shared test: [2m      Tests [22m [1m[32m68 passed[39m[22m[90m (68)[39m
+packages/shared test: [2m   Start at [22m 16:11:20
+packages/shared test: [2m   Duration [22m 524ms[2m (transform 198ms, setup 0ms, collect 326ms, tests 18ms, environment 0ms, prepare 286ms)[22m
+packages/vite-plugin-source-tag test:  [32m✓[39m src/reserved-jsx-r2.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+packages/vite-plugin-source-tag test:  [32m✓[39m src/index.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+packages/vite-plugin-source-tag test:  [32m✓[39m src/component-name.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+packages/shared test: Done
+packages/vite-plugin-source-tag test: [2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+packages/vite-plugin-source-tag test: [2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+packages/vite-plugin-source-tag test: [2m   Start at [22m 16:11:20
+packages/vite-plugin-source-tag test: [2m   Duration [22m 640ms[2m (transform 143ms, setup 0ms, collect 654ms, tests 121ms, environment 0ms, prepare 434ms)[22m
+packages/vite-plugin-source-tag test: Done
+packages/bridge test$ node --test src/index.test.mjs
+apps/server test$ vitest run
+packages/scene-renderer test$ vitest run
+packages/scene-renderer test: [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/packages/scene-renderer[39m
+apps/server test: [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/apps/server[39m
+packages/scene-renderer test:  [32m✓[39m src/pose.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+packages/scene-renderer test: [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+packages/scene-renderer test: [2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+packages/scene-renderer test: [2m   Start at [22m 16:11:21
+packages/scene-renderer test: [2m   Duration [22m 568ms[2m (transform 127ms, setup 0ms, collect 208ms, tests 6ms, environment 0ms, prepare 119ms)[22m
+apps/server test: [90mstdout[2m | src/assets/lux3d.test.ts[2m > [22m[2maborts an in-flight task query without waiting for the upstream timeout
+apps/server test: [22m[39m[lux3d-test fixture] { port: [33m2117[39m }
+apps/server test: [90mstderr[2m | src/assets/lux3d.test.ts[2m > [22m[2maborts an in-flight task query without waiting for the upstream timeout
+apps/server test: [22m[39m[lux3d-test transport] { port: [33m2117[39m, error: [32m'This operation was aborted'[39m, cause: [90mundefined[39m }
+packages/scene-renderer test: Done
+apps/server test:  [32m✓[39m src/assets/lux3d.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 58[2mms[22m[39m
+apps/server test:  [32m✓[39m src/events.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+apps/server test:  [32m✓[39m src/work/preview.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 84[2mms[22m[39m
+apps/server test:  [32m✓[39m src/agent/limits.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 94[2mms[22m[39m
+apps/server test:  [32m✓[39m src/work/preview-origin.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 118[2mms[22m[39m
+apps/server test: [90mstdout[2m | src/assets/process-model.test.ts[2m > [22m[2mnormalizes world-space geometry and preserves textured material through meshopt decoding
+apps/server test: [22m[39mprune: Removed types... Accessor (3)
+apps/server test: [90mstdout[2m | src/assets/process-model.test.ts[2m > [22m[2mnormalizes world-space geometry and preserves textured material through meshopt decoding
+apps/server test: [22m[39mprune: Removed types... Accessor (2)
+apps/server test:  [32m✓[39m src/assets/mock-server.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 306[2mms[22m[39m
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mconcurrent and restarted submissions use one paid task; conflicting input is rejected
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'10040'[39m, scenario: [32m'success'[39m }
+apps/server test:  [32m✓[39m src/assets/download.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 397[2mms[22m[39m
+apps/server test:  [32m✓[39m src/assets/cleanup.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 24[2mms[22m[39m
+apps/server test:  [32m✓[39m src/agent/tools.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 61[2mms[22m[39m
+apps/server test:  [32m✓[39m src/assets/instance-lock.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 404[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m replaces locks left by dead or unreadable owners [33m 361[2mms[22m[39m
+apps/server test:  [32m✓[39m src/assets/parts.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+apps/server test: (node:50128) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:592) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  [32m✓[39m src/assets/process-model.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 425[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m normalizes world-space geometry and preserves textured material through meshopt decoding [33m 303[2mms[22m[39m
+apps/server test: (node:48964) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:65408) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test:  [32m✓[39m src/work/preview-recovery.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 791[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m handles spawn failure and closes a preview when its owning parent is killed [33m 791[2mms[22m[39m
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: (node:36172) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mdoes not resubmit when the remote creation result is unknown
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'11645'[39m, scenario: [32m'success'[39m }
+apps/server test:  [32m✓[39m src/agent/client.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 510[2mms[22m[39m
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles failed without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'11648'[39m, scenario: [32m'failed'[39m }
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles cancelled without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'11651'[39m, scenario: [32m'cancelled'[39m }
+apps/server test:  [32m✓[39m src/assets/process-isolated.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 957[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m publishes model and parts only after successful worker exit [33m 587[2mms[22m[39m
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles expired403 without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'11654'[39m, scenario: [32m'expired403'[39m }
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles expired404 without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'8999'[39m, scenario: [32m'expired404'[39m }
+apps/server test: (node:67464) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles unknown without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'9003'[39m, scenario: [32m'unknown'[39m }
+packages/bridge test: ✔ capture isolation, real click selection, restoration and idle overlay without #root (1480.2829ms)
+packages/bridge test: ℹ tests 1
+packages/bridge test: ℹ suites 0
+packages/bridge test: ℹ pass 1
+packages/bridge test: ℹ fail 0
+packages/bridge test: ℹ cancelled 0
+packages/bridge test: ℹ skipped 0
+packages/bridge test: ℹ todo 0
+packages/bridge test: ℹ duration_ms 2140.5487
+packages/bridge test: Done
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mhandles timeout without creating a task during import
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'9005'[39m, scenario: [32m'timeout'[39m }
+apps/server test: [90mstdout[2m | src/assets/service.test.ts[2m > [22m[2masset idempotency and polling[2m > [22m[2mrejects unsafe IDs and internal downloads, and wraps part-split on the shared task endpoint
+apps/server test: [22m[39m[asset-test fixture] { port: [32m'9007'[39m, scenario: [32m'success'[39m }
+apps/server test:  [32m✓[39m src/assets/service.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 938[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m asset idempotency and polling[2m > [22mconcurrent and restarted submissions use one paid task; conflicting input is rejected [33m 472[2mms[22m[39m
+apps/server test:  [32m✓[39m src/isolation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 916[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects preview-origin mutations before any task or paid upstream work, and exposes no API on preview listener [33m 887[2mms[22m[39m
+apps/server test: (node:67464) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/app.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 2074[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m runs the mock import through HTTP, processing and model serving; rejects invalid inputs and foreign origins [33m 2073[2mms[22m[39m
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:67464) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/work/fs-boundary.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 3644[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m serves work and candidate modules but denies workspace sentinel files via @fs [33m 3643[2mms[22m[39m
+apps/server test: (node:67464) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:65408) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/scene/service.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3305[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m HTTP returns field errors, accepts config without coercion, and enforces origins [33m 768[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m adopts only ready assets, requires force and copies metadata with undo [33m 684[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m bounds the persisted journal and undo stack [33m 685[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m refuses requests addressed to a non-loopback host name unless explicitly allowed [33m 927[2mms[22m[39m
+apps/server test:  [32m✓[39m src/approvals/routes.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 3935[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m exposes approvals without exposing private candidates and accepts only raw JSON 0/1 [33m 3934[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 0ms init-start
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/m2-api.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 4482[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m exposes the M2 task/candidate/version flow and durable event replay without exposing the agent key [33m 4481[2mms[22m[39m
+apps/server test: (node:65408) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 508ms init
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 521ms listen
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 575ms accepted
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 576ms preClose
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 577ms second-instance-rejected
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 583ms new-request-rejected
+apps/server test: [n4-http] 583ms gate-released
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1049ms old-response
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1051ms file-and-event-before-unlock
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1052ms closing-resolved
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1052ms closing-awaited
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1053ms restart-start
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1299ms restart-ready
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1312ms restart-closed
+apps/server test: [n4-http] 1312ms finally-enter
+apps/server test: [n4-http] 1312ms finally-gate-released
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1312ms finally-closed
+apps/server test: [90mstdout[2m | src/events-lock.test.ts[2m > [22m[2mdrains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+apps/server test: [22m[39m[n4-http] 1318ms finally-cleaned
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/assets/recovery.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 6101[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL [33m 2298[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m detects missing ready models on restart and allows re-import [33m 557[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not resubmit after taskId persistence fails, even after restart [33m 329[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m app.close stops drip work and persists a restartable record [33m 1428[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m app.close stops timeout work and persists a restartable record [33m 1392[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/work/recovery-fix.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 8669[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m only snapshots permitted work files and serializes concurrent snapshots [33m 4216[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m recovers a committed adoption from durable intent without merging twice [33m 4452[2mms[22m[39m
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: warning: in the working copy of 'src/deploy.pem', LF will be replaced by CRLF the next time Git touches it
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/work/repo.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 13444[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m snapshots disk edits, adopts a candidate and reverts the merge without rewriting history [33m 3491[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m includes untracked files in pendingDiff and binds exact content without committing [33m 1994[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m aborts a conflicting adoption without changing the main worktree [33m 2142[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m refuses snapshot, candidates, adopt and revert while the work tree contains a junction (D2) [33m 1425[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m refuses when src/ or public/ itself is a junction (review F1) [33m 1116[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m refuses an existing clean repository that already tracks a forbidden file (review F3) [33m 952[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not abort an interrupted merge through a junctioned src/ at startup (review N1) [33m 1621[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m audits paths containing tabs, newlines and spaces as whole names (review N2) [33m 701[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:56448) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/events-lock.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 13393[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m keeps the event log inside the work-data lock and continues seq after a graceful restart (review F4) [33m 1980[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m releases the work-data lock when a constructor throws after it was taken (review N3) [33m 1280[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains queued work-tree operations before the log closes and the lock is released (review N4) [33m 1143[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains an admitted real HTTP snapshot before unlock and preserves nested repo calls [33m 1320[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains admitted HTTP submit before task files, journal and lock close [33m 1285[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains admitted HTTP selection before task files, journal and lock close [33m 1879[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains admitted HTTP cancel before task files, journal and lock close [33m 1201[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains an admitted real HTTP approval before closing the journal and releasing the lock [33m 2906[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m retains ownership and journal if a producer fails to stop, while stopping other producers [33m 398[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [31m❯[39m src/work/service.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 16496[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains an admitted direct submit before close returns (selection=false) [33m 1007[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains an admitted direct submit before close returns (selection=true) [33m 1290[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m validates source paths, commits, line ranges and stale selections before enqueueing [33m 2038[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m runs one task, records checks and scope, then adopts and reverts the work version [33m 3677[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m holds changes outside the selected file and its ancestors for approval [33m 1830[2mms[22m[39m
+apps/server test: [31m   [31m×[31m keeps at most three pending candidates and cleans up the oldest[39m[33m 5015[2mms[22m[39m
+apps/server test: [31m     → Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test:    [33m[2m✓[22m[39m cancels a running task and removes its candidate directory [33m 938[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m marks an interrupted running task as failed and retryable after restart [33m 700[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/approvals/policy.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 19694[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m allows an App-only copy edit on the real template with CSS and JSON?raw imports [33m 1901[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m still detects the real shared Button with instances=1 and valid leaf resources [33m 1617[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m reports a genuinely missing local import on the real template [33m 1446[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m resolves queried source imports without losing shared evidence [33m 1296[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m detects deletion of a referenced leaf resource: src/style.css [33m 1279[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m detects deletion of a referenced leaf resource: src/scene.config.json [33m 1265[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not ignore an existing local reference that escapes src [33m 1218[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not treat a resource created only in the draft as present in the baseline [33m 838[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m detects three same-file Button JSX uses despite one import and instances=1 [33m 879[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m resolves imported aliases when counting shared JSX uses [33m 841[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m resolves default exports and named re-export barrels [33m 898[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not label an App-only copy edit as a shared Button edit [33m 785[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m uses conservative UI instance evidence only for the changed selected file [33m 812[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m requires approval for global CSS and scene config, but not module CSS alone [33m 718[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m requires approval for out-of-scope edits and for every nonempty edit without selection [33m 933[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not turn baseline read failures into a new-file pass [33m 661[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m treats a genuinely new file in a valid baseline as absent without uncertainty [33m 723[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m keeps baseline shared evidence when the draft cannot be parsed [33m 735[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m fails closed on parse errors and dynamic imports [33m 845[2mms[22m[39m
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test: (node:61400) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+apps/server test:  [32m✓[39m src/task-id.test.ts [2m([22m[2m24 tests[22m[2m)[22m[33m 22816[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "1e5" without upstream queries [33m 1663[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "0" without upstream queries [33m 1307[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "01" without upstream queries [33m 1171[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId " 1" without upstream queries [33m 1020[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "1 " without upstream queries [33m 1000[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "1\n" without upstream queries [33m 1019[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "1\r\n" without upstream queries [33m 969[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "1.5" without upstream queries [33m 962[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "" without upstream queries [33m 939[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "+1" without upstream queries [33m 944[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "12345678901234567890" without upstream queries [33m 978[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId 0 without upstream queries [33m 918[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId -1 without upstream queries [33m 878[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId 1.5 without upstream queries [33m 876[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId 9007199254740992 without upstream queries [33m 867[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId null without upstream queries [33m 895[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId true without upstream queries [33m 836[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId "123" without upstream queries [33m 806[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects invalid raw taskId {"id":"123"} without upstream queries [33m 848[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m accepts valid raw taskId "123" without losing precision [33m 798[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m accepts valid raw taskId "9007199254740992" without losing precision [33m 777[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m accepts valid raw taskId "9999999999999999999" without losing precision [33m 785[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m accepts valid raw taskId 456 without losing precision [33m 778[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m accepts valid raw taskId 9007199254740991 without losing precision [33m 777[2mms[22m[39m
+apps/server test:  [31m❯[39m src/work/approvals.test.ts [2m([22m[2m23 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 68770[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m holds a shared edit in private staging, then approves exactly that draft without another model call [33m 4027[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rejects and cancels awaiting tasks with staging cleanup and no public candidate [33m 3364[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m releases the task queue while awaiting and allows a later local task [33m 3275[2mms[22m[39m
+apps/server test: [31m   [31m×[31m combines rules into one card and enforces the three-pending-card limit[39m[33m 5011[2mms[22m[39m
+apps/server test: [31m     → Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test:    [33m[2m✓[22m[39m binds answers to the exact draft digest and current main version [33m 3776[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m hard-fails package changes instead of offering an approval card [33m 1344[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m preserves a pending card and its staging across restart without approving it [33m 1617[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m recovers a persisted approval after the commit without creating a second commit or public event [33m 2420[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m rolls back a new card when its first durable save fails before cleanup [33m 1548[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m does not broadcast or publish when persisting an approval answer fails [33m 1757[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m drains an admitted direct answer before close and refuses later answers [33m 2200[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m isolates preview Error to its approval and permits another card and restart [33m 4078[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m isolates preview AbortError to its approval and permits another card and restart [33m 3650[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m recovers a committed approval with a failing preview without preventing startup [33m 2532[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m resumes failed-preview cleanup after terminal save failure without restarting preview [33m 2599[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m retains stale cleanup intent across save failure and restart [33m 2031[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m retains stale cleanup intent across cleanup failure and restart [33m 2010[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m recovers another card before cancel, including repeated cleanup failure [33m 3710[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m recovers another card before cancel, including repeated terminal-save failure [33m 3560[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m uses the recovered state when cancelling the same target after a terminal-save failure [33m 2354[2mms[22m[39m
+apps/server test:    [33m[2m✓[22m[39m persists stale draft approvals, releases capacity and rejects repeated answers consistently [33m 4738[2mms[22m[39m
+apps/server test: [31m   [31m×[31m persists stale main approvals, releases capacity and rejects repeated answers consistently[39m[33m 5002[2mms[22m[39m
+apps/server test: [31m     → Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test:    [33m[2m✓[22m[39m serializes approve, reject and cancel so only one terminal transition wins [33m 2164[2mms[22m[39m
+apps/server test: [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+apps/server test: [41m[1m FAIL [22m[49m src/work/approvals.test.ts[2m > [22mcombines rules into one card and enforces the three-pending-card limit
+apps/server test: [31m[1mError[22m: Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test: [36m [2m❯[22m src/work/approvals.test.ts:[2m142:1[22m[39m
+apps/server test:     [90m140| [39m})[33m;[39m
+apps/server test:     [90m141| [39m
+apps/server test:     [90m142| [39mit('combines rules into one card and enforces the three-pending-card l…
+apps/server test:     [90m   | [39m[31m^[39m
+apps/server test:     [90m143| [39m  [35mconst[39m f [33m=[39m [35mawait[39m [34mfixture[39m()[33m;[39m
+apps/server test:     [90m144| [39m  [35mtry[39m {
+apps/server test: [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+apps/server test: [41m[1m FAIL [22m[49m src/work/approvals.test.ts[2m > [22mpersists stale main approvals, releases capacity and rejects repeated answers consistently
+apps/server test: [31m[1mError[22m: Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test: [36m [2m❯[22m src/work/approvals.test.ts:[2m525:26[22m[39m
+apps/server test:     [90m523| [39m})[33m;[39m
+apps/server test:     [90m524| [39m
+apps/server test:     [90m525| [39mit.each(['draft', 'main'])('persists stale %s approvals, releases capa…
+apps/server test:     [90m   | [39m                         [31m^[39m
+apps/server test:     [90m526| [39m  [35mconst[39m f [33m=[39m [35mawait[39m [34mfixture[39m()[33m;[39m
+apps/server test:     [90m527| [39m  [35mtry[39m {
+apps/server test: [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+apps/server test: [41m[1m FAIL [22m[49m src/work/service.test.ts[2m > [22mkeeps at most three pending candidates and cleans up the oldest
+apps/server test: [31m[1mError[22m: Test timed out in 5000ms.
+apps/server test: If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+apps/server test: [36m [2m❯[22m src/work/service.test.ts:[2m118:1[22m[39m
+apps/server test:     [90m116| [39m})[33m;[39m
+apps/server test:     [90m117| [39m
+apps/server test:     [90m118| [39mit('keeps at most three pending candidates and cleans up the oldest', …
+apps/server test:     [90m   | [39m[31m^[39m
+apps/server test:     [90m119| [39m  [35mconst[39m f [33m=[39m [35mawait[39m [34mfixture[39m()[33m;[39m
+apps/server test:     [90m120| [39m  [35mtry[39m {
+apps/server test: [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+apps/server test: [2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m28 passed[39m[22m[90m (30)[39m
+apps/server test: [2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m176 passed[39m[22m[90m (179)[39m
+apps/server test: [2m   Start at [22m 16:11:21
+apps/server test: [2m   Duration [22m 70.01s[2m (transform 1.91s, setup 0ms, collect 13.75s, tests 192.97s, environment 5ms, prepare 4.41s)[22m
+apps/server test: Failed
+E:\空间化AI工作台\apps\server:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/server@ test: `vitest run`
+Exit status 1
+[ELIFECYCLE] Test failed. See above for more details.
