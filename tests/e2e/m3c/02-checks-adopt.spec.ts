@@ -288,8 +288,9 @@ test('采用另一个候选（version.changed）让旧候选的采用门禁立�
   expect((await api.revertVersion()).status, '回退失败').toBe(200);
 });
 
-test('M1 场景写回：写入落盘、门禁不被写回放宽（未检查的候选仍不可采用）', async ({ page }) => {
+test('M1 场景写回：写入落盘并使旧候选证明失效（采用仍关灯）', async ({ page }) => {
   await openStudio(page);
+  const versionBefore = (await api.getVersion()).body.version;
   const { candidate } = await localCandidate(page, '把首屏文案改成“场景写回用”');
 
   const scene = (await api.getScene()).body;
@@ -299,8 +300,20 @@ test('M1 场景写回：写入落盘、门禁不被写回放宽（未检查的�
   const reread = (await api.getScene()).body;
   expect(reread.hero.lights.ambient, 'M1 写回没有真正落盘').toBe(written.hero.lights.ambient);
 
+  // 实测（2026-11-15 定向自证）：场景写回会经作品快照产生新版本，旧候选的基线随即失效。
+  // 之前“PUT /scene 不发 version.changed”的推断只看 scene/service.ts，漏了作品快照那一路；
+  // 这里以真实界面/接口为准，不按旧推断写断言。
+  const versionAfter = (await api.getVersion()).body.version;
+  expect(versionAfter, '场景写回后作品版本没有变化').not.toBe(versionBefore);
+
   await page.getByTestId('state-refresh').click();
-  await expect(page.getByTestId('candidate-gate-reason')).toContainText('尚未运行检查', { timeout: 60_000 });
-  expect(await page.getByTestId('candidate-adopt').isDisabled(), '场景写回后未检查的候选真的可以采用？').toBe(true);
-  expect((await api.listCandidates()).body.find((item: { id: string }) => item.id === candidate.id)?.decision).toBe('pending');
+  await expect(page.getByTestId('candidate-gate-reason')).toContainText('证明已失效', { timeout: 60_000 });
+  await expect(page.getByTestId('candidate-checks')).toContainText('历史检查结果 · 证明已失效');
+  expect(await page.getByTestId('candidate-adopt').isDisabled(), '场景写回后旧候选的采用被放开了').toBe(true);
+  expect((await api.listCandidates()).body.find((item: { id: string }) => item.id === candidate.id)?.decision, '候选被自动采用或关闭了').toBe('pending');
+
+  writeArtifact('m3c-m1-scene-writeback.json', {
+    versionBefore, versionAfter, gateReason: await gateReason(page),
+    ambientAfter: reread.hero.lights.ambient, adoptDisabled: await page.getByTestId('candidate-adopt').isDisabled(),
+  });
 });

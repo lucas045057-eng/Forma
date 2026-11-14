@@ -70,29 +70,32 @@ test('mock：事件历史被截断时重新取锚点，不跳过触发事件（�
   writeArtifact('m3c-mock-truncated.json', { poisonedCalls: poisoned, seqAfter: seqText, status: await card.getAttribute('data-status') });
 });
 
-test('mock：迟到的旧快照不会把已批准的回滚成待批准', async ({ page }) => {
+test('mock：旧代次的迟到快照响应被丢弃，不回滚已批准', async ({ page }) => {
   await openStudio(page);
   const { card } = await createAwaitingCard(page);
   const approvalId = (await card.getAttribute('data-approval-id'))!;
+  // 先抓一份“批准前”的旧快照字节，等会儿把它当作迟到响应发回去
   const stale = await api.listApprovals().then((result) => JSON.stringify(result.body));
 
   expect((await api.answerApproval(approvalId, 0)).status).toBe(200);
   await expect(card).toHaveAttribute('data-status', 'approved', { timeout: 120_000 });
 
-  let served = 0;
+  // 设计 §4.2/§4.5：旧代次的迟到响应必须丢弃。做法：让第一次刷新拿到旧字节但迟到 2s 才返回，
+  // 期间再发一次刷新拿到真实响应；如果产品没有代次/操作序号守卫，旧响应就会把卡片拨回 pending。
+  let held = false;
   await page.route('**/approvals', async (route) => {
-    if (route.request().method() === 'GET') {
-      served += 1;
-      // 把“旧的 pending 快照”当成这次 GET 的响应（模拟迟到/乱序）
-      return route.fulfill({ status: 200, contentType: 'application/json', body: stale });
-    }
-    return route.continue();
+    if (route.request().method() !== 'GET' || held) return route.continue();
+    held = true;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    return route.fulfill({ status: 200, contentType: 'application/json', body: stale });
   });
   await page.getByTestId('state-refresh').click();
-  await page.waitForTimeout(2_000);
-  await expect(card, '旧快照把终态回滚了').toHaveAttribute('data-status', 'approved');
+  await page.getByTestId('state-refresh').click();
+  await page.waitForTimeout(3_500);
+
+  await expect(card, '旧代次的迟到响应把终态回滚了').toHaveAttribute('data-status', 'approved');
   await expect(card.getByTestId('approval-approve')).toBeDisabled();
-  writeArtifact('m3c-mock-late-snapshot.json', { staleServes: served, finalStatus: await card.getAttribute('data-status') });
+  writeArtifact('m3c-mock-late-snapshot.json', { heldStale: held, finalStatus: await card.getAttribute('data-status') });
 });
 
 test('mock：写请求响应丢失时显示“无法确认服务器状态”，不自动重发；刷新后按服务器状态显示', async ({ page }) => {
