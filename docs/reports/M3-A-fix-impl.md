@@ -56,11 +56,29 @@ M3-C/Pi 应以 GET 卡片 stale 与关联任务错误展示“草稿或主作品
 
 结果由调度核验已结束 job 的 exit 文件及完整日志；本轮未重复安装或上述已完成验证。B1 与 R1/R2 在不同阶段验证，不拼接为最终提交全量通过。
 
+### 最终全量验证状态更新
+
+25c33a8 的 job_c2efd2aa 已失败：七包 typecheck/build、shared 68、plugin 20、bridge 1、renderer 5 通过；server 176 项中 175 过，四候选清理用例在 5000ms 超时，studio 因首败即停未运行。job_f100e2a7 对原用例隔离运行 1 项通过（4506ms、另 7 项筛选跳过），只作对照。阶段耗时取证尚未完成，未调整 timeout/retry/skip 或候选断言，也未宣称性能根因已定位。
+
 ### 最终全量验证
 
 待后台结果。冻结报告提交后使用已有 `node apps/server/scripts/m3a-full-validation.mjs`，依次七包 typecheck → 七包 build → 六测试包完整单测一次，首败即停。入口记录 HEAD、锁 SHA256、每步命令/日志/PID/exit/signal、结束 HEAD 和工作树状态；证据目录为本 worktree `.data/m3a-validation-<启动时间>/`，准确目录由日志打印。全量未返回前不预写测试数量或成功。
 
 原 7fad918 的 job_049bdc52 已由调度核验通过：20 步、261 单测，HEAD/锁/工作树不变；这是整改前基线，不证明本轮修复。原件 `.data/m3a-validation-1794636746586/` 不改写，核验报告见主工作树 [M3-A-validation.md](E:/空间化AI工作台/docs/reports/M3-A-validation.md)（主线文件，当前 worktree 不复制或修改）。
+
+## RR1：取消覆盖另一卡的恢复意图
+
+触发：C 的 preview_failed 意图已保存、staging 已删除，但终态保存瞬时失败；此时取消另一个等待任务 D，旧 cancel 未先恢复意图，直接把唯一槽覆盖为 D cancel，最终留下永久 approving/awaiting 且无草稿的 C。
+
+修复提交：`50a13b6a523f34c78f716b48f0626c632f7364c5`。cancel 在 repo.exclusive 内先 await recoverApprovalIntent()，然后才重新读取目标任务。旧意图的保存或清理失败会拒绝新取消，不吞错、不改 D 状态、不覆盖 C 磁盘意图；恢复完成后再按 C 和 D 各自终态操作，不扩展为多卡意图数据库。
+
+返回语义：D 最终可正常取消；C 成为 failed/PREVIEW_FAILED。若恢复使同一目标已 failed，取消返回 409 INVALID_STATE，保留失败终态；同答批准返回既有失败结果且不重启预览/提交/模型，反答返回 APPROVAL_ALREADY_ANSWERED。直接 cancel/HTTP close 仍沿用原 N4 准入排空。
+
+红绿证据：调度 Node argv runner 的 job_bd0dced0（原夹具校正后、生产修复前）3 项真实失败、另 20 项筛选跳过；分别是跨卡槽覆盖、terminal-save 后恢复依据丢失及 same-target 错误取消。job_7d5ea2d5 为修复后绿灯，shared/server tsc 均通过，审批 23 + 路由 1 + events-lock 9 = 33/33；`.data/m3a-rr1-green.json` 确认三步骤 exit 0、signal null、HEAD/锁/实现与测试摘要不变。33 项是实现方定向门槛，不表示独立复核已通过。
+
+夹具校正：统一 terminal save 错误文案；同目标恢复后不改成 cancelled。故障 stub 保留首次 start 计数，以证明后续没有再次启动。
+
+剩余 RS1：Object.assign 回滚不能删除新增 error/candidateId 键，仍保留，未在本轮顺带修改。RS2：关闭中断按当前合同转为 PREVIEW_FAILED 并删除草稿，保留；M3-C 应明确提示。原 S1–S6 分流不变。
 
 ## S1–S6 分流
 
