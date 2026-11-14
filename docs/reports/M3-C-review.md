@@ -12,6 +12,8 @@
 
 **结论：有条件通过**（0 blocker / 1 应修）。**建议在该基础上继续 C3 收口**，应修项在 C3 内一并修掉并由 Pi 的三处高亮用例覆盖。
 
+> **修后复核（`1644d10`，随 `91134d7` 冻结）：C1-1 确认已修。** 影响模式下收到 `pick:result`/`error` 即发 `pick:stop → pick:start → highlight(卡片 src)`（`App.tsx:115`、`approval-state.ts` `impactHighlightMessages`），bridge 的临时 selectedSrc 与 hover 被清掉，Selection 不被替换；C1-S1 已采纳（进入影响模式时把 pending 选取置 none）。残留：指针再移动仍会出现临时 hover 框（Pi 按 `data-highlight-src` 过滤）；影响模式会吞掉主 iframe 的全部 `error` 消息（见 C3-S3）。
+
 ### 重点复核逐条结论
 
 | 复核点 | 结论 | 依据 |
@@ -63,6 +65,8 @@
 ## C2 — CandidatePanel 真实检查与证据（`974ffa2`，相对 `886bd99`；不含 `9124f7e` 与 C3 提交）
 
 **结论：有条件通过**（0 blocker / 1 应修）。**建议在该基础上继续 C3 收口**，但应修 C2-1 必须在 C3 内修掉并补单测，否则 C3 的故障态 UI 与采用门禁会被整页"状态待同步"掩盖。
+
+> **修后复核（`a94add0`，随 `91134d7` 冻结）：C2-1 确认已修。** `sync-state.ts` `pendingRunIds` 只取 pending 候选；run GET 用 `allSettled`，失败/结构不符/无 runId/空 toolIdentity/视图不一致只写入该候选 `checkIssues`；快照仅在"检查事件跨越本次快照"时最多重读 2 次，用尽后仍提交快照、`syncReady=true`；实时 `check.updated` 不再触发全局重同步（`reconcileLiveEvent`）。全局同步只受事件历史连续性与四份核心 GET 约束。8 个单测覆盖所述场景。残留：`checkIssue` 同时封住了"重新检查"，导致后端明确要求"显式重新检查"的旧记录走入死路（见 C3-2）。
 
 ### 重点复核逐条结论
 
@@ -121,6 +125,85 @@
 
 ---
 
+## C3 — 按钮门禁与失败态 UI（冻结 `91134d7`；C3 本体 `16ce0c4`/`1baa587`/`d09ce49`，整改 `1644d10`/`a94add0`/`91134d7`）
+
+审查范围：`git diff 974ffa2 91134d7 -- apps/studio docs/reports/M3-C-impl.md`（21 文件），对照任务卡 `c3-gates-failure-ui.md`、设计 §5/§4/§7、基线 `bc615bf` 后端（`work/service.ts`、`checks/runner.ts`、`scene/service.ts`、`app.ts`）与基线 E2E（`tests/e2e/m1b`、`m2b`）。只读提交字节，未运行任何测试。
+
+**结论：有条件通过**（0 blocker / 3 应修）。采用门禁本身没有发现绕过窗口；3 条应修都在门禁之外的衔接面（M1 场景草稿、旧记录重跑、任务重试范围），均为 Studio 内小改。**不建议直接把 `91134d7` 冻结交 Pi 做正式验收**：建议先修 3 条应修（尤其 C3-1 直接影响 Pi 要跑的 M1 回归稳定性）再冻结；Pi 可先在 `91134d7` 上起草 `tests/e2e/m3c` 和 `--list`，正式轮次以修后的冻结提交为准。
+
+### 重点复核逐条结论
+
+| 复核点 | 结论 | 依据 |
+| --- | --- | --- |
+| 采用门禁完整性 | 通过 | `adoption-gate.ts:8-24` 依次要求：同步+连接；无 work 锁；候选 pending；有 candidateCommit；`baseVersion===version`；run 关联且 `mainVersion===version`；该 run 未被 409 封存；`completed+passed+无 error`；contentDigest/policyVersion/toolIdentity 非空；`consistentChecks` 且四项 passed；六份必需证据各恰好一份且主证据 hash 对应；最后要求**证据回执** `receipt.ready` 且 `receipt.key === proofKey(candidate, run, version, epoch)`。回执由 `Evidence` 在六份全部通过 MIME/大小/SHA-256 校验后发出（`CheckPanel.tsx:33-35`），key 绑定整份 candidate/run JSON、版本与同步代次，任一变化或新同步开始即失配；卸载时撤回。无 canAdopt 类后端字段。 |
+| 绕过窗口（事件/键盘/直接调用） | 通过 | 唯一发起点 `CandidatePanel.action('adopt')`，执行前用 `receiptRef.current` **再算一次** `adoptionReason`（`:70-71`）并要求 `checkIssue` 为空；按钮为真 `disabled` 且 onClick 内再判（`AdoptButton`），键盘无法激活 disabled 按钮；没有任何事件回调或同步路径会自动 POST adopt。`version.changed`/`check.started`/`check.finished` 实时到达即全量重同步、`syncReady=false`、epoch 变化→回执失效，所以 M1 写回或回退后旧候选立即关灯。 |
+| TOCTOU 交后端 | 通过 | 前端只做可见性门禁，门禁文案"采用时仍由服务器最终核对"；后端 `validatePassedRun` 在锁内重核字节与证据（基线未改）。 |
+| `CHECKS_NOT_PASSED` / `STALE_CANDIDATE` 语义 | 通过 | `operationError`：adopt+`CHECKS_NOT_PASSED`→"检查未通过或证明已失效…"，并 `rejected[id]=run.id` 封住该 run，只有新 run 才可能恢复，不自动再采用；`STALE_CANDIDATE` 只在 `run/rerun` 分支处理并永久禁用该候选的检查。不期待 adopt 返回 `STALE_CANDIDATE`，无 `MERGE_CONFLICT` 分支。与后端一致。 |
+| 共享锁：死锁 / 漏放 | 通过 | `MutationLocks`（`mutation-locks.ts`）：含 `work` 的请求与任何在途锁互斥，实体锁按 key 互斥；锁在请求返回后 `awaiting` 标记 `after=epoch+1`，只在之后一次**成功同步**时释放（`EventCenter.tsx:124`）。`api()` 与场景 `request()` 均加 60s 超时，`json()` 20s，所以不存在"请求永不返回→锁永不进入可释放态"；断线重连后的自动同步也能释放。ApprovalPanel（`approval:id`+`task:id`）与 PointSpeak（`task:id`、`task:create`）共用任务锁，C1-S3 已落实。代价是任一在途写操作会短暂封住所有作品级写入（保守，可接受）。 |
+| 回退入口 | 通过 | `canRevert = ready && !locked(['work'])`，不依据本地历史猜测；`NO_ADOPTION`→"暂无可回退的采用记录"。 |
+| 撤回运行中候选 / 晚到 run | 通过 | 撤回仅受本候选锁与同步约束；候选关闭后 `reduceM2Event` 拒绝 pending 回写，晚到 run 事件不再更新候选（只有 latest 指针匹配时才写候选）。 |
+| 回答错误路径 | 通过 | `STALE_APPROVAL`/`ALREADY_ANSWERED`/`NOT_PENDING` 写入 `blockedIds` 永久禁该卡；网络未知先权威重读；刷新失败不误报为操作失败。 |
+| 跨源隔离 / 单 WS / 文本安全 | 通过 | origin+source 校验未动；候选 iframe 仍不进入选取；仍只有一个 WebSocket；新增文案与服务端 message 均为文本节点。 |
+| M2 选择与 STALE_SELECTION | 通过（行为有变，见 C3-S4） | `App.tsx:45-56` 版本变化即作废选取、停止选取模式；PointSpeak 要求 `selection.baseVersion===state.version`，旧 Selection 不能生成任务。 |
+| M2-B 现有采用 E2E | 预计兼容，需 Pi 实证 | `tests/e2e/m2b/01-ui.spec.ts:122-128` 先由 helper 走真实 checks API 跑通四检查再点 `candidate-adopt`。C3 下 `check.finished` 触发重同步→终态证据读取→回执就绪后按钮才可用，Playwright 的可操作性等待会覆盖这段时间；`candidate-checks [data-status]` 在无 run 时仍全为 `not_run`。 |
+| SceneEditor 移入 inspector 列的 M1 风险 | **仍存在，且 C3 新增了一个更直接的风险**（C3-1） | 布局层面：场景编辑器仍在 `aside.inspector` 内、原内容 `hidden`。C3 又给场景写入加了同步/作品锁门禁并改为"写完靠事件与重载刷新"。`scene-diff` 现在只由 `scene.changed` 事件设置（服务端在 HTTP 返回前发出，`scene/service.ts:102-103`），一般不影响 `m1b/02-writeback` 读取；主要问题见 C3-1。 |
+
+### Blocker
+
+无。
+
+### 应修
+
+**C3-1 任意一次全量同步都会用服务器配置覆盖场景编辑器里尚未保存的草稿（M1 衔接回归）**
+- 位置：`apps/studio/src/SceneEditor.tsx:86`（`state.reload` → `load()` → `applyConfig` 无条件覆盖、清 `dirty`），配合 `EventCenter.tsx:127`（**每次**成功同步都会发 `state.reload`）与 `:173`（`version.changed`/`check.started`/`check.finished` 都会触发全量同步）。基线里 `state.reload` 只在首连/截断时出现；C1–C3 后它在每次检查开始/结束、每次任何面板写操作后的 `reload()`、每次版本变化时都会出现。
+- 失败情形：
+  1. 用户在 3D 场景编辑器里拖了参数还没点"设为首屏"，此时任何候选的检查开始/结束、请示被回答、他处采用/回退，都会把草稿悄悄重置。
+  2. 首连时序竞争：`writeBlocked` 让 fieldset 在 `syncReady` 变 true 的同一刻才启用，而同一刻 `state.reload` 触发的 `GET /scene` 正在途中；`m1b/02-writeback` 与 `03-undo` 一启用就 `setSlider` 再保存，若 GET 晚于滑条到达，草稿被覆盖、保存的是原配置，画面不变化而超时。基线中 fieldset 不受同步门禁，这一竞争窗口小得多。
+- 最小修法（只改 SceneEditor）：`state.reload` 分支与 `scene.changed` 分支一致，`if (!dirty.current) { void load(); }`（资产列表照常刷新）；`action()` 写成功后显式 `dirty.current = false`（或像基线一样以本次写入返回的 `config` 调 `applyConfig` 并 `setLatest`，这是 M1 自己写入的确定结果，不属于 M2/M3 实体乐观更新）。补一个"dirty 时收到 state.reload 不覆盖草稿"的单测。
+
+**C3-2 `checkIssue` 同时封住"重新检查"，把后端要求"显式重新检查"的旧记录变成死路**
+- 位置：`apps/studio/src/CandidatePanel.tsx:56`（`canRun` 含 `!checkIssue`）、`:58`（`canCancel` 同理）；来源 `sync-state.ts:28`。
+- 后端可达：`runner.ts:147-151`（基线）把缺 outcome 的旧 run 标为 `LEGACY_CHECK_RECORD`"旧记录缺少完整检查证明，请显式重新检查"；`service.ts:285-291` 对 policyVersion 不符或 toolIdentity 为空的 run 给出无 `runId` 的默认 checks → 前端判为视图不一致 → `checkIssue` → 运行/重跑/取消全部 disabled。用户只能撤回候选重新生成，后端提供的恢复路径在 UI 上不可达。
+- 最小修法：区分"run 读不到（`failed`）"与"run 已读到但视图不一致/旧记录"。后者若 run 为终态，允许 `check-rerun`（仍发 `{rerun:true}`，由后端裁决：故障期间返回 503/`STALE_CANDIDATE` 均已有文案）；若 run 仍活动，允许取消该 run。采用继续由 `checkIssue` 封住。补单测：旧记录/无 runId 视图下 rerun 可用、adopt 仍 disabled。
+
+**C3-3 "重试"不再沿用原任务的选取范围，可能把一次"共享 Button"范围的任务悄悄变成整页任务**
+- 位置：`apps/studio/src/PointSpeak.tsx:77`（`submit(active.instruction, selection)`，基线为 `active.selection ?? null`）。
+- 失败情形：`App.tsx:45-56` 在任何版本变化时把 pick 置 none；`canSubmit` 允许 none（"可以提交整体修改"）。于是选中共享 Button 发起的任务失败/取消后，只要期间作品版本变过（或用户没有重新点选），点"重试"就会发出**不带 selection** 的任务——范围、请示策略（out_of_scope/shared_component）与用户原意都变了，且 UI 没有任何提示。若用户点了别的元素，重试会换成新元素的范围。
+- 最小修法：重试时若 `active.selection` 存在：其 `baseVersion===state.version` 则沿用它；否则禁用重试并提示"页面已变化，请重新点选后再重试"（或在用户重新点选同一 src 后用新 Selection）。原任务无 selection 时才按整页提交。
+
+### 建议
+
+- **C3-S1 确定性 4xx 被说成"无法确认服务器状态"**：`adoption-gate.ts:36` 的兜底把所有未列出的码（如 `MODEL_MISSING`、`INVALID_TASK`、`INVALID_SELECTION`、`NOT_READY`、`INVALID_OPTION`）都变成"无法确认服务器状态，请刷新后继续"。设计里这句话是给网络/5xx 的；对已明确拒绝的 4xx 会误导用户去刷新。建议：`ApiError` 且 `status` 为 4xx 时显示"操作被拒绝：<服务器 message 文本>"，仅网络错误/超时/5xx 用"无法确认"。PointSpeak 任务提交由此比基线丢失了原有错误说明。
+- **C3-S2** 未运行过检查时门禁原因显示"检查状态不完整或基线不一致"（`adoption-gate.ts:15`，`!run` 也走这条），应改为"尚未运行检查，请先运行检查"，避免把正常的未检查说成异常。
+- **C3-S3** 影响模式下 `App.tsx:115` 吞掉主 iframe 的**所有** `error` 消息，包括页面真实运行错误（bridge 的 `window.error`/`unhandledrejection` 转发），并为每条错误重发一次高亮。建议只吞"未找到带源码标记的外层容器"这类选取错误，其余照常显示。
+- **C3-S4** 版本变化时 `App.tsx:55` 无条件显示红色 alert"页面已变化，请重新点选"，即使用户之前没有任何选取（例如只是做了场景写回或采用）。建议仅在原先有 ready/pending 选取时提示。同时注意它会关闭选取模式，Pi 需留意 M2 用例里"采用后继续点选"的步骤。
+- **C3-S5** `reconcileLiveEvent` 只累加 `checkIssues` 不清除，问题只能等下一次全量同步（`check.finished` 会触发，所以实际会自愈）；建议在 live 路径对事件涉及的候选重算而不是合并保留，减少误报持续时间。
+
+### 对 CodeBuddy 建议取舍理由的核对（`M3-C-impl.md`）
+
+| 项 | 取舍 | 核对 |
+| --- | --- | --- |
+| C1-S1 | 采纳 | 成立，已见 `App.tsx:74`。 |
+| C1-S2 | 不采纳（重载即清理，不恢复旧选取） | 成立：重载后旧 Selection 不可信，保守。 |
+| C1-S3 | 采纳 | 成立，任务锁已共享。 |
+| C1-S4 | 部分采纳（抽纯函数，不重写驱动） | 成立，`sync-state.test.ts` 8 例覆盖决策逻辑；完整异步驱动仍是 Pi mock UI 的责任，需在 Pi 报告中单列。 |
+| C1-S5 | 不变 | 成立，符合设计 §4.6。 |
+| C2-S1 | 不采纳缓存重构 | 成立：重复读取只是成本，换来"失步即作废凭据"的保守语义；终态才读取（C2-S2）后成本已明显下降。 |
+| C2-S2 | 采纳 | 成立，`CheckPanel.tsx:61`。 |
+| C2-S3 | 采纳 | 成立，前缀改为"未开始执行："。 |
+| C2-S4 | 采纳通用文案 | 方向成立，但兜底范围过宽，见 C3-S1。 |
+| C2-S5 | 不变 | 成立，交 Pi 验证。 |
+
+### 未覆盖与风险
+
+- 全部浏览器级行为（完整闭环、三处高亮、真实四检查与六证据、409 两路径、POST 响应丢失、断线/重启、双击、M1 写回后旧候选关灯）归 Pi；本次只读代码，`job_1f28cd58` 结果未纳入。
+- EventCenter 的异步驱动（真实 WebSocket + fetch 交错）仍无自动化测试，只有决策纯函数测试。
+- M1 回归：除 C3-1 外，场景写入期间 fieldset 会在同步窗口内短暂 disabled、`scene-diff` 改由事件更新，均依赖 Playwright 的等待；建议 Pi 在完整回归里关注 m1b 三套的时延与偶发。
+- 每个在途写操作都会短暂封住全部作品级写入（含场景写回、采用、回退、回答）；属于设计允许的保守互斥，但高频检查事件期间 UI 会频繁出现"状态待同步"。
+- `real-model` 套件（`tests/e2e/real-model/real-model.spec.ts:352/380`）直接点采用/回退，不在 146 例回归内，但若后续启用，需要先跑检查。
+
+---
+
 ## 总结
 
 | 卡 | 结论 | Blocker | 应修 | 是否建议继续 C3 |
@@ -128,4 +211,6 @@
 | C1 `886bd99` | 有条件通过 | 0 | 1（C1-1 影响模式页面内高亮可被点击改写） | 是，C3 内顺带修复 |
 | C2 `974ffa2` | 有条件通过 | 0 | 1（C2-1 单候选检查不一致导致全局同步失败） | 是，但 C2-1 须在 C3 冻结前修复并补单测，C3 审查时复核 |
 
-C3 审查时将一并复核：C1-1、C2-1 的修复；C1-S3 共享任务锁；采用门禁是否完整消费证据可读性结果；`version-revert` 恢复与 M2 采用/回退回归。
+| C3 `91134d7` | 有条件通过 | 0 | 3（C3-1 同步覆盖场景草稿；C3-2 checkIssue 封死重新检查；C3-3 重试丢失选取范围） | 不直接冻结；修完 3 条应修后冻结交 Pi 正式验收 |
+
+C1-1、C2-1 修后复核均确认已修；C1-S3 共享任务锁已落实；采用门禁完整消费了六证据可读性回执并绑定同步代次；`version-revert` 已恢复且由后端判定。C3 三条应修修后需要复核（只看对应 diff 与新增单测即可），之后 0 blocker / 0 应修 + Pi 正式通过才能收口。
