@@ -41,14 +41,14 @@ test('请示卡持久显示：刷新页面与手动刷新状态后仍是同 id �
   // 刷新页面：按持久状态恢复，不是靠内存里的事件
   await page.reload();
   await openStudio(page);
-  await expect(page.getByTestId('approval-card')).toHaveCount(1, { timeout: 90_000 });
-  await expect(page.getByTestId('approval-card')).toHaveAttribute('data-approval-id', approvalId!);
+  await expect(page.locator('[data-testid="approval-card"][data-status="pending"]'), '待处理卡不是恰好一张').toHaveCount(1, { timeout: 90_000 });
+  await expect(page.locator(`[data-approval-id="${approvalId}"]`), '刷新后同一个 id 出现了多次').toHaveCount(1);
   await expect(page.getByTestId('approval-card')).toHaveAttribute('data-status', 'pending');
 
   // 只读刷新同样不改变卡片身份
   await page.getByTestId('state-refresh').click();
-  await expect(page.getByTestId('approval-card')).toHaveCount(1, { timeout: 60_000 });
-  await expect(page.getByTestId('approval-card')).toHaveAttribute('data-approval-id', approvalId!);
+  await expect(page.locator('[data-testid="approval-card"][data-status="pending"]')).toHaveCount(1, { timeout: 60_000 });
+  await expect(page.locator(`[data-approval-id="${approvalId}"]`)).toHaveCount(1);
 
   writeArtifact('m3c-approval-persistence.json', {
     approvalId, taskId, selectionSrc: selection.src, instances: selection.instances,
@@ -245,8 +245,9 @@ test('请示卡在页面重载后不重复：同 id 单卡（反复刷新比一�
   for (let round = 0; round < 2; round += 1) {
     await page.reload();
     await openStudio(page);
-    await expect(page.getByTestId('approval-card')).toHaveCount(1, { timeout: 90_000 });
-    await expect(cardByTask(page, taskId)).toHaveAttribute('data-approval-id', approvalId!);
+    // 历史卡（已拒/已失效）也在 DOM 里（折叠区），所以只数“待处理”，并确认该 id 只出现一次。
+    await expect(page.locator('[data-testid="approval-card"][data-status="pending"]'), `第 ${round + 1} 次重载后待处理卡不唯一`).toHaveCount(1, { timeout: 90_000 });
+    await expect(page.locator(`[data-approval-id="${approvalId}"]`), `第 ${round + 1} 次重载后同 id 卡重复`).toHaveCount(1);
     await expect(cardByTask(page, taskId)).toHaveAttribute('data-status', 'pending');
   }
 });

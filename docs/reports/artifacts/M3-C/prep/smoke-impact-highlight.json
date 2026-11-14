@@ -1,0 +1,10 @@
+{
+  "cyanBoxes": 3,
+  "distinctSrc": [
+    "src/components/Button.tsx:5:5"
+  ],
+  "boxesAfterClick": 3,
+  "selectionPreserved": true,
+  "usagePoint": "src/App.tsx:27:14",
+  "usagePointBoxes": 0
+}
