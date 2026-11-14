@@ -47,13 +47,9 @@ function gitRead(root: string, args: string[]): Promise<{ code: number; stdout: 
   });
 }
 
-async function gitShow(root: string, baseVersion: string, file: string): Promise<string | undefined> {
-  if (!/^[0-9a-f]{7,64}$/i.test(baseVersion)) throw new Error('基线版本无效');
-  // A missing path and a broken/unreadable repository both make Git exit nonzero. Only the
-  // former may remove baseline evidence; every other failure must remain analysis_uncertain.
-  const listing = await gitRead(root, ['ls-tree', '-z', baseVersion, '--', file]);
-  if (listing.code !== 0) throw new Error('无法读取基线版本库');
-  if (!listing.stdout) return undefined;
+// Called only for paths present in this evaluation's audited baseline listing.
+// A failed read is an analysis error, never evidence that the path is absent.
+async function gitShow(root: string, baseVersion: string, file: string): Promise<string> {
   const content = await gitRead(root, ['show', `${baseVersion}:${file}`]);
   if (content.code !== 0) throw new Error('无法读取基线文件');
   return content.stdout;
@@ -86,7 +82,7 @@ async function baselineFiles(root: string, version: string) {
     const tab = record.indexOf('\t');
     const meta = record.slice(0, tab), file = record.slice(tab + 1);
     if (!/^100(?:644|755) blob [0-9a-f]+$/.test(meta) || !/^src\/[A-Za-z0-9_./-]+$/.test(file) || file.split('/').includes('..')) throw new Error('基线含不安全源码路径');
-    files.set(file, SOURCE_FILE.test(file) ? (await gitShow(root, version, file))! : '');
+    files.set(file, SOURCE_FILE.test(file) ? await gitShow(root, version, file) : '');
     if (files.size > 500) throw new Error('源码文件过多，无法可靠分析');
   }
   return files;
