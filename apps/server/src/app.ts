@@ -146,6 +146,24 @@ export async function createApp(options: AppOptions = {}) {
   app.get('/tasks', async () => work.listTasks());
   app.get<{ Params: { id: string } }>('/tasks/:id', async request => work.getTask(request.params.id));
   app.post<{ Params: { id: string } }>('/tasks/:id/cancel', async request => work.cancel(request.params.id));
+  app.get('/approvals', async () => work.listApprovals());
+  app.get<{ Params: { id: string } }>('/approvals/:id', async request => work.getApproval(request.params.id));
+  app.post<{ Params: { id: string }; Body: unknown }>('/approvals/:id', {
+    preValidation: async request => {
+      const body = request.body;
+      if (typeof body !== 'object' || body === null || Array.isArray(body) || Object.keys(body).some(key => key !== 'option')) {
+        throw new WorkError('INVALID_OPTION', '请求体只能包含原始 JSON 数字 option：0 或 1', 400);
+      }
+    },
+    schema: { body: { type: 'object', additionalProperties: false, required: ['option'], properties: {
+      // Keep the raw JSON value: Fastify's typed schema would coerce strings to numbers.
+      option: {},
+    } } },
+  }, async request => {
+    const option = (request.body as { option: unknown }).option;
+    if (typeof option !== 'number' || !Number.isInteger(option) || (option !== 0 && option !== 1)) throw new WorkError('INVALID_OPTION', 'option 必须是原始 JSON 数字 0 或 1', 400);
+    return work.answerApproval(request.params.id, option);
+  });
   app.get('/candidates', async () => work.listCandidates());
   app.get<{ Params: { id: string } }>('/candidates/:id', async request => work.getCandidate(request.params.id));
   app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => work.adopt(request.params.id));

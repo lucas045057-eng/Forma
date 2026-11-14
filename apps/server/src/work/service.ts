@@ -2,13 +2,14 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir } from 'node:fs/promises';
 import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
-import type { Candidate, Check, Selection, Task } from '@spatial/shared';
+import type { ApprovalCard, Candidate, Check, Selection, Task } from '@spatial/shared';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { CodingAgent, CodingAgentError, type CodingAgentOptions } from '../agent/client.ts';
 import { Sandbox, ToolError } from '../agent/tools.ts';
 import type { StudioEvent } from '../events.ts';
 import { PreviewManager, previewBase } from './preview.ts';
 import { WorkRepo, WorkError } from './repo.ts';
+import { evaluateApproval } from '../approvals/policy.ts';
 
 interface StoredTask extends Task {
   createdAt: string;
@@ -16,8 +17,17 @@ interface StoredTask extends Task {
   error?: { code: string; message: string };
 }
 interface StoredCandidate extends Candidate { taskId: string; createdAt: string }
+interface StoredApproval extends ApprovalCard { summary: string }
+interface ApprovalIntent { kind: 'approve' | 'reject' | 'cancel' | 'preview_failed' | 'stale'; id: string; taskId: string; before: string; contentDigest: string }
 interface Adoption { mergeCommit: string; candidateId: string; at: string }
-interface State { tasks: StoredTask[]; candidates: StoredCandidate[]; adoptions: Adoption[]; intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string } }
+interface State {
+  tasks: StoredTask[];
+  candidates: StoredCandidate[];
+  adoptions: Adoption[];
+  approvals: StoredApproval[];
+  intent?: { kind: 'adopt' | 'revert' | 'discard'; id: string; before: string; target?: string };
+  approvalIntent?: ApprovalIntent;
+}
 
 export interface WorkServiceOptions {
   /** The caller already holds the instance lock of `directory` (createApp does, so the event log is covered too). */
@@ -38,7 +48,7 @@ export class WorkService {
   readonly previews: PreviewManager;
   private readonly options: WorkServiceOptions;
   private readonly file: string;
-  private state: State = { tasks: [], candidates: [], adoptions: [] };
+  private state: State = { tasks: [], candidates: [], adoptions: [], approvals: [] };
   private writes: Promise<void> = Promise.resolve();
   private taskQueue: Promise<void> = Promise.resolve();
   private controllers = new Map<string, AbortController>();
@@ -54,7 +64,7 @@ export class WorkService {
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
     // These mutations can await work outside the repo queue. Register admission
     // synchronously so close cannot miss a submit that has not enqueued its task yet.
-    for (const name of ['submit', 'cancel']) {
+    for (const name of ['submit', 'cancel', 'answerApproval']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => {
         if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
@@ -76,12 +86,21 @@ export class WorkService {
     await this.repo.init();
     try {
       const saved = JSON.parse(await readFile(this.file, 'utf8')) as State;
-      if (!Array.isArray(saved.tasks) || !Array.isArray(saved.candidates) || !Array.isArray(saved.adoptions)) throw new Error('invalid state');
-      this.state = saved;
-    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取 M2 任务状态 tasks.json'); }
+      if (!Array.isArray(saved.tasks) || !Array.isArray(saved.candidates) || !Array.isArray(saved.adoptions) ||
+        (saved.approvals !== undefined && !Array.isArray(saved.approvals))) throw new Error('invalid state');
+      this.state = { ...saved, approvals: saved.approvals ?? [] };
+    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取 M2/M3 任务状态 tasks.json'); }
+    for (const task of this.state.tasks) {
+      if (task.status === 'awaiting_approval' && !this.state.approvals.some(card => card.taskId === task.id)) throw new Error('等待请示的任务缺少对应卡片，拒绝自动清理或发布');
+    }
     await this.recoverIntent();
+    await this.recoverApprovalIntent();
     for (const entry of await readdir(this.repo.candidatesDir, { withFileTypes: true })) {
-      if (/^[a-z0-9]{6,32}$/.test(entry.name) && !this.state.candidates.some(c => c.id === entry.name && c.decision === 'pending')) await this.repo.removeCandidate(entry.name);
+      if (!/^[a-z0-9]{6,32}$/.test(entry.name)) continue;
+      const publicPending = this.state.candidates.some(c => c.id === entry.name && c.decision === 'pending');
+      const privateStaging = this.state.tasks.some(task => task.id === entry.name && task.status === 'awaiting_approval' &&
+        this.state.approvals.some(card => card.taskId === task.id));
+      if (!publicPending && !privateStaging) await this.repo.removeCandidate(entry.name);
     }
     let recovered = false;
     for (const task of this.state.tasks) {
@@ -118,6 +137,99 @@ export class WorkService {
     try { await this.save(); } catch (error) { this.state.intent = intent; throw error; }
   }
 
+  private async recoverApprovalIntent() {
+    const intent = this.state.approvalIntent;
+    if (!intent) return;
+    const card = this.approval(intent.id), task = this.task(intent.taskId);
+    if (intent.kind === 'approve') { await this.finalizeApprovedTask(task.id); return; }
+    if (intent.kind === 'preview_failed' || intent.kind === 'stale') await this.save();
+    await this.previews.stop(task.id);
+    await this.repo.removeCandidate(task.id);
+    const previousCard = clone(card), previousTask = clone(task);
+    const failed = intent.kind === 'preview_failed' || intent.kind === 'stale';
+    card.status = intent.kind === 'preview_failed' ? 'failed' : intent.kind === 'stale' ? 'stale' : intent.kind === 'reject' ? 'rejected' : 'cancelled';
+    card.updatedAt = new Date().toISOString();
+    task.status = failed ? 'failed' : 'cancelled';
+    task.error = intent.kind === 'preview_failed' ? { code: 'PREVIEW_FAILED', message: '候选预览启动失败，本次草稿已丢弃，请重新提交任务' }
+      : intent.kind === 'stale' ? { code: 'STALE_APPROVAL', message: '草稿或主作品版本已变化，不能继续批准' }
+      : { code: intent.kind === 'reject' ? 'APPROVAL_REJECTED' : 'TASK_CANCELLED', message: intent.kind === 'reject' ? '用户拒绝并丢弃本次修改' : '用户取消任务' };
+    task.updatedAt = card.updatedAt;
+    task.events.push({ type: 'task.updated', ts: card.updatedAt, sequence: task.events.length + 1, message: task.error.message });
+    this.state.approvalIntent = undefined;
+    try { await this.save(); } catch (error) {
+      Object.assign(card, previousCard); Object.assign(task, previousTask);
+      this.state.approvalIntent = intent; throw error;
+    }
+    this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
+    this.options.emit({ type: 'task.updated', task: clone(task) });
+  }
+
+  private async failApproval(card: StoredApproval, kind: 'preview_failed' | 'stale') {
+    // Persist the cleanup decision before removing the only draft. A failed terminal save
+    // can then resume cleanup without retrying the preview or requiring the removed files.
+    this.state.approvalIntent = { kind, id: card.id, taskId: card.taskId, before: card.baseVersion, contentDigest: card.contentDigest };
+    await this.recoverApprovalIntent();
+  }
+
+  /** Publish only the already-generated draft named by a durable approval intent. */
+  async finalizeApprovedTask(taskId: string) {
+    const card = this.state.approvals.find(item => item.taskId === taskId);
+    const task = this.task(taskId);
+    if (!card) throw new WorkError('NOT_FOUND', '任务没有请示卡片', 404);
+    const intent = this.state.approvalIntent;
+    if (!intent) {
+      if (card.status === 'approved' && task.status === 'done' && this.state.candidates.some(candidate => candidate.id === taskId)) {
+        return { approval: this.publicApproval(card), task: clone(task) };
+      }
+      return { approval: this.publicApproval(card), task: clone(task) };
+    }
+    if (intent.kind !== 'approve' || intent.id !== card.id || intent.taskId !== taskId) throw new WorkError('RECOVERY_CONFLICT', '请示恢复意图不一致', 409);
+    const head = await this.repo.head();
+    const pending = await this.repo.pendingDiff(taskId, intent.before);
+    if (head !== intent.before || pending.contentDigest !== intent.contentDigest || card.contentDigest !== intent.contentDigest || card.baseVersion !== intent.before) {
+      await this.failApproval(card, 'stale');
+      return { approval: this.publicApproval(card), task: clone(task) };
+    }
+    const controller = new AbortController();
+    this.controllers.set(taskId, controller);
+    try {
+      await this.repo.commitCandidate(taskId, card.summary);
+      let previewUrl: string;
+      try {
+        previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
+        controller.signal.throwIfAborted();
+      } catch {
+        await this.failApproval(card, 'preview_failed');
+        return { approval: this.publicApproval(card), task: clone(task) };
+      }
+      const previousTask = clone(task), previousCard = clone(card), previousCandidates = clone(this.state.candidates);
+      let candidate = this.state.candidates.find(item => item.id === taskId);
+      if (!candidate) {
+        const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
+        candidate = { id: taskId, taskId, baseVersion: intent.before, branch: this.repo.branch(taskId), previewUrl,
+          createdAt: new Date().toISOString(), diff: pending.diff, outOfScope: pending.changedFiles.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending' };
+        this.state.candidates.push(candidate);
+      } else candidate.previewUrl = previewUrl;
+      if (task.status !== 'done') {
+        task.status = 'done'; task.candidateId = taskId; task.error = undefined; task.updatedAt = new Date().toISOString();
+        task.events.push({ type: 'task.updated', ts: task.updatedAt, sequence: task.events.length + 1, message: card.summary });
+      }
+      card.status = 'approved'; card.updatedAt = new Date().toISOString();
+      this.state.approvalIntent = undefined;
+      try { await this.save(); } catch (error) {
+        Object.assign(task, previousTask); Object.assign(card, previousCard);
+        this.state.candidates = previousCandidates; this.state.approvalIntent = intent;
+        await this.previews.stop(taskId);
+        throw error;
+      }
+      this.options.emit({ type: 'task.updated', task: clone(task) });
+      this.options.emit({ type: 'candidate.ready', candidate: clone(candidate) });
+      this.options.emit({ type: 'approval.resolved', approval: this.publicApproval(card) });
+      await this.trimCandidates();
+      return { approval: this.publicApproval(card), task: clone(task) };
+    } finally { this.controllers.delete(taskId); }
+  }
+
   private save() {
     const json = JSON.stringify(this.state, null, 2);
     const operation = this.writes.then(() => writeAtomic(this.file, json));
@@ -134,6 +246,15 @@ export class WorkService {
     const candidate = this.state.candidates.find(item => item.id === id);
     if (!candidate) throw new WorkError('NOT_FOUND', '候选版本不存在', 404);
     return candidate;
+  }
+  private approval(id: string) {
+    const approval = this.state.approvals.find(item => item.id === id);
+    if (!approval) throw new WorkError('NOT_FOUND', '请示卡片不存在', 404);
+    return approval;
+  }
+  private publicApproval(card: StoredApproval): ApprovalCard {
+    const { summary: _summary, ...approval } = clone(card);
+    return approval;
   }
   private async append(task: StoredTask, message: string) {
     task.updatedAt = new Date().toISOString();
@@ -201,12 +322,43 @@ export class WorkService {
       });
       const result = await agent.run({ taskId: id, instruction: task.instruction, selection: task.selection, root: this.repo.candidatePath(id), signal: controller.signal });
       controller.signal.throwIfAborted();
+      const pending = await this.repo.pendingDiff(id, base);
+      if (!pending.changedFiles.length) throw new WorkError('NO_CHANGES', '编码 Agent 没有产生任何文件改动', 409);
+      const evaluation = await evaluateApproval({ root: this.repo.candidatePath(id), baseVersion: base, changedFiles: pending.changedFiles, selection: task.selection });
+      if (evaluation.required) {
+        await this.repo.exclusive(async () => {
+          controller.signal.throwIfAborted();
+          if (task.status !== 'running') throw new WorkError('TASK_CANCELLED', '任务已取消', 409);
+          if (this.state.approvals.filter(card => card.status === 'pending').length >= 3) throw new WorkError('APPROVAL_LIMIT', '最多保留 3 张等待请示卡片，请先处理现有卡片', 409);
+          const now = new Date().toISOString();
+          const card: StoredApproval = {
+            id: randomUUID().replaceAll('-', ''), taskId: id, question: '本次修改涉及共享或范围外内容，是否发布为候选版本？',
+            reason: evaluation.evidence.join('\n'), options: [{ label: '批准本次修改', impact: '仅发布绑定当前摘要的私有草稿' }, { label: '拒绝并丢弃', impact: '删除本任务私有草稿，不改变主作品' }],
+            affected: evaluation.affected, evidence: evaluation.evidence, status: 'pending', ruleCodes: evaluation.ruleCodes,
+            ruleVersion: 'm3a-v1', baseVersion: base, contentDigest: pending.contentDigest, createdAt: now, updatedAt: now, summary: result.summary,
+          };
+          const previousEvents = [...task.events], previousUpdatedAt = task.updatedAt;
+          this.state.approvals.push(card);
+          task.status = 'awaiting_approval';
+          task.error = undefined;
+          try {
+            await this.append(task, `模型已生成私有草稿，需批准后才能发布；规则：${evaluation.ruleCodes.join('、')}`);
+          } catch (error) {
+            // The first durable card save failed: do not leave a pending card pointing at the
+            // staging that the outer task failure path is about to remove.
+            this.state.approvals = this.state.approvals.filter(item => item.id !== card.id);
+            task.status = 'running'; task.events = previousEvents; task.updatedAt = previousUpdatedAt;
+            throw error;
+          }
+          this.options.emit({ type: 'approval.requested', approval: this.publicApproval(card) });
+        });
+        return;
+      }
       const changed = await this.repo.commitCandidate(id, result.summary);
-      if (!changed.length) throw new WorkError('NO_CHANGES', '编码 Agent 没有产生任何文件改动', 409);
       const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
       const candidate: StoredCandidate = {
         id, taskId: id, baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),
-        diff: await this.repo.diff(id, base), outOfScope: changed.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending',
+        diff: pending.diff, outOfScope: changed.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending',
       };
       await this.append(task, `候选已提交，改动 ${changed.length} 个文件；正在启动预览`);
       candidate.previewUrl = await this.previews.start(id, this.repo.candidatePath(id), controller.signal);
@@ -244,15 +396,65 @@ export class WorkService {
   getTask(id: string) { return clone(this.task(id)); }
   listCandidates() { return clone(this.state.candidates); }
   getCandidate(id: string) { return clone(this.candidate(id)); }
+  listApprovals(): ApprovalCard[] { return this.state.approvals.map(card => this.publicApproval(card)); }
+  getApproval(id: string): ApprovalCard { return this.publicApproval(this.approval(id)); }
+
+  async answerApproval(id: string, option: 0 | 1) {
+    if (!Number.isInteger(option) || (option !== 0 && option !== 1)) throw new WorkError('INVALID_OPTION', 'option 必须是原始 JSON 数字 0 或 1', 400);
+    return this.repo.exclusive(async () => {
+      await this.recoverApprovalIntent();
+      const card = this.approval(id), task = this.task(card.taskId);
+      if (card.status === 'stale') throw new WorkError('STALE_APPROVAL', '请示已过期，请重新生成任务', 409);
+      if (card.answer) {
+        if (card.answer.option === option) return { approval: this.publicApproval(card), task: clone(task) };
+        throw new WorkError('APPROVAL_ALREADY_ANSWERED', '请示已经以另一选项回答，不能重放或覆盖', 409);
+      }
+      if (card.status !== 'pending' || task.status !== 'awaiting_approval') throw new WorkError('APPROVAL_NOT_PENDING', '请示已失效，不能继续回答', 409);
+      if (option === 0) {
+        const head = await this.snapshot();
+        const pending = await this.repo.pendingDiff(task.id, card.baseVersion);
+        if (head !== card.baseVersion || pending.contentDigest !== card.contentDigest) {
+          await this.failApproval(card, 'stale');
+          throw new WorkError('STALE_APPROVAL', '草稿摘要或主作品版本已变化，请重新生成任务', 409);
+        }
+      }
+      const index = this.state.approvals.findIndex(item => item.id === id);
+      const previous = clone(card);
+      const now = new Date().toISOString();
+      card.answer = { option, at: now }; card.updatedAt = now; card.status = option === 0 ? 'approving' : 'rejected';
+      this.state.approvalIntent = { kind: option === 0 ? 'approve' : 'reject', id, taskId: task.id, before: card.baseVersion, contentDigest: card.contentDigest };
+      try { await this.save(); }
+      catch (error) { this.state.approvals[index] = previous; this.state.approvalIntent = undefined; throw error; }
+      await this.recoverApprovalIntent();
+      return { approval: this.publicApproval(card), task: clone(this.task(task.id)) };
+    });
+  }
 
   async cancel(id: string) {
-    const task = this.task(id);
-    if (task.status !== 'queued' && task.status !== 'running') throw new WorkError('INVALID_STATE', '任务已经结束，不能取消', 409);
-    task.status = 'cancelled';
-    task.error = { code: 'TASK_CANCELLED', message: '用户取消任务' };
-    this.controllers.get(id)?.abort();
-    await this.append(task, '用户取消任务');
-    return clone(task);
+    return this.repo.exclusive(async () => {
+      await this.recoverApprovalIntent();
+      const task = this.task(id);
+      if (task.status === 'awaiting_approval') {
+        const card = this.state.approvals.find(item => item.taskId === id);
+        if (!card) throw new WorkError('RECOVERY_CONFLICT', '等待任务缺少请示卡片', 409);
+        const previous = clone(card), previousIntent = this.state.approvalIntent;
+        card.status = 'cancelled'; card.updatedAt = new Date().toISOString();
+        this.state.approvalIntent = { kind: 'cancel', id: card.id, taskId: id, before: card.baseVersion, contentDigest: card.contentDigest };
+        try { await this.save(); }
+        catch (error) {
+          const index = this.state.approvals.findIndex(item => item.id === card.id);
+          this.state.approvals[index] = previous; this.state.approvalIntent = previousIntent; throw error;
+        }
+        await this.recoverApprovalIntent();
+        return clone(this.task(id));
+      }
+      if (task.status !== 'queued' && task.status !== 'running') throw new WorkError('INVALID_STATE', '任务已经结束，不能取消', 409);
+      task.status = 'cancelled';
+      task.error = { code: 'TASK_CANCELLED', message: '用户取消任务' };
+      this.controllers.get(id)?.abort();
+      await this.append(task, '用户取消任务');
+      return clone(task);
+    });
   }
 
   private async trimCandidates() {

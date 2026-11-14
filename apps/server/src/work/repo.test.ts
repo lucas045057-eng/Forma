@@ -38,6 +38,24 @@ it('snapshots disk edits, adopts a candidate and reverts the merge without rewri
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
+it('includes untracked files in pendingDiff and binds exact content without committing', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    await writeFile(path.join(repo.candidatePath('candidate1'), 'src/New.ts'), 'export const value = 1;\n');
+    const pending = await repo.pendingDiff('candidate1', base);
+    expect(pending.changedFiles).toEqual(['src/New.ts']);
+    expect(pending.diff[0].patch).toContain('export const value = 1;');
+    expect(await repo.candidateCommit('candidate1')).toBe(base);
+    expect((await repo.pendingDiff('candidate1', base)).contentDigest).toBe(pending.contentDigest);
+    await writeFile(path.join(repo.candidatePath('candidate1'), 'src/New.ts'), 'export const value = 2;\n');
+    expect((await repo.pendingDiff('candidate1', base)).contentDigest).not.toBe(pending.contentDigest);
+    expect(await repo.candidateCommit('candidate1')).toBe(base);
+    expect(await repo.commitCandidate('candidate1', '新增文件')).toEqual(['src/New.ts']);
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
 it('aborts a conflicting adoption without changing the main worktree', async () => {
   const { directory, workRoot, repo } = await fixture();
   try {

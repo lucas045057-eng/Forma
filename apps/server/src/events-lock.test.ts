@@ -4,6 +4,7 @@ import { get, request } from 'node:http';
 import { CodingAgent } from './agent/client.ts';
 import path from 'node:path';
 import { expect, it, vi } from 'vitest';
+import { existsSync } from 'node:fs';
 import { createApp } from './app.ts';
 
 it('keeps the event log inside the work-data lock and continues seq after a graceful restart (review F4)', async () => {
@@ -240,6 +241,92 @@ it.each(['submit', 'selection', 'cancel'])('drains admitted HTTP %s before task 
     const restarted = await createApp(options);
     try { expect(restarted.events.last).toBe(instance.events.last); }
     finally { await restarted.app.close(); }
+  } finally {
+    release();
+    await (closing ?? instance.app.close());
+    agent.mockRestore();
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it('drains an admitted real HTTP approval before closing the journal and releasing the lock', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'n4-approval-http-'));
+  const workRoot = path.join(root, 'work');
+  await mkdir(path.join(workRoot, 'src/components'), { recursive: true });
+  await writeFile(path.join(workRoot, 'src/App.tsx'), "import { Button } from './components/Button';\nexport default () => <><Button/><Button/><Button/></>;\n");
+  await writeFile(path.join(workRoot, 'src/components/Button.tsx'), 'export function Button() { return <button>购买</button>; }\n');
+  const options = { workRoot, workDataDirectory: path.join(root, 'data'), historyDirectory: path.join(root, 'history'),
+    dataDirectory: path.join(root, 'assets'), base: 'http://127.0.0.1:9', key: 'mock-only',
+    codingAgentBaseUrl: 'http://127.0.0.1:9', codingAgentApiKey: 'mock-only', codingAgentModel: 'mock' };
+  const agent = vi.spyOn(CodingAgent.prototype, 'run').mockImplementation(async ({ root: candidate }) => {
+    await writeFile(path.join(candidate, 'src/components/Button.tsx'), 'export function Button() { return <button>批准</button>; }\n');
+    return { summary: 'mock approval edit', written: ['src/components/Button.tsx'] };
+  });
+  const instance = await createApp(options);
+  instance.work.previews.start = async id => `/preview/c/${id}/`;
+  instance.work.previews.stop = async () => {};
+  instance.work.previews.stopAll = async () => {};
+  const lock = path.join(root, 'data', '.instance.lock');
+  let release!: () => void, entered!: () => void, preClosed!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const accepted = new Promise<void>(resolve => { entered = resolve; });
+  const preClose = new Promise<void>(resolve => { preClosed = resolve; });
+  instance.app.addHook('preClose', async () => { preClosed(); });
+  let closing: Promise<void> | undefined;
+  try {
+    const baseVersion = await instance.work.repo.head();
+    const task = await instance.work.submit('shared HTTP close', { src: 'src/components/Button.tsx:1:1', baseVersion,
+      cid: 'Button', bbox: [0, 0, 1, 1], styles: { display: 'inline-block', position: 'static', color: 'rgb(0, 0, 0)',
+        backgroundColor: 'rgba(0, 0, 0, 0)', fontSize: '16px', fontFamily: 'Arial', fontWeight: '400', lineHeight: '16px',
+        padding: '0px', margin: '0px', borderRadius: '0px', width: '10px', height: '10px' }, instances: 1, ancestors: [] });
+    await instance.work.idle();
+    expect(instance.work.getTask(task.id).status).toBe('awaiting_approval');
+    const card = instance.work.listApprovals()[0];
+    const pendingDiff = instance.work.repo.pendingDiff.bind(instance.work.repo);
+    vi.spyOn(instance.work.repo, 'pendingDiff').mockImplementationOnce(async (...args) => { entered(); await gate; return pendingDiff(...args); });
+    let taskAtBoundary = '', logAtBoundary = '';
+    const closeEvents = instance.events.close.bind(instance.events);
+    vi.spyOn(instance.events, 'close').mockImplementation(async () => {
+      await readFile(lock, 'utf8');
+      taskAtBoundary = await readFile(path.join(root, 'data', 'tasks.json'), 'utf8');
+      logAtBoundary = await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8');
+      const saved = JSON.parse(taskAtBoundary);
+      expect(saved.tasks[0].status).toBe('done');
+      expect(saved.approvals[0].status).toBe('approved');
+      expect(saved.candidates).toHaveLength(1);
+      expect(JSON.parse(logAtBoundary.trim().split('\n').at(-1)!).type).toBe('approval.resolved');
+      await closeEvents();
+    });
+    const origin = await instance.app.listen({ host: '127.0.0.1', port: 0 });
+    let responded = false;
+    const response = new Promise<number>((resolve, reject) => {
+      const req = request(`${origin}/approvals/${card.id}`, { method: 'POST', agent: false,
+        headers: { 'content-type': 'application/json', connection: 'close' } }, res => {
+        res.resume(); res.once('end', () => { responded = true; resolve(res.statusCode!); });
+      });
+      req.on('error', reject); req.end(JSON.stringify({ option: 0 }));
+    });
+    await accepted;
+    let closed = false;
+    closing = instance.app.close().then(() => { closed = true; });
+    await preClose;
+    expect(responded).toBe(false);
+    expect(closed).toBe(false);
+    expect(existsSync(lock)).toBe(true);
+    await expect(createApp(options)).rejects.toMatchObject({ code: 'INSTANCE_LOCKED' });
+    release();
+    expect(await response).toBe(200);
+    await closing;
+    expect(existsSync(lock)).toBe(false);
+    await instance.work.idle();
+    expect(await readFile(path.join(root, 'data', 'tasks.json'), 'utf8')).toBe(taskAtBoundary);
+    expect(await readFile(path.join(root, 'data', 'events.jsonl'), 'utf8')).toBe(logAtBoundary);
+    const restarted = await createApp(options);
+    try {
+      expect(restarted.events.last).toBe(instance.events.last);
+      expect(restarted.events.publish({ type: 'approval.restart.check' }).seq).toBe(instance.events.last + 1);
+      expect(restarted.work.getTask(task.id).status).toBe('done');
+    } finally { await restarted.app.close(); }
   } finally {
     release();
     await (closing ?? instance.app.close());
