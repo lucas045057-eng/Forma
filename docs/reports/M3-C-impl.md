@@ -90,7 +90,7 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm --filter @spatial/studio test &&
 
 ## C3 — 门禁与失败态 UI
 
-状态：C1–C3 实现已接通；C3 冻结后的全量单测/typecheck/build 待后台结果，尚未独立测试、审查或正式验收。基线 `974ffa2`，同一 `.worktrees/m3c` / `feat/m3c-approval`。`9124f7e` 补录调度已确认的 C2 自测结果。
+状态：C1–C3 实现已接通；C3 `d09ce49` 全量自测/typecheck/build 已由调度确认通过，独立审查应修的后续整改见末节；尚未正式验收。基线 `974ffa2`，同一 `.worktrees/m3c` / `feat/m3c-approval`。`9124f7e` 补录调度已确认的 C2 自测结果。
 
 ### 分步提交、文件与原因
 
@@ -139,3 +139,65 @@ Claude Code 重点：门禁真值表与证据 key 生命周期、跨面板/卸�
 ### 需调度批准
 
 无必须的后端/协议变更或待拍板事项。没有修改 apps/server、packages、templates、锁/依赖、Pi E2E 或历史证据，没有读取真实 .env、调用付费模型、合并、push 或删除 worktree。
+
+## C1/C2 独立审查应修整改（基于 C3 d09ce49）
+
+依据：主树 `ad5698c` 的 `docs/reports/M3-C-review.md`，C1/C2 各有一条应修。只读审查报告，未合并 master、未改独立报告；仍在原实现 worktree。`308a584` 已按调度反馈补录 C3 原轮自测通过实况，以下整改需新的冻结验证，不能借用旧成绩。
+
+### C1-1：影响模式恢复卡片高亮
+
+修复提交 `1644d10`。`App.tsx` 在已验证主 frame 的 origin/source 后，若影响模式收到 pick:result 或选取 error，发送 `impactHighlightMessages(卡片src)` 并返回，不采用点击目标，不替换 Selection、不显示误导性的选取错误。该纯函数依次发 pick:stop（清空当前 hover 与临时选中）→pick:start→highlight(卡片 src)，进入影响模式也使用同一序列。
+
+单测：`approval-state.test.ts` 的 `restores the card source after a pick result and clears the hover before highlighting`，断言完整消息顺序，并从点击到其它源码/有 hover 的状态验证最终卡片 src 与 hover 清空。它是 Studio 消息策略单测，不冒充真实 bridge/DOM 验证。
+
+既有 bridge 没有独立 hover 关闭消息；以后再次移动指针仍可出现临时 hover 框（卡片的 selectedSrc 不变）。本修复清理收到结果时的 hover，不宣称永久禁止 hover；不改 bridge 合同、不加轮询或跨源 DOM 操作。Pi 应按 `data-highlight-src === 卡片src` 统计目标框，真实三处高亮仍待独立浏览器验证。
+
+### C2-1：检查故障限定到候选
+
+修复提交 `a94add0`。新增 `sync-state.ts`，把 pending run 请求计划、Promise.allSettled 结果归并、快照/缓冲重放、代次有效性判断与候选检查故障分类抽成可测纯函数，由 EventCenter 实际调用。
+
+- `pendingRunIds` 仅为 pending 候选取 latest run，已采用/已撤回候选不再发详情 GET。
+- 单个 run GET 拒绝/结构不符、候选 checks 无 runId、旧记录/空 toolIdentity、关联不一致，写入该候选 `checkIssues`。不抛全局异常、不清其它候选或请示状态；该候选显示“检查状态不完整”，检查/采用禁用，撤回与其它全局操作保持各自门禁。
+- 只有快照窗口内出现相关检查事件时才允许有界重读；第三次仍不一致则提交有效事件快照，全局 syncReady=true，保留局部问题。真正事件缺号/截断/溢出仍要求重锚；用尽时文案为“事件历史无法连续补齐”，不再把检查故障误报为历史变化过快。
+- 实时 check.updated 走纯归并与局部分类，不因检查不一致触发全局同步。局部故障在成功的后续 REST 同步后重新评估；不会凭旧证据自行开放采用。
+- 基础 tasks/candidates/version/approvals 或事件历史读取失败仍关闭全局同步，这是关键权威状态缺失，与单 run 故障分开。
+
+新增 `sync-state.test.ts` 单测名：
+
+- `a run GET failure isolates one candidate while global sync and the other candidate succeed`
+- `unhealthy views without runId and legacy empty toolIdentity stay local`
+- `does not plan run GETs for adopted or discarded candidates`
+- `old candidate.ready cannot clear a newer latest pointer during snapshot replay`
+- `a faulty live check.updated does not taint another candidate or request global resync`
+- `snapshot-window events are replayed, while history gaps and overflow require reanchoring`
+- `a new run in the snapshot window requests a bounded reread but keeps failure candidate-local`
+- `drops late operations and old connections without publishing their snapshot`
+
+`check-render.test.tsx` 另增 `isolates a candidate check issue without closing global work actions`，断言该候选检查/采用 disabled、回退仍可由服务器裁决。纯函数测试不替代 socket/fetch 异步全链路或浏览器真实操作测试。
+
+### 审查其余建议逐项取舍
+
+| 建议 | 处理与理由 |
+| --- | --- |
+| C1-S1 pending 选取悬挂 | 采纳：进入影响模式先作废请求，若旧 pick 为 pending 则明确置 none，退出不遗留永久 pending。 |
+| C1-S2 iframe ready 恢复语义 | 保留现状：ready 与 onLoad 均清理影响模式并停止选取，等价于不恢复的退出策略；重载后旧 Selection 不再可信，不恢复旧高亮。 |
+| C1-S3 taskId 共享锁 | C3 已采纳：ApprovalPanel 与 PointSpeak 共用 EventCenter task 锁；独立复核仍待 Claude。 |
+| C1-S4 异步编排测试 | 部分采纳：本次抽出并实接同步决策纯模块，覆盖快照期间事件、旧请求/连接判断、缺号/溢出与局部失败；未重写整个 WebSocket/fetch 驱动为注入式运行器，以控制整改范围。完整异步竞态仍交 Pi mock UI。 |
+| C1-S5 首连失败提示 | 已具备 state-refresh 与全局 syncError；保持手动 GET 恢复，不新增自动循环重试。Pi 验证首连失败路径。 |
+| C2-S1 busy 导致证据重读 | 暂不采纳缓存重构：目前 busy/失步会销毁旧凭据与请求，能保守保证 C3 新门禁不复用旧绿灯；保留有限重复读取成本，避免本次整改扩大缓存生命周期改造。 |
+| C2-S2 活动 run 自动读产物 | 采纳终态自动读取：queued/running 不再自动取部分 artifacts；完成/取消且同步后读取已有证据。没有额外增加运行中按需读取入口。 |
+| C2-S3 blocked_by 前缀 | 采纳：使用后端实际“未开始执行：”前缀，保留原 message 文本；Studio 渲染测试 fixture 改为真实文案，原失败/未运行断言不放宽。 |
+| C2-S4 未知错误码 | C3 已采纳 operationError 通用安全文案与按操作区分的错误码；不恢复旧 MERGE_CONFLICT 分支。 |
+| C2-S5 撤回后预览模式 | 保留现状：有其它候选时继续显示下一候选，无候选时 App 回到 current；避免额外改变既有交互，已明确交 Pi 验证撤回多候选场景。 |
+
+场景编辑器位于 inspector 内的布局风险仍保留；仅在最终整改冻结提交上跑 Pi 完整 M1/M2/M3-C UI 回归，不在 C1/C2 中间禁用入口的提交上冒充回归通过。
+
+### 整改验证与边界
+
+`git diff --check` 静态检查后冻结；后台串行命令仍为：
+
+```text
+cd /d .worktrees\m3c && set CI=true&& call pnpm test && call pnpm typecheck && call pnpm build
+```
+
+本整改轮结果待调度核对，job id/日志路径及最终固定 HEAD 在回合小结给出；取得 job 后结束且冻结文件。不调用子 Agent、不改 apps/server/packages/templates/锁/Pi tests 或历史证据，不读取真实 .env、不调用付费模型。没有必须的后端或协议变更、没有新增“需批准”项；不宣称应修已经独立复核或正式验收通过。

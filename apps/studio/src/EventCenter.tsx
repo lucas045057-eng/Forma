@@ -108,7 +108,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs, checkIssues: {} };
           const result = reconcileSnapshot(snapshot, replay, buffer, anchor, overflow, failed);
           if (!result) continue;
-          // Only a new latest pointer appearing during this snapshot warrants another read.
+          // Retry check inconsistencies only when check events crossed this snapshot.
           // Exhaustion keeps that candidate closed, never the entire Studio.
           if (result.retryChecks && attempt < 2) continue;
           const { events, cursor, state: next } = result;
