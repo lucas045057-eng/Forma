@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { Candidate, CheckRun, Task } from '@spatial/shared';
-import { associatedRun, consistentChecks, isCheckRun } from './check-state.ts';
-import { emptyM2State, contiguousReplay, reduceM2Event, isCandidate, isTask, type IncomingEvent, type M2State } from './m2-state.ts';
+import type { Candidate, Task } from '@spatial/shared';
+import { currentSync, collectRunResults, pendingRunIds, reconcileLiveEvent, reconcileSnapshot, type EventHistory } from './sync-state.ts';
+import { emptyM2State, isCandidate, isTask, type IncomingEvent, type M2State } from './m2-state.ts';
 import { isApproval, sortApprovals } from './approval-state.ts';
 import { MutationLocks } from './mutation-locks.ts';
 
@@ -26,7 +26,7 @@ async function json<T>(url: string): Promise<T> {
   if (!response.ok) throw new Error(`请求失败：${response.status}`);
   return response.json() as Promise<T>;
 }
-type History = { events: IncomingEvent[]; current: number; oldest: number; truncated: boolean };
+type History = EventHistory;
 
 export function EventCenterProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<M2State>(emptyM2State);
@@ -72,7 +72,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     let buffer: IncomingEvent[] = [];
     let overflow = false;
     const notify = (event: CenterEvent) => { for (const listener of listeners.current) listener(event); };
-    const valid = (generation: number, operation: number) => !disposed && generation === connection && operation === request && socket?.readyState === WebSocket.OPEN;
+    const valid = (generation: number, operation: number) => currentSync(generation, operation, connection, request, socket?.readyState === WebSocket.OPEN, disposed);
     const history = (since: number) => json<History>(`/events/history?since=${since}`);
 
     async function synchronize(anchor = seq) {
@@ -99,24 +99,19 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           ]);
           if (!valid(generation, operation)) return;
           if (!Array.isArray(tasks) || !tasks.every(isTask) || !Array.isArray(candidates) || !candidates.every(isCandidate) || typeof version.version !== 'string' || !Array.isArray(approvals) || !approvals.every(isApproval)) throw new Error('持久状态格式不完整');
-          const latest = await Promise.all([...new Set(candidates.map(candidate => candidate.latestCheckRunId).filter((id): id is string => !!id))].map(async id => {
-            const run = await json<unknown>(`/checks/${encodeURIComponent(id)}`);
-            if (!isCheckRun(run) || run.id !== id) throw new Error('检查状态不完整，请刷新状态');
-            return run;
-          }));
+          const ids = pendingRunIds(candidates);
+          const latest = await Promise.allSettled(ids.map(id => json<unknown>(`/checks/${encodeURIComponent(id)}`)));
           if (!valid(generation, operation)) return;
-          const runs: Record<string, CheckRun> = Object.fromEntries(latest.map(run => [run.id, run]));
+          const { runs, failed } = collectRunResults(ids, latest);
           const replay = await history(anchor);
           if (!valid(generation, operation)) return;
-          if (overflow || replay.truncated || replay.oldest > anchor + 1 || replay.current < anchor) continue;
-          const ordered = contiguousReplay([...replay.events, ...buffer], anchor, replay.current);
-          if (!ordered) continue;
-          const { events, cursor } = ordered;
-          const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs };
-          const next = events.reduce(reduceM2Event, snapshot);
-          // A run started during the non-atomic snapshot requires fresh latest pointers.
-          if (events.some(event => event.type === 'check.started' && isCheckRun(event.run) && !runs[event.run.id])) continue;
-          if (next.candidates.some(candidate => candidate.latestCheckRunId && (!associatedRun(candidate, next.runs[candidate.latestCheckRunId]) || !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) continue;
+          const snapshot: M2State = { tasks, candidates, version: version.version, approvals: sortApprovals(approvals), runs, checkIssues: {} };
+          const result = reconcileSnapshot(snapshot, replay, buffer, anchor, overflow, failed);
+          if (!result) continue;
+          // Only a new latest pointer appearing during this snapshot warrants another read.
+          // Exhaustion keeps that candidate closed, never the entire Studio.
+          if (result.retryChecks && attempt < 2) continue;
+          const { events, cursor, state: next } = result;
           currentState = next;
           setState(next);
           seq = cursor;
@@ -132,7 +127,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           notify({ type: 'state.reload' });
           return;
         }
-        throw new Error('事件历史变化过快或不完整，请刷新状态');
+        throw new Error('事件历史无法连续补齐，请刷新状态');
       } catch (cause) {
         if (!disposed && generation === connection && operation === request) {
           syncing = false;
@@ -185,12 +180,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           (['candidate.ready', 'candidate.closed'].includes(event.type) && !isCandidate(event.candidate)) ||
           (['approval.requested', 'approval.resolved'].includes(event.type) && !isApproval(event.approval));
         if (malformed) { buffer.push(event); startSync(); return; }
-        const next = reduceM2Event(currentState, event);
-        if (event.type === 'check.updated' && (!isCheckRun(event.run) || next.candidates.some(candidate => candidate.latestCheckRunId && !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) {
-          buffer.push(event);
-          startSync();
-          return;
-        }
+        const next = reconcileLiveEvent(currentState, event);
         seq = event.seq;
         setLastSeq(seq);
         currentState = next;
