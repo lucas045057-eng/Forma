@@ -48,7 +48,7 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm install --offline --frozen-lockf
 
 ## C2 — CandidatePanel 真实检查与证据
 
-状态：实现与单测已提交，首次 C2 后台自测待执行/核对；不代表 C2 或 M3-C 验收通过。继续使用 `.worktrees/m3c`、`feat/m3c-approval`，从 `886bd99` 接续；`928db02` 先补录调度确认的 C1 自测实况。
+状态：实现与单测已提交，自测通过（调度核对后台原始日志）；不代表 C2 或 M3-C 验收通过。继续使用 `.worktrees/m3c`、`feat/m3c-approval`，从 `886bd99` 接续；`928db02` 先补录调度确认的 C1 自测实况。
 
 ### 文件与分步提交
 
@@ -69,13 +69,13 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm install --offline --frozen-lockf
 
 静态检查：`git diff --check` 已通过。C2 新单测为状态/归并/安全映射、证据 GET/校验/取消边界、React 静态渲染；不是 Pi real UI 证据。未运行既有 E2E 或 Pi 验收套件，未改其断言。
 
-本回合将通过根 `orbital/bin/bg.cmd` 单次后台执行：
+已通过根 `orbital/bin/bg.cmd` 单次后台执行，受测固定提交 `974ffa2`：
 
 ```text
 cd /d .worktrees\m3c && set CI=true&& call pnpm --filter @spatial/studio test && call pnpm typecheck && call pnpm build
 ```
 
-C2 实跑结果当前待核对；job id、根 `orbital/jobs/<job>/output.log` 与受测固定 HEAD 在启动后的回合小结给出。取得 job 后立即结束、不轮询，冻结受测文件；由于未设置 ORBITAL_SESSION_ID，由调度读取完成结果后补录，不假设自动回调。
+调度已核对 `job_77a38b3d` exit 0：`Test Files 9 passed (9)`、`Tests 29 passed (29)`，全仓 `pnpm typecheck` 与 `pnpm build` 全部 Done。日志原件为根 `orbital/jobs/job_77a38b3d/output.log`。本轮按调度提供的实况补录，不重复启动 C2 验证，不宣称独立验收通过。
 
 ### 未覆盖与 Pi 接点
 
