@@ -1,0 +1,759 @@
+{
+  "decoy": {
+    "pid": 9220,
+    "created": "2026-11-15T02:09:36.4593350+08:00",
+    "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy"
+  },
+  "pidKill": {
+    "environment": {
+      "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+      "baselines": [
+        "5377b52",
+        "81558a7"
+      ],
+      "files": [
+        {
+          "file": "apps/server/src/work/preview.ts",
+          "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "baselines": {
+            "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+            "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+          },
+          "identicalToAllBaselines": true
+        },
+        {
+          "file": "apps/server/src/work/preview-worker.ts",
+          "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "baselines": {
+            "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+            "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+          },
+          "identicalToAllBaselines": true
+        }
+      ],
+      "identicalToAllBaselines": true
+    },
+    "kind": "backend-pid-only",
+    "backend": {
+      "pid": 9048,
+      "created": "2026-11-15T02:09:37.4731250+08:00",
+      "base": "http://127.0.0.1:52158",
+      "previewOrigin": "http://127.0.0.1:32663"
+    },
+    "candidate": {
+      "id": "3d517f59792048e9b0c4a3b768f6318e",
+      "previewUrl": "/preview/c/3d517f59792048e9b0c4a3b768f6318e/"
+    },
+    "preview": {
+      "originStatus": 200,
+      "workerPorts": [
+        4569
+      ],
+      "directStatuses": [
+        {
+          "port": 4569,
+          "status": 200
+        }
+      ]
+    },
+    "worker": {
+      "pid": 51420,
+      "ppid": 9048,
+      "created": "2026-11-15T02:09:41.1383150+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+    },
+    "oldMetric": {
+      "oldStyleCount": 3,
+      "matcher": {
+        "selfPid": 51416,
+        "selfMatched": true,
+        "pids": [
+          9220,
+          51416
+        ],
+        "nodePids": [
+          9220
+        ]
+      },
+      "nodePidsOtherThanDecoy": [],
+      "note": "实际 worker 的命令行含 preview-worker.ts 与 vite.js，缓存目录只在环境变量里，旧口径看不见它"
+    },
+    "decoy": {
+      "pid": 9220,
+      "created": "2026-11-15T02:09:36.4593350+08:00",
+      "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+      "alive": true
+    },
+    "kill": {
+      "method": "taskkill /F /PID 9048（无 /T）",
+      "killStartedAtWall": "2026-11-14T18:09:45.279Z",
+      "killCommandDurationMs": 173,
+      "snapshots": [
+        {
+          "label": "immediately-after-kill-command",
+          "requestedOffsetMs": 0,
+          "sampleStartedOffsetMs": 174,
+          "sampleFinishedOffsetMs": 687,
+          "alive": []
+        },
+        {
+          "label": "confirm-at-1000ms",
+          "requestedOffsetMs": 1008,
+          "sampleStartedOffsetMs": 1008,
+          "sampleFinishedOffsetMs": 1544,
+          "alive": []
+        }
+      ],
+      "gone": true,
+      "stillAlive": [],
+      "firstSnapshotAlive": [],
+      "aliveLastSeenAtMs": null,
+      "goneFirstSeenAtMs": 687,
+      "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+      "previewStatusAfter": 0,
+      "leftoverIdentities": [],
+      "decoyAliveAfter": true,
+      "matcherAfter": {
+        "selfPid": 46036,
+        "selfMatched": true,
+        "pids": [
+          9220,
+          46036
+        ],
+        "nodePids": [
+          9220
+        ]
+      }
+    }
+  },
+  "treeKill": {
+    "environment": {
+      "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+      "baselines": [
+        "5377b52",
+        "81558a7"
+      ],
+      "files": [
+        {
+          "file": "apps/server/src/work/preview.ts",
+          "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "baselines": {
+            "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+            "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+          },
+          "identicalToAllBaselines": true
+        },
+        {
+          "file": "apps/server/src/work/preview-worker.ts",
+          "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "baselines": {
+            "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+            "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+          },
+          "identicalToAllBaselines": true
+        }
+      ],
+      "identicalToAllBaselines": true
+    },
+    "kind": "launcher-tree",
+    "backend": {
+      "pid": 34604,
+      "created": "2026-11-15T02:09:48.3569020+08:00",
+      "base": "http://127.0.0.1:31334",
+      "previewOrigin": "http://127.0.0.1:54919"
+    },
+    "candidate": {
+      "id": "8810f3acdada4a42abd345e70f4ee718",
+      "previewUrl": "/preview/c/8810f3acdada4a42abd345e70f4ee718/"
+    },
+    "preview": {
+      "originStatus": 200,
+      "workerPorts": [
+        6796
+      ],
+      "directStatuses": [
+        {
+          "port": 6796,
+          "status": 200
+        }
+      ]
+    },
+    "worker": {
+      "pid": 52164,
+      "ppid": 34604,
+      "created": "2026-11-15T02:09:52.0119190+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+    },
+    "tree": [
+      {
+        "pid": 42580,
+        "ppid": 34604,
+        "created": "2026-11-15T02:09:48.3683220+08:00",
+        "summary": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+      },
+      {
+        "pid": 52164,
+        "ppid": 34604,
+        "created": "2026-11-15T02:09:52.0119190+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      {
+        "pid": 56940,
+        "ppid": 52164,
+        "created": "2026-11-15T02:09:52.0155170+08:00",
+        "summary": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4"
+      },
+      {
+        "pid": 46540,
+        "ppid": 52164,
+        "created": "2026-11-15T02:09:52.2059720+08:00",
+        "summary": "E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\@esbuild+win32-x64@0.28.2\\node_modules\\@esbuild\\win32-x64\\esbuild.exe --service=0.28.2 --ping"
+      }
+    ],
+    "oldMetric": {
+      "oldStyleCount": 3,
+      "matcher": {
+        "selfPid": 59712,
+        "selfMatched": true,
+        "pids": [
+          9220,
+          59712
+        ],
+        "nodePids": [
+          9220
+        ]
+      },
+      "nodePidsOtherThanDecoy": []
+    },
+    "decoy": {
+      "pid": 9220,
+      "created": "2026-11-15T02:09:36.4593350+08:00",
+      "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+      "alive": true
+    },
+    "kill": {
+      "method": "taskkill /T /F /PID 34604",
+      "killStartedAtWall": "2026-11-14T18:09:56.160Z",
+      "killCommandDurationMs": 208,
+      "snapshots": [
+        {
+          "label": "immediately-after-kill-command",
+          "requestedOffsetMs": 0,
+          "sampleStartedOffsetMs": 208,
+          "sampleFinishedOffsetMs": 1321,
+          "alive": []
+        },
+        {
+          "label": "poll-250ms",
+          "requestedOffsetMs": 1584,
+          "sampleStartedOffsetMs": 1584,
+          "sampleFinishedOffsetMs": 2754,
+          "alive": []
+        }
+      ],
+      "gone": true,
+      "stillAlive": [],
+      "firstSnapshotAlive": [],
+      "aliveLastSeenAtMs": null,
+      "goneFirstSeenAtMs": 1321,
+      "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+      "previewStatusAfter": 0,
+      "leftoversAfter": [],
+      "decoyAliveAfter": true
+    }
+  },
+  "multiCandidate": {
+    "environment": {
+      "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+      "baselines": [
+        "5377b52",
+        "81558a7"
+      ],
+      "files": [
+        {
+          "file": "apps/server/src/work/preview.ts",
+          "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "baselines": {
+            "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+            "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+          },
+          "identicalToAllBaselines": true
+        },
+        {
+          "file": "apps/server/src/work/preview-worker.ts",
+          "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "baselines": {
+            "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+            "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+          },
+          "identicalToAllBaselines": true
+        }
+      ],
+      "identicalToAllBaselines": true
+    },
+    "kind": "multi-candidate-backend-pid-only",
+    "backend": {
+      "pid": 39700,
+      "created": "2026-11-15T02:10:00.6525070+08:00",
+      "base": "http://127.0.0.1:34658",
+      "previewOrigin": "http://127.0.0.1:48570"
+    },
+    "candidates": [
+      {
+        "id": "cb364459ad214c8dbe39dbe6c94db094",
+        "previewUrl": "/preview/c/cb364459ad214c8dbe39dbe6c94db094/",
+        "marker": "马上购买甲"
+      },
+      {
+        "id": "e0df4f8431e240cf96352023dfb394b6",
+        "previewUrl": "/preview/c/e0df4f8431e240cf96352023dfb394b6/",
+        "marker": "马上购买乙"
+      },
+      {
+        "id": "e6a0870635d147af86329ef6b58b8bc8",
+        "previewUrl": "/preview/c/e6a0870635d147af86329ef6b58b8bc8/",
+        "marker": "马上购买丙"
+      }
+    ],
+    "workers": [
+      {
+        "pid": 34056,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:04.4048440+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      {
+        "pid": 20284,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:07.3951340+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      {
+        "pid": 60248,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:10.4408820+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      }
+    ],
+    "workerDetails": [
+      {
+        "worker": {
+          "pid": 34056,
+          "ppid": 39700,
+          "created": "2026-11-15T02:10:04.4048440+08:00",
+          "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+        },
+        "ports": [
+          7802
+        ]
+      },
+      {
+        "worker": {
+          "pid": 20284,
+          "ppid": 39700,
+          "created": "2026-11-15T02:10:07.3951340+08:00",
+          "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+        },
+        "ports": [
+          8329
+        ]
+      },
+      {
+        "worker": {
+          "pid": 60248,
+          "ppid": 39700,
+          "created": "2026-11-15T02:10:10.4408820+08:00",
+          "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+        },
+        "ports": [
+          8355
+        ]
+      }
+    ],
+    "mappingMatrix": [
+      {
+        "workerPid": 34056,
+        "port": 7802,
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "status": 200,
+        "textHasMarker": true
+      },
+      {
+        "workerPid": 34056,
+        "port": 7802,
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 34056,
+        "port": 7802,
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 20284,
+        "port": 8329,
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 20284,
+        "port": 8329,
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "status": 200,
+        "textHasMarker": true
+      },
+      {
+        "workerPid": 20284,
+        "port": 8329,
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 60248,
+        "port": 8355,
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 60248,
+        "port": 8355,
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "status": 404,
+        "textHasMarker": false
+      },
+      {
+        "workerPid": 60248,
+        "port": 8355,
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "status": 200,
+        "textHasMarker": true
+      }
+    ],
+    "mapping": [
+      {
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "marker": "马上购买甲",
+        "workerPid": 34056,
+        "port": 7802
+      },
+      {
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "marker": "马上购买乙",
+        "workerPid": 20284,
+        "port": 8329
+      },
+      {
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "marker": "马上购买丙",
+        "workerPid": 60248,
+        "port": 8355
+      }
+    ],
+    "originBefore": [
+      {
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "status": 200
+      },
+      {
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "status": 200
+      },
+      {
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "status": 200
+      }
+    ],
+    "oldMetric": {
+      "matcher": {
+        "selfPid": 11824,
+        "selfMatched": true,
+        "pids": [
+          9220,
+          11824
+        ],
+        "nodePids": [
+          9220
+        ]
+      },
+      "oldStyleCount": 3
+    },
+    "decoy": {
+      "pid": 9220,
+      "created": "2026-11-15T02:09:36.4593350+08:00",
+      "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+      "alive": true
+    },
+    "kill": {
+      "method": "taskkill /F /PID 39700（无 /T）",
+      "killStartedAtWall": "2026-11-14T18:10:15.974Z",
+      "killCommandDurationMs": 183,
+      "snapshots": [
+        {
+          "label": "immediately-after-kill-command",
+          "requestedOffsetMs": 0,
+          "sampleStartedOffsetMs": 183,
+          "sampleFinishedOffsetMs": 917,
+          "alive": []
+        },
+        {
+          "label": "confirm-at-1000ms",
+          "requestedOffsetMs": 1004,
+          "sampleStartedOffsetMs": 1004,
+          "sampleFinishedOffsetMs": 1781,
+          "alive": []
+        }
+      ],
+      "gone": true,
+      "stillAlive": [],
+      "firstSnapshotAlive": [],
+      "aliveLastSeenAtMs": null,
+      "goneFirstSeenAtMs": 917,
+      "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+      "originAfter": [
+        {
+          "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+          "status": 0
+        },
+        {
+          "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+          "status": 0
+        },
+        {
+          "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+          "status": 0
+        }
+      ],
+      "portsAfter": [
+        {
+          "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+          "port": 7802,
+          "status": 0
+        },
+        {
+          "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+          "port": 8329,
+          "status": 0
+        },
+        {
+          "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+          "port": 8355,
+          "status": 0
+        }
+      ],
+      "leftoversAfter": [],
+      "decoyAliveAfter": true
+    }
+  },
+  "startupWindow": {
+    "environment": {
+      "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+      "baselines": [
+        "5377b52",
+        "81558a7"
+      ],
+      "files": [
+        {
+          "file": "apps/server/src/work/preview.ts",
+          "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "baselines": {
+            "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+            "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+          },
+          "identicalToAllBaselines": true
+        },
+        {
+          "file": "apps/server/src/work/preview-worker.ts",
+          "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "baselines": {
+            "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+            "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+          },
+          "identicalToAllBaselines": true
+        }
+      ],
+      "identicalToAllBaselines": true
+    },
+    "kind": "preview-startup-window-backend-pid-only",
+    "backend": {
+      "pid": 42972,
+      "created": "2026-11-15T02:10:19.5286090+08:00",
+      "base": "http://127.0.0.1:21311",
+      "previewOrigin": "http://127.0.0.1:49031"
+    },
+    "fixture": {
+      "workRoot": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attributed-startup-1794679819518\\work",
+      "note": "临时作品副本的 node_modules/vite 是测试替身：CommonJS 异步等待 4s 后才 import 真实 Vite；生产 preview 代码未改"
+    },
+    "task": {
+      "id": "af9761ea0f0a4d1b8cbb6fd062a24362",
+      "statusAtWindow": "running"
+    },
+    "window": {
+      "worker": {
+        "pid": 13688,
+        "ppid": 42972,
+        "created": "2026-11-15T02:10:23.0192130+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attribut"
+      },
+      "ports": [],
+      "originStatus": 502,
+      "observations": [
+        {
+          "atOffsetMs": 3236,
+          "worker": {
+            "pid": 13688,
+            "ppid": 42972,
+            "created": "2026-11-15T02:10:23.0192130+08:00",
+            "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attribut"
+          },
+          "ports": [],
+          "served": [],
+          "originStatus": 502,
+          "taskStatus": "running"
+        }
+      ],
+      "proof": "worker 进程存在且 PPID=backend，但 preview-origin 在该阶段不是 200"
+    },
+    "oldMetric": {
+      "oldStyleCount": 3,
+      "matcher": {
+        "selfPid": 2572,
+        "selfMatched": true,
+        "pids": [
+          9220,
+          2572
+        ],
+        "nodePids": [
+          9220
+        ]
+      }
+    },
+    "decoy": {
+      "pid": 9220,
+      "created": "2026-11-15T02:09:36.4593350+08:00",
+      "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+      "alive": true
+    },
+    "kill": {
+      "method": "taskkill /F /PID 42972（无 /T，窗口内）",
+      "killStartedAtWall": "2026-11-14T18:10:24.353Z",
+      "killCommandDurationMs": 176,
+      "snapshots": [
+        {
+          "label": "immediately-after-kill-command",
+          "requestedOffsetMs": 0,
+          "sampleStartedOffsetMs": 176,
+          "sampleFinishedOffsetMs": 728,
+          "alive": []
+        },
+        {
+          "label": "confirm-at-1000ms",
+          "requestedOffsetMs": 1005,
+          "sampleStartedOffsetMs": 1005,
+          "sampleFinishedOffsetMs": 1526,
+          "alive": []
+        }
+      ],
+      "gone": true,
+      "stillAlive": [],
+      "firstSnapshotAlive": [],
+      "aliveLastSeenAtMs": null,
+      "goneFirstSeenAtMs": 728,
+      "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+      "originStatusAfter": 0,
+      "portStatusAfter": [],
+      "leftoversAfter": [],
+      "decoyAliveAfter": true
+    }
+  },
+  "negativeControl": {
+    "environment": {
+      "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+      "baselines": [
+        "5377b52",
+        "81558a7"
+      ],
+      "files": [
+        {
+          "file": "apps/server/src/work/preview.ts",
+          "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "baselines": {
+            "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+            "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+          },
+          "identicalToAllBaselines": true
+        },
+        {
+          "file": "apps/server/src/work/preview-worker.ts",
+          "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "baselines": {
+            "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+            "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+          },
+          "identicalToAllBaselines": true
+        }
+      ],
+      "identicalToAllBaselines": true
+    },
+    "oldStyleCount": 3,
+    "matcher": {
+      "selfPid": 10676,
+      "selfMatched": true,
+      "pids": [
+        9220,
+        10676
+      ],
+      "nodePids": [
+        9220
+      ]
+    },
+    "selfMatch": {
+      "selfPid": 10676,
+      "selfMatched": true,
+      "note": "旧口径的计数进程自身命令行含两个关键字"
+    },
+    "decoy": {
+      "pid": 9220,
+      "created": "2026-11-15T02:09:36.4593350+08:00",
+      "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+      "alive": true,
+      "inOldMatcher": true
+    },
+    "attribution": {
+      "oldCriterionWouldPass": false,
+      "oldCriterionWouldFailDespiteCleanup": true,
+      "attributedLeftovers": [],
+      "targetCount": 14,
+      "note": "本轮判据只检查 targets（自己启动的 backend/worker/后代）的 PID+创建时间；无关 decoy 与计数进程不参与"
+    }
+  },
+  "decoyCleanup": {
+    "attempted": true,
+    "matchedIdentity": true,
+    "pid": 9220,
+    "killCommandDurationMs": 196,
+    "gone": true,
+    "snapshots": [
+      {
+        "label": "immediately-after-kill-command",
+        "requestedOffsetMs": 0,
+        "sampleStartedOffsetMs": 196,
+        "sampleFinishedOffsetMs": 587,
+        "alive": []
+      },
+      {
+        "label": "confirm-at-1000ms",
+        "requestedOffsetMs": 1004,
+        "sampleStartedOffsetMs": 1004,
+        "sampleFinishedOffsetMs": 1386,
+        "alive": []
+      }
+    ]
+  }
+}

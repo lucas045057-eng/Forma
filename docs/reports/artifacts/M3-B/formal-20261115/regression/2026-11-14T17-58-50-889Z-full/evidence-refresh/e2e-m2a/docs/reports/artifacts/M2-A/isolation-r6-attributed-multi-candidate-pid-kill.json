@@ -1,0 +1,288 @@
+{
+  "environment": {
+    "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+    "baselines": [
+      "5377b52",
+      "81558a7"
+    ],
+    "files": [
+      {
+        "file": "apps/server/src/work/preview.ts",
+        "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+        "baselines": {
+          "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+        },
+        "identicalToAllBaselines": true
+      },
+      {
+        "file": "apps/server/src/work/preview-worker.ts",
+        "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+        "baselines": {
+          "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+        },
+        "identicalToAllBaselines": true
+      }
+    ],
+    "identicalToAllBaselines": true
+  },
+  "kind": "multi-candidate-backend-pid-only",
+  "backend": {
+    "pid": 39700,
+    "created": "2026-11-15T02:10:00.6525070+08:00",
+    "base": "http://127.0.0.1:34658",
+    "previewOrigin": "http://127.0.0.1:48570"
+  },
+  "candidates": [
+    {
+      "id": "cb364459ad214c8dbe39dbe6c94db094",
+      "previewUrl": "/preview/c/cb364459ad214c8dbe39dbe6c94db094/",
+      "marker": "马上购买甲"
+    },
+    {
+      "id": "e0df4f8431e240cf96352023dfb394b6",
+      "previewUrl": "/preview/c/e0df4f8431e240cf96352023dfb394b6/",
+      "marker": "马上购买乙"
+    },
+    {
+      "id": "e6a0870635d147af86329ef6b58b8bc8",
+      "previewUrl": "/preview/c/e6a0870635d147af86329ef6b58b8bc8/",
+      "marker": "马上购买丙"
+    }
+  ],
+  "workers": [
+    {
+      "pid": 34056,
+      "ppid": 39700,
+      "created": "2026-11-15T02:10:04.4048440+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+    },
+    {
+      "pid": 20284,
+      "ppid": 39700,
+      "created": "2026-11-15T02:10:07.3951340+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+    },
+    {
+      "pid": 60248,
+      "ppid": 39700,
+      "created": "2026-11-15T02:10:10.4408820+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+    }
+  ],
+  "workerDetails": [
+    {
+      "worker": {
+        "pid": 34056,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:04.4048440+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      "ports": [
+        7802
+      ]
+    },
+    {
+      "worker": {
+        "pid": 20284,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:07.3951340+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      "ports": [
+        8329
+      ]
+    },
+    {
+      "worker": {
+        "pid": 60248,
+        "ppid": 39700,
+        "created": "2026-11-15T02:10:10.4408820+08:00",
+        "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\node_modules\\.pnpm\\vite@"
+      },
+      "ports": [
+        8355
+      ]
+    }
+  ],
+  "mappingMatrix": [
+    {
+      "workerPid": 34056,
+      "port": 7802,
+      "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+      "status": 200,
+      "textHasMarker": true
+    },
+    {
+      "workerPid": 34056,
+      "port": 7802,
+      "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 34056,
+      "port": 7802,
+      "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 20284,
+      "port": 8329,
+      "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 20284,
+      "port": 8329,
+      "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+      "status": 200,
+      "textHasMarker": true
+    },
+    {
+      "workerPid": 20284,
+      "port": 8329,
+      "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 60248,
+      "port": 8355,
+      "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 60248,
+      "port": 8355,
+      "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+      "status": 404,
+      "textHasMarker": false
+    },
+    {
+      "workerPid": 60248,
+      "port": 8355,
+      "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+      "status": 200,
+      "textHasMarker": true
+    }
+  ],
+  "mapping": [
+    {
+      "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+      "marker": "马上购买甲",
+      "workerPid": 34056,
+      "port": 7802
+    },
+    {
+      "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+      "marker": "马上购买乙",
+      "workerPid": 20284,
+      "port": 8329
+    },
+    {
+      "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+      "marker": "马上购买丙",
+      "workerPid": 60248,
+      "port": 8355
+    }
+  ],
+  "originBefore": [
+    {
+      "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+      "status": 200
+    },
+    {
+      "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+      "status": 200
+    },
+    {
+      "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+      "status": 200
+    }
+  ],
+  "oldMetric": {
+    "matcher": {
+      "selfPid": 11824,
+      "selfMatched": true,
+      "pids": [
+        9220,
+        11824
+      ],
+      "nodePids": [
+        9220
+      ]
+    },
+    "oldStyleCount": 3
+  },
+  "decoy": {
+    "pid": 9220,
+    "created": "2026-11-15T02:09:36.4593350+08:00",
+    "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+    "alive": true
+  },
+  "kill": {
+    "method": "taskkill /F /PID 39700（无 /T）",
+    "killStartedAtWall": "2026-11-14T18:10:15.974Z",
+    "killCommandDurationMs": 183,
+    "snapshots": [
+      {
+        "label": "immediately-after-kill-command",
+        "requestedOffsetMs": 0,
+        "sampleStartedOffsetMs": 183,
+        "sampleFinishedOffsetMs": 917,
+        "alive": []
+      },
+      {
+        "label": "confirm-at-1000ms",
+        "requestedOffsetMs": 1004,
+        "sampleStartedOffsetMs": 1004,
+        "sampleFinishedOffsetMs": 1781,
+        "alive": []
+      }
+    ],
+    "gone": true,
+    "stillAlive": [],
+    "firstSnapshotAlive": [],
+    "aliveLastSeenAtMs": null,
+    "goneFirstSeenAtMs": 917,
+    "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+    "originAfter": [
+      {
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "status": 0
+      },
+      {
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "status": 0
+      },
+      {
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "status": 0
+      }
+    ],
+    "portsAfter": [
+      {
+        "candidateId": "cb364459ad214c8dbe39dbe6c94db094",
+        "port": 7802,
+        "status": 0
+      },
+      {
+        "candidateId": "e0df4f8431e240cf96352023dfb394b6",
+        "port": 8329,
+        "status": 0
+      },
+      {
+        "candidateId": "e6a0870635d147af86329ef6b58b8bc8",
+        "port": 8355,
+        "status": 0
+      }
+    ],
+    "leftoversAfter": [],
+    "decoyAliveAfter": true
+  }
+}

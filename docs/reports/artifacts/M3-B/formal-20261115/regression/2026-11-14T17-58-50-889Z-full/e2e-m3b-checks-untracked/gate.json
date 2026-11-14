@@ -1,0 +1,276 @@
+{
+  "candidateA": "c50cb9e8b57c46a98d6c8e44b1a5bdfa",
+  "run1": {
+    "id": "0edd425b51654eaebf4c1980d71cf5da",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-14T18:14:12.538Z",
+    "finishedAt": "2026-11-14T18:14:18.833Z",
+    "durationMs": 6295,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 9
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3574
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "f5f2ea15559e44223947a75ebc5e35a96c1d0b375ba00f6308878292266d7f16",
+        "durationMs": 882
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "a13577834891b3a1689bf28f66f53267ea608400706940900c47efacff821a3e",
+        "durationMs": 89
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "f5f2ea15559e44223947a75ebc5e35a96c1d0b375ba00f6308878292266d7f16"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2717,
+        "hash": "a13577834891b3a1689bf28f66f53267ea608400706940900c47efacff821a3e"
+      }
+    ]
+  },
+  "run2": {
+    "id": "d7bb4a8e360c4e40a5f33c92d43d8448",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-14T18:14:20.187Z",
+    "finishedAt": "2026-11-14T18:14:26.522Z",
+    "durationMs": 6335,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 8
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3614
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "5d196cd00d79d25e361ad5bb7ff7f58a697227e020e1e213a556421fe89348ce",
+        "durationMs": 906
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "eb6e2c322eafd5041e30e6370ccb71e5c9bbde0ee9c6c9e91aedb24b602fff30",
+        "durationMs": 90
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "5d196cd00d79d25e361ad5bb7ff7f58a697227e020e1e213a556421fe89348ce"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2717,
+        "hash": "eb6e2c322eafd5041e30e6370ccb71e5c9bbde0ee9c6c9e91aedb24b602fff30"
+      }
+    ]
+  },
+  "run3": {
+    "id": "c6f94761229c4df8bf1a24640c30b78c",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-14T18:14:30.512Z",
+    "finishedAt": "2026-11-14T18:14:37.012Z",
+    "durationMs": 6500,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 9
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3677
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "64d7e1602c665f32cdb18631e8edd5b27a89a7df9e603db4d1b97e0b54ac770a",
+        "durationMs": 884
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "77a09f70c2339fbd0327f0dc818f2f5e0aef45b2d08ccef7d4a61ff75b9d2f65",
+        "durationMs": 119
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105624,
+        "hash": "9ec659b362a7275bf7ba3ee08be0451e5c415965234b200976e85c8975601ee9"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "64d7e1602c665f32cdb18631e8edd5b27a89a7df9e603db4d1b97e0b54ac770a"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105624,
+        "hash": "9ec659b362a7275bf7ba3ee08be0451e5c415965234b200976e85c8975601ee9"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "77a09f70c2339fbd0327f0dc818f2f5e0aef45b2d08ccef7d4a61ff75b9d2f65"
+      }
+    ]
+  },
+  "idempotent": {
+    "duplicate": true,
+    "afterDone": true
+  },
+  "rerunCreatedNew": true,
+  "cancelAfterDone": {
+    "status": "completed",
+    "outcome": "passed"
+  },
+  "strictBodies": [
+    {
+      "label": "rerun 非布尔",
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "label": "未知字段 budget",
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "label": "未知字段 force",
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "label": "数组请求体",
+      "status": 400,
+      "code": "INVALID_INPUT"
+    }
+  ],
+  "tamper": {
+    "runId": "d7bb4a8e360c4e40a5f33c92d43d8448",
+    "artifactGet": 409,
+    "adopt": {
+      "status": 409,
+      "code": "CHECKS_NOT_PASSED"
+    },
+    "originalBytes": 304
+  },
+  "stale": {
+    "runId": "c6f94761229c4df8bf1a24640c30b78c",
+    "versionBefore": "587c82699720ce17f4b0739a7e76a9984c5bd855",
+    "versionAfter": "30c7fa7c4e8ffcf6d5bb365a49dbec17034d1c94",
+    "restartChecks": {
+      "status": 409,
+      "code": "STALE_CANDIDATE"
+    },
+    "adopt": {
+      "status": 409,
+      "code": "CHECKS_NOT_PASSED"
+    }
+  },
+  "mainChangedDirectly": true
+}

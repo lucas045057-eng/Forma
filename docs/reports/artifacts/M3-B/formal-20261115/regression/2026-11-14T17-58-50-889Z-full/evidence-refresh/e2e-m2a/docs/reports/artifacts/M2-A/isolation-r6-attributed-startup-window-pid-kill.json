@@ -1,0 +1,122 @@
+{
+  "environment": {
+    "head": "6cf8de07dbb6326f4717c506554ce5e24457f1a2",
+    "baselines": [
+      "5377b52",
+      "81558a7"
+    ],
+    "files": [
+      {
+        "file": "apps/server/src/work/preview.ts",
+        "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+        "baselines": {
+          "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+        },
+        "identicalToAllBaselines": true
+      },
+      {
+        "file": "apps/server/src/work/preview-worker.ts",
+        "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+        "baselines": {
+          "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+        },
+        "identicalToAllBaselines": true
+      }
+    ],
+    "identicalToAllBaselines": true
+  },
+  "kind": "preview-startup-window-backend-pid-only",
+  "backend": {
+    "pid": 42972,
+    "created": "2026-11-15T02:10:19.5286090+08:00",
+    "base": "http://127.0.0.1:21311",
+    "previewOrigin": "http://127.0.0.1:49031"
+  },
+  "fixture": {
+    "workRoot": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attributed-startup-1794679819518\\work",
+    "note": "临时作品副本的 node_modules/vite 是测试替身：CommonJS 异步等待 4s 后才 import 真实 Vite；生产 preview 代码未改"
+  },
+  "task": {
+    "id": "af9761ea0f0a4d1b8cbb6fd062a24362",
+    "statusAtWindow": "running"
+  },
+  "window": {
+    "worker": {
+      "pid": 13688,
+      "ppid": 42972,
+      "created": "2026-11-15T02:10:23.0192130+08:00",
+      "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attribut"
+    },
+    "ports": [],
+    "originStatus": 502,
+    "observations": [
+      {
+        "atOffsetMs": 3236,
+        "worker": {
+          "pid": 13688,
+          "ppid": 42972,
+          "created": "2026-11-15T02:10:23.0192130+08:00",
+          "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3b-acceptance\\.data\\pi-m2a\\d3-attribut"
+        },
+        "ports": [],
+        "served": [],
+        "originStatus": 502,
+        "taskStatus": "running"
+      }
+    ],
+    "proof": "worker 进程存在且 PPID=backend，但 preview-origin 在该阶段不是 200"
+  },
+  "oldMetric": {
+    "oldStyleCount": 3,
+    "matcher": {
+      "selfPid": 2572,
+      "selfMatched": true,
+      "pids": [
+        9220,
+        2572
+      ],
+      "nodePids": [
+        9220
+      ]
+    }
+  },
+  "decoy": {
+    "pid": 9220,
+    "created": "2026-11-15T02:09:36.4593350+08:00",
+    "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+    "alive": true
+  },
+  "kill": {
+    "method": "taskkill /F /PID 42972（无 /T，窗口内）",
+    "killStartedAtWall": "2026-11-14T18:10:24.353Z",
+    "killCommandDurationMs": 176,
+    "snapshots": [
+      {
+        "label": "immediately-after-kill-command",
+        "requestedOffsetMs": 0,
+        "sampleStartedOffsetMs": 176,
+        "sampleFinishedOffsetMs": 728,
+        "alive": []
+      },
+      {
+        "label": "confirm-at-1000ms",
+        "requestedOffsetMs": 1005,
+        "sampleStartedOffsetMs": 1005,
+        "sampleFinishedOffsetMs": 1526,
+        "alive": []
+      }
+    ],
+    "gone": true,
+    "stillAlive": [],
+    "firstSnapshotAlive": [],
+    "aliveLastSeenAtMs": null,
+    "goneFirstSeenAtMs": 728,
+    "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+    "originStatusAfter": 0,
+    "portStatusAfter": [],
+    "leftoversAfter": [],
+    "decoyAliveAfter": true
+  }
+}

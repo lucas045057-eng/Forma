@@ -1,0 +1,13 @@
+{
+  "before": {
+    "nodeModules": 9,
+    "pnpm": 250,
+    "ok": true
+  },
+  "after": {
+    "nodeModules": 9,
+    "pnpm": 250,
+    "ok": true
+  },
+  "candidateExists": false
+}

@@ -1,0 +1,68 @@
+{
+  "files": [
+    "model.glb",
+    "model.glb.tmp",
+    "parts.json",
+    "raw.glb",
+    "raw.glb.tmp"
+  ],
+  "temps": [
+    "model.glb.tmp",
+    "raw.glb.tmp"
+  ],
+  "indexTemps": [],
+  "asset": {
+    "id": "76f54037-7a5b-400b-ad5b-3df0e31c73fb",
+    "status": "ready",
+    "createdAt": "2026-11-14T18:04:19.192Z",
+    "updatedAt": "2026-11-14T18:04:19.502Z",
+    "taskId": "9000001",
+    "metrics": {
+      "before": {
+        "bytes": 488,
+        "vertices": 3
+      },
+      "after": {
+        "bytes": 1300,
+        "vertices": 3
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 0,
+            "name": "",
+            "bounds": {
+              "min": [
+                -0.5,
+                0,
+                0
+              ],
+              "max": [
+                0.5,
+                1,
+                0
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 13,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          0
+        ],
+        "max": [
+          0.5,
+          1,
+          0
+        ]
+      }
+    },
+    "modelUrl": "/assets/76f54037-7a5b-400b-ad5b-3df0e31c73fb/model.glb?revision=787622b7-cf3c-4038-a679-907a4aa2a891"
+  }
+}

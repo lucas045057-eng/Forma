@@ -1,0 +1,37 @@
+{
+  "case": {
+    "name": "任务失败 status=4",
+    "mock": "failed",
+    "status": "failed",
+    "code": "GENERATION_FAILED"
+  },
+  "submitted": {
+    "id": "4504134b-8e4b-431e-90ef-0a7cd4a90e78",
+    "status": "polling",
+    "createdAt": "2026-11-14T18:03:39.015Z",
+    "updatedAt": "2026-11-14T18:03:39.026Z",
+    "taskId": "9000001"
+  },
+  "finalAsset": {
+    "id": "4504134b-8e4b-431e-90ef-0a7cd4a90e78",
+    "status": "failed",
+    "createdAt": "2026-11-14T18:03:39.015Z",
+    "updatedAt": "2026-11-14T18:03:39.030Z",
+    "taskId": "9000001",
+    "error": {
+      "code": "GENERATION_FAILED",
+      "message": "Lux3D 生成失败"
+    }
+  },
+  "elapsedMs": 20,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 1
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 1
+    }
+  }
+}

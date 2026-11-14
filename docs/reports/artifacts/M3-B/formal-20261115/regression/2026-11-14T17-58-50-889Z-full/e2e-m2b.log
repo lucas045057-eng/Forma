@@ -1,0 +1,21 @@
+# e2e-m2b: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m3b-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m2b.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\空间化AI工作台\.worktrees\m3b-acceptance\docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T17-58-50-889Z-full\e2e-m2b-output
+# started=2026-11-14T18:10:36.327Z
+[WebServer] (node:66428) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\m2b\01-ui.spec.ts:69:3 › M2-B 界面 › 点选 → Ctrl+Enter 提交 → 步骤 → 候选/并排对比 → diff/未检查 → 采用 (15.0s)
+  ok  2 [chromium] › tests\e2e\m2b\01-ui.spec.ts:147:3 › M2-B 界面 › 改动越界时界面给出醒目提示，检查仍显示未检查 (5.0s)
+  ok  3 [chromium] › tests\e2e\m2b\01-ui.spec.ts:175:3 › M2-B 界面 › 取消与重试：任务可以中途取消，重试后能产出候选 (4.2s)
+  ok  4 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:127:3 › M2-B 接管后专项 › STALE 事实：选中文件自身变化 → 409 + 界面提示重新点选；重新点选后可提交 (3.2s)
+  ok  5 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:189:3 › M2-B 接管后专项 › STALE 事实：只改其他文件（App.tsx，选中仍是 Button.tsx）→ 允许提交并产出候选 (5.7s)
+  ok  6 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:244:3 › M2-B 接管后专项 › R1：第二次点选的版本请求未返回期间，按钮与快捷键都不能提交 (3.4s)
+  ok  7 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:290:3 › M2-B 接管后专项 › R1：第二次点选的版本请求失败期间同样禁止提交，重新点选可恢复 (2.7s)
+  ok  8 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:337:3 › M2-B 接管后专项 › R1：retry 在 pending/failed 期间也不得提交 (2.1s)
+  ok  9 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:370:3 › M2-B 接管后专项 › 断线重连：断开期间采用候选，重连后补拉历史并更新界面 (12.2s)
+  ok 10 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:429:3 › M2-B 接管后专项 › 历史截断：补拉返回 truncated 时整体重载任务/候选/版本 (7.5s)
+  ok 11 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:498:3 › M2-B 接管后专项 › 三个待定候选在界面切换，标识与预览内容一一对应 (11.1s)
+  ok 12 [chromium] › tests\e2e\m2b\02-takeover.spec.ts:543:3 › M2-B 接管后专项 › 多面板共用一条事件连接：3D 场景与 3D 资产同时打开仍只有一个 WS (3.0s)
+
+  12 passed (1.3m)

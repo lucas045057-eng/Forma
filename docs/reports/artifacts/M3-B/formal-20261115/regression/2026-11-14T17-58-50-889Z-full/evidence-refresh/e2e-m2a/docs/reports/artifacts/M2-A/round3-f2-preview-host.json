@@ -1,0 +1,14 @@
+{
+  "evil": 403,
+  "wrongPort": 403,
+  "lookalike": 403,
+  "good": 200,
+  "evilWs": {
+    "status": "",
+    "closed": true
+  },
+  "wrongOriginWs": {
+    "status": "",
+    "closed": true
+  }
+}
