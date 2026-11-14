@@ -1,0 +1,16 @@
+# collect-m2b: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m3c-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m2b.config.ts --list --reporter=list
+# started=2026-11-14T21:12:58.160Z
+Listing tests:
+  [chromium] › 01-ui.spec.ts:69:3 › M2-B 界面 › 点选 → Ctrl+Enter 提交 → 步骤 → 候选/并排对比 → diff/未检查 → 采用
+  [chromium] › 01-ui.spec.ts:147:3 › M2-B 界面 › 改动越界时界面给出醒目提示，检查仍显示未检查
+  [chromium] › 01-ui.spec.ts:175:3 › M2-B 界面 › 取消与重试：任务可以中途取消，重试后能产出候选
+  [chromium] › 02-takeover.spec.ts:127:3 › M2-B 接管后专项 › STALE 事实：选中文件自身变化 → 409 + 界面提示重新点选；重新点选后可提交
+  [chromium] › 02-takeover.spec.ts:189:3 › M2-B 接管后专项 › STALE 事实：只改其他文件（App.tsx，选中仍是 Button.tsx）→ 允许提交并产出候选
+  [chromium] › 02-takeover.spec.ts:244:3 › M2-B 接管后专项 › R1：第二次点选的版本请求未返回期间，按钮与快捷键都不能提交
+  [chromium] › 02-takeover.spec.ts:290:3 › M2-B 接管后专项 › R1：第二次点选的版本请求失败期间同样禁止提交，重新点选可恢复
+  [chromium] › 02-takeover.spec.ts:337:3 › M2-B 接管后专项 › R1：retry 在 pending/failed 期间也不得提交
+  [chromium] › 02-takeover.spec.ts:370:3 › M2-B 接管后专项 › 断线重连：断开期间采用候选，重连后补拉历史并更新界面
+  [chromium] › 02-takeover.spec.ts:429:3 › M2-B 接管后专项 › 历史截断：补拉返回 truncated 时整体重载任务/候选/版本
+  [chromium] › 02-takeover.spec.ts:498:3 › M2-B 接管后专项 › 三个待定候选在界面切换，标识与预览内容一一对应
+  [chromium] › 02-takeover.spec.ts:543:3 › M2-B 接管后专项 › 多面板共用一条事件连接：3D 场景与 3D 资产同时打开仍只有一个 WS
+Total: 12 tests in 2 files

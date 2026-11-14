@@ -1,0 +1,495 @@
+{
+  "runId": "2026-11-14T21-12-52-141Z-collect",
+  "mode": "collect",
+  "suite": "M3-C",
+  "startedAt": "2026-11-14T21:12:52.561Z",
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m3c-acceptance",
+  "node": "v24.14.1",
+  "pid": 25000,
+  "playwrightCli": "node_modules\\@playwright\\test\\cli.js",
+  "envKeys": [
+    "PATH",
+    "Path",
+    "PATHEXT",
+    "SystemRoot",
+    "SystemDrive",
+    "WINDIR",
+    "ComSpec",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "LOCALAPPDATA",
+    "APPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "HOME",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+    "PROCESSOR_IDENTIFIER",
+    "OS",
+    "PNPM_HOME",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "npm_config_cache",
+    "npm_config_store_dir"
+  ],
+  "baseline": {
+    "identity": {
+      "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+      "branch": "test/m3c-acceptance",
+      "files": 278,
+      "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+      "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "dirty": [
+        "tests/e2e/m3c/02-checks-adopt.spec.ts"
+      ]
+    },
+    "evidence": {},
+    "dirty": {}
+  },
+  "evidenceDirtyAtStart": [],
+  "steps": [
+    {
+      "step": "collect-m0b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test --list --reporter=list",
+      "pid": 63664,
+      "startedAt": "2026-11-14T21:12:52.563Z",
+      "finishedAt": "2026-11-14T21:12:53.242Z",
+      "durationMs": 964,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m0b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m0a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m0a.config.ts --list --reporter=list",
+      "pid": 600,
+      "startedAt": "2026-11-14T21:12:53.528Z",
+      "finishedAt": "2026-11-14T21:12:54.199Z",
+      "durationMs": 939,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m0a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m1a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m1a.config.ts --list --reporter=list",
+      "pid": 65120,
+      "startedAt": "2026-11-14T21:12:54.467Z",
+      "finishedAt": "2026-11-14T21:12:55.155Z",
+      "durationMs": 1105,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m1a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m1b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m1b.config.ts --list --reporter=list",
+      "pid": 43876,
+      "startedAt": "2026-11-14T21:12:55.573Z",
+      "finishedAt": "2026-11-14T21:12:56.411Z",
+      "durationMs": 1277,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m1b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m2a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m2a.config.ts --list --reporter=list",
+      "pid": 32968,
+      "startedAt": "2026-11-14T21:12:56.851Z",
+      "finishedAt": "2026-11-14T21:12:57.747Z",
+      "durationMs": 1308,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m2a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m2b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m2b.config.ts --list --reporter=list",
+      "pid": 32160,
+      "startedAt": "2026-11-14T21:12:58.160Z",
+      "finishedAt": "2026-11-14T21:12:58.958Z",
+      "durationMs": 1170,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m2b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m3a",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m3a.config.ts --list --reporter=list",
+      "pid": 39256,
+      "startedAt": "2026-11-14T21:12:59.330Z",
+      "finishedAt": "2026-11-14T21:13:00.144Z",
+      "durationMs": 1222,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m3a.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m3b",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m3b.config.ts --list --reporter=list",
+      "pid": 52400,
+      "startedAt": "2026-11-14T21:13:00.552Z",
+      "finishedAt": "2026-11-14T21:13:01.354Z",
+      "durationMs": 1222,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m3b.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "collect-m3c",
+      "command": "E:\\Node\\node.exe E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m3c.config.ts --list --reporter=list",
+      "pid": 21384,
+      "startedAt": "2026-11-14T21:13:01.775Z",
+      "finishedAt": "2026-11-14T21:13:02.632Z",
+      "durationMs": 1241,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-14T21-12-52-141Z-collect\\collect-m3c.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "before": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "after": {
+          "head": "545a9d1b0f2177c6fa48e85dd6beb03ad34b7efa",
+          "branch": "test/m3c-acceptance",
+          "files": 278,
+          "digest": "c48d49dd855ee515be48ecc8062e4bd65755cb282af51e8710e7f523eb12e667",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": [
+            "tests/e2e/m3c/02-checks-adopt.spec.ts"
+          ]
+        },
+        "drift": []
+      },
+      "ok": true
+    }
+  ]
+}
