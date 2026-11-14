@@ -1,0 +1,10 @@
+{
+  "job": "job_e3cfdb4a",
+  "command": "node tests/e2e/m3a/run-validation.mjs --run-id run-20261114-m3a-2 --base 6c86101b4738634024779af8b51165aafdeb5f51",
+  "pid": 61740,
+  "state": "exited",
+  "exitCode": 1,
+  "startedAt": "2026-11-14T08:56:28.000Z",
+  "finishedAt": "2026-11-14T08:58:13.399Z",
+  "wallSeconds": 105
+}

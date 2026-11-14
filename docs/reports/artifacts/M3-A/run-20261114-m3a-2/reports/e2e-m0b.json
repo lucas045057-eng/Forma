@@ -1,0 +1,133 @@
+{
+  "config": {
+    "argv": [
+      "E:\\Node\\node.exe",
+      "E:\\空间化AI工作台\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "-c",
+      "playwright.config.ts",
+      "--reporter=list",
+      "--reporter=json",
+      "--output=E:\\空间化AI工作台\\docs\\reports\\artifacts\\M3-A\\run-20261114-m3a-2\\output\\e2e-m0b"
+    ],
+    "configFile": "E:\\空间化AI工作台\\playwright.config.ts",
+    "rootDir": "E:/空间化AI工作台/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/空间化AI工作台/docs/reports/artifacts/M3-A/run-20261114-m3a-2/output/e2e-m0b",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "E:/空间化AI工作台/tests/e2e",
+        "testIgnore": [
+          "**/m0a/**",
+          "**/m1a/**",
+          "**/m1b/**",
+          "**/m2a/**",
+          "**/m2b/**",
+          "**/m3a/**"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "E:\\空间化AI工作台\\docs\\reports\\artifacts\\M3-A\\run-20261114-m3a-2\\output\\e2e-m0b",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "name": "chromium",
+        "testDir": "E:\\空间化AI工作台\\tests\\e2e",
+        "snapshotDir": "E:\\空间化AI工作台\\tests\\e2e",
+        "testIgnore": [
+          "**/m0a/**",
+          "**/m1a/**",
+          "**/m1b/**",
+          "**/m2a/**",
+          "**/m2b/**",
+          "**/m3a/**"
+        ],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 120000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5173",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "trace": "off",
+          "video": "off",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Error: REAL_MODEL_RUN_DIR 未设置",
+      "stack": "Error: REAL_MODEL_RUN_DIR 未设置\n    at Object.<anonymous> (E:\\空间化AI工作台\\tests\\e2e\\real-model\\real-model.spec.ts:17:21)",
+      "location": {
+        "file": "E:\\空间化AI工作台\\tests\\e2e\\real-model\\real-model.spec.ts",
+        "column": 21,
+        "line": 17
+      },
+      "snippet": "\u001b[90m   at \u001b[39mreal-model\\real-model.spec.ts:17\n\n \u001b[90m 15 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mREAL\u001b[39m \u001b[33m=\u001b[39m \u001b[33mMODE\u001b[39m \u001b[33m===\u001b[39m \u001b[32m'real'\u001b[39m\u001b[33m;\u001b[39m\n \u001b[90m 16 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mRUN_DIR\u001b[39m \u001b[33m=\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mREAL_MODEL_RUN_DIR\u001b[39m\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 17 |\u001b[39m \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39m\u001b[33mRUN_DIR\u001b[39m) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m'REAL_MODEL_RUN_DIR 未设置'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 18 |\u001b[39m \u001b[90m// 真实模式固定十题与 8/10 门槛，不继承 limit/min-pass/only-results。\u001b[39m\n \u001b[90m 19 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mLIMIT\u001b[39m \u001b[33m=\u001b[39m \u001b[33mREAL\u001b[39m \u001b[33m?\u001b[39m \u001b[33mCASES\u001b[39m\u001b[33m.\u001b[39mlength \u001b[33m:\u001b[39m \u001b[33mNumber\u001b[39m(process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mREAL_MODEL_CASE_LIMIT\u001b[39m \u001b[33m??\u001b[39m \u001b[33mCASES\u001b[39m\u001b[33m.\u001b[39mlength)\u001b[33m;\u001b[39m\n \u001b[90m 20 |\u001b[39m \u001b[36mconst\u001b[39m \u001b[33mMIN_PASS\u001b[39m \u001b[33m=\u001b[39m \u001b[33mREAL\u001b[39m \u001b[33m?\u001b[39m \u001b[35m8\u001b[39m \u001b[33m:\u001b[39m \u001b[33mNumber\u001b[39m(process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mREAL_MODEL_MIN_PASS\u001b[39m \u001b[33m??\u001b[39m \u001b[33mMath\u001b[39m\u001b[33m.\u001b[39mmin(\u001b[33mLIMIT\u001b[39m\u001b[33m,\u001b[39m \u001b[33mCASES\u001b[39m\u001b[33m.\u001b[39mlength))\u001b[33m;\u001b[39m"
+    }
+  ],
+  "stats": {
+    "startTime": "2026-11-14T08:58:08.246Z",
+    "duration": 3840.508,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

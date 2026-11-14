@@ -1,0 +1,17 @@
+# 2026-11-14T08:58:07.759Z node node_modules/@playwright/test/cli.js test -c playwright.config.ts --reporter=list --reporter=json --output="E:\空间化AI工作台\docs\reports\artifacts\M3-A\run-20261114-m3a-2\output\e2e-m0b"
+[WebServer] (node:20460) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Error: REAL_MODEL_RUN_DIR 未设置
+
+   at real-model\real-model.spec.ts:17
+
+  15 | const REAL = MODE === 'real';
+  16 | const RUN_DIR = process.env.REAL_MODEL_RUN_DIR;
+> 17 | if (!RUN_DIR) throw new Error('REAL_MODEL_RUN_DIR 未设置');
+     |                     ^
+  18 | // 真实模式固定十题与 8/10 门槛，不继承 limit/min-pass/only-results。
+  19 | const LIMIT = REAL ? CASES.length : Number(process.env.REAL_MODEL_CASE_LIMIT ?? CASES.length);
+  20 | const MIN_PASS = REAL ? 8 : Number(process.env.REAL_MODEL_MIN_PASS ?? Math.min(LIMIT, CASES.length));
+    at Object.<anonymous> (E:\空间化AI工作台\tests\e2e\real-model\real-model.spec.ts:17:21)
+

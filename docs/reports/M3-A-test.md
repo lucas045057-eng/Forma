@@ -5,6 +5,16 @@
 - 基线门禁：`git merge-base --is-ancestor 012d9a65… HEAD` 成功；`apps/packages/templates` 与 `pnpm-lock.yaml` 相对 `012d9a6` 无差异
 - 运行：`job_b10ae204`，exit 1，约 86 秒；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-1/`
 
+## 第二轮（HEAD `6c86101`，`run-20261114-m3a-2`）
+
+- `job_e3cfdb4a` exit 1，约 103 秒；证据 `docs/reports/artifacts/M3-A/run-20261114-m3a-2/`。
+- `typecheck`（4967ms）、`build`（7364ms）、标准 `pnpm test`（86211ms）均 exit 0；**280 单测全部通过**（shared 68、plugin 20、bridge 1、scene-renderer 5、server 179、Studio 7），无筛选/失败/跳过。四重点 4497/4922/4921/5842ms，均在 15s 预算内，普通 5s 预算未改。
+- **M0-B 步骤在收集阶段失败，0 个测试执行**（`reports/e2e-m0b.json` total=0）：默认 `playwright.config.ts` 的 `testIgnore` 遗漏 `**/real-model/**`，误加载 `real-model.spec.ts:17`，报 `REAL_MODEL_RUN_DIR 未设置`；不是模型鉴权或产品失败，未读取 `.env`、未发真实请求。M0-A/M1-A/M1-B/M2-A/M2-B/M3-A 六套因此未开始。
+- 修正：仅在 `playwright.config.ts` 的 `testIgnore` 增加 `**/real-model/**`（保留 m0a/m1a/m1b/m2a/m2b/m3a），并把专用十题限定到独立配置/runner。收集验证 `--list`：exit 0、**24 tests in 4 files**（`m0b-known-issues`、`m0b-message-guard`、`m0b-mutation-check`、`m0b-pick`），不再收集 real-model 或其他阶段；**这只是收集验证，不是 24 条已执行通过**。
+- 本步骤前后 HEAD/锁/生产摘要一致，`refreshedArtifacts=0`；run1、stability、M2 历史证据均未覆盖。正式验收仍未完成，修正后由调度启动 `run-20261114-m3a-3`，结果待返回。
+
+<!-- 历史：第一轮失败记录保留如下 -->
+
 ## 结论：验收未完成，完整回归被单测超时阻断
 
 - `typecheck`、`build` 通过；`unit` 在 **apps/server** 失败（176/179 通过，3 项 5000ms 超时），`pnpm test` 首败即停，**Studio 单测未调度**。

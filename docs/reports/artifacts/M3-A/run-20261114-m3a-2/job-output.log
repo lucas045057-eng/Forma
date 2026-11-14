@@ -1,0 +1,4 @@
+[PASS] typecheck exit=0 5s
+[PASS] build exit=0 7s
+[PASS] unit exit=0 86s
+[FAIL] e2e-m0b exit=1 4s 0/0

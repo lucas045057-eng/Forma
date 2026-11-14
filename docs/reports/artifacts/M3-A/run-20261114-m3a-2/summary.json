@@ -1,0 +1,53 @@
+{
+  "runId": "run-20261114-m3a-2",
+  "head": "6c86101b4738634024779af8b51165aafdeb5f51",
+  "status": "failed",
+  "steps": [
+    {
+      "id": "typecheck",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 4967,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "build",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 7364,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "unit",
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 86211,
+      "playwright": null,
+      "failed": false
+    },
+    {
+      "id": "e2e-m0b",
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 4251,
+      "playwright": {
+        "total": 0,
+        "passed": 0,
+        "expectedFailed": 0,
+        "unexpected": 0,
+        "skipped": 0
+      },
+      "failed": true
+    }
+  ],
+  "productionDigest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+  "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+  "productionAfter": {
+    "digest": "465ea81c2c27b4f2a8779bdd3caae1e06238dddb0a00fed13417cd971328e1a2",
+    "lockHash": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+    "status": ""
+  },
+  "refreshedArtifacts": 0
+}

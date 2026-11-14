@@ -15,8 +15,9 @@ const REPO = process.cwd();
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // M0-A / M1-A / M1-B / M2-A / M2-B 的用例需要各自的配置，不能跟 M0-B 混跑。
-  testIgnore: ['**/m0a/**', '**/m1a/**', '**/m1b/**', '**/m2a/**', '**/m2b/**', '**/m3a/**'],
+  // M0-A / M1-A / M1-B / M2-A / M2-B / M3-A 的用例需要各自的配置；real-model 固定十题只能由
+  // playwright.realmodel.config.ts 与其后台 runner 执行，不能混入默认 M0-B 收集。
+  testIgnore: ['**/m0a/**', '**/m1a/**', '**/m1b/**', '**/m2a/**', '**/m2b/**', '**/m3a/**', '**/real-model/**'],
   timeout: 120_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
