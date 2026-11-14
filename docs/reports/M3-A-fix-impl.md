@@ -58,11 +58,27 @@ M3-C/Pi 应以 GET 卡片 stale 与关联任务错误展示“草稿或主作品
 
 ### 最终全量验证状态更新
 
-25c33a8 的 job_c2efd2aa 已失败：七包 typecheck/build、shared 68、plugin 20、bridge 1、renderer 5 通过；server 176 项中 175 过，四候选清理用例在 5000ms 超时，studio 因首败即停未运行。job_f100e2a7 对原用例隔离运行 1 项通过（4506ms、另 7 项筛选跳过），只作对照。阶段耗时取证尚未完成，未调整 timeout/retry/skip 或候选断言，也未宣称性能根因已定位。
+25c33a8 的 job_c2efd2aa 已失败：七包 typecheck/build、shared 68、plugin 20、bridge 1、renderer 5 通过；server 176 项中 175 过，四候选清理用例在 5000ms 超时，studio 因首败即停未运行。job_f100e2a7 对原用例隔离运行 1 项通过（4506ms、另 7 项筛选跳过），只作对照。当时阶段耗时取证尚未完成；后续对照见下节。未调整 timeout/retry/skip 或候选断言，也未宣称历史唯一根因已定位。
+
+### 四候选阶段取证与最小优化
+
+优化提交：`6fe015c3b68561e7aaa953045a6b0e84a682add5`。仅复用本次 `baselineFiles` 已审计的真实完整基线清单，去掉每个 `gitShow` 之前对同一路径的重复 ls-tree；没有改 WorkRepo、互斥、持久层、缓存或并发策略。所有源码仍从真实基线读取，草稿独立；模式/路径/链接/控制字符审计、500 文件限制与每次 Git 输出预算保持。清单缺失即不存在，清单内源码读取失败仍是 analysis_uncertain，不能作为缺文件放行。
+
+job_bd68f0c1 与 job_b71ad06e 中的同一运行时方法包装探针，均复刻原 mock 夹具、四次任务、最老候选清理与显式 discard，并完成断言；completed/unchanged 均为 true：
+
+| 指标 | 优化前（24879aa） | 优化后（提交前 policy 改动） |
+| --- | --- | --- |
+| 阶段总耗时 | 4487.0ms | 4341.4ms |
+| Git 调用数 / 累计耗时 | 168 / 4220.8ms | 160 / 4072.6ms |
+| 四次策略窗口 | 123.3 / 110.0 / 117.3 / 107.4ms | 71.9 / 69.3 / 67.2 / 65.5ms |
+
+优化前 repo queue-wait 最大 0.02ms、close 0.7ms；本次探针未发现队列或关闭卡死。两源码夹具每轮少两次重复清单查询，四轮实际减少八次 Git；阶段总耗时本次减少约 146ms。单次对照受系统调度影响，不证明全量超时已关闭，也不证明历史唯一根因。
+
+前测原件保存在 `.data/m3a-stage-timing-24879aa.json`、`.log`、`.mjs`；后测 `.data/m3a-stage-timing-reused-list.json`，后测记录 HEAD/锁/源摘要。历史失败及原始诊断没有覆盖。job_b71ad06e 顺序执行 server typecheck、policy 19 + work/service 8 = 27 项定向测试、后测探针，全部 exit 0。原四候选用例、5000ms 预算和断言未改，无 retry/skip。
 
 ### 最终全量验证
 
-待后台结果。冻结报告提交后使用已有 `node apps/server/scripts/m3a-full-validation.mjs`，依次七包 typecheck → 七包 build → 六测试包完整单测一次，首败即停。入口记录 HEAD、锁 SHA256、每步命令/日志/PID/exit/signal、结束 HEAD 和工作树状态；证据目录为本 worktree `.data/m3a-validation-<启动时间>/`，准确目录由日志打印。全量未返回前不预写测试数量或成功。
+本次最小优化后的冻结全量待后台结果。冻结报告提交后使用已有 `node apps/server/scripts/m3a-full-validation.mjs`，依次七包 typecheck → 七包 build → 六测试包完整单测一次，首败即停。入口记录 HEAD、锁 SHA256、每步命令/日志/PID/exit/signal、结束 HEAD 和工作树状态；证据目录为本 worktree `.data/m3a-validation-<启动时间>/`，准确目录由日志打印。全量未返回前不预写测试数量或成功。
 
 原 7fad918 的 job_049bdc52 已由调度核验通过：20 步、261 单测，HEAD/锁/工作树不变；这是整改前基线，不证明本轮修复。原件 `.data/m3a-validation-1794636746586/` 不改写，核验报告见主工作树 [M3-A-validation.md](E:/空间化AI工作台/docs/reports/M3-A-validation.md)（主线文件，当前 worktree 不复制或修改）。
 
