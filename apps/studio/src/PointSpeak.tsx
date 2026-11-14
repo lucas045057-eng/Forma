@@ -8,10 +8,10 @@ const statusLabels: Record<Task['status'], string> = {
   queued: '排队中', running: '执行中', awaiting_approval: '等待请示', done: '候选已就绪', failed: '失败', cancelled: '已取消',
 };
 
-export default function PointSpeak({ pick }: { pick: PickState }) {
+export default function PointSpeak({ pick, blocked = false }: { pick: PickState; blocked?: boolean }) {
   const selection = submittedSelection(pick);
-  const submittable = canSubmit(pick);
-  const { state, reload } = useEventCenter();
+  const { state, reload, syncReady } = useEventCenter();
+  const submittable = canSubmit(pick) && !blocked && syncReady;
   const [instruction, setInstruction] = useState('');
   const [activeId, setActiveId] = useState('');
   const [busy, setBusy] = useState(false);
