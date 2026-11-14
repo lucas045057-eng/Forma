@@ -1,6 +1,14 @@
-# 编码 Agent 模型服务 · 2026-11-10
+# 编码 Agent 模型服务
 
-用户指定：OpenCode Go，`https://opencode.ai/zen/go/v1`，模型 DeepSeek V4.1 Flash。key 在 `apps/server/.env` 的 `CODING_AGENT_API_KEY`（不入库）。
+## 当前配置（2026-11-14）
+
+用户在确认真实十题用途后提供 `https://xfastapi.ai` 和模型 `gpt-6.1-sol`。本轮按切换服务并执行既定十题理解，后端基址设为 `https://xfastapi.ai/v1`；key 仅保存在 `apps/server/.env` 的 `CODING_AGENT_API_KEY`，不入库。
+
+调度仅查询 `GET /v1/models`：HTTP 200，返回列表含精确模型 ID `gpt-6.1-sol`。尚未发送对话请求，也未实测新服务的工具调用兼容性；由 Pi 在固定十题中如实记录，不额外发送付费探针、不放宽失败计数。没有核实单价，不沿用下方旧服务的价格与能力声明。
+
+## 历史配置：OpenCode Go（2026-11-10，已被当前配置取代）
+
+先前用户指定 OpenCode Go，`https://opencode.ai/zen/go/v1`，模型 DeepSeek V4.1 Flash。以下为当时实测，不能作为新服务兼容性的证据。
 
 ## 实测
 - `GET /models` 可用；模型 id 为 **`deepseek-v4.1-flash`**（用户写的是“deepseekV4.1 fresh”，按列表里的 Flash 理解）。同一列表里还有 `deepseek-v4-pro` 等。
