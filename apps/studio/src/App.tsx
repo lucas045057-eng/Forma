@@ -2,7 +2,7 @@ import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { isPreviewMessage, type ApprovalCard, type StudioMessage } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
-import { restorePicking, waiting } from './approval-state.ts';
+import { impactHighlightMessages, restorePicking, waiting } from './approval-state.ts';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
 import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
@@ -71,6 +71,7 @@ function Studio() {
   function highlight(card: ApprovalCard, src: string) {
     if (!syncReady || card.baseVersion !== state.version || !waiting(card)) return;
     ++pickRequest.current;
+    if (pick.kind === 'pending') setPick({ kind: 'none' });
     const next = { id: card.id, src, baseVersion: card.baseVersion, wasPicking: impactRef.current?.wasPicking ?? pickingRef.current };
     impactRef.current = next;
     setImpact(next);
@@ -78,8 +79,7 @@ function Studio() {
     setMode('current');
     pickingRef.current = false;
     setPicking(false);
-    send({ type: 'pick:start' });
-    send({ type: 'highlight', payload: { src } });
+    impactHighlightMessages(src).forEach(send);
   }
   useEffect(() => {
     if (!impact) return;
@@ -110,6 +110,10 @@ function Studio() {
           syncScroll(preview.current, event.data.payload.at);
         }
         // Candidate frames deliberately never enter picking mode or change Selection.
+        return;
+      }
+      if (impactRef.current && (event.data.type === 'pick:result' || event.data.type === 'error')) {
+        impactHighlightMessages(impactRef.current.src).forEach(send);
         return;
       }
       switch (event.data.type) {

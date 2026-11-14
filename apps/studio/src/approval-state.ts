@@ -1,4 +1,4 @@
-import type { ApprovalCard, Selection, Task } from '@spatial/shared';
+import type { ApprovalCard, Selection, StudioMessage, Task } from '@spatial/shared';
 
 const statuses = ['pending', 'approving', 'approved', 'rejected', 'cancelled', 'stale', 'failed'];
 const rules = ['shared_component', 'global_style', 'out_of_scope', 'analysis_uncertain'];
@@ -27,6 +27,10 @@ export function affectedSource(card: ApprovalCard, task: Task | undefined, affec
   const selection = task?.id === card.taskId ? task.selection : undefined;
   if (selection?.baseVersion === version && sourceFile(selection.src) === affected) return selection.src;
   if (sourceFile(affected)) return affected;
+}
+export function impactHighlightMessages(src: string): StudioMessage[] {
+  // stop clears bridge hover and its temporary selection; start restores the overlay.
+  return [{ type: 'pick:stop' }, { type: 'pick:start' }, { type: 'highlight', payload: { src } }];
 }
 export function restorePicking(wasPicking: boolean, selection: Selection | null, version: string) {
   return wasPicking && selection?.baseVersion === version;
