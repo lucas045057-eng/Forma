@@ -32,19 +32,28 @@ const MODULE_CSS = /\.module\.css$/i;
 const GLOBAL_CONFIG = /(?:^|\/)(?:scene\.config\.json|theme\.(?:json|ts|tsx|js|jsx))$/i;
 const extensions = ['.tsx', '.ts', '.jsx', '.js'];
 
-function gitShow(root: string, baseVersion: string, file: string): Promise<string | undefined> {
-  if (!/^[0-9a-f]{7,64}$/i.test(baseVersion)) return Promise.reject(new Error('基线版本无效'));
+function gitRead(root: string, args: string[]): Promise<{ code: number; stdout: string }> {
   return new Promise((resolve, reject) => {
-    execFile('git', ['-c', 'core.quotepath=false', 'show', `${baseVersion}:${file}`], {
+    execFile('git', ['-c', 'core.quotepath=false', ...args], {
       cwd: root, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024, windowsHide: true,
       env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0' },
     }, (error, stdout) => {
-      if (error) {
-        if (typeof error.code === 'number') resolve(undefined);
-        else reject(error);
-      } else resolve(stdout);
+      if (error && typeof error.code !== 'number') reject(error);
+      else resolve({ code: error?.code ?? 0, stdout });
     });
   });
+}
+
+async function gitShow(root: string, baseVersion: string, file: string): Promise<string | undefined> {
+  if (!/^[0-9a-f]{7,64}$/i.test(baseVersion)) throw new Error('基线版本无效');
+  // A missing path and a broken/unreadable repository both make Git exit nonzero. Only the
+  // former may remove baseline evidence; every other failure must remain analysis_uncertain.
+  const listing = await gitRead(root, ['ls-tree', '-z', baseVersion, '--', file]);
+  if (listing.code !== 0) throw new Error('无法读取基线版本库');
+  if (!listing.stdout) return undefined;
+  const content = await gitRead(root, ['show', `${baseVersion}:${file}`]);
+  if (content.code !== 0) throw new Error('无法读取基线文件');
+  return content.stdout;
 }
 
 async function sourceFiles(root: string) {
@@ -223,47 +232,60 @@ export async function evaluateApproval(options: {
 
   const sourceChanges = changedFiles.filter(file => SOURCE_FILE.test(file));
   if (sourceChanges.length) {
-    try {
-      const draft = await sourceFiles(root);
-      const base = new Map(draft);
-      for (const file of sourceChanges) {
-        if (!/^src\/[A-Za-z0-9_./-]+$/.test(file) || file.split('/').includes('..')) throw new Error(`改动路径无法安全分析：${file}`);
-        const content = await gitShow(root, baseVersion, file);
-        if (content === undefined) base.delete(file); else base.set(file, content);
-      }
-      for (const [label, snapshot] of [['基线', base], ['草稿', draft]] as const) {
-        const { modules, bindingForTag } = analyze(snapshot);
-        const unresolved = [...modules.values()].flatMap(info => [
-          ...info.uncertain,
-          ...[...info.references].filter(reference => resolveModule(reference, modules) === null).map(() => `${info.file} 含无法解析的本地模块引用`),
-        ]);
-        for (const file of sourceChanges) {
-          const info = modules.get(file);
-          if (!info) continue;
-          const consumers = [...modules.values()].filter(other => other.file !== file &&
-            [...other.references].some(reference => resolveModule(reference, modules) === file)).map(other => other.file);
-          if (consumers.length >= 2) addRule(codes, affected, evidence, 'shared_component', [file, ...consumers],
-            `${label}中 ${file} 被 ${consumers.length} 个使用方引用：${consumers.join('、')}`);
-          const exported = new Set([...info.exports.keys()].flatMap(name => {
-            const binding = resolveExport(modules, file, name);
-            return binding ? [`${binding.module}\0${binding.local}`] : [];
-          }));
-          if (!exported.size) continue;
-          const locations: string[] = [];
-          for (const other of modules.values()) for (const usage of other.jsx) {
-            const binding = bindingForTag(other, usage.tag);
-            if (binding && exported.has(`${binding.module}\0${binding.local}`)) locations.push(usage.at);
-            else if (binding === null) unresolved.push(`${other.file} 的 JSX 组件来源无法确定`);
-          }
-          if (locations.length >= 2) addRule(codes, affected, evidence, 'shared_component', [file, ...locations],
-            `${label}中 ${file} 的导出组件有 ${locations.length} 次 JSX 使用：${locations.join('、')}`);
-        }
-        if (unresolved.length) addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
-          `${label}静态分析不完整，保守请示：${[...new Set(unresolved)].slice(0, 8).join('；')}`);
-      }
-    } catch (error) {
+    let draft: Map<string, string> | undefined;
+    try { draft = await sourceFiles(root); }
+    catch (error) {
       addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
-        `静态分析失败，保守请示：${error instanceof Error ? error.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
+        `草稿静态分析失败，保守请示：${error instanceof Error ? error.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
+    }
+    if (draft) {
+      const base = new Map(draft);
+      let baseError: unknown;
+      try {
+        for (const file of sourceChanges) {
+          if (!/^src\/[A-Za-z0-9_./-]+$/.test(file) || file.split('/').includes('..')) throw new Error(`改动路径无法安全分析：${file}`);
+          const content = await gitShow(root, baseVersion, file);
+          if (content === undefined) base.delete(file); else base.set(file, content);
+        }
+      } catch (error) { baseError = error; }
+      if (baseError) addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
+        `基线静态分析失败，保守请示：${baseError instanceof Error ? baseError.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
+      const sides: Array<['基线' | '草稿', Map<string, string>]> = baseError ? [['草稿', draft]] : [['基线', base], ['草稿', draft]];
+      for (const [label, snapshot] of sides) {
+        try {
+          const { modules, bindingForTag } = analyze(snapshot);
+          const unresolved = [...modules.values()].flatMap(info => [
+            ...info.uncertain,
+            ...[...info.references].filter(reference => resolveModule(reference, modules) === null).map(() => `${info.file} 含无法解析的本地模块引用`),
+          ]);
+          for (const file of sourceChanges) {
+            const info = modules.get(file);
+            if (!info) continue;
+            const consumers = [...modules.values()].filter(other => other.file !== file &&
+              [...other.references].some(reference => resolveModule(reference, modules) === file)).map(other => other.file);
+            if (consumers.length >= 2) addRule(codes, affected, evidence, 'shared_component', [file, ...consumers],
+              `${label}中 ${file} 被 ${consumers.length} 个使用方引用：${consumers.join('、')}`);
+            const exported = new Set([...info.exports.keys()].flatMap(name => {
+              const binding = resolveExport(modules, file, name);
+              return binding ? [`${binding.module}\0${binding.local}`] : [];
+            }));
+            if (!exported.size) continue;
+            const locations: string[] = [];
+            for (const other of modules.values()) for (const usage of other.jsx) {
+              const binding = bindingForTag(other, usage.tag);
+              if (binding && exported.has(`${binding.module}\0${binding.local}`)) locations.push(usage.at);
+              else if (binding === null) unresolved.push(`${other.file} 的 JSX 组件来源无法确定`);
+            }
+            if (locations.length >= 2) addRule(codes, affected, evidence, 'shared_component', [file, ...locations],
+              `${label}中 ${file} 的导出组件有 ${locations.length} 次 JSX 使用：${locations.join('、')}`);
+          }
+          if (unresolved.length) addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
+            `${label}静态分析不完整，保守请示：${[...new Set(unresolved)].slice(0, 8).join('；')}`);
+        } catch (error) {
+          addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
+            `${label}静态分析失败，保守请示：${error instanceof Error ? error.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
+        }
+      }
     }
   }
   const selectedFile = selection?.src.replace(/:\d+:\d+$/, '');

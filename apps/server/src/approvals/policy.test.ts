@@ -109,6 +109,36 @@ it('requires approval for out-of-scope edits and for every nonempty edit without
   } finally { await rm(f.directory, { recursive: true, force: true }); }
 });
 
+it('does not turn baseline read failures into a new-file pass', async () => {
+  const f = await fixture();
+  try {
+    await writeFile(path.join(f.root, 'src/components/Button.tsx'), 'export function Button() { return <button>新样式</button>; }\n');
+    const result = await evaluateApproval({ root: f.root, baseVersion: '0'.repeat(40), changedFiles: ['src/components/Button.tsx'], selection: selection(f.baseVersion) });
+    expect(result.ruleCodes).toContain('shared_component');
+    expect(result.ruleCodes).toContain('analysis_uncertain');
+    expect(result.evidence.join('\n')).toContain('无法读取基线版本库');
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});
+
+it('treats a genuinely new file in a valid baseline as absent without uncertainty', async () => {
+  const f = await fixture();
+  try {
+    const result = await evaluate(f, 'src/components/New.ts', 'export const value = 1;\n', selection(f.baseVersion, 'src/components/New.ts:1:1'));
+    expect(result.required).toBe(false);
+    expect(result.ruleCodes).not.toContain('analysis_uncertain');
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});
+
+it('keeps baseline shared evidence when the draft cannot be parsed', async () => {
+  const f = await fixture();
+  try {
+    const result = await evaluate(f, 'src/components/Button.tsx', 'export function Button( {\n', selection(f.baseVersion));
+    expect(result.ruleCodes).toContain('shared_component');
+    expect(result.affected.filter(file => file.startsWith('src/App.tsx:'))).toHaveLength(3);
+    expect(result.ruleCodes).toContain('analysis_uncertain');
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});
+
 it('fails closed on parse errors and dynamic imports', async () => {
   const f = await fixture({ 'src/App.tsx': "export default async () => <>{await import('./components/Button')}</>;\n" });
   try {
