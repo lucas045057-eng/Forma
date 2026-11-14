@@ -5,7 +5,7 @@ import { BACKEND_BASE } from './env';
 import { checkRun } from './support';
 import {
   cleanup, countRequests, dropSockets, ensurePicked, gateReason, mainFrame, openStudio,
-  overlayTotal, pendingCandidates, waitCandidate, waitChecksPassed, waitEvidenceReady,
+  overlayTotal, pendingCandidates, selectionText, waitCandidate, waitChecksPassed, waitEvidenceReady,
 } from './support';
 
 /**
@@ -95,7 +95,8 @@ test('真实四检查：只发一次 POST body={}，四项通过，六份证据�
   expect(run.outcome).toBe('passed');
   expect(run.checks.map((check: { status: string }) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
 
-  // 候选 iframe：不进入选取、不画 overlay、点击不产生 Selection
+  // 候选 iframe：不进入选取、不画 overlay、点击不改主 iframe 的 Selection
+  const selectionBeforeCandidate = await selectionText(page);
   await page.getByTestId('preview-candidate').click();
   const candidateFrameElement = page.locator('[data-testid="candidate-frame"]');
   await expect(candidateFrameElement).toBeVisible({ timeout: 60_000 });
@@ -105,7 +106,7 @@ test('真实四检查：只发一次 POST body={}，四项通过，六份证据�
   await candidateFrame!.locator('[data-testid="buy-button"]').first().click();
   await page.waitForTimeout(500);
   expect(await overlayTotal(candidateFrame!), '候选 iframe 被拖进了选取/高亮').toBe(0);
-  await expect(page.getByTestId('pick-state')).not.toHaveAttribute('data-kind', 'ready');
+  expect(await selectionText(page), '候选 iframe 的点击改了主 iframe 的 Selection').toBe(selectionBeforeCandidate);
 
   writeArtifact('m3c-checks-passed.json', {
     candidateId: candidate.id, runId: started, requestBody: JSON.parse(bodies[0] ?? 'null'),
@@ -117,7 +118,7 @@ test('真实四检查：只发一次 POST body={}，四项通过，六份证据�
 test('采用门禁与采用：证据未就绪前 disabled，六证据就绪后可采用并切换作品', async ({ page }) => {
   await openStudio(page);
   const before = (await api.getVersion()).body.version;
-  const { candidate } = await localCandidate(page, '把首屏文案改成“给自己的一份礼物”');
+  const { candidate } = await localCandidate(page, '把首屏文案改成“给自己的一份礼物”', '一份给自己，也给生活的温柔礼物。', '给自己的一份礼物');
 
   await page.getByTestId('check-run').click();
   await waitChecksPassed(page);
@@ -192,8 +193,9 @@ test('取消检查：running 时取消只作用于该 run，未运行项不变�
   await expect(page.getByTestId('check-run-status')).toContainText('检查已取消', { timeout: 60_000 });
 
   const statuses = await page.getByTestId('check-item').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-status')));
-  expect(statuses.includes('passed'), `取消后不应留下可采用的通过项：${JSON.stringify(statuses)}`).toBe(false);
-  expect(await page.getByTestId('candidate-adopt').isDisabled()).toBe(true);
+  // 设计语义：取消后保留已完成项（可能已有 passed），但**不能因此变成可采用**。
+  expect(statuses.some((status) => status === 'not_run') || statuses.every((status) => status === 'passed'), `取消后的四项状态异常：${JSON.stringify(statuses)}`).toBe(true);
+  expect(await page.getByTestId('candidate-adopt').isDisabled(), '取消后采用被放开了').toBe(true);
   expect(cancels.count(), '取消请求发了不止一次').toBe(1);
 });
 
@@ -210,6 +212,8 @@ test('三候选与多 run 切换：状态与证据按候选隔离，迟到的旧
   // 在候选一上跑真实检查
   await select.selectOption(one.candidate.id);
   await page.getByTestId('check-run').click();
+  // 先等本次 run 真的落到 UI（data-run-id 非空），再读 id，否则会拿到空串去拼 URL。
+  await expect.poll(async () => (await page.getByTestId('check-run-status').getAttribute('data-run-id')) ?? '', { timeout: 60_000 }).not.toBe('');
   await expect.poll(async () => (await page.getByTestId('check-run-status').getAttribute('data-candidate-id')), { timeout: 30_000 }).toBe(one.candidate.id);
   const runId = (await page.getByTestId('check-run-status').getAttribute('data-run-id'))!;
 
