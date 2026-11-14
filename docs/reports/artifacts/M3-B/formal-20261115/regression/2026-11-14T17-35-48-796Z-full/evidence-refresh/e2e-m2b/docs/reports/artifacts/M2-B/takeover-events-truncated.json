@@ -1,0 +1,17 @@
+{
+  "startSeq": 124,
+  "currentAfterSecond": 139,
+  "truncatedHistoryRequests": [
+    "http://127.0.0.1:5173/events/history?since=124"
+  ],
+  "reloadRequests": [
+    "/tasks",
+    "/candidates",
+    "/version"
+  ],
+  "candidateOptions": [
+    "候选 e541f56b",
+    "候选 af2efa7d"
+  ],
+  "eventsSeqText": "139"
+}

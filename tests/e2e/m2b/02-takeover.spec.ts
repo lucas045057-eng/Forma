@@ -3,7 +3,7 @@ import { appendFileSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page, type Route, type WebSocketRoute } from '@playwright/test';
 import {
-  adoptCandidate, discardCandidate, getCandidate, getScene, getVersion, history, http, listCandidates, listTasks,
+  adoptCandidate, discardCandidate, ensureChecksPassed, getCandidate, getScene, getVersion, history, http, listCandidates, listTasks,
   previewFrameSafe, putScene, resetMock, restoreTemplate, revertVersion, setScript, submitTask, wait, waitFor, waitForTask,
 } from '../m2a/api';
 import { BACKEND_BASE, STUDIO_PORT, TEMPLATE_APP, WORK_ROOT } from '../m2a/env';
@@ -392,6 +392,8 @@ test.describe('M2-B 接管后专项', () => {
       await socketMock.sockets.at(-1)!.close();
       await expect(page.getByTestId('events-status')).toHaveAttribute('data-status', 'reconnecting', { timeout: 15_000 });
 
+      // M3-B：采用前先跑真实检查并等本次 run 终态（断线补拉仍由真实事件驱动）
+      expect((await ensureChecksPassed(candidateId)).outcome).toBe('passed');
       const adopted = await adoptCandidate(candidateId);
       expect(adopted.status, adopted.text).toBe(200);
       const versionAfterAdopt = adopted.body.version as string;

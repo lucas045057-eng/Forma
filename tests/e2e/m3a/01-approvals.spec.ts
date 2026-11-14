@@ -9,6 +9,7 @@ import {
   history, http, jsonRequest, listApprovals, listCandidates, listTasks, mockStats, removeFixture, resetMock,
   selection, setScript, sleep, startBackendFixture, startMockAgent, submit, waitFor, waitTask, type Fixture,
 } from './fixture';
+import { ensureChecksPassed } from '../m3b/checks';
 
 const LOCAL = [
   [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '一份给自己，也给生活的温柔礼物。', new: '给自己一份安静的礼物。' } }],
@@ -45,7 +46,7 @@ test.afterEach(async () => {
   while (fixtures.length) {
     const fixture = fixtures.pop()!;
     await fixture.stop().catch(() => {});
-    removeFixture(fixture.root);
+    await removeFixture(fixture.root, [fixture.port, fixture.previewPort]);
   }
 });
 
@@ -139,6 +140,8 @@ test('共享 Button：批准前私有、不公开候选/预览；批准不增加
   expect(events.filter((event: any) => event.type === 'approval.requested')).toHaveLength(1);
   expect(events.filter((event: any) => event.type === 'approval.resolved')).toHaveLength(1);
   expect(events.filter((event: any) => event.type === 'candidate.ready' && event.candidate?.id === task.id)).toHaveLength(1);
+  // M3-B：采用前跑真实四项检查（M3-A 原断言不变）
+  expect((await ensureChecksPassed(f.base, task.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
   const adopted = await adoptCandidate(f.base, task.id);
   expect(adopted.status).toBe(200);
   expect(await readFile(path.join(f.workRoot, 'src/components/Button.tsx'), 'utf8')).not.toBe(beforeButton);
@@ -301,7 +304,7 @@ test('重启保留等待卡/staging，不重跑模型；损坏 tasks.json 拒绝
     rejected = /createApp rejected|无法读取|Invalid|tasks\.json/i.test(String(error));
   }
   expect(rejected, '损坏 tasks.json 应拒绝启动').toBe(true);
-  removeFixture(f.root);
+  await removeFixture(f.root, [f.port, f.previewPort]);
 });
 
 test('R1：首次批准预览失败 → failed/PREVIEW_FAILED，无候选；另一卡仍可回答，同答不重启预览', async () => {

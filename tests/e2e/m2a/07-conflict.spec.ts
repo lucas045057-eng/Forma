@@ -1,11 +1,17 @@
 import { expect, test } from '@playwright/test';
 import {
-  adoptCandidate, appText, discardCandidate, getCandidate, getVersion, git, pickSelection, resetMock, restoreTemplate,
+  adoptCandidate, appText, discardCandidate, ensureChecksPassed, getCandidate, getVersion, git, pickSelection, resetMock, restoreTemplate,
   revertVersion, setScript, submitTask, waitForTask,
 } from './api';
+import { BACKEND_BASE } from './env';
+import { startChecks } from '../m3b/checks';
 import { writeArtifactFrom } from './artifact';
 
-/** 采用冲突：两个候选都基于同一版本，先采用的会让另一个 409，且主线不留半合并状态。 */
+/**
+ * 采用冲突：两个候选都基于同一版本，先采用的会让另一个 409，且主线不留半合并状态。
+ * M3-B 后 B 的拒绝分两条路径：startChecks → STALE_CANDIDATE；adopt → CHECKS_NOT_PASSED。
+ * （MERGE_CONFLICT 已不再是公共 API 可达行为；原「无半合并/主线不变/pending/可撤回」断言保留。）
+ */
 
 test.describe('采用冲突', () => {
   test.beforeAll(() => { const restored = restoreTemplate(); expect(restored.clean, restored.status).toBe(true); });
@@ -37,13 +43,24 @@ test.describe('采用冲突', () => {
     expect(a.baseVersion, '两个候选不是基于同一版本').toBe(b.baseVersion);
     expect(a.baseVersion).toBe(versionBefore);
 
+    // M3-B：两个候选都要先拿到各自的真实检查绿灯（同一基线版本各跑一次）
+    expect((await ensureChecksPassed(a.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
+    expect((await ensureChecksPassed(b.id)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
+
     expect((await adoptCandidate(a.id)).status, '第一个候选采用失败').toBe(200);
     const afterFirst = appText();
     expect(afterFirst).toContain('马上购买');
 
+    // M3-B：A 采用后 B 的绿灯已属旧基线，两条路径的错误码不同，分开验证：
+    // 1) 重新发起检查（startChecks）直接在候选解析阶段比对主版本 → STALE_CANDIDATE；
+    // 2) 直接采用（adopt）则把「证明失效」统一归一为 CHECKS_NOT_PASSED（work/service.ts:650-657）。
+    const restartChecks = await startChecks(BACKEND_BASE, b.id);
+    expect(restartChecks.status, JSON.stringify(restartChecks.body)).toBe(409);
+    expect((restartChecks.body as any)?.error?.code).toBe('STALE_CANDIDATE');
+
     const conflict = await adoptCandidate(b.id);
     expect(conflict.status, JSON.stringify(conflict.body)).toBe(409);
-    expect((conflict.body as any).error.code).toBe('MERGE_CONFLICT');
+    expect((conflict.body as any).error.code).toBe('CHECKS_NOT_PASSED');
 
     // 主线没有变化，也没有半合并状态
     expect(appText(), '冲突后主线被改动了').toBe(afterFirst);
@@ -59,7 +76,13 @@ test.describe('采用冲突', () => {
     writeArtifactFrom('adopt-conflict.json', {
       baseVersion: a.baseVersion,
       first: { id: a.id, decision: (await getCandidate(a.id)).body.decision },
-      second: { id: b.id, status: conflict.status, code: (conflict.body as any).error.code, decision: (await getCandidate(b.id)).body.decision },
+      second: {
+        id: b.id,
+        restartStatus: restartChecks.status, restartCode: (restartChecks.body as any)?.error?.code,
+        adoptStatus: conflict.status, adoptCode: (conflict.body as any).error.code,
+        decision: (await getCandidate(b.id)).body.decision,
+      },
+      mergeConflictReachable: false,
     });
   });
 });

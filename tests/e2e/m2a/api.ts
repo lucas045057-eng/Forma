@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import type { Page, Frame } from '@playwright/test';
 import { clickTarget, setPicking } from '../lib';
+import { ensureChecksPassed as checksAt } from '../m3b/checks';
 import {
   BACKEND_BASE, M2A_DATA, MOCK_BASE, REPO_ROOT, TEMPLATE_APP, WORK_DATA, WORK_ROOT,
 } from './env';
@@ -68,6 +69,13 @@ export const cancelTask = (id: string) => http<TaskLike>(base(`/tasks/${id}/canc
 export const listCandidates = () => http<CandidateLike[]>(base('/candidates'));
 export const getCandidate = (id: string) => http<CandidateLike>(base(`/candidates/${id}`));
 export const adoptCandidate = (id: string) => http(base(`/candidates/${id}/adopt`), { method: 'POST' });
+
+/**
+ * M3-B 采用门禁：旧 M2/M2-B 用例在采用前必须显式跑真实检查并等本次 run 终态。
+ * 只走产品 HTTP（POST /candidates/:id/checks + GET /checks/:id），不注入 executor、不伪造 passed。
+ */
+export const ensureChecksPassed = (candidateId: string, options?: { timeoutMs?: number }) =>
+  checksAt(BACKEND_BASE, candidateId, options);
 export const discardCandidate = (id: string) => http(base(`/candidates/${id}/discard`), { method: 'POST' });
 export const history = (since: number) => http<{ events: Array<{ type: string; seq: number }>; current: number; oldest: number; truncated: boolean }>(base(`/events/history?since=${since}`));
 export const getScene = () => http<any>(base('/scene'));

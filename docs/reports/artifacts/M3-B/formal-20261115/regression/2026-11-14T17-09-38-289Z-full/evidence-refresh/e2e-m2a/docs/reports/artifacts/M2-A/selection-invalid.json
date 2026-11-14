@@ -1,0 +1,58 @@
+{
+  "version": "c09d4971ae6da742773058a56a73a9521215f006",
+  "results": [
+    {
+      "name": "缺 src/ 前缀",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "含 ../",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "缺行号列号",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "行号为 0",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "行号越界",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "文件不存在",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "反斜杠路径",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "baseVersion 不是提交",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    },
+    {
+      "name": "baseVersion 格式错",
+      "status": 400,
+      "code": "INVALID_SELECTION"
+    }
+  ],
+  "before": {
+    "calls": 0,
+    "tasks": 4
+  },
+  "after": {
+    "calls": 0,
+    "tasks": 4
+  }
+}

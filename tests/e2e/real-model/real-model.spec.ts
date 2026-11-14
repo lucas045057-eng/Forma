@@ -10,6 +10,7 @@ import {
   getVersion, httpJson, listCandidates, mockAgentConfig, readAgentEnv, removeTree, resetMock, revertVersion,
   setMockScript, snapshotInPage, startStack, waitFor, workDigest, writeJson, type Snapshot,
 } from './helpers';
+import { ensureChecksPassed } from '../m3b/checks';
 
 const MODE = process.env.REAL_MODEL_MODE === 'real' ? 'real' as const : 'mock' as const;
 const REAL = MODE === 'real';
@@ -343,6 +344,10 @@ test('固定十题真实模型验收（同一冻结实现）', async ({ page }) 
       expect(workDigest(workRoot), '采用前作品内容不应被候选修改').toBe(baselineDigest);
       expect(readFileSync(scenePath, 'utf8'), '采用前场景配置不应被候选修改').toBe(baselineConfig);
       record.preAdopt = { snapshot: preAdoptSnapshot, workDigest: workDigest(workRoot), sceneConfig: JSON.parse(readFileSync(scenePath, 'utf8')) };
+
+      // M3-B：界面采用前先走真实四项检查（真 Vite 构建 + 真 Chromium），等本次 run 终态
+      const checkRun = await ensureChecksPassed(API_BASE, candidateId, { timeoutMs: 300_000 });
+      expect(checkRun.outcome, `候选 ${caseDef.id} 的真实检查没有通过：${JSON.stringify(checkRun.checks)}`).toBe('passed');
 
       await page.getByTestId('candidate-adopt').click();
       await waitFor(async () => (await getVersion()).body.version !== baselineVersion, 30_000, 200);

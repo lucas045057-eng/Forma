@@ -1,0 +1,252 @@
+# e2e-m0a: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m3b-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m0a.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\空间化AI工作台\.worktrees\m3b-acceptance\docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output
+# started=2026-11-14T16:30:01.144Z
+[WebServer] (node:33628) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:44:3 › M0-A 主链路（全程 mock Lux3D） › 1. 出站守卫自检：指向真实 Lux3D 域名的请求会被拦截并留痕 (75ms)
+  x   2 [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:61:3 › M0-A 主链路（全程 mock Lux3D） › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready (1.0m)
+  x   3 [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:145:3 › M0-A 主链路（全程 mock Lux3D） › 3. 图生 3D 与参数校验：img 走同一条 mock 链路，非法请求被拒 (1.0m)
+  x   4 [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:17:3 › M0-A 幂等与「结果不明不重发」 › 1. 同一幂等键顺序提交两次：只创建一次，返回同一条资产 (1.0m)
+  x   5 [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:35:3 › M0-A 幂等与「结果不明不重发」 › 2. 同一幂等键并发提交两次：只创建一个远端任务 (1.0m)
+  ok  6 [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:53:3 › M0-A 幂等与「结果不明不重发」 › 3. 同一幂等键不同参数：409，且不产生新任务 (25ms)
+  x   7 [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:66:3 › M0-A 幂等与「结果不明不重发」 › 4. 提交结果不明：不自动重发，同键再提交也不重发，只能查询远端后导入 (1.0m)
+  ok  8 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务失败 status=4 (2.7s)
+  ok  9 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务取消 status=6 (2.7s)
+  ok 10 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 结果 URL 过期 403 (2.7s)
+  ok 11 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 结果 URL 过期 404 (2.7s)
+  ok 12 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 轮询超时 (3.9s)
+  ok 13 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 未知任务状态 (2.7s)
+  ok 14 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 并发超限（create 返回 c 错误码） (2.6s)
+  ok 15 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › create 返回 HTTP 500（结果不明） (2.5s)
+  ok 16 [chromium] › tests\e2e\m0a\03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务成功但没有 GLB 输出 (2.6s)
+  x  17 [chromium] › tests\e2e\m0a\04-import.spec.ts:6:3 › M0-A 导入已有任务（零额度） › 导入一个已完成任务：只查询不创建，处理后可下载模型 (1.0m)
+  ok 18 [chromium] › tests\e2e\m0a\05-security.spec.ts:24:3 › M0-A 路径穿越与密钥泄露 › 1. /assets/:id 与 /assets/:id/model.glb 的穿越 id 全部被拒 (25ms)
+  x  19 [chromium] › tests\e2e\m0a\05-security.spec.ts:47:3 › M0-A 路径穿越与密钥泄露 › 2. 响应、模型下载与 WebSocket 事件里都不含上游 key (1.0m)
+  ok 20 [chromium] › tests\e2e\m0a\05-security.spec.ts:88:3 › M0-A 路径穿越与密钥泄露 › 3. 跨源 Origin 被拒（后端只服务同源工作台） (16ms)
+  x  21 [chromium] › tests\e2e\m0a\05-security.spec.ts:100:3 › M0-A 路径穿越与密钥泄露 › 4. 幂等键本身不落盘成明文（索引里只有哈希） (1.0m)
+  x  22 [chromium] › tests\e2e\m0a\06-viewport.spec.ts:12:1 › Studio 3D 视口：加载处理后模型、画布非空、可拖动旋转、无运行错误 (1.5m)
+  ok 23 [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:32:3 › M0-A 审查整改回归 › R1 资产目录预置残留 model.glb.tmp / raw.glb.tmp 后重试仍能成功 (2.6s)
+  ok 24 [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:74:3 › M0-A 审查整改回归 › R2a 滴流下载被总时限中止，错误清晰且不卡死 (4.0s)
+  ok 25 [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:108:3 › M0-A 审查整改回归 › R2b 下载中优雅停机 → 记录可恢复 → 重启后继续原 taskId 且不新建任务 (4.0s)
+  x  26 [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:163:3 › M0-A 审查整改回归 › R3 ready 资产模型丢失：视口报错 → 重新导入 → 画布恢复（不新建任务） (2.0m)
+  ok 27 [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:233:3 › M0-A 审查整改回归 › S3 非 loopback 的 http 上游在启动时被拒绝，且没有发出任何请求 (475ms)
+
+
+  1) [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:61:3 › M0-A 主链路（全程 mock Lux3D） › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready 
+
+    Error: 资产 74b1d58d-cc3e-4d7a-982d-447d92608234 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\01-pipeline.spec.ts:77:31
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\01-pipeline-M0-A-主链路（全程-mo-64d97-1-3-→-下载-→-处理-→-asset-ready-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:145:3 › M0-A 主链路（全程 mock Lux3D） › 3. 图生 3D 与参数校验：img 走同一条 mock 链路，非法请求被拒 
+
+    Error: 资产 9774995e-8652-4578-bb74-e45b9dece1e2 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\01-pipeline.spec.ts:156:23
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\01-pipeline-M0-A-主链路（全程-mo-708ef-数校验：img-走同一条-mock-链路，非法请求被拒-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:17:3 › M0-A 幂等与「结果不明不重发」 › 1. 同一幂等键顺序提交两次：只创建一次，返回同一条资产 
+
+    Error: 资产 9226c71b-f13a-4c99-910c-6e83e0561226 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\02-idempotency.spec.ts:28:5
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\02-idempotency-M0-A-幂等与「结果不明不重发」-1-同一幂等键顺序提交两次：只创建一次，返回同一条资产-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:35:3 › M0-A 幂等与「结果不明不重发」 › 2. 同一幂等键并发提交两次：只创建一个远端任务 
+
+    Error: 资产 7dacd5d2-0646-4253-94f9-2813e14857a6 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\02-idempotency.spec.ts:47:5
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\02-idempotency-M0-A-幂等与「结果不明不重发」-2-同一幂等键并发提交两次：只创建一个远端任务-chromium\error-context.md
+
+  5) [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:66:3 › M0-A 幂等与「结果不明不重发」 › 4. 提交结果不明：不自动重发，同键再提交也不重发，只能查询远端后导入 
+
+    Error: 资产 4524811d-a9c8-4b9a-8977-77e459962463 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\02-idempotency.spec.ts:76:7
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\02-idempotency-M0-A-幂等与「结果-97874-明：不自动重发，同键再提交也不重发，只能查询远端后导入-chromium\error-context.md
+
+  6) [chromium] › tests\e2e\m0a\04-import.spec.ts:6:3 › M0-A 导入已有任务（零额度） › 导入一个已完成任务：只查询不创建，处理后可下载模型 
+
+    Error: 资产 lux3d-7000001 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\04-import.spec.ts:15:23
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\04-import-M0-A-导入已有任务（零额度）-导入一个已完成任务：只查询不创建，处理后可下载模型-chromium\error-context.md
+
+  7) [chromium] › tests\e2e\m0a\05-security.spec.ts:47:3 › M0-A 路径穿越与密钥泄露 › 2. 响应、模型下载与 WebSocket 事件里都不含上游 key 
+
+    Error: 资产 lux3d-7000009 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\05-security.spec.ts:51:23
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\05-security-M0-A-路径穿越与密钥泄露-2-响应、模型下载与-WebSocket-事件里都不含上游-key-chromium\error-context.md
+
+  8) [chromium] › tests\e2e\m0a\05-security.spec.ts:100:3 › M0-A 路径穿越与密钥泄露 › 4. 幂等键本身不落盘成明文（索引里只有哈希） 
+
+    Error: 资产 abe88218-752a-4b79-89fd-c08f3b208614 在超时前没有进入终态，观察到的状态：polling → failed
+
+       at harness.ts:337
+
+      335 |     await new Promise((resolve) => setTimeout(resolve, 50));
+      336 |   }
+    > 337 |   throw new Error(`资产 ${id} 在超时前没有进入终态，观察到的状态：${seen.join(' → ')}`);
+          |         ^
+      338 | }
+      339 |
+      340 | export const TERMINAL = new Set(['ready', 'failed', 'cancelled', 'submit_unknown']);
+        at waitForAsset (E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\harness.ts:337:9)
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\05-security.spec.ts:104:5
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\05-security-M0-A-路径穿越与密钥泄露-4-幂等键本身不落盘成明文（索引里只有哈希）-chromium\error-context.md
+
+  9) [chromium] › tests\e2e\m0a\06-viewport.spec.ts:12:1 › Studio 3D 视口：加载处理后模型、画布非空、可拖动旋转、无运行错误 ───
+
+    Error: 资产没有进入「可查看」
+
+    expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('asset-status')
+    Expected substring: "可查看"
+    Received string:    "失败lux3d-7000002模型下载返回 HTTP 500"
+    Timeout: 90000ms
+
+    Call log:
+      - 资产没有进入「可查看」 getByTestId('asset-status') with timeout 90000ms
+      - waiting for getByTestId('asset-status')
+        2 × locator resolved to <div data-testid="asset-status">…</div>
+          - unexpected value "等待生成lux3d-7000002"
+        177 × locator resolved to <div data-testid="asset-status">…</div>
+            - unexpected value "失败lux3d-7000002模型下载返回 HTTP 500"
+
+
+      25 |   await page.getByTestId('asset-import').click();
+      26 |
+    > 27 |   await expect(page.getByTestId('asset-status'), '资产没有进入「可查看」').toContainText('可查看', { timeout: 90_000 });
+         |                                                                 ^
+      28 |   const viewport = page.locator('[data-testid="model-viewport"]');
+      29 |   await expect(viewport).toHaveAttribute('data-loaded', 'true', { timeout: 90_000 });
+      30 |   await expect(viewport.locator('.model-empty')).toHaveCount(0);
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\06-viewport.spec.ts:27:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\06-viewport-Studio-3D-视口：加载处理后模型、画布非空、可拖动旋转、无运行错误-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\06-viewport-Studio-3D-视口：加载处理后模型、画布非空、可拖动旋转、无运行错误-chromium\error-context.md
+
+  10) [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:163:3 › M0-A 审查整改回归 › R3 ready 资产模型丢失：视口报错 → 重新导入 → 画布恢复（不新建任务） 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "ready"
+    Received: "failed"
+
+    Call Log:
+    - Timeout 120000ms exceeded while waiting on the predicate
+
+      177 |     // 面板会自动选中已有的 ready 资产，所以 data-loaded 可能提前就是 true；
+      178 |     // 先等这次导入的资产在后端真正 ready，再等面板切到它并加载完。
+    > 179 |     await expect.poll(async () => (await getJson(`${BACKEND_BASE}/assets/lux3d-${taskId}`)).body.status, { timeout: 120_000 }).toBe('ready');
+          |                                                                                                                                ^
+      180 |     await expect(page.getByTestId('asset-select')).toHaveValue(`lux3d-${taskId}`, { timeout: 60_000 });
+      181 |     await expect(viewport).toHaveAttribute('data-loaded', 'true', { timeout: 90_000 });
+      182 |     const asset = (await getJson(`${BACKEND_BASE}/assets/lux3d-${taskId}`)).body as any;
+        at E:\空间化AI工作台\.worktrees\m3b-acceptance\tests\e2e\m0a\07-review-fixes.spec.ts:179:128
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\07-review-fixes-M0-A-审查整改回-08e66-失：视口报错-→-重新导入-→-画布恢复（不新建任务）-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-25-33-369Z-full\e2e-m0a-output\07-review-fixes-M0-A-审查整改回-08e66-失：视口报错-→-重新导入-→-画布恢复（不新建任务）-chromium\error-context.md
+
+  10 failed
+    [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:61:3 › M0-A 主链路（全程 mock Lux3D） › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready 
+    [chromium] › tests\e2e\m0a\01-pipeline.spec.ts:145:3 › M0-A 主链路（全程 mock Lux3D） › 3. 图生 3D 与参数校验：img 走同一条 mock 链路，非法请求被拒 
+    [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:17:3 › M0-A 幂等与「结果不明不重发」 › 1. 同一幂等键顺序提交两次：只创建一次，返回同一条资产 
+    [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:35:3 › M0-A 幂等与「结果不明不重发」 › 2. 同一幂等键并发提交两次：只创建一个远端任务 
+    [chromium] › tests\e2e\m0a\02-idempotency.spec.ts:66:3 › M0-A 幂等与「结果不明不重发」 › 4. 提交结果不明：不自动重发，同键再提交也不重发，只能查询远端后导入 
+    [chromium] › tests\e2e\m0a\04-import.spec.ts:6:3 › M0-A 导入已有任务（零额度） › 导入一个已完成任务：只查询不创建，处理后可下载模型 
+    [chromium] › tests\e2e\m0a\05-security.spec.ts:47:3 › M0-A 路径穿越与密钥泄露 › 2. 响应、模型下载与 WebSocket 事件里都不含上游 key 
+    [chromium] › tests\e2e\m0a\05-security.spec.ts:100:3 › M0-A 路径穿越与密钥泄露 › 4. 幂等键本身不落盘成明文（索引里只有哈希） 
+    [chromium] › tests\e2e\m0a\06-viewport.spec.ts:12:1 › Studio 3D 视口：加载处理后模型、画布非空、可拖动旋转、无运行错误 ────
+    [chromium] › tests\e2e\m0a\07-review-fixes.spec.ts:163:3 › M0-A 审查整改回归 › R3 ready 资产模型丢失：视口报错 → 重新导入 → 画布恢复（不新建任务） 
+  17 passed (12.3m)

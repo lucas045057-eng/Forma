@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
-  discardCandidate, getVersion, listCandidates, previewFrameSafe, resetMock, restoreTemplate, revertVersion,
+  discardCandidate, ensureChecksPassed, getVersion, listCandidates, previewFrameSafe, resetMock, restoreTemplate, revertVersion,
   setScript, waitFor, listApprovals, answerApproval, getTask,
 } from '../m2a/api';
 import { writeArtifactFrom } from './artifact';
@@ -119,6 +119,12 @@ test.describe('M2-B 界面', () => {
     expect(await page.getByTestId('candidate-out-of-scope').count(), '选中的是 Button.tsx，改的是祖先文件 App.tsx，不该算越界').toBe(0);
 
     // 采用
+    // M3-B：Studio 还没接检查界面（M3-C 未做）。这里由测试 helper 走真实 checks API 驱动一次检查，
+    // 等本次 run 终态后才点界面上的采用；不伪造 passed、不改产品 UI 掩盖阶段边界。
+    const pending = (await listCandidates()).body.find((item) => item.decision === 'pending');
+    expect(pending, '界面没有产出待定候选').toBeTruthy();
+    const checkRun = await ensureChecksPassed(pending!.id);
+    expect(checkRun.outcome).toBe('passed');
     await page.getByTestId('candidate-adopt').click();
     await waitFor(async () => {
       const frame = await previewFrameSafe(page);

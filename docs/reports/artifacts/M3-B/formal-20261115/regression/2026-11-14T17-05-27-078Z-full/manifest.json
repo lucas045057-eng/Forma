@@ -1,0 +1,151 @@
+{
+  "runId": "2026-11-14T17-05-27-078Z-full",
+  "mode": "full",
+  "startedAt": "2026-11-14T17:05:27.415Z",
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance",
+  "node": "v24.14.1",
+  "pid": 10340,
+  "playwrightCli": "node_modules\\@playwright\\test\\cli.js",
+  "envKeys": [
+    "PATH",
+    "Path",
+    "PATHEXT",
+    "SystemRoot",
+    "SystemDrive",
+    "WINDIR",
+    "ComSpec",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "LOCALAPPDATA",
+    "APPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "HOME",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+    "PROCESSOR_IDENTIFIER",
+    "OS",
+    "PNPM_HOME",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "npm_config_cache",
+    "npm_config_store_dir"
+  ],
+  "baseline": {
+    "identity": {
+      "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+      "branch": "test/m3b-acceptance",
+      "files": 253,
+      "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+      "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "dirty": []
+    },
+    "evidence": {},
+    "dirty": {}
+  },
+  "evidenceDirtyAtStart": [
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/disposals-01-happy.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/disposals-02-faults.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/disposals-03-gate.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/disposals-04-lifecycle.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/evidence-01-happy/occlusion.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/evidence-01-happy/smoke.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/happy-path.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/fault-classes.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/gate.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/lifecycle-cancel.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/lifecycle-missing-browser.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/lifecycle-restart.json",
+    "docs/reports/artifacts/M3-B/formal-20261115/checks/lifecycle-serial.json"
+  ],
+  "steps": [
+    {
+      "step": "typecheck",
+      "command": "pnpm typecheck",
+      "pid": 18044,
+      "startedAt": "2026-11-14T17:05:27.416Z",
+      "finishedAt": "2026-11-14T17:05:32.749Z",
+      "durationMs": 5675,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-05-27-078Z-full\\typecheck.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "ok": true
+    },
+    {
+      "step": "build",
+      "command": "pnpm build",
+      "pid": 13028,
+      "startedAt": "2026-11-14T17:05:33.093Z",
+      "finishedAt": "2026-11-14T17:05:40.742Z",
+      "durationMs": 7969,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T17-05-27-078Z-full\\build.log",
+      "identityStable": true,
+      "identityProblems": [],
+      "evidenceArchived": [],
+      "identity": {
+        "baseline": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "before": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "after": {
+          "head": "a9c1ef0c7f38bbd1dac03b45ec96d953dae580af",
+          "branch": "test/m3b-acceptance",
+          "files": 253,
+          "digest": "a2133cd40ac8fbe919a53063a3add2afcea9293b5311ab1bd9e911c5491882f4",
+          "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+          "dirty": []
+        },
+        "drift": []
+      },
+      "ok": true
+    }
+  ]
+}

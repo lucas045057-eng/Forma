@@ -1,0 +1,139 @@
+{
+  "at": "2026-11-14T16:19:50.846Z",
+  "head": "6e5c7b4b5558a79196b1a69d2300321460cf2ef0",
+  "worktreeDirty": [
+    "M tests/e2e/m3b/01-happy.spec.ts",
+    "M tests/e2e/m3b/artifact.ts",
+    "M tests/e2e/m3b/full-regression.mjs"
+  ],
+  "helper": "tests/e2e/m3b/runner-support.mjs",
+  "data": {
+    "realReport": "docs/reports/artifacts/M3-B/acceptance-precheck/playwright-results.json",
+    "realReportStats": {
+      "startTime": "2026-11-14T15:36:57.654Z",
+      "duration": 14093.918000000001,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "total": 9,
+  "passed": 9,
+  "results": [
+    {
+      "name": "real-report-passes",
+      "ok": true,
+      "detail": {
+        "counts": {
+          "suites": 1,
+          "specs": 1,
+          "tests": 1,
+          "results": 1,
+          "projects": [
+            "(default)"
+          ]
+        },
+        "stats": {
+          "startTime": "2026-11-14T15:36:57.654Z",
+          "duration": 14093.918000000001,
+          "expected": 1,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      }
+    },
+    {
+      "name": "nested-suites-counted",
+      "ok": true,
+      "detail": {
+        "suites": 2,
+        "specs": 1,
+        "tests": 1,
+        "results": 1,
+        "projects": [
+          "(default)"
+        ]
+      }
+    },
+    {
+      "name": "failed-result-rejected",
+      "ok": true,
+      "detail": [
+        "stats.unexpected=1（必须为 0）",
+        "spec 未通过：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退",
+        "test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退 [(default)]"
+      ]
+    },
+    {
+      "name": "skip-and-expected-failed-rejected",
+      "ok": true,
+      "detail": {
+        "skipped": [
+          "stats.skipped=1（必须为 0）",
+          "expectedStatus=skipped（要求 passed）：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退 [(default)]"
+        ],
+        "expectedFailed": [
+          "expectedStatus=failed（要求 passed）：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退 [(default)]"
+        ]
+      }
+    },
+    {
+      "name": "retry-rejected",
+      "ok": true,
+      "detail": [
+        "stats.flaky=1（必须为 0）",
+        "results 数量=2（要求恰好 1，出现重试即失败）：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退 [(default)]",
+        "results[1].retry=1（要求 0）：01-happy.spec.ts › 四项真实检查通过 → 证据可读 → 采用 → 回退 [(default)]"
+      ]
+    },
+    {
+      "name": "errors-and-stats-rejected",
+      "ok": true,
+      "detail": [
+        "stats.expected=2 与实际 test 记录数 1 不一致"
+      ]
+    },
+    {
+      "name": "identity-detection",
+      "ok": true,
+      "detail": {
+        "same": true,
+        "bytes": true,
+        "lock": true,
+        "dirty": true
+      }
+    },
+    {
+      "name": "evidence-plan",
+      "ok": true,
+      "detail": {
+        "restorable": [
+          {
+            "file": "docs/reports/artifacts/M0-B/playwright-results.json",
+            "beforeHash": "head1",
+            "afterHash": "new1"
+          }
+        ],
+        "conflicts": [
+          "docs/reports/artifacts/M1-A/x.json"
+        ],
+        "created": []
+      }
+    },
+    {
+      "name": "spawn-enoent-bounded",
+      "ok": true,
+      "detail": {
+        "pid": null,
+        "code": null,
+        "signal": null,
+        "spawnError": "ENOENT",
+        "ok": false,
+        "elapsedMs": 3
+      }
+    }
+  ],
+  "failed": []
+}

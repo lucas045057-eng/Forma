@@ -1,0 +1,100 @@
+{
+  "ids": [
+    "44cee9004ab54845bd9444be762a48d2",
+    "9e4e2aacbc4c4f8dba4c91bb88a89362",
+    "664b2bd8e0e34d02b92585d96f507152",
+    "ab8e86fc52004b7fb2399585f172f47a"
+  ],
+  "decisions": [
+    {
+      "id": "4230c0b37a7744a6b66498627af1f79c",
+      "decision": "adopted"
+    },
+    {
+      "id": "bf845ebd9bd4493698c11c3cbdebd5b2",
+      "decision": "discarded"
+    },
+    {
+      "id": "77ea5b983c5c48cd966de80a2fb5e425",
+      "decision": "discarded"
+    },
+    {
+      "id": "a6916c91a019425d8c30bf0563436956",
+      "decision": "adopted"
+    },
+    {
+      "id": "1819e409fdd749c188a3f5d2e00df3d1",
+      "decision": "discarded"
+    },
+    {
+      "id": "aa4bb528fbe6410a96e791bbc44e0cd6",
+      "decision": "discarded"
+    },
+    {
+      "id": "1853dc30ccba4caf92e7052573ce32b4",
+      "decision": "adopted"
+    },
+    {
+      "id": "44cee9004ab54845bd9444be762a48d2",
+      "decision": "pending"
+    },
+    {
+      "id": "9e4e2aacbc4c4f8dba4c91bb88a89362",
+      "decision": "pending"
+    },
+    {
+      "id": "664b2bd8e0e34d02b92585d96f507152",
+      "decision": "pending"
+    },
+    {
+      "id": "ab8e86fc52004b7fb2399585f172f47a",
+      "decision": "pending"
+    }
+  ],
+  "finalDecisions": [
+    {
+      "id": "4230c0b37a7744a6b66498627af1f79c",
+      "decision": "adopted"
+    },
+    {
+      "id": "bf845ebd9bd4493698c11c3cbdebd5b2",
+      "decision": "discarded"
+    },
+    {
+      "id": "77ea5b983c5c48cd966de80a2fb5e425",
+      "decision": "discarded"
+    },
+    {
+      "id": "a6916c91a019425d8c30bf0563436956",
+      "decision": "adopted"
+    },
+    {
+      "id": "1819e409fdd749c188a3f5d2e00df3d1",
+      "decision": "discarded"
+    },
+    {
+      "id": "aa4bb528fbe6410a96e791bbc44e0cd6",
+      "decision": "discarded"
+    },
+    {
+      "id": "1853dc30ccba4caf92e7052573ce32b4",
+      "decision": "adopted"
+    },
+    {
+      "id": "44cee9004ab54845bd9444be762a48d2",
+      "decision": "discarded"
+    },
+    {
+      "id": "9e4e2aacbc4c4f8dba4c91bb88a89362",
+      "decision": "pending"
+    },
+    {
+      "id": "664b2bd8e0e34d02b92585d96f507152",
+      "decision": "pending"
+    },
+    {
+      "id": "ab8e86fc52004b7fb2399585f172f47a",
+      "decision": "pending"
+    }
+  ]
+}

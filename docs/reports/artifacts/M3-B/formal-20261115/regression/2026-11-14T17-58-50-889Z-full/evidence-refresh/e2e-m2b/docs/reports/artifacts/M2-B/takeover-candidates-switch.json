@@ -1,0 +1,39 @@
+{
+  "created": [
+    {
+      "id": "71f257ab3e0047f58ba8790b46d52e63",
+      "text": "马上购买甲",
+      "previewUrl": "/preview/c/71f257ab3e0047f58ba8790b46d52e63/",
+      "baseVersion": "fe3729d7a0f81c3369c0947d37a464226530a275"
+    },
+    {
+      "id": "b7ec44fdcbd94cc99bcbe3f114e04675",
+      "text": "马上购买乙",
+      "previewUrl": "/preview/c/b7ec44fdcbd94cc99bcbe3f114e04675/",
+      "baseVersion": "fe3729d7a0f81c3369c0947d37a464226530a275"
+    },
+    {
+      "id": "b920b380132c4c9d8532e60daf0e9b63",
+      "text": "马上购买丙",
+      "previewUrl": "/preview/c/b920b380132c4c9d8532e60daf0e9b63/",
+      "baseVersion": "fe3729d7a0f81c3369c0947d37a464226530a275"
+    }
+  ],
+  "switched": [
+    {
+      "id": "71f257ab3e0047f58ba8790b46d52e63",
+      "text": "马上购买甲",
+      "frameSrc": "http://127.0.0.1:5175/preview/c/71f257ab3e0047f58ba8790b46d52e63/?studioOrigin=http%3A%2F%2F127.0.0.1%3A5173"
+    },
+    {
+      "id": "b7ec44fdcbd94cc99bcbe3f114e04675",
+      "text": "马上购买乙",
+      "frameSrc": "http://127.0.0.1:5175/preview/c/b7ec44fdcbd94cc99bcbe3f114e04675/?studioOrigin=http%3A%2F%2F127.0.0.1%3A5173"
+    },
+    {
+      "id": "b920b380132c4c9d8532e60daf0e9b63",
+      "text": "马上购买丙",
+      "frameSrc": "http://127.0.0.1:5175/preview/c/b920b380132c4c9d8532e60daf0e9b63/?studioOrigin=http%3A%2F%2F127.0.0.1%3A5173"
+    }
+  ]
+}

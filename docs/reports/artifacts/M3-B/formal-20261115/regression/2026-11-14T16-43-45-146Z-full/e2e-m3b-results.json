@@ -1,0 +1,579 @@
+{
+  "config": {
+    "argv": [
+      "E:\\Node\\node.exe",
+      "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "-c",
+      "playwright.m3b.config.ts",
+      "--retries=0",
+      "--workers=1",
+      "--reporter=list,json",
+      "--output=E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output"
+    ],
+    "configFile": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\playwright.m3b.config.ts",
+    "rootDir": "E:/空间化AI工作台/.worktrees/m3b-acceptance/tests/e2e/m3b",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/空间化AI工作台/.worktrees/m3b-acceptance/docs/reports/artifacts/M3-B/formal-20261115/regression/2026-11-14T16-43-45-146Z-full/e2e-m3b-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "E:/空间化AI工作台/.worktrees/m3b-acceptance/tests/e2e/m3b",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 600000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b",
+        "snapshotDir": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 600000,
+        "use": {
+          "trace": "off",
+          "video": "off",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "01-happy.spec.ts",
+      "file": "01-happy.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "四项真实检查通过 → 证据可读 → 采用 → 回退",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 420000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\01-happy.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12645,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:57:18.963Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\01-happy.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1a8a50b2d2a6f3ced743-f2bd3dcfe879664a3130",
+          "file": "01-happy.spec.ts",
+          "line": 37,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "02-faults.spec.ts",
+      "file": "02-faults.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "四类真实故障分别让检查失败，采用被拒，服务仍可继续",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\02-faults.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 2590,
+                  "error": {
+                    "message": "Error: 任务没有产出候选：{\"id\":\"f3d316dd9e5d423b9af87b8d3137c254\",\"instruction\":\"把场景配置写坏\",\"selection\":{\"src\":\"src/App.tsx:30:11\",\"baseVersion\":\"9fef7424df3e9d4d5ec2672fd914354245351d9b\",\"cid\":\"Node\",\"text\":\"\",\"bbox\":[0,0,10,10],\"styles\":{\"display\":\"inline-block\",\"position\":\"static\",\"color\":\"rgb(0, 0, 0)\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"fontSize\":\"16px\",\"fontFamily\":\"Arial\",\"fontWeight\":\"400\",\"lineHeight\":\"16px\",\"padding\":\"0px\",\"margin\":\"0px\",\"borderRadius\":\"0px\",\"width\":\"10px\",\"height\":\"10px\"},\"instances\":1,\"ancestors\":[]},\"status\":\"failed\",\"events\":[{\"type\":\"task.updated\",\"ts\":\"2026-11-14T16:57:33.906Z\",\"sequen",
+                    "stack": "Error: 任务没有产出候选：{\"id\":\"f3d316dd9e5d423b9af87b8d3137c254\",\"instruction\":\"把场景配置写坏\",\"selection\":{\"src\":\"src/App.tsx:30:11\",\"baseVersion\":\"9fef7424df3e9d4d5ec2672fd914354245351d9b\",\"cid\":\"Node\",\"text\":\"\",\"bbox\":[0,0,10,10],\"styles\":{\"display\":\"inline-block\",\"position\":\"static\",\"color\":\"rgb(0, 0, 0)\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"fontSize\":\"16px\",\"fontFamily\":\"Arial\",\"fontWeight\":\"400\",\"lineHeight\":\"16px\",\"padding\":\"0px\",\"margin\":\"0px\",\"borderRadius\":\"0px\",\"width\":\"10px\",\"height\":\"10px\"},\"instances\":1,\"ancestors\":[]},\"status\":\"failed\",\"events\":[{\"type\":\"task.updated\",\"ts\":\"2026-11-14T16:57:33.906Z\",\"sequen\n    at createCandidate (E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\fixture.ts:286:58)\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\02-faults.spec.ts:84:21",
+                    "location": {
+                      "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\fixture.ts",
+                      "column": 58,
+                      "line": 286
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39mfixture.ts:286\n\n \u001b[90m 284 |\u001b[39m   \u001b[36mif\u001b[39m (submitted\u001b[33m.\u001b[39mstatus \u001b[33m!==\u001b[39m \u001b[35m202\u001b[39m) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m`提交任务失败：${submitted.status} ${submitted.text.slice(0, 400)}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 285 |\u001b[39m   \u001b[36mconst\u001b[39m task \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m waitTask(fixture\u001b[33m.\u001b[39mbase\u001b[33m,\u001b[39m submitted\u001b[33m.\u001b[39mbody\u001b[33m.\u001b[39mid\u001b[33m,\u001b[39m options\u001b[33m.\u001b[39mtimeoutMs)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 286 |\u001b[39m   \u001b[36mif\u001b[39m (task\u001b[33m.\u001b[39mstatus \u001b[33m!==\u001b[39m \u001b[32m'done'\u001b[39m \u001b[33m||\u001b[39m \u001b[33m!\u001b[39mtask\u001b[33m.\u001b[39mcandidateId) \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m`任务没有产出候选：${JSON.stringify(task).slice(0, 600)}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 287 |\u001b[39m   \u001b[36mconst\u001b[39m candidate \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m getCandidate(fixture\u001b[33m.\u001b[39mbase\u001b[33m,\u001b[39m task\u001b[33m.\u001b[39mcandidateId)\u001b[33m;\u001b[39m\n \u001b[90m 288 |\u001b[39m   \u001b[36mreturn\u001b[39m { taskId\u001b[33m:\u001b[39m task\u001b[33m.\u001b[39mid\u001b[33m,\u001b[39m candidateId\u001b[33m:\u001b[39m task\u001b[33m.\u001b[39mcandidateId\u001b[33m,\u001b[39m task\u001b[33m,\u001b[39m candidate\u001b[33m:\u001b[39m candidate\u001b[33m.\u001b[39mbody }\u001b[33m;\u001b[39m\n \u001b[90m 289 |\u001b[39m }"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\fixture.ts",
+                        "column": 58,
+                        "line": 286
+                      },
+                      "message": "Error: 任务没有产出候选：{\"id\":\"f3d316dd9e5d423b9af87b8d3137c254\",\"instruction\":\"把场景配置写坏\",\"selection\":{\"src\":\"src/App.tsx:30:11\",\"baseVersion\":\"9fef7424df3e9d4d5ec2672fd914354245351d9b\",\"cid\":\"Node\",\"text\":\"\",\"bbox\":[0,0,10,10],\"styles\":{\"display\":\"inline-block\",\"position\":\"static\",\"color\":\"rgb(0, 0, 0)\",\"backgroundColor\":\"rgba(0, 0, 0, 0)\",\"fontSize\":\"16px\",\"fontFamily\":\"Arial\",\"fontWeight\":\"400\",\"lineHeight\":\"16px\",\"padding\":\"0px\",\"margin\":\"0px\",\"borderRadius\":\"0px\",\"width\":\"10px\",\"height\":\"10px\"},\"instances\":1,\"ancestors\":[]},\"status\":\"failed\",\"events\":[{\"type\":\"task.updated\",\"ts\":\"2026-11-14T16:57:33.906Z\",\"sequen\n\n   at fixture.ts:286\n\n  284 |   if (submitted.status !== 202) throw new Error(`提交任务失败：${submitted.status} ${submitted.text.slice(0, 400)}`);\n  285 |   const task = await waitTask(fixture.base, submitted.body.id, options.timeoutMs);\n> 286 |   if (task.status !== 'done' || !task.candidateId) throw new Error(`任务没有产出候选：${JSON.stringify(task).slice(0, 600)}`);\n      |                                                          ^\n  287 |   const candidate = await getCandidate(fixture.base, task.candidateId);\n  288 |   return { taskId: task.id, candidateId: task.candidateId, task, candidate: candidate.body };\n  289 | }\n    at createCandidate (E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\fixture.ts:286:58)\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\02-faults.spec.ts:84:21"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:57:32.143Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\02-faults.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\02-faults-四类真实故障分别让检查失败，采用被拒，服务仍可继续\\error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\02-faults-四类真实故障分别让检查失败，采用被拒，服务仍可继续\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\fixture.ts",
+                    "column": 58,
+                    "line": 286
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "914ec84c6033c6183337-223b44477b414339f92d",
+          "file": "02-faults.spec.ts",
+          "line": 74,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "03-gate.spec.ts",
+      "file": "03-gate.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "同身份幂等、显式 rerun、严格请求体、证据篡改与过期候选",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 29077,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"STALE_CANDIDATE\"\u001b[39m\nReceived: \u001b[31m\"CHECKS_NOT_PASSED\"\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"STALE_CANDIDATE\"\u001b[39m\nReceived: \u001b[31m\"CHECKS_NOT_PASSED\"\u001b[39m\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts:129:51",
+                    "location": {
+                      "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts",
+                      "column": 51,
+                      "line": 129
+                    },
+                    "snippet": " \u001b[90m 127 |\u001b[39m   \u001b[36mconst\u001b[39m adoptedStale \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m adoptCandidate(fixture\u001b[33m.\u001b[39mbase\u001b[33m,\u001b[39m createdB\u001b[33m.\u001b[39mcandidateId)\u001b[33m;\u001b[39m\n \u001b[90m 128 |\u001b[39m   expect(adoptedStale\u001b[33m.\u001b[39mstatus\u001b[33m,\u001b[39m adoptedStale\u001b[33m.\u001b[39mtext\u001b[33m.\u001b[39mslice(\u001b[35m0\u001b[39m\u001b[33m,\u001b[39m \u001b[35m300\u001b[39m))\u001b[33m.\u001b[39mtoBe(\u001b[35m409\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 129 |\u001b[39m   expect((adoptedStale\u001b[33m.\u001b[39mbody \u001b[36mas\u001b[39m any)\u001b[33m?.\u001b[39merror\u001b[33m?.\u001b[39mcode)\u001b[33m.\u001b[39mtoBe(\u001b[32m'STALE_CANDIDATE'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 130 |\u001b[39m   record\u001b[33m.\u001b[39mstale \u001b[33m=\u001b[39m { runId\u001b[33m:\u001b[39m run3\u001b[33m.\u001b[39mid\u001b[33m,\u001b[39m versionBefore\u001b[33m,\u001b[39m versionAfter\u001b[33m,\u001b[39m status\u001b[33m:\u001b[39m adoptedStale\u001b[33m.\u001b[39mstatus\u001b[33m,\u001b[39m code\u001b[33m:\u001b[39m (adoptedStale\u001b[33m.\u001b[39mbody \u001b[36mas\u001b[39m any)\u001b[33m?.\u001b[39merror\u001b[33m?.\u001b[39mcode }\u001b[33m;\u001b[39m\n \u001b[90m 131 |\u001b[39m\n \u001b[90m 132 |\u001b[39m   \u001b[90m/* ---------- 不存在的东西 ---------- */\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts",
+                        "column": 51,
+                        "line": 129
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m\"STALE_CANDIDATE\"\u001b[39m\nReceived: \u001b[31m\"CHECKS_NOT_PASSED\"\u001b[39m\n\n  127 |   const adoptedStale = await adoptCandidate(fixture.base, createdB.candidateId);\n  128 |   expect(adoptedStale.status, adoptedStale.text.slice(0, 300)).toBe(409);\n> 129 |   expect((adoptedStale.body as any)?.error?.code).toBe('STALE_CANDIDATE');\n      |                                                   ^\n  130 |   record.stale = { runId: run3.id, versionBefore, versionAfter, status: adoptedStale.status, code: (adoptedStale.body as any)?.error?.code };\n  131 |\n  132 |   /* ---------- 不存在的东西 ---------- */\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts:129:51"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:57:35.528Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\03-gate-同身份幂等、显式-rerun、严格请求体、证据篡改与过期候选\\error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\03-gate-同身份幂等、显式-rerun、严格请求体、证据篡改与过期候选\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\03-gate.spec.ts",
+                    "column": 51,
+                    "line": 129
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "762cc5cba16539413ca5-cb92d9ce62bc7bbdf6a2",
+          "file": "03-gate.spec.ts",
+          "line": 38,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "04-lifecycle.spec.ts",
+      "file": "04-lifecycle.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "取消运行中的检查：run 变 cancelled，未完成项 not_run，不能采用",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 4693,
+                  "error": {
+                    "message": "TypeError: (0 , _fixture.sleep) is not a function",
+                    "stack": "TypeError: (0 , _fixture.sleep) is not a function\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts:60:9",
+                    "location": {
+                      "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                      "column": 9,
+                      "line": 60
+                    },
+                    "snippet": " \u001b[90m 58 |\u001b[39m   \u001b[90m// 取消后再等：不能晚写 passed 或晚出证据\u001b[39m\n \u001b[90m 59 |\u001b[39m   \u001b[36mconst\u001b[39m snapshotAfter \u001b[33m=\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify(run\u001b[33m.\u001b[39mchecks)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 60 |\u001b[39m   \u001b[36mawait\u001b[39m sleep(\u001b[35m3000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 61 |\u001b[39m   \u001b[36mconst\u001b[39m later \u001b[33m=\u001b[39m (\u001b[36mawait\u001b[39m getCheckRun(fixture\u001b[33m.\u001b[39mbase\u001b[33m,\u001b[39m started\u001b[33m.\u001b[39mbody\u001b[33m.\u001b[39mid))\u001b[33m.\u001b[39mbody\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m   expect(\u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify(later\u001b[33m.\u001b[39mchecks))\u001b[33m.\u001b[39mtoBe(snapshotAfter)\u001b[33m;\u001b[39m\n \u001b[90m 63 |\u001b[39m   expect(later\u001b[33m.\u001b[39mstatus)\u001b[33m.\u001b[39mtoBe(\u001b[32m'cancelled'\u001b[39m)\u001b[33m;\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                        "column": 9,
+                        "line": 60
+                      },
+                      "message": "TypeError: (0 , _fixture.sleep) is not a function\n\n  58 |   // 取消后再等：不能晚写 passed 或晚出证据\n  59 |   const snapshotAfter = JSON.stringify(run.checks);\n> 60 |   await sleep(3000);\n     |         ^\n  61 |   const later = (await getCheckRun(fixture.base, started.body.id)).body;\n  62 |   expect(JSON.stringify(later.checks)).toBe(snapshotAfter);\n  63 |   expect(later.status).toBe('cancelled');\n    at E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts:60:9"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:58:05.464Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\04-lifecycle-取消运行中的检查：run-变-cancelled，未完成项-not-run，不能采用\\error-context.md"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M3-B\\formal-20261115\\regression\\2026-11-14T16-43-45-146Z-full\\e2e-m3b-output\\04-lifecycle-取消运行中的检查：run-变-cancelled，未完成项-not-run，不能采用\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                    "column": 9,
+                    "line": 60
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3d53ee76ed2e160e43e1-72611728f7a95fd18424",
+          "file": "04-lifecycle.spec.ts",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "后端被强杀后重启：运行中的检查变为 SERVICE_RESTARTED，不自动重跑、不能采用",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:58:10.729Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "3d53ee76ed2e160e43e1-64852c1886cb4a1be082",
+          "file": "04-lifecycle.spec.ts",
+          "line": 74,
+          "column": 1
+        },
+        {
+          "title": "两个候选的检查串行：后一个在排队，不并行也不交错",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:58:10.729Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "3d53ee76ed2e160e43e1-b2510a5b589eba005e1b",
+          "file": "04-lifecycle.spec.ts",
+          "line": 116,
+          "column": 1
+        },
+        {
+          "title": "缺浏览器：schema/build 通过，smoke 如实失败，occlusion not_run",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 600000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\tests\\e2e\\m3b\\04-lifecycle.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T16:58:10.729Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "3d53ee76ed2e160e43e1-12deacfa473492d21b0d",
+          "file": "04-lifecycle.spec.ts",
+          "line": 158,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-14T16:57:18.691Z",
+    "duration": 52057.104999999996,
+    "expected": 1,
+    "skipped": 3,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

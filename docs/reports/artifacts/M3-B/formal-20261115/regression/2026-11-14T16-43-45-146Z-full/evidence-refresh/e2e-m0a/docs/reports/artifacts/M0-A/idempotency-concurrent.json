@@ -1,0 +1,26 @@
+{
+  "first": {
+    "id": "a58a0afc-667e-47ea-8790-02ca1dd85dd1",
+    "status": "polling",
+    "createdAt": "2026-11-14T16:48:08.208Z",
+    "updatedAt": "2026-11-14T16:48:08.210Z",
+    "taskId": "9000004"
+  },
+  "second": {
+    "id": "a58a0afc-667e-47ea-8790-02ca1dd85dd1",
+    "status": "polling",
+    "createdAt": "2026-11-14T16:48:08.208Z",
+    "updatedAt": "2026-11-14T16:48:08.210Z",
+    "taskId": "9000004"
+  },
+  "mockStats": {
+    "before": {
+      "creates": 3,
+      "gets": 9
+    },
+    "after": {
+      "creates": 4,
+      "gets": 12
+    }
+  }
+}

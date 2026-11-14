@@ -1,0 +1,365 @@
+# e2e-m0b: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m3b-acceptance\node_modules\@playwright\test\cli.js test --retries=0 --workers=1 --reporter=list,json --output=E:\空间化AI工作台\.worktrees\m3b-acceptance\docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output
+# started=2026-11-14T16:24:05.502Z
+[WebServer] (node:22848) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 24 tests using 1 worker
+
+  x   1 [chromium] › tests\e2e\m0b-known-issues.spec.ts:30:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 (1ms)
+  x   2 [chromium] › tests\e2e\m0b-known-issues.spec.ts:48:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1b 单输入框表单的回车隐式提交不应触发 (1ms)
+  x   3 [chromium] › tests\e2e\m0b-known-issues.spec.ts:63:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转 (1ms)
+  x   4 [chromium] › tests\e2e\m0b-known-issues.spec.ts:79:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1d 退出选取后 pointer / mouse / click 监听器完全恢复 (1ms)
+  x   5 [chromium] › tests\e2e\m0b-known-issues.spec.ts:101:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1e 选取模式下右键菜单与双击被拦截，退出选取后恢复 (1ms)
+  x   6 [chromium] › tests\e2e\m0b-known-issues.spec.ts:127:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1f 选取模式下 Space 激活被拦截，退出选取后按钮可被 Space 激活 (1ms)
+  x   7 [chromium] › tests\e2e\m0b-known-issues.spec.ts:155:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1g 选取期间悬停高亮与滚动仍然正常（拦截不误伤移动/滚动） (1ms)
+  x   8 [chromium] › tests\e2e\m0b-message-guard.spec.ts:67:3 › S4 消息来源与形状校验 › S4a bridge 忽略 source 不是 parent 的 pick:start (1ms)
+  x   9 [chromium] › tests\e2e\m0b-message-guard.spec.ts:87:3 › S4 消息来源与形状校验 › S4b 对照：source 正确时 bridge 会进入选取模式并拦截点击 (1ms)
+  x  10 [chromium] › tests\e2e\m0b-message-guard.spec.ts:107:3 › S4 消息来源与形状校验 › S4c Studio 忽略形状非法的 pick:result（合法对照必须被接受） (1ms)
+  x  11 [chromium] › tests\e2e\m0b-message-guard.spec.ts:152:3 › S4 消息来源与形状校验 › S4d bridge 忽略畸形 highlight 与未知 Studio 消息 (1ms)
+  x  12 [chromium] › tests\e2e\m0b-mutation-check.spec.ts:21:3 › 变异验证（R3：证明判定条件有效） › 变异 A 同名标签错标：所有 span 统一指向同一个错误位置，必须被抓到 (1ms)
+  x  13 [chromium] › tests\e2e\m0b-mutation-check.spec.ts:65:3 › 变异验证（R3：证明判定条件有效） › 变异 B 漏标一类元素：li 不再注入 data-src，完整性校验必须报出来 (1ms)
+  ok 14 [chromium] › tests\e2e\m0b-mutation-check.spec.ts:98:3 › 变异验证（R3：证明判定条件有效） › 变异 C 列号整体偏一位：AST 期望本身自检能发现 oracle 与源码不一致 (127ms)
+  ok 15 [chromium] › tests\e2e\m0b-pick.spec.ts:69:3 › M0-B 校验器自检（非验收用例） › readSourceAt 能识别列号偏移（防止断言空转） (1ms)
+  x  16 [chromium] › tests\e2e\m0b-pick.spec.ts:81:3 › M0-B 点选 → 源码定位 › 用例 1：随机 20 个 data-src 元素，点选后 src 指向该元素 JSX 开标签 (0ms)
+  x  17 [chromium] › tests\e2e\m0b-pick.spec.ts:164:3 › M0-B 点选 → 源码定位 › 用例 2：选取模式下点击不触发原行为，退出选取后恢复 (1ms)
+  x  18 [chromium] › tests\e2e\m0b-pick.spec.ts:183:3 › M0-B 点选 → 源码定位 › 用例 3：共享 Button 的 instances 与高亮框数量一致（≥3） (1ms)
+  x  19 [chromium] › tests\e2e\m0b-pick.spec.ts:209:3 › M0-B 点选 → 源码定位 › 用例 4：map 生成的卖点列表项被标注为多实例且 instances 正确 (1ms)
+  x  20 [chromium] › tests\e2e\m0b-pick.spec.ts:238:3 › M0-B 点选 → 源码定位 › 用例 5：点击无 data-src 的子元素归到最近标记外层并带 outer-container (1ms)
+  x  21 [chromium] › tests\e2e\m0b-pick.spec.ts:269:3 › M0-B 点选 → 源码定位 › 用例 6：ancestors 最多 3 层且每项都是合法 data-src (1ms)
+  x  22 [chromium] › tests\e2e\m0b-pick.spec.ts:304:3 › M0-B 点选 → 源码定位 › 用例 7：错误 origin 的 pick:result 被 Studio 忽略（bridge 侧同样校验） (1ms)
+  x  23 [chromium] › tests\e2e\m0b-pick.spec.ts:369:3 › M0-B 点选 → 源码定位 › 用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src） (1ms)
+  x  24 [chromium] › tests\e2e\m0b-pick.spec.ts:393:3 › M0-B 点选 → 源码定位 › 用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照 (1ms)
+
+
+  1) [chromium] › tests\e2e\m0b-known-issues.spec.ts:30:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-9e8e4-mousedown-mouseup-不应触达业务监听器-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\m0b-known-issues.spec.ts:48:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1b 单输入框表单的回车隐式提交不应触发 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-3379e-的业务行为-R1b-单输入框表单的回车隐式提交不应触发-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\m0b-known-issues.spec.ts:63:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-46db7-R1c-选取模式下链接不跳转，退出选取后链接恢复可跳转-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\m0b-known-issues.spec.ts:79:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1d 退出选取后 pointer / mouse / click 监听器完全恢复 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-f85b2-pointer-mouse-click-监听器完全恢复-chromium\error-context.md
+
+  5) [chromium] › tests\e2e\m0b-known-issues.spec.ts:101:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1e 选取模式下右键菜单与双击被拦截，退出选取后恢复 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-f3614-R1e-选取模式下右键菜单与双击被拦截，退出选取后恢复-chromium\error-context.md
+
+  6) [chromium] › tests\e2e\m0b-known-issues.spec.ts:127:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1f 选取模式下 Space 激活被拦截，退出选取后按钮可被 Space 激活 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-aaa10-ce-激活被拦截，退出选取后按钮可被-Space-激活-chromium\error-context.md
+
+  7) [chromium] › tests\e2e\m0b-known-issues.spec.ts:155:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1g 选取期间悬停高亮与滚动仍然正常（拦截不误伤移动/滚动） 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-known-issues-R1-选取模式不得-113b0-选取期间悬停高亮与滚动仍然正常（拦截不误伤移动-滚动）-chromium\error-context.md
+
+  8) [chromium] › tests\e2e\m0b-message-guard.spec.ts:67:3 › S4 消息来源与形状校验 › S4a bridge 忽略 source 不是 parent 的 pick:start 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-message-guard-S4-消息来源与-2a7b4-urce-不是-parent-的-pick-start-chromium\error-context.md
+
+  9) [chromium] › tests\e2e\m0b-message-guard.spec.ts:87:3 › S4 消息来源与形状校验 › S4b 对照：source 正确时 bridge 会进入选取模式并拦截点击 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-message-guard-S4-消息来源与-7ca62-rce-正确时-bridge-会进入选取模式并拦截点击-chromium\error-context.md
+
+  10) [chromium] › tests\e2e\m0b-message-guard.spec.ts:107:3 › S4 消息来源与形状校验 › S4c Studio 忽略形状非法的 pick:result（合法对照必须被接受） 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-message-guard-S4-消息来源与-fae07-状非法的-pick-result（合法对照必须被接受）-chromium\error-context.md
+
+  11) [chromium] › tests\e2e\m0b-message-guard.spec.ts:152:3 › S4 消息来源与形状校验 › S4d bridge 忽略畸形 highlight 与未知 Studio 消息 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-message-guard-S4-消息来源与-2214e-略畸形-highlight-与未知-Studio-消息-chromium\error-context.md
+
+  12) [chromium] › tests\e2e\m0b-mutation-check.spec.ts:21:3 › 变异验证（R3：证明判定条件有效） › 变异 A 同名标签错标：所有 span 统一指向同一个错误位置，必须被抓到 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-mutation-check-变异验证（R3-f1bff-标：所有-span-统一指向同一个错误位置，必须被抓到-chromium\error-context.md
+
+  13) [chromium] › tests\e2e\m0b-mutation-check.spec.ts:65:3 › 变异验证（R3：证明判定条件有效） › 变异 B 漏标一类元素：li 不再注入 data-src，完整性校验必须报出来 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-mutation-check-变异验证（R3-1c321-li-不再注入-data-src，完整性校验必须报出来-chromium\error-context.md
+
+  14) [chromium] › tests\e2e\m0b-pick.spec.ts:81:3 › M0-B 点选 → 源码定位 › 用例 1：随机 20 个 data-src 元素，点选后 src 指向该元素 JSX 开标签 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-7c458-rc-元素，点选后-src-指向该元素-JSX-开标签-chromium\error-context.md
+
+  15) [chromium] › tests\e2e\m0b-pick.spec.ts:164:3 › M0-B 点选 → 源码定位 › 用例 2：选取模式下点击不触发原行为，退出选取后恢复 ──
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-2：选取模式下点击不触发原行为，退出选取后恢复-chromium\error-context.md
+
+  16) [chromium] › tests\e2e\m0b-pick.spec.ts:183:3 › M0-B 点选 → 源码定位 › 用例 3：共享 Button 的 instances 与高亮框数量一致（≥3） 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-e18f7-on-的-instances-与高亮框数量一致（≥3）-chromium\error-context.md
+
+  17) [chromium] › tests\e2e\m0b-pick.spec.ts:209:3 › M0-B 点选 → 源码定位 › 用例 4：map 生成的卖点列表项被标注为多实例且 instances 正确 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-a9d34-的卖点列表项被标注为多实例且-instances-正确-chromium\error-context.md
+
+  18) [chromium] › tests\e2e\m0b-pick.spec.ts:238:3 › M0-B 点选 → 源码定位 › 用例 5：点击无 data-src 的子元素归到最近标记外层并带 outer-container 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-25598-素归到最近标记外层并带-outer-container-chromium\error-context.md
+
+  19) [chromium] › tests\e2e\m0b-pick.spec.ts:269:3 › M0-B 点选 → 源码定位 › 用例 6：ancestors 最多 3 层且每项都是合法 data-src 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-c4b92-tors-最多-3-层且每项都是合法-data-src-chromium\error-context.md
+
+  20) [chromium] › tests\e2e\m0b-pick.spec.ts:304:3 › M0-B 点选 → 源码定位 › 用例 7：错误 origin 的 pick:result 被 Studio 忽略（bridge 侧同样校验） 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-2a15e-t-被-Studio-忽略（bridge-侧同样校验）-chromium\error-context.md
+
+  21) [chromium] › tests\e2e\m0b-pick.spec.ts:369:3 › M0-B 点选 → 源码定位 › 用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src） 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-000c8-由模板源码-AST-独立算出（不读-data-src）-chromium\error-context.md
+
+  22) [chromium] › tests\e2e\m0b-pick.spec.ts:393:3 › M0-B 点选 → 源码定位 › 用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\Admin\AppData\Local\ms-playwright \chromium_headless_shell-1254\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: docs\reports\artifacts\M3-B\formal-20261115\regression\2026-11-14T16-20-27-242Z-full\e2e-m0b-output\m0b-pick-M0-B-点选-→-源码定位-用例-1530c-——AST-位置集合与运行时-DOM-标记集合互相对照-chromium\error-context.md
+
+  22 failed
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:30:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1a 真实鼠标的 pointerdown / mousedown / mouseup 不应触达业务监听器 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:48:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1b 单输入框表单的回车隐式提交不应触发 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:63:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1c 选取模式下链接不跳转，退出选取后链接恢复可跳转 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:79:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1d 退出选取后 pointer / mouse / click 监听器完全恢复 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:101:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1e 选取模式下右键菜单与双击被拦截，退出选取后恢复 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:127:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1f 选取模式下 Space 激活被拦截，退出选取后按钮可被 Space 激活 
+    [chromium] › tests\e2e\m0b-known-issues.spec.ts:155:3 › R1 选取模式不得触发先于/绕过 click 的业务行为 › R1g 选取期间悬停高亮与滚动仍然正常（拦截不误伤移动/滚动） 
+    [chromium] › tests\e2e\m0b-message-guard.spec.ts:67:3 › S4 消息来源与形状校验 › S4a bridge 忽略 source 不是 parent 的 pick:start 
+    [chromium] › tests\e2e\m0b-message-guard.spec.ts:87:3 › S4 消息来源与形状校验 › S4b 对照：source 正确时 bridge 会进入选取模式并拦截点击 
+    [chromium] › tests\e2e\m0b-message-guard.spec.ts:107:3 › S4 消息来源与形状校验 › S4c Studio 忽略形状非法的 pick:result（合法对照必须被接受） 
+    [chromium] › tests\e2e\m0b-message-guard.spec.ts:152:3 › S4 消息来源与形状校验 › S4d bridge 忽略畸形 highlight 与未知 Studio 消息 
+    [chromium] › tests\e2e\m0b-mutation-check.spec.ts:21:3 › 变异验证（R3：证明判定条件有效） › 变异 A 同名标签错标：所有 span 统一指向同一个错误位置，必须被抓到 
+    [chromium] › tests\e2e\m0b-mutation-check.spec.ts:65:3 › 变异验证（R3：证明判定条件有效） › 变异 B 漏标一类元素：li 不再注入 data-src，完整性校验必须报出来 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:81:3 › M0-B 点选 → 源码定位 › 用例 1：随机 20 个 data-src 元素，点选后 src 指向该元素 JSX 开标签 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:164:3 › M0-B 点选 → 源码定位 › 用例 2：选取模式下点击不触发原行为，退出选取后恢复 ────
+    [chromium] › tests\e2e\m0b-pick.spec.ts:183:3 › M0-B 点选 → 源码定位 › 用例 3：共享 Button 的 instances 与高亮框数量一致（≥3） 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:209:3 › M0-B 点选 → 源码定位 › 用例 4：map 生成的卖点列表项被标注为多实例且 instances 正确 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:238:3 › M0-B 点选 → 源码定位 › 用例 5：点击无 data-src 的子元素归到最近标记外层并带 outer-container 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:269:3 › M0-B 点选 → 源码定位 › 用例 6：ancestors 最多 3 层且每项都是合法 data-src 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:304:3 › M0-B 点选 → 源码定位 › 用例 7：错误 origin 的 pick:result 被 Studio 忽略（bridge 侧同样校验） 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:369:3 › M0-B 点选 → 源码定位 › 用例 8：确定性目标——期望位置由模板源码 AST 独立算出（不读 data-src） 
+    [chromium] › tests\e2e\m0b-pick.spec.ts:393:3 › M0-B 点选 → 源码定位 › 用例 9：应标记节点完整性——AST 位置集合与运行时 DOM 标记集合互相对照 
+  2 passed (9.7s)

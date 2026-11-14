@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import {
-  candidateDir, collectEvents, discardCandidate, getCandidate, getVersion, listCandidates, openCandidatePreview, pickSelection,
+  candidateDir, collectEvents, discardCandidate, ensureChecksPassed, getCandidate, getVersion, listCandidates, openCandidatePreview, pickSelection,
   previewFetch, resetMock, restoreTemplate, setScript, submitTask, waitFor, waitForTask,
 } from './api';
 import { writeArtifactFrom } from './artifact';
@@ -65,6 +65,8 @@ test.describe('撤回候选', () => {
     const task = await waitForTask((await submitTask('改成马上购买', selection)).body.id);
     const candidateId = task.candidateId!;
     const { adoptCandidate, revertVersion } = await import('./api');
+    // M3-B：旧用例直接 adopt 的路径改为显式跑真实检查并等本次 run 终态
+    expect((await ensureChecksPassed(candidateId)).checks.map((check) => check.status)).toEqual(['passed', 'passed', 'passed', 'passed']);
     expect((await adoptCandidate(candidateId)).status).toBe(200);
     expect((await adoptCandidate(candidateId)).status).toBe(409);
     expect((await discardCandidate(candidateId)).status).toBe(409);

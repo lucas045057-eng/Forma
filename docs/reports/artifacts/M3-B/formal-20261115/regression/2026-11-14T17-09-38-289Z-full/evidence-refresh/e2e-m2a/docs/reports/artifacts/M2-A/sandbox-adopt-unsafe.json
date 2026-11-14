@@ -1,0 +1,7 @@
+{
+  "status": 409,
+  "code": "UNSAFE_WORK_TREE",
+  "targetEntries": [],
+  "mainUnchanged": true,
+  "candidateDecision": "pending"
+}
