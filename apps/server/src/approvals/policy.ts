@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { readdir, readFile } from 'node:fs/promises';
+import { lstat, realpath, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import type { ApprovalRuleCode, Selection } from '@spatial/shared';
@@ -61,12 +61,15 @@ async function gitShow(root: string, baseVersion: string, file: string): Promise
 
 async function sourceFiles(root: string) {
   const result = new Map<string, string>();
+  const src = path.join(root, 'src');
+  if ((await lstat(src)).isSymbolicLink() || path.relative(src, await realpath(src)) !== '') throw new Error('源码根目录含链接');
   const walk = async (folder: string, relative: string) => {
     for (const entry of await readdir(path.join(folder, relative), { withFileTypes: true })) {
       const file = `${relative}/${entry.name}`;
-      if (entry.isSymbolicLink()) throw new Error(`源码目录含链接：${file}`);
+      const absolute = path.join(folder, file);
+      if (entry.isSymbolicLink() || path.relative(absolute, await realpath(absolute)) !== '') throw new Error(`源码目录含链接：${file}`);
       if (entry.isDirectory()) await walk(folder, file);
-      else if (entry.isFile() && SOURCE_FILE.test(file)) result.set(file, await readFile(path.join(folder, file), 'utf8'));
+      else if (entry.isFile()) result.set(file, SOURCE_FILE.test(file) ? await readFile(absolute, 'utf8') : '');
       if (result.size > 500) throw new Error('源码文件过多，无法可靠分析');
     }
   };
@@ -74,9 +77,25 @@ async function sourceFiles(root: string) {
   return result;
 }
 
+async function baselineFiles(root: string, version: string) {
+  if (!/^[0-9a-f]{7,64}$/i.test(version)) throw new Error('基线版本无效');
+  const listing = await gitRead(root, ['ls-tree', '-r', '-z', version, '--', 'src']);
+  if (listing.code !== 0) throw new Error('无法读取基线版本库');
+  const files = new Map<string, string>();
+  for (const record of listing.stdout.split('\0').filter(Boolean)) {
+    const tab = record.indexOf('\t');
+    const meta = record.slice(0, tab), file = record.slice(tab + 1);
+    if (!/^100(?:644|755) blob [0-9a-f]+$/.test(meta) || !/^src\/[A-Za-z0-9_./-]+$/.test(file) || file.split('/').includes('..')) throw new Error('基线含不安全源码路径');
+    files.set(file, SOURCE_FILE.test(file) ? (await gitShow(root, version, file))! : '');
+    if (files.size > 500) throw new Error('源码文件过多，无法可靠分析');
+  }
+  return files;
+}
+
 function moduleName(file: string, specifier: string) {
   if (!specifier.startsWith('.')) return undefined;
-  const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
+  if (specifier.includes('\\')) return null;
+  const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier.split(/[?#]/)[0]));
   if (!base.startsWith('src/') || base.split('/').includes('..')) return null;
   return base;
 }
@@ -108,7 +127,11 @@ function parseModule(file: string, text: string): ModuleInfo {
   const info: ModuleInfo = { file, source, imports: new Map(), exports: new Map(), stars: [], references: new Set(), jsx: [], uncertain: [] };
   const diagnostics = (source as ts.SourceFile & { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics ?? [];
   for (const diagnostic of diagnostics) info.uncertain.push(`${file}:${source.getLineAndCharacterOfPosition(diagnostic.start ?? 0).line + 1} 解析失败`);
-  const reference = (node: ts.StringLiteralLike) => moduleName(file, node.text);
+  const reference = (node: ts.StringLiteralLike) => {
+    const target = moduleName(file, node.text);
+    if (target === null) info.uncertain.push(`${file} 含越界或不安全的本地引用`);
+    return target;
+  };
   for (const statement of source.statements) {
     if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
       const target = reference(statement.moduleSpecifier);
@@ -186,7 +209,7 @@ function resolveExport(files: Map<string, ModuleInfo>, file: string, name: strin
 
 function analyze(files: Map<string, string>) {
   const modules = new Map<string, ModuleInfo>();
-  for (const [file, text] of files) modules.set(file, parseModule(file, text));
+  for (const [file, text] of files) if (SOURCE_FILE.test(file)) modules.set(file, parseModule(file, text));
   const resolveImport = (entry: ImportEntry): Binding | undefined | null => {
     const target = resolveModule(entry.source, modules);
     return target ? resolveExport(modules, target, entry.imported) : null;
@@ -241,25 +264,22 @@ export async function evaluateApproval(options: {
       addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
         `草稿静态分析失败，保守请示：${error instanceof Error ? error.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
     }
-    if (draft) {
-      const base = new Map(draft);
+    {
+      let base: Map<string, string> | undefined;
       let baseError: unknown;
-      try {
-        for (const file of sourceChanges) {
-          if (!/^src\/[A-Za-z0-9_./-]+$/.test(file) || file.split('/').includes('..')) throw new Error(`改动路径无法安全分析：${file}`);
-          const content = await gitShow(root, baseVersion, file);
-          if (content === undefined) base.delete(file); else base.set(file, content);
-        }
-      } catch (error) { baseError = error; }
+      try { base = await baselineFiles(root, baseVersion); }
+      catch (error) { baseError = error; }
       if (baseError) addRule(codes, affected, evidence, 'analysis_uncertain', sourceChanges,
         `基线静态分析失败，保守请示：${baseError instanceof Error ? baseError.message.replaceAll(root, '<作品>') : '未知解析错误'}`);
-      const sides: Array<['基线' | '草稿', Map<string, string>]> = baseError ? [['草稿', draft]] : [['基线', base], ['草稿', draft]];
+      const sides: Array<['基线' | '草稿', Map<string, string>]> = [];
+      if (base) sides.push(['基线', base]);
+      if (draft) sides.push(['草稿', draft]);
       for (const [label, snapshot] of sides) {
         try {
           const { modules, bindingForTag } = analyze(snapshot);
           const unresolved = [...modules.values()].flatMap(info => [
             ...info.uncertain,
-            ...[...info.references].filter(reference => resolveModule(reference, modules) === null).map(() => `${info.file} 含无法解析的本地模块引用`),
+            ...[...info.references].filter(reference => resolveModule(reference, modules) === null && !snapshot.has(reference)).map(() => `${info.file} 含无法解析的本地模块引用`),
           ]);
           for (const file of sourceChanges) {
             const info = modules.get(file);
