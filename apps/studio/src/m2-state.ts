@@ -45,7 +45,9 @@ export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
     if (typeof candidate?.id !== 'string' || typeof candidate.decision !== 'string' || !Array.isArray(candidate.diff)) return state;
     const old = state.candidates.find(item => item.id === candidate.id);
     if (old && old.decision !== 'pending' && candidate.decision === 'pending') return state;
-    return { ...state, candidates: upsert(state.candidates, candidate as unknown as Candidate) };
+    const value = candidate as unknown as Candidate;
+    const merged = old?.latestCheckRunId && value.latestCheckRunId !== old.latestCheckRunId ? { ...value, latestCheckRunId: old.latestCheckRunId, checks: old.checks } : value;
+    return { ...state, candidates: upsert(state.candidates, merged) };
   }
   if (event.type === 'version.changed' && typeof event.version === 'string') return { ...state, version: event.version };
   return state;

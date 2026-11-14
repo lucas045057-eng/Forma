@@ -8,7 +8,10 @@ const record = (value: unknown): value is Record<string, unknown> => !!value && 
 export function isCheckRun(value: unknown): value is CheckRun {
   return record(value) && ['id', 'candidateId', 'candidateCommit', 'baseVersion', 'mainVersion', 'contentDigest', 'policyVersion', 'createdAt'].every(key => typeof value[key] === 'string') &&
     ['queued', 'running', 'completed', 'cancelled'].includes(String(value.status)) && Array.isArray(value.checks) &&
-    value.checks.every(check => record(check) && typeof check.name === 'string' && typeof check.status === 'string' && (check.message === undefined || typeof check.message === 'string')) &&
+    ['startedAt', 'finishedAt', 'outcome', 'toolIdentity'].every(key => value[key] === undefined || typeof value[key] === 'string') &&
+    value.checks.every(check => record(check) && typeof check.name === 'string' && typeof check.status === 'string' &&
+      (check.message === undefined || typeof check.message === 'string') && (check.evidence === undefined || typeof check.evidence === 'string') &&
+      (check.durationMs === undefined || (typeof check.durationMs === 'number' && Number.isFinite(check.durationMs) && check.durationMs >= 0))) &&
     (value.error === undefined || (record(value.error) && typeof value.error.code === 'string' && typeof value.error.message === 'string')) &&
     (value.artifacts === undefined || Array.isArray(value.artifacts));
 }
