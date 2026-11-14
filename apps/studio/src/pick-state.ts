@@ -11,6 +11,14 @@ export type PickState =
   | { kind: 'failed'; src: string }
   | { kind: 'ready'; selection: Selection };
 
+export function retrySelection(original: Selection | undefined, pick: PickState, version: string): { allowed: boolean; selection: Selection | null; reason: string } {
+  if (pick.kind === 'pending' || pick.kind === 'failed') return { allowed: false, selection: null, reason: '请完成重新点选后再重试' };
+  if (!original) return { allowed: true, selection: null, reason: '' };
+  if (original.baseVersion === version) return { allowed: true, selection: original, reason: '' };
+  if (pick.kind === 'ready' && pick.selection.baseVersion === version && pick.selection.src === original.src) return { allowed: true, selection: pick.selection, reason: '' };
+  return { allowed: false, selection: null, reason: `页面已变化，请重新点选 ${original.src} 后再重试` };
+}
+
 export function canSubmit(pick: PickState) { return pick.kind === 'none' || pick.kind === 'ready'; }
 export function submittedSelection(pick: PickState): Selection | null { return pick.kind === 'ready' ? pick.selection : null; }
 export function pickHint(pick: PickState) {
