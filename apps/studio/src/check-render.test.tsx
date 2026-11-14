@@ -1,0 +1,40 @@
+import { renderToStaticMarkup } from 'react-dom/server';
+import { beforeEach, expect, it, vi } from 'vitest';
+import type { Candidate, CheckRun } from '@spatial/shared';
+import { emptyM2State } from './m2-state.ts';
+import CheckPanel from './CheckPanel.tsx';
+import CandidatePanel from './CandidatePanel.tsx';
+const center = vi.hoisted(() => ({ state: {} as typeof emptyM2State, syncReady: true, syncEpoch: 1, reload: vi.fn() }));
+vi.mock('./EventCenter.tsx', () => ({ useEventCenter: () => center }));
+const candidate: Candidate = { id: 'c', candidateCommit: 'commit', baseVersion: 'v1', branch: 'c', previewUrl: '/preview/c/', decision: 'pending', outOfScope: [], diff: [], checks: [] };
+beforeEach(() => { center.syncReady = true; center.state = { ...emptyM2State, version: 'v1', candidates: [candidate] }; });
+const render = () => renderToStaticMarkup(<CandidatePanel selectedId="c" onSelect={() => {}} mode="current" onMode={() => {}}>preview</CandidatePanel>);
+it('offers only first run for unchecked candidate and keeps adoption/revert disabled', () => {
+  const html = render();
+  expect(html).toMatch(/data-testid="check-run">/);
+  expect(html).not.toContain('data-testid="check-rerun"');
+  expect(html).toMatch(/data-testid="check-cancel" disabled=""/);
+  expect(html).toMatch(/data-testid="candidate-adopt" disabled=""/);
+  expect(html).toMatch(/data-testid="version-revert" disabled=""/);
+  expect(html.match(/data-status="not_run"/g)).toHaveLength(4);
+});
+it('disables rerun during active checks; ordered rows retain failure and blocked diagnostics as text', () => {
+  const run: CheckRun = { id: 'run001', candidateId: 'c', candidateCommit: 'commit', baseVersion: 'v1', mainVersion: 'v1', contentDigest: 'd', policyVersion: 'p', createdAt: 'now', status: 'running', checks: [{ name: 'schema', status: 'failed', message: '<script>bad</script>' }, { name: 'build', status: 'not_run', message: 'blocked_by:schema' }, { name: 'smoke', status: 'not_run' }, { name: 'occlusion', status: 'not_run' }] };
+  center.state = { ...center.state, candidates: [{ ...candidate, latestCheckRunId: run.id, checks: run.checks.map(check => ({ ...check, runId: run.id })) }], runs: { [run.id]: run } };
+  const html = render();
+  expect(html).toMatch(/data-testid="check-rerun" disabled=""/);
+  expect(html).toMatch(/data-testid="check-cancel">/);
+  expect(html).toContain('&lt;script&gt;bad&lt;/script&gt;');
+  expect(html).not.toContain('<script>');
+  expect(html).toContain('前序失败，未运行');
+  expect([...html.matchAll(/data-check-name="([^"]+)"/g)].map(match => match[1])).toEqual(['schema', 'build', 'smoke', 'occlusion']);
+  center.syncReady = false;
+  expect(render()).toMatch(/data-testid="check-cancel" disabled=""/);
+});
+it('never renders evidence href from an unverified hash or a foreign run', () => {
+  const run = { id: 'run001', candidateId: 'other', checks: [], status: 'completed' } as unknown as CheckRun;
+  const html = renderToStaticMarkup(<CheckPanel candidate={{ ...candidate, latestCheckRunId: run.id }} run={run} syncReady syncEpoch={1} version="v1"/>);
+  expect(html).toContain('检查状态不完整');
+  expect(html).not.toContain('data-testid="check-evidence"');
+  expect(html).not.toContain('全部检查通过');
+});

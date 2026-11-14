@@ -46,6 +46,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     let connection = 0;
     let request = 0;
     let seq = 0;
+    let currentState = emptyM2State;
     let initialized = false;
     let syncing = false;
     let readyReceived = false;
@@ -96,6 +97,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           // A run started during the non-atomic snapshot requires fresh latest pointers.
           if (events.some(event => event.type === 'check.started' && isCheckRun(event.run) && !runs[event.run.id])) continue;
           if (next.candidates.some(candidate => candidate.latestCheckRunId && (!associatedRun(candidate, next.runs[candidate.latestCheckRunId]) || !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) continue;
+          currentState = next;
           setState(next);
           seq = cursor;
           setLastSeq(seq);
@@ -155,9 +157,16 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           startSync();
           return;
         }
+        const next = reduceM2Event(currentState, event);
+        if (event.type === 'check.updated' && (!isCheckRun(event.run) || next.candidates.some(candidate => candidate.latestCheckRunId && !consistentChecks(candidate, next.runs[candidate.latestCheckRunId])))) {
+          buffer.push(event);
+          startSync();
+          return;
+        }
         seq = event.seq;
         setLastSeq(seq);
-        setState(previous => reduceM2Event(previous, event));
+        currentState = next;
+        setState(next);
         notify(event);
       };
       active.onerror = () => active.close();

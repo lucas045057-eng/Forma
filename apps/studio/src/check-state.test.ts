@@ -37,6 +37,9 @@ describe('real check presentation', () => {
     const older = { ...run, id: 'run000', status: 'running' as const };
     const next = reduceM2Event(state, { type: 'check.updated', seq: 10, run: older, candidate: { ...candidate, latestCheckRunId: older.id } });
     expect(next.candidates[0].latestCheckRunId).toBe(run.id);
+    const replayedReady = reduceM2Event(next, { type: 'candidate.ready', seq: 11, candidate: { ...candidate, latestCheckRunId: undefined, checks: [] } });
+    expect(replayedReady.candidates[0].latestCheckRunId).toBe(run.id);
+    expect(replayedReady.candidates[0].checks).toEqual(candidate.checks);
     expect(associatedRun(candidate, older)).toBe(false);
     expect(mergeRun(run, { ...run, status: 'running' })).toBe(run);
     expect(mergeRun({ ...run, status: 'running' }, { ...run, status: 'running', checks: run.checks.map(check => ({ ...check, status: 'not_run' })) }).checks).toEqual(run.checks);
