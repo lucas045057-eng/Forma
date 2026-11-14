@@ -333,7 +333,7 @@ cd /d .worktrees\m3c && set CI=true&& node apps/studio/verify-proxy-isolation.mj
 3. 记录 `[port-check]` 的 before-full-test 证据后执行 `pnpm test`；全量结束再验证该端口仍为 Vite 服务并记录 after-full-test，然后依次 `pnpm typecheck`、`pnpm build`。
 4. 关闭本脚本创建的 Vite，记录 `[cleanup] owned Studio listening=false`，清理本脚本缓存。若使用的是外部 Vite，明确记录未拥有监听器，原服务保持运行。任何命令失败也走 finally。
 
-本回合初次只读检查未发现 5173 监听；冻结后的起跑前复查已发现 5173 被 PID 40308 监听。脚本会在单文件通过后确认已有 Vite 占用，若期间释放则自行建立占用，并以作业内的前后探针作为真正“端口被占仍通过”的证据。本轮结果尚待后台作业完成后调度读取，不预写“单文件通过”或“占用端口仍全绿”。最终提交、job id 与日志路径在回合小结给出；取得 job 后立即结束、不轮询。
+本回合初次只读检查未发现 5173 监听；冻结后的起跑前复查已发现 5173 被 PID 40308 监听。脚本会在单文件通过后确认已有 Vite 占用，若期间释放则自行建立占用，并以作业内的前后探针作为真正“端口被占仍通过”的证据。该轮 job_76cfe414 最终 exit 1，不能接受 ec01a50 为最终冻结。已读取日志确认单文件 exit 0、pnpm test exit 0；其前后两条 port-check 均为 port=5173、owned=true、vite=true。随后 Studio typecheck 报 dev-proxy.test.ts(56,27) TS2339，命令 exit 2；build 未执行，cleanup 记录 owned Studio listening=false。归类为测试文件类型错误，不是接线/端口隔离失败；占用条件下全量单测通过这一局部事实不能替代整轮通过。原始日志保留于 orbital/jobs/job_76cfe414/output.log。
 
 ### 其它测试的固定端口盘点
 
@@ -344,3 +344,18 @@ cd /d .worktrees\m3c && set CI=true&& node apps/studio/verify-proxy-isolation.mj
 ### 状态与边界
 
 本轮仅修改 Studio 测试/验证入口与实现报告，未改后端、协议、模板、锁、产品反代键或 Pi 的测试与失败证据；未读取真实 .env、未调用付费模型、未派子 Agent。新验证未完成前仍不可宣称正式冻结通过，无额外需批准事项。
+
+## Vite HttpServer 类型小修与窄验证
+
+依据 job_76cfe414 的 TS2339，仅做本轮授权的小修，不启动全量测试或端口占用脚本。
+
+- `e7232ad`：dev-proxy.test.ts 的 Vite httpServer 通过 `as unknown as { closeAllConnections?: () => void } | null | undefined` 描述可选清理能力，并用可选调用；内层 finally 始终 await Vite close，外层 finally 仍关闭 stub 与清理临时缓存。即使清连接方法抛错也不会跳过 Vite close。不改变系统临时端口、代理断言或产品反代配置。
+- `b2ebcd6`：verify-proxy-isolation.mjs 的子命令 stdout/stderr 实时原样转发，同时保留末尾 64,000 字符；失败 Error 包含命令、退出码、信号和原始输出尾部，tsc 文件/行号/错误码不再被通用摘要遮住。此次只修改脚本，不运行它。
+
+窄验证通过根 bg.cmd 后台串行执行：
+
+```text
+cd /d .worktrees\m3c && set CI=true&& call pnpm --filter @spatial/studio typecheck && call pnpm --filter @spatial/studio exec vitest run src/dev-proxy.test.ts
+```
+
+本轮只报告修复提交与窄验证 job，结果尚待读取；通过后再确认最终冻结号。不会启动 pnpm test 全量、build、5173 占用验证或 Pi E2E，不停止/修改 Pi 的服务器；单文件测试仍仅使用系统分配端口。后续全量与占用条件验证等待调度另行指令，无新增需批准事项。
