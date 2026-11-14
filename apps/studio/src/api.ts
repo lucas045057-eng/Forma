@@ -29,7 +29,7 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(60_000) });
   const result = await response.json().catch(() => ({})) as { error?: { code?: string; message?: string } };
   if (!response.ok) throw new ApiError(response.status, result.error?.code ?? 'REQUEST_FAILED', result.error?.message ?? `请求失败（${response.status}）`);
   return result as T;

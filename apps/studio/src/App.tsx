@@ -42,6 +42,19 @@ function Studio() {
   const send = (message: StudioMessage) => preview.current?.contentWindow?.postMessage(message, previewOrigin);
   const sendCandidate = (message: StudioMessage) => candidatePreview.current?.contentWindow?.postMessage(message, previewOrigin);
 
+  const selectionVersion = useRef(state.version);
+  useEffect(() => {
+    const previous = selectionVersion.current;
+    selectionVersion.current = state.version;
+    if (!previous || previous === state.version) return;
+    ++pickRequest.current;
+    setPick({ kind: 'none' });
+    pickingRef.current = false;
+    setPicking(false);
+    send({ type: 'pick:stop' });
+    setError('页面已变化，请重新点选');
+  }, [state.version]);
+
   function exitImpact(restore = true) {
     const previous = impactRef.current;
     if (!previous) return;

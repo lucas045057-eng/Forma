@@ -13,7 +13,8 @@ type Operation = { phase: 'submitting' | 'outcomeUnknown' | 'refreshing'; messag
 export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
   highlightId: string | null; onHighlight: (card: ApprovalCard, src: string) => void; onExit: () => void;
 }) {
-  const { state, syncReady, status, reload } = useEventCenter();
+  const { state, syncReady, status, reload, acquire, awaiting, locked } = useEventCenter();
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const locks = useRef(new Map<string, Operation>());
   const [, render] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,12 +26,14 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
   };
   useEffect(() => {
     if (!syncReady) return;
-    for (const [id, lock] of locks.current) if (lock.phase !== 'submitting') update(id);
+    for (const [id, lock] of locks.current) if (lock.phase !== 'submitting' && !locked([`approval:${id}`])) update(id);
   }, [state, syncReady]);
 
   async function decide(card: ApprovalCard, option: 0 | 1 | 'cancel') {
     const task = state.tasks.find(item => item.id === card.taskId);
-    if (locks.current.has(card.id) || !canAnswer(card, task, state.version, syncReady && status === 'connected')) return;
+    if (blockedIds.has(card.id) || locks.current.has(card.id) || !canAnswer(card, task, state.version, syncReady && status === 'connected')) return;
+    const token = acquire([`approval:${card.id}`, `task:${card.taskId}`]);
+    if (!token) return;
     update(card.id, { phase: 'submitting', message: '正在提交…' });
     setErrors(previous => ({ ...previous, [card.id]: '' }));
     let succeeded = false;
@@ -40,12 +43,13 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
       else await api(`/approvals/${encodeURIComponent(card.id)}`, mutation('POST', { option }));
       succeeded = true;
     } catch (cause) {
+      if (mounted.current && cause instanceof ApiError && ['STALE_APPROVAL', 'APPROVAL_ALREADY_ANSWERED', 'APPROVAL_NOT_PENDING'].includes(cause.code)) setBlockedIds(previous => new Set([...previous, card.id]));
       if (cause instanceof ApiError && cause.code === 'STALE_APPROVAL') failure = '请示已失效，请重新生成任务';
       else if (cause instanceof ApiError && ['APPROVAL_ALREADY_ANSWERED', 'APPROVAL_NOT_PENDING'].includes(cause.code)) failure = '该请示已处理或不可继续，正在刷新状态';
       else failure = '提交结果尚未确认，正在读取服务器状态';
     }
-    if (!mounted.current) return;
-    update(card.id, { phase: succeeded ? 'refreshing' : 'outcomeUnknown', message: succeeded ? '操作已提交，正在刷新状态' : failure });
+    awaiting(token);
+    if (mounted.current) update(card.id, { phase: succeeded ? 'refreshing' : 'outcomeUnknown', message: succeeded ? '操作已提交，正在刷新状态' : failure });
     try {
       // Mutation response never writes local entities: only authoritative GET + event replay does.
       await reload();
@@ -59,7 +63,7 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
   function show(card: ApprovalCard) {
     const task = state.tasks.find(item => item.id === card.taskId);
     const lock = locks.current.get(card.id);
-    const enabled = !lock && canAnswer(card, task, state.version, syncReady && status === 'connected');
+    const enabled = !lock && !blockedIds.has(card.id) && !locked([`approval:${card.id}`, `task:${card.taskId}`]) && canAnswer(card, task, state.version, syncReady && status === 'connected');
     return <article key={card.id} className="approval-card" data-testid="approval-card" data-approval-id={card.id} data-task-id={card.taskId} data-status={card.status}>
       <h3>{card.question}</h3><code>{card.taskId}</code>
       <p>{card.reason}</p><p>{card.ruleCodes.map(rule => rules[rule]).join('、')}</p>
@@ -82,7 +86,7 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
       </div>
     </article>;
   }
-  return <section className="approval-panel" data-testid="approval-panel" aria-label="修改请示">
+  return <section id="approval-panel" className="approval-panel" data-testid="approval-panel" aria-label="修改请示">
     <h2>修改请示 · 待处理 {pending.length}</h2>
     {!syncReady && <p role="status">状态待同步，暂不可回答</p>}
     {pending.map(show)}

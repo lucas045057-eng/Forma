@@ -4,18 +4,20 @@ import type { Candidate, CheckRun } from '@spatial/shared';
 import { emptyM2State } from './m2-state.ts';
 import CheckPanel from './CheckPanel.tsx';
 import CandidatePanel from './CandidatePanel.tsx';
-const center = vi.hoisted(() => ({ state: {} as typeof emptyM2State, syncReady: true, syncEpoch: 1, reload: vi.fn() }));
+const center = vi.hoisted(() => ({ state: {} as typeof emptyM2State, syncReady: true, status: 'connected', syncEpoch: 1, locked: vi.fn(() => false), acquire: vi.fn(), awaiting: vi.fn(), reload: vi.fn() }));
 vi.mock('./EventCenter.tsx', () => ({ useEventCenter: () => center }));
 const candidate: Candidate = { id: 'c', candidateCommit: 'commit', baseVersion: 'v1', branch: 'c', previewUrl: '/preview/c/', decision: 'pending', outOfScope: [], diff: [], checks: [] };
 beforeEach(() => { center.syncReady = true; center.state = { ...emptyM2State, version: 'v1', candidates: [candidate] }; });
 const render = () => renderToStaticMarkup(<CandidatePanel selectedId="c" onSelect={() => {}} mode="current" onMode={() => {}}>preview</CandidatePanel>);
-it('offers only first run for unchecked candidate and keeps adoption/revert disabled', () => {
+it('keeps unchecked adoption disabled and allows the server to adjudicate revert', () => {
   const html = render();
   expect(html).toMatch(/data-testid="check-run">/);
   expect(html).not.toContain('data-testid="check-rerun"');
   expect(html).toMatch(/data-testid="check-cancel" disabled=""/);
   expect(html).toMatch(/data-testid="candidate-adopt" disabled=""/);
-  expect(html).toMatch(/data-testid="version-revert" disabled=""/);
+  expect(html).toMatch(/data-testid="version-revert">/);
+  center.syncReady = false;
+  expect(render()).toMatch(/data-testid="version-revert" disabled=""/);
   expect(html.match(/data-status="not_run"/g)).toHaveLength(4);
 });
 it('disables rerun during active checks; ordered rows retain failure and blocked diagnostics as text', () => {
