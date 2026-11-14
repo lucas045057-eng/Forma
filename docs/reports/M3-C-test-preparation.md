@@ -89,16 +89,49 @@ node node_modules/@playwright/test/cli.js test -c playwright.m3c.config.ts --lis
 
 ## 6. 现在还缺什么才能跑正式全量（如实列出）
 
-1. **最终冻结提交号**：当前基线是 `5edaa22`（C3 三条应修的整改提交）。调度确认最终冻结号后，本套件要在该 HEAD 上重新 `--list`，并复核断言（尤其 C3-1 场景草稿、C3-2 旧记录重跑、C3-3 重试范围三处修法）。
+1. **最终冻结提交号**：当前基线是 `5edaa22`（C3 三条应修的整改提交）。但 §7 发现了一个**前置实现缺陷**（Studio 开发服缺 `/approvals` 与 `/checks` 反代），必须由实现者先修；修完后冻结号会变，本套件要在新的 HEAD 上重新 `--list` 并复核断言（尤其 C3-1 场景草稿、C3-2 旧记录重跑、C3-3 重试范围三处修法）。
 2. **真实后端进程重启**：本套件由 `playwright.m3c.config.ts` 的 `webServer` 拥有后端进程，测试内无法合法重启它。当前用“页面重载 + 只读刷新”覆盖持久恢复；真实进程重启由 M3-A 的 `15-n4-shutdown` 证据支撑。若要自证，需要一个由 Pi 自己的 launcher 管理 4 个服务并暴露重启钩子的入口——建议在正式轮之前决定是“引用 M3-A 证据”还是“加这个入口”，不默认略过。
 3. **`version.changed` 的实测口径**：读实现后确认 `PUT /scene`（M1 场景写回）只发 `scene.changed`，**不发** `version.changed`；`version.changed` 来自 adopt/revert/snapshot。因此“M1 写回后旧基线失效”这一条按可执行语义拆成两例：①采用造成的 `version.changed` 让旧候选门禁立即失效（真断言）；②M1 写回后门禁不被放宽（未检查的候选仍不可采用）。若验收要求“场景写回也必须让旧证明失效”，那是实现/合同问题，需要调度判定，不能由测试改断言凑绿。
 4. **M2 回归兼容性**：`tests/e2e/m2b/01-ui.spec.ts` 的采用步骤先走真实 checks API 再点界面按钮；C3 下采用还要求六份证据回执就绪，Playwright 的可操作性等待预期能覆盖，但必须在正式轮里实测确认（这是 Claude 复核里点名要 Pi 确认的点）。
 5. **既有八套 + 新套件的同一轮跑法**：正式轮建议沿用 M3-B 的 `full-regression.mjs` 形状（顺序执行、首败即停、每套独立 `--output`/JSON、证据先归档后按 blob 还原），把 m3c 作为第 12 步加入；这需要调度批准改测试工具（不改断言）。
 6. **定向自证**：harness 接线已用一个真实用例冒烟（见 §7），其余 26 例尚未执行。正式轮之前建议至少把 01/02 各跑一遍，避免把“从未跑过的断言”当验收。
 
-## 7. 本轮已做的接线冒烟（不是验收）
+## 7. 本轮已做的接线冒烟（不是验收）——**冒烟直接撞出一个实现缺陷**
 
-在干净基线上用单独输出目录跑了 1 个 real 用例（影响模式三处高亮），目的是验证 4 个 webServer、Studio 启动、mock Agent、真实点选与 overlay 读取这条链路，**不作为通过证据**；结果与日志在 `orbital/jobs/` 对应作业目录里。
+在干净基线上用单独输出目录跑了 1 个 real 用例（影响模式三处高亮），目的只是验证 4 个 webServer、Studio 启动、mock Agent、真实点选与 overlay 读取这条链路，**不作为通过证据**。结果：**链路在第一步就断了**，并按原件定位到根因。
+
+### 7.1 现象
+
+`openStudio()` 在 `events-status` 上等 90 秒失败（一直是 `connecting`），页面同时显示：
+
+```
+状态待同步
+Unexpected token '<', "<!doctype "... is not valid JSON
+```
+
+作品预览（iframe）已连接，说明 Studio 本体是活的；卡在事件中心的**首次权威快照**。
+
+### 7.2 根因（已在浏览器里逐层取到证据）
+
+| 证据 | 结果 |
+| --- | --- |
+| 拦截四份快照的响应体 | `/tasks` → `[]`、`/candidates` → `[]`、`/version` → `{"version":"1799b929…"}`、**`/approvals` → `<!doctype html>…`（Vite 的 SPA fallback，即 Studio 的 index.html）** |
+| 探针：页面里直接开 `ws://127.0.0.1:5173/events` | 能收到 `{"type":"ready","seq":0,"oldest":1}` → **WS 代理本身没问题** |
+| 探针：页面里直接开 `ws://127.0.0.1:3001/events` | 403（后端同源校验，预期行为） |
+| `apps/studio/vite.config.ts` 的 proxy 键 | `'/scene' '/assets' '/events' '/tasks' '/candidates' '/version'` —— **缺 `/approvals` 与 `/checks`** |
+
+即：C1 新增了 `/approvals` 的读写、C2 新增了 `/checks/:id`、`/checks/:id/cancel`、`/checks/:id/artifacts/:name`，但开发服务器的反代表从 M1 时代到 `5edaa22` 没动过。开发服把这两个前缀当成前端路由，回了 index.html → `JSON.parse` 失败 → `syncReady` 永远为 false → **请示面板、检查面板、采用门禁全套不可用**。
+
+为什么以前没暴露：M2 / M3-A / M3-B 的 E2E 一律**直连后端 3001** 驱动请示与检查，没有任何套件从 Studio 页面里访问过 `/approvals` 或 `/checks`，所以历史全绿也覆盖不到。这也说明本套件（从页面走真实界面）是必要的。
+
+### 7.3 定位与归类
+
+- **归类：实现缺陷（产品侧 `apps/studio/vite.config.ts`），不是测试问题、不是环境问题。**
+- 修复者：实现者（CodeBuddy），不是 Pi。只需两行反代：`'/approvals': { target: backend },` 与 `'/checks': { target: backend },`；不改后端、不改协议、不改断言。
+- 复原材料：`docs/reports/artifacts/M3-C/prep/dev-proxy-missing-approvals-checks.json`（四份响应体、探针结果、作业号与建议 diff）与同目录的 `smoke-open-studio-timeout-error-context.md`。
+- 修后自验：`events-status` 应在数秒内变 `connected`；六份证据 GET 应返回真实 JSON/PNG（不是 HTML）。
+
+因此本套件当前在 `5edaa22` 上**跑不出真实通过**（不是断言写错，是被测界面拿不到请示/检查数据）。正式全量必须等这个缺陷修完、拿到新的冻结提交之后再做。
 
 ## 8. 纪律确认
 
