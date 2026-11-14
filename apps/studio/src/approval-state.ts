@@ -19,7 +19,8 @@ export function canAnswer(card: ApprovalCard, task: Task | undefined, version: s
 }
 export function sourceFile(src: string): string | undefined {
   const match = /^(src\/(?:[\w.-]+\/)*[\w.-]+\.(?:tsx?|jsx?)):[1-9]\d*:[1-9]\d*$/.exec(src);
-  return match?.[1];
+  const file = match?.[1];
+  return file && !file.split('/').some(part => part === '.' || part === '..') ? file : undefined;
 }
 export function affectedSource(card: ApprovalCard, task: Task | undefined, affected: string, version: string): string | undefined {
   if (!waiting(card) || card.baseVersion !== version || !card.affected.includes(affected)) return;
