@@ -112,7 +112,7 @@ test.describe('S4 消息来源与形状校验', () => {
     const baseline = await selectionText(page);
     expect(baseline).toContain(buttonSrc);
 
-    const dispatch = async (message: unknown) => {
+    const send = async (message: unknown) => {
       await page.evaluate(({ data, previewOrigin }) => {
         const iframe = document.querySelector('[data-testid="preview-frame"]') as HTMLIFrameElement | null;
         window.dispatchEvent(new MessageEvent('message', {
@@ -121,6 +121,9 @@ test.describe('S4 消息来源与形状校验', () => {
           source: iframe?.contentWindow ?? null,
         }));
       }, { data: message, previewOrigin: PREVIEW_ORIGIN });
+    };
+    const dispatch = async (message: unknown) => {
+      await send(message);
       await page.waitForTimeout(120);
       return selectionText(page);
     };
@@ -131,9 +134,11 @@ test.describe('S4 消息来源与形状校验', () => {
     }
 
     // 对照：同一条合法 payload 必须被接受，证明上面的“不变”是形状校验生效，而不是通道没通
-    const acceptedText = await dispatch({ type: 'pick:result', payload: validPayload });
-    const accepted = acceptedText !== baseline;
-    const acceptedSelection = accepted ? await readSelection(page) : null;
+    await send({ type: 'pick:result', payload: validPayload });
+    await waitForSelectionChange(page, baseline);
+    await expect(page.getByTestId('pick-state')).toHaveAttribute('data-kind', 'ready');
+    const acceptedSelection = await readSelection(page);
+    const accepted = true;
 
     const errors = consoleErrorsOf(page).filter((line) => !line.includes('favicon'));
     writeArtifact('case-s4c-studio-payload-guard.json', { baselineSrc: buttonSrc, results, accepted, errors });

@@ -39,6 +39,15 @@
 - 接线审计：`tests/e2e` 中仅该处使用 `listen(0)`；其余外部服务/浏览器监听通过 `freePort()` 消费，或使用测试显式固定的 3001/4011/5173/5174 等既定端口。未改生产内部 preview worker 的端口逻辑，也未改 `waitForHttp` 超时、服务启停、测试预算、断言或 Playwright 收集排除。
 - 本轮未单独用探针把 freePort 当作通过；端口修正由 run5 的实际服务启动/端口交接验证。
 
+## 第五轮（HEAD `c6578f5`，`run-20261114-m3a-5`）
+
+- `job_4a04377c` exit 1，约 3 分钟：typecheck（5846ms）、build（10982ms）、完整 `pnpm test`（96805ms）通过，**289 单测**（68+20+1+5+188+7，含 Studio 7）；**M0-B 23/24**，1 失败；M0-A/M1-A/M1-B/M2-A/M2-B/M3-A 六套未开始。原始 JSON 失败 expectedStatus=passed、retry=0、skipped=0。
+- 失败：`tests/e2e/m0b-message-guard.spec.ts:107` S4c 合法对照；`lib.ts:258 readSelection` 报“Selection 面板还没有内容”（3154ms）。原始失败 JSON/截图/context 在 run5；截图稍后可见 GuardProbe、`src/App.tsx:1:1` 与 baseVersion，说明不是永久拒绝。
+- 核实为测试就绪判定竞争：合法 pick 后 Studio 先进入 `pending` 并移除 `selection-json`，异步入 `GET /version` 回来才 `ready`；原 S4c 只等 120ms 就把 `selectionText='' !== baseline` 当作 accepted，随即 `readSelection` 空读。
+- 最小修正仅 S4c 正例：保留原 `send` 与负例 120ms 观察窗；正例发送后 `waitForSelectionChange(page, baseline)`，等待 `pick-state=ready` 后再 `readSelection`，断言 cid=GuardProbe；负例全部 malformed payload 不改变选择、console errors 为空、合法对照必须接受的断言不变；未加 sleep/超时、未 skip/删负例、未改产品版本门禁或全局 readSelection。
+- 定向单次复现：只跑 S4c 一次，**1 passed（7.7s，exit 0）**；日志在 `run-20261114-m3a-5/targeted-s4c.log`，只作接线验证，不是完整回归。
+- 4 份 refreshed artifacts 已归档；run1–4/checkpoint/stability/mock-port 证据未覆盖。下一轮 run6 为完整十步顺序验证。
+
 <!-- 历史：第一轮失败记录保留如下 -->
 
 ## 结论：验收未完成，完整回归被单测超时阻断

@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "total": 289,
+  "packages": {
+    "shared": 68,
+    "plugin": 20,
+    "bridge": 1,
+    "sceneRenderer": 5,
+    "server": 188,
+    "studio": 7
+  },
+  "failed": 0,
+  "skipped": 0,
+  "note": "完整标准 pnpm test exit 0；Studio 7 真实运行；此前 run4 的 280 不是本轮结果"
+}
