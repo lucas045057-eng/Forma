@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WorkRepo } from './repo.ts';
 import { PreviewManager } from './preview.ts';
+import { getInternalPreview } from '../test-support/http-get.ts';
 
 it('serves work and candidate modules but denies workspace sentinel files via @fs', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'vite-boundary-'));
@@ -37,9 +38,9 @@ it('serves work and candidate modules but denies workspace sentinel files via @f
     for (const [id, directory] of [['current1', workRoot], ['candidate1', repo.candidatePath('candidate1')]]) {
       const base = await previews.start(id, directory);
       const origin = `http://127.0.0.1:${previews.port(id)}`;
-      expect((await fetch(origin + base + 'src/main.tsx')).status).toBe(200);
+      expect((await getInternalPreview(origin + base + 'src/main.tsx')).status).toBe(200);
       for (const filename of files) {
-        const response = await fetch(origin + base + '@fs/' + encodeURI(filename.replaceAll('\\', '/')));
+        const response = await getInternalPreview(origin + base + '@fs/' + encodeURI(filename.replaceAll('\\', '/')));
         expect(response.status).toBe(403);
         expect(await response.text()).not.toContain('PRIVATE-SENTINEL');
       }

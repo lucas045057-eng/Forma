@@ -6,6 +6,7 @@ import { AssetService } from './service.ts';
 import { Lux3DClient } from './lux3d.ts';
 import { createMockServer, type MockScenario } from './mock-server.ts';
 import { downloadGlb } from './download.ts';
+import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 const cleanups: (() => Promise<unknown>)[] = [];
 const nativeFetch = globalThis.fetch;
@@ -27,8 +28,7 @@ afterEach(async () => {
 async function setup(scenario: MockScenario = 'success', timeoutMs = 2000) {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-assets-'));
   cleanups.push(() => rm(directory, { recursive: true, force: true }));
-  const mock = await createMockServer({ scenario, key: 'test-only-key' });
-  const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl: base } = await listenForFetch(() => createMockServer({ scenario, key: 'test-only-key' }));
   console.info('[asset-test fixture]', { port: new URL(base).port, scenario });
   cleanups.push(() => mock.close());
   const client = new Lux3DClient({ base, key: 'test-only-key' });

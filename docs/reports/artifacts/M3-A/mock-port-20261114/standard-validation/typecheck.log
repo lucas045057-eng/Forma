@@ -1,0 +1,16 @@
+$ pnpm -r typecheck
+Scope: 7 of 8 workspace projects
+packages/shared typecheck$ tsc
+packages/vite-plugin-source-tag typecheck$ tsc
+packages/shared typecheck: Done
+packages/vite-plugin-source-tag typecheck: Done
+packages/bridge typecheck$ tsc
+packages/scene-renderer typecheck$ tsc
+apps/server typecheck$ tsc
+packages/bridge typecheck: Done
+packages/scene-renderer typecheck: Done
+apps/server typecheck: Done
+apps/studio typecheck$ tsc
+templates/product-page typecheck$ tsc
+templates/product-page typecheck: Done
+apps/studio typecheck: Done

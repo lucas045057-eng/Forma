@@ -1,0 +1,456 @@
+{
+  "root": "E:\\空间化AI工作台\\.worktrees\\m3a",
+  "before": {
+    "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+    "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+    "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+    "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+    "files": {
+      "apps/server/src/agent/client.test.ts": {
+        "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+        "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+      },
+      "apps/server/src/app.test.ts": {
+        "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+        "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+      },
+      "apps/server/src/assets/lux3d.test.ts": {
+        "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+        "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+      },
+      "apps/server/src/assets/recovery.test.ts": {
+        "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+        "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+      },
+      "apps/server/src/assets/service.test.ts": {
+        "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+        "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+      },
+      "apps/server/src/m2-api.test.ts": {
+        "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+        "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+      },
+      "apps/server/src/task-id.test.ts": {
+        "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+        "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+      },
+      "apps/server/src/work/service.test.ts": {
+        "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+        "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+      },
+      "apps/server/src/test-support/fetch-listener.ts": {
+        "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+        "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+      },
+      "apps/server/src/test-support/fetch-listener.test.ts": {
+        "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+        "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+      }
+    }
+  },
+  "startedAt": "2026-11-14T09:42:40.792Z",
+  "steps": [
+    {
+      "name": "typecheck",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm typecheck"
+      ],
+      "startedAt": "2026-11-14T09:42:41.135Z",
+      "before": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "log": "typecheck.log",
+      "pid": 41752,
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-11-14T09:42:46.976Z",
+      "elapsedMs": 5505,
+      "after": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "identityPreserved": true
+    },
+    {
+      "name": "build",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm build"
+      ],
+      "startedAt": "2026-11-14T09:42:47.626Z",
+      "before": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "log": "build.log",
+      "pid": 55216,
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-11-14T09:42:55.953Z",
+      "elapsedMs": 7998,
+      "after": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "identityPreserved": true
+    },
+    {
+      "name": "test",
+      "command": [
+        "C:\\Windows\\system32\\cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "pnpm test"
+      ],
+      "startedAt": "2026-11-14T09:42:56.588Z",
+      "before": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "log": "test.log",
+      "pid": 49084,
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-11-14T09:44:28.217Z",
+      "elapsedMs": 91317,
+      "after": {
+        "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+        "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+        "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+        "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+        "files": {
+          "apps/server/src/agent/client.test.ts": {
+            "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+            "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+          },
+          "apps/server/src/app.test.ts": {
+            "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+            "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+          },
+          "apps/server/src/assets/lux3d.test.ts": {
+            "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+            "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+          },
+          "apps/server/src/assets/recovery.test.ts": {
+            "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+            "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+          },
+          "apps/server/src/assets/service.test.ts": {
+            "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+            "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+          },
+          "apps/server/src/m2-api.test.ts": {
+            "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+            "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+          },
+          "apps/server/src/task-id.test.ts": {
+            "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+            "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+          },
+          "apps/server/src/work/service.test.ts": {
+            "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+            "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+          },
+          "apps/server/src/test-support/fetch-listener.ts": {
+            "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+            "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+          },
+          "apps/server/src/test-support/fetch-listener.test.ts": {
+            "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+            "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+          }
+        }
+      },
+      "identityPreserved": true
+    }
+  ],
+  "status": "passed",
+  "contract": {
+    "testOnlyListenerPorts": [
+      20000,
+      65535
+    ],
+    "maxAllocationCandidates": 32,
+    "httpRetries": 0,
+    "previousTimeoutsUnchanged": true
+  },
+  "finishedAt": "2026-11-14T09:44:28.552Z",
+  "after": {
+    "head": "c2f79f8227466e908d064c81e49d530cc264756e",
+    "status": "M apps/server/src/agent/client.test.ts\n M apps/server/src/app.test.ts\n M apps/server/src/assets/lux3d.test.ts\n M apps/server/src/assets/recovery.test.ts\n M apps/server/src/assets/service.test.ts\n M apps/server/src/m2-api.test.ts\n M apps/server/src/task-id.test.ts\n M apps/server/src/work/service.test.ts\n?? apps/server/src/test-support/fetch-listener.test.ts\n?? apps/server/src/test-support/fetch-listener.ts",
+    "lock": "48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f",
+    "diff": "578f3a190c552bd2d9a64aa266f8f60e2ec8280c7275a2878ea6191677012754",
+    "files": {
+      "apps/server/src/agent/client.test.ts": {
+        "sha256": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+        "gitBlob": "01c0af4a30a38217a81612c5ed2d1aa657e5004e"
+      },
+      "apps/server/src/app.test.ts": {
+        "sha256": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+        "gitBlob": "1c9e3d0eba2115949a61a1d96a6a8dd4ad70f26d"
+      },
+      "apps/server/src/assets/lux3d.test.ts": {
+        "sha256": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+        "gitBlob": "a9f0d747737835d12ba2bd0aca9950b2b426ffd4"
+      },
+      "apps/server/src/assets/recovery.test.ts": {
+        "sha256": "c53246600655e976cd4da914d53053eafcb0b134c56fe491585aab484e85344b",
+        "gitBlob": "2561a00de70316eaf55904e7a00d4cc8fdba85e2"
+      },
+      "apps/server/src/assets/service.test.ts": {
+        "sha256": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+        "gitBlob": "55530de34505b220078cf5673fbfecfd049bbcdd"
+      },
+      "apps/server/src/m2-api.test.ts": {
+        "sha256": "8d761362db00a9221964f40ef084bc3334f2df81c46c0bfa5155bdf12970a8c1",
+        "gitBlob": "8534f4addb0625fd31519e392337981067ecab56"
+      },
+      "apps/server/src/task-id.test.ts": {
+        "sha256": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+        "gitBlob": "67766158564c261a43eec71870e34d410e9c1c81"
+      },
+      "apps/server/src/work/service.test.ts": {
+        "sha256": "de7a35f608825fb0e5d7af9098d4574a7a0ee7640ca4c5eeedc5d9de6def2013",
+        "gitBlob": "07f03284adc23788da405b6433c9e84b6c3e1169"
+      },
+      "apps/server/src/test-support/fetch-listener.ts": {
+        "sha256": "a72cc2b8b30f797d0a9d26da2b58bcd474d453622369bde8f9819894c65d78fd",
+        "gitBlob": "6c6825cc34836ca0cbbb677dc0c3e3eea7776e26"
+      },
+      "apps/server/src/test-support/fetch-listener.test.ts": {
+        "sha256": "2de01585f6d4a184d74be0b80ed2daa922c991d43206bbb17f4dd398172ee3e9",
+        "gitBlob": "76db791d9414888827f6329d20eb070228c69db7"
+      }
+    }
+  },
+  "identityPreserved": true
+}

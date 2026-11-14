@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { PreviewManager } from './preview.ts';
+import { getInternalPreview } from '../test-support/http-get.ts';
 
 it('handles spawn failure and closes a preview when its owning parent is killed', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'preview-ipc-'));
@@ -22,8 +23,8 @@ it('handles spawn failure and closes a preview when its owning parent is killed'
     await manager.stopAll();
     await vi.waitFor(() => expect(output).toMatch(/PORT=\d+/), { timeout: 10000 });
     const port = Number(/PORT=(\d+)/.exec(output)![1]);
-    expect((await fetch(`http://127.0.0.1:${port}/`)).status).toBe(200);
+    expect((await getInternalPreview(`http://127.0.0.1:${port}/`)).status).toBe(200);
     parent.kill('SIGKILL'); await exited;
-    await vi.waitFor(async () => { await expect(fetch(`http://127.0.0.1:${port}/`)).rejects.toThrow(); }, { timeout: 10000 });
+    await vi.waitFor(async () => { await expect(getInternalPreview(`http://127.0.0.1:${port}/`)).rejects.toThrow(); }, { timeout: 10000 });
   } finally { parent.kill('SIGKILL'); await exited; await manager.stopAll(); await rm(root, { recursive: true, force: true }); }
 }, 20000);

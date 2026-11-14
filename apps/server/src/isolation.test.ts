@@ -5,6 +5,7 @@ import path from 'node:path';
 import { createApp } from './app.ts';
 import { createPreviewOrigin } from './work/preview-origin.ts';
 import { EventLog } from './events.ts';
+import { listenServerForFetch } from './test-support/fetch-listener.ts';
 
 it('rejects preview-origin mutations before any task or paid upstream work, and exposes no API on preview listener', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'isolation-'));
@@ -15,15 +16,13 @@ it('rejects preview-origin mutations before any task or paid upstream work, and 
   const write = vi.spyOn(scene, 'put');
   const submit = vi.spyOn(work, 'submit');
   const adopt = vi.spyOn(work, 'adopt');
-  const server = createPreviewOrigin(work.previews);
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
-  const address = server.address() as { port: number };
+  const { server, baseUrl } = await listenServerForFetch(() => createPreviewOrigin(work.previews));
   try {
     for (const [method, url] of [['PUT', '/scene'], ['POST', '/assets/lux3d'], ['POST', '/tasks'], ['POST', '/candidates/example/adopt'], ['POST', '/version/revert']] as const) {
       const result = await app.inject({ method, url, headers: { origin: 'http://127.0.0.1:5175' }, payload: {} });
       expect(result.statusCode).toBe(403);
       expect(result.json().error.code).toBe('ORIGIN_DENIED');
-      expect((await fetch(`http://127.0.0.1:${address.port}${url}`, { method })).status).toBe(404);
+      expect((await fetch(`${baseUrl}${url}`, { method })).status).toBe(404);
     }
     expect(paid).not.toHaveBeenCalled(); expect(write).not.toHaveBeenCalled();
     expect(submit).not.toHaveBeenCalled(); expect(adopt).not.toHaveBeenCalled();

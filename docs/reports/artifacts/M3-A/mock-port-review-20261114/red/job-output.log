@@ -1,0 +1,36 @@
+{"head":"b66e1f46734925ebb46ab93e5a159a5412bfa62d","purpose":"RED: Windows-reserved EACCES currently stops allocation","command":["E:\\Node\\node.exe","E:\\空间化AI工作台\\.worktrees\\m3a\\node_modules\\.pnpm\\vitest@3.2.7_@types+node@24.19.2\\node_modules\\vitest\\vitest.mjs","run","src/test-support/fetch-listener.test.ts"]}
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3a/apps/server
+
+ ❯ src/test-support/fetch-listener.test.ts (8 tests | 1 failed) 2020ms
+   ✓ never binds a fetch-forbidden candidate and returns the listener it keeps open 2ms
+   ✓ closes a listener whose bind collided before allocating a new one 0ms
+   × reallocates Windows-reserved ports while preserving permission errors on other platforms 2ms
+     → reserved by the operating system
+   ✓ propagates a bind error other than an occupied port after cleaning up 1ms
+   ✓ does not allocate another listener when cleanup fails 0ms
+   ✓ bounds allocation when every candidate remains occupied 1ms
+   ✓ keeps a real HTTP listener reachable to native fetch and closes it without an orphan 27ms
+   ✓ handles a real Fastify bind collision without closing the existing listener  1986ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test-support/fetch-listener.test.ts > reallocates Windows-reserved ports while preserving permission errors on other platforms
+Error: reserved by the operating system
+ ❯ src/test-support/fetch-listener.test.ts:32:31
+     30| 
+     31| it('reallocates Windows-reserved ports while preserving permission err…
+     32|   const error = Object.assign(new Error('reserved by the operating sys…
+       |                               ^
+     33|   const reserved = { listen: vi.fn(async () => { throw error; }), clos…
+     34|   const available = { listen: vi.fn(async () => 'http://127.0.0.1:2000…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  17:55:31
+   Duration  5.10s (transform 78ms, setup 0ms, collect 2.24s, tests 2.02s, environment 0ms, prepare 571ms)
+
+{"code":1,"signal":null}

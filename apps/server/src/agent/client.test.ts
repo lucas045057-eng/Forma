@@ -4,13 +4,13 @@ import path from 'node:path';
 import { expect, it } from 'vitest';
 import { CodingAgent, codingAgentEndpoint } from './client.ts';
 import { createCodingAgentMock, type MockScenario } from './mock-server.ts';
+import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 async function fixture(scenario: MockScenario = 'success', delayMs?: number) {
   const root = await mkdtemp(path.join(tmpdir(), 'spatial-agent-'));
   await mkdir(path.join(root, 'src'), { recursive: true });
   await writeFile(path.join(root, 'src', 'App.tsx'), '<button>立即购买</button>\n');
-  const mock = await createCodingAgentMock({ scenario, delayMs });
-  const baseUrl = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl } = await listenForFetch(() => createCodingAgentMock({ scenario, delayMs }));
   const agent = new CodingAgent({ baseUrl, apiKey: 'mock-only', model: 'mock-coder', timeoutMs: 1000 });
   return { root, mock, agent, baseUrl };
 }

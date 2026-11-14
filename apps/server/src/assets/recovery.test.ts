@@ -6,6 +6,7 @@ import { Lux3DClient } from './lux3d.ts';
 import { AssetService } from './service.ts';
 import { createApp } from '../app.ts';
 import * as atomic from './atomic-file.ts';
+import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 const cleanups: (() => Promise<unknown>)[] = [];
 afterEach(async () => { vi.restoreAllMocks(); for (const close of cleanups.reverse()) await close(); cleanups.length = 0; });
@@ -14,8 +15,7 @@ async function setup(scenario: MockScenario = 'success') {
   await mkdir(root, { recursive: true });
   const directory = await mkdtemp(join(root, 'recovery-test-'));
   cleanups.push(() => rm(directory, { recursive: true, force: true }));
-  const mock = await createMockServer({ scenario });
-  const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl: base } = await listenForFetch(() => createMockServer({ scenario }));
   cleanups.push(() => mock.close());
   const client = new Lux3DClient({ base, key: 'mock-only' });
   return { root, directory, mock, base, client };
@@ -117,8 +117,7 @@ it.each(['drip', 'timeout'] as const)('app.close stops %s work and persists a re
   expect(stored).toMatchObject({ id: asset.id, status: 'polling', error: { code: 'SERVICE_STOPPED' } });
   expect((await mock.inject('/__stats')).json().creates).toBe(0);
   if (scenario === 'drip') expect(await readdir(join(directory, '123'))).toEqual([]);
-  const resumedMock = await createMockServer();
-  const resumedBase = await resumedMock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock: resumedMock, baseUrl: resumedBase } = await listenForFetch(() => createMockServer());
   cleanups.push(() => resumedMock.close());
   const resumed = new AssetService({ directory, client: new Lux3DClient({ base: resumedBase, key: 'mock-only' }), pollMs: 1 });
   cleanups.push(() => resumed.close());

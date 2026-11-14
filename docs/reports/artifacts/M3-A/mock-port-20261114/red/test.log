@@ -1,0 +1,26 @@
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3a/apps/server
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test-support/fetch-listener.test.ts [ src/test-support/fetch-listener.test.ts ]
+Error: Cannot find module './fetch-listener.ts' imported from 'E:/空间化AI工作台/.worktrees/m3a/apps/server/src/test-support/fetch-listener.test.ts'
+ ❯ src/test-support/fetch-listener.test.ts:2:1
+      1| import { expect, it, vi } from 'vitest';
+      2| import { listenForFetch } from './fetch-listener.ts';
+       | ^
+      3| 
+      4| it('never binds a fetch-forbidden candidate and returns the listener i…
+
+Caused by: Error: Failed to load url ./fetch-listener.ts (resolved id: ./fetch-listener.ts) in E:/空间化AI工作台/.worktrees/m3a/apps/server/src/test-support/fetch-listener.test.ts. Does the file exist?
+ ❯ loadAndTransform ../../../../../%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m3a/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:22907:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  17:37:01
+   Duration  230ms (transform 23ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 66ms)
+

@@ -3,13 +3,13 @@ import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { createApp } from './app.ts';
 import { createMockServer } from './assets/mock-server.ts';
+import { listenForFetch } from './test-support/fetch-listener.ts';
 
 async function fixture() {
   const root = path.resolve(import.meta.dirname, '../../../.data');
   await mkdir(root, { recursive: true });
   const directory = await mkdtemp(path.join(root, 'task-id-'));
-  const mock = await createMockServer();
-  const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl: base } = await listenForFetch(() => createMockServer());
   const { app } = await createApp({ dataDirectory: directory, base, key: 'mock-only', pollMs: 1 });
   return { app, mock, close: async () => { await app.close(); await mock.close(); await rm(directory, { recursive: true, force: true }); } };
 }

@@ -5,6 +5,30 @@ import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { chromium } from '@playwright/test';
 import ts from 'typescript';
+import { randomInt } from 'node:crypto';
+
+// Test-only browser listener: avoid Chromium's blocked ports without releasing a
+// probed socket. Reallocate only unavailable binds, never browser/test actions.
+async function listenForBrowser(server) {
+  let lastBindError;
+  for (let attempt = 0; attempt < 32; attempt++) {
+    try {
+      await new Promise((resolve, reject) => {
+        const onError = error => reject(error);
+        server.once('error', onError);
+        server.listen(randomInt(20_000, 65_536), '127.0.0.1', () => {
+          server.off('error', onError);
+          resolve();
+        });
+      });
+      return;
+    } catch (error) {
+      lastBindError = error;
+      if (error.code !== 'EADDRINUSE' && !(process.platform === 'win32' && error.code === 'EACCES')) throw error;
+    }
+  }
+  throw new Error('Unable to bind a browser-compatible test listener after 32 candidates', { cause: lastBindError });
+}
 
 const transpile = source => ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const shared = transpile(await readFile(new URL('../../shared/src/index.ts', import.meta.url), 'utf8')).replace(/^export /gm, '');
@@ -16,7 +40,7 @@ test('capture isolation, real click selection, restoration and idle overlay with
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.end(req.url === '/child' ? '<body><button data-src="src/Button.tsx:1:1" data-cid="Button">Pick</button><form><input aria-label="input"></form><a href="#target">Link</a><p>plain text</p></body>' : '<iframe src="/child" style="width:600px;height:500px"></iframe>');
   });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  await listenForBrowser(server);
   const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
   const browser = await chromium.launch({ executablePath: existsSync(chrome) ? chrome : undefined });
   try {

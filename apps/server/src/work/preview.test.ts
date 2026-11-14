@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { expect, it } from 'vitest';
 import { PreviewManager } from './preview.ts';
+import { listenServerForFetch } from '../test-support/fetch-listener.ts';
 
 it('proxies only GET and HEAD to the selected loopback preview port', async () => {
   const upstream = createServer((request, response) => {
@@ -13,9 +14,7 @@ it('proxies only GET and HEAD to the selected loopback preview port', async () =
   const manager = new PreviewManager({ workRoot: '.', cacheDirectory: '.' });
   const running = manager as unknown as { running: Map<string, { port: number }> };
   running.running.set('candidate1', { port });
-  const proxy = createServer((request, response) => manager.proxy('candidate1', request, response));
-  await new Promise<void>(resolve => proxy.listen(0, '127.0.0.1', resolve));
-  const base = `http://127.0.0.1:${(proxy.address() as AddressInfo).port}`;
+  const { server: proxy, baseUrl: base } = await listenServerForFetch(() => createServer((request, response) => manager.proxy('candidate1', request, response)));
   try {
     const get = await fetch(`${base}/preview/c/candidate1/src/main.tsx?direct=1`);
     expect(get.status).toBe(200);
