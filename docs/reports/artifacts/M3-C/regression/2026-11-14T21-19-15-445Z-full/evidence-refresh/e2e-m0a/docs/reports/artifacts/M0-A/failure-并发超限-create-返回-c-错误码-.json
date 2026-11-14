@@ -1,0 +1,40 @@
+{
+  "case": {
+    "name": "并发超限（create 返回 c 错误码）",
+    "stub": "concurrency",
+    "submitOnly": true,
+    "status": "submit_unknown",
+    "code": "UPSTREAM_REJECTED"
+  },
+  "submitted": {
+    "id": "0c9be267-4bda-4167-9c61-96c312e7b7ea",
+    "status": "submit_unknown",
+    "createdAt": "2026-11-14T21:24:35.428Z",
+    "updatedAt": "2026-11-14T21:24:35.440Z",
+    "error": {
+      "code": "UPSTREAM_REJECTED",
+      "message": "Lux3D 未接受请求，请核对参数、额度及并发任务"
+    }
+  },
+  "finalAsset": {
+    "id": "0c9be267-4bda-4167-9c61-96c312e7b7ea",
+    "status": "submit_unknown",
+    "createdAt": "2026-11-14T21:24:35.428Z",
+    "updatedAt": "2026-11-14T21:24:35.440Z",
+    "error": {
+      "code": "UPSTREAM_REJECTED",
+      "message": "Lux3D 未接受请求，请核对参数、额度及并发任务"
+    }
+  },
+  "elapsedMs": 20,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 0
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 0
+    }
+  }
+}
