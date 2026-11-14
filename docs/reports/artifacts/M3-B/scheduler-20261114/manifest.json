@@ -1,0 +1,49 @@
+{
+  "scope": "implementation Git/scheduler/store evidence, not independent acceptance",
+  "runs": {
+    "red": "m3b-scheduler-red-1794658032674",
+    "green": "m3b-scheduler-green-1794658761281"
+  },
+  "files": [
+    {
+      "path": "red/evidence.json",
+      "bytes": 5915,
+      "sha256": "1845b9500517cd732467accfa6839765393dbe40b2b94efb0f5d3118f3367217"
+    },
+    {
+      "path": "red/tests.json",
+      "bytes": 12115,
+      "sha256": "3ef5a3f4cea82b726216c3914d336fca720883576b8406e76f4a18735d548e45"
+    },
+    {
+      "path": "red/tests.log",
+      "bytes": 111,
+      "sha256": "ecb5293f42c23459b8b197ac7dc25c1a32cb2fc0ec841afd886fbfb34a20ff41"
+    },
+    {
+      "path": "green/evidence.json",
+      "bytes": 9753,
+      "sha256": "5ed787a37e316e307e2f195364bd59a1be6e56daca9287565e6eca2aee408023"
+    },
+    {
+      "path": "green/foundation-native-import.log",
+      "bytes": 67,
+      "sha256": "8b0ee163ab7b4e675a400cb4a4eeaa5aa6b57668327269a11ff8bea9aba792a2"
+    },
+    {
+      "path": "green/foundation-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "green/tests.json",
+      "bytes": 17437,
+      "sha256": "e0e0123f532c2a919ec089a0ef998ff577e74e5f0f31dbecfcec181ba698ae20"
+    },
+    {
+      "path": "green/tests.log",
+      "bytes": 220,
+      "sha256": "317d79de8432e371b0f4285497d78f6bc6939a2e6778bd6e33022d87199220e9"
+    }
+  ]
+}

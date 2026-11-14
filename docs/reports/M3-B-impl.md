@@ -23,8 +23,16 @@
 - 只补预算数组的readonly tuple类型注解（as const），不改预算/判断。`job_31832add`：基础模块定向typecheck、原生Node导入均exit0；`.data/m3b-foundation-types-native-1794657398639/`。SHA验证撤销注解后等于44项受测源码，其余受测文件字节不变；新运行前后身份一致，没有重复宣称44项在新提交上执行。
 - 上述五轮原始实现证据归档于 `docs/reports/artifacts/M3-B/foundation-20261114/`（manifest逐文件SHA256、局部.gitattributes保留原字节）。属于实现阶段证据，不替代Pi独立验收。
 
-### 仍未完成的集成边界
+## 第三批：Git身份、跨候选串行与持久层适配
 
-Claude固定B1审查 `M3-B-B1-review.md` 中，完整摘要/证据/持久化/逻辑中止已有上述实现用例，但尚未独立复审关闭；H1与Git commit绑定、H2服务级跨候选唯一运行器、H4真实进程强制中止，以及tasks.json同文件集成、真实构建、浏览器与采用门禁仍待完成。不能称B1/B2或整个M3-B通过。
+`WorkRepo.candidateCommit(id,{clean:true,expectedCommit})`新增严格模式：确认预期分支提交、common gitdir、工作树HEAD、commit与路径审计，并拒绝未提交/ignored输入。不传选项保持原审批使用的语义。CheckRunner按candidateId重新解析并冻结输入，开始/结束都复核，单个执行队列在stop确认后释放名额；排队取消/超时可独立持久化终态。提供所属CheckStateStore适配，启用时不再竞争写check-runs.json，留给后端实际tasks.json接入。
+
+- RED `job_b65e0f3c`：十一项真实临时Git/调度/store用例，2通过/9目标失败，0跳过；`.data/m3b-scheduler-red-1794658032674/`。
+- GREEN `job_675d2ed6`：**63/63**（此前44、新调度11、既有repo8）通过、0失败/跳过；基础模块定向typecheck和原生Node导入均exit0，前后源码身份一致；`.data/m3b-scheduler-green-1794658761281/`。
+- 原始证据归档 `docs/reports/artifacts/M3-B/scheduler-20261114/`，保留RED和GREEN，不把后续提交HEAD当作重新受测。
+
+### 当前仍未完成
+
+Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中止、Git提交绑定和单实例跨候选串行已有上述实现验证，尚未独立复审关闭。真实受控worker的强制中止/父进程退出清理、实际tasks.json/事件/API、Vite构建、浏览器及采用门禁仍待完成；不能称B1/B2或整个M3-B通过。
 
 本批没有运行完整typecheck/build/单测或正式E2E，没有读取真实.env/ASKS，也未启动模型/Lux3D/浏览器/网络服务。正式交付仍需后续完整验证、独立复审及Pi验收。

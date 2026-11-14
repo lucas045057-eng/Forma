@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { CheckRun, CheckName, CheckResult } from '@spatial/shared';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { WorkError } from '../work/repo.ts';
-import { computeSnapshot, type SnapshotResult, copyAudited, cleanupSnapshot } from './snapshot.ts';
+import { computeSnapshot, type SnapshotResult, SnapshotError, copyAudited, cleanupSnapshot } from './snapshot.ts';
 import { writeArtifact, readArtifact, ARTIFACT_NAMES, type ArtifactRef } from './artifacts.ts';
 
 export { SnapshotError } from './snapshot.ts';
@@ -37,8 +37,8 @@ export interface CheckContext {
   artifactsDir: string;
   writeArtifact: (name: string, content: Buffer | string) => Promise<ArtifactRef>;
 }
-export interface CheckRunnerOptions {
-  dataDirectory: string;
+export interface CheckCandidateInput {
+  candidateId: string;
   candidatePath: string;
   candidateCommit: string;
   baseVersion: string;
@@ -46,12 +46,28 @@ export interface CheckRunnerOptions {
   contentDigest: string;
   mainVersion: string;
   toolIdentity?: string;
+}
+export interface CheckStateStore {
+  load(): Promise<CheckRun[]>;
+  save(runs: CheckRun[]): Promise<void>;
+}
+export interface CheckRunnerOptions extends Partial<CheckCandidateInput> {
+  dataDirectory: string;
+  /** WorkService resolves and audits the named candidate under its repository mutex. */
+  resolveCandidate?: (candidateId: string, signal?: AbortSignal) => Promise<CheckCandidateInput>;
+  /** Production uses the owning WorkService's tasks.json; the file fallback is for standalone callers. */
+  store?: CheckStateStore;
   executor?: CheckExecutor;
   buildTimeoutMs?: number;
   browserTimeoutMs?: number;
   runTimeoutMs?: number;
 }
-interface ActiveRun { run: CheckRun; controller: AbortController; promise: Promise<CheckRun> }
+interface ActiveRun {
+  run: CheckRun; controller: AbortController; promise: Promise<CheckRun>;
+  state: 'queued' | 'running' | 'settling';
+  resolve: (run: CheckRun) => void; reject: (error: unknown) => void;
+  timer?: ReturnType<typeof setTimeout>;
+}
 const copy = <T>(value: T): T => structuredClone(value);
 const cancelled = () => new WorkError('CANCELLED', '检查被取消', 409);
 const timeout = () => new WorkError('TIMEOUT', '检查超过时间预算', 408);
@@ -75,6 +91,8 @@ export class CheckRunner {
   private active = new Map<string, ActiveRun>();
   private writes: Promise<void> = Promise.resolve();
   private admissions: Promise<void> = Promise.resolve();
+  private executions: Promise<void> = Promise.resolve();
+  private boundCandidateId?: string;
   private closing = false;
   private fault?: WorkError;
   private resourceFault?: WorkError;
@@ -95,12 +113,13 @@ export class CheckRunner {
   async init() {
     await mkdir(this.options.dataDirectory, { recursive: true });
     try {
-      const saved = JSON.parse(await readFile(this.file, 'utf8')) as { runs?: unknown };
-      if (!Array.isArray(saved.runs) || !saved.runs.every(validStoredRun) ||
-        new Set(saved.runs.map(run => run.id)).size !== saved.runs.length) throw new Error('Invalid check runs');
-      this.runs = saved.runs;
+      const records: unknown = this.options.store ? await this.options.store.load() :
+        (JSON.parse(await readFile(this.file, 'utf8')) as { runs?: unknown }).runs;
+      if (!Array.isArray(records) || !records.every(validStoredRun) ||
+        new Set(records.map(run => run.id)).size !== records.length) throw new Error('Invalid check runs');
+      this.runs = copy(records);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取检查运行状态 check-runs.json');
+      if (this.options.store || (error as NodeJS.ErrnoException).code !== 'ENOENT') throw new Error('无法读取检查运行状态');
     }
     this.durable = copy(this.runs);
     let changed = false;
@@ -144,7 +163,8 @@ export class CheckRunner {
     const snapshot = copy(this.runs);
     const operation = this.writes.then(async () => {
       if (this.fault) throw this.fault;
-      await writeAtomic(this.file, JSON.stringify({ runs: snapshot }, null, 2));
+      if (this.options.store) await this.options.store.save(copy(snapshot));
+      else await writeAtomic(this.file, JSON.stringify({ runs: snapshot }, null, 2));
       this.durable = snapshot;
     });
     this.writes = operation.then(() => {}, () => {});
@@ -165,23 +185,48 @@ export class CheckRunner {
     return operation;
   }
 
+  private async inputFor(candidateId: string, signal?: AbortSignal): Promise<CheckCandidateInput> {
+    signal?.throwIfAborted();
+    const resolved = this.options.resolveCandidate;
+    const source = resolved ? await resolved(candidateId, signal) : this.options;
+    signal?.throwIfAborted();
+    if (!source || typeof source !== 'object') throw new WorkError('INVALID_CANDIDATE_INPUT', '候选检查输入无效', 409);
+    if (resolved) {
+      if (inputString(source, 'candidateId') !== candidateId) throw new WorkError('CANDIDATE_ID_MISMATCH', '检查输入不属于请求的候选', 409);
+    } else {
+      const bound = this.options.candidateId ?? this.boundCandidateId ?? candidateId;
+      if (bound !== candidateId) throw new WorkError('CANDIDATE_ID_MISMATCH', '固定检查输入不能冒充另一个候选', 409);
+      this.boundCandidateId = bound;
+    }
+    const input: CheckCandidateInput = {
+      candidateId, candidatePath: inputString(source, 'candidatePath'),
+      candidateCommit: inputString(source, 'candidateCommit'), baseVersion: inputString(source, 'baseVersion'),
+      mainVersion: inputString(source, 'mainVersion'), contentDigest: inputString(source, 'contentDigest'),
+      toolIdentity: source.toolIdentity ?? '',
+    };
+    if (!path.isAbsolute(input.candidatePath) || typeof input.toolIdentity !== 'string') throw new WorkError('INVALID_CANDIDATE_INPUT', '候选检查路径或工具身份无效', 409);
+    return Object.freeze(input);
+  }
+
   private async startAdmitted(candidateId: string, opts?: { rerun?: boolean }): Promise<CheckRun> {
     if (this.fault) throw this.fault;
-    if (this.options.mainVersion !== this.options.baseVersion) throw new WorkError('STALE_CANDIDATE', '主作品版本已变化，请重新生成候选', 409);
     const controller = new AbortController();
     const deadline = Date.now() + (this.options.runTimeoutMs ?? DEFAULT_RUN_TIMEOUT_MS);
     const timer = setTimeout(() => controller.abort(timeout()), Math.max(0, deadline - Date.now()));
+    let input: CheckCandidateInput;
     let snapshot: SnapshotResult;
     try {
-      snapshot = await computeSnapshot(this.options.candidatePath, { toolIdentity: this.options.toolIdentity, signal: controller.signal });
+      input = await bounded(() => this.inputFor(candidateId, controller.signal), controller.signal);
+      if (input.mainVersion !== input.baseVersion) throw new WorkError('STALE_CANDIDATE', '主作品版本已变化，请重新生成候选', 409);
+      snapshot = await computeSnapshot(input.candidatePath, { toolIdentity: input.toolIdentity, signal: controller.signal });
       controller.signal.throwIfAborted();
     } finally { clearTimeout(timer); }
-    if (snapshot.digest !== this.options.contentDigest) throw new WorkError('SNAPSHOT_MISMATCH', '候选字节与完整检查摘要不一致', 409);
+    if (snapshot.digest !== input.contentDigest) throw new WorkError('SNAPSHOT_MISMATCH', '候选字节与完整检查摘要不一致', 409);
     const run: CheckRun = {
       id: randomUUID().replaceAll('-', ''), candidateId,
-      candidateCommit: this.options.candidateCommit, baseVersion: this.options.baseVersion,
-      mainVersion: this.options.mainVersion, contentDigest: snapshot.digest,
-      toolIdentity: this.options.toolIdentity ?? '', policyVersion: POLICY_VERSION,
+      candidateCommit: input.candidateCommit, baseVersion: input.baseVersion,
+      mainVersion: input.mainVersion, contentDigest: snapshot.digest,
+      toolIdentity: input.toolIdentity ?? '', policyVersion: POLICY_VERSION,
       status: 'queued', outcome: 'not_run', artifacts: [],
       checks: CHECK_ORDER.map(name => ({ name, status: 'not_run' })),
       createdAt: new Date().toISOString(),
@@ -196,10 +241,53 @@ export class CheckRunner {
     this.runs.push(run);
     try { await this.save(); }
     catch (error) { this.runs = this.runs.filter(item => item.id !== run.id); throw error; }
-    const promise = Promise.resolve().then(() => this.execute(run, controller, snapshot, deadline));
-    this.active.set(run.id, { run, controller, promise });
-    void promise.finally(() => this.active.delete(run.id)).catch(() => {});
+    let resolve!: (value: CheckRun) => void;
+    let reject!: (error: unknown) => void;
+    const promise = new Promise<CheckRun>((done, failed) => { resolve = done; reject = failed; });
+    const entry: ActiveRun = { run, controller, promise, state: 'queued', resolve, reject };
+    this.active.set(run.id, entry);
+    const queuedAbort = () => {
+      if (entry.state !== 'queued') return;
+      entry.state = 'settling';
+      void this.finishQueued(entry).then(entry.resolve, entry.reject);
+    };
+    controller.signal.addEventListener('abort', queuedAbort, { once: true });
+    entry.timer = setTimeout(() => controller.abort(timeout()), Math.max(0, deadline - Date.now()));
+    void promise.finally(() => {
+      if (entry.timer) clearTimeout(entry.timer);
+      controller.signal.removeEventListener('abort', queuedAbort);
+      this.active.delete(run.id);
+    }).catch(() => {});
+    const scheduled = this.executions.then(async () => {
+      if (entry.state !== 'queued') return;
+      if (this.fault || this.resourceFault) {
+        controller.abort(this.fault ?? this.resourceFault);
+        return;
+      }
+      entry.state = 'running';
+      if (entry.timer) clearTimeout(entry.timer);
+      try { entry.resolve(await this.execute(run, controller, snapshot, deadline, input)); }
+      catch (error) { entry.reject(error); }
+    });
+    this.executions = scheduled.then(() => {}, error => { entry.reject(error); });
     return copy(run);
+  }
+
+  private async finishQueued(entry: ActiveRun): Promise<CheckRun> {
+    if (this.fault) throw this.fault;
+    const reason = entry.controller.signal.reason;
+    const failure = reason instanceof WorkError ? reason : cancelled();
+    const run = entry.run;
+    run.status = failure.code === 'CANCELLED' ? 'cancelled' : 'completed';
+    run.outcome = failure.code === 'CANCELLED' ? 'cancelled' : 'failed';
+    run.error = { code: failure.code, message: failure.message };
+    run.finishedAt = new Date().toISOString();
+    run.checks = CHECK_ORDER.map((name, index) => ({
+      name, status: failure.code !== 'CANCELLED' && index === 0 ? 'failed' : 'not_run',
+      message: '未开始执行：' + failure.message,
+    }));
+    await this.save();
+    return run;
   }
 
   async cancelChecks(runId: string): Promise<CheckRun> {
@@ -221,7 +309,7 @@ export class CheckRunner {
     return run ? copy(run) : undefined;
   }
 
-  private async execute(run: CheckRun, controller: AbortController, snapshot: SnapshotResult, deadline: number): Promise<CheckRun> {
+  private async execute(run: CheckRun, controller: AbortController, snapshot: SnapshotResult, deadline: number, input: CheckCandidateInput): Promise<CheckRun> {
     const signal = controller.signal;
     const timer = setTimeout(() => controller.abort(timeout()), Math.max(0, deadline - Date.now()));
     const buildRoot = path.join(this.options.dataDirectory, 'check-builds', run.id);
@@ -234,7 +322,16 @@ export class CheckRunner {
       run.startedAt = new Date().toISOString();
       await this.save();
       if (!executor) throw new WorkError('NO_EXECUTOR', '检查运行器未配置', 503);
-      const copied = await copyAudited(this.options.candidatePath, buildRoot, snapshot.digest, { toolIdentity: this.options.toolIdentity, signal });
+      const verifyInput = async () => {
+        const current = await bounded(() => this.inputFor(run.candidateId, signal), signal);
+        if (current.mainVersion !== current.baseVersion ||
+          path.resolve(current.candidatePath) !== path.resolve(input.candidatePath) ||
+          this.identity({ ...current, policyVersion: POLICY_VERSION }) !== this.identity(run)) {
+          throw new WorkError('STALE_CANDIDATE', '排队或检查期间候选身份发生变化', 409);
+        }
+      };
+      await verifyInput();
+      const copied = await copyAudited(input.candidatePath, buildRoot, snapshot.digest, { toolIdentity: input.toolIdentity, signal });
       for (phaseIndex = 0; phaseIndex < CHECK_ORDER.length; phaseIndex++) {
         signal.throwIfAborted();
         const name = CHECK_ORDER[phaseIndex];
@@ -249,7 +346,7 @@ export class CheckRunner {
           if (!open || phaseSignal.aborted || this.fault) throw phaseSignal.reason ?? this.fault ?? cancelled();
         };
         const context: CheckContext = {
-          runId: run.id, candidateRoot: this.options.candidatePath, buildRoot,
+          runId: run.id, candidateRoot: input.candidatePath, buildRoot,
           snapshot: copied, signal: phaseSignal,
           buildTimeoutMs: this.options.buildTimeoutMs ?? DEFAULT_BUILD_TIMEOUT_MS,
           browserTimeoutMs: this.options.browserTimeoutMs ?? DEFAULT_BROWSER_TIMEOUT_MS,
@@ -289,11 +386,14 @@ export class CheckRunner {
           if (phaseTimer) clearTimeout(phaseTimer);
         }
       }
+      await verifyInput();
+      const finalSnapshot = await computeSnapshot(input.candidatePath, { toolIdentity: input.toolIdentity, signal });
+      if (finalSnapshot.digest !== run.contentDigest) throw new WorkError('SNAPSHOT_MISMATCH', '检查结束时输入字节已经变化', 409);
       signal.throwIfAborted();
       run.outcome = 'passed';
     } catch (error) {
       if (!this.fault) {
-        const failure = error instanceof WorkError ? error : new WorkError('RUN_ERROR', error instanceof Error ? error.message : '检查运行异常', 500);
+        const failure = error instanceof WorkError ? error : new WorkError(error instanceof SnapshotError ? error.code : 'RUN_ERROR', error instanceof Error ? error.message : '检查运行异常', 500);
         const index = Math.min(phaseIndex, CHECK_ORDER.length - 1);
         run.status = failure.code === 'CANCELLED' ? 'cancelled' : 'completed';
         run.outcome = failure.code === 'CANCELLED' ? 'cancelled' : 'failed';
@@ -332,10 +432,12 @@ export class CheckRunner {
   }
 
   async waitForActive(): Promise<void> {
-    await Promise.all([...this.active.values()].map(entry => entry.promise));
+    const settled = await Promise.allSettled([...this.active.values()].map(entry => entry.promise));
     await this.writes;
     if (this.fault) throw this.fault;
     if (this.resourceFault) throw this.resourceFault;
+    const failure = settled.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+    if (failure) throw failure.reason;
   }
   async drain(): Promise<void> {
     this.closing = true;
@@ -368,4 +470,10 @@ function validStoredRun(value: unknown): value is CheckRun {
       Number.isSafeInteger(ref.bytes) && (ref.bytes as number) >= 0 && typeof ref.hash === 'string' && /^[a-f0-9]{64}$/.test(ref.hash);
   }))) return false;
   return true;
+}
+
+function inputString(source: object, field: keyof CheckCandidateInput): string {
+  const value: unknown = Reflect.get(source, field);
+  if (typeof value !== 'string' || !value) throw new WorkError('INVALID_CANDIDATE_INPUT', '候选检查输入缺失或非法', 409);
+  return value;
 }
