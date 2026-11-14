@@ -4,14 +4,14 @@ import path from 'node:path';
 import { expect, it } from 'vitest';
 import { createApp } from './app.ts';
 import { createCodingAgentMock } from './agent/mock-server.ts';
+import { listenForFetch } from './test-support/fetch-listener.ts';
 
 it('exposes the M2 task/candidate/version flow and durable event replay without exposing the agent key', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-m2-api-'));
   const workRoot = path.join(directory, 'work');
   await mkdir(path.join(workRoot, 'src'), { recursive: true });
   await writeFile(path.join(workRoot, 'src', 'App.tsx'), '<button>立即购买</button>\n');
-  const mock = await createCodingAgentMock({ key: 'mock-agent-secret' });
-  const codingAgentBaseUrl = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl: codingAgentBaseUrl } = await listenForFetch(() => createCodingAgentMock({ key: 'mock-agent-secret' }));
   const { app, work } = await createApp({
     workRoot, dataDirectory: path.join(directory, 'assets'), workDataDirectory: path.join(directory, 'm2'), historyDirectory: path.join(directory, 'history'),
     base: 'http://127.0.0.1:1', key: 'mock-only', codingAgentBaseUrl, codingAgentApiKey: 'mock-agent-secret', codingAgentModel: 'mock-coder',

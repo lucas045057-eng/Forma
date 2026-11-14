@@ -6,6 +6,7 @@ import type { Selection } from '@spatial/shared';
 import { createCodingAgentMock, type CodingAgentMock, type MockScenario } from '../agent/mock-server.ts';
 import type { StudioEvent } from '../events.ts';
 import { WorkService } from './service.ts';
+import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 async function fixture(scenario: MockScenario = 'success', delayMs?: number) {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-m2-'));
@@ -13,8 +14,7 @@ async function fixture(scenario: MockScenario = 'success', delayMs?: number) {
   await mkdir(path.join(workRoot, 'src', 'components'), { recursive: true });
   await writeFile(path.join(workRoot, 'src', 'App.tsx'), '<button>立即购买</button>\n');
   await writeFile(path.join(workRoot, 'src', 'components', 'Button.tsx'), 'export const Button = () => <button>立即购买</button>;\n');
-  const mock = await createCodingAgentMock({ scenario, delayMs });
-  const baseUrl = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl } = await listenForFetch(() => createCodingAgentMock({ scenario, delayMs }));
   const published: StudioEvent[] = [];
   const work = new WorkService({
     workRoot, directory: path.join(directory, 'data'), emit: event => { const stamped = { ...event, seq: published.length + 1, ts: new Date().toISOString() } as StudioEvent; published.push(stamped); return stamped; },

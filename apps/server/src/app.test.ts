@@ -4,11 +4,11 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { createApp } from './app.ts';
 import { createMockServer } from './assets/mock-server.ts';
+import { listenForFetch } from './test-support/fetch-listener.ts';
 
 it('runs the mock import through HTTP, processing and model serving; rejects invalid inputs and foreign origins', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'spatial-api-'));
-  const mock = await createMockServer();
-  const base = await mock.listen({ host: '127.0.0.1', port: 0 });
+  const { mock, baseUrl: base } = await listenForFetch(() => createMockServer());
   const { app, service } = await createApp({ dataDirectory: directory, base, key: 'mock-only', pollMs: 1 });
   try {
     const invalid = await app.inject({ method: 'POST', url: '/assets/lux3d', payload: { prompt: 'bottle', img: 'https://example.com/x.png', version: 'G1', idempotencyKey: 'one' } });

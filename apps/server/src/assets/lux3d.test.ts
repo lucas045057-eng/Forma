@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
-import { createServer } from 'node:http';
 import { Lux3DClient } from './lux3d.ts';
+import { listenHttpForFetch } from '../test-support/fetch-listener.ts';
 
 it.each(['http://example.com', 'http://10.0.0.1', 'ftp://example.com', 'https://user:secret@example.com'])('rejects unsafe upstream %s before any request', base => {
   const fetch = vi.spyOn(globalThis, 'fetch');
@@ -15,8 +15,7 @@ it.each(['http://127.0.0.1:4010', 'http://localhost:4010', 'http://[::1]:4010', 
 it('aborts an in-flight task query without waiting for the upstream timeout', async () => {
   let started!: () => void;
   const received = new Promise<void>(resolve => { started = resolve; });
-  const server = createServer(() => started());
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+  const { server, baseUrl } = await listenHttpForFetch(() => started());
   const controller = new AbortController();
   const nativeFetch = globalThis.fetch;
   const port = (server.address() as { port: number }).port;
@@ -30,7 +29,7 @@ it('aborts an in-flight task query without waiting for the upstream timeout', as
     }
   });
   try {
-    const client = new Lux3DClient({ base: `http://127.0.0.1:${(server.address() as { port: number }).port}`, key: 'mock-only' });
+    const client = new Lux3DClient({ base: baseUrl, key: 'mock-only' });
     const result = expect(client.getTask('123', controller.signal)).rejects.toMatchObject({ code: 'UPSTREAM_UNAVAILABLE' });
     await received;
     const start = Date.now(); controller.abort(); await result;
