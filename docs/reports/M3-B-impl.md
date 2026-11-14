@@ -94,3 +94,11 @@ adopt同repo锁中快照主作品后核对最新run、完整输入摘要、candi
 RED job_91b1f5f0：types0，十项全部目标失败。GREEN job_d1db8079：types0，89/89实际通过、0失败/跳过、identityPreserved=true（新10项、B1四套55项、work approvals23及routes1）。原件归档work-integration-20261114。集成测试用内部构造参数注入产生实际artifact ref的受控executor，不能称其为真实浏览器E2E；HTTP不提供覆盖入口。
 
 保存故障/完成时失效/跨候选与裁剪竞态、HTTP接口与鉴权/关闭、旧直接adopt单测及Pi E2E迁移仍待完成。完整标准typecheck/build/单测、Claude独立复审与Pi正式验收未完成，不称B4或M3-B通过。
+
+## 第十批：B4 保存 / 发布 / 并发故障验证
+
+job_e295fcc8：定向types0；新增九项全部实际通过，原十项按testNamePattern筛选未执行（JSON total19/pass9/pending10），源码身份不变。生产与83759a9无差异。覆盖初始保存失败不执行/不发事件，终态保存或事件发布失败不给绿灯并保留锁，完成后candidate/evidence变化转为持久failed且不误报I/O故障，失败重跑不复用旧绿，跨候选串行/释放资源先于下一执行，主动检查中自动裁剪先取消，终态保存阻塞时公开状态不提前completed。原件work-faults-20261114。
+
+故障测试先断言正常close拒绝PERSISTENCE_FAILED、第二实例INSTANCE_LOCKED；之后仅测试夹具用明确清理路径等待无进程executor屏障再释放自己锁，不是生产HTTP旁路或放宽关闭保锁规则。当前没有重跑完整十九项，不能写19/19。
+
+HTTP接口、真实HTTP并发关闭/证据响应、旧直接采用单测与Pi E2E迁移、完整回归和独立审查仍待完成。

@@ -16,10 +16,21 @@ type IntegratedWork=WorkService & {
   cancelCheckRun(id:string):Promise<CheckRun>;
   readCheckArtifact(id:string,name:string):Promise<{buffer:Buffer;ref:ArtifactRef}>;
 };
-const owned:{directory:string;work:IntegratedWork}[]=[];
+const owned:{directory:string;work:IntegratedWork;allowPoisonedCleanup?:boolean}[]=[];
 afterEach(async()=>{
   vi.restoreAllMocks();
-  for(const f of owned.splice(0)){await f.work.close();await rm(f.directory,{recursive:true,force:true});}
+  for(const f of owned.splice(0)){
+    try { await f.work.close(); }
+    catch(error){
+      if(!f.allowPoisonedCleanup)throw error;
+      // Fault tests first assert that normal close retains ownership. This explicit
+      // test-only cleanup waits for the no-process executor, then releases its lock.
+      const runner=Reflect.get(f.work,'checkRunner') as {waitForActive():Promise<void>};
+      await runner.waitForActive().catch(()=>{});await f.work.previews.stopAll();
+      const release=Reflect.get(f.work,'releaseLock') as (()=>Promise<void>)|undefined;await release?.();
+    }
+    await rm(f.directory,{recursive:true,force:true});
+  }
 });
 async function fixture(){
   const directory=await mkdtemp(path.join(tmpdir(),'m3b-integrated-')),workRoot=path.join(directory,'work'),dataDirectory=path.join(directory,'data');
@@ -49,7 +60,7 @@ async function fixture(){
       const stamped={...event,seq:published.length+1,ts:new Date().toISOString()} as StudioEvent;published.push(stamped);return stamped;
     },
   };
-  const f={directory,workRoot,dataDirectory,options,calls,stopped,published,durableEvents,work:new WorkService(options) as IntegratedWork,
+  const f={directory,workRoot,dataDirectory,options,calls,stopped,published,durableEvents,allowPoisonedCleanup:false,work:new WorkService(options) as IntegratedWork,
     hook:(hook:typeof phaseHook)=>{phaseHook=hook;}};
   owned.push(f);
   await f.work.init();
@@ -164,5 +175,117 @@ it('migrates missing run storage without trusting legacy candidate green labels'
   f.work=new WorkService(f.options) as IntegratedWork;await f.work.init();stubPreview(f.work);
   await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED',status:409});
   expect(f.work.getCandidate(c.id).checks.every(check=>check.status==='not_run')).toBe(true);
+},15000);
+
+
+function mutableSave(work:WorkService){return work as unknown as {save():Promise<void>};}
+async function assertFaultRetainsOwnership(f:Awaited<ReturnType<typeof fixture>>){
+  await expect(f.work.close()).rejects.toMatchObject({code:'PERSISTENCE_FAILED'});
+  const second=new WorkService(f.options);
+  await expect(second.init()).rejects.toMatchObject({code:'INSTANCE_LOCKED'});
+}
+it('does not execute or emit when the check start save fails and retains ownership',async()=>{
+  const f=await fixture(),c=await candidate(f);f.allowPoisonedCleanup=true;
+  const published=f.published.length;
+  vi.spyOn(mutableSave(f.work),'save').mockRejectedValueOnce(new Error('injected initial check save failure'));
+  await expect(f.work.startChecks(c.id)).rejects.toMatchObject({code:'PERSISTENCE_FAILED'});
+  expect(f.calls).toEqual([]);expect(f.published).toHaveLength(published);
+  expect(JSON.parse(await readFile(path.join(f.dataDirectory,'tasks.json'),'utf8')).checkRuns).toEqual([]);
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+  await assertFaultRetainsOwnership(f);
+},15000);
+it('withholds green state and events when the terminal save fails',async()=>{
+  const f=await fixture(),c=await candidate(f);f.allowPoisonedCleanup=true;
+  const original=mutableSave(f.work).save.bind(f.work);let failed=false;
+  vi.spyOn(mutableSave(f.work),'save').mockImplementation(async()=>{
+    const state=Reflect.get(f.work,'state') as {checkRuns:CheckRun[]};
+    if(!failed&&state.checkRuns.some(run=>run.status==='completed'&&run.outcome==='passed')){failed=true;throw new Error('injected terminal check save failure');}
+    await original();
+  });
+  const run=await f.work.startChecks(c.id);
+  await vi.waitFor(()=>expect(f.work.getCheckRun(run.id).error?.code).toBe('PERSISTENCE_FAILED'),{timeout:5000});
+  expect(failed).toBe(true);
+  expect(f.work.getCandidate(c.id).checks.every(check=>check.status!=='passed')).toBe(true);
+  expect(f.published.some(event=>event.type==='check.finished'&&(event.run as CheckRun).outcome==='passed')).toBe(false);
+  expect(JSON.parse(await readFile(path.join(f.dataDirectory,'tasks.json'),'utf8')).checkRuns.find((r:CheckRun)=>r.id===run.id).status).not.toBe('completed');
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+  expect(f.stopped).toContain(run.id);await assertFaultRetainsOwnership(f);
+},15000);
+it('blocks adoption and retains the lock when check publication fails after saving',async()=>{
+  const f=await fixture(),c=await candidate(f);f.allowPoisonedCleanup=true;
+  const emit=f.options.emit;
+  f.options.emit=event=>{if(event.type==='check.finished')throw new Error('injected event journal failure');return emit(event);};
+  const run=await f.work.startChecks(c.id);
+  await vi.waitFor(()=>expect(f.work.getCheckRun(run.id).error?.code).toBe('PERSISTENCE_FAILED'),{timeout:5000});
+  expect(f.work.getCandidate(c.id).checks.every(check=>check.status!=='passed')).toBe(true);
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+  expect(f.stopped).toContain(run.id);await assertFaultRetainsOwnership(f);
+},15000);
+it.each(['candidate','evidence'])('rejects completion when %s changes after execution but before publication',async(kind)=>{
+  const f=await fixture(),c=await candidate(f),stop=f.options.checks.executor.stop!;
+  f.options.checks.executor.stop=async id=>{
+    await stop(id);
+    await writeFile(kind==='candidate'?path.join(f.work.repo.candidatePath(c.id),'src/App.tsx'):path.join(f.dataDirectory,'check-artifacts',id,'schema.json'),
+      kind==='candidate'?'export default ()=> <main>Changed after execution</main>;':'{"changedAfterExecution":true}');
+  };
+  const run=await complete(f,c.id);
+  expect(run.status).toBe('completed');expect(run.outcome).toBe('failed');expect(run.error?.code).not.toBe('PERSISTENCE_FAILED');
+  expect(f.published.some(event=>event.type==='check.finished'&&(event.run as CheckRun).outcome==='passed')).toBe(false);
+  const saved=JSON.parse(await readFile(path.join(f.dataDirectory,'tasks.json'),'utf8')).checkRuns.find((r:CheckRun)=>r.id===run.id);
+  expect(saved.outcome).toBe('failed');
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+},15000);
+it('uses the latest failed rerun instead of falling back to an older green result',async()=>{
+  const f=await fixture(),c=await candidate(f),passed=await complete(f,c.id);
+  expect(passed.outcome).toBe('passed');
+  f.options.checks.executor.schema=async ctx=>{
+    const ref=await ctx.writeArtifact('schema.json','{"fixtureFailure":true}');
+    return {name:'schema',status:'failed',evidence:ref.hash,message:'fixture check failure'};
+  };
+  const rerun=await f.work.startChecks(c.id,{rerun:true});expect(rerun.id).not.toBe(passed.id);
+  await vi.waitFor(()=>expect(f.work.getCheckRun(rerun.id).status).toBe('completed'),{timeout:5000});
+  expect(f.work.getCheckRun(rerun.id).outcome).toBe('failed');
+  expect(f.work.getCandidate(c.id).latestCheckRunId).toBe(rerun.id);
+  await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED'});
+},15000);
+it('serializes check execution across candidates and releases resources before starting the next',async()=>{
+  const f=await fixture(),a=await candidate(f),b=await candidate(f);
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});const schemas:string[]=[];
+  f.hook(async(name,ctx)=>{if(name==='schema'){schemas.push(ctx.runId);if(schemas.length===1)await gate;else expect(f.stopped).toContain(schemas[0]);}});
+  try{
+    const first=await f.work.startChecks(a.id),second=await f.work.startChecks(b.id);
+    await vi.waitFor(()=>expect(schemas).toEqual([first.id]));
+    expect(f.work.getCheckRun(second.id).status).toBe('queued');release();
+    await vi.waitFor(()=>expect(f.work.getCheckRun(second.id).status).toBe('completed'),{timeout:10000});
+    expect(f.work.getCheckRun(first.id).outcome).toBe('passed');expect(f.work.getCheckRun(second.id).outcome).toBe('passed');
+  }finally{release();}
+},20000);
+it('trims an actively checked oldest candidate only after cancellation and cleanup',async()=>{
+  const f=await fixture(),first=await candidate(f);
+  f.hook(async(name,ctx)=>{if(name==='schema')await new Promise<void>((_resolve,reject)=>ctx.signal.addEventListener('abort',()=>reject(ctx.signal.reason),{once:true}));});
+  const run=await f.work.startChecks(first.id);await vi.waitFor(()=>expect(f.calls).toContain('schema'));
+  const original=f.work.repo.removeCandidate.bind(f.work.repo);
+  vi.spyOn(f.work.repo,'removeCandidate').mockImplementation(async id=>{if(id===first.id)expect(f.stopped).toContain(run.id);await original(id);});
+  for(let i=0;i<3;i++)await candidate(f);
+  expect(f.work.getCandidate(first.id).decision).toBe('discarded');expect(f.work.getCheckRun(run.id).status).toBe('cancelled');
+  expect(await f.work.repo.candidateExists(first.id)).toBe(false);
+  expect(f.work.listCandidates().filter(c=>c.decision==='pending')).toHaveLength(3);
+},20000);
+it('does not expose an uncommitted terminal run while its durable save is blocked',async()=>{
+  const f=await fixture(),c=await candidate(f);
+  let release!:()=>void,entered!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;}),atSave=new Promise<void>(resolve=>{entered=resolve;});
+  const original=mutableSave(f.work).save.bind(f.work);
+  vi.spyOn(mutableSave(f.work),'save').mockImplementation(async()=>{
+    const state=Reflect.get(f.work,'state') as {checkRuns:CheckRun[]};
+    if(state.checkRuns.some(run=>run.status==='completed'&&run.outcome==='passed')){entered();await gate;}
+    await original();
+  });
+  try{
+    const run=await f.work.startChecks(c.id);await atSave;
+    expect(f.work.getCheckRun(run.id).status).toBe('running');
+    const saved=JSON.parse(await readFile(path.join(f.dataDirectory,'tasks.json'),'utf8')).checkRuns.find((r:CheckRun)=>r.id===run.id);
+    expect(saved.status).toBe('running');expect(f.published.some(event=>event.type==='check.finished')).toBe(false);
+    release();await vi.waitFor(()=>expect(f.work.getCheckRun(run.id).outcome).toBe('passed'),{timeout:5000});
+  }finally{release();}
 },15000);
 
