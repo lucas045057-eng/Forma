@@ -1,0 +1,1 @@
+apps/server/src/checks/worker-lifecycle.test.ts(97,20): error TS2561: Object literal may only specify known properties, but 'intervals' does not exist in type 'ExpectPollOptions'. Did you mean to write 'interval'?

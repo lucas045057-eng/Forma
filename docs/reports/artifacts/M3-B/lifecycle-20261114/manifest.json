@@ -1,0 +1,57 @@
+[
+    {
+        "path":  ".gitattributes",
+        "sha256":  "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+        "bytes":  8
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green-1794662644632/evidence.json",
+        "sha256":  "5d19c8053646b2c33368ee8ad29510daf39da6c1014e4521ac528b17112576f6",
+        "bytes":  10590
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green-1794662644632/types-first.log",
+        "sha256":  "5c9048f68461356efc0f6cdd271b204996a07537209648fccbce7af9b370d436",
+        "bytes":  215
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green2-1794662672477/evidence.json",
+        "sha256":  "72c2ffb7548fd7f86dd6e2ae973c688d08ee5f61e76564b399f8c552f7d5b326",
+        "bytes":  11856
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green2-1794662672477/native-import.log",
+        "sha256":  "2bf1d94a96f75a51f0152ce9bcc2a17319668d8401423a9bba806ef8c2e36add",
+        "bytes":  108
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green2-1794662672477/tests.json",
+        "sha256":  "bb93dfd8d84f1d5755442755f00a8c9621c34c24c322eda3e1494f521feb4f12",
+        "bytes":  6824
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green2-1794662672477/types-first.log",
+        "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes":  0
+    },
+    {
+        "path":  "m3b-worker-lifecycle-green2-1794662672477/worker-contracts.log",
+        "sha256":  "154291808dbe43dbdb5568c3e7c2f24f61eba992c7a5ccc730517e99a8ef3152",
+        "bytes":  121
+    },
+    {
+        "path":  "m3b-worker-lifecycle-red-1794662565904/evidence.json",
+        "sha256":  "3dff13d5aa3828a300894486e0345372d32c4ff4bcb457a8891512c0dc8cac87",
+        "bytes":  10760
+    },
+    {
+        "path":  "m3b-worker-lifecycle-red-1794662565904/tests.json",
+        "sha256":  "d4e367607e456d1870e3c2c668f6ced63168dae4fd1aa1a7bbf6ed4227f87485",
+        "bytes":  2316
+    },
+    {
+        "path":  "m3b-worker-lifecycle-red-1794662565904/worker-contracts.log",
+        "sha256":  "aa282313a58c07030f5ad505f6a474238dc5908e21415ec8b257bedb83bbb2e7",
+        "bytes":  118
+    }
+]

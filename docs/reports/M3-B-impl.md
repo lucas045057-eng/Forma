@@ -48,3 +48,11 @@ Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中
 - 原件归档docs/reports/artifacts/M3-B/worker-20261114，各目录evidence包含具体命令/时间/PID/退出与源码SHA/Git blob；manifest与局部.gitattributes保留字节。
 
 这不是OS级安全沙箱：可信Node工具仍有addons/child-process权限，Node网络守卫属于应用层防线。十九项包含实际worker取消并确认退出，但父进程死亡、esbuild后代/异常退出/超时/强制终止仍需补测；B2尚未完成。B3真实浏览器、B4集成、全量验证与Claude/Pi独立门禁均未完成，smoke/occlusion仍not_run。未读真实.env/ASKS，未启动付费模型/Lux3D。
+
+## 第五批：worker 生命周期与 stop 等待者
+
+四项新增测试先RED：job_1bd6b2e3为3通过/1失败，失败为不abort仅stop时进程已退出但调用方Promise未终结。stop现捕获待完成请求与首个终止原因，在实际exited后拒绝，停止期间close/send/ready故障不抢先覆盖CANCELLED/TIMEOUT。
+
+job_3e2be5af只在types报测试expect.poll的intervals字段不兼容，运行测试未开始；改为Vitest支持的interval:200，10s观察预算不变。最终job_044b65b5：types、23/23（19+4）与native全部exit0，0失败/跳过，源码身份不变。真实父进程死亡用例先实际构建并观察esbuild服务，再按PID+创建时间断言worker/后代消失、同场无关Node进程仍存活；JSON保存断言与耗时，但本轮JSON reporter未保存console输出中的具体PID，原件不冒充有原始PID列表。后续正式证据需显式落盘身份表。
+
+原始RED/类型失败/GREEN归档docs/reports/artifacts/M3-B/lifecycle-20261114。只证明已测Windows正常IPC断开回收和单worker取消/超时/异常退出；强制终止失败的异常支路与浏览器后代尚未覆盖。B2主要实现已有定向证据，仍须B3/B4完成后的全量与Claude/Pi独立门禁；尚未宣称M3-B完成。

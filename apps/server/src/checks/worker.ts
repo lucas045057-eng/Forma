@@ -24,13 +24,14 @@ export function workerScriptPath() {
 export function createRealExecutor(): CheckExecutor {
   const sessions = new Map<string, Session>();
   let token = 0;
-  async function stop(runId: string) {
+  async function stop(runId: string, reason: unknown = cancelled()) {
     const s = sessions.get(runId);
     if (!s) return;
     if (s.stop) return s.stop;
     s.stopping = true;
+    const pending = s.pending;
     s.stop = (async () => {
-      if (s.dead) return;
+      if (s.dead) { pending?.reject(reason); return; }
       s.child.send({ kind: 'stop' }, () => {});
       const timer = setTimeout(() => {
         if (s.dead || !s.child.pid) return;
@@ -41,6 +42,8 @@ export function createRealExecutor(): CheckExecutor {
         }
       }, 2000);
       try { await s.exited; } finally { clearTimeout(timer); }
+      // Release the waiter after actual exit, including callers that only invoke stop().
+      pending?.reject(reason);
     })();
     return s.stop;
   }
@@ -71,7 +74,7 @@ export function createRealExecutor(): CheckExecutor {
     sessions.set(ctx.runId, s);
     const collect = (data: Buffer) => { s.output = (s.output + data.toString('utf8')).slice(-6000); };
     child.stdout?.on('data', collect); child.stderr?.on('data', collect);
-    const failed = (error: unknown) => { rejectReady(error); s.pending?.reject(error); };
+    const failed = (error: unknown) => { rejectReady(error); if (!s.stopping) s.pending?.reject(error); };
     child.on('error', error => { failed(error); if (!child.pid) { s.dead = true; acceptExit(); } });
     child.once('close', () => {
       s.dead = true; acceptExit();
@@ -121,22 +124,23 @@ export function createRealExecutor(): CheckExecutor {
       };
       const abort = () => { void stop(ctx.runId).then(() => finish(cancelled()), finish); };
       const timer = setTimeout(() => {
-        void stop(ctx.runId).then(() => finish(fault('TIMEOUT', '检查阶段超时')), finish);
+        const reason = fault('TIMEOUT', '检查阶段超时');
+        void stop(ctx.runId, reason).then(() => finish(reason), finish);
       }, name === 'build' ? ctx.buildTimeoutMs : ctx.browserTimeoutMs);
       const requestToken = ++token;
       s.pending = { token: requestToken, ctx, name, refs: new Set(), resolve: result => {
         if (ctx.signal.aborted || s.stopping) return;
         finish(undefined, result);
-      }, reject: error => { if (!s.stopping) finish(error); } };
+      }, reject: error => finish(error) };
       ctx.signal.addEventListener('abort', abort, { once: true });
       if (ctx.signal.aborted) { abort(); return; }
       void s.ready.then(() => {
         if (settled || s.stopping) return;
         s.child.send({ kind: 'run', token: requestToken, runId: ctx.runId, name, buildRoot: ctx.buildRoot,
           snapshot: ctx.snapshot, buildTimeoutMs: ctx.buildTimeoutMs, browserTimeoutMs: ctx.browserTimeoutMs }, error => {
-          if (error) finish(error);
+          if (error && !s.stopping) finish(error);
         });
-      }, error => { finish(error); void stop(ctx.runId); });
+      }, error => { if (!s.stopping) { finish(error); void stop(ctx.runId); } });
     });
   }
   return { schema: ctx => run('schema', ctx), build: ctx => run('build', ctx),
