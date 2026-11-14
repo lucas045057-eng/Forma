@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { lstat, mkdir, readdir, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { lstat, mkdir, readdir, readFile, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
 
@@ -9,6 +10,7 @@ export class WorkError extends Error {
   constructor(code: string, message: string, status = 400) { super(message); this.code = code; this.status = status; }
 }
 const idPattern = /^[a-z0-9]{6,32}$/;
+const modelWritable = /^src\/(?:[A-Za-z0-9_-][A-Za-z0-9._-]*\/)*[A-Za-z0-9_-][A-Za-z0-9._-]*\.(?:tsx|ts|css|json|svg)$/;
 const identity = ['-c', 'core.hooksPath=/dev/null', '-c', 'user.name=Studio', '-c', 'user.email=studio@localhost', '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', '-c', 'commit.gpgsign=false'];
 
 function git(args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): Promise<{ code: number; stdout: string; stderr: string }> {
@@ -46,7 +48,7 @@ export class WorkRepo {
     this.candidatesDir = path.join(path.resolve(options.dataDirectory), 'candidates');
     // Bind every repository operation to the same reentrant queue, including nested snapshot calls.
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
-    for (const name of ['init', 'head', 'snapshot', 'isCommit', 'fileAt', 'fileChangedSince', 'createCandidate', 'commitCandidate', 'diff', 'adopt', 'revert', 'removeCandidate', 'candidateExists']) {
+    for (const name of ['init', 'head', 'snapshot', 'isCommit', 'fileAt', 'fileChangedSince', 'createCandidate', 'commitCandidate', 'pendingDiff', 'candidateCommit', 'diff', 'adopt', 'revert', 'removeCandidate', 'candidateExists']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => this.exclusive(() => operation(...args));
     }
@@ -240,6 +242,39 @@ export class WorkRepo {
     };
     await unlink(path.join(directory, 'node_modules'));
     await rm(path.join(directory, 'node_modules'), { recursive: true, force: true });
+  }
+  /**
+   * Read the complete unpublished diff without committing it. Intent-to-add makes new files
+   * visible to git diff; the digest covers every changed file's exact bytes, including deletion.
+   */
+  async pendingDiff(id: string, base: string) {
+    const directory = this.candidatePath(id);
+    await this.assertNoLinks(directory);
+    await this.auditTree(base);
+    const untracked = (await this.inCandidate(id, ['ls-files', '--others', '--exclude-standard', '-z'])).stdout.split('\0').filter(Boolean);
+    if (untracked.some(file => !modelWritable.test(file))) throw new WorkError('UNSAFE_CANDIDATE_DIFF', '模型草稿包含不允许的新增文件，不能请示或发布', 409);
+    if (untracked.length) await this.inCandidate(id, ['add', '-N', '--', ...untracked]);
+    const changedFiles = (await this.inCandidate(id, ['diff', '--name-only', '-z', base, '--'])).stdout.split('\0').filter(Boolean);
+    if (changedFiles.some(file => !modelWritable.test(file))) throw new WorkError('UNSAFE_CANDIDATE_DIFF', '模型只能修改 src/ 下允许的源码文件；依赖、配置与发布操作仍硬拒绝', 409);
+    const diff: FileDiff[] = [];
+    const hash = createHash('sha256').update(base);
+    for (const file of changedFiles) {
+      const patch = (await this.inCandidate(id, ['diff', '--no-color', '--unified=3', base, '--', file])).stdout;
+      diff.push({ path: file, patch: patch.length > 60_000 ? `${patch.slice(0, 60_000)}\n…（差异过长，已截断）` : patch });
+      let content: Buffer | undefined;
+      try { content = await readFile(path.join(directory, file)); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+      hash.update(file).update(Buffer.from(String(content?.byteLength ?? -1)));
+      if (content) hash.update(content);
+    }
+    // Full, untruncated patches participate in the identity even though the public diff is capped.
+    for (const file of changedFiles) hash.update(await this.inCandidate(id, ['diff', '--no-color', '--unified=3', base, '--', file]).then(result => result.stdout));
+    return { changedFiles, diff, contentDigest: hash.digest('hex') };
+  }
+  async candidateCommit(id: string) {
+    const result = await this.main(['rev-parse', '--verify', this.branch(id)], true);
+    if (result.code !== 0) throw new WorkError('NOT_FOUND', '私有草稿分支不存在', 404);
+    return result.stdout.trim();
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
   async commitCandidate(id: string, message: string) {

@@ -1,0 +1,277 @@
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import type { Selection } from '@spatial/shared';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { CodingAgent } from '../agent/client.ts';
+import type { StudioEvent } from '../events.ts';
+import { WorkService } from './service.ts';
+import { WorkRepo } from './repo.ts';
+
+function agentSpy() { return vi.spyOn(CodingAgent.prototype, 'run'); }
+const agentOptions = { baseUrl: 'http://127.0.0.1:1', apiKey: 'mock-only', model: 'mock-coder' };
+let agent: ReturnType<typeof agentSpy>;
+let modelCalls = 0;
+beforeEach(() => {
+  modelCalls = 0;
+  agent = vi.spyOn(CodingAgent.prototype, 'run').mockImplementation(async ({ root, instruction }) => {
+    modelCalls += 1;
+    if (instruction.includes('multi')) {
+      await writeFile(path.join(root, 'src/components/Button.tsx'), 'export function Button() { return <button>共享</button>; }\n');
+      await writeFile(path.join(root, 'src/style.css'), 'button { border-radius: 8px; }\n');
+    } else if (instruction.includes('shared')) await writeFile(path.join(root, 'src/components/Button.tsx'), 'export function Button() { return <button style={{ borderRadius: 8 }}>购买</button>; }\n');
+    else if (instruction.includes('local')) await writeFile(path.join(root, 'src/App.tsx'), "import { Button } from './components/Button';\nexport default () => <><p>局部文案</p><Button/><Button/><Button/></>;\n");
+    else if (instruction.includes('package')) await writeFile(path.join(root, 'package.json'), '{"changed":true}\n');
+    return { summary: `完成 ${instruction}`, written: [] };
+  });
+});
+afterEach(() => { agent.mockRestore(); });
+
+async function fixture() {
+  const directory = await mkdtemp(path.join(tmpdir(), 'spatial-m3-approvals-'));
+  const workRoot = path.join(directory, 'work');
+  await mkdir(path.join(workRoot, 'src/components'), { recursive: true });
+  await writeFile(path.join(workRoot, 'src/App.tsx'), "import { Button } from './components/Button';\nexport default () => <><Button/><Button/><Button/></>;\n");
+  await writeFile(path.join(workRoot, 'src/components/Button.tsx'), 'export function Button() { return <button>购买</button>; }\n');
+  await writeFile(path.join(workRoot, 'src/style.css'), 'button { color: black; }\n');
+  const published: StudioEvent[] = [];
+  const work = new WorkService({ workRoot, directory: path.join(directory, 'data'), agent: agentOptions, emit: event => {
+    const stamped = { ...event, seq: published.length + 1, ts: new Date().toISOString() } as StudioEvent;
+    published.push(stamped); return stamped;
+  } });
+  await work.init();
+  const previewStarts: string[] = [];
+  work.previews.start = async id => { previewStarts.push(id); return `/preview/c/${id}/`; };
+  work.previews.stop = async () => {};
+  work.previews.stopAll = async () => {};
+  const baseVersion = await work.repo.head();
+  return { directory, workRoot, work, published, previewStarts, baseVersion };
+}
+
+function selection(baseVersion: string, src = 'src/components/Button.tsx:1:1'): Selection {
+  return { src, baseVersion, cid: 'Button', bbox: [0, 0, 10, 10], styles: {} as Selection['styles'], instances: 1, ancestors: [] };
+}
+
+async function cleanup(f: Awaited<ReturnType<typeof fixture>>) {
+  await f.work.close(); await rm(f.directory, { recursive: true, force: true });
+}
+
+function expectStatus(work: WorkService, id: string, status: string) {
+  const task = work.getTask(id);
+  expect(task.status, `任务 ${id}：${JSON.stringify(task.error ?? { code: 'NONE', message: '无错误记录' })}`).toBe(status);
+}
+
+it('holds a shared edit in private staging, then approves exactly that draft without another model call', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared radius', selection(f.baseVersion));
+    await f.work.idle();
+    expectStatus(f.work, task.id, 'awaiting_approval');
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(() => f.work.getCandidate(task.id)).toThrow('候选版本不存在');
+    await expect(f.work.adopt(task.id)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect(f.previewStarts).toEqual([]);
+    expect(f.work.listApprovals()).toHaveLength(1);
+    const card = f.work.listApprovals()[0];
+    expect(card).toMatchObject({ taskId: task.id, status: 'pending', baseVersion: f.baseVersion, ruleCodes: ['shared_component'] });
+    expect(card.contentDigest).toMatch(/^[0-9a-f]{64}$/);
+    expect(await f.work.repo.candidateExists(task.id)).toBe(true);
+    expect(await readFile(path.join(f.workRoot, 'src/components/Button.tsx'), 'utf8')).not.toContain('borderRadius');
+    expect(f.published.filter(event => event.type === 'approval.requested')).toHaveLength(1);
+    expect(f.published.some(event => event.type === 'candidate.ready')).toBe(false);
+
+    const approved = await f.work.answerApproval(card.id, 0);
+    expect(approved.task.status).toBe('done');
+    expect(approved.approval.status).toBe('approved');
+    expect(f.work.listCandidates()).toHaveLength(1);
+    expect(f.previewStarts).toEqual([task.id]);
+    expect(modelCalls).toBe(1);
+    expect(f.published.filter(event => event.type === 'candidate.ready')).toHaveLength(1);
+    expect(f.published.filter(event => event.type === 'approval.resolved')).toHaveLength(1);
+    const repeated = await f.work.answerApproval(card.id, 0);
+    expect(repeated).toEqual(approved);
+    expect(modelCalls).toBe(1);
+    expect(f.previewStarts).toEqual([task.id]);
+    await expect(f.work.answerApproval(card.id, 1)).rejects.toMatchObject({ code: 'APPROVAL_ALREADY_ANSWERED', status: 409 });
+  } finally { await cleanup(f); }
+});
+
+it('rejects and cancels awaiting tasks with staging cleanup and no public candidate', async () => {
+  const f = await fixture();
+  try {
+    const rejected = await f.work.submit('shared reject', selection(f.baseVersion));
+    await f.work.idle();
+    const rejectedCard = f.work.listApprovals()[0];
+    const response = await f.work.answerApproval(rejectedCard.id, 1);
+    expect(response.task.status).toBe('cancelled');
+    expect(response.approval.status).toBe('rejected');
+    expect(await f.work.repo.candidateExists(rejected.id)).toBe(false);
+    expect(f.work.listCandidates()).toEqual([]);
+    expect((await f.work.answerApproval(rejectedCard.id, 1)).approval.status).toBe('rejected');
+    await expect(f.work.answerApproval(rejectedCard.id, 0)).rejects.toMatchObject({ code: 'APPROVAL_ALREADY_ANSWERED' });
+
+    const cancelled = await f.work.submit('shared cancel', selection(f.baseVersion));
+    await f.work.idle();
+    await f.work.cancel(cancelled.id);
+    expectStatus(f.work, cancelled.id, 'cancelled');
+    expect(f.work.getApproval(f.work.listApprovals()[1].id).status).toBe('cancelled');
+    expect(await f.work.repo.candidateExists(cancelled.id)).toBe(false);
+    expect(f.work.listCandidates()).toEqual([]);
+  } finally { await cleanup(f); }
+});
+
+it('releases the task queue while awaiting and allows a later local task', async () => {
+  const f = await fixture();
+  try {
+    const waiting = await f.work.submit('shared waiting', selection(f.baseVersion));
+    await f.work.idle();
+    const local = await f.work.submit('local copy', selection(f.baseVersion, 'src/App.tsx:2:1'));
+    await f.work.idle();
+    expectStatus(f.work, waiting.id, 'awaiting_approval');
+    expectStatus(f.work, local.id, 'done');
+    expect(f.work.listCandidates().map(candidate => candidate.id)).toEqual([local.id]);
+    expect(modelCalls).toBe(2);
+  } finally { await cleanup(f); }
+});
+
+it('combines rules into one card and enforces the three-pending-card limit', async () => {
+  const f = await fixture();
+  try {
+    const multi = await f.work.submit('multi shared', selection(f.baseVersion));
+    await f.work.idle();
+    expect(f.work.listApprovals()).toHaveLength(1);
+    expect(f.work.getApproval(f.work.listApprovals()[0].id).ruleCodes).toEqual(expect.arrayContaining(['shared_component', 'global_style']));
+    for (const name of ['second', 'third']) {
+      await f.work.submit(`shared ${name}`, selection(f.baseVersion));
+      await f.work.idle();
+    }
+    expect(f.work.listApprovals().filter(card => card.status === 'pending')).toHaveLength(3);
+    const overflow = await f.work.submit('shared overflow', selection(f.baseVersion));
+    await f.work.idle();
+    expectStatus(f.work, overflow.id, 'failed');
+    expect(f.work.getTask(overflow.id)).toMatchObject({ error: { code: 'APPROVAL_LIMIT' } });
+    expect(f.work.listApprovals()).toHaveLength(3);
+    expect(await f.work.repo.candidateExists(overflow.id)).toBe(false);
+  } finally { await cleanup(f); }
+});
+
+it('binds answers to the exact draft digest and current main version', async () => {
+  const f = await fixture();
+  try {
+    const changed = await f.work.submit('shared digest', selection(f.baseVersion));
+    await f.work.idle();
+    await writeFile(path.join(f.work.repo.candidatePath(changed.id), 'src/components/Button.tsx'), 'export function Button() { return <button>篡改</button>; }\n');
+    await expect(f.work.answerApproval(f.work.listApprovals()[0].id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL', status: 409 });
+    expect(f.work.listCandidates()).toEqual([]);
+
+    const moved = await f.work.submit('shared version', selection(f.baseVersion));
+    await f.work.idle();
+    await writeFile(path.join(f.workRoot, 'src/App.tsx'), 'export default () => <p>主作品已变化</p>;\n');
+    await f.work.version();
+    await expect(f.work.answerApproval(f.work.listApprovals()[1].id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL', status: 409 });
+    expect(f.work.listCandidates()).toEqual([]);
+  } finally { await cleanup(f); }
+});
+
+it('hard-fails package changes instead of offering an approval card', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('package change', selection(f.baseVersion, 'src/App.tsx:2:1'));
+    await f.work.idle();
+    expectStatus(f.work, task.id, 'failed');
+    expect(f.work.getTask(task.id)).toMatchObject({ error: { code: 'UNSAFE_CANDIDATE_DIFF' } });
+    expect(f.work.listApprovals()).toEqual([]);
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(await f.work.repo.candidateExists(task.id)).toBe(false);
+  } finally { await cleanup(f); }
+});
+
+it('preserves a pending card and its staging across restart without approving it', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared restart', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const before = await readFile(path.join(f.work.repo.candidatePath(task.id), 'src/components/Button.tsx'), 'utf8');
+    await f.work.close();
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    restarted.previews.start = async id => `/preview/c/${id}/`;
+    restarted.previews.stop = async () => {};
+    restarted.previews.stopAll = async () => {};
+    try {
+      await restarted.init();
+      expectStatus(restarted, task.id, 'awaiting_approval');
+      expect(restarted.getApproval(card.id).status).toBe('pending');
+      expect(await readFile(path.join(restarted.repo.candidatePath(task.id), 'src/components/Button.tsx'), 'utf8')).toBe(before);
+      expect(restarted.listCandidates()).toEqual([]);
+      expect(modelCalls).toBe(1);
+    } finally { await restarted.close(); }
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});
+
+it('recovers a persisted approval after the commit without creating a second commit or public event', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared recover', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    await f.work.close();
+    const file = path.join(f.directory, 'data', 'tasks.json');
+    const saved = JSON.parse(await readFile(file, 'utf8'));
+    saved.approvals[0] = { ...saved.approvals[0], status: 'approved', answer: { option: 0, at: new Date().toISOString() } };
+    saved.approvalIntent = { kind: 'approve', id: card.id, taskId: task.id, before: f.baseVersion, contentDigest: card.contentDigest };
+    await writeFile(file, JSON.stringify(saved));
+    const repo = new WorkRepo({ workRoot: f.workRoot, dataDirectory: path.join(f.directory, 'data') });
+    await repo.commitCandidate(task.id, saved.approvals[0].summary);
+    const committed = await repo.candidateCommit(task.id);
+    const events: StudioEvent[] = [];
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: event => {
+      const stamped = { ...event, seq: events.length + 1, ts: new Date().toISOString() } as StudioEvent; events.push(stamped); return stamped;
+    } });
+    restarted.previews.start = async id => `/preview/c/${id}/`;
+    restarted.previews.stop = async () => {};
+    restarted.previews.stopAll = async () => {};
+    try {
+      await restarted.init();
+      expect(await restarted.repo.candidateCommit(task.id)).toBe(committed);
+      expectStatus(restarted, task.id, 'done');
+      expect(restarted.listCandidates()).toHaveLength(1);
+      expect(events.filter(event => event.type === 'candidate.ready')).toHaveLength(1);
+      const snapshot = JSON.stringify(events);
+      await restarted.finalizeApprovedTask(task.id);
+      expect(JSON.stringify(events)).toBe(snapshot);
+      expect(modelCalls).toBe(1);
+    } finally { await restarted.close(); }
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});
+
+it('does not broadcast or publish when persisting an approval answer fails', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared write failure', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const save = vi.spyOn(f.work as unknown as { save: () => Promise<void> }, 'save').mockRejectedValueOnce(new Error('injected disk failure'));
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toThrow('injected disk failure');
+    save.mockRestore();
+    expectStatus(f.work, task.id, 'awaiting_approval');
+    expect(f.work.getApproval(card.id).status).toBe('pending');
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(f.previewStarts).toEqual([]);
+    expect(f.published.some(event => event.type === 'approval.resolved' || event.type === 'candidate.ready')).toBe(false);
+  } finally { await cleanup(f); }
+});
+
+it('serializes approve, reject and cancel so only one terminal transition wins', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared race', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const results = await Promise.allSettled([f.work.answerApproval(card.id, 0), f.work.answerApproval(card.id, 1), f.work.cancel(task.id)]);
+    expect(results.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+    expect(['done', 'cancelled']).toContain(f.work.getTask(task.id).status);
+    expect(f.work.listCandidates().length <= 1).toBe(true);
+    expect(modelCalls).toBe(1);
+  } finally { await cleanup(f); }
+});

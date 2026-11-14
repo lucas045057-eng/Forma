@@ -67,6 +67,8 @@ export interface Check {
   status: 'passed' | 'failed' | 'not_run';
   evidence?: string;
 }
+export type ApprovalRuleCode = 'shared_component' | 'global_style' | 'out_of_scope' | 'analysis_uncertain';
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'stale';
 export interface ApprovalCard {
   id: string;
   taskId: string;
@@ -74,7 +76,15 @@ export interface ApprovalCard {
   reason: string;
   options: { label: string; impact: string }[];
   affected: string[];
-  answer?: { option: number; at: string };
+  evidence: string[];
+  status: ApprovalStatus;
+  ruleCodes: ApprovalRuleCode[];
+  ruleVersion: string;
+  baseVersion: string;
+  contentDigest: string;
+  createdAt: string;
+  updatedAt: string;
+  answer?: { option: 0 | 1; at: string };
 }
 export type StudioMessage =
   | { type: 'pick:start' }

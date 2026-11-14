@@ -102,14 +102,16 @@ it('runs one task, records checks and scope, then adopts and reverts the work ve
   } finally { await cleanup(f); }
 });
 
-it('records changes outside the selected file and its ancestors', async () => {
+it('holds changes outside the selected file and its ancestors for approval', async () => {
   const f = await fixture();
   try {
     const base = (await f.work.version()).version;
     const task = await f.work.submit('修改共享按钮', selection(base, 'src/components/Button.tsx:1:38'));
     await f.work.idle();
-    expect(f.work.getTask(task.id).status).toBe('done');
-    expect(f.work.getCandidate(task.id).outOfScope).toEqual(['src/App.tsx']);
+    expect(f.work.getTask(task.id).status).toBe('awaiting_approval');
+    expect(f.work.listCandidates()).toEqual([]);
+    expect(f.work.listApprovals()[0].ruleCodes).toContain('out_of_scope');
+    expect(f.work.listApprovals()[0].affected).toContain('src/App.tsx');
   } finally { await cleanup(f); }
 });
 
@@ -117,8 +119,9 @@ it('keeps at most three pending candidates and cleans up the oldest', async () =
   const f = await fixture();
   try {
     const ids: string[] = [];
+    const base = (await f.work.version()).version;
     for (let index = 0; index < 4; index += 1) {
-      const task = await f.work.submit(`修改 ${index}`);
+      const task = await f.work.submit(`修改 ${index}`, selection(base));
       ids.push(task.id);
       await f.work.idle();
       expect(f.work.getTask(task.id).status).toBe('done');

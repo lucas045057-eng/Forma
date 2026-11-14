@@ -2,9 +2,9 @@ import { execFile } from 'node:child_process';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
-import type { Selection } from '@spatial/shared';
+import type { ApprovalRuleCode, Selection } from '@spatial/shared';
 
-export type ApprovalRuleCode = 'shared_component' | 'global_style' | 'out_of_scope' | 'analysis_uncertain';
+export type { ApprovalRuleCode } from '@spatial/shared';
 export interface ApprovalEvaluation {
   required: boolean;
   ruleCodes: ApprovalRuleCode[];
@@ -38,8 +38,11 @@ function gitRead(root: string, args: string[]): Promise<{ code: number; stdout: 
       cwd: root, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024, windowsHide: true,
       env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0' },
     }, (error, stdout) => {
-      if (error && typeof error.code !== 'number') reject(error);
-      else resolve({ code: error?.code ?? 0, stdout });
+      if (error) {
+        if (typeof error.code !== 'number') { reject(error); return; }
+        resolve({ code: error.code, stdout }); return;
+      }
+      resolve({ code: 0, stdout });
     });
   });
 }
