@@ -68,7 +68,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
       <div className="candidate-checks" data-testid="candidate-checks">{Object.entries(checkNames).map(([name, label]) => <span key={name} data-status="not_run">{label}：未检查</span>)}</div>
       <Diff candidate={selected}/>
       <div className="candidate-actions">
-        <button type="button" data-testid="candidate-adopt" disabled={busy} onClick={() => void action('adopt', selected.id)}>采用此候选</button>
+        <button type="button" data-testid="candidate-adopt" disabled title="真实检查与采用门禁接入前不可采用" onClick={() => void action('adopt', selected.id)}>采用此候选</button>
         <button type="button" data-testid="candidate-discard" disabled={busy} onClick={() => void action('discard', selected.id)}>撤回候选</button>
       </div>
     </section>}
