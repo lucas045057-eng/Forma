@@ -75,7 +75,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       const config = await request<SceneConfig>('/scene');
       if (!isSceneConfig(config)) throw new Error('服务返回的场景配置无效');
       if (mounted.current && draftGuard.current.canApply(sequence)) { applyConfig(config); setError(''); }
-    } catch (cause) { if (mounted.current) setError(String(cause)); }
+    } catch (cause) { if (mounted.current && draftGuard.current.canApply(sequence)) setError(String(cause)); }
   }
   useEffect(() => {
     mounted.current = true;
