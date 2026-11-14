@@ -137,3 +137,35 @@
 - 只追加本节；没有改实现、测试、依赖或其他报告，也没有提交。
 - 一个临时探针，数据放在 `E:/空间化AI工作台/.data/claude-m3a-rereview-probe`，结束后已删除；用伪造的 Agent，`previews.start` 用替身代替，没有模型、网络、端口或子进程。故障注入只在探针进程内替换 `save`。
 - 没有跑构建、单测或 E2E，没有读 `.env` 或 ASKS 全文，没有等待 `job_c2efd2aa`。RR1 修复后需要在新的固定提交上复核，并核对全量证据。
+
+## 复核（RR1与基线读取优化）
+
+- 日期：2026-11-14。固定 HEAD：**`012d9a65b4242cad2407a40c34614b2d162c8032`**（feat/m3a-approvals）。范围 `25c33a8..012d9a6`：50a13b6（RR1）、6fe015c（policy 基线读取）、24879aa 和 012d9a6（报告）。行号对应 012d9a6。
+- 探针导入的 `.worktrees/m3a` 在开始和结束时都是 HEAD=012d9a6、工作树干净。全量 `job_d6233862` 尚未返回，本节**没有**等待或预写它的结果；上一轮全量 job_c2efd2aa（25c33a8，server 175/176，四候选用例 5012ms 超出 5000ms 预算）仍是失败记录。
+- **结论：RR1 关闭；基线读取优化可以接受；本轮没有新的阻断或应修。M3-A 代码审查转为“通过”**。这只是代码审查结论：冻结提交的全量 `job_d6233862` 必须由调度核验通过（尤其是四候选 5000ms 用例），合并后还需 Pi 的正式验收。不代表 M3-B/M3-C、正式 E2E 或全量测试已经通过。
+
+### RR1 · 关闭
+- `service.ts:435`：`cancel` 在 `repo.exclusive` 内、读取目标任务**之前**先 `await this.recoverApprovalIntent()`。我逐一追踪了 `approvalIntent` 的所有写入点：
+  - `:170`（`failApproval`）：只会在本卡的 approve 恢复过程中（`:190`/`:202`），或回答本卡时已先恢复过（`:405` → `:417`）的情况下被调用，替换的是同一张卡的意图；
+  - `:425`（answer）：前面有 `:405` 的恢复；
+  - `:442`（cancel）：前面有 `:435` 的恢复；
+  - `:158`、`:161`、`:218`、`:221`、`:427`、`:446`：清除或回滚的都是同一个意图。
+  - `execute` 和 `init` 不写这个槽位，`init:97` 只做恢复。现在已经没有“先覆盖、后恢复”的入口。
+- 实证（临时探针：真实 `WorkService`/`WorkRepo`，伪造 `CodingAgent.run`，`previews.start` 用替身代替，不启动 Vite、不监听端口；数据放在已被 git 忽略的 `.data/claude-m3a-final-probe`，结束已删除）：
+  - 卡 C 预览失败、第 3 次 `save` 注入瞬时失败 → 磁盘意图 `preview_failed`（属于 C），草稿已删除。
+  - **持续写盘失败**期间 `cancel(D)` 报错，D 仍是 `pending/awaiting_approval`，磁盘意图仍是 C 的 `preview_failed`，没有丢失也没有被覆盖。
+  - 故障解除后 `cancel(D)` 返回 `cancelled`；C 先被恢复为 `failed/failed/PREVIEW_FAILED`。
+  - 再对 C 执行 cancel → `409 INVALID_STATE`，C 保持 failed。C 以同一答案 option 0 再回答，返回既有的 `failed`；相反答案返回 `409 APPROVAL_ALREADY_ANSWERED`。
+  - 整个过程 `previews.start` 只调用了 1 次，候选数 0。重启 init 成功，卡片状态为 `failed,cancelled`，意图为 null，没有残留的 approving 卡，**重启后也没有再次启动预览**。
+- 并发终局、`inFlight` 同步准入、嵌套 `repo.exclusive` 和 N4 关闭顺序都没有改动（`service.ts` 只增加了 `:435` 这一行）；新增测试只在 `approvals.test.ts`，没有改动 timeout、retry、skip 或 fails 标记。
+
+### 基线读取优化 · 可接受
+- `policy.ts:76`–`:89` 的 `baselineFiles` 先检查版本格式（`:77`），`ls-tree -r -z` 失败直接报错；每条记录都校验 `100644/100755 blob`、`src/` 字符集和 `..`，并有 500 个文件的上限。这些检查都在调用 `gitShow`（`:85`）**之前**。`gitShow`（`:52`–`:56`）唯一的调用者就是这里，只读取已审计清单中的路径；读取失败抛出“无法读取基线文件”，最终记为 `analysis_uncertain`，**不会被当成文件不存在**。链接、子模块、非常规模式在清单阶段就会失败。草稿与基线仍然分别读取（基线不再用草稿副本代替）。
+- 探针复测：真实模板 App `<h1>` → 不请示；Button → `shared_component`；新增文件 → `out_of_scope`；基线版本不存在 → `analysis_uncertain`。原有的别名、barrel、坏语法测试文件未改动。
+- 性能：只减少了重复的逐文件 `ls-tree`（报告中阶段 Git 调用 168 → 160 次，约少 146ms，四个策略窗口约 110ms → 70ms）。`WorkRepo`、全局锁、`work/service.test.ts`、`policy.test.ts`、配置、依赖和 lockfile 都没有改动，四候选 5000ms 预算与断言保持原样。这只是**单次测量到的改善**，不能证明全量超时已经消除，也不能确定历史失败的唯一根因，要以 `job_d6233862` 的结果为准。
+
+### 建议的状态
+- 原 S1–S6、RS1（`Object.assign` 回滚不删除新增键）、RS2（关闭时中止会丢弃已批准的草稿）都按整改报告保留。本轮没有发现使它们需要升级的新证据。其中 S1（预览启动期间持有作品锁）与四候选耗时没有直接关联：该用例走的是不需要请示的发布路径。建议在 M3-B 引入检查运行器之前处理 S1。
+
+### 本节验证范围
+只追加本节，没有改实现、测试或其他报告，也没有提交。一个短探针（伪造 Agent 和预览替身，在进程内注入写盘失败），没有模型、网络、端口或子进程，临时数据已删除。没有跑构建、单测或 E2E，没有读 `.env` 或 ASKS 全文，没有接触旧 worktree 或 Orbital 运行时。
