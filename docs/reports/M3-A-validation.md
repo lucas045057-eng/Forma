@@ -39,3 +39,20 @@
 独立归档 [implementation-25c33a8-failed/evidence.json](artifacts/M3-A/implementation-25c33a8-failed/evidence.json) 保留原证据、19 份已执行步骤日志、作业输出及 SHA256 清单。前一轮 `implementation-7fad918` 通过证据未改。
 
 Claude Code 已另完成对固定 `25c33a8` 的复核（`job_391aa28d`），见 [M3-A-review.md](M3-A-review.md) 的“复核（首轮整改）”：原 B1/R1/R2 关闭，新增 RR1 应修，取消操作可覆盖另一卡尚未完成的持久清理意图。当前 CodeBuddy 只读诊断超时，RR1 补修任务已准备；没有合并或正式 Pi 验收。最终需在补修后的新固定提交上再次全量验证及复核。
+
+## RR1与读取优化后的最终实现全量：通过
+
+固定提交 `012d9a65b4242cad2407a40c34614b2d162c8032`，作业 `job_d6233862` 退出 0，约 80 秒。包含 RR1 修复 `50a13b6`、基线读取优化 `6fe015c` 及报告更新。调度核验全部 20 步骤均 exitCode=0、signal=null，各步骤及最终 HEAD、锁摘要、干净状态一致，锁 SHA256 仍为 `48263def62ed2028e6f747ea1b08be9b4d77435f1b8c0bd52e3db7ef4a3a527f`。
+
+| 范围 | 当前固定提交的结果 |
+| --- | --- |
+| 七包 typecheck / 七包 build | 全部通过 |
+| shared / source-tag / bridge / scene-renderer | 68 / 20 / 1 / 5 通过 |
+| server / studio | 179 / 7 通过 |
+| 完整单测合计 | **280 通过** |
+
+此前超时的四候选清理用例本轮通过，耗时 **4961ms**，未调整其 5000ms 预算、四候选/清理断言、retry 或 skip。本轮成功不能证明将来不会超时，余量较小仍作为 Pi 验收注意项保留；两次单独探针对照仅证明减少八次 Git 查询及当次约146ms阶段耗时，不能外推唯一历史根因或稳定性。
+
+原件 `.worktrees/m3a/.data/m3a-validation-1794641716227/` 另存归档 [implementation-012d9a6/evidence.json](artifacts/M3-A/implementation-012d9a6/evidence.json)，包括20份步骤日志、作业输出和SHA256清单。原261项通过、25c33a8失败的两个归档保留，没有覆盖或将跳过步骤补成通过。
+
+Claude Code 最终复核作业 `job_25d6d6c0` 尚待交回，范围是 RR1 与基线读取优化；Pi 尚未在合并后独立验收。未使用真实模型或 Lux3D，本结果不是 M3 整体过关；M3-B/C 尚未实现。进程清理与正式浏览器回归由后续验收按身份核对，不能仅由 exit0推断。

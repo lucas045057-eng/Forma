@@ -1,0 +1,307 @@
+
+ RUN  v3.2.7 E:/空间化AI工作台/.worktrees/m3a/apps/server
+
+stdout | src/assets/lux3d.test.ts > aborts an in-flight task query without waiting for the upstream timeout
+[lux3d-test fixture] { port: 10114 }
+
+stderr | src/assets/lux3d.test.ts > aborts an in-flight task query without waiting for the upstream timeout
+[lux3d-test transport] { port: 10114, error: 'This operation was aborted', cause: undefined }
+
+ ✓ src/events.test.ts (2 tests) 53ms
+ ✓ src/assets/lux3d.test.ts (9 tests) 59ms
+ ✓ src/agent/limits.test.ts (3 tests) 74ms
+ ✓ src/work/preview.test.ts (1 test) 105ms
+ ✓ src/work/preview-origin.test.ts (2 tests) 125ms
+ ✓ src/assets/instance-lock.test.ts (2 tests) 156ms
+stdout | src/assets/process-model.test.ts > normalizes world-space geometry and preserves textured material through meshopt decoding
+prune: Removed types... Accessor (3)
+
+stdout | src/assets/process-model.test.ts > normalizes world-space geometry and preserves textured material through meshopt decoding
+prune: Removed types... Accessor (2)
+
+ ✓ src/assets/download.test.ts (11 tests) 438ms
+stdout | src/assets/service.test.ts > asset idempotency and polling > concurrent and restarted submissions use one paid task; conflicting input is rejected
+[asset-test fixture] { port: '10178', scenario: 'success' }
+
+ ✓ src/assets/parts.test.ts (4 tests) 12ms
+ ✓ src/assets/mock-server.test.ts (5 tests) 312ms
+ ✓ src/assets/cleanup.test.ts (1 test) 21ms
+ ✓ src/agent/tools.test.ts (3 tests) 40ms
+ ✓ src/assets/process-model.test.ts (4 tests) 276ms
+ ✓ src/work/preview-recovery.test.ts (1 test) 558ms
+   ✓ handles spawn failure and closes a preview when its owning parent is killed  557ms
+ ✓ src/agent/client.test.ts (4 tests) 453ms
+(node:60120) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:49896) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33588) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | src/assets/service.test.ts > asset idempotency and polling > does not resubmit when the remote creation result is unknown
+[asset-test fixture] { port: '10193', scenario: 'success' }
+
+(node:45204) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:53284) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles failed without creating a task during import
+[asset-test fixture] { port: '10197', scenario: 'failed' }
+
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles cancelled without creating a task during import
+[asset-test fixture] { port: '10199', scenario: 'cancelled' }
+
+ ✓ src/assets/process-isolated.test.ts (4 tests) 799ms
+   ✓ publishes model and parts only after successful worker exit  410ms
+   ✓ rejects invalid input in the worker and cleans staging  311ms
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles expired403 without creating a task during import
+[asset-test fixture] { port: '10201', scenario: 'expired403' }
+
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles expired404 without creating a task during import
+[asset-test fixture] { port: '10205', scenario: 'expired404' }
+
+(node:57376) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles unknown without creating a task during import
+[asset-test fixture] { port: '10209', scenario: 'unknown' }
+
+stdout | src/assets/service.test.ts > asset idempotency and polling > handles timeout without creating a task during import
+[asset-test fixture] { port: '10211', scenario: 'timeout' }
+
+stdout | src/assets/service.test.ts > asset idempotency and polling > rejects unsafe IDs and internal downloads, and wraps part-split on the shared task endpoint
+[asset-test fixture] { port: '10213', scenario: 'success' }
+
+ ✓ src/assets/service.test.ts (9 tests) 800ms
+   ✓ asset idempotency and polling > concurrent and restarted submissions use one paid task; conflicting input is rejected  368ms
+ ✓ src/isolation.test.ts (2 tests) 726ms
+   ✓ rejects preview-origin mutations before any task or paid upstream work, and exposes no API on preview listener  691ms
+(node:57376) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/app.test.ts (1 test) 1574ms
+   ✓ runs the mock import through HTTP, processing and model serving; rejects invalid inputs and foreign origins  1573ms
+(node:57376) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:57376) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/work/fs-boundary.test.ts (1 test) 3191ms
+   ✓ serves work and candidate modules but denies workspace sentinel files via @fs  3190ms
+(node:45204) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/scene/service.test.ts (8 tests) 2687ms
+   ✓ HTTP returns field errors, accepts config without coercion, and enforces origins  631ms
+   ✓ adopts only ready assets, requires force and copies metadata with undo  575ms
+   ✓ bounds the persisted journal and undo stack  617ms
+   ✓ refuses requests addressed to a non-loopback host name unless explicitly allowed  714ms
+ ✓ src/approvals/routes.test.ts (1 test) 2928ms
+   ✓ exposes approvals without exposing private candidates and accepts only raw JSON 0/1  2927ms
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 0ms init-start
+
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/m2-api.test.ts (1 test) 3500ms
+   ✓ exposes the M2 task/candidate/version flow and durable event replay without exposing the agent key  3499ms
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 386ms init
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 399ms listen
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 436ms accepted
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 436ms preClose
+
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 438ms second-instance-rejected
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 444ms new-request-rejected
+[n4-http] 444ms gate-released
+
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:45204) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 782ms old-response
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 784ms file-and-event-before-unlock
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 785ms closing-resolved
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 785ms closing-awaited
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 785ms restart-start
+
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 992ms restart-ready
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 1007ms restart-closed
+[n4-http] 1007ms finally-enter
+[n4-http] 1007ms finally-gate-released
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 1008ms finally-closed
+
+stdout | src/events-lock.test.ts > drains an admitted real HTTP snapshot before unlock and preserves nested repo calls
+[n4-http] 1014ms finally-cleaned
+
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/assets/recovery.test.ts (7 tests) 5055ms
+   ✓ processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL  1810ms
+   ✓ detects missing ready models on restart and allows re-import  569ms
+   ✓ does not resubmit after taskId persistence fails, even after restart  324ms
+   ✓ app.close stops drip work and persists a restartable record  1125ms
+   ✓ app.close stops timeout work and persists a restartable record  1142ms
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/work/recovery-fix.test.ts (2 tests) 6554ms
+   ✓ only snapshots permitted work files and serializes concurrent snapshots  3090ms
+   ✓ recovers a committed adoption from durable intent without merging twice  3462ms
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+warning: in the working copy of 'src/deploy.pem', LF will be replaced by CRLF the next time Git touches it
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/work/repo.test.ts (8 tests) 10284ms
+   ✓ snapshots disk edits, adopts a candidate and reverts the merge without rewriting history  2670ms
+   ✓ includes untracked files in pendingDiff and binds exact content without committing  1582ms
+   ✓ aborts a conflicting adoption without changing the main worktree  1608ms
+   ✓ refuses snapshot, candidates, adopt and revert while the work tree contains a junction (D2)  1087ms
+   ✓ refuses when src/ or public/ itself is a junction (review F1)  832ms
+   ✓ refuses an existing clean repository that already tracks a forbidden file (review F3)  744ms
+   ✓ does not abort an interrupted merge through a junctioned src/ at startup (review N1)  1232ms
+   ✓ audits paths containing tabs, newlines and spaces as whole names (review N2)  528ms
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:53672) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/events-lock.test.ts (9 tests) 9995ms
+   ✓ keeps the event log inside the work-data lock and continues seq after a graceful restart (review F4)  1434ms
+   ✓ releases the work-data lock when a constructor throws after it was taken (review N3)  996ms
+   ✓ drains queued work-tree operations before the log closes and the lock is released (review N4)  925ms
+   ✓ drains an admitted real HTTP snapshot before unlock and preserves nested repo calls  1016ms
+   ✓ drains admitted HTTP submit before task files, journal and lock close  969ms
+   ✓ drains admitted HTTP selection before task files, journal and lock close  1329ms
+   ✓ drains admitted HTTP cancel before task files, journal and lock close  895ms
+   ✓ drains an admitted real HTTP approval before closing the journal and releasing the lock  2125ms
+   ✓ retains ownership and journal if a producer fails to stop, while stopping other producers  304ms
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/work/service.test.ts (8 tests) 13480ms
+   ✓ drains an admitted direct submit before close returns (selection=false)  709ms
+   ✓ drains an admitted direct submit before close returns (selection=true)  958ms
+   ✓ validates source paths, commits, line ranges and stale selections before enqueueing  1577ms
+   ✓ runs one task, records checks and scope, then adopts and reverts the work version  2724ms
+   ✓ holds changes outside the selected file and its ancestors for approval  1331ms
+   ✓ keeps at most three pending candidates and cleans up the oldest  4961ms
+   ✓ cancels a running task and removes its candidate directory  697ms
+   ✓ marks an interrupted running task as failed and retryable after restart  522ms
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/approvals/policy.test.ts (19 tests) 15402ms
+   ✓ allows an App-only copy edit on the real template with CSS and JSON?raw imports  1493ms
+   ✓ still detects the real shared Button with instances=1 and valid leaf resources  1256ms
+   ✓ reports a genuinely missing local import on the real template  1146ms
+   ✓ resolves queried source imports without losing shared evidence  1031ms
+   ✓ detects deletion of a referenced leaf resource: src/style.css  965ms
+   ✓ detects deletion of a referenced leaf resource: src/scene.config.json  964ms
+   ✓ does not ignore an existing local reference that escapes src  924ms
+   ✓ does not treat a resource created only in the draft as present in the baseline  626ms
+   ✓ detects three same-file Button JSX uses despite one import and instances=1  665ms
+   ✓ resolves imported aliases when counting shared JSX uses  645ms
+   ✓ resolves default exports and named re-export barrels  699ms
+   ✓ does not label an App-only copy edit as a shared Button edit  590ms
+   ✓ uses conservative UI instance evidence only for the changed selected file  571ms
+   ✓ requires approval for global CSS and scene config, but not module CSS alone  646ms
+   ✓ requires approval for out-of-scope edits and for every nonempty edit without selection  697ms
+   ✓ does not turn baseline read failures into a new-file pass  558ms
+   ✓ treats a genuinely new file in a valid baseline as absent without uncertainty  593ms
+   ✓ keeps baseline shared evidence when the draft cannot be parsed  606ms
+   ✓ fails closed on parse errors and dynamic imports  724ms
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(node:65868) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ ✓ src/task-id.test.ts (24 tests) 17408ms
+   ✓ rejects invalid raw taskId "1e5" without upstream queries  1177ms
+   ✓ rejects invalid raw taskId "0" without upstream queries  999ms
+   ✓ rejects invalid raw taskId "01" without upstream queries  893ms
+   ✓ rejects invalid raw taskId " 1" without upstream queries  782ms
+   ✓ rejects invalid raw taskId "1 " without upstream queries  849ms
+   ✓ rejects invalid raw taskId "1\n" without upstream queries  738ms
+   ✓ rejects invalid raw taskId "1\r\n" without upstream queries  694ms
+   ✓ rejects invalid raw taskId "1.5" without upstream queries  721ms
+   ✓ rejects invalid raw taskId "" without upstream queries  703ms
+   ✓ rejects invalid raw taskId "+1" without upstream queries  698ms
+   ✓ rejects invalid raw taskId "12345678901234567890" without upstream queries  685ms
+   ✓ rejects invalid raw taskId 0 without upstream queries  710ms
+   ✓ rejects invalid raw taskId -1 without upstream queries  670ms
+   ✓ rejects invalid raw taskId 1.5 without upstream queries  635ms
+   ✓ rejects invalid raw taskId 9007199254740992 without upstream queries  722ms
+   ✓ rejects invalid raw taskId null without upstream queries  635ms
+   ✓ rejects invalid raw taskId true without upstream queries  654ms
+   ✓ rejects invalid raw taskId "123" without upstream queries  683ms
+   ✓ rejects invalid raw taskId {"id":"123"} without upstream queries  632ms
+   ✓ accepts valid raw taskId "123" without losing precision  651ms
+   ✓ accepts valid raw taskId "9007199254740992" without losing precision  629ms
+   ✓ accepts valid raw taskId "9999999999999999999" without losing precision  620ms
+   ✓ accepts valid raw taskId 456 without losing precision  632ms
+   ✓ accepts valid raw taskId 9007199254740991 without losing precision  592ms
+ ✓ src/work/approvals.test.ts (23 tests) 50939ms
+   ✓ holds a shared edit in private staging, then approves exactly that draft without another model call  2991ms
+   ✓ rejects and cancels awaiting tasks with staging cleanup and no public candidate  2599ms
+   ✓ releases the task queue while awaiting and allows a later local task  2387ms
+   ✓ combines rules into one card and enforces the three-pending-card limit  3779ms
+   ✓ binds answers to the exact draft digest and current main version  2913ms
+   ✓ hard-fails package changes instead of offering an approval card  1102ms
+   ✓ preserves a pending card and its staging across restart without approving it  1267ms
+   ✓ recovers a persisted approval after the commit without creating a second commit or public event  1809ms
+   ✓ rolls back a new card when its first durable save fails before cleanup  1171ms
+   ✓ does not broadcast or publish when persisting an approval answer fails  1329ms
+   ✓ drains an admitted direct answer before close and refuses later answers  1713ms
+   ✓ isolates preview Error to its approval and permits another card and restart  2631ms
+   ✓ isolates preview AbortError to its approval and permits another card and restart  2570ms
+   ✓ recovers a committed approval with a failing preview without preventing startup  1779ms
+   ✓ resumes failed-preview cleanup after terminal save failure without restarting preview  1867ms
+   ✓ retains stale cleanup intent across save failure and restart  1499ms
+   ✓ retains stale cleanup intent across cleanup failure and restart  1448ms
+   ✓ recovers another card before cancel, including repeated cleanup failure  2623ms
+   ✓ recovers another card before cancel, including repeated terminal-save failure  2597ms
+   ✓ uses the recovered state when cancelling the same target after a terminal-save failure  1799ms
+   ✓ persists stale draft approvals, releases capacity and rejects repeated answers consistently  3785ms
+   ✓ persists stale main approvals, releases capacity and rejects repeated answers consistently  3661ms
+   ✓ serializes approve, reject and cancel so only one terminal transition wins  1620ms
+
+ Test Files  30 passed (30)
+      Tests  179 passed (179)
+   Start at  15:35:40
+   Duration  51.89s (transform 1.83s, setup 0ms, collect 12.89s, tests 148.01s, environment 5ms, prepare 3.94s)
+
