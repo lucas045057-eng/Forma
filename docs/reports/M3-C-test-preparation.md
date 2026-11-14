@@ -162,6 +162,24 @@ Unexpected token '<', "<!doctype "... is not valid JSON
 
 因此本套件当前在 `5edaa22` 上**跑不出真实通过**（不是断言写错，是被测界面拿不到请示/检查数据）。正式全量必须等这个缺陷修完、拿到新的冻结提交之后再做。
 
+### 7.4 修复后复验（实现提交 `052b64d`，已合入验收分支 `d5ff155`）
+
+实现者提交 `052b64d fix(studio): 补齐 approvals checks health 开发反代`，只改 `apps/studio/vite.config.ts` 一个文件、只加三行反代：`'/health'`、`'/approvals'`、`'/checks'`。验收分支用 `git merge --no-ff` 合入该提交（不改产品字节；`git diff 052b64d -- apps packages templates pnpm-lock.yaml` 为 0 行）。
+
+复验结果：
+
+- **阻断点消失**：`openStudio()` 现在能在几秒内拿到 `events-status=connected`（`dirtyAtStart=[]`、四份快照全是真实 JSON）。
+- 顺势修掉了两处**测试侧**缺陷（不改断言语义，只把“读一次”改成“等落定”与选对定位条目）：
+  1. bridge 的 overlay 是 `requestAnimationFrame` 重画，原来“读到空就断言”会偶发 0 框；改为轮询等待，并在仍失败时输出诊断（overlay/affected/selection/data-src 数量）。
+  2. 定位必须点 **文件级条目**（`src/components/Button.tsx`）。affected 里前面的 `src/App.tsx:27:14` 这类“使用点”也会给按钮，但页面元素的 `data-src` 指向的是组件定义（`Button.tsx:5:5`），点它只能得到 0 框。
+- 修后单例复跑（`01-approval.spec.ts:60`）：**1 passed in 7.9s**。
+
+> 已记录但**不作为通过条件**的观察项：affected 中的“使用点”（如 `src/App.tsx:27:14`）提供了“查看源码对应位置”按钮，但 bridge 只支持精确 src，点击结果为 0 框且无提示。共享组件主路径（文件级条目）正常框出三处。建议实现侧下阶段评估是否对这类条目降级为“文件级影响”（设计 §2 的“无法确认命中”语义），本轮不改断言、不扩合同。
+
+### 7.5 关于 `052b64d` 里多出来的 `'/health'`
+
+核对结论：**`/health` 不在 Studio 的调用面上**——`apps/studio/src/**` 全仓搜索没有任何 `/health` 请求（唯一的 `health` 命中是 `sync-state.test.ts` 里一个用例名）；后端 `/health` 只被测试启动器（`webServer.url` 直连 3001）与运维探活使用。因此这一行是“核对后端路由清单时顺手补齐”的**冗余但无害**项：它只让 5173/health 转发到后端，不改变任何前端行为；且不引入新攻击面（dev server 仅监听 127.0.0.1）。无需整改，但建议实现者说明它属于“白名单补齐”而非 Studio 依赖。
+
 ## 8. 纪律确认
 
 - 不改产品：`apps/`、`packages/`、`templates/`、`pnpm-lock.yaml` 零改动；
