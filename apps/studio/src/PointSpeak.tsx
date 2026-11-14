@@ -1,7 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { Selection, Task } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
-import { operationError } from './adoption-gate.ts';
+import { operationError, refreshError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import { canSubmit, pickHint, retrySelection, submittedSelection, type PickState } from './pick-state.ts';
 
@@ -32,10 +32,10 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
       const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
       setActiveId(task.id);
       succeeded = true;
-    } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined)); }
+    } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined)); }
     awaiting(token);
     try { await reload(); }
-    catch { setError(succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续'); }
+    catch { setError(previous => refreshError(succeeded, previous)); }
     finally { setBusy(false); }
   }
   function keyboard(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -51,10 +51,10 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     setBusy(true); setError('');
     let succeeded = false;
     try { await api(`/tasks/${encodeURIComponent(task.id)}/cancel`, mutation('POST')); succeeded = true; }
-    catch (cause) { setError(operationError('cancel', cause instanceof ApiError ? cause.code : undefined)); }
+    catch (cause) { setError(operationError('cancel', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined)); }
     awaiting(token);
     try { await reload(); }
-    catch { setError(succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续'); }
+    catch { setError(previous => refreshError(succeeded, previous)); }
     finally { setBusy(false); }
   }
 

@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { ApprovalCard, Task } from '@spatial/shared';
-import { affectedSource, canAnswer, impactHighlightMessages, isApproval, mergeApproval, restorePicking, sortApprovals } from './approval-state.ts';
+import { affectedSource, canAnswer, impactHighlightMessages, isImpactPickError, isApproval, mergeApproval, restorePicking, sortApprovals } from './approval-state.ts';
 import { contiguousReplay, emptyM2State, reduceM2Event } from './m2-state.ts';
 
 const card: ApprovalCard = { id: 'a', taskId: 't', question: '修改？', reason: '<script>text</script>', options: [{ label: '批准', impact: '发布' }, { label: '拒绝', impact: '丢弃' }], affected: ['src/Button.tsx'], evidence: [], status: 'pending', ruleCodes: ['shared_component'], ruleVersion: '1', baseVersion: 'v1', contentDigest: 'digest', createdAt: '2026-01-01', updatedAt: '2026-01-01' };
 const task: Task = { id: 't', instruction: '修改', status: 'awaiting_approval', events: [] };
 describe('approval state and conservative gates', () => {
+  it('suppresses only pick errors in impact mode, not real page failures', () => {
+    expect(isImpactPickError('未找到带源码标记的外层容器')).toBe(true);
+    expect(isImpactPickError('Uncaught TypeError: page crashed')).toBe(false);
+    expect(isImpactPickError('Unhandled promise rejection')).toBe(false);
+  });
   it('restores the card source after a pick result and clears the hover before highlighting', () => {
     const messages = impactHighlightMessages('src/Button.tsx:3:4');
     expect(messages).toEqual([{ type: 'pick:stop' }, { type: 'pick:start' }, { type: 'highlight', payload: { src: 'src/Button.tsx:3:4' } }]);

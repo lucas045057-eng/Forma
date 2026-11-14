@@ -2,7 +2,7 @@ import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { isPreviewMessage, type ApprovalCard, type StudioMessage } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
-import { impactHighlightMessages, restorePicking, waiting } from './approval-state.ts';
+import { impactHighlightMessages, isImpactPickError, restorePicking, waiting } from './approval-state.ts';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
 import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
@@ -52,7 +52,7 @@ function Studio() {
     pickingRef.current = false;
     setPicking(false);
     send({ type: 'pick:stop' });
-    setError('页面已变化，请重新点选');
+    if (pick.kind === 'ready' || pick.kind === 'pending') setError('页面已变化，请重新点选');
   }, [state.version]);
 
   function exitImpact(restore = true) {
@@ -112,7 +112,7 @@ function Studio() {
         // Candidate frames deliberately never enter picking mode or change Selection.
         return;
       }
-      if (impactRef.current && (event.data.type === 'pick:result' || event.data.type === 'error')) {
+      if (impactRef.current && (event.data.type === 'pick:result' || (event.data.type === 'error' && isImpactPickError(event.data.payload.message)))) {
         impactHighlightMessages(impactRef.current.src).forEach(send);
         return;
       }

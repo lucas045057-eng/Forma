@@ -5,7 +5,7 @@ import { api, ApiError, mutation } from './api.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import CheckPanel from './CheckPanel.tsx';
 import { activeRun, associatedRun } from './check-state.ts';
-import { adoptionReason, operationError, type EvidenceReceipt } from './adoption-gate.ts';
+import { adoptionReason, operationError, refreshError, type EvidenceReceipt } from './adoption-gate.ts';
 
 export type PreviewMode = 'current' | 'candidate' | 'compare';
 export function AdoptButton({ reason, onAdopt }: { reason: string; onAdopt: () => void }) {
@@ -87,14 +87,14 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
         const code = cause instanceof ApiError ? cause.code : undefined;
         if ((kind === 'run' || kind === 'rerun') && code === 'STALE_CANDIDATE') setInvalid(previous => ({ ...previous, [id]: true }));
         if (kind === 'adopt' && code === 'CHECKS_NOT_PASSED') setRejected(previous => ({ ...previous, [id]: run!.id }));
-        setErrors(previous => ({ ...previous, [id]: operationError(kind, code) }));
+        setErrors(previous => ({ ...previous, [id]: operationError(kind, code, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined) }));
       }
     }
     // Locks live in the provider, including when this panel unmounts during a request.
     awaiting(token);
     try { await reload(); }
     catch {
-      if (mounted.current) setErrors(previous => ({ ...previous, [id]: succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '无法确认服务器状态，请刷新后继续' }));
+      if (mounted.current) setErrors(previous => ({ ...previous, [id]: refreshError(succeeded, previous[id]) }));
     }
   }
 

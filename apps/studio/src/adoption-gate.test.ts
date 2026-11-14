@@ -2,7 +2,7 @@ import { expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AdoptButton } from './CandidatePanel.tsx';
 import type { Candidate, CheckRun } from '@spatial/shared';
-import { adoptionReason, operationError, proofKey } from './adoption-gate.ts';
+import { adoptionReason, operationError, refreshError, proofKey } from './adoption-gate.ts';
 import { MutationLocks } from './mutation-locks.ts';
 
 function allowed() {
@@ -52,6 +52,20 @@ it.each(cases)('blocks adoption: %s', (_name, change) => {
 it('rejects a missing run or a receipt from another candidate', () => {
   expect(adoptionReason({ ...allowed(), run: undefined })).not.toBe('');
   expect(adoptionReason({ ...allowed(), receipt: { ready: true, key: 'old' } })).not.toBe('');
+});
+it('distinguishes definite rejection from unknown network or server outcomes', () => {
+  const denied = operationError('task', 'MODEL_MISSING', 400, '未配置模型');
+  expect(denied).toBe('操作被拒绝：未配置模型');
+  expect(operationError('task', 'INVALID_TASK', 422, '指令无效')).toBe('操作被拒绝：指令无效');
+  expect(operationError('task', undefined)).toContain('无法确认');
+  expect(operationError('task', 'SERVER_ERROR', 500, 'internal')).toContain('无法确认');
+  expect(refreshError(false, denied)).toContain('操作被拒绝');
+  expect(refreshError(true)).toContain('操作已提交');
+});
+it('labels an unchecked candidate as not yet checked rather than inconsistent', () => {
+  const input = allowed();
+  delete input.candidate.latestCheckRunId;
+  expect(adoptionReason({ ...input, run: undefined })).toBe('尚未运行检查，请先运行检查');
 });
 it('scopes backend error codes to their actual operation', () => {
   expect(operationError('adopt', 'CHECKS_NOT_PASSED')).toContain('证明已失效');

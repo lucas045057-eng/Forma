@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ApprovalCard, ApprovalStatus } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
+import { operationError, refreshError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import { affectedSource, canAnswer, sortApprovals, waiting } from './approval-state.ts';
 
@@ -46,7 +47,7 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
       if (mounted.current && cause instanceof ApiError && ['STALE_APPROVAL', 'APPROVAL_ALREADY_ANSWERED', 'APPROVAL_NOT_PENDING'].includes(cause.code)) setBlockedIds(previous => new Set([...previous, card.id]));
       if (cause instanceof ApiError && cause.code === 'STALE_APPROVAL') failure = '请示已失效，请重新生成任务';
       else if (cause instanceof ApiError && ['APPROVAL_ALREADY_ANSWERED', 'APPROVAL_NOT_PENDING'].includes(cause.code)) failure = '该请示已处理或不可继续，正在刷新状态';
-      else failure = '提交结果尚未确认，正在读取服务器状态';
+      else failure = operationError('approval', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined);
     }
     awaiting(token);
     if (mounted.current) update(card.id, { phase: succeeded ? 'refreshing' : 'outcomeUnknown', message: succeeded ? '操作已提交，正在刷新状态' : failure });
@@ -55,7 +56,7 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
       await reload();
       if (mounted.current && failure) setErrors(previous => ({ ...previous, [card.id]: failure }));
     } catch {
-      if (mounted.current) update(card.id, { phase: succeeded ? 'refreshing' : 'outcomeUnknown', message: succeeded ? '操作已提交，状态刷新失败，请刷新状态' : '提交结果尚未确认，请刷新状态后继续' });
+      if (mounted.current) update(card.id, { phase: succeeded ? 'refreshing' : 'outcomeUnknown', message: refreshError(succeeded, failure) });
     }
   }
   const cards = sortApprovals(state.approvals);
