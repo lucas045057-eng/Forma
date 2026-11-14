@@ -41,6 +41,20 @@ it('isolates a candidate check issue without closing global work actions', () =>
   expect(html).toMatch(/data-testid="candidate-adopt" disabled=""/);
   expect(html).toMatch(/data-testid="version-revert">/);
 });
+it('allows explicit rerun for a completed legacy run while adoption stays disabled', () => {
+  const run: CheckRun = { id: 'legacy01', candidateId: 'c', candidateCommit: 'commit', baseVersion: 'v1', mainVersion: 'v1', contentDigest: '', policyVersion: 'old', toolIdentity: '', createdAt: 'now', status: 'completed', error: { code: 'LEGACY_CHECK_RECORD', message: '请显式重新检查' }, checks: [] };
+  center.state.candidates = [{ ...candidate, latestCheckRunId: run.id }];
+  center.state.runs = { [run.id]: run };
+  center.state.checkIssues = { c: '检查状态不完整' };
+  expect(render()).toMatch(/data-testid="check-rerun">/);
+  expect(render()).toMatch(/data-testid="candidate-adopt" disabled=""/);
+  center.state.runs[run.id] = { ...run, status: 'running' };
+  expect(render()).toMatch(/data-testid="check-cancel">/);
+  expect(render()).toMatch(/data-testid="check-rerun" disabled=""/);
+  center.state.runs = {};
+  expect(render()).toMatch(/data-testid="check-rerun" disabled=""/);
+  expect(render()).toMatch(/data-testid="check-cancel" disabled=""/);
+});
 it('marks a backend-rejected proof as invalid historical results', () => {
   const html = renderToStaticMarkup(<CheckPanel candidate={candidate} syncReady syncEpoch={1} version="v1" proofRejected/>);
   expect(html).toContain('历史检查结果 · 证明已失效');
