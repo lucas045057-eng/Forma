@@ -2,8 +2,8 @@ import type { ApprovalCard, Candidate, CheckRun, Task } from '@spatial/shared';
 import { isApproval, mergeApproval } from './approval-state.ts';
 import { isCheckRun, mergeRun } from './check-state.ts';
 
-export interface M2State { tasks: Task[]; candidates: Candidate[]; version: string; approvals: ApprovalCard[]; runs: Record<string, CheckRun> }
-export const emptyM2State: M2State = { tasks: [], candidates: [], version: '', approvals: [], runs: {} };
+export interface M2State { tasks: Task[]; candidates: Candidate[]; version: string; approvals: ApprovalCard[]; runs: Record<string, CheckRun>; checkIssues: Record<string, string> }
+export const emptyM2State: M2State = { tasks: [], candidates: [], version: '', approvals: [], runs: {}, checkIssues: {} };
 
 export type IncomingEvent = { type: string; seq: number; ts?: string } & Record<string, unknown>;
 

@@ -51,12 +51,13 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
   const connected = status === 'connected';
   const ready = syncReady && connected;
   const error = (selected ? errors[selected.id] : '') || errors.work;
+  const checkIssue = selected ? state.checkIssues[selected.id] : undefined;
   const linked = !!selected && associatedRun(selected, run);
-  const canRun = !!selected && ready && !busy && !invalid[selected.id] && !!selected.candidateCommit && selected.baseVersion === state.version &&
+  const canRun = !!selected && ready && !checkIssue && !busy && !invalid[selected.id] && !!selected.candidateCommit && selected.baseVersion === state.version &&
     (!selected.latestCheckRunId || (linked && !activeRun(run)));
-  const canCancel = ready && !busy && linked && activeRun(run);
+  const canCancel = ready && !checkIssue && !busy && linked && activeRun(run);
   const canRevert = ready && !locked(['work']);
-  const reason = adoptionReason({ candidate: selected, run, version: state.version, epoch: syncEpoch, ready, connected,
+  const reason = checkIssue || adoptionReason({ candidate: selected, run, version: state.version, epoch: syncEpoch, ready, connected,
     busy: locked(['work']), rejectedRun: selected ? (invalid[selected.id] ? run?.id : rejected[selected.id]) : undefined, receipt });
 
   async function action(kind: 'run' | 'rerun' | 'cancel' | 'discard' | 'adopt' | 'revert') {
@@ -65,6 +66,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     if ((kind === 'run' || kind === 'rerun') && (!canRun || (kind === 'rerun') !== !!selected?.latestCheckRunId)) return;
     if (kind === 'cancel' && !canCancel) return;
     if (kind === 'revert' && !canRevert) return;
+    if (kind === 'adopt' && checkIssue) return;
     if (kind === 'adopt' && adoptionReason({ candidate: selected, run, version: state.version, epoch: syncEpoch, ready, connected,
       busy: locked(['work']), rejectedRun: selected ? (invalid[selected.id] ? run?.id : rejected[selected.id]) : undefined, receipt: receiptRef.current })) return;
     const id = kind === 'revert' ? 'work' : selected!.id;
@@ -116,7 +118,7 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
     {selected && <section className="candidate-details" data-testid="candidate-details">
       <div className="candidate-title"><h2>候选 {selected.id.slice(0, 8)}</h2><span>待定候选 {pending.length}/3</span></div>
       {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
-      <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '前端检查与证据已就绪，采用时仍由服务器最终核对'}/>
+      <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} checkIssue={checkIssue} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '前端检查与证据已就绪，采用时仍由服务器最终核对'}/>
       <div className="check-actions">
         {!selected.latestCheckRunId ? <button type="button" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button> : <button type="button" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
         <button type="button" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
