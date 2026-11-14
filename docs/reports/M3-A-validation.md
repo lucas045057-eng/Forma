@@ -29,3 +29,13 @@
 ## 当前边界
 
 本轮为 fake/mock 实现验证，不包含正式 E2E、真实模型调用或 Lux3D 付费调用。M3-A 独立审查作业 `job_f1c79be9` 已启动，报告待返回；尚未合并 master、尚未交 Pi 独立验收。M3-B 检查运行器与 M3-C 界面尚未实现，不能据本结果宣布 M3 整体过关。测试后的当前进程/端口是否残留需另行核查，脚本退出本身不等同于该项通过。
+
+## 首轮整改后的全量结果：失败
+
+固定提交 `25c33a83877bff173ffa5635c52ef5cb7b526cd7`，作业 `job_c2efd2aa` 退出 1，约 73 秒。锁摘要与上轮一致；全部已执行步骤前后 HEAD、锁摘要和干净状态一致，排除运行中代码被修改。
+
+七包类型检查、七包构建及 shared 68 / plugin 20 / bridge 1 / renderer 5 单测通过。后端 176 项中 175 项通过、1 项失败：`apps/server/src/work/service.test.ts:118` 的四候选上限及最早候选清理用例在 5012ms 时触发默认 5000ms 超时，未有候选数量或清理断言失败的证据。入口按首败即停退出，后续 Studio 单测未运行，不能用上一轮 Studio 结果补成全量通过，也不能由单次超时直接归因为环境或逻辑死锁。
+
+独立归档 [implementation-25c33a8-failed/evidence.json](artifacts/M3-A/implementation-25c33a8-failed/evidence.json) 保留原证据、19 份已执行步骤日志、作业输出及 SHA256 清单。前一轮 `implementation-7fad918` 通过证据未改。
+
+Claude Code 已另完成对固定 `25c33a8` 的复核（`job_391aa28d`），见 [M3-A-review.md](M3-A-review.md) 的“复核（首轮整改）”：原 B1/R1/R2 关闭，新增 RR1 应修，取消操作可覆盖另一卡尚未完成的持久清理意图。当前 CodeBuddy 只读诊断超时，RR1 补修任务已准备；没有合并或正式 Pi 验收。最终需在补修后的新固定提交上再次全量验证及复核。

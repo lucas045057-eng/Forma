@@ -83,3 +83,57 @@
   - R1：真实 `WorkService`/`WorkRepo`，用伪造的 `CodingAgent.run`（不调用模型），`previews.start` 用抛错代替，没有启动任何 Vite 或预览进程，也没有监听端口。
 - 没有读 `.env` 或 ASKS 全文，没有使用真实 key、模型或 Lux3D，没有跑构建、单测或 E2E，没有碰 orbital 运行时。
 - 修复后需要在新的固定提交上复审 B1、R1、R2，并核对 `job_049bdc52`（或其后续作业）的完整证据。
+
+## 复核（首轮整改）
+
+- 日期：2026-11-14。固定 HEAD：**`25c33a83877bff173ffa5635c52ef5cb7b526cd7`**（feat/m3a-approvals；ff6fe99 = B1，b82efad = R1/R2，25c33a8 = 报告）。复核差异 `git diff 7fad918 25c33a8`，并追踪了 `answerApproval`/`cancel`/`finalizeApprovedTask`/`recoverApprovalIntent`/`init` 的完整调用链。行号对应 25c33a8。
+- 探针导入的 `.worktrees/m3a` 在开始和结束时都是 HEAD=25c33a8、工作树干净。全量 `job_c2efd2aa` 尚未返回，**本节不预写全量通过**，也不拿 7fad918 的 job_049bdc52 或分阶段的定向作业拼成全量结论。
+- **结论：仍不能转为通过，暂判“有条件通过”**。B1、R1、R2 都可以关闭，没有新阻断；新增 1 条应修（RR1：取消会覆盖另一张卡已持久化的清理意图）。RR1 修好、全量作业通过后，可以转为通过。
+
+### B1 · 关闭
+- `policy.ts:83`–`:96` 的 `baselineFiles` 用 `ls-tree -r` 从真实 Git 基线树读取：链接、子模块或非常规模式、`src/` 外、非法字符，一律报基线错误。草稿则由 `sourceFiles`（`:62`–`:78`）从磁盘独立读取，并检查源码根和每一项是否为链接。两侧各自出错、各自记 `analysis_uncertain`，不会抹掉另一侧的证据（`:262`–`:276`）。
+- `moduleName`（`:96`–`:101`）去掉 `?`/`#` 后缀后解析；含反斜杠、越出 `src/` 的引用直接视为不确定（`:130`–`:134`）。非源码资源只有在**对应一侧快照中确实存在**时才放行（`:285`）；TS/JS 带查询串仍按源码模块参与共享计数。
+- 实证（临时探针，`git archive 25c33a8` 取出真实模板，原生 Node 导入真实 `WorkRepo`/`evaluateApproval`）：
+  - App `<h1>` 文案 → `required=false`；
+  - Button（instances=1）→ `shared_component`；
+  - 导入不存在的 `./nope.css` → `analysis_uncertain`；
+  - `../package.json?raw` → `analysis_uncertain`；
+  - 反斜杠路径 → `analysis_uncertain`。
+- 别名、default、barrel、坏语法、基线失败等原有断言保留在 `policy.test.ts`。S5（整树统计不确定性）按整改报告保留，没有新的升级依据。
+
+### R1 · 关闭
+- 批准先保存为 `approving` 加 approve 意图（`service.ts:424`），这时没有候选、没有 `approved`。`:197`–`:204` 只在 `previews.start` 和随后的取消检查外层捕获异常，异常转为持久化的 `preview_failed` 清理意图（`:167`–`:172`）。commit、摘要、路径和写盘错误不在这个 catch 范围内，会照常抛出。
+- 实证（真实 `WorkService`/`WorkRepo`，伪造 `CodingAgent.run` 不调用模型，`previews.start` 抛错代替预览失败，不启动 Vite、不监听端口）：
+  - 批准卡 A → `failed/failed/PREVIEW_FAILED`，候选数 0；
+  - 再次以同一答案回答 A → 原样返回 `failed`，不重启预览；
+  - 拒绝卡 B 正常；
+  - 关闭后重启 init 成功，A 仍是 `failed`。
+- 旧数据中 `approved` 加 approve 意图的组合，恢复时同样走 finalize（不检查卡片 status），预览失败时同样进入 `preview_failed`。
+- 成功发布但最后一次保存失败时（`:219`–`:224`），会回滚候选、卡片和任务，停掉预览并保留 approve 意图；之后由 commit-before-save 恢复重新发布，不会产生第二个提交（原有测试保留）。
+
+### R2 · 关闭
+- 回答时发现过期（`:414`–`:419`），在同一 `exclusive` 内先持久化 `stale` 意图，再清理本卡草稿、写入终态，然后才发 `approval.resolved`/`task.updated`，最后抛 409。卡片已是 stale 后，任何答案都在 `:407` 稳定返回 409。pending 计数只统计 `pending`，名额随之释放。新增测试 `approvals.test.ts`（diff 第 104–158 行处）覆盖了草稿变化、主版本变化、保存失败、清理失败加重启，断言了卡片/任务状态、磁盘内容和名额。
+
+### 新问题
+
+#### RR1 · 应修：取消另一个任务会覆盖已持久化但尚未完成的清理意图，留下永远“approving”的卡
+- 位置：`service.ts:433`–`:447`（`cancel` 没有先执行 `recoverApprovalIntent()`，直接写入唯一的 `approvalIntent` 槽位再保存），对比 `answerApproval` 在 `:405` 会先恢复。相关代码在 `:145`、`:156`–`:162`（终态保存失败时保留意图）。
+- 触发条件：卡 C 预览失败，`preview_failed` 意图已落盘，草稿也已删除，但终态保存遇到一次瞬时写盘失败。此时状态为 C=`approving`、任务 `awaiting_approval`，磁盘上保留着 C 的意图。在任何 `answerApproval` 之前，用户先取消了另一个等待中的任务 D。
+- 实证（同一探针，第 3 次 `save` 注入一次失败）：
+  - 回答 C 报出注入的错误，磁盘意图为 `preview_failed`/C；
+  - `cancel(D)` 成功后，**磁盘意图变为 null**；
+  - C 变成 `approving answer=0`、任务 `awaiting_approval`，草稿已不存在；
+  - 再次以同一答案回答 C，返回 `approving/awaiting_approval`（200），按“同答返回既有状态”永远不会推进；
+  - 重启 init 正常，但 C 仍是 `approving`，没有任何恢复依据。只有用户对 C 也执行取消才能结束。
+- 为什么：违反了“不得丢失恢复依据、不得用清理覆盖新的意图”的合同，对外表现为一张卡长期“正在批准”却没有草稿也没有候选。7fad918 里同一个 cancel 也会覆盖 approve 意图，只是当时被 R1 掩盖了；现在可以单独复现。
+- 修法：`cancel` 在 `exclusive` 内先 `await this.recoverApprovalIntent()`（与 answer 一致）；或者在存在不属于本卡的未完成意图时拒绝取消。更稳妥的做法是把意图改成按卡片 id 存储，避免单一槽位。补一条回归：终态保存失败 → 取消另一个任务 → 断言原意图仍在磁盘上，并在下一次回答或重启时完成为 `failed`。
+
+### 建议（不影响关闭结论）
+- RS1 `service.ts:160`、`:220`：回滚用的是 `Object.assign(previous)`，不会删掉新增的键。从磁盘加载的任务对象本来没有 `error` 键、发布前没有 `candidateId` 键，回滚后内存里会残留 `task.error=PREVIEW_FAILED`，或在 awaiting 任务上残留 `candidateId`。如果在重试之前恰好有其他操作保存，这些残留会写入磁盘。建议整对象替换（与 `state.approvals[index] = previous` 的做法一致）。
+- RS2 `service.ts:197`–`:204`：正常关闭时中止 controller，会把用户已经批准的草稿转成 `PREVIEW_FAILED` 并删除，而不是保留 approve 意图到重启后继续发布。这符合本轮合同（AbortError 视为失败），但用户可能因为一次停机丢掉已批准的修改。建议在 closing 时保留意图，或者由 M3-C 明确提示。
+- 原 S1–S4、S6 的处理说明与代码一致（锁的作用域、diff 展示、逐卡 schema、方法可见性都未改；S6 已在文档中澄清），没有新证据要求升级。
+
+### 本节验证范围
+- 只追加本节；没有改实现、测试、依赖或其他报告，也没有提交。
+- 一个临时探针，数据放在 `E:/空间化AI工作台/.data/claude-m3a-rereview-probe`，结束后已删除；用伪造的 Agent，`previews.start` 用替身代替，没有模型、网络、端口或子进程。故障注入只在探针进程内替换 `save`。
+- 没有跑构建、单测或 E2E，没有读 `.env` 或 ASKS 全文，没有等待 `job_c2efd2aa`。RR1 修复后需要在新的固定提交上复核，并核对全量证据。
