@@ -304,4 +304,43 @@ Studio 不要求检查由 UI 发起：check.finished 触发权威快照，或首
 
 上轮 `job_2adead58` exit 0 已在 C3 三项整改节补录，不重跑旧轮。它的单测没有开发反代接线覆盖，所以与本次 Pi 的真实产品缺陷并不矛盾。
 
-本次新增接线集成自测随新冻结版本通过根 bg.cmd 串行运行 `pnpm test`、`pnpm typecheck`、`pnpm build`；结果待核对，job id 与日志路径在回合小结给出。取得 job 即结束、冻结文件，不轮询。只改 Studio 与实现报告，不改后端/协议/模板/锁/Pi tests 和历史证据，无需新增批准。
+该轮 `job_b3756ceb` 已确认失败：exit 原件为 `1 0`，日志中 dev-proxy.test.ts 报 `Port 5173 is already in use`，Studio 为 1 failed / 85 passed。归类为新增测试的端口隔离缺陷，不是产品反代故障；bdb297a 不作为可验收冻结版。由于命令串首败即停，该轮后续 typecheck/build 不记为通过。失败原件保留于根 orbital/jobs/job_b3756ceb，产品三个反代键保持不变。后续修复与新验证见下节。
+
+## 代理接线测试 hermetic 整改（基于 bdb297a）
+
+### 根因与修复
+
+修复提交 `fb13d35`。检查当前安装的 Vite `dist/node/chunks/config.js`：`startServer` 以 `!configPort` 判断端口是否存在；配置 `port:0` 或直接 `studio.listen(0)` 都会被当成未指定，回退到默认开发端口。这解释了为何原测试虽然写了 0，仍在 Pi 占用默认端口时失败。
+
+新测试对 stub 使用 Node HTTP `listen(0)`，对 Vite 使用其已创建的 `studio.httpServer.listen(0)`，绕过 Vite 的默认端口选择封装；Vite 包装过的底层 listen 仍执行 initServer，再交给 Node/系统分配临时端口。监听成功后从各自 `address().port` 读取实际端口，stub 的实际地址写入测试代理 target，Vite 的实际地址用于请求；没有释放临时端口后再绑定的抢占窗口，也没有固定高位端口常量。
+
+只覆盖测试配置，不改产品 vite.config.ts 的三个反代键或其它产品配置。测试仍使用真实代理键和 HTTP 请求断言；configFile:false、envFile:false，不读取真实 .env，不连接真实后端；禁用 HMR/文件监听，优化缓存使用 mkdtemp 的独立临时目录，避免与其它 dev server 共用缓存。嵌套 finally 确保即便 Vite close 失败也继续关闭 stub，最后删除本测试创建的缓存目录；不会关闭外部服务。
+
+### 单文件与占用端口自证入口
+
+提交 `2a879fa` 新增 `apps/studio/verify-proxy-isolation.mjs`，用于这次串行验证，不进入 Vitest 自动收集，也不修改 package scripts。验证端口由 CLI 参数传入，接线测试文件自身不含默认/固定高位端口值。
+
+后台命令：
+
+```text
+cd /d .worktrees\m3c && set CI=true&& node apps/studio/verify-proxy-isolation.mjs 5173
+```
+
+脚本按顺序执行，首败即停，finally 清理：
+
+1. `pnpm --filter @spatial/studio exec vitest run src/dev-proxy.test.ts`，单独验证修复后的文件。
+2. 在传入的默认 Studio 端口起一个实际 Vite server，root 为 Studio，禁用 envFile、代理与 HMR，缓存独立；它只用于制造端口占用，不访问后端。如果端口已经占用，则通过 `/@vite/client` 的 createHotContext 内容确认已有 Vite 服务，复用这个占用条件，不停止或修改它；若不是 Vite 服务则明确失败，不伪造覆盖。
+3. 记录 `[port-check]` 的 before-full-test 证据后执行 `pnpm test`；全量结束再验证该端口仍为 Vite 服务并记录 after-full-test，然后依次 `pnpm typecheck`、`pnpm build`。
+4. 关闭本脚本创建的 Vite，记录 `[cleanup] owned Studio listening=false`，清理本脚本缓存。若使用的是外部 Vite，明确记录未拥有监听器，原服务保持运行。任何命令失败也走 finally。
+
+本回合启动前的只读端口检查未发现 5173 监听；脚本将在单文件通过后建立占用，并以作业内的前后探针作为真正“端口被占仍通过”的证据。本轮结果尚待后台作业完成后调度读取，不预写“单文件通过”或“占用端口仍全绿”。最终提交、job id 与日志路径在回合小结给出；取得 job 后立即结束、不轮询。
+
+### 其它测试的固定端口盘点
+
+只读检索本实现树 `*.test.ts/tsx/js/mjs` 的 listen/port 常量、无参 Vite listen 与默认端口引用：未发现第二处与本缺陷相同的真实固定端口单测入口。命中的 `apps/server/src/test-support/fetch-listener.test.ts` 数字是 vi.fn 模拟分配/冲突断言，其真实监听用动态分配 helper；`apps/server/src/scene/service.test.ts` 的默认端口字符串是 app.inject 的 Host 校验，不绑定监听。此结论限本次静态检索，不宣称穷尽所有间接环境依赖。
+
+另确认独立 E2E 的 `tests/e2e/m0a/env.ts`、`m1a/env.ts`、`m1b/env.ts`、`m2a/env.ts` 有固定 Studio/模板/后端/上游端口（包括 5173/5174），多套同时启动可能冲突。这些是由 Pi runner 顺序运行的整套服务配置，不是 pnpm test 单测；本轮仅列出，不修改 Pi 测试/配置、不得关闭 Pi 进程。
+
+### 状态与边界
+
+本轮仅修改 Studio 测试/验证入口与实现报告，未改后端、协议、模板、锁、产品反代键或 Pi 的测试与失败证据；未读取真实 .env、未调用付费模型、未派子 Agent。新验证未完成前仍不可宣称正式冻结通过，无额外需批准事项。
