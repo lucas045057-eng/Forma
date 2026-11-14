@@ -53,9 +53,9 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
   const error = (selected ? errors[selected.id] : '') || errors.work;
   const checkIssue = selected ? state.checkIssues[selected.id] : undefined;
   const linked = !!selected && associatedRun(selected, run);
-  const canRun = !!selected && ready && !checkIssue && !busy && !invalid[selected.id] && !!selected.candidateCommit && selected.baseVersion === state.version &&
-    (!selected.latestCheckRunId || (linked && !activeRun(run)));
-  const canCancel = ready && !checkIssue && !busy && linked && activeRun(run);
+  const canRun = !!selected && ready && !busy && !invalid[selected.id] && !!selected.candidateCommit && selected.baseVersion === state.version &&
+    (selected.latestCheckRunId ? linked && !activeRun(run) : !checkIssue);
+  const canCancel = ready && !busy && linked && activeRun(run);
   const canRevert = ready && !locked(['work']);
   const reason = checkIssue || adoptionReason({ candidate: selected, run, version: state.version, epoch: syncEpoch, ready, connected,
     busy: locked(['work']), rejectedRun: selected ? (invalid[selected.id] ? run?.id : rejected[selected.id]) : undefined, receipt });
