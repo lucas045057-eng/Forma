@@ -10,6 +10,7 @@ import { WorkRepo } from './repo.ts';
 
 function agentSpy() { return vi.spyOn(CodingAgent.prototype, 'run'); }
 function saveSpy(work: WorkService) { return vi.spyOn(work as unknown as { save: () => Promise<void> }, 'save'); }
+function removeSpy(work: WorkService) { return vi.spyOn(work.repo, 'removeCandidate'); }
 const agentOptions = { baseUrl: 'http://127.0.0.1:1', apiKey: 'mock-only', model: 'mock-coder' };
 let agent: ReturnType<typeof agentSpy>;
 let modelCalls = 0;
@@ -445,6 +446,79 @@ it.each(['save', 'cleanup'])('retains stale cleanup intent across %s failure and
       expectStatus(restarted, task.id, 'failed');
       expect(modelCalls).toBe(1);
     } finally { await restarted.close(); }
+  } finally { await cleanup(f); }
+});
+
+it.each(['cleanup', 'terminal-save'])('recovers another card before cancel, including repeated %s failure', async failure => {
+  const f = await fixture();
+  let save: ReturnType<typeof saveSpy> | undefined;
+  try {
+    const first = await f.work.submit('shared C intent', selection(f.baseVersion));
+    await f.work.idle();
+    const second = await f.work.submit('shared D intent', selection(f.baseVersion));
+    await f.work.idle();
+    const [c, d] = f.work.listApprovals();
+    const originalSave = f.work['save'].bind(f.work);
+    vi.spyOn(f.work.previews, 'start').mockImplementationOnce(async () => {
+      save = saveSpy(f.work).mockImplementationOnce(originalSave).mockRejectedValueOnce(new Error('C terminal save failure'));
+      throw new Error('C preview failure');
+    });
+    await expect(f.work.answerApproval(c.id, 0)).rejects.toThrow('C terminal save failure');
+    save?.mockRestore();
+    let remove: ReturnType<typeof removeSpy> | undefined;
+    if (failure === 'cleanup') remove = removeSpy(f.work).mockRejectedValueOnce(new Error('C recovery cleanup failure'));
+    else save = saveSpy(f.work).mockRejectedValueOnce(new Error('C recovery terminal save failure'));
+    const failureMessage = failure === 'cleanup' ? 'C recovery cleanup failure' : 'C recovery terminal save failure';
+    await expect(f.work.cancel(second.id)).rejects.toThrow(failureMessage);
+    remove?.mockRestore(); save?.mockRestore();
+    const interrupted = JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8'));
+    expect(interrupted.approvalIntent).toMatchObject({ kind: 'preview_failed', taskId: first.id });
+    expectStatus(f.work, second.id, 'awaiting_approval');
+    expect(f.work.getApproval(d.id).status).toBe('pending');
+    expect(f.published.filter(event => event.type === 'candidate.ready')).toEqual([]);
+
+    await f.work.cancel(second.id);
+    expectStatus(f.work, first.id, 'failed');
+    expect(f.work.getApproval(c.id).status).toBe('failed');
+    expectStatus(f.work, second.id, 'cancelled');
+    expect(f.work.getApproval(d.id).status).toBe('cancelled');
+    expect(JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8')).approvalIntent).toBeUndefined();
+    await f.work.close();
+    const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
+    const start = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not replay C'));
+    const commit = vi.spyOn(restarted.repo, 'commitCandidate');
+    try {
+      await restarted.init();
+      expect(restarted.getApproval(c.id).status).toBe('failed');
+      expectStatus(restarted, first.id, 'failed');
+      expect(start).not.toHaveBeenCalled();
+      expect(commit).not.toHaveBeenCalled();
+      expect(modelCalls).toBe(2);
+    } finally { await restarted.close(); }
+  } finally { save?.mockRestore(); await cleanup(f); }
+});
+
+it('uses the recovered state when cancelling the same target after a terminal-save failure', async () => {
+  const f = await fixture();
+  try {
+    const task = await f.work.submit('shared self recovery', selection(f.baseVersion));
+    await f.work.idle();
+    const card = f.work.listApprovals()[0];
+    const originalSave = f.work['save'].bind(f.work);
+    vi.spyOn(f.work.previews, 'start').mockImplementationOnce(async id => {
+      f.previewStarts.push(id);
+      saveSpy(f.work).mockImplementationOnce(originalSave).mockRejectedValueOnce(new Error('self terminal failure'));
+      throw new Error('self preview failure');
+    });
+    await expect(f.work.answerApproval(card.id, 0)).rejects.toThrow('self terminal failure');
+    await expect(f.work.cancel(task.id)).rejects.toMatchObject({ code: 'INVALID_STATE' });
+    expectStatus(f.work, task.id, 'failed');
+    expect(f.work.getApproval(card.id).status).toBe('failed');
+    const repeated = await f.work.answerApproval(card.id, 0);
+    expect(repeated).toMatchObject({ approval: { status: 'failed' }, task: { status: 'failed', error: { code: 'PREVIEW_FAILED' } } });
+    await expect(f.work.answerApproval(card.id, 1)).rejects.toMatchObject({ code: 'APPROVAL_ALREADY_ANSWERED' });
+    expect(f.previewStarts).toEqual([task.id]);
+    expect(modelCalls).toBe(1);
   } finally { await cleanup(f); }
 });
 

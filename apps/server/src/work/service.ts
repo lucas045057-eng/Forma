@@ -432,6 +432,7 @@ export class WorkService {
 
   async cancel(id: string) {
     return this.repo.exclusive(async () => {
+      await this.recoverApprovalIntent();
       const task = this.task(id);
       if (task.status === 'awaiting_approval') {
         const card = this.state.approvals.find(item => item.taskId === id);
