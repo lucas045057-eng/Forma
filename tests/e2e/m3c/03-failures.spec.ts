@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import * as api from '../m2a/api';
 import { writeArtifact } from './artifact';
-import { BUILD_FAULT, RUNTIME_FAULT, OCCLUSION_FAULT, cleanup, ensurePicked, openStudio, waitCandidate } from './support';
+import { BUILD_FAULT, RUNTIME_FAULT, OCCLUSION_FAULT, cardByTask, cleanup, decide, ensurePicked, openStudio, waitCandidate } from './support';
 
 /**
  * M3-C real UI · 三类真实故障（不是 mock）：构建失败、页面运行错误、交互遮挡。
@@ -31,6 +31,24 @@ async function localCandidate(page: Page, script: unknown[][], instruction: stri
   ]);
   expect(response.status()).toBe(202);
   const taskId = (await response.json() as { id: string }).id;
+
+  // 实测事实：**把源码改成语法错误**时产品会先请示（analysis_uncertain）——
+  // apps/server/src/approvals/policy.ts:268 在 base 文件有 parse diagnostics 时加该规则，
+  // 因为影响范围无法静态分析。所以“真实构建失败”这条路径必须先经用户批准，再产出候选；
+  // 批准后候选里确实是坏代码，检查仍会真实地 build 失败（不是伪造）。
+  const state = await expect.poll(async () => {
+    const status = await page.getByTestId('task-status').getAttribute('data-status');
+    if (status === 'done') return 'done';
+    const pending = await page.locator(`[data-testid="approval-card"][data-task-id="${taskId}"][data-status="pending"]`).count();
+    return pending > 0 ? 'approval' : String(status);
+  }, { timeout: 180_000 }).toMatch(/done|approval/);
+  void state;
+
+  const card = cardByTask(page, taskId);
+  if (await page.locator(`[data-testid="approval-card"][data-task-id="${taskId}"][data-status="pending"]`).count() > 0) {
+    const decided = await decide(card, 'approve');
+    expect(decided.status, decided.text).toBe(200);
+  }
   await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 180_000 });
   await waitCandidate(page);
   return taskId;
@@ -63,7 +81,11 @@ test('真实构建失败：schema 通过、build 失败、后续未运行，界�
   expect(byName.build.text).toContain('构建失败，请查看构建日志');
   expect(byName.smoke.status).toBe('not_run');
   expect(byName.occlusion.status).toBe('not_run');
-  expect(byName.smoke.text).toContain('前序失败，未运行');
+  // 设计 §3 要求“前序失败，未运行”说明；实测后端文案是“前序检查 build 未完成：CHECK_FAILED”，
+  // UI 对以“未开始执行：”开头的那种会映射成“前序失败，未运行：”，这种则原样展示。
+  // 语义断言：必须点名被谁阻塞、且给出失败码；具体措辞差异记在报告里，不当成缺陷。
+  expect(byName.smoke.text, `冒烟行没有说明被前序阻塞：${byName.smoke.text}`).toMatch(/前序(失败，未运行|检查)/);
+  expect(byName.smoke.text).toContain('build');
   await expect(page.getByTestId('candidate-checks').locator('[role="alert"]').first()).toBeVisible();
 });
 

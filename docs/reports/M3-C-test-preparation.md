@@ -101,7 +101,7 @@ node node_modules/@playwright/test/cli.js test -c playwright.m3c.config.ts --lis
 | 重复点击 | `01` 重复点击用例：绕过可操作性等待连点两次，断言 `/approvals/:id` 的 POST 恰好 1 次 |
 | 三候选与多 run 切换 | `02` 三候选用例：切换候选后 run/证据按候选隔离，迟到的旧 run 不覆盖当前候选 |
 | 采用 / 回退 | `02` 采用门禁用例（采用后作品文案变化 + 版本变化 + 回退 200）与 version.changed 失效用例 |
-| M1 写回后旧基线失效 | `02` 两例：采用另一个候选后旧候选门禁变“证明已失效”；`PUT /scene` 真实落盘后未检查候选仍不可采用（见 §6 关于 version.changed 的实测口径） |
+| M1 写回后旧基线失效 | `02` 两例：①采用另一个候选造成 `version.changed` → 旧候选门禁变“证明已失效”；②`PUT /scene`（M1 场景写回）→ 作品版本变化 + 旧候选证明失效 + 采用关灯（实测，见 §6 第 3 条纠正） |
 
 ## 5. mock 用例 → 设计 mock 边界对照（逐例标题带 `mock：`，不冒充运行器真实失败）
 
@@ -120,7 +120,8 @@ node node_modules/@playwright/test/cli.js test -c playwright.m3c.config.ts --lis
 
 1. **最终冻结提交号**：当前基线是 `5edaa22`（C3 三条应修的整改提交）。但 §7 发现了一个**前置实现缺陷**（Studio 开发服缺 `/approvals` 与 `/checks` 反代），必须由实现者先修；修完后冻结号会变，本套件要在新的 HEAD 上重新 `--list` 并复核断言（尤其 C3-1 场景草稿、C3-2 旧记录重跑、C3-3 重试范围三处修法）。
 2. **真实后端进程重启 —— 已定（调度 2026-11-15）**：**不为套件新增 launcher 入口**。正式轮用“页面重载 + 只读刷新”覆盖持久恢复；真实进程重启**引用 M3-A 已通过的 `15-n4-shutdown` 证据**，报告里明确写“由既有证据支撑、本轮未新执行”，不计入本套件新覆盖。
-3. **`version.changed` 的实测口径 —— 已定（调度 2026-11-15）**：接受两例拆分，**不扩合同**。读实现确认 `PUT /scene`（M1 场景写回）只发 `scene.changed`、不发 `version.changed`；`version.changed` 来自 adopt/revert/snapshot。因此：①采用造成的 `version.changed` 让旧候选门禁立即失效（真断言）；②M1 写回后门禁不被放宽（未检查的候选仍不可采用）。该局限如实写进正式报告，另由 Codex 在设计文档补一段“场景写回是否需要让旧检查证明失效”的语义确认（不改实现）。
+3. **`version.changed` 的实测口径 —— 已纠正（2026-11-15 定向自证实测）**：早先根据 `apps/server/src/scene/service.ts` 的 `commit()` 推断“`PUT /scene` 只发 `scene.changed`、不发 `version.changed`”，**该推断是错的**。真实界面上（`02-checks-adopt.spec.ts` 的 M1 用例）实测：`PUT /scene` 写入后作品版本会变（经作品快照那一路），待定候选的采用门禁随即变成 **“证明已失效，作品已变化，请重新生成候选”**，检查区显示“历史检查结果 · 证明已失效”，采用保持 disabled，候选仍为 pending。
+   因此本条不再拆成两例，而是直接按真实行为断言一例：**M1 场景写回使其旧证明立即失效**（版本变化 + 门禁失效 + 采用关灯 + 候选不被自动采用）。这也与 Codex 在 `2d56b0c` 补的设计说明一致（“主作品写回经后续快照可能使旧证明失效”）。证据：`docs/reports/artifacts/M3-C/prep/…` 同目录与自证输出 `.data/pi-m3c/selfcheck8/`。
 4. **M2 回归兼容性**：`tests/e2e/m2b/01-ui.spec.ts` 的采用步骤先走真实 checks API 再点界面按钮；C3 下采用还要求六份证据回执就绪，Playwright 的可操作性等待预期能覆盖，但必须在正式轮里实测确认（这是 Claude 复核里点名要 Pi 确认的点）。
 5. **既有八套 + 新套件的同一轮跑法 —— 已定并落地**：调度已批准把 m3c 作为第 12 步接进同形状 runner；Pi 写成 `tests/e2e/m3c/full-regression.mjs`（不改 M3-B 已冻结那份），总例数由 `--collect` 固定为 **173**（见 §3.1）。
 6. **定向自证**：harness 接线冒烟已撞出 §7 的实现缺陷（不是断言写错）；反代修完、拿到新冻结提交后，正式轮之前建议至少把 01/02 各跑一遍，避免把“从未跑过的断言”当验收。
@@ -186,3 +187,32 @@ Unexpected token '<', "<!doctype "... is not valid JSON
 - 不改实现者报告与历史证据，不删任何失败原件；
 - 模型只用 loopback mock（`127.0.0.1:4011`），Lux3D 指向无人监听的 loopback，后端带出站网络守卫，无付费调用；
 - 长命令一律从仓库根用 `orbital\bin\bg.cmd` 起跑，拿 job 立即结束回合，不轮询不睡眠。
+
+## 9. 定向自证实况（2026-11-15，全部实测，不是正式全量）
+
+背景：§7 的阻断点修复后（实现 `052b64d` 已合入验收分支 `d5ff155`），先把本套件自己的用例调到真能跑。自证过程中共发现 **7 处用例侧缺陷**，已全部修正（不改产品质量），并额外**纠正了一份自己写错的实现结论**。
+
+| 文件 | 结果 | 耗时 | 修了什么 |
+| --- | --- | --- | --- |
+| `01-approval.spec.ts` | **8/8 passed** | 33.8s | rAF 轮询、改点文件级受影响条目、历史卡计数口径 |
+| `02-checks-adopt.spec.ts` | **8/8 passed**（7 例一轮 + 第 8 例修后单例） | 2.8m + 9.5s | 文案断言、取消语义、`data-run-id` 竞态、场景写回断言 |
+| `03-failures.spec.ts` | **3/3 passed** | 33.9s | 构建失败需先过请示；前后缀断言改成语义断言 |
+| `04-mock-boundaries.spec.ts` | **8/8 passed** | 1.1m | “迟到响应”改写成真正的旧代次迟到，而不是让服务器说谎 |
+
+### 9.1 自证过程中确认的三个产品事实（不是缺陷，但要记下来）
+
+1. **语法级破坏的改动会先请示（`analysis_uncertain`）**：把 `src/App.tsx` 改成语法错误时，任务会停在 `awaiting_approval` 而不是直接产出候选——`apps/server/src/approvals/policy.ts:268` 在 baseline 文件有 parse diagnostics 时加 `analysis_uncertain`（影响范围无法静态分析）。所以“真实构建失败”的构造路径是：**提交 → 批准 → 候选 → 真实检查 build 失败**；批准后候选里确实是坏代码，检查仍是真的失败，不是伪造。（M3-B 的 `02-faults` 等价，只是它的 `waitTask` helper 自动回答了请示。）
+2. **M1 场景写回会经作品快照产生新版本**：实测 `PUT /scene` 后 `GET /version` 变化，待定候选门禁立即变成“证明已失效，作品已变化，请重新生成候选”，检查区显示“历史检查结果 · 证明已失效”，采用保持 disabled、候选仍为 pending。这**纠正了**我早先“`PUT /scene` 只发 `scene.changed`、不发 `version.changed`”的推断（当时只读了 `scene/service.ts`，漏了作品快照那一路），与 Codex 在 `2d56b0c` 补的设计说明一致。
+3. **`blocked_by` 实测措辞**：构建失败后后续项的 message 是“前序检查 build 未完成：CHECK_FAILED”，而 UI 只把以“未开始执行：”开头的 message 映射为“前序失败，未运行：”，所以这里原样展示。语义满足设计 §3（点名被谁阻塞 + 带失败码），但两种措辞不统一；建议实现侧下阶段统一（不是 blocker，也不是本套件失败）。
+
+### 9.2 一条超出合同的观察（不设为通过条件）
+
+mock 实验表明：如果**当前请求**返回一份陈旧快照（“服务器说谎”），产品会相信它（快照就是权威来源）。设计要求的只是“**旧代次的迟到响应**必须丢弃”，这一点已改写成真实验并用断言盯住：让第一次刷新拿到旧字节但迟到 2s 返回，期间再发一次刷新拿真实响应，最终卡片必须仍为 `approved`。不要把它误读成“产品不防陈旧数据”的缺陷——那超出了现有合同。
+
+## 10. 下一步（等最终冻结号）
+
+1. 拿到最终冻结提交后，把验收树对齐到**同一份产品字节**（比对 `HEAD:apps` 与 `git diff <frozen> -- apps packages templates pnpm-lock.yaml`，不用临时 merge 当受测版本）。
+2. 在该 HEAD 上重跑 `--list`（应为 m3c 27 / 总 173）与一次全量自证，然后跑 `node tests/e2e/m3c/full-regression.mjs`（12 步）。
+3. 判据与 M3-B 一致：11/11（现 12/12）步 `ok=true`、`identityStable=true`、每例恰好 1 条 result、retry/skip/expected-failed/flaky/errors 全 0、末步 `evidenceArchived` 实际归档。
+4. 报告正文改为 `docs/reports/M3-C-test.md`（本文件只保留准备与自证记录），六份证据 sha256 与清理信息按轮目归档。
+
