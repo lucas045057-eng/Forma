@@ -33,6 +33,18 @@
 
 ### 当前仍未完成
 
-Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中止、Git提交绑定和单实例跨候选串行已有上述实现验证，尚未独立复审关闭。真实受控worker的强制中止/父进程退出清理、实际tasks.json/事件/API、Vite构建、浏览器及采用门禁仍待完成；不能称B1/B2或整个M3-B通过。
+Claude固定B1审查 `M3-B-B1-review.md` 中，内容/证据/持久化/逻辑中止、Git提交绑定和单实例跨候选串行已有上述实现验证，尚未独立复审关闭。真实受控worker的强制中止/父进程退出与后代清理、实际tasks.json/事件/API、浏览器及采用门禁仍待完成；固定worker内真实Vite已通过下述十九项子集；不能称B1/B2或整个M3-B通过。
 
 本批没有运行完整typecheck/build/单测或正式E2E，没有读取真实.env/ASKS，也未启动模型/Lux3D/浏览器/网络服务。正式交付仍需后续完整验证、独立复审及Pi验收。
+
+## 第四批：冻结输入的真实 Schema / Vite worker（B2 子集）
+
+固定Node入口worker-entry，无任意shell/worker路径；最小环境剔除provider配置、NODE_OPTIONS与VITE变量。父进程审计快照路径并管理证据落盘/ref，子进程只接收冻结buildRoot；Node文件权限只允许快照和明确工具根。Schema读冻结配置并返回实际schema.json摘要；Vite使用固定HTML/React/PostCSS与JSON字符串tsconfigRaw，关闭env/config自动发现，固定工作区范围，候选模块只被编译。AST/解析路径/CSS资源边界拒绝raw越界、Node内建与网络导入。工具依赖仅精确声明已有Vite7.3.7、React插件5.2.0与Playwright1.65.0，离线frozen安装通过。
+
+- RED job_af6388e3：十四项全部目标行为失败，identityPreserved=true。
+- 中间失败原件保留：两次14/19权限失败、workspace修正后14/19、HTML单例失败、19/19后DNS类型失败、types与19/19后验证探针同步throw捕获失败。没有将失败轮改写为通过。
+- job_cdb84423：定向types0、19/19实际通过、0跳过；native导入完成但DNS探针同步拒绝未被.then捕获导致该步骤1。
+- 仅修探针兼容同步throw/异步reject。job_48a1e8a2：native导入与DNS callback/promisify/promises全部拒绝验证0，unchangedFromPassedRun=true、identityPreserved=true；逐文件SHA证明生产源码/测试/包锁均与上一轮types/19项通过状态一致。未重复声称在本次提交HEAD全量重跑。
+- 原件归档docs/reports/artifacts/M3-B/worker-20261114，各目录evidence包含具体命令/时间/PID/退出与源码SHA/Git blob；manifest与局部.gitattributes保留字节。
+
+这不是OS级安全沙箱：可信Node工具仍有addons/child-process权限，Node网络守卫属于应用层防线。十九项包含实际worker取消并确认退出，但父进程死亡、esbuild后代/异常退出/超时/强制终止仍需补测；B2尚未完成。B3真实浏览器、B4集成、全量验证与Claude/Pi独立门禁均未完成，smoke/occlusion仍not_run。未读真实.env/ASKS，未启动付费模型/Lux3D。

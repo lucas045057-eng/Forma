@@ -1,0 +1,227 @@
+{
+  "purpose": "B2 worker subset; no B3/B4 or independent acceptance claim",
+  "before": {
+    "head": "e878975f3430a14226b008bed95a843b7f790b2e",
+    "status": "M apps/server/package.json\n M pnpm-lock.yaml\n?? apps/server/src/checks/build.test.ts\n?? apps/server/src/checks/build.ts\n?? apps/server/src/checks/network-guard.ts\n?? apps/server/src/checks/protocol.ts\n?? apps/server/src/checks/schema.ts\n?? apps/server/src/checks/tools.ts\n?? apps/server/src/checks/worker-boundary.test.ts\n?? apps/server/src/checks/worker-entry.ts\n?? apps/server/src/checks/worker.ts\n?? debug-build.mjs",
+    "hashes": {
+      "apps/server/package.json": {
+        "sha256": "b9247d2888068b900144c2f3ffe0d28d241647189f2e0cdaf3654ba723ac81cb",
+        "gitBlob": "27333132b86a90f246edb3aba253a6aa1a5f97a8"
+      },
+      "pnpm-lock.yaml": {
+        "sha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+        "gitBlob": "3c8dba901b5be775ad3502cc523468e174cbc586"
+      },
+      "apps/server/src/work/repo.ts": {
+        "sha256": "964303f81e4a7309d35c52bcadf007eb002515e1be27a94147a8539d9ff87d7d",
+        "gitBlob": "a49d4ac6c2e8eb834195d93e1f66da86599987da"
+      },
+      "packages/shared/src/index.ts": {
+        "sha256": "fd59f05fdafcfcf32567d3c621c2eb26f234b9daca93a7d7ad4c2d3b7cd3da37",
+        "gitBlob": "6d7a29fe4883a8ac50940155895ed145ca71c2ea"
+      },
+      "apps/server/src/checks/artifacts.ts": {
+        "sha256": "890478a8405bf3a5660329e15eaa1e5cb7caffb765d2ec31e0183a4365cd3b5d",
+        "gitBlob": "83dc84c00ab80127b0a6d7bf0ca529b45c38b9c6"
+      },
+      "apps/server/src/checks/build.test.ts": {
+        "sha256": "73b1bf495867b1708710c820c0cdff575ee71807ce4b0466d07f23fae874d829",
+        "gitBlob": "79bab312f46348c6e11396519caba21b78249cdc"
+      },
+      "apps/server/src/checks/build.ts": {
+        "sha256": "66361d928e033300ed5542b845fca85819483a33cff3e3c2b1bee30514703fe1",
+        "gitBlob": "6a2f493870a97945e40c961792397afac40bb8c3"
+      },
+      "apps/server/src/checks/handoff.test.ts": {
+        "sha256": "a40f41ebaac89a09232698f9e6fe68027764b730cec4539fb65aabdc82232408",
+        "gitBlob": "6a04993e33a18c30992727ed8aec83b181ced5cc"
+      },
+      "apps/server/src/checks/network-guard.ts": {
+        "sha256": "54f1711c874508ede98305ba61704c07879c52e0f8458145fda81328ea4ce21d",
+        "gitBlob": "bb30decbfe54125bdd798601563946da160675c0"
+      },
+      "apps/server/src/checks/paths.ts": {
+        "sha256": "48bab467f5ede94328674f00d11fb769da5115369f35087c89a4a669507a7df8",
+        "gitBlob": "acef2b28ba83333237513c0556d9f7d34b485705"
+      },
+      "apps/server/src/checks/protocol.ts": {
+        "sha256": "c35b036fa0efb4843470bad4352dd4189ee1965f999ce834e42d96328488700b",
+        "gitBlob": "d785ec983c271355f6e146962e6ba955a473d932"
+      },
+      "apps/server/src/checks/reliability.test.ts": {
+        "sha256": "60718fd750f54d674a2355eaace360df72281bc2d97b6df6c7ac2de18775cbe0",
+        "gitBlob": "d848f6ac7e6c1b53153f57719a98ba0c7ee01061"
+      },
+      "apps/server/src/checks/runner.ts": {
+        "sha256": "8c594d9f813c60231793adbd52fbcc3127a736d9d14760dc19a4b15d5eff6919",
+        "gitBlob": "5ef15792570dbf82d3f9d0c4e93be362f4dacb2d"
+      },
+      "apps/server/src/checks/scheduler.test.ts": {
+        "sha256": "5be2abf8aa13d66febc42a1446b22ef2c57d8ff7daca5815424b4d07e645e6d0",
+        "gitBlob": "b2530b0b41128fef357d0801bf9caf0d2b59b426"
+      },
+      "apps/server/src/checks/schema.ts": {
+        "sha256": "83af7048e1efa85d19fa22f8d85146c548ab198354f1fb723f41b305037886ab",
+        "gitBlob": "edd1f586e008b8151227d3f327124a0ab4efdb40"
+      },
+      "apps/server/src/checks/snapshot.test.ts": {
+        "sha256": "10c047ab2be6550e0a2a936e7e7db3da5cbbff1115fa36e86d6293c45b7a895c",
+        "gitBlob": "9a6004015be5c484ae8dfe1978a57f3daca830a5"
+      },
+      "apps/server/src/checks/snapshot.ts": {
+        "sha256": "980a9d150b4d174a229f0e55ef5229fa02668ff2f0742a7481058b7a65b1c9b0",
+        "gitBlob": "dcf7d3d9c9e8069e3901dd903baa82306c4551ff"
+      },
+      "apps/server/src/checks/tools.ts": {
+        "sha256": "bc3c2690b3cc9923463a20523ec82c387fbce932c65d85194d70a76c34461edb",
+        "gitBlob": "6f31ead2b0dddd109bf854367d85e0033f2784d3"
+      },
+      "apps/server/src/checks/worker-boundary.test.ts": {
+        "sha256": "dbadd79c3f366b278fe24ae40842f280126c36664c766be205d3b30a4aeffb68",
+        "gitBlob": "b7f26a686a90b0efa42aa7ce9fabd13913d2face"
+      },
+      "apps/server/src/checks/worker-entry.ts": {
+        "sha256": "c8e20654dcf4023ad5ff042578c5b6080d9c34e29601827b807388589d25baa4",
+        "gitBlob": "b631ab96f0ffa7ebd530bf4725050780fbe2c66a"
+      },
+      "apps/server/src/checks/worker.ts": {
+        "sha256": "ac253ec6de9a8f15ce577cd5b15d269bec5af9771cedeca707fb930973cb48ff",
+        "gitBlob": "8bd00d4d8dfe58634d4433c6c7961e2baf88fdce"
+      }
+    }
+  },
+  "after": {
+    "head": "e878975f3430a14226b008bed95a843b7f790b2e",
+    "status": "M apps/server/package.json\n M pnpm-lock.yaml\n?? apps/server/src/checks/build.test.ts\n?? apps/server/src/checks/build.ts\n?? apps/server/src/checks/network-guard.ts\n?? apps/server/src/checks/protocol.ts\n?? apps/server/src/checks/schema.ts\n?? apps/server/src/checks/tools.ts\n?? apps/server/src/checks/worker-boundary.test.ts\n?? apps/server/src/checks/worker-entry.ts\n?? apps/server/src/checks/worker.ts\n?? debug-build.mjs",
+    "hashes": {
+      "apps/server/package.json": {
+        "sha256": "b9247d2888068b900144c2f3ffe0d28d241647189f2e0cdaf3654ba723ac81cb",
+        "gitBlob": "27333132b86a90f246edb3aba253a6aa1a5f97a8"
+      },
+      "pnpm-lock.yaml": {
+        "sha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+        "gitBlob": "3c8dba901b5be775ad3502cc523468e174cbc586"
+      },
+      "apps/server/src/work/repo.ts": {
+        "sha256": "964303f81e4a7309d35c52bcadf007eb002515e1be27a94147a8539d9ff87d7d",
+        "gitBlob": "a49d4ac6c2e8eb834195d93e1f66da86599987da"
+      },
+      "packages/shared/src/index.ts": {
+        "sha256": "fd59f05fdafcfcf32567d3c621c2eb26f234b9daca93a7d7ad4c2d3b7cd3da37",
+        "gitBlob": "6d7a29fe4883a8ac50940155895ed145ca71c2ea"
+      },
+      "apps/server/src/checks/artifacts.ts": {
+        "sha256": "890478a8405bf3a5660329e15eaa1e5cb7caffb765d2ec31e0183a4365cd3b5d",
+        "gitBlob": "83dc84c00ab80127b0a6d7bf0ca529b45c38b9c6"
+      },
+      "apps/server/src/checks/build.test.ts": {
+        "sha256": "73b1bf495867b1708710c820c0cdff575ee71807ce4b0466d07f23fae874d829",
+        "gitBlob": "79bab312f46348c6e11396519caba21b78249cdc"
+      },
+      "apps/server/src/checks/build.ts": {
+        "sha256": "66361d928e033300ed5542b845fca85819483a33cff3e3c2b1bee30514703fe1",
+        "gitBlob": "6a2f493870a97945e40c961792397afac40bb8c3"
+      },
+      "apps/server/src/checks/handoff.test.ts": {
+        "sha256": "a40f41ebaac89a09232698f9e6fe68027764b730cec4539fb65aabdc82232408",
+        "gitBlob": "6a04993e33a18c30992727ed8aec83b181ced5cc"
+      },
+      "apps/server/src/checks/network-guard.ts": {
+        "sha256": "54f1711c874508ede98305ba61704c07879c52e0f8458145fda81328ea4ce21d",
+        "gitBlob": "bb30decbfe54125bdd798601563946da160675c0"
+      },
+      "apps/server/src/checks/paths.ts": {
+        "sha256": "48bab467f5ede94328674f00d11fb769da5115369f35087c89a4a669507a7df8",
+        "gitBlob": "acef2b28ba83333237513c0556d9f7d34b485705"
+      },
+      "apps/server/src/checks/protocol.ts": {
+        "sha256": "c35b036fa0efb4843470bad4352dd4189ee1965f999ce834e42d96328488700b",
+        "gitBlob": "d785ec983c271355f6e146962e6ba955a473d932"
+      },
+      "apps/server/src/checks/reliability.test.ts": {
+        "sha256": "60718fd750f54d674a2355eaace360df72281bc2d97b6df6c7ac2de18775cbe0",
+        "gitBlob": "d848f6ac7e6c1b53153f57719a98ba0c7ee01061"
+      },
+      "apps/server/src/checks/runner.ts": {
+        "sha256": "8c594d9f813c60231793adbd52fbcc3127a736d9d14760dc19a4b15d5eff6919",
+        "gitBlob": "5ef15792570dbf82d3f9d0c4e93be362f4dacb2d"
+      },
+      "apps/server/src/checks/scheduler.test.ts": {
+        "sha256": "5be2abf8aa13d66febc42a1446b22ef2c57d8ff7daca5815424b4d07e645e6d0",
+        "gitBlob": "b2530b0b41128fef357d0801bf9caf0d2b59b426"
+      },
+      "apps/server/src/checks/schema.ts": {
+        "sha256": "83af7048e1efa85d19fa22f8d85146c548ab198354f1fb723f41b305037886ab",
+        "gitBlob": "edd1f586e008b8151227d3f327124a0ab4efdb40"
+      },
+      "apps/server/src/checks/snapshot.test.ts": {
+        "sha256": "10c047ab2be6550e0a2a936e7e7db3da5cbbff1115fa36e86d6293c45b7a895c",
+        "gitBlob": "9a6004015be5c484ae8dfe1978a57f3daca830a5"
+      },
+      "apps/server/src/checks/snapshot.ts": {
+        "sha256": "980a9d150b4d174a229f0e55ef5229fa02668ff2f0742a7481058b7a65b1c9b0",
+        "gitBlob": "dcf7d3d9c9e8069e3901dd903baa82306c4551ff"
+      },
+      "apps/server/src/checks/tools.ts": {
+        "sha256": "bc3c2690b3cc9923463a20523ec82c387fbce932c65d85194d70a76c34461edb",
+        "gitBlob": "6f31ead2b0dddd109bf854367d85e0033f2784d3"
+      },
+      "apps/server/src/checks/worker-boundary.test.ts": {
+        "sha256": "dbadd79c3f366b278fe24ae40842f280126c36664c766be205d3b30a4aeffb68",
+        "gitBlob": "b7f26a686a90b0efa42aa7ce9fabd13913d2face"
+      },
+      "apps/server/src/checks/worker-entry.ts": {
+        "sha256": "c8e20654dcf4023ad5ff042578c5b6080d9c34e29601827b807388589d25baa4",
+        "gitBlob": "b631ab96f0ffa7ebd530bf4725050780fbe2c66a"
+      },
+      "apps/server/src/checks/worker.ts": {
+        "sha256": "ac253ec6de9a8f15ce577cd5b15d269bec5af9771cedeca707fb930973cb48ff",
+        "gitBlob": "8bd00d4d8dfe58634d4433c6c7961e2baf88fdce"
+      }
+    }
+  },
+  "identityPreserved": true,
+  "stages": [
+    {
+      "name": "worker-contracts",
+      "command": [
+        "E:\\Node\\node.exe",
+        "E:\\空间化AI工作台\\.worktrees\\m3b\\node_modules\\.pnpm\\vitest@3.2.7_@types+node@24.19.2\\node_modules\\vitest\\vitest.mjs",
+        "run",
+        "src/checks/worker-boundary.test.ts",
+        "src/checks/build.test.ts",
+        "--reporter=json",
+        "--outputFile",
+        "E:\\空间化AI工作台\\.worktrees\\m3b\\.data\\m3b-worker-tsconfig-fix-1794662215560\\tests.json"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\apps\\server",
+      "pid": 39416,
+      "startedAt": "2026-11-14T13:16:56.334Z",
+      "finishedAt": "2026-11-14T13:17:11.319Z",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "name": "types",
+      "command": [
+        "E:\\Node\\node.exe",
+        "E:\\空间化AI工作台\\.worktrees\\m3b\\node_modules\\.pnpm\\typescript@5.9.3\\node_modules\\typescript\\bin\\tsc",
+        "-p",
+        "E:\\空间化AI工作台\\.worktrees\\m3b\\.data\\tsconfig.m3b-worker.json"
+      ],
+      "cwd": "E:\\空间化AI工作台\\.worktrees\\m3b\\",
+      "pid": 28360,
+      "startedAt": "2026-11-14T13:17:11.319Z",
+      "finishedAt": "2026-11-14T13:17:12.565Z",
+      "code": 2,
+      "signal": null
+    }
+  ],
+  "counts": {
+    "total": 19,
+    "passed": 19,
+    "failed": 0,
+    "pending": 0
+  },
+  "exitCode": 1
+}
