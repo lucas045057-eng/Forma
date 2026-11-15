@@ -262,7 +262,12 @@
 - 本轮原件齐备：`manifest.json`/`manifest.log`、九套 `e2e-*-results.json` + `e2e-*-log` + `e2e-*-output/`、
   `unit.log`/`typecheck.log`/`build.log`、`evidence-refresh/`（各套刷新的历史证据新字节）、
   `launcher/`（job 的 `cmd`/`exit`/`job.json`/`output.log`）、`verification.json`、`cleanup.json`、
-  `sha256-manifest.json`（**189 个文件**逐字节 SHA256）。
+  `sha256-manifest.json`（**196 个文件**逐字节 SHA256）。
+- M3-B 套件的 artifact helper 写死 `docs/reports/artifacts/M3-B/formal-20261115/checks/`，本轮跑完留下 6 个**未跟踪**中间证据
+  （`fault-classes.json`、`gate.json`、`lifecycle-*.json`）。已把它们作为**本 run 的原件**归档到
+  `e2e-m3b-artifacts/M3-B/formal-20261115/checks/`（含 `relocation.json` 记录路径/字节/SHA256），并从历史证据目录移除——
+  既没有丢失内容，也没有把本轮产物塞进 M3-B 已跟踪证据集。卫生缺口如实记录：该 helper 尚未支持定向目录，
+  后续 M3-B 正式轮若再出现同类未跟踪文件，需要同样归档（或另行让该 helper 支持 run 目录），本轮不改它的实现。
 - 历史不改写：第一正式轮失败原件（`…21-19-15-445Z-full`）、collect 原件、两次定向轮原件均保持原样。
 
 ### 12.4 边界（写实）
