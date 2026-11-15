@@ -140,3 +140,43 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受�
    否则 `reused`；`unknown` 在用例里单独判失败，不自动补杀。避免"每个 PID 同步起一次 PowerShell"阻塞测试 worker。
 6. **失败安全**：`01-speech` 增加 `afterEach` 兜底 `mouse.up()`（按住途中抛错也不会让后续用例继承按住状态）；主错/清理错/证据分开保留。
 7. **措辞**：用例标题不再写"发送 DELETE"——录音阶段取消**从未上传**，断言是"**不应发送 DELETE**"，不伪造该路径。
+## 9. M4 专项（501ea9e）实际结果与三个夹具前提修正
+
+run `docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/`，`job_07aabc4e`，49s：
+
+- **19 例 = 13 通过 / 3 失败 / 3 条 serial 未执行（skipped）**（`expected=13, unexpected=3, skipped=3, flaky=0`）。
+  **3 条 skipped 不是通过**；`614` 单测、`12` 脚本、旧九套 `174` 本轮**均未执行**。
+- 通过含：6 条语音（按住录音/确认、hidden 取消、499+新 UUID、权限取消、F1、F2）、3 个布局、2 条 fallback 前置（字节哈希、列表/非法输入）、
+  2 条 demo（进程内 SIGINT 模拟、候选 HMR 连 plan.preview 且 10s 无循环导航）。
+- 失败 3 条，全部定位为**夹具前提错误**（不是产品缺陷）：
+
+### 9.1 `01-speech` A/B 用了同一个共享组件
+
+- 现象：`second.src != first.src` 失败——`buy-button` 与 `save-button` 都来自共享 `Button`，
+  `data-src` 都是 `src/components/Button.tsx:5:5`，所以"两个对象不同"这个前提本身不成立；F1 里重复点选同理。
+- 修：换**真实不同来源**的 DOM 目标（`benefits` → `src/App.tsx`；必要时 `product-placeholder`），
+  **保留** `notEqual`、冲突提示、`speech-use` 禁用、显式确认、确认后再改选仍拦等全部原断言；
+  F1 用不同来源目标制造真实的 selection（epoch）变化。
+
+### 9.2 `02-fallback` 用错了还原接口
+
+- 现象：采用后调用 `POST /version/revert` → `409 NO_ADOPTION`。该路由走 `WorkService.revert`，只回退**候选采用**；
+  资产的采用走 `SceneService.adopt`（压的是 scene history 栈），还原必须 `POST /scene/undo`（`app.ts:247`）。
+- 修：采用前记录**完整场景 + 来源**；采用后核对 `model` 的 provenance/`outputHash` 与**实际 model.glb 字节 SHA256** 一致；
+  再调 `POST /scene/undo`，断言场景与来源精确回到采用前的快照（不再拿"采用后的 sceneAfter"当基准，也不把 409 当通过）。
+
+### 9.3 `04-demo` 5175 已被 M4 主验收后端占用
+
+- 现象：夹具自己 `net.listen(5175)` → `EADDRINUSE`。M4 主验收后端的预览源本就用 `PREVIEW_ORIGIN_PORT=5175`，
+  所以 5175 在本轮内**本来就是自有服务在监听**。
+- 修：先查"谁在监听 5175"（PID + 创建时间，作为证据）：
+  已被占用 → **复用它**作为冲突对照（记录归属），**不**再自己 listen、**不杀**任何进程；
+  未占用 → 才建自己的 server，并只在 finally 关闭自己这个句柄。断言仍为：demo 的 `plan.preview ≠ 5175`、
+  Studio/API 可达、demo 预览源在自己的随机端口真实应答；**不吞 EADDRINUSE**、不抢端口。
+
+### 9.4 归档与边界
+
+- 专项原件 + launcher + 真实 demo run 证据（827 个文件）+ `counts.json` 已归档，SHA 清单 **857 载荷、排除自身、0 mismatch**；
+  60 个文件因运行中已消失/是链接而记录为 skipped，不伪造。
+- `F4`（坏 sidecar 三类 409）与**硬杀**本轮因 serial 未执行，下一轮专项覆盖；这两个用例的前提**未**改动。
+- 关闭路径仍只称“**进程内 SIGINT 处理模拟**”；真实 Windows 控制台 Ctrl+C、真实阿里/厂商/编码/Lux3D、真人 A/B、完整彩排均未执行。

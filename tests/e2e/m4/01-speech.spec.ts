@@ -179,7 +179,9 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     const captured = await page.getByTestId('speech-capture-object').innerText();
     expect(captured.length, '没有显示录音时指着的对象').toBeGreaterThan(0);
 
-    const second = await pickElement(page, 'save-button');
+    // buy-button 与 save-button 都是共享 Button 组件 → data-src 相同（src/components/Button.tsx:5:5），
+    // 用它证明"两个对象不同"是无效前提。改用真实不同来源的 DOM 目标（ul.benefits，src/App.tsx）。
+    const second = await pickElement(page, 'benefits');
     expect(second.src, '两次点选没落到不同对象').not.toBe(first.src);
     await expect(page.getByTestId('speech-selection-conflict')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('speech-use')).toBeDisabled();
@@ -314,7 +316,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     const pressed = await pressRecord(page);
     await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
-    const second = await pickElement(page, 'save-button');
+    const second = await pickElement(page, 'benefits');
     await expect(page.getByTestId('speech-review'), '重新点选后转写被丢弃了').toBeVisible();
     const reviewText = await page.getByTestId('speech-review-text').inputValue();
     expect(reviewText.length, 'review 文本被清空').toBeGreaterThan(0);
@@ -322,6 +324,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     await expect(page.getByTestId('speech-use')).toBeDisabled();
     await page.getByTestId('speech-use-current').click();
     await expect(page.getByTestId('speech-review')).toHaveCount(0);
+    // 换回另一个**不同来源**的目标，制造真实的绑定与当前选择不一致。
     await pickElement(page, 'buy-button');
     await expect(page.getByTestId('speech-binding-conflict')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('generate-candidate')).toBeDisabled();

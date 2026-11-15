@@ -1,0 +1,20 @@
+{
+  "ports": {
+    "api": 31027,
+    "studio": 41776,
+    "main": 23074,
+    "preview": 64547,
+    "coding": 59251,
+    "lux3d": 45001,
+    "speech": 50699
+  },
+  "candidateId": "ffac7609daff433f8ceb5942c706182f",
+  "sockets": [
+    "ws://127.0.0.1:64547/preview/c/ffac7609daff433f8ceb5942c706182f/hmr?token=2WZIpBBpGM2l"
+  ],
+  "navigations": [
+    "http://127.0.0.1:64547/preview/c/ffac7609daff433f8ceb5942c706182f/"
+  ],
+  "extraNavigations": 0,
+  "candidateUrl": "http://127.0.0.1:64547/preview/c/ffac7609daff433f8ceb5942c706182f/"
+}

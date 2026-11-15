@@ -60,6 +60,18 @@ export const adoptAsset = (id: string) => http(base(`/assets/${encodeURIComponen
 export const revertVersion = () => http(base('/version/revert'), { method: 'POST' });
 export const getAsset = (id: string) => http<any>(base(`/assets/${encodeURIComponent(id)}`));
 
+/** 场景历史撤销：资产采用的是 SceneService.adopt（压 scene history），还原走这里，不是 /version/revert。 */
+export const undoScene = () => http(base('/scene/undo'), { method: 'POST' });
+
+/** 通过真实 HTTP 取资产 model.glb 的字节，算 SHA256（用于核对来源绑定的字节）。 */
+export async function assetModelHash(id: string): Promise<string> {
+  const response = await fetch(`${BACKEND_BASE}/assets/${encodeURIComponent(id)}/model.glb`);
+  if (!response.ok) throw new Error(`取模型字节失败：HTTP ${response.status}`);
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const { createHash } = await import('node:crypto');
+  return createHash('sha256').update(buffer).digest('hex');
+}
+
 export const resetMock = () => http(`${MOCK_BASE}/__reset`, { method: 'POST' });
 export const setScript = (steps: unknown[], delayMs = 0) =>
   http(`${MOCK_BASE}/__script`, jsonRequest('POST', { steps, delayMs }));

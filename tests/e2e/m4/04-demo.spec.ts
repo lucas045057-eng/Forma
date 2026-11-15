@@ -99,6 +99,25 @@ function descendantsOf(pid: number): Array<{ pid: number; created: string; depth
  * 进程快照：一次 CIM 查询拿到全表，避免"每个 PID 同步起一次 PowerShell"把测试 worker 阻塞，
  * 也让"存在性"和"创建时间"来自同一次观测。查询失败/超时 = null（调用方必须当成 unknown，绝不能当 gone）。
  */
+/** 谁在监听某个端口：返回自有可核的 PID + 创建时间；没有监听者返回 null；查询失败返回 null 并记录。 */
+function listenerOf(port: number): { pid: number; created: string } | null {
+  const script = [
+    `$c = Get-NetTCPConnection -State Listen -LocalPort ${port} -ErrorAction SilentlyContinue | Select-Object -First 1`,
+    "if (-not $c) { exit 0 }",
+    "$p = Get-Process -Id $c.OwningProcess -ErrorAction SilentlyContinue",
+    "$created = if ($p) { $p.StartTime.ToUniversalTime().ToString('o') } else { '' }",
+    "Write-Output ('' + $c.OwningProcess + '|' + $created)",
+  ].join("; ");
+  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], { encoding: 'utf8', timeout: 20000 });
+  if (result.error || result.status !== 0) return null;
+  const text = (result.stdout ?? '').trim();
+  if (!text) return null;
+  const [pidText, created] = text.split('|');
+  const pid = Number(pidText);
+  if (!Number.isInteger(pid) || pid <= 0) return null;
+  return { pid, created: created ?? '' };
+}
+
 function snapshotProcesses(): Map<number, string> | null {
   const script = "Get-CimInstance Win32_Process | Where-Object { $null -ne $_.CreationDate } | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o')} } | ConvertTo-Json -Compress";
   const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], { encoding: 'utf8', timeout: 20000 });
@@ -339,20 +358,41 @@ test.describe('M4-D5 演示入口（mock）', () => {
     await stopHandle(handle);
   });
 
-  test('固定 5175 被占用时不串实例（demo 用自己的随机预览端口）', async () => {
+  test('固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口）', async () => {
     test.setTimeout(300_000);
-    const occupy = net.createServer((socket) => socket.destroy());
-    await new Promise<void>((resolve, reject) => { occupy.once('error', reject); occupy.listen(5175, '127.0.0.1', resolve); });
+    // 关键：M4 主验收后端的预览源本身就监听 5175（PREVIEW_ORIGIN_PORT=5175），
+    // 所以"自己再 listen(5175)"必然 EADDRINUSE。这里先确认 5175 是否已被**自有**进程占用：
+    // - 已被占用：把它当作冲突对照（记录 PID + 创建时间），不启动自己的 server、不杀任何进程；
+    // - 未占用：才建自己的 net server 作为对照，并在 finally 只关闭自己这个句柄。
+    const listener = listenerOf(5175);
+    let ownProbe: ReturnType<typeof net.createServer> | null = null;
+    const record: Record<string, unknown> = { port: 5175, existingListener: listener };
     try {
+      if (listener === null) {
+        ownProbe = net.createServer((socket) => socket.destroy());
+        await new Promise<void>((resolve, reject) => {
+          ownProbe!.once('error', reject);
+          ownProbe!.listen(5175, '127.0.0.1', resolve);
+        });
+        record.ownProbe = true;
+      } else {
+        record.ownProbe = false;
+        expect(listener.created, '已占用 5175 的监听必须有可核的创建时间').toBeTruthy();
+      }
+
       const handle = await startMockDemo();
+      record.plan = handle.plan;
       expect(handle.plan.ports.preview, 'demo 预览端口不能等于被占用的 5175').not.toBe(5175);
       expect((await fetch(`http://127.0.0.1:${handle.plan.ports.studio}/`)).status).toBe(200);
-      const backend = await fetch(`http://127.0.0.1:${handle.plan.ports.api}/health`);
-      expect(backend.status).toBe(200);
-      writeArtifact('demo-port-5175-occupied.json', { plan: handle.plan, occupied: 5175 });
+      expect((await fetch(`http://127.0.0.1:${handle.plan.ports.api}/health`)).status).toBe(200);
+      // 不串实例：demo 的预览源真的在它自己的随机端口上应答。
+      const previewStatus = (await fetch(`http://127.0.0.1:${handle.plan.ports.preview}/preview/main/`)).status;
+      expect([200, 404], `demo 预览源没有在自己端口应答：${previewStatus}`).toContain(previewStatus);
+      record.previewStatus = previewStatus;
+      writeArtifact('demo-port-5175-occupied.json', record);
       await stopHandle(handle);
     } finally {
-      await new Promise<void>((resolve) => occupy.close(() => resolve()));
+      if (ownProbe) await new Promise<void>((resolve) => ownProbe!.close(() => resolve()));
     }
   });
 
