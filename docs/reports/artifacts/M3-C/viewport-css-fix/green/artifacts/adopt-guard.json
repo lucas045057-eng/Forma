@@ -1,0 +1,11 @@
+{
+  "withoutForce": {
+    "status": 409,
+    "code": "FORCE_REQUIRED"
+  },
+  "withForce": 200,
+  "conflict": {
+    "status": 409,
+    "code": "ASSET_NAME_CONFLICT"
+  }
+}

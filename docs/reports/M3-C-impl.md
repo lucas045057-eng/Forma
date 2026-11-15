@@ -359,3 +359,58 @@ cd /d .worktrees\m3c && set CI=true&& call pnpm --filter @spatial/studio typeche
 ```
 
 本轮只报告修复提交与窄验证 job，结果尚待读取；通过后再确认最终冻结号。不会启动 pnpm test 全量、build、5173 占用验证或 Pi E2E，不停止/修改 Pi 的服务器；单文件测试仍仅使用系统分配端口。后续全量与占用条件验证等待调度另行指令，无新增需批准事项。
+
+## M1-B 视觉回归整改：嵌套容器裁剪画布（2026-11-15）
+
+状态：单行 CSS 产品修复已通过原 M1-B 23 例定向回归；本次提交后只补 Studio typecheck/build，结果待返回。尚未完成修后 Claude 独立复审和 Pi 12 步 174 例正式回归，不宣称 M3-C 通过，不自行合并。
+
+### 真实根因与最小修复
+
+M3-C 为了场景编辑时仍显示审批卡，把 SceneEditor 放进 `.inspector`。外层 inspector 的 padding、border 与内层 SceneEditor 的样式叠加，在其 overflow 容器中裁掉了固定宽度对照画布最右两列。原截图中画布左上角为 (1020,304)、尺寸 378×378；第 372–375 列均为背景 RGB(239,232,220)，第 376 列的 378 行均为边框色 RGB(52,66,77)，第 377 列的 378 行均为面板色 RGB(23,35,45)。这两列解释了三例完全相同的 `changedRatio = 2/378 = 0.005291005291005291`，不是渲染姿态或画布尺寸不一致。
+
+轮廓算法以左上背景色找非背景包围盒，这两列贯穿全高，使量出的“模型”高度错误地固定为 378、minY 固定为 0，所以关键帧和出厂模型开盖被量成 0px。移除裁剪后原断言能量到真实模型与开盖位移。先前关于相机 onEnd 回调、dirty 状态阻止配置加载的假说未经证实，本轮没有依此修改代码。
+
+产品仅在 `apps/studio/src/scene-editor.css` 增加：
+
+```css
+.workspace.scene-editing > .inspector { padding: 0; border: 0; }
+```
+
+保留 SceneEditor 自身的 padding、border、overflow 和审批卡；不改旧 M1-B 用例任何一行、阈值、skip/retry；不改姿态/scrollAt/相机回调、SceneDraftGuard 未保存草稿保护、审批/检查/采用门禁、后端、模板、依赖与锁文件。未新增镜像单测，未重跑全仓单测。
+
+### RED / GREEN 原始证据与身份
+
+专用归档：`docs/reports/artifacts/M3-C/viewport-css-fix/`。`red/`、`green/` 分别复制原 run 的 JSON、artifacts、失败截图/error-context、manifest 和 launcher 的 cmd/output.log/job.json/exit；原始历史 M1-B 证据及 `.data` 原件均未改写。`entry/` 保存 GREEN 实际入口脚本与 CSS 草稿 patch；RED 的精确调用以其 launcher/cmd 和 manifest 为准，不将后来改过的 GREEN 入口冒称为 RED 入口。`diagnosis/` 保存像素核对脚本及其输出，脚本的截图坐标和路径限定于原失败截图，不是通用检测器。`summary.json` 为从原件提取的核对表；`sha256-manifest.json` 列出其余 75 份文件的来源、字节数与 SHA256，复制后逐字节核对，清单自身不自引用。归档内 `.gitattributes` 禁用文本换行转换，保证 Git 保存与检出原始字节。
+
+| 项目 | RED | GREEN |
+| --- | --- | --- |
+| 后台作业 | job_72b0a612，exit 1 | job_8b19c345，exit 0 |
+| 原 run | 2026-11-14T21-34-09.744Z | 2026-11-15T02-30-10.199Z |
+| 运行身份 | 0860fbb5dd44f23ab9f99e9827d949e50b86b141 | 同一 HEAD + 本报告单行 CSS 未提交草稿 |
+| 原始 Playwright 耗时 | 95717.131ms | 108839.961ms |
+| 原 M1-B 23 例 | 18 expected / 5 unexpected | 23 expected / 0 unexpected |
+| skipped / flaky | 0 / 0 | 0 / 0 |
+| 旧证据恢复 | evidenceRestored=true | evidenceRestored=true |
+| 运行前后身份 | RED 当时未记录完整字节门禁，不补造 | identityUnchanged=true，原 manifest 含逐文件前后 SHA256 |
+
+RED 命令：`pnpm exec playwright test -c playwright.m1b.config.ts --workers=1 --retries=0 --reporter=list,json`；GREEN 命令：`node node_modules/@playwright/test/cli.js test -c playwright.m1b.config.ts --workers=1 --retries=0 --reporter=list,json`，output 参数定向各自 `.data` run 目录，历史 evidence 目录执行期间重定向后按原字节恢复。GREEN 三层状态已重新遍历核对：23 条 expectedStatus=passed、test.status=expected，每条恰好一个 result、status=passed、retry=0，顶层 errors 为空。无补跑。本批交付不重跑这 23 例。
+
+GREEN 的 HEAD:apps 是原提交树 `66e7ec7776b4d67a3d494cbd03652e127d1fd4f8`，不是含草稿的产品树；实际受测 CSS 字节 SHA256 为 `18f9e413956f6b332067a62d7cede878e93e7afe1ebd9856ce50bd9eb346b8eb`。本次提交将同一草稿固定下来，不能把 GREEN 说成是在未来提交 HEAD 上重新执行。原 job 无通知关联；Codex 后加只读转接 job_14c759cc，不是第二轮测试，也不混入行为证据。
+
+### 五例指标核对
+
+| 原件 | RED | GREEN |
+| --- | --- | --- |
+| consistency-default.json | changedRatio 0.005291，shift (0,0)，378/378px | changedRatio 0，shift (0,0)，378/378px |
+| consistency-after-edit.json | changedRatio 0.005291 | changedRatio 0 |
+| consistency-scroll-06.json | changedRatio 0.005291，visibleHeight 251 | changedRatio 0，visibleHeight 251 |
+| keyframe-write.json | 位移 0px，错误模型高 378，期望 15.7383px | 位移 11px，模型高 289，期望 12.0327px，ratio 0.91417；该位置一致性差异 0 |
+| fix-r2-lid-gating.json | 出厂位移 0px / 期望45.36px；fake 0 | 出厂位移32px / 期望32.16px，ratio 0.99502；fake 位移0、changed 0 |
+
+期望值随实际轮廓高度重新计算，因此两轮数值不同；GREEN 的指标来自完整原测试，不调阈值、不裁证据来消除失败。全部原始图像/JSON 随红绿各自目录保存。
+
+### 提交后的窄检查与交接
+
+精确提交 CSS、本节报告及上述专用归档；fallback 不入库。固定 HEAD 后在 `.data` 写最小入口，依次执行标准命令 `pnpm --filter @spatial/studio typecheck`、`pnpm --filter @spatial/studio build`，首败即停，记录 HEAD、锁/CSS SHA256、命令、PID、时间、退出码及运行前后身份。只用本地已安装依赖，环境按操作系统/工具运行所需白名单构造，不读取真实 .env；不启动服务、浏览器或全仓 501 项单测。
+
+从根调用带通知上下文的 `orbital/coordination/m2-takeover/bg-root.cmd` 启动，获得 job 后冻结 HEAD/源文件并立即交回。类型/构建尚未完成时不宣称本批检查全绿。结果返回后由 Codex 衔接 Claude 独立复审，再合并冻结交 Pi 12 步 174 例正式验收。
