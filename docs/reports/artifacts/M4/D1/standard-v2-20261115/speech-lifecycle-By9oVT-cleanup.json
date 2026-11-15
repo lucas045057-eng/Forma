@@ -1,0 +1,11 @@
+{
+  "pid": 37860,
+  "at": "2026-11-15T07:07:27.855Z",
+  "origin": "http://127.0.0.1:11350",
+  "upstream": "http://127.0.0.1:36663",
+  "appListening": false,
+  "upstreamListening": false,
+  "calls": 1,
+  "retainedDirectory": null,
+  "errors": []
+}

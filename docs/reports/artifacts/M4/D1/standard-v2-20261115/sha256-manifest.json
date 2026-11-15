@@ -1,0 +1,174 @@
+{
+  "algorithm": "sha256",
+  "manifestExcluded": "sha256-manifest.json",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "source": "Static evidence verification; no commands rerun",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "build.log",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/build.log",
+      "bytes": 3900,
+      "sha256": "705483ef35346daa6cbf28d3ff136b2469c27c5050050b934638a9601ad9cd9c"
+    },
+    {
+      "path": "entries/d1-loopback.cjs",
+      "source": ".worktrees/m4/.data/d1-loopback.cjs",
+      "bytes": 1847,
+      "sha256": "aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136"
+    },
+    {
+      "path": "entries/standard-v2.mjs",
+      "source": ".worktrees/m4/.data/d1-standard-v2.mjs",
+      "bytes": 6317,
+      "sha256": "8f15f95cd964d1cb0750f9215d07eb5347f6ca3d0eff4e7a75fd4019e920325c"
+    },
+    {
+      "path": "launcher/cmd",
+      "source": "orbital/jobs/job_fe569815/cmd",
+      "bytes": 44,
+      "sha256": "0e16f9f7c5da6f6306a36f89dec1eb49c0387aa3944e30f0d0d9360228f28cd5"
+    },
+    {
+      "path": "launcher/exit",
+      "source": "orbital/jobs/job_fe569815/exit",
+      "bytes": 5,
+      "sha256": "043b5ae7334040ef63298adca08912d5287ad37e66f9425316adc50d2c1ab652"
+    },
+    {
+      "path": "launcher/job.json",
+      "source": "orbital/jobs/job_fe569815/job.json",
+      "bytes": 406,
+      "sha256": "919e5ce4167cd9295382bf0c4b86e45703b0ce3f2717e8a2a96d0a5962770869"
+    },
+    {
+      "path": "launcher/output.log",
+      "source": "orbital/jobs/job_fe569815/output.log",
+      "bytes": 72957,
+      "sha256": "9513b0bd161db480c0d5a9dfeac539558f4d3a212edff411fd4a1273d3efe25c"
+    },
+    {
+      "path": "manifest.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/manifest.json",
+      "bytes": 269145,
+      "sha256": "2b7181827ace1edef32404808372fe193ff5c61f3e9fd877a76a7f22ae0e68e6"
+    },
+    {
+      "path": "original-sha256-manifest.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/sha256-manifest.json",
+      "bytes": 3432,
+      "sha256": "2c0f46eec8609eee752ef7e72d918d4d02bda98366adefcea3a67696c6e72796"
+    },
+    {
+      "path": "speech-cleanup-19912.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-cleanup-19912.json",
+      "bytes": 332,
+      "sha256": "3eb4dd8271f38955ceb5d605c9b09d611f981d32724e24812154612292b3f5e5"
+    },
+    {
+      "path": "speech-lifecycle-4fRIib-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-lifecycle-4fRIib-cleanup.json",
+      "bytes": 246,
+      "sha256": "b5828d24b39f8e36bd6a583d7882a821d3dbb1b4ef8c62a041cfdd6122e4db4f"
+    },
+    {
+      "path": "speech-lifecycle-6eUcAh-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-lifecycle-6eUcAh-cleanup.json",
+      "bytes": 246,
+      "sha256": "1a4af5ff0286d6afeada9a363baccdd5d74562cfbd08df157f037491b76c9438"
+    },
+    {
+      "path": "speech-lifecycle-ahgB1S-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-lifecycle-ahgB1S-cleanup.json",
+      "bytes": 246,
+      "sha256": "ba1d645916d45bf17c7666418e4fad04dd1054418a825bb8336c3641b3643110"
+    },
+    {
+      "path": "speech-lifecycle-By9oVT-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-lifecycle-By9oVT-cleanup.json",
+      "bytes": 246,
+      "sha256": "3801e2091f7c860654279610e2d17c8953e297bc02d074131bb9280fe7b557b3"
+    },
+    {
+      "path": "speech-mock-0518bbd6-e6f9-40d8-8f31-218ababd9369-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-0518bbd6-e6f9-40d8-8f31-218ababd9369-cleanup.json",
+      "bytes": 92,
+      "sha256": "3b9f9dfade29e8d41d313145aa93ba5979c707def2014ff879b8a8bfa16a4ca0"
+    },
+    {
+      "path": "speech-mock-06b80e3c-f367-4038-91eb-82fc8b9902a3-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-06b80e3c-f367-4038-91eb-82fc8b9902a3-cleanup.json",
+      "bytes": 92,
+      "sha256": "087498639662acb83158b3f3851d3dcfc89ec689ad2807cb3ddea651207648a2"
+    },
+    {
+      "path": "speech-mock-59b1b283-179a-44e1-a781-db744f11e92f-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-59b1b283-179a-44e1-a781-db744f11e92f-cleanup.json",
+      "bytes": 92,
+      "sha256": "329364d146e0ffb227976d24a24a02fed4969f63e435acd4963c75a76a8a8547"
+    },
+    {
+      "path": "speech-mock-662259c6-8d4b-401b-947f-9f62f8e50c4f-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-662259c6-8d4b-401b-947f-9f62f8e50c4f-cleanup.json",
+      "bytes": 92,
+      "sha256": "3946eaf84282b9ebd52dc119b204609a8ba82a7ec794f5f8502e79e98844ccdf"
+    },
+    {
+      "path": "speech-mock-86e9f43e-7db5-47ae-af88-300433a90cdf-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-86e9f43e-7db5-47ae-af88-300433a90cdf-cleanup.json",
+      "bytes": 92,
+      "sha256": "312b82a54bd3ea0f661ed8e4621ed1993fed535adaef85a2198fb0306a528fe8"
+    },
+    {
+      "path": "speech-mock-8e77ba97-c9dc-4bce-ba63-8c252a0350eb-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-8e77ba97-c9dc-4bce-ba63-8c252a0350eb-cleanup.json",
+      "bytes": 92,
+      "sha256": "0ab8c511a031dc82903dabedcd5851e2765436a33ee716dcabbf090715815cdc"
+    },
+    {
+      "path": "speech-mock-91ddc08c-ffbf-4fbd-bb9d-f09cff5c118f-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-91ddc08c-ffbf-4fbd-bb9d-f09cff5c118f-cleanup.json",
+      "bytes": 92,
+      "sha256": "e0ffe4dcb7bd7dd1fe3cd2c3c2b9f0e1f26ba4c5fc74f58c45a50a1e70b2880b"
+    },
+    {
+      "path": "speech-mock-9c6e0a71-d692-4338-976b-b3c7e9d0176b-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-9c6e0a71-d692-4338-976b-b3c7e9d0176b-cleanup.json",
+      "bytes": 92,
+      "sha256": "a6fd1f608967deb5ca9c3dd407e8e9fb3699584cbe55aa4b503b60a689b034c2"
+    },
+    {
+      "path": "speech-mock-ab215591-6420-4eed-88ce-fae2ee7d86e2-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-ab215591-6420-4eed-88ce-fae2ee7d86e2-cleanup.json",
+      "bytes": 92,
+      "sha256": "f7a5d08fa7e5de198108425cf49028d8c44d3ac02a4e0686db173ff59f46d387"
+    },
+    {
+      "path": "speech-mock-bb7c1703-3a0b-46f4-b734-ab4cefe678ab-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/speech-mock-bb7c1703-3a0b-46f4-b734-ab4cefe678ab-cleanup.json",
+      "bytes": 92,
+      "sha256": "0109ebf31f9901b1da61247f5f16f829c7dfa4a3278986499dfc06e6869486a0"
+    },
+    {
+      "path": "test.log",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/test.log",
+      "bytes": 68256,
+      "sha256": "0d98bfa6b44627cc8e24197af8fd1b467f5adaf58bda0dea22956dea0f346a28"
+    },
+    {
+      "path": "typecheck.log",
+      "source": ".worktrees/m4/.data/d1-standard-v2-2026-11-15T07-04-08.991Z/typecheck.log",
+      "bytes": 540,
+      "sha256": "2b8500033b81bf168f1d3a42352ca0ca6c525e8179a1d4b95cfa8281ae269380"
+    },
+    {
+      "path": "verification.json",
+      "source": "Static evidence verification; no commands rerun",
+      "bytes": 6211,
+      "sha256": "1213e4c320a0fce5d892c4cecbde90d3af724bbf95f3c8074cf20cd3d17f5cff"
+    }
+  ]
+}
