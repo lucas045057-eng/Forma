@@ -450,52 +450,59 @@ it.each(['save', 'cleanup'])('retains stale cleanup intent across %s failure and
 });
 
 it.each(['cleanup', 'terminal-save'])('recovers another card before cancel, including repeated %s failure', async failure => {
-  const f = await fixture();
-  let save: ReturnType<typeof saveSpy> | undefined;
+  const begun=performance.now();const stages:Array<{stage:string;ms:number}>=[];
+  const mark=(stage:string)=>{const value={stage,ms:performance.now()-begun};stages.push(value);console.info('[approval recovery stage]',JSON.stringify({branch:failure,...value}));};
+  async function phase<T>(name:string,work:()=>Promise<T>){mark(`${name}:begin`);try{return await work();}finally{mark(`${name}:end`);}}
+  const f = await phase('fixture-init',fixture);
+  let save: ReturnType<typeof saveSpy> | undefined;let remove: ReturnType<typeof removeSpy> | undefined;let primary:unknown;const cleanupErrors:unknown[]=[];
   try {
-    const first = await f.work.submit('shared C intent', selection(f.baseVersion));
-    await f.work.idle();
-    const second = await f.work.submit('shared D intent', selection(f.baseVersion));
-    await f.work.idle();
+    const first = await phase('submit-C',()=>f.work.submit('shared C intent', selection(f.baseVersion)));
+    await phase('idle-C',()=>f.work.idle());
+    const second = await phase('submit-D',()=>f.work.submit('shared D intent', selection(f.baseVersion)));
+    await phase('idle-D',()=>f.work.idle());
     const [c, d] = f.work.listApprovals();
     const originalSave = f.work['save'].bind(f.work);
     vi.spyOn(f.work.previews, 'start').mockImplementationOnce(async () => {
-      save = saveSpy(f.work).mockImplementationOnce(originalSave).mockRejectedValueOnce(new Error('C terminal save failure'));
+      mark('preview-fault-injected');save = saveSpy(f.work).mockImplementationOnce(()=>phase('persist-C-intent',originalSave)).mockImplementationOnce(async()=>{mark('C-terminal-save-fault');throw new Error('C terminal save failure');});
       throw new Error('C preview failure');
     });
-    await expect(f.work.answerApproval(c.id, 0)).rejects.toThrow('C terminal save failure');
+    await phase('answer-C-failure',async()=>{await expect(f.work.answerApproval(c.id, 0)).rejects.toThrow('C terminal save failure');});
     save?.mockRestore();
-    let remove: ReturnType<typeof removeSpy> | undefined;
     if (failure === 'cleanup') remove = removeSpy(f.work).mockRejectedValueOnce(new Error('C recovery cleanup failure'));
     else save = saveSpy(f.work).mockRejectedValueOnce(new Error('C recovery terminal save failure'));
     const failureMessage = failure === 'cleanup' ? 'C recovery cleanup failure' : 'C recovery terminal save failure';
-    await expect(f.work.cancel(second.id)).rejects.toThrow(failureMessage);
+    await phase('cancel-D-recovery-failure',async()=>{await expect(f.work.cancel(second.id)).rejects.toThrow(failureMessage);});
     remove?.mockRestore(); save?.mockRestore();
-    const interrupted = JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8'));
+    const interrupted = JSON.parse(await phase('read-recovery-intent',()=>readFile(path.join(f.directory, 'data/tasks.json'), 'utf8')));
     expect(interrupted.approvalIntent).toMatchObject({ kind: 'preview_failed', taskId: first.id });
     expectStatus(f.work, second.id, 'awaiting_approval');
     expect(f.work.getApproval(d.id).status).toBe('pending');
     expect(f.published.filter(event => event.type === 'candidate.ready')).toEqual([]);
 
-    await f.work.cancel(second.id);
+    await phase('cancel-D-retry',()=>f.work.cancel(second.id));
     expectStatus(f.work, first.id, 'failed');
     expect(f.work.getApproval(c.id).status).toBe('failed');
     expectStatus(f.work, second.id, 'cancelled');
     expect(f.work.getApproval(d.id).status).toBe('cancelled');
     expect(JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8')).approvalIntent).toBeUndefined();
-    await f.work.close();
+    await phase('work-close',()=>f.work.close());
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     const start = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not replay C'));
     const commit = vi.spyOn(restarted.repo, 'commitCandidate');
     try {
-      await restarted.init();
+      await phase('restart-init',()=>restarted.init());
       expect(restarted.getApproval(c.id).status).toBe('failed');
       expectStatus(restarted, first.id, 'failed');
       expect(start).not.toHaveBeenCalled();
       expect(commit).not.toHaveBeenCalled();
-      expect(modelCalls).toBe(2);
-    } finally { await restarted.close(); }
-  } finally { save?.mockRestore(); await cleanup(f); }
+      expect(modelCalls).toBe(2);mark('assertions-complete');
+    } finally { try{await phase('restart-close',()=>restarted.close());}catch(error){cleanupErrors.push(error);} }
+  }catch(error){primary=error;}
+  finally {
+    save?.mockRestore();remove?.mockRestore();try{await phase('fixture-cleanup',()=>cleanup(f));}catch(error){cleanupErrors.push(error);}
+    console.info('[approval recovery timings]',JSON.stringify({branch:failure,stages}));
+    const errors=[...(primary===undefined?[]:[primary]),...cleanupErrors];if(errors.length)throw new AggregateError(errors,'Approval recovery failed; see phase timings');
+  }
 });
 
 it('uses the recovered state when cancelling the same target after a terminal-save failure', async () => {
