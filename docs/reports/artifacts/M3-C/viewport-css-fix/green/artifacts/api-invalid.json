@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "name": "额外字段",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "fov=999",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "关键帧乱序",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "关键帧重复 at",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "模型路径越界",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "模型路径相对",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "模型路径为 http",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    },
+    {
+      "name": "缺字段",
+      "status": 400,
+      "code": "INVALID_SCENE",
+      "fields": 1
+    }
+  ]
+}
