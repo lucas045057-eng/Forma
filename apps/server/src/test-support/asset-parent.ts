@@ -16,7 +16,7 @@ const service=new AssetService({directory,fallbackDirectory,presetDigests:{'diff
  try{return await new Promise<ModelMetrics>((_resolve,reject)=>{
   let spawnFailure:Error|undefined;
   const env:NodeJS.ProcessEnv={};for(const key of ['SystemRoot','WINDIR','TEMP','TMP'])if(process.env[key])env[key]=process.env[key];
-  const worker=fork(fileURLToPath(new URL('../assets/process-worker.ts',import.meta.url)),[input,path.join(stage,'model.glb')],{env,execArgv:['--import',fileURLToPath(new URL('./asset-loader-register.mjs',import.meta.url))],stdio:['ignore','ignore','pipe','ipc']});
+  const worker=fork(fileURLToPath(new URL('../assets/process-worker.ts',import.meta.url)),[input,path.join(stage,'model.glb')],{env,execArgv:['--import',new URL('./asset-loader-register.mjs',import.meta.url).href],stdio:['ignore','ignore','pipe','ipc']});
   // Ownership is reported before barrier readiness; failed startup is still ours to reap.
   worker.once('spawn',()=>report({type:'worker-spawned',pid:worker.pid,stage}));
   worker.stderr?.on('data',bytes=>process.stderr.write(bytes));
