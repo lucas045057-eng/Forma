@@ -1,0 +1,21 @@
+node:fs:736
+  return binding.read(fd, buffer, offset, length, position);
+                 ^
+
+Error: EISDIR: illegal operation on a directory, read
+    at Object.readSync (node:fs:736:18)
+    at tryReadSync (node:fs:416:20)
+    at readFileSync (node:fs:470:19)
+    at readHash (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/.data/m4-special-run.mjs:39:70)
+    at file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/.data/m4-special-run.mjs:50:111
+    at Array.map (<anonymous>)
+    at evidenceHashes (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/.data/m4-special-run.mjs:50:90)
+    at file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/.data/m4-special-run.mjs:62:59
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26) {
+  errno: -4068,
+  code: 'EISDIR',
+  syscall: 'read'
+}
+
+Node.js v24.14.1
