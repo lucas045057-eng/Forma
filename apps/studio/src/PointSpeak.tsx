@@ -32,6 +32,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
   const latestContext = useRef(context); latestContext.current = context;
   const [binding,setBinding] = useState<SpeechContext | null>(null);
   const latestBinding = useRef(binding); latestBinding.current = binding;
+  const boundText = useRef('');
   const voiceGate = !speechBusy(speechState) && (!binding || bindingMatches(binding,context));
   function changeInstruction(text:string,clearBinding=false) {
     ++revision.current; latestContext.current = {...latestContext.current,revision:revision.current};
@@ -43,7 +44,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     const decision=reviewDecision(review.context,latestContext.current,submittable&&!busy,review.text);
     if (!decision[mode]) return;
     changeInstruction(review.text);
-    const confirmed={...latestContext.current}; latestBinding.current=confirmed;setBinding(confirmed);speech.accept();
+    const confirmed={...latestContext.current}; boundText.current=review.text;latestBinding.current=confirmed;setBinding(confirmed);speech.accept();
   }
   const active = state.tasks.find(task => task.id === activeId) ?? state.tasks[0];
 
@@ -61,6 +62,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     try {
       const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
       setActiveId(task.id);
+      latestBinding.current=null;setBinding(null);
       succeeded = true;
     } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined)); }
     awaiting(token);
@@ -95,12 +97,12 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
         placeholder="例如：把这个按钮改成“马上购买”" rows={3}/>
     </label>
     <p className="hint"><span data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span> Ctrl/⌘ + Enter 提交。</p>
-    <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} onUse={useReview}/>
+    <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
     {binding&&!bindingMatches(binding,context)&&<div data-testid="speech-binding-conflict" role="alert">
       <p>语音确认后选中对象已变化，生成前需再次确认。</p>
       <p>上次确认：{identityLabel(binding.selection)}；当前：{identityLabel(context.selection)}</p>
       {binding.version!==context.version?<p>页面版本已变化，请放弃此语音指令并重新点选。</p>:<button type="button" data-testid="speech-reconfirm" disabled={!submittable||busy} onClick={()=>{if(!submittable||busy||speechBusy(speech.getSnapshot())||latestBinding.current?.version!==latestContext.current.version)return;const next={...latestContext.current};latestBinding.current=next;setBinding(next);}}>确认用于当前对象{context.selection?.cid??'（整体修改）'}</button>}
-      <button type="button" data-testid="speech-clear-binding" onClick={()=>changeInstruction('',true)}>放弃此语音指令</button>
+      <button type="button" data-testid="speech-clear-binding" onClick={()=>changeInstruction(instruction===boundText.current?'':instruction,true)}>放弃此语音指令，保留后续文字编辑</button>
     </div>}
     <p className="hint">指令、选中对象与必要源码发送到已配置编码服务。</p>
     <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>生成候选版本</button>

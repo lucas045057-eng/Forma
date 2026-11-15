@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { ProductScene, sceneRenderSettings } from '@spatial/scene-renderer';
 import type { Asset, FallbackPreset } from '@spatial/shared';
 import {assetOriginLabel} from './model-provenance.tsx';
+import {ApiError} from './api.ts';
+const fallbackErrors:Record<string,string>={UNKNOWN_PRESET:'备用编号不存在，请刷新目录。',ASSET_EXISTS:'该编号已有不同内容，请保留现有资产并刷新状态。',FALLBACK_CHANGED:'本地备用文件已变化，请恢复指定材料。',FALLBACK_PATH_DENIED:'备用路径未通过安全检查。',FALLBACK_TOO_LARGE:'备用模型超过32MiB，未开始处理。',INVALID_GLB:'备用文件不是完整的GLB模型。',SERVICE_STOPPED:'资产服务正在停止，请稍后刷新。'};
 import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import './assets.css';
 import { useEventCenter } from './EventCenter.tsx';
@@ -65,8 +67,8 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
   }
   async function importFallback(id:string){
     if(!canImport||busy)return;setBusy(true);setError('');
-    try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new Error(result.error?.message??'备用导入失败');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
-    catch{setError('无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
+    try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new ApiError(response.status,typeof result?.error?.code==='string'?result.error.code:'ASSET_IMPORT_FAILED','备用导入未成功');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
+    catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
   return <div className="asset-dialog" role="dialog" aria-modal="true" aria-label="3D 资产视口">
     <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
