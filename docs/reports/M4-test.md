@@ -169,3 +169,69 @@ Exit status 2
 
 实现方在下一批统一返工里修 Q1（并处理 Q4 中决定吸收的建议）→ 冻结新提交 → 我从头再跑同一 `full-regression.mjs`。
 本轮不改产品、不改测试、不自行派实现者、不 merge、不自动重跑。
+---
+
+# 附录：集中第三轮（返工二后）—— 编译已过，单测 3 失败，E2E 全部未执行
+
+> 本轮**不是全仓单测通过**：server 实际 **375 passed / 3 failed（378）**；Studio 单测未启动；
+> `demo-safety` 与全部 E2E（11 步）未执行。193（M4 19 + 旧 174）仍然只是**收集数**。
+
+## B1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `e863f261e0263e857c71cefd785bbed7c42e6f3d`（merge 返工二 `1aa5450`） |
+| 冻结产品 | `1aa54500ebab4efd5cd457b94c145e71880990df` |
+| 身份摘要 / 锁 | `453d220d74df…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `1aa5450` **0 差异**（`productDiffVsAccepted=[]`） |
+| 证据目录起跑前 | 脏项 **0** |
+
+## B2. 实际执行与结果（命令失败与身份漂移分开）
+
+| 步骤 | 结果 |
+| --- | --- |
+| typecheck | **exit 0 / 9s**：`7 of 8` 项目全 Done，**含 `apps/studio` 与 `templates/product-page`（Studio 类型检查首次实际执行）** |
+| build | **exit 0 / 17s** |
+| unit（`pnpm test`） | **exit 1 / 269s**：server **375 passed / 3 failed（378）** |
+| demo-safety | 未执行 |
+| M4 E2E（19） | 未执行 |
+| 旧九套（174） | 未执行 |
+
+- **命令失败**：`pnpm test` 退出码 1（`signal=null`）。
+- **身份漂移：无**。该步 `problems` 只有退出码一条；起跑前 `evidenceDirtyAtStart=[]`；产品/脚本/锁与 `1aa5450` 字节一致。
+- **单测分包（实际日志）**：shared 68、vite-plugin-source-tag 20、scene-renderer 5、bridge 1、**server 375 通过 / 3 失败 = 378**；**`apps/studio` 未启动**（server 首败即停）。
+- 因此**不能**写"全仓单测通过"；也不改写成"测试失败 1 项"。
+
+## B3. 三条失败（原文）
+
+1. `src/assets/fallback-process-lifecycle.test.ts` › **a hard-killed asset parent loses its worker, preserves complete raw input and cleans owned staging on restart**
+   `Error: Timed out waiting for deterministic model import barrier`（`fallback-process-lifecycle.test.ts:29`）
+   —— 测试夹具的确定性"模型加载屏障"没有被触发（超时），属**测试侧/夹具**问题，产品语义未被证伪。
+2. `src/assets/fallbacks.test.ts` › **fallback HTTP refuses client paths, URLs and provenance fields without creating work**
+   `AssertionError: expected { kind: 'unknown' } to match object { kind: 'fallback', …(1) }`
+   —— 期望 `kind: 'fallback'`，实际得到 `kind: 'unknown'`：需要判定是实现回归（采用/来源写回）还是断言已过时。
+3. `src/assets/recovery.test.ts` › **does not resubmit after taskId persistence fails, even after restart**
+   `Error: disk full`（`recovery.test.ts:85`）
+   —— 注入的"磁盘已满"故障没有被用例自身吞掉，以未捕获错误抛出。
+
+## B4. 清理与证据
+
+- 静态核对时：3001/4011/5173/5174/5175 无监听；本树无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；无 `.model-stage-*` 残留；未执行任何 kill（没有需要回收的自有残留，也没有对未知归属进程动手）。
+- 本步**未刷新任何 tracked 证据**（`evidenceArchived: []`）。
+- 归档：`manifest.json`、`manifest.log`、`typecheck.log`、`build.log`、`unit.log`、`cleanup.json`、`launcher/`（job 的 cmd/exit/job.json/output.log）；
+  `sha256-manifest.json` 登记 **10 个载荷、排除自身、静态复算 0 mismatch**。
+
+## B5. 统一问题清单（合并返工二复审 0 必修 / 3 建议）
+
+1. **R1（阻断，测试夹具）** `fallback-process-lifecycle` 的确定性加载屏障超时：需要修夹具（或让屏障在真实 worker 上可观测），不能放宽断言。
+2. **R2（阻断，需定性）** `fallbacks.test.ts` 期望 `kind: 'fallback'` 实得 `kind: 'unknown'`：先判定是产品回归还是断言过时；不得为了变绿改产品语义。
+3. **R3（阻断，测试侧）** `recovery.test.ts` 的 `disk full` 注入未收敛：需在用例内明确捕获/恢复，不能靠重试。
+4. **R4（覆盖缺口）** `apps/studio` 单测、`demo-safety`、M4 19 例、旧九套 174（含 M1-B 23 像素）本轮**全未执行**；编译已确认通过（含 Studio），但"运行通过"仍无证据。
+5. **R5（边界）** 真实 Windows 控制台 Ctrl+C、整链进程回收（backend/frontends/preview/check-Chromium/asset worker）、真实模板 iframe 点选与 HMR 端口仍需实测；本轮一条都没跑到。
+6. **R6（未执行外部项）** 真实阿里语音/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+
+## B6. 下一步
+
+实现/测试双方由 Codex 统一返工三（根 `17a9249`）处理 R1–R3；修复后我再从头跑同一 `full-regression.mjs`。
+本轮不改产品、不改测试、不自行派实现者、不 merge、不自动补跑。
