@@ -1,6 +1,6 @@
 # M4：视觉、语音、备用资产与演示
 
-状态：D1已实现、标准验证547项通过、独立代码审查0 blocker/0 should-fix，交付aa43c2a已合主线，可接D2。D1尚无Pi正式验收，D2–D5未实现，M4未收口。原设计审查0 blocker/8 should-fix/9 suggestions已在d6ec495修订回应S1–S8。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收；不授权新增真实付费调用、不代替真实凭据或参与者。
+状态：D2–D5已按统一任务完成开发交付（实现fd38840，详见[M4-development-handoff.md](../reports/M4-development-handoff.md)），尚未集中测试与统一审查，M4未收口。此前D1标准547项/独立审查0 blocker/0 should-fix只对应原冻结字节aa43c2a，不外推覆盖这次完整开发；D1尚无Pi正式验收。原设计审查0 blocker/8 should-fix/9 suggestions已在d6ec495修订回应S1–S8。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收；不授权新增真实付费调用、不代替真实凭据或参与者。
 
 **执行顺序更新（用户2026-11-15）**：正式语音使用阿里云百炼配置。等待当前返工交回后，先连贯完成D2–D5全部开发，再集中测试和统一独立审查；不再逐卡RED/GREEN、逐卡全仓验证或交审。下文各卡的功能/安全/最终验收合同不变，旧逐卡执行指令由本条及§8更新取代。已有验证结果保留，不重跑以往基线；开发完成与验证通过分别报告。
 
