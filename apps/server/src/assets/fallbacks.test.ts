@@ -8,6 +8,7 @@ import {sha256,readFallback} from './fallbacks.ts';
 import {SceneService} from '../scene/service.ts';
 import {defaultSceneConfig} from '@spatial/shared/scene-config';
 import {createApp} from '../app.ts';
+import {Document,NodeIO} from '@gltf-transform/core';
 const cleanups:Array<()=>Promise<unknown>>=[];
 afterEach(async()=>{const errors:unknown[]=[];for(const close of cleanups.splice(0).reverse())try{await close();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Fallback fixture cleanup failed');});
 function binary(){const bytes=Buffer.alloc(12);bytes.write('glTF');bytes.writeUInt32LE(2,4);bytes.writeUInt32LE(12,8);return bytes;}
@@ -61,8 +62,18 @@ it('a persistence failure rejects idle and close while retaining the instance lo
 });
 it('fallback HTTP refuses client paths, URLs and provenance fields without creating work',async()=>{
  const f=await fixture();const work=path.join(f.root,'http-work');await mkdir(path.join(work,'src'),{recursive:true});await writeFile(path.join(work,'src/app.ts'),'export const a=1;');
- const {app}=await createApp({workRoot:work,workDataDirectory:path.join(f.root,'http-data'),dataDirectory:path.join(f.root,'http-assets'),historyDirectory:path.join(f.root,'http-history'),fallbackDirectory:f.preset,presetDigests:{'diffuser-split':sha256(f.bytes)},base:'http://127.0.0.1:9',key:'mock-only'});cleanups.push(()=>app.close());
+ // Unlike the 12-byte header used with the service's synthetic processor, HTTP uses a real GLB.
+ const document=new Document();const buffer=document.createBuffer();const positions=document.createAccessor().setType('VEC3').setArray(new Float32Array([0,0,0,1,0,0,0,1,0])).setBuffer(buffer);
+ document.createScene().addChild(document.createNode().setMesh(document.createMesh().addPrimitive(document.createPrimitive().setAttribute('POSITION',positions))));
+ const source=Buffer.from(await new NodeIO().writeBinary(document));await writeFile(path.join(f.preset,'lux3d-split-4969889.glb'),source);
+ const {app,service}=await createApp({workRoot:work,workDataDirectory:path.join(f.root,'http-data'),dataDirectory:path.join(f.root,'http-assets'),historyDirectory:path.join(f.root,'http-history'),fallbackDirectory:f.preset,presetDigests:{'diffuser-split':sha256(source)},base:'http://127.0.0.1:9',key:'mock-only'});cleanups.push(()=>app.close());
+ const upstream=[vi.spyOn(Lux3DClient.prototype,'createTextTo3d'),vi.spyOn(Lux3DClient.prototype,'createImgTo3d'),vi.spyOn(Lux3DClient.prototype,'getTask')];
+ try{
  for(const body of [{path:'/secret'},{url:'https://invalid.example'},{provenance:{kind:'lux3d'}}]){const response=await app.inject({method:'POST',url:'/assets/fallbacks/diffuser-split/import',payload:body});expect(response.statusCode).toBe(400);}
  expect((await app.inject('/assets')).json()).toEqual([]);expect((await app.inject('/assets/fallbacks')).json()).toEqual(expect.arrayContaining([expect.objectContaining({id:'diffuser-split',available:true})]));
- const accepted=await app.inject({method:'POST',url:'/assets/fallbacks/diffuser-split/import',headers:{'content-type':'application/json'},payload:'{}'});expect(accepted.statusCode).toBe(202);expect(accepted.json().provenance).toMatchObject({kind:'fallback',presetId:'diffuser-split'});
+ const accepted=await app.inject({method:'POST',url:'/assets/fallbacks/diffuser-split/import',headers:{'content-type':'application/json'},payload:'{}'});expect(accepted.statusCode).toBe(202);expect(accepted.json().status).toBe('processing');expect(accepted.json().provenance).toEqual({kind:'unknown'});expect(accepted.json().modelUrl).toBeUndefined();
+ await service.idle();const ready=await app.inject(`/assets/${accepted.json().id}`);expect(ready.statusCode).toBe(200);expect(ready.json().status).toBe('ready');
+ const processed=await readFile(service.modelPath(accepted.json().id)!);expect(ready.json().provenance).toMatchObject({kind:'fallback',presetId:'diffuser-split',sourceHash:sha256(source),outputHash:sha256(processed)});
+ expect((await app.inject(`/assets/${accepted.json().id}/model.glb`)).rawPayload).toEqual(processed);for(const call of upstream)expect(call).not.toHaveBeenCalled();
+ }finally{for(const call of upstream)call.mockRestore();}
 });
