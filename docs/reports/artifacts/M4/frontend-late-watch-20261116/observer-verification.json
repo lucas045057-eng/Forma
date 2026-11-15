@@ -1,0 +1,75 @@
+{
+    "sourceJob":  "job_5117bda5",
+    "sourceHead":  "70e82cafbd23af19902e327bb647847c67663661",
+    "created":  88,
+    "nativeClose":  87,
+    "observerErrors":  [
+
+                       ],
+    "recordedLifecycleSnapshots":  3,
+    "unmatchedInRecordedSnapshots":  [
+
+                                     ],
+    "ownedCloseFinished":  "2026-11-15T18:11:20.597Z",
+    "unclosed":  [
+                     {
+                         "at":  "2026-11-15T18:11:20.598Z",
+                         "pid":  62532,
+                         "event":  "watch-created",
+                         "phase":  {
+                                       "event":  "process:disconnect"
+                                   },
+                         "id":  88,
+                         "api":  "watch",
+                         "path":  {
+                                      "input":  "E:/空间化AI工作台/.worktrees/m4/packages/scene-renderer/src/index.tsx",
+                                      "absolute":  "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer\\src\\index.tsx"
+                                  },
+                         "options":  {
+                                         "persistent":  true
+                                     },
+                         "callsite":  "Error: Watcher observation callsite\n    at stack (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/.data/frontend-watcher-trace-20261116/watcher-observer.mjs:9:18)\n    at fs.\u003ccomputed\u003e [as watch] (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/.data/frontend-watcher-trace-20261116/watcher-observer.mjs:26:106)\n    at createFsWatchInstance (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:12958:16)\n    at setFsWatchListener (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13000:14)\n    at NodeFsHandler$1._watchWithNodeFs (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13114:20)\n    at NodeFsHandler$1._handleFile (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13158:24)\n    at NodeFsHandler$1._addToNodeFs (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13332:26)\n    at async file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13974:18\n    at async Promise.all (index 0)",
+                         "state":  {
+                                       "constructor":  "FSWatcher",
+                                       "nativePresent":  true,
+                                       "nativeType":  "FSEvent",
+                                       "hasRef":  true,
+                                       "readOnlyNativeRefInspection":  true
+                                   },
+                         "weakObjectRegistry":  true
+                     }
+                 ],
+    "lateCreations":  [
+                          {
+                              "at":  "2026-11-15T18:11:20.598Z",
+                              "pid":  62532,
+                              "event":  "watch-created",
+                              "phase":  {
+                                            "event":  "process:disconnect"
+                                        },
+                              "id":  88,
+                              "api":  "watch",
+                              "path":  {
+                                           "input":  "E:/空间化AI工作台/.worktrees/m4/packages/scene-renderer/src/index.tsx",
+                                           "absolute":  "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer\\src\\index.tsx"
+                                       },
+                              "options":  {
+                                              "persistent":  true
+                                          },
+                              "callsite":  "Error: Watcher observation callsite\n    at stack (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/.data/frontend-watcher-trace-20261116/watcher-observer.mjs:9:18)\n    at fs.\u003ccomputed\u003e [as watch] (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/.data/frontend-watcher-trace-20261116/watcher-observer.mjs:26:106)\n    at createFsWatchInstance (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:12958:16)\n    at setFsWatchListener (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13000:14)\n    at NodeFsHandler$1._watchWithNodeFs (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13114:20)\n    at NodeFsHandler$1._handleFile (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13158:24)\n    at NodeFsHandler$1._addToNodeFs (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13332:26)\n    at async file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/node_modules/.pnpm/vite@7.3.7_@types+node@24.19.2/node_modules/vite/dist/node/chunks/config.js:13974:18\n    at async Promise.all (index 0)",
+                              "state":  {
+                                            "constructor":  "FSWatcher",
+                                            "nativePresent":  true,
+                                            "nativeType":  "FSEvent",
+                                            "hasRef":  true,
+                                            "readOnlyNativeRefInspection":  true
+                                        },
+                              "weakObjectRegistry":  true
+                          }
+                      ],
+    "lastSnapshotAt":  "2026-11-15T18:11:20.598Z",
+    "lastSnapshotAfterLateCreation":  false,
+    "scope":  "Creation and close events are observed; final pre-kill count after the last snapshot is not fully sampled. The late persistent/ref=true creation has no close call/event; exact internal scheduling is a static interpretation, not a measured breakpoint.",
+    "lateCloseMethodCalls":  0,
+    "uniqueNativeClosedIds":  87
+}

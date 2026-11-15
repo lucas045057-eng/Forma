@@ -1,0 +1,3903 @@
+{
+  "started": "2026-11-15T18:11:16.467Z",
+  "pid": 44556,
+  "head": "70e82cafbd23af19902e327bb647847c67663661",
+  "statusBefore": "?? fallback/\n",
+  "out": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\frontend-watcher-trace-20261116\\run-2026-11-15T18-11-16.466Z",
+  "identityBefore": {
+    "scripts/demo/frontends.mjs": "54f6f7924e25149b914c9e8093955c8c99d3d34462541c0455b11a368234ef46",
+    "scripts/demo/launch.mjs": "14cb7435182f087749737ac99458fe56758ec637a445a0bf9dc0c22f4c3836d0",
+    "scripts/demo/runtime.mjs": "94c7cfdd66c1a8162d8075c2d95adc595a38a740f180ba354a05222057db4871",
+    "scripts/demo/prepare.mjs": "e90178f3a028551a05b78b998855ccf9ade69de1f1a9f39e732204f9ac4c63ef",
+    "scripts/demo/backend.mjs": "c99912612e9e2673631a5b51bb1d0f6ce4f79b8200fa2a70e64688baec105e62",
+    "scripts/demo/network-guard.cjs": "257759d9d88610d9e0bc67efe3397817f1bc7df8b91af39ecc5e9b4c42727518",
+    "package.json": "c080c92609ba44ba4cb31c48b11054d5506d4e4d3fac2c5730e1a659b49fcacc",
+    "pnpm-lock.yaml": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960"
+  },
+  "cases": [
+    {
+      "kind": "consumed",
+      "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\frontend-watcher-trace-20261116\\run-2026-11-15T18-11-16.466Z\\consumed",
+      "pid": 65456,
+      "started": "2026-11-15T18:11:16.605Z",
+      "identities": [
+        {
+          "pid": 65456,
+          "parent": 44556,
+          "created": "2026-11-15T18:11:16.6021170Z",
+          "depth": 0
+        },
+        {
+          "pid": 46056,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.6056870Z",
+          "depth": 1
+        },
+        {
+          "pid": 60996,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.7819390Z",
+          "depth": 1
+        },
+        {
+          "pid": 62532,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:18.2702170Z",
+          "depth": 1
+        },
+        {
+          "pid": 58968,
+          "parent": 62532,
+          "created": "2026-11-15T18:11:18.6900370Z",
+          "depth": 2
+        }
+      ],
+      "events": [
+        {
+          "at": "2026-11-15T18:11:16.613Z",
+          "event": "spawn",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true
+        },
+        {
+          "at": "2026-11-15T18:11:16.773Z",
+          "event": "plan-created",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4",
+          "ports": {
+            "api": 61681,
+            "studio": 55410,
+            "main": 37355,
+            "preview": 58794,
+            "coding": 55672,
+            "lux3d": 59482,
+            "speech": 34963
+          }
+        },
+        {
+          "at": "2026-11-15T18:11:16.784Z",
+          "event": "owned-created",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:11:16.784Z",
+          "event": "owned:spawn",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:11:18.267Z",
+          "event": "owned-ready",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:11:18.272Z",
+          "event": "owned-created",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:11:18.272Z",
+          "event": "owned:spawn",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:11:18.679Z",
+          "event": "owned-ready",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:11:18.680Z",
+          "event": "all-ready",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4",
+          "ports": {
+            "api": 61681,
+            "studio": 55410,
+            "main": 37355,
+            "preview": 58794,
+            "coding": 55672,
+            "lux3d": 59482,
+            "speech": 34963
+          }
+        },
+        {
+          "at": "2026-11-15T18:11:18.683Z",
+          "event": "stdout:data",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "bytes": 259
+        },
+        {
+          "at": "2026-11-15T18:11:19.428Z",
+          "event": "real-ready-identity",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "identities": [
+            {
+              "pid": 65456,
+              "parent": 44556,
+              "created": "2026-11-15T18:11:16.6021170Z",
+              "depth": 0
+            },
+            {
+              "pid": 46056,
+              "parent": 65456,
+              "created": "2026-11-15T18:11:16.6056870Z",
+              "depth": 1
+            },
+            {
+              "pid": 60996,
+              "parent": 65456,
+              "created": "2026-11-15T18:11:16.7819390Z",
+              "depth": 1
+            },
+            {
+              "pid": 62532,
+              "parent": 65456,
+              "created": "2026-11-15T18:11:18.2702170Z",
+              "depth": 1
+            },
+            {
+              "pid": 58968,
+              "parent": 62532,
+              "created": "2026-11-15T18:11:18.6900370Z",
+              "depth": 2
+            }
+          ],
+          "ports": {
+            "api": 61681,
+            "studio": 55410,
+            "main": 37355,
+            "preview": 58794,
+            "coding": 55672,
+            "lux3d": 59482,
+            "speech": 34963
+          }
+        },
+        {
+          "at": "2026-11-15T18:11:19.428Z",
+          "event": "fetch-begin",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:55410/",
+          "consumption": "consumed"
+        },
+        {
+          "at": "2026-11-15T18:11:19.463Z",
+          "event": "fetch-headers",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:55410/",
+          "status": 200,
+          "bodyUsedAtHeaders": false
+        },
+        {
+          "at": "2026-11-15T18:11:19.464Z",
+          "event": "fetch-fully-consumed",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:55410/",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 531,
+          "bodyUsedAfter": true
+        },
+        {
+          "at": "2026-11-15T18:11:19.464Z",
+          "event": "fetch-begin",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:61681/health",
+          "consumption": "consumed"
+        },
+        {
+          "at": "2026-11-15T18:11:19.470Z",
+          "event": "fetch-headers",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:61681/health",
+          "status": 200,
+          "bodyUsedAtHeaders": false
+        },
+        {
+          "at": "2026-11-15T18:11:19.470Z",
+          "event": "fetch-fully-consumed",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:61681/health",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 34,
+          "bodyUsedAfter": true
+        },
+        {
+          "at": "2026-11-15T18:11:19.470Z",
+          "event": "fetch-begin",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:58794/preview/main/",
+          "consumption": "consumed"
+        },
+        {
+          "at": "2026-11-15T18:11:19.506Z",
+          "event": "fetch-headers",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:58794/preview/main/",
+          "status": 200,
+          "bodyUsedAtHeaders": false
+        },
+        {
+          "at": "2026-11-15T18:11:19.506Z",
+          "event": "fetch-fully-consumed",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "url": "http://127.0.0.1:58794/preview/main/",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 576,
+          "bodyUsedAfter": true
+        },
+        {
+          "at": "2026-11-15T18:11:20.202Z",
+          "event": "shutdown-request",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true
+        },
+        {
+          "at": "2026-11-15T18:11:20.203Z",
+          "event": "shutdown-send",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:11:20.598Z",
+          "event": "owned:disconnect",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:12:05.209Z",
+          "event": "owned-close-timeout",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:12:05.212Z",
+          "event": "owned-stderr:end",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:12:05.213Z",
+          "event": "owned-stderr:close",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "frontends"
+        },
+        {
+          "at": "2026-11-15T18:12:05.225Z",
+          "event": "owned:exit",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": "SIGKILL",
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "frontends",
+          "signal": "SIGKILL"
+        },
+        {
+          "at": "2026-11-15T18:12:05.225Z",
+          "event": "owned:close",
+          "childPid": 62532,
+          "exitCode": null,
+          "signalCode": "SIGKILL",
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "frontends",
+          "signal": "SIGKILL"
+        },
+        {
+          "at": "2026-11-15T18:12:05.225Z",
+          "event": "shutdown-send",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:12:05.229Z",
+          "event": "owned:disconnect",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:12:05.237Z",
+          "event": "owned-stderr:end",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:12:05.237Z",
+          "event": "owned-stderr:close",
+          "childPid": 60996,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": true,
+          "type": "diagnostic-event",
+          "role": "backend"
+        },
+        {
+          "at": "2026-11-15T18:12:05.242Z",
+          "event": "owned:exit",
+          "childPid": 60996,
+          "exitCode": 0,
+          "signalCode": null,
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "backend",
+          "code": 0,
+          "signal": null
+        },
+        {
+          "at": "2026-11-15T18:12:05.242Z",
+          "event": "owned:close",
+          "childPid": 60996,
+          "exitCode": 0,
+          "signalCode": null,
+          "connected": false,
+          "type": "diagnostic-event",
+          "role": "backend",
+          "code": 0,
+          "signal": null
+        },
+        {
+          "at": "2026-11-15T18:12:05.243Z",
+          "event": "disconnect",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false
+        },
+        {
+          "at": "2026-11-15T18:12:05.250Z",
+          "event": "stdout:end",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false
+        },
+        {
+          "at": "2026-11-15T18:12:05.251Z",
+          "event": "stdout:close",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true
+        },
+        {
+          "at": "2026-11-15T18:12:05.251Z",
+          "event": "stderr:end",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false
+        },
+        {
+          "at": "2026-11-15T18:12:05.251Z",
+          "event": "stderr:close",
+          "childPid": 65456,
+          "exitCode": null,
+          "signalCode": null,
+          "connected": false,
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true
+        },
+        {
+          "at": "2026-11-15T18:12:05.255Z",
+          "event": "exit",
+          "childPid": 65456,
+          "exitCode": 1,
+          "signalCode": null,
+          "connected": false,
+          "code": 1,
+          "signal": null
+        },
+        {
+          "at": "2026-11-15T18:12:05.255Z",
+          "event": "close",
+          "childPid": 65456,
+          "exitCode": 1,
+          "signalCode": null,
+          "connected": false,
+          "code": 1,
+          "signal": null
+        },
+        {
+          "at": "2026-11-15T18:12:05.255Z",
+          "event": "native-close-observed",
+          "childPid": 65456,
+          "exitCode": 1,
+          "signalCode": null,
+          "connected": false,
+          "code": 1,
+          "signal": null
+        }
+      ],
+      "requests": [
+        {
+          "url": "http://127.0.0.1:55410/",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 531,
+          "bodyUsedAfter": true
+        },
+        {
+          "url": "http://127.0.0.1:61681/health",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 34,
+          "bodyUsedAfter": true
+        },
+        {
+          "url": "http://127.0.0.1:58794/preview/main/",
+          "status": 200,
+          "bodyUsedAtHeaders": false,
+          "bytes": 576,
+          "bodyUsedAfter": true
+        }
+      ],
+      "fallbackKills": [],
+      "cleanupErrors": [],
+      "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4",
+      "ports": {
+        "api": 61681,
+        "studio": 55410,
+        "main": 37355,
+        "preview": 58794,
+        "coding": 55672,
+        "lux3d": 59482,
+        "speech": 34963
+      },
+      "manifestBefore": {
+        "schemaVersion": 1,
+        "mode": "mock",
+        "status": "running",
+        "createdAt": "2026-11-15T18:11:16.671Z",
+        "head": "70e82cafbd23af19902e327bb647847c67663661",
+        "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work",
+        "files": [
+          {
+            "path": "index.html",
+            "bytes": 286,
+            "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+          },
+          {
+            "path": "package.json",
+            "bytes": 515,
+            "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+          },
+          {
+            "path": "vite.config.ts",
+            "bytes": 1666,
+            "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+          },
+          {
+            "path": "tsconfig.json",
+            "bytes": 410,
+            "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+          },
+          {
+            "path": "public/assets/diffuser-4969889.glb",
+            "bytes": 988116,
+            "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+          },
+          {
+            "path": "public/assets/diffuser-4969889.provenance.json",
+            "bytes": 311,
+            "sha256": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333"
+          },
+          {
+            "path": "public/assets/parts.json",
+            "bytes": 2098,
+            "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+          },
+          {
+            "path": "src/App.tsx",
+            "bytes": 2751,
+            "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+          },
+          {
+            "path": "src/components/Button.tsx",
+            "bytes": 288,
+            "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+          },
+          {
+            "path": "src/components/ProductHero.tsx",
+            "bytes": 2079,
+            "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+          },
+          {
+            "path": "src/main.tsx",
+            "bytes": 316,
+            "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+          },
+          {
+            "path": "src/scene-config-store.ts",
+            "bytes": 1259,
+            "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+          },
+          {
+            "path": "src/scene.config.json",
+            "bytes": 539,
+            "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+          },
+          {
+            "path": "src/style.css",
+            "bytes": 3505,
+            "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+          }
+        ],
+        "dependencies": [
+          {
+            "name": "@spatial/bridge",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge"
+          },
+          {
+            "name": "@spatial/shared",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared"
+          },
+          {
+            "name": "@spatial/scene-renderer",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer"
+          },
+          {
+            "name": "react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+          },
+          {
+            "name": "react-dom",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+          },
+          {
+            "name": "@spatial/vite-plugin-source-tag",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\vite-plugin-source-tag"
+          },
+          {
+            "name": "vite",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+          },
+          {
+            "name": "@types/react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+          },
+          {
+            "name": "@types/react-dom",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+          }
+        ],
+        "credentials": {
+          "speech": false,
+          "coding": false,
+          "lux3d": false
+        },
+        "realParticipants": false,
+        "rehearsalExecuted": false,
+        "mockServices": true,
+        "children": [
+          {
+            "role": "backend",
+            "pid": 60996,
+            "startedAt": "2026-11-15T18:11:16.779Z"
+          },
+          {
+            "role": "frontends",
+            "pid": 62532,
+            "startedAt": "2026-11-15T18:11:18.267Z"
+          }
+        ],
+        "ports": {
+          "api": 61681,
+          "studio": 55410,
+          "main": 37355,
+          "preview": 58794,
+          "coding": 55672,
+          "lux3d": 59482,
+          "speech": 34963
+        },
+        "startedAt": "2026-11-15T18:11:18.679Z"
+      },
+      "shutdownRequested": "2026-11-15T18:11:20.201Z",
+      "closed": {
+        "code": 1,
+        "signal": null
+      },
+      "manifestAfter": {
+        "schemaVersion": 1,
+        "mode": "mock",
+        "status": "cleanup_failed",
+        "createdAt": "2026-11-15T18:11:16.671Z",
+        "head": "70e82cafbd23af19902e327bb647847c67663661",
+        "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work",
+        "files": [
+          {
+            "path": "index.html",
+            "bytes": 286,
+            "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+          },
+          {
+            "path": "package.json",
+            "bytes": 515,
+            "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+          },
+          {
+            "path": "vite.config.ts",
+            "bytes": 1666,
+            "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+          },
+          {
+            "path": "tsconfig.json",
+            "bytes": 410,
+            "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+          },
+          {
+            "path": "public/assets/diffuser-4969889.glb",
+            "bytes": 988116,
+            "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+          },
+          {
+            "path": "public/assets/diffuser-4969889.provenance.json",
+            "bytes": 311,
+            "sha256": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333"
+          },
+          {
+            "path": "public/assets/parts.json",
+            "bytes": 2098,
+            "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+          },
+          {
+            "path": "src/App.tsx",
+            "bytes": 2751,
+            "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+          },
+          {
+            "path": "src/components/Button.tsx",
+            "bytes": 288,
+            "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+          },
+          {
+            "path": "src/components/ProductHero.tsx",
+            "bytes": 2079,
+            "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+          },
+          {
+            "path": "src/main.tsx",
+            "bytes": 316,
+            "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+          },
+          {
+            "path": "src/scene-config-store.ts",
+            "bytes": 1259,
+            "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+          },
+          {
+            "path": "src/scene.config.json",
+            "bytes": 539,
+            "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+          },
+          {
+            "path": "src/style.css",
+            "bytes": 3505,
+            "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+          }
+        ],
+        "dependencies": [
+          {
+            "name": "@spatial/bridge",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge"
+          },
+          {
+            "name": "@spatial/shared",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared"
+          },
+          {
+            "name": "@spatial/scene-renderer",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer"
+          },
+          {
+            "name": "react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+          },
+          {
+            "name": "react-dom",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+          },
+          {
+            "name": "@spatial/vite-plugin-source-tag",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\vite-plugin-source-tag"
+          },
+          {
+            "name": "vite",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+          },
+          {
+            "name": "@types/react",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+          },
+          {
+            "name": "@types/react-dom",
+            "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+          }
+        ],
+        "credentials": {
+          "speech": false,
+          "coding": false,
+          "lux3d": false
+        },
+        "realParticipants": false,
+        "rehearsalExecuted": false,
+        "mockServices": true,
+        "children": [
+          {
+            "role": "backend",
+            "pid": 60996,
+            "startedAt": "2026-11-15T18:11:16.779Z"
+          },
+          {
+            "role": "frontends",
+            "pid": 62532,
+            "startedAt": "2026-11-15T18:11:18.267Z"
+          }
+        ],
+        "ports": {
+          "api": 61681,
+          "studio": 55410,
+          "main": 37355,
+          "preview": 58794,
+          "coding": 55672,
+          "lux3d": 59482,
+          "speech": 34963
+        },
+        "startedAt": "2026-11-15T18:11:18.679Z",
+        "finishedAt": "2026-11-15T18:12:05.242Z",
+        "cleanup": {
+          "problems": [
+            "frontends: forced shutdown",
+            "frontends: unsuccessful exit"
+          ],
+          "children": [
+            {
+              "role": "backend",
+              "pid": 60996,
+              "startedAt": "2026-11-15T18:11:16.779Z",
+              "exit": 0,
+              "signal": null,
+              "forced": false,
+              "stderrObserved": true,
+              "stderrCodes": []
+            },
+            {
+              "role": "frontends",
+              "pid": 62532,
+              "startedAt": "2026-11-15T18:11:18.267Z",
+              "exit": null,
+              "signal": "SIGKILL",
+              "forced": true,
+              "stderrObserved": true,
+              "stderrCodes": []
+            }
+          ],
+          "note": "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+        }
+      },
+      "afterAction": [
+        {
+          "pid": 65456,
+          "parent": 44556,
+          "created": "2026-11-15T18:11:16.6021170Z",
+          "depth": 0,
+          "state": "gone"
+        },
+        {
+          "pid": 46056,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.6056870Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 60996,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.7819390Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 62532,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:18.2702170Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 58968,
+          "parent": 62532,
+          "created": "2026-11-15T18:11:18.6900370Z",
+          "depth": 2,
+          "state": "gone"
+        }
+      ],
+      "beforeFallback": [
+        {
+          "pid": 65456,
+          "parent": 44556,
+          "created": "2026-11-15T18:11:16.6021170Z",
+          "depth": 0,
+          "state": "gone"
+        },
+        {
+          "pid": 46056,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.6056870Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 60996,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:16.7819390Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 62532,
+          "parent": 65456,
+          "created": "2026-11-15T18:11:18.2702170Z",
+          "depth": 1,
+          "state": "gone"
+        },
+        {
+          "pid": 58968,
+          "parent": 62532,
+          "created": "2026-11-15T18:11:18.6900370Z",
+          "depth": 2,
+          "state": "gone"
+        }
+      ],
+      "remaining": [],
+      "finished": "2026-11-15T18:12:09.954Z",
+      "watcherTrace": {
+        "file": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\frontend-watcher-trace-20261116\\run-2026-11-15T18-11-16.466Z\\consumed\\frontend-events.jsonl.watchers.jsonl",
+        "eventCount": 528,
+        "createdObjects": 88,
+        "observationErrors": [],
+        "lifecycleSnapshots": [
+          {
+            "at": "2026-11-15T18:11:20.551Z",
+            "pid": 62532,
+            "event": "watcher-snapshot",
+            "phase": {
+              "event": "owned-close-begin"
+            },
+            "reason": "owned-close-begin",
+            "activeWatcherHandles": [
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 1,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/.data/demo-runs/2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4/work",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 2,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\index.html",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\index.html"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 3,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\package.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\package.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 4,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\tsconfig.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\tsconfig.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 5,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\vite.config.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\vite.config.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 6,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/.data/demo-runs/2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4/work/public",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 7,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/apps/studio",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 8,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\index.html",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\index.html"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 9,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\package.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\package.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 10,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\tsconfig.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\tsconfig.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 11,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\verify-proxy-isolation.mjs",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\verify-proxy-isolation.mjs"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 12,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\vite.config.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\vite.config.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 13,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 14,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 15,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\adoption-gate.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\adoption-gate.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 16,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\adoption-gate.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\adoption-gate.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 17,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\api.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\api.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 18,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\App.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\App.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 19,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-state.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-state.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 20,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-state.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-state.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 21,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\ApprovalPanel.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\ApprovalPanel.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 22,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\AssetPanel.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\AssetPanel.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 23,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-render.test.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\approval-render.test.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 24,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\assets.css",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\assets.css"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 25,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\CandidatePanel.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\CandidatePanel.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 26,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-evidence.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-evidence.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 27,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-render.test.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-render.test.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 28,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-state.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-state.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 29,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-state.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\check-state.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 30,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\CheckPanel.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\CheckPanel.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 31,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\dev-proxy.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\dev-proxy.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 32,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff-render.test.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff-render.test.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 33,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 34,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\diff.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 35,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\EventCenter.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\EventCenter.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 36,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\m2-state.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\m2-state.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 37,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\m2-state.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\m2-state.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 38,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\main.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\main.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 39,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\model-provenance.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\model-provenance.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 40,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\mutation-locks.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\mutation-locks.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 41,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\pick-state.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\pick-state.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 42,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\pick-state.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\pick-state.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 43,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\PointSpeak.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\PointSpeak.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 44,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\preview-origin.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\preview-origin.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 45,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-draft.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-draft.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 46,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-draft.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-draft.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 47,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-editor.css",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\scene-editor.css"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 48,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\SceneEditor.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\SceneEditor.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 49,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-api.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-api.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 50,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-api.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-api.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 51,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-app.browser.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-app.browser.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 52,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-browser.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-browser.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 53,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.css",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.css"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 54,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 55,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-input.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 56,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-render.test.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-render.test.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 57,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-review.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-review.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 58,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-review.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\speech-review.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 59,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\SpeechInput.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\SpeechInput.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 60,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\style.css",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\style.css"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 61,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\sync-state.test.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\sync-state.test.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 62,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\sync-state.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\sync-state.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 63,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\App.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\App.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 64,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\main.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\main.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 65,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\scene-config-store.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\scene-config-store.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 66,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\scene.config.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\scene.config.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 67,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\style.css",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\style.css"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 68,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 69,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\diffuser-4969889.glb",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\diffuser-4969889.glb"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 70,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\diffuser-4969889.provenance.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\diffuser-4969889.provenance.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 71,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\parts.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\public\\assets\\parts.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 72,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 73,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-app.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-app.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 74,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-browser-fixture.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-browser-fixture.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 75,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-center.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-center.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 76,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-fakes.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-fakes.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 77,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-harness.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\apps\\studio\\src\\test-support\\speech-harness.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 78,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 79,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components\\Button.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components\\Button.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 80,
+                  "path": {
+                    "input": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components\\ProductHero.tsx",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-11-16.667Z-b54d5c88-9993-4022-b2fa-5b3a98288bb4\\work\\src\\components\\ProductHero.tsx"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 81,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/bridge/package.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge\\package.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 82,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/shared/package.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared\\package.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 83,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/scene-renderer/package.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer\\package.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 84,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/bridge/src/index.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge\\src\\index.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 85,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/shared/src/index.ts",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared\\src\\index.ts"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              },
+              {
+                "type": "FSWatcher",
+                "identity": {
+                  "id": 86,
+                  "path": {
+                    "input": "E:/空间化AI工作台/.worktrees/m4/packages/shared/tsconfig.json",
+                    "absolute": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared\\tsconfig.json"
+                  },
+                  "api": "watch",
+                  "closeCalls": 0,
+                  "refCalls": 0,
+                  "unrefCalls": 0,
+                  "closeEventSeen": false,
+                  "stopEventSeen": false,
+                  "returnedObjectMatches": true,
+                  "returnedNativeMatches": false,
+                  "state": {
+                    "constructor": "FSWatcher",
+                    "nativePresent": true,
+                    "nativeType": "FSEvent",
+                    "hasRef": true,
+                    "readOnlyNativeRefInspection": true
+                  }
+                },
+                "state": {
+                  "constructor": "FSWatcher",
+                  "nativePresent": true,
+                  "nativeType": "FSEvent",
+                  "hasRef": true,
+                  "readOnlyNativeRefInspection": true
+                }
+              }
+            ],
+            "unmatched": [],
+            "trackedCount": 86
+          },
+          {
+            "at": "2026-11-15T18:11:20.597Z",
+            "pid": 62532,
+            "event": "watcher-snapshot",
+            "phase": {
+              "event": "owned-close-finished"
+            },
+            "reason": "owned-close-finished",
+            "activeWatcherHandles": [],
+            "unmatched": [],
+            "trackedCount": 87
+          },
+          {
+            "at": "2026-11-15T18:11:20.598Z",
+            "pid": 62532,
+            "event": "watcher-snapshot",
+            "phase": {
+              "event": "process:disconnect"
+            },
+            "reason": "process:disconnect",
+            "activeWatcherHandles": [],
+            "unmatched": [],
+            "trackedCount": 87
+          }
+        ],
+        "lastSnapshot": {
+          "at": "2026-11-15T18:11:20.598Z",
+          "pid": 62532,
+          "event": "watcher-snapshot",
+          "phase": {
+            "event": "process:disconnect"
+          },
+          "reason": "process:disconnect",
+          "activeWatcherHandles": [],
+          "unmatched": [],
+          "trackedCount": 87
+        },
+        "sourceConclusion": "Paths and creation stacks are raw observations; no watcher is forcibly closed or unrefed by the observer"
+      }
+    }
+  ],
+  "errors": [],
+  "node": "v24.14.1",
+  "limits": {
+    "cases": 1,
+    "startupMs": 75000,
+    "closeMs": 105000,
+    "unchangedLaunchCloseMs": 45000
+  },
+  "traceScope": "One consumed case only; delegated watcher creation/lifecycle observation; no changes to watcher lifetime",
+  "copyHashes": {
+    "frontends-diagnostic.mjs": "77578d50e46e3917bb4ad0e7afd493e50608bd8a1f6e87e50f280c007aa4fff7",
+    "launch-diagnostic.mjs": "3794d1b72e81c08749ffa2d79fadd79f6aa484bd2345a257d42917bd1581ae2f",
+    "watcher-observer.mjs": "ff6a413d9948edad11106d11ef3e1781f0ac0ff7f3cc6099007000090e7b0307"
+  },
+  "failedReference": {
+    "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T17-42-46.253Z-b31d73cb-4a78-407e-a3ac-f191ba46348b\\manifest.json",
+    "sha256": "4127152c8d135818cf4a3cf5684e3b45b49d567e0f530bcb905726339cf5950b",
+    "head": "62ea1c8f375518617bc95ae0097b06bab2787b93",
+    "status": "cleanup_failed",
+    "cleanup": {
+      "problems": [
+        "frontends: forced shutdown",
+        "frontends: unsuccessful exit"
+      ],
+      "children": [
+        {
+          "role": "backend",
+          "pid": 38400,
+          "startedAt": "2026-11-15T17:42:46.340Z",
+          "exit": 0,
+          "signal": null,
+          "forced": false,
+          "stderrObserved": true,
+          "stderrCodes": []
+        },
+        {
+          "role": "frontends",
+          "pid": 46308,
+          "startedAt": "2026-11-15T17:42:47.595Z",
+          "exit": null,
+          "signal": "SIGKILL",
+          "forced": true,
+          "stderrObserved": false,
+          "stderrCodes": []
+        }
+      ],
+      "note": "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+    },
+    "readOnly": true
+  },
+  "priorDiagnostic": {
+    "head": "70e82cafbd23af19902e327bb647847c67663661",
+    "started": "2026-11-15T17:58:35.089Z",
+    "finished": "2026-11-15T18:00:29.842Z",
+    "changed": [],
+    "source": "sealed archive only; no acceptance tree access"
+  },
+  "nodeSources": {
+    "internal/fs/watchers": {
+      "file": "node-internal-fs-watchers-source.js.txt",
+      "sha256": "6a23eda7a5553c3941a5ddfb8ca2beaef15a9ab8f42fabb1bd037e2a5d1466e1"
+    },
+    "fs": {
+      "file": "node-fs-source.js.txt",
+      "sha256": "802f46eb69b050a3e1bb4a401a29a4188839818fd460fbf4dac1a4dc5d6a30fd"
+    }
+  },
+  "copyScope": {
+    "frontends": "Import relocation, logging-only wrappers that call each original Vite.close and its original submethods; original reverse order and promises retained",
+    "launch": "Import relocation, diagnostic frontend entry/log env only, native event observation, plan/ready notifications and reserved-port preflight; original prepare/backend and 45s/5s budgets retained",
+    "runtime": "Original production runtime imported directly; no diagnostic runtime override",
+    "httpControls": "Same fetch sequence studio /, API /health, own preview /preview/main/; body consumption only changed. Only the consumed scenario executes; no request/status-only variants are rerun. Delegated fs.watch/fs.watchFile/unwatchFile observation is installed before Vite import; watcher ref state read-only."
+  },
+  "vite": {
+    "entry": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite\\dist\\node\\index.js",
+    "config": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite\\dist\\node\\chunks\\config.js",
+    "sha256": "2e71344450b7c25a7fe0848d5ee474fb7342614d900ab9168588986150cbb9f9",
+    "version": "7.3.7"
+  },
+  "identityAfter": {
+    "scripts/demo/frontends.mjs": "54f6f7924e25149b914c9e8093955c8c99d3d34462541c0455b11a368234ef46",
+    "scripts/demo/launch.mjs": "14cb7435182f087749737ac99458fe56758ec637a445a0bf9dc0c22f4c3836d0",
+    "scripts/demo/runtime.mjs": "94c7cfdd66c1a8162d8075c2d95adc595a38a740f180ba354a05222057db4871",
+    "scripts/demo/prepare.mjs": "e90178f3a028551a05b78b998855ccf9ade69de1f1a9f39e732204f9ac4c63ef",
+    "scripts/demo/backend.mjs": "c99912612e9e2673631a5b51bb1d0f6ce4f79b8200fa2a70e64688baec105e62",
+    "scripts/demo/network-guard.cjs": "257759d9d88610d9e0bc67efe3397817f1bc7df8b91af39ecc5e9b4c42727518",
+    "package.json": "c080c92609ba44ba4cb31c48b11054d5506d4e4d3fac2c5730e1a659b49fcacc",
+    "pnpm-lock.yaml": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960"
+  },
+  "changed": [],
+  "statusAfter": "?? fallback/\n",
+  "finished": "2026-11-15T18:12:09.994Z"
+}
