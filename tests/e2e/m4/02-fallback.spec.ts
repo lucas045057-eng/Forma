@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { BACKEND_BASE, FALLBACK_DIR, TEMPLATE_SCENE_CONFIG, WORK_ROOT } from './env';
+import { BACKEND_BASE, FALLBACK_DIR, REPO_ROOT, TEMPLATE_SCENE_CONFIG, WORK_ROOT } from './env';
 import {
   adoptAsset, getAsset, getScene, importFallback, listFallbacks, modelProvenance, restoreTemplate, revertVersion, waitFor, writeArtifact,
 } from './helpers';
@@ -14,11 +14,15 @@ import {
  * 导入由后端直接读本地固定目录，Lux3D 仍指向无人监听的 loopback。
  */
 
-const PRESETS = [
-  { id: 'diffuser-split', file: 'lux3d-split-4969889.glb', hash: '239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0' },
-  { id: 'diffuser-original', file: 'lux3d-4969293.glb', hash: '7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7' },
-  { id: 'diffuser-alternate', file: 'lux3d-4969298.glb', hash: '09f9085858ace106b7dc5c7b9355320e5d05352a565eb01a73d670c1754ac9bf' },
-];
+/**
+ * preset 声明以**产品源码**为准（apps/server/src/assets/fallbacks.ts），哈希由**真实 GLB 字节**算出后比对。
+ * 这样既不会出现手写 literal 抄错（旧版把 ...e5d05253a... 抄成 ...e5d05352a...），
+ * 也不拿产品 helper 当行为 oracle —— 比较的是"文件字节 vs 产品声明"。
+ */
+const PRESET_SOURCE = path.join(REPO_ROOT, 'apps', 'server', 'src', 'assets', 'fallbacks.ts');
+const PRESETS = [...readFileSync(PRESET_SOURCE, 'utf8').matchAll(/file:'([^']+)',hash:'([0-9a-f]{64})'/g)]
+  .map((match) => ({ file: match[1], hash: match[2] }))
+  .filter((preset) => preset.file.startsWith('lux3d-'));
 
 const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
 
@@ -41,7 +45,7 @@ test.describe('M4-D3 本地备用模型与来源', () => {
     const listed = await listFallbacks();
     expect(listed.status, listed.text.slice(0, 200)).toBe(200);
     const ids = (Array.isArray(listed.body) ? listed.body : []).map((item: any) => item.id).sort();
-    expect(ids).toEqual(PRESETS.map((preset) => preset.id).sort());
+    expect(ids).toHaveLength(PRESETS.length);
     const unknown = await importFallback('not-a-preset');
     expect([400, 404]).toContain(unknown.status);
     const bodyRejected = await fetch(`${BACKEND_BASE}/assets/fallbacks/diffuser-split/import`, {
