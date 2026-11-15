@@ -1,0 +1,14 @@
+{"event":"spawned-child","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:28.988Z","connected":true,"childPid":26636,"childRole":"preview"}
+{"event":"spawned-child","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:28.994Z","connected":true,"childPid":34688,"childRole":"check"}
+{"event":"spawned-child","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:28.999Z","connected":true,"childPid":11912,"childRole":"asset"}
+{"event":"spawned-child","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:29.005Z","connected":true,"childPid":15112,"childRole":"frontend-worker"}
+{"event":"ready","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:29.005Z","connected":true}
+{"event":"close-called","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.680Z","connected":true,"closeMode":"complete"}
+{"event":"child-close","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.687Z","connected":true,"childRole":"asset","childPid":11912,"code":null,"signal":"SIGTERM"}
+{"event":"child-close","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.687Z","connected":true,"childRole":"frontend-worker","childPid":15112,"code":null,"signal":"SIGTERM"}
+{"event":"child-close","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.688Z","connected":true,"childRole":"check","childPid":34688,"code":null,"signal":"SIGTERM"}
+{"event":"child-close","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.688Z","connected":true,"childRole":"preview","childPid":26636,"code":null,"signal":"SIGTERM"}
+{"event":"close-completed","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.688Z","connected":true,"forced":false}
+{"event":"disconnect","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.688Z","connected":false}
+{"event":"beforeExit","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.689Z","connected":false,"code":0}
+{"event":"exit","role":"orphan","pid":28144,"parent":68828,"at":"2026-11-15T19:59:30.689Z","connected":false,"code":0}

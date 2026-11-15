@@ -1,0 +1,2 @@
+{"event":"spawned-child","role":"parent","pid":49448,"parent":68828,"at":"2026-11-15T19:59:16.735Z","connected":true,"childPid":47944,"childRole":"orphan"}
+{"event":"ready","role":"parent","pid":49448,"parent":68828,"at":"2026-11-15T19:59:16.736Z","connected":true}
