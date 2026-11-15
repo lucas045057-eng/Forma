@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-15T15:35:44.153Z",
+  "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T15-25-23-020Z-full",
+  "head": "eba163282b744efe0d9550def18a7b3d1b3767f9",
+  "job": {
+    "id": "job_fde9d7f2",
+    "pid": 65336,
+    "exitCode": 1
+  },
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "stagingLeftovers": [],
+  "templateAndProductDirty": [],
+  "productDiffVsAccepted": [],
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "retainedScenes": [
+    "fallback-parent-death-1Z4Qum|2026-11-15T13:07:08.1299293Z",
+    "fallback-parent-death-PxCzE3|2026-11-15T13:51:32.0319424Z"
+  ],
+  "note": "本轮唯一失败在 Studio 的 pointer-capture 用例；component/real-app/asset 三个夹具的 cleanup 均报告 remaining=[]、端口关闭、errors=[]。本轮 fixture 目录 fallback-parent-death-NmrcM3 成功路径已自清；历史上两个现场（1Z4Qum/PxCzE3）继续保留。逐 PID 复核时 18956 一度被 conhost 复用、随后消失，未擅自处理；无自有 node/chrome、无端口、无 staging 残留，未执行任何 kill。"
+}

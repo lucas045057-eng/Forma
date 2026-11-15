@@ -457,3 +457,82 @@ by the default ESM loader. On Windows, absolute paths must be valid file:// URLs
 
 返工六（`6bfd58b`，仅浏览器 fixture 加载/启动诊断）冻结后，我仍从头跑同一 `full-regression.mjs`。
 本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。
+---
+
+# 附录：集中第七轮（返工六后）—— server 全过，Studio 141/142，仅剩 1 例
+
+> 仍**不是全仓通过**：shared/plugin/renderer/bridge/server 全过（server **378/378**），
+> **Studio 141 passed / 1 failed（142）**；`demo-safety`、M4 19、旧九套 174 **全部未执行**。
+> 上一轮的 `jsxDEV` 与真实 App 启动失败**本轮未再出现**（有 ready 证据），但**不等于产品全部通过**。
+
+## F1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `eba163282b744efe0d9550def18a7b3d1b3767f9`（merge 返工六 `7f300f1`） |
+| 冻结产品 | `7f300f120c7b7e8947979f008bb19923d36077f3` |
+| 身份摘要 / 锁 | `1d74f3853a52…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `7f300f1` **0 差异**（`HEAD:apps = 7f3:apps = e47ebc1e…`） |
+| 证据目录起跑前 | 脏项 **0**；unit 前 `preparedDirs = D2_RUN_DIR ok=true` |
+
+## F2. 逐包实际计数（命令失败 ≠ 身份漂移）
+
+| 包 | 结果 |
+| --- | --- |
+| shared / plugin / renderer / bridge | 68 / 20 / 5 / 1 全过 |
+| server | **378 passed / 378（49 files 全过）** |
+| **apps/studio** | **141 passed / 1 failed（142；1 file 失败）** |
+| demo-safety / M4 19 / 旧 174 | 未执行 |
+
+- **命令失败**：`pnpm test` 退出码 1（`signal=null`）。
+- **身份漂移：无**（`problems` 仅退出码；`evidenceDirtyAtStart=[]`；产品/脚本/锁与 `7f300f1` 字节一致）。
+- **回退的进展（有原件）**：`component-cleanup.json` 的 `vite.optimizeDeps` 已含 `react/jsx-dev-runtime`，`errors: []`、`remaining: []`、`serverListening:false`；
+  `real-app-cleanup.json`：`stage=interaction`、`bootstrap.ready=true`（`navigate 14.5 → event-center-ready 188.0 → interaction 333.9ms`）、`pageErrors: []`、`denied: []`、`chromium exit 0`
+  → 上一轮的 `jsxDEV` 23 例与真实 App 起页失败本轮**均已消失**。
+
+## F3. 唯一剩余失败（原文 + 互动证据）
+
+`src/speech-browser.test.ts` › **abnormal native pointer-capture loss cancels without uploading**
+
+```
+Error: Matcher did not succeed in time.
+ ❯ src/speech-browser.test.ts:140:104
+Caused by: AssertionError: expected 1 to be +0   // Object.is equality
+- Expected 0  + Received 1
+```
+
+- 该断言轮询的是 `window.__speechTest.liveTracks`：**`liveTracks` 在 30s 内始终为 1**（期望 0）。
+  即：`releasePointerCapture(...)` + `mouse.move(20,20)` 这条"异常丢失指针捕获"路径**没有触发停止录音**。
+- 对应诊断 `d2-browser/component/6.json`（按 test 名匹配）：
+  - `posts: []`、`deletes: []` → **全程没有上传、没有 DELETE**（没有网络/计费泄漏）；
+  - `pageErrors: []`、`denied: []`；
+  - 交互期 `beforeUnmount = { streams:1, liveTracks:1, recorderStarts:1, recorderStops:0 }`，
+    卸载后 `afterUnmount = { liveTracks:0, recorderStops:1 }` → **只有卸载才停**，异常路径本身没停；
+  - `bootstrap.ready=true`（`navigate-component 0.4 → react-component-mounted 68.7 → speech-config-ready 133.4ms`）。
+- **能确认**：该用例的页面已就绪、无 pageerror、无网络请求，失败点是**异常指针捕获丢失未触发取消/停录**。
+- **不能确认**：这是产品取消路径缺陷，还是"合成 `releasePointerCapture` 在无头 Chromium 下不等价于真实指针捕获丢失"。归返工七静态定位（CodeBuddy 正在做），**本轮不预判**。
+
+## F4. 清理与证据
+
+- 3001/4011/5173/5174/5175 无监听；本树无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；无 `.model-stage-*` 残留。
+- 三个夹具的自清理证据：`component-cleanup.json`（chrome 39652 + 3 子进程、`remaining: []`、端口关闭、`errors: []`）、
+  `real-app-cleanup.json`（chromium 64020 exit 0、两个端口均 `Listening:false`）、`asset-lifecycle/cleanup-18956.json`（`primary:null`、`autonomousWorkerExit:true`、`cleanupKills:[]`）、
+  `asset-recovery/persistence-56468.json`（`primary:null`、SIGKILL 后 restart 断言完成）。
+- **PID 复用如实记录**：逐 PID 复核时 18956 一度被 `conhost.exe` 复用（随后自行消失）——它不是我们的进程，**未做任何处理**；这也说明"按 PID + 创建时间"归属必须继续保留。
+- 本轮 fixture 目录 `fallback-parent-death-NmrcM3` **成功路径已自清**；历史两个现场（`1Z4Qum` 第四轮、`PxCzE3` 第五轮）继续保留，不删不改。
+- 归档：`manifest/log/typecheck/build/unit`、`cleanup.json`、`launcher/`、`d2-browser/`（**23 组 component JSON+PNG**、三个 cleanup/asset 诊断）；
+  `sha256-manifest.json` **62 载荷、排除自身、静态复算 0 mismatch**。
+
+## F5. 统一问题清单（第七轮）
+
+1. **V1（阻断，待定位）** `pointer-capture loss` 异常路径未停录（`liveTracks` 1≠0），但无上传/无 pageerror。需判定"产品取消路径缺陷"还是"无头环境下合成 pointer 事件的等价性问题"（返工七静态定位）。
+2. **V2（已消除）** 上一轮 `jsxDEV` 23 例与真实 App 起页失败本轮未再出现，且有 `ready`/`optimizeDeps` 证据；仍需后续完整轮确认不是偶然。
+3. **V3（覆盖缺口）** `demo-safety`、M4 独立 19、旧九套 174（含 M1-B 23 像素）**全部未执行**。
+4. **V4（边界）** 真实 Windows 控制台 Ctrl+C、生产资产 worker 整链、真实模板 iframe 点选与候选 HMR 端口未跑到；真实阿里/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+5. **V5（审查缺口）** Claude 独立复审仍无正式报告；141/142 **不是** M4 验收结论。
+
+## F6. 下一步
+
+返工七（静态定位 V1）冻结后，我仍从头跑同一 `full-regression.mjs`。
+本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。
