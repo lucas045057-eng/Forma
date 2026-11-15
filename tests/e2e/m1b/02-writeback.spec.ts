@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { SCENE_CONFIG, getScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, waitFor } from './api';
 import { captureCanvases, enableCompare, openEditor, readScrollAt, setSlider } from './editor';
-import { waitForPairChange } from './window-compare';
+import { assertBaselineReady, observeResponse, summarizeAttempts, waitForPairChange } from './window-compare';
 import { compareAligned } from '../m1a/visual';
 import { writeArtifactFrom } from './artifact';
 import { readFileSync } from 'node:fs';
@@ -24,15 +24,30 @@ test.describe('写回与即时同步', () => {
     const frameIdentityBefore = await frame.evaluate(() => window.name || 'preview');
 
     const before = await getScene();
+    const readiness = await assertBaselineReady(page, frame);
     const baseline = await captureCanvases(page, frame);
 
     await setSlider(page, 'scene-ambient', 2.6);
     await setSlider(page, 'scene-rotation-y', 1.24);
+    // 预算从点击前 clickedAt 起算（后面的 10s 延迟判据用同一起点）。
     const clickedAt = Date.now();
+    const write = observeResponse(page, 'PUT', '/scene');
     await page.getByTestId('scene-save-hero').click();
-    // 同一窗口下等待画面变化：先等写回完成/提示消失/几何回到基线，再用基线窗口比较（原 30s 预算与 0.01 阈值不变）。
-    const changed = await waitForPairChange(page, frame, baseline, { threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 });
-    const latencyMs = changed.elapsedMs;
+    let changed: Awaited<ReturnType<typeof waitForPairChange>> | null = null;
+    let captureFailure: Error | null = null;
+    try { changed = await waitForPairChange(page, frame, baseline, { startedAt: clickedAt, threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 }); }
+    catch (error) { captureFailure = error as Error; }
+    const writeResult = await write;
+    if (captureFailure) {
+      writeArtifactFrom('writeback-hero-failure.json', {
+        readiness: readiness.gate, baselineWindow: readiness.window, write: writeResult, clickedAt,
+        failure: String(captureFailure).slice(0, 3_000),
+      });
+      throw captureFailure;
+    }
+    const latencyMs = changed!.elapsedMs;
+    // 本次 PUT /scene 必须真的成功，不能只看画面有没有变。
+    expect(writeResult.status, 'PUT /scene 未成功：' + JSON.stringify(writeResult).slice(0, 300)).toBe(200);
 
     const identity = await page.evaluate(() => (window as unknown as { __m1bIdentity?: number }).__m1bIdentity);
     const frameIdentityAfter = await frame.evaluate(() => window.name || 'preview');
@@ -43,6 +58,11 @@ test.describe('写回与即时同步', () => {
 
     writeArtifactFrom('writeback-hero.json', {
       latencyMs,
+      write: writeResult,
+      readiness: readiness.gate,
+      baselineWindow: readiness.window,
+      changedRatio: changed!.changedRatio,
+      captureAttempts: summarizeAttempts(changed!.attempts),
       wallClockMs: Date.now() - clickedAt,
       identity: { before: IDENTITY, after: identity },
       frameIdentity: { before: frameIdentityBefore, after: frameIdentityAfter },

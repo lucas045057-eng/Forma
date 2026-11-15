@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { getScene, putScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, undoScene, waitFor } from './api';
 import { captureCanvases, openEditor, setSlider } from './editor';
-import { waitForPairChange } from './window-compare';
+import { assertBaselineReady, observeResponse, summarizeAttempts, waitForPairChange } from './window-compare';
 import { writeArtifactFrom } from './artifact';
 
 /** 撤回：配置值与网页画面都恢复；历史为空时 409 且界面有错误提示。 */
@@ -13,15 +13,33 @@ test.describe('撤回', () => {
   test('界面写入 → 撤回：配置与网页画面都恢复', async ({ page }) => {
     const { frame } = await openEditor(page);
     const original = (await getScene()).body;
+    const readiness = await assertBaselineReady(page, frame);
     const baseline = await captureCanvases(page, frame);
 
     await setSlider(page, 'scene-ambient', 3.4);
+    // 写入阶段：预算从点击前起算；同时观测真实 PUT /scene。
+    const writeStartedAt = Date.now();
+    const write = observeResponse(page, 'PUT', '/scene');
     await page.getByTestId('scene-save-hero').click();
-    const changed = await waitForPairChange(page, frame, baseline, { threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 });
-    const changedMs = changed.elapsedMs;
+    let changed: Awaited<ReturnType<typeof waitForPairChange>> | null = null;
+    let changeFailure: Error | null = null;
+    try { changed = await waitForPairChange(page, frame, baseline, { startedAt: writeStartedAt, threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 }); }
+    catch (error) { changeFailure = error as Error; }
+    const writeResult = await write;
+    if (changeFailure) {
+      writeArtifactFrom('undo-ui-write-failure.json', {
+        readiness: readiness.gate, baselineWindow: readiness.window, write: writeResult, writeStartedAt,
+        failure: String(changeFailure).slice(0, 3_000),
+      });
+      throw changeFailure;
+    }
+    expect(writeResult.status, 'PUT /scene 未成功：' + JSON.stringify(writeResult).slice(0, 300)).toBe(200);
+    const changedMs = changed!.elapsedMs;
     const afterWrite = (await getScene()).body;
     expect(afterWrite.hero.lights.ambient).toBeCloseTo(3.4, 1);
 
+    const undoStartedAt = Date.now();
+    const undo = observeResponse(page, 'POST', '/scene/undo');
     await page.getByTestId('scene-undo').click();
     // 界面撤回后配置应恢复到写入前
     await waitFor(async () => sameJson((await getScene()).body, original), 20_000, 200);
@@ -31,13 +49,26 @@ test.describe('撤回', () => {
 
     // 作品页画面也应恢复（允许与基线有极小的抗锯齿差异）
     // 撤回后画面回到基线：同一窗口下等差异降到 0.002 以下（原预算/阈值不变）。
-    const recovered = await waitForPairChange(page, frame, baseline, { threshold: 0.002, timeoutMs: 30_000, intervalMs: 150, mode: 'decrease' });
-    const recoveredMs = recovered.elapsedMs;
+    let recovered: Awaited<ReturnType<typeof waitForPairChange>> | null = null;
+    let recoverFailure: Error | null = null;
+    try { recovered = await waitForPairChange(page, frame, baseline, { startedAt: undoStartedAt, threshold: 0.002, timeoutMs: 30_000, intervalMs: 150, mode: 'decrease' }); }
+    catch (error) { recoverFailure = error as Error; }
+    const undoResult = await undo;
+    if (recoverFailure) {
+      writeArtifactFrom('undo-ui-recover-failure.json', {
+        readiness: readiness.gate, baselineWindow: readiness.window, undo: undoResult, undoStartedAt,
+        write: writeResult, failure: String(recoverFailure).slice(0, 3_000),
+      });
+      throw recoverFailure;
+    }
+    const recoveredMs = recovered!.elapsedMs;
 
     writeArtifactFrom('undo-ui.json', {
       changedMs, recoveredMs,
-      changedRatio: changed.changedRatio, recoveredRatio: recovered.changedRatio,
-      captureAttempts: { changed: changed.attempts.length, recovered: recovered.attempts.length },
+      changedRatio: changed!.changedRatio, recoveredRatio: recovered!.changedRatio,
+      write: writeResult, undo: undoResult,
+      readiness: readiness.gate, baselineWindow: readiness.window,
+      captureAttempts: { changed: summarizeAttempts(changed!.attempts), recovered: summarizeAttempts(recovered!.attempts) },
       originalAmbient: original.hero.lights.ambient, afterWriteAmbient: afterWrite.hero.lights.ambient,
     });
   });

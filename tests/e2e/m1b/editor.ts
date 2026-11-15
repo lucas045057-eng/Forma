@@ -76,6 +76,11 @@ export interface CaptureWindow {
   studioRect: Rect;
   frameRect: Rect;
   viewport: { width: number; height: number };
+  /** 两侧各自算出的可见行区间（诊断用）。 */
+  previewRows: { start: number; end: number };
+  studioRows: { start: number; end: number };
+  /** canvas backing 尺寸与 DPR：前后采样必须一致。 */
+  backing: { preview: number; studio: number; dpr: number };
 }
 
 export interface CanvasPair {
@@ -140,7 +145,10 @@ export async function captureCanvases(page: Page, frame: Frame): Promise<CanvasP
     const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement;
     return { studio: studioCanvas.width, dpr: window.devicePixelRatio };
   });
-  const captureWindow: CaptureWindow = { size, start, end, visibleHeight, previewRect, studioRect, frameRect, viewport };
+  const captureWindow: CaptureWindow = {
+    size, start, end, visibleHeight, previewRect, studioRect, frameRect, viewport, previewRows, studioRows,
+    backing: { preview: backing.preview, studio: studioBacking.studio, dpr: Math.max(backing.dpr, studioBacking.dpr) },
+  };
   return {
     window: captureWindow,
     size,

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
-import { SCENE_CONFIG, SPLIT_GLB, TEMPLATE_ASSETS } from './env';
+import { SPLIT_GLB, TEMPLATE_ASSETS } from './env';
 import {
   adoptAsset, createSandbox, getScene, mutateIndex, processLocal, readSceneFile, restoreSceneFile,
   snapshotSceneFile, waitFor,
@@ -98,6 +98,10 @@ test.describe('采用模型', () => {
     // finally 里恢复原状：原本不存在就删掉；原本已存在则按原字节写回——不能删历史文件、也不能留残留。
     const adoptedSidecar = path.join(TEMPLATE_ASSETS, `${imported.id}.provenance.json`);
     const sidecarBefore = existsSync(adoptedSidecar) ? readFileSync(adoptedSidecar) : null;
+    let primary: unknown = undefined;
+    let cleanupScene: boolean | null = null;
+    let sidecarBytesMatch = false;
+    const cleanupErrors: string[] = [];
     try {
       const { frame } = await openEditor(page);
       const beforeModel = originalConfig.model;
@@ -126,20 +130,36 @@ test.describe('采用模型', () => {
         diff: (response.body as any).diff,
       });
       expect(typeof loaded === 'number' && loaded > 0, '作品页没有加载新模型').toBe(true);
-    } finally {
-      restoreSceneFile();
-      rmSync(adoptedFile, { force: true });
-      rmSync(adoptedParts, { force: true });
-      // sidecar 按原状恢复（原字节 / 原本不存在则删除），并留证。
-      let sidecarRestored = 'absent';
-      if (sidecarBefore) { writeFileSync(adoptedSidecar, sidecarBefore); sidecarRestored = 'restored-original'; }
-      else { rmSync(adoptedSidecar, { force: true }); sidecarRestored = 'removed'; }
-      writeArtifactFrom('adopt-provenance-cleanup.json', { sidecar: adoptedSidecar, existedBefore: Boolean(sidecarBefore), action: sidecarRestored, existsAfter: existsSync(adoptedSidecar) });
+    } catch (error) { primary = error; } finally {
+      // 每一步独立收尾，错误聚合；不在这里 expect，避免遮盖主错（主错在 finally 之后优先抛出）。
+      const attempt = (label: string, work: () => void) => {
+        try { work(); } catch (error) { cleanupErrors.push(label + ': ' + String(error).slice(0, 200)); }
+      };
+      attempt('restore-scene', () => { cleanupScene = restoreSceneFile().matches; });
+      attempt('remove-glb', () => rmSync(adoptedFile, { force: true }));
+      attempt('remove-parts', () => rmSync(adoptedParts, { force: true }));
+      // sidecar 按原状恢复：原本不存在则删除，原本存在则按原字节写回（不删历史文件）。
+      attempt('restore-sidecar', () => { if (sidecarBefore) writeFileSync(adoptedSidecar, sidecarBefore); else rmSync(adoptedSidecar, { force: true }); });
       await page.waitForTimeout(1_500).catch(() => {});
-      expect(readFileSync(SCENE_CONFIG, 'utf8'), '配置没有还原').toContain('diffuser-4969889');
-      expect(existsSync(adoptedFile), '测试产物没有清理').toBe(false);
-      expect(existsSync(adoptedParts), 'parts.json 没有清理').toBe(false);
-      expect(existsSync(adoptedSidecar), 'provenance sidecar 没有恢复原状').toBe(Boolean(sidecarBefore));
+      // 用**字节相等**验证，不是只看“文件在不在”。
+      sidecarBytesMatch = sidecarBefore
+        ? (existsSync(adoptedSidecar) && readFileSync(adoptedSidecar).equals(sidecarBefore))
+        : !existsSync(adoptedSidecar);
+      writeArtifactFrom('adopt-provenance-cleanup.json', {
+        sidecar: adoptedSidecar,
+        existedBefore: Boolean(sidecarBefore),
+        existsAfter: existsSync(adoptedSidecar),
+        sidecarBytesMatch,
+        sceneRestored: cleanupScene,
+        cleanupErrors,
+      });
     }
+    // 主错优先；收尾错误单独聚合，不能被静默吞掉。
+    if (primary) throw primary;
+    expect(cleanupScene, '配置没有按快照还原').toBe(true);
+    expect(existsSync(adoptedFile), '测试产物没有清理').toBe(false);
+    expect(existsSync(adoptedParts), 'parts.json 没有清理').toBe(false);
+    expect(sidecarBytesMatch, 'provenance sidecar 没有按原字节恢复原状').toBe(true);
+    if (cleanupErrors.length) throw new AggregateError(cleanupErrors, 'adopt 收尾有错误：' + cleanupErrors.join(' | '));
   });
 });
