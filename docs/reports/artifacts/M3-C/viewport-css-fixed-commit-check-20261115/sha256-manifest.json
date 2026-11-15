@@ -1,0 +1,52 @@
+[
+    {
+        "path":  ".gitattributes",
+        "bytes":  8,
+        "sha256":  "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+        "path":  "build.log",
+        "bytes":  1517,
+        "sha256":  "35ee726afaad3de0891baf45126e684d8e69ab6d8e9f9c3fe9be5d2485fd60ee"
+    },
+    {
+        "path":  "manifest.json",
+        "bytes":  55948,
+        "sha256":  "7f9eed7645449f4dfad06f4250abec84ed5476651ad32ee638aa8289574978e7"
+    },
+    {
+        "path":  "summary.json",
+        "bytes":  1099,
+        "sha256":  "77ebcc23befd6fea165d445a395ae3c0fb6750c571e6050437a9172da65f162e"
+    },
+    {
+        "path":  "typecheck.log",
+        "bytes":  6,
+        "sha256":  "5ac71a99decf5b92dbfe798066cbe8ea317395f8f764f5a8879fd3511ca99454"
+    },
+    {
+        "path":  "verify-css-commit.mjs",
+        "bytes":  3861,
+        "sha256":  "2882c9ba6ad46ca084e9b5a6b9a0a06723306b2d533b101f5b717578b18d8547"
+    },
+    {
+        "path":  "launcher/cmd",
+        "bytes":  48,
+        "sha256":  "08a96fedb2ead6b81d71ef7029db2733f3013ada4e79b7a8660bdafc45b1ff70"
+    },
+    {
+        "path":  "launcher/exit",
+        "bytes":  5,
+        "sha256":  "043b5ae7334040ef63298adca08912d5287ad37e66f9425316adc50d2c1ab652"
+    },
+    {
+        "path":  "launcher/job.json",
+        "bytes":  411,
+        "sha256":  "2a13f78101625f1a15051e327c6f9ed86c4a065861a5642784aed0ab7b4dd249"
+    },
+    {
+        "path":  "launcher/output.log",
+        "bytes":  1867,
+        "sha256":  "aaaee03009d9d251bdb836dcb91a2adab7f6e0babfc1fd91eb9c22b9e26437ca"
+    }
+]
