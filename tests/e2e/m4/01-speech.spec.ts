@@ -95,20 +95,28 @@ async function installSpeechStubs(page: import('@playwright/test').Page): Promis
   return stub;
 }
 
+interface SpeechProbe {
+  stops: number; recorderStarts: number; recorderStops: number; errors: number; timeslice: number;
+  liveTracks: number; streams: number; events: string[];
+}
+
 const probe = (page: import('@playwright/test').Page) =>
-  page.evaluate(() => (window as any).__speechProbe as { stops: number; recorderStarts: number; recorderStops: number; errors: number; timeslice: number });
+  page.evaluate(() => (window as any).__speechProbe as SpeechProbe);
 
 /**
  * 真实按住：先等按钮可用（上一轮录音必须已结算），记录**本次之前**的计数，
  * hover → pointerdown → 等到本次 `recorderStarts` **增量 ≥1**、`liveTracks ≥1`、状态含"录音"，
  * 再返回"松开"函数。用累计值判断第二次录音会假通过，所以这里全部是增量。
  */
+let pressOutstanding = false;
+
 async function pressRecord(page: import('@playwright/test').Page): Promise<{ release: () => Promise<void>; delta: () => Promise<{ starts: number; liveTracks: number }> }> {
   const button = page.getByTestId('speech-record');
   await expect(button).toBeEnabled({ timeout: 30_000 });
   const before = await probe(page);
   await button.hover();
   await page.mouse.down();
+  pressOutstanding = true;
   await waitFor(async () => {
     const now = await probe(page);
     return now.recorderStarts > before.recorderStarts && now.liveTracks >= 1;
@@ -118,13 +126,19 @@ async function pressRecord(page: import('@playwright/test').Page): Promise<{ rel
     const now = await probe(page);
     return { starts: now.recorderStarts - before.recorderStarts, liveTracks: now.liveTracks };
   };
-  return { release: async () => { await page.mouse.up(); }, delta };
+  return { release: async () => { pressOutstanding = false; await page.mouse.up(); }, delta };
 }
 
 test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显）', () => {
   test.beforeAll(() => { const restored = restoreTemplate(); expect(restored.clean, restored.status).toBe(true); });
   test.afterAll(() => { const restored = restoreTemplate(); expect(restored.clean, restored.status).toBe(true); });
   test.beforeEach(async ({ page }) => { await resetMock(); await installSpeechStubs(page); });
+  // 失败安全：任何用例中途抛错都要把按住的指针松开，否则后续用例会继承"按住"状态。
+  test.afterEach(async ({ page }) => {
+    if (!pressOutstanding) return;
+    pressOutstanding = false;
+    await page.mouse.up().catch(() => {});
+  });
 
   test('按住录音 → 松手转写 → 可编辑 review → 确认写入指令，只有点生成才提交任务', async ({ page }) => {
     await openStudio(page);
@@ -175,7 +189,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     writeArtifact('speech-selection-conflict.json', { captured, first: first.src, second: second.src });
   });
 
-  test('录音中页面隐藏：立即取消、释放轨道并发送 DELETE，且不上传', async ({ page }) => {
+  test('录音中页面隐藏：立即取消并释放轨道；录音阶段无上传，因此不应发送 DELETE', async ({ page }) => {
     await openStudio(page);
     const stub = await installSpeechStubs(page);
     const pressed = await pressRecord(page);
@@ -206,12 +220,17 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
 
     const firstPressed = await pressRecord(page);
     await firstPressed.release();
-    await waitFor(async () => stub.posts.length >= 1, 20_000, 100);
+    // 先等**真实 POST 发生**（499 的响应必然对应一次真实上传），再等界面进入取消/错误终态。
+    await waitFor(async () => stub.posts.length >= 1, 30_000, 100);
     expect(stub.posts[0].id, '第一次转写没有带 UUID').toMatch(/^[0-9a-f-]{36}$/);
+    await waitFor(async () => {
+      const text = await page.getByTestId('speech-status').innerText();
+      return text.includes('取消') || (await page.getByTestId('speech-error').count()) > 0;
+    }, 30_000, 100);
     await expect(page.getByTestId('speech-review')).toHaveCount(0);
-    await waitFor(async () => (await page.getByTestId('speech-status').innerText()).length > 0, 20_000, 100);
     const statusText = await page.getByTestId('speech-status').innerText();
-    expect(statusText).not.toContain('内部取消细节');
+    const errorText = (await page.getByTestId('speech-error').count()) > 0 ? await page.getByTestId('speech-error').innerText() : '';
+    expect(statusText + errorText).not.toContain('内部取消细节');
 
     const secondPressed = await pressRecord(page);
     await secondPressed.release();
@@ -227,14 +246,34 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     await openStudio(page);
     // 确定性 barrier：getUserMedia 一直 pending，直到测试显式放行；不用"等 1500ms 猜"。
     await page.evaluate(() => {
-      const gate = { resolve: null as null | (() => void) };
+      const probeState = (window as any).__speechProbe;
+      const gate = { established: false, pending: 0, resolve: null as null | (() => void) };
       (window as any).__permissionGate = gate;
+      const makeTrack = () => {
+        // 真正分配：streams +1、liveTracks +1；stop 幂等（重复 stop 不再减）。
+        probeState.streams += 1;
+        probeState.liveTracks += 1;
+        probeState.events.push('stream-live');
+        let ended = false;
+        return {
+          kind: 'audio',
+          stop() {
+            if (ended) return;
+            ended = true;
+            probeState.stops += 1;
+            probeState.liveTracks -= 1;
+            probeState.events.push('track-ended');
+          },
+        };
+      };
       Object.defineProperty(navigator, 'mediaDevices', {
         configurable: true,
         value: {
-          getUserMedia: () => new Promise((resolve) => {
-            gate.resolve = () => resolve({ getTracks: () => [{ kind: 'audio', stop() { (window as any).__speechProbe.stops += 1; (window as any).__speechProbe.liveTracks -= 1; (window as any).__speechProbe.events.push('track-ended'); } }] });
-          }),
+          getUserMedia: () => {
+            gate.pending += 1;
+            gate.established = true;
+            return new Promise((resolve) => { gate.resolve = () => resolve({ getTracks: () => [makeTrack()] }); });
+          },
         },
       });
     });
@@ -242,18 +281,27 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     await button.hover();
     await page.mouse.down();
     await expect(page.getByTestId('speech-status')).toContainText('权限', { timeout: 15_000 });
+    // 前提必须是"权限真的在等待"：gate 已建立且有一个 pending 调用。
+    const gateState = await page.evaluate(() => {
+      const gate = (window as any).__permissionGate as { established: boolean; pending: number };
+      return { established: gate.established, pending: gate.pending };
+    });
+    expect(gateState, `权限 gates 前提不成立：${JSON.stringify(gateState)}`).toEqual({ established: true, pending: 1 });
     // 按住期间按钮持有 pointer capture，点取消按钮可能被拦；用真实键盘 Escape 路径取消。
     await page.keyboard.press('Escape');
+    pressOutstanding = false;
     await page.mouse.up();
-    await waitFor(async () => (await page.getByTestId('speech-status').innerText()).includes('取消') || (await probe(page)).stops >= 1, 20_000, 100);
+    // 必须是**真正的取消终态**，不是"状态非空"。
+    await expect(page.getByTestId('speech-status')).toContainText('取消', { timeout: 20_000 });
     expect(await page.getByTestId('speech-review').count(), '取消后仍然弹出了 review').toBe(0);
-    // 放行迟到的权限：轨道必须被立刻停掉，且 recorder 从未启动、没有上传。
-    await page.evaluate(() => { (window as any).__permissionGate.resolve?.(); });
-    await waitFor(async () => (await probe(page)).stops >= 1 || (await probe(page)).streams === 0, 20_000, 100);
+    const before = await probe(page);
+    // 放行迟到的权限：这条轨道必须被停掉（stops 增量 ≥1、liveTracks 回 0）。
+    await page.evaluate(() => { const gate = (window as any).__permissionGate; gate.resolve(); gate.resolve = null; });
+    await waitFor(async () => (await probe(page)).stops > before.stops, 20_000, 100);
     const after = await probe(page);
-    expect(after.recorderStarts, '权限未返回就不该启动 recorder').toBe(0);
     expect(after.liveTracks, '迟到权限的轨道没有被释放').toBe(0);
-    writeArtifact('speech-late-permission.json', { probe: after });
+    expect(after.recorderStarts, '权限未返回就不该启动 recorder').toBe(0);
+    writeArtifact('speech-late-permission.json', { gateState, before, after });
   });
 
   test('F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦', async ({ page }) => {

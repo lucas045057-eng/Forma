@@ -29,16 +29,22 @@ if (!process.send) {
   process.exit(9);
 }
 
-process.on('message', (message) => {
+const onMessage = (message) => {
   if (message && typeof message === 'object' && message.type === 'sigint') {
     // 只触发进程内 SIGINT 事件，让 launch 自己的 once('SIGINT') 处理器跑起来。
     process.emit('SIGINT');
   }
-});
+};
+process.on('message', onMessage);
 
 try {
   await launch('mock', []);
 } catch (error) {
   console.error(`driver launch failed: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
+} finally {
+  // IPC 通道与监听会保持事件循环：必须在这里释放，否则 launch 返回后进程不退出。
+  // 注意是**子进程侧**主动 disconnect（父侧 child.disconnect() 在旧版 Node 有已知问题，不使用）。
+  process.removeListener('message', onMessage);
+  if (process.connected) { try { process.disconnect(); } catch { /* 已断开 */ } }
 }

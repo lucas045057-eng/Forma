@@ -94,35 +94,44 @@ function descendantsOf(pid: number): Array<{ pid: number; created: string; depth
   return out.sort((a, b) => b.depth - a.depth);
 }
 
-interface ProcessProbe { state: 'present' | 'absent' | 'unknown' | 'error'; created?: string; detail?: string }
-
 /**
- * 三态以上：查询**超时**、启动失败、输出不可解析都只能是 unknown/error，不能当成 gone。
- * 也不把缺失的创建时间当作 epoch 0 或 reused。
+ * 进程快照：一次 CIM 查询拿到全表，避免"每个 PID 同步起一次 PowerShell"把测试 worker 阻塞，
+ * 也让"存在性"和"创建时间"来自同一次观测。查询失败/超时 = null（调用方必须当成 unknown，绝不能当 gone）。
  */
-function probeProcess(pid: number): ProcessProbe {
-  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
-    `try { $p = Get-Process -Id ${pid} -ErrorAction Stop; 'present|' + $p.StartTime.ToUniversalTime().ToString('o') } catch { 'absent' }`],
-  { encoding: 'utf8', timeout: 15000 });
-  if (result.error) return { state: 'error', detail: String(result.error).slice(0, 160) };
-  if (result.status !== 0) return { state: 'unknown', detail: `exit ${result.status}: ${(result.stderr ?? '').slice(0, 120)}` };
+function snapshotProcesses(): Map<number, string> | null {
+  const script = "Get-CimInstance Win32_Process | Where-Object { $null -ne $_.CreationDate } | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o')} } | ConvertTo-Json -Compress";
+  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', script], { encoding: 'utf8', timeout: 20000 });
+  if (result.error || result.status !== 0) return null;
   const text = (result.stdout ?? '').trim();
-  if (text === 'absent') return { state: 'absent' };
-  const match = /^present\|(.+)$/.exec(text);
-  if (!match) return { state: 'unknown', detail: text.slice(0, 120) };
-  return { state: 'present', created: match[1] };
+  if (!text) return null;
+  try {
+    const parsed = JSON.parse(text);
+    const rows = Array.isArray(parsed) ? parsed : [parsed];
+    const map = new Map<number, string>();
+    for (const row of rows) {
+      if (!row || !Number.isInteger(row.pid) || typeof row.created !== 'string') continue;
+      map.set(row.pid, row.created);
+    }
+    return map.size ? map : null;
+  } catch { return null; }
 }
 
 /**
- * 判定"是否仍是本次受测的进程"：present + 创建时间一致 → alive；present 但创建时间不同 → reused；
- * absent → gone；查询超时/失败/不可解析 → unknown（**绝不**算 gone，也不自动补杀）。
+ * 判定"是否仍是本次受测的进程"：
+ * - 快照失败 → unknown（不算 gone）；
+ * - 快照里没有 → gone；
+ * - 记录或观测到的创建时间无效（NaN / ≤0 / epoch 0）→ unknown，不参与 alive/reused 判定；
+ * - 创建时间一致（≤2s 窗口）→ alive，否则 reused（PID 被复用）。
  */
-function stillOwn(pid: number, created: string): 'gone' | 'alive' | 'reused' | 'unknown' {
-  const probeResult = probeProcess(pid);
-  if (probeResult.state === 'absent') return 'gone';
-  if (probeResult.state !== 'present') return 'unknown';
-  const same = Math.abs(Date.parse(probeResult.created ?? '') - Date.parse(created)) <= 2000;
-  return same ? 'alive' : 'reused';
+function stillOwn(pid: number, created: string, snapshot: Map<number, string> | null): 'gone' | 'alive' | 'reused' | 'unknown' {
+  const recorded = Date.parse(created);
+  if (!Number.isFinite(recorded) || recorded <= 0) return 'unknown';
+  if (snapshot === null) return 'unknown';
+  const observedRaw = snapshot.get(pid);
+  if (observedRaw === undefined) return 'gone';
+  const observed = Date.parse(observedRaw);
+  if (!Number.isFinite(observed) || observed <= 0) return 'unknown';
+  return Math.abs(observed - recorded) <= 2000 ? 'alive' : 'reused';
 }
 
 async function startMockDemo(): Promise<DemoHandle> {
@@ -214,7 +223,9 @@ test.describe('M4-D5 演示入口（mock）', () => {
       for (const port of ports) if (await portOpen(port)) stillOpen.push(port);
       expect(stillOpen, `graceful 收尾后端口仍可连接：${stillOpen.join(',')}`).toEqual([]);
 
-      const verdicts = tracked.map((item) => ({ pid: item.pid, created: item.created, verdict: stillOwn(item.pid, item.created) }));
+      const sigintSnapshot = snapshotProcesses();
+      expect(sigintSnapshot, '进程快照查询失败，不能据此判定后代已退出').not.toBeNull();
+      const verdicts = tracked.map((item) => ({ pid: item.pid, created: item.created, verdict: stillOwn(item.pid, item.created, sigintSnapshot) }));
       expect(verdicts.filter((item) => item.verdict === 'alive'), `仍有受测后代存活：${JSON.stringify(verdicts.filter((item) => item.verdict === 'alive'))}`).toEqual([]);
       expect(verdicts.filter((item) => item.verdict === 'unknown'), `进程查询未知，不能判定已退出：${JSON.stringify(verdicts.filter((item) => item.verdict === 'unknown'))}`).toEqual([]);
       progress(record, { finalManifest, stillOpen, verdicts });
@@ -323,7 +334,8 @@ test.describe('M4-D5 演示入口（mock）', () => {
     let reused: number[] = [];
     let unknown: Array<{ pid: number; verdict: string }> = [];
     while (Date.now() < deadline) {
-      const verdicts = tracked.map((item) => ({ item, verdict: stillOwn(item.pid, item.created) }));
+      const snapshot = snapshotProcesses();
+      const verdicts = tracked.map((item) => ({ item, verdict: snapshot === null ? 'unknown' as const : stillOwn(item.pid, item.created, snapshot) }));
       remaining = verdicts.filter((entry) => entry.verdict === 'alive').map((entry) => entry.item);
       reused = verdicts.filter((entry) => entry.verdict === 'reused').map((entry) => entry.item.pid);
       unknown = verdicts.filter((entry) => entry.verdict === 'unknown').map((entry) => ({ pid: entry.item.pid, verdict: entry.verdict }));

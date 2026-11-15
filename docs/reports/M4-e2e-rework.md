@@ -124,3 +124,19 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受�
 - 主错误、清理错误、证据写入分别保留，互不覆盖。
 
 **边界**：该用例只能命名为“**进程内 SIGINT 处理模拟**”；`process.emit('SIGINT')` **不是**真实 Windows 控制台 Ctrl+C（CTRL_C_EVENT 投递路径仍未执行），也不伪造 handler 结果或 native close。
+## 8. 按 Codex 静态复核的第二批修正（本轮已改，未运行）
+
+1. **driver 事件循环**：`demo-launch-driver.mjs` 在 `finally` 里 `removeListener('message')` 并**由子进程侧** `process.disconnect()`；
+   不使用父侧 `child.disconnect()`（旧版 Node 已知问题）。否则 launch 返回后监听 + IPC 会挂住事件循环。
+2. **speech probe 类型**：统一为 `SpeechProbe { stops, recorderStarts, recorderStops, errors, timeslice, liveTracks, streams, events }`，
+   消除"返回类型缺字段但后文使用"的 TS 错误；`track.stop()` 幂等（重复 stop 不再重复计数）。
+3. **权限 barrier**：改成**真正分配**流与轨道（`streams+1/liveTracks+1`）后才 resolve；断言 gate 已建立且 pending=1；
+   Escape 后必须是**取消终态**（不是"状态非空"）；放行后等 **stops 增量 ≥1**，再断言 `liveTracks=0`、`recorderStarts=0`、
+   无 POST、无 review；不再有 `stops>=1 || streams===0` 这种可空过的等待。
+4. **499**：先等**真实 POST 发生**（并用其 header UUID 断言格式），再等取消/错误终态（`speech-status` 含"取消"或出现 `speech-error`），
+   确认安全文案里没有内部细节，之后才发起第二次录音；不再以"status 非空"作为就绪判据。
+5. **进程判定**：改为**一次 CIM 批量快照**（`snapshotProcesses()`），失败/超时返回 `null` → 一律 `unknown`（**不算 gone**）；
+   `stillOwn(pid, created, snapshot)` 要求**两边创建时间都有效**（NaN/≤0/epoch0 → `unknown`），一致（≤2s）才算 `alive`，
+   否则 `reused`；`unknown` 在用例里单独判失败，不自动补杀。避免"每个 PID 同步起一次 PowerShell"阻塞测试 worker。
+6. **失败安全**：`01-speech` 增加 `afterEach` 兜底 `mouse.up()`（按住途中抛错也不会让后续用例继承按住状态）；主错/清理错/证据分开保留。
+7. **措辞**：用例标题不再写"发送 DELETE"——录音阶段取消**从未上传**，断言是"**不应发送 DELETE**"，不伪造该路径。
