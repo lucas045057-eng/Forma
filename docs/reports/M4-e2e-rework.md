@@ -345,3 +345,65 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T18-57-35-050Z-m4-special/`�
   所以"脚本套件 = 12 例"的说法**已过时**：**实际数必须在完整轮里运行得出**（预计 12+5+6，但**不预填、不沿用作成绩**）。
 - 旧 **614 单测 / 12 脚本**成绩**不能抵新生产字节**（本轮生产确有 `c8f35b0` 的 watcher 门禁与 `ea32d48` 接线变化）；完整回归待 Codex 整合审查后另行安排。
 - M1-B 23 例仍按**原像素阈值**，不在本轮执行。
+## 15. 集中完整回归第一轮（受测 c846e03 / 产品 ea32d48）：停在 M1-B
+
+run `docs/reports/artifacts/M4/regression/2026-11-15T19-02-35-094Z-full/`，`job_5324e1fd`：**首败在 `e2e-m1b`，后面全部未执行**。
+
+| 步骤 | 实际结果 |
+| --- | --- |
+| typecheck | exit 0 / 9s |
+| build | exit 0 / 10s |
+| pnpm test | **exit 0 / 215s：614/614**（新生产字节上的真实计数） |
+| demo-safety | **exit 0 / 23s：23/23**（12 基础 + gate 5 + response 6，本轮实测，未沿用旧 12） |
+| M4 E2E | **19/19** |
+| M0-B | 24/24 |
+| M0-A | 27/27 |
+| M1-A | 7/7 |
+| **M1-B** | **20/23**：`expected=20, unexpected=3, skipped=0, flaky=0` |
+| M2-A / M2-B / M3-A / M3-B / M3-C | **未执行（合计 93 例）** |
+
+因此本轮计数是 **614 单测 + 23 脚本 + 19 M4 + 58 旧套（24+27+7）+ M1-B 20/23**，**不是**"旧九套全过"。
+
+### 15.1 三条 M1-B 失败：同一个尺寸不一致（原文）
+
+三条失败都抛在 `compareAligned`（`tests/e2e/m1a/visual.ts:75`）：
+
+```
+Error: 尺寸不一致：378x378 vs 378x341
+```
+
+对应用例：① `② 经 Studio 改动并经 PUT /scene 写入明显不同的相机后，两边仍然一致`（`01-consistency.spec.ts:67`）；
+② `设为首屏后作品页在秒级内更新，iframe 不整页刷新…`（`02-writeback.spec.ts:34`）；
+③ `界面写入 → 撤回：配置与网页画面都恢复`（`03-undo.spec.ts:22`）。
+
+**静态定位（可确认的事实，不是结论）**：
+- `captureCanvases()`（`tests/e2e/m1b/editor.ts`）分别截取预览 iframe 与 Studio 的 canvas 元素；两侧像素尺寸差 **37px（378→341，只有高度差）**，
+  宽度完全一致 → 不是缩放，而是**某一侧 canvas 的可视高度被压掉 37px**。
+- 与已知 M4 变更吻合：作品预览上方新增**来源标签行**（复审 S1 提到"预览 iframe 会变矮"），
+  且 `resetEditorScroll()` 只在**截图前**把容器滚到顶；若 canvas 高度由容器剩余高度决定而非由 `aspectRatio` 撑开，就会出现这种"宽度不变、高度少 37px"。
+- **尚不能确认**是产品尺寸缺陷还是测试夹具在"写入/撤回后的过渡态"截图（本机 M4 studio 布局在过渡期可能短暂变高/变矮）。
+  需要下一步用**同一时刻记录** canvas `getBoundingClientRect`、容器高度、来源标签存在性、当前 `data-state` 的证据来判定——本轮只做定位，未改测试或产品。
+
+### 15.2 旧采用清理遗漏（已确证，并按归属清理）
+
+- 静态确认：`tests/e2e/m1b/06-adopt.spec.ts` 的 `finally`（125–128 行）只删 `adoptedFile`（`.glb`）与 `adoptedParts`（`.parts.json`），
+  **没有删新增的 `.provenance.json` sidecar** → 作品目录残留 `templates/product-page/public/assets/lux3d-8400001.provenance.json`。
+- 处理：先把该文件**按原字节**保存到本 run 的 `residue/lux3d-8400001.provenance.json`（285B，sha256 `b084c100eb4b…`），
+  再只删除**本轮产生**的这一份；`templates` 工作区现为干净（脏项 0）。历史证据与其他 sidecar **未动**，未新增 gitlink。
+
+### 15.3 归档（含嵌套仓库物化）
+
+launcher（`job_5324e1fd`）、M1-B 三份 `error-context.md`/`test-failed-1.png`、本轮 4 个真实 demo run、脚本三分支持久证据、
+`counts.json`（逐步实际计数 + 未执行清单）、`residue/` 原字节副本。
+demo run 内的 **2 个嵌套 candidates 仓库**物化为 `gitlink-container/01|02` 的普通 payload（各 15 个，含惰性 `.git` 指针字节）+ `mapping.json`；
+`git ls-files --stage` 复核：本 run **1070 条全部 `100644`、0 条 `160000`**，`artifacts` 下仍**只有 1 条历史 gitlink**。
+
+### 15.4 清理与环境（实测）
+
+- 端口 3001/4011/5173/5174/5175 **无监听**；无自有 node/chrome；`.data` 下无 `.model-stage-*` 残留；`templates` 脏项 0。
+- 说明：`full-regression.mjs` 本身**不产出 `cleanup.json`**（那是 `.data` 专项入口的产物）；本轮端口/进程证据是运行结束后实测记录的，不代表逐套件回收断言。
+- 未执行任何 kill；`unknown` 查询不当 gone。
+
+### 15.5 边界
+
+真实 Windows 控制台 Ctrl+C、真实服务/真人 A/B/完整彩排仍未验证；本轮未改测试/helper/runner/产品，未启动任何新验证。

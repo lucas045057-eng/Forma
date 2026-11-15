@@ -1,0 +1,51 @@
+{
+  "launcherPid": 68984,
+  "tracked": [
+    {
+      "pid": 68984,
+      "created": "2026-11-15T19:07:40.3260600Z",
+      "depth": 0
+    },
+    {
+      "pid": 52372,
+      "created": "2026-11-15T19:07:44.1834170Z",
+      "depth": 3
+    },
+    {
+      "pid": 39596,
+      "created": "2026-11-15T19:07:44.3797110Z",
+      "depth": 3
+    },
+    {
+      "pid": 39380,
+      "created": "2026-11-15T19:07:44.1796650Z",
+      "depth": 2
+    },
+    {
+      "pid": 39128,
+      "created": "2026-11-15T19:07:42.1353650Z",
+      "depth": 2
+    },
+    {
+      "pid": 39268,
+      "created": "2026-11-15T19:07:40.3283070Z",
+      "depth": 1
+    },
+    {
+      "pid": 67840,
+      "created": "2026-11-15T19:07:40.4768470Z",
+      "depth": 1
+    },
+    {
+      "pid": 52560,
+      "created": "2026-11-15T19:07:41.7758970Z",
+      "depth": 1
+    }
+  ],
+  "remaining": [],
+  "reused": [],
+  "unknown": [],
+  "orphanFiles": [],
+  "portsStillListening": [],
+  "note": "硬杀父启动器后，这里只断言\"本次受测的 PID（以创建时间核对）全部消失\"；它不能证明是 IPC 断开处理器或 watchdog 执行的回收——在 Windows 上无 detached 的子进程可能由系统直接终止（推断，未泛化证实）。watchdog 的因果证据只来自 fixture 角色主动断开 IPC + close 挂起那条分支。"
+}
