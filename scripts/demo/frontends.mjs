@@ -4,9 +4,10 @@ import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {repository} from './safety.mjs';
 import {loadPlan,ownedLifetime} from './runtime.mjs';
+import {createFrontendWatchGate} from './frontend-watch-gate.mjs';
 const require=createRequire(path.join(repository,'apps/server/package.json'));const templateRequire=createRequire(path.join(repository,'templates/product-page/package.json'));
-const servers=[];let stage='load-plan';const stop=ownedLifetime(async()=>{const errors=[];for(const server of servers.reverse())try{await server.close();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Demo frontends could not close');});
-async function ownServer(server){if(stop.closing){await server.close();throw new Error('Demo shutdown already started');}servers.push(server);await server.listen();if(stop.closing){await server.close();throw new Error('Demo startup interrupted');}}
+const servers=[];const watchGate=createFrontendWatchGate();let stage='load-plan';const stop=ownedLifetime(async()=>{watchGate.seal();const errors=[];for(const server of servers.reverse())try{await server.close();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Demo frontends could not close');});
+async function ownServer(server){watchGate.attach(server.watcher);servers.push(server);if(watchGate.closing){await server.close();throw new Error('Demo shutdown already started');}await server.listen();if(watchGate.closing){await server.close();throw new Error('Demo startup interrupted');}}
 try{
  const plan=await loadPlan();const {ports}=plan;
  stage='dependencies';const {createServer}=await import(pathToFileURL(require.resolve('vite')).href);
