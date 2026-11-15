@@ -8,6 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {prepareDemo} from './prepare.mjs';
 import {readPlan} from './runtime.mjs';
 import {repository,systemEnvironment} from './safety.mjs';
+import {runOrphanCase} from './test-support/orphan-case.mjs';
 
 async function fixture(){const root=await mkdtemp(path.join(tmpdir(),'demo-body-'));const template=path.join(root,'templates/product-page');await mkdir(path.join(template,'src'),{recursive:true});await mkdir(path.join(template,'public'),{recursive:true});
  for(const [name,text]of Object.entries({'index.html':'<div id="root"></div>','package.json':'{"dependencies":{}}','vite.config.ts':'export default {};','tsconfig.json':'{}','src/App.tsx':'export default 1;','public/info.json':'{}','src/.env':'DECOY_SECRET=not-real','public/config.env.local':'DECOY_SECRET=not-real'}))await writeFile(path.join(template,name),text);
@@ -69,18 +70,6 @@ test('mock and real launch both bind the generated preview port and SIGINT ends 
  }finally{await settleFixture(run);await rm(f.root,{recursive:true,force:true});}
 });
 
-test('orphan watchdog terminates identified worker descendants after parent IPC closes, not unrelated processes',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'demo-orphan-'));let run;let unrelated;let identities=[];try{
- const runtime=pathToFileURL(path.join(repository,'scripts/demo/runtime.mjs')).href;const entry=path.join(root,'orphan.mjs');const plan=path.join(root,'plan.json');await writeFile(plan,'{}');
- await writeFile(entry,`import {fork} from 'node:child_process';import {ownedLifetime} from ${JSON.stringify(runtime)};import {writeFile} from 'node:fs/promises';import path from 'node:path';const worker=process.argv[2];if(worker){setInterval(()=>{},1000);}else{ownedLifetime(()=>new Promise(()=>{}),{hardTimeoutMs:300});for(const role of ['preview','check','asset','frontend-worker']){const child=fork(import.meta.filename,[role],{execArgv:[],stdio:['ignore','ignore','ignore','ipc']});}await writeFile(path.join(path.dirname(process.env.DEMO_PLAN),'ready'),String(process.pid));}`);
- const parentEntry=path.join(root,'parent.mjs');await writeFile(parentEntry,`import {fork} from 'node:child_process';fork(${JSON.stringify(entry)},[],{execArgv:[],stdio:['ignore','inherit','inherit','ipc']});setInterval(()=>{},1000);`);
- run=await child(parentEntry,[],{env:{...systemEnvironment(),DEMO_PLAN:plan}});unrelated=await child(entry,['unrelated']);const orphanPid=Number(await waitFor(async()=>{try{return await readFile(path.join(root,'ready'),'utf8');}catch{return;}}));
- const table=processIdentities();const orphan=table.find(item=>item.pid===orphanPid);assert.ok(orphan);
- const descendants=[];const queue=[orphan];for(let index=0;index<queue.length;index++){const parent=queue[index];for(const item of table)if(item.parent===parent.pid&&Date.parse(item.created)>=Date.parse(parent.created)&&!descendants.some(old=>old.pid===item.pid)){descendants.push(item);queue.push(item);}}
- const rolePart=(command,role)=>typeof command==='string'&&command.replaceAll('\\','/').includes(entry.replaceAll('\\','/'))&&command.split(/\s+/).some(part=>part.replaceAll('"','')===role);
- for(const role of ['preview','check','asset','frontend-worker'])assert.equal(descendants.filter(item=>rolePart(item.command,role)).length,1,`Owned ${role} process must be identifiable by role`);
- identities=[orphan,...descendants];const unrelatedIdentity=table.find(item=>item.pid===unrelated.processHandle.pid);assert.ok(unrelatedIdentity);
- run.processHandle.kill('SIGKILL');const result=await bounded(run.closed,20_000);assert.match(result.stderr,/DEMO_ORPHAN_TIMEOUT/);
- await waitFor(async()=>!processIdentities().some(item=>identities.some(old=>old.pid===item.pid&&old.created===item.created)));assert.ok(processIdentities().some(item=>item.pid===unrelatedIdentity.pid&&item.created===unrelatedIdentity.created));const cleanup=JSON.parse(await readFile(path.join(root,`orphan-cleanup-${orphanPid}.json`),'utf8'));assert.equal(cleanup.forced,true);assert.equal(cleanup.errors.length,0);
- }finally{for(const identity of identities)if(identity&&processIdentities().some(item=>item.pid===identity.pid&&item.created===identity.created))process.kill(identity.pid,'SIGKILL');await settleFixture(run);await settleFixture(unrelated);await rm(root,{recursive:true,force:true});}
-});
+test('hard-killed parent leaves no original worker identities and preserves an unrelated process',()=>runOrphanCase('hard-kill'));
+test('explicit IPC disconnect with hung close triggers the watchdog and reclaims only owned descendants',()=>runOrphanCase('disconnect-hung'));
+test('completed owned close exits normally without watchdog or forced cleanup',()=>runOrphanCase('normal-close'));

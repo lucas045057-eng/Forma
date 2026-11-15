@@ -1,0 +1,3543 @@
+{
+  "kind": "focused diagnosis only; not product verification",
+  "pid": 45060,
+  "started": "2026-11-15T16:04:02.326Z",
+  "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z",
+  "expectedHead": "97bd68652108b808b8f5de9117ceefd8a8c888f9",
+  "scenarios": [
+    {
+      "action": "kill",
+      "closeMode": "hung",
+      "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung",
+      "events": [
+        {
+          "role": "parent",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:02.580Z",
+          "pid": 56772
+        },
+        {
+          "role": "unrelated",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:02.580Z",
+          "pid": 54544
+        },
+        {
+          "role": "driver",
+          "event": "original-parent-SIGKILL",
+          "pid": 56772,
+          "at": "2026-11-15T16:04:03.442Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:03.460Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:03.460Z"
+        },
+        {
+          "role": "parent",
+          "event": "exit",
+          "at": "2026-11-15T16:04:03.460Z",
+          "code": null,
+          "signal": "SIGKILL"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:03.460Z"
+        },
+        {
+          "role": "parent",
+          "event": "close",
+          "at": "2026-11-15T16:04:03.460Z",
+          "code": null,
+          "signal": "SIGKILL",
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "role": "parent",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:03.460Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:13.245Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:13.245Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:13.245Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:13.245Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "exit",
+          "at": "2026-11-15T16:04:13.250Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "unrelated",
+          "event": "close",
+          "at": "2026-11-15T16:04:13.250Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "observations": [
+        {
+          "at": "2026-11-15T16:04:04.071Z",
+          "parentClosed": true,
+          "remainingFamily": [],
+          "unrelatedAlive": true
+        }
+      ],
+      "cleanup": {
+        "kills": [
+          {
+            "role": "unrelated",
+            "pid": 54544,
+            "created": "2026-11-15T16:04:02.5782230Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          }
+        ],
+        "errors": [],
+        "remaining": []
+      },
+      "errors": [],
+      "identities": [
+        {
+          "pid": 48928,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6891500Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+        },
+        {
+          "pid": 60628,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6850020Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+        },
+        {
+          "pid": 60992,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6935490Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+        },
+        {
+          "pid": 16440,
+          "parent": 56772,
+          "created": "2026-11-15T16:04:02.6122220Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+        },
+        {
+          "pid": 56772,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5735560Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+        },
+        {
+          "pid": 31984,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6802740Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+        },
+        {
+          "pid": 54544,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5782230Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+        },
+        {
+          "pid": 48928,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6891500Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+        },
+        {
+          "pid": 60628,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6850020Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+        },
+        {
+          "pid": 60992,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6935490Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+        },
+        {
+          "pid": 16440,
+          "parent": 56772,
+          "created": "2026-11-15T16:04:02.6122220Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+        },
+        {
+          "pid": 56772,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5735560Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+        },
+        {
+          "pid": 31984,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6802740Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+        },
+        {
+          "pid": 54544,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5782230Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+        }
+      ],
+      "allWorkersReadyAt": "2026-11-15T16:04:03.442Z",
+      "actionAt": "2026-11-15T16:04:03.442Z",
+      "killReturn": true,
+      "familyGoneBeforeFallback": true,
+      "unrelatedAliveBeforeCleanup": true,
+      "originalRunClosed": {
+        "code": null,
+        "signal": "SIGKILL",
+        "stdout": "",
+        "stderr": "",
+        "at": "2026-11-15T16:04:03.460Z"
+      },
+      "orphanEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "orphan",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.675Z",
+          "uptime": 0.0494483,
+          "connected": true,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "orphan",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.676Z",
+          "uptime": 0.0503442,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ownedLifetime-installed",
+          "role": "orphan",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.696Z",
+          "uptime": 0.0698474,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closing": false,
+          "forced": false,
+          "hardTimeoutMs": 300
+        },
+        {
+          "event": "ready",
+          "role": "orphan",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.696Z",
+          "uptime": 0.0701641,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "worker-spawn",
+          "role": "preview",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.697Z",
+          "uptime": 0.0705967,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 31984
+        },
+        {
+          "event": "worker-spawn",
+          "role": "check",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.697Z",
+          "uptime": 0.0708103,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 60628
+        },
+        {
+          "event": "worker-spawn",
+          "role": "asset",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.697Z",
+          "uptime": 0.0709983,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 48928
+        },
+        {
+          "event": "worker-spawn",
+          "role": "frontend-worker",
+          "pid": 16440,
+          "ppid": 56772,
+          "at": "2026-11-15T16:04:02.697Z",
+          "uptime": 0.0711647,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 60992
+        }
+      ],
+      "parentEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "parent",
+          "pid": 56772,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:02.607Z",
+          "uptime": 0.0209673,
+          "connected": false,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "parent",
+          "pid": 56772,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:02.609Z",
+          "uptime": 0.0219195,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ready",
+          "role": "parent",
+          "pid": 56772,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:02.615Z",
+          "uptime": 0.0280835,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ]
+        },
+        {
+          "event": "orphan-spawn",
+          "role": "parent",
+          "pid": 56772,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:02.615Z",
+          "uptime": 0.0285702,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 16440,
+          "stdio": "inherit stdout/stderr; IPC parent-owned"
+        }
+      ],
+      "orphanLocalStderr": "",
+      "markerInParentCapturedStderr": false,
+      "markerInOrphanLocalStderr": false,
+      "runtimeCleanup": null,
+      "closeCalled": false,
+      "closeCompleted": false,
+      "explicitDisconnectObserved": false,
+      "observationComplete": true,
+      "finalKnownIdentities": [
+        {
+          "pid": 48928,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6891500Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+        },
+        {
+          "pid": 60628,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6850020Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+        },
+        {
+          "pid": 60992,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6935490Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+        },
+        {
+          "pid": 16440,
+          "parent": 56772,
+          "created": "2026-11-15T16:04:02.6122220Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+        },
+        {
+          "pid": 56772,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5735560Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+        },
+        {
+          "pid": 31984,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6802740Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+        },
+        {
+          "pid": 54544,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5782230Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+        },
+        {
+          "pid": 48928,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6891500Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+        },
+        {
+          "pid": 60628,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6850020Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+        },
+        {
+          "pid": 60992,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6935490Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+        },
+        {
+          "pid": 16440,
+          "parent": 56772,
+          "created": "2026-11-15T16:04:02.6122220Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+        },
+        {
+          "pid": 56772,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5735560Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+        },
+        {
+          "pid": 31984,
+          "parent": 16440,
+          "created": "2026-11-15T16:04:02.6802740Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+        },
+        {
+          "pid": 54544,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:02.5782230Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+        }
+      ],
+      "finished": "2026-11-15T16:04:14.363Z"
+    },
+    {
+      "action": "kill",
+      "closeMode": "complete",
+      "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete",
+      "events": [
+        {
+          "role": "parent",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:14.385Z",
+          "pid": 68640
+        },
+        {
+          "role": "unrelated",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:14.385Z",
+          "pid": 16732
+        },
+        {
+          "role": "driver",
+          "event": "original-parent-SIGKILL",
+          "pid": 68640,
+          "at": "2026-11-15T16:04:15.211Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:15.215Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:15.215Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:15.215Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:15.215Z"
+        },
+        {
+          "role": "parent",
+          "event": "exit",
+          "at": "2026-11-15T16:04:15.217Z",
+          "code": null,
+          "signal": "SIGKILL"
+        },
+        {
+          "role": "parent",
+          "event": "close",
+          "at": "2026-11-15T16:04:15.217Z",
+          "code": null,
+          "signal": "SIGKILL",
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:25.069Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:25.069Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:25.069Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:25.069Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "exit",
+          "at": "2026-11-15T16:04:25.074Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "unrelated",
+          "event": "close",
+          "at": "2026-11-15T16:04:25.074Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "observations": [
+        {
+          "at": "2026-11-15T16:04:15.791Z",
+          "parentClosed": true,
+          "remainingFamily": [],
+          "unrelatedAlive": true
+        }
+      ],
+      "cleanup": {
+        "kills": [
+          {
+            "role": "unrelated",
+            "pid": 16732,
+            "created": "2026-11-15T16:04:14.3832450Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          }
+        ],
+        "errors": [],
+        "remaining": []
+      },
+      "errors": [],
+      "identities": [
+        {
+          "pid": 66936,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5034900Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\asset-66936"
+        },
+        {
+          "pid": 26640,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4985430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\check-26640"
+        },
+        {
+          "pid": 56032,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5087750Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\frontend-worker-56032"
+        },
+        {
+          "pid": 46200,
+          "parent": 68640,
+          "created": "2026-11-15T16:04:14.4166090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan-46200"
+        },
+        {
+          "pid": 68640,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3774440Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent-68640"
+        },
+        {
+          "pid": 9020,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4939130Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\preview-9020"
+        },
+        {
+          "pid": 16732,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3832450Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\unrelated-16732"
+        },
+        {
+          "pid": 66936,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5034900Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\asset-66936"
+        },
+        {
+          "pid": 26640,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4985430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\check-26640"
+        },
+        {
+          "pid": 56032,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5087750Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\frontend-worker-56032"
+        },
+        {
+          "pid": 46200,
+          "parent": 68640,
+          "created": "2026-11-15T16:04:14.4166090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan-46200"
+        },
+        {
+          "pid": 68640,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3774440Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent-68640"
+        },
+        {
+          "pid": 9020,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4939130Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\preview-9020"
+        },
+        {
+          "pid": 16732,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3832450Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\unrelated-16732"
+        }
+      ],
+      "allWorkersReadyAt": "2026-11-15T16:04:15.211Z",
+      "actionAt": "2026-11-15T16:04:15.211Z",
+      "killReturn": true,
+      "familyGoneBeforeFallback": true,
+      "unrelatedAliveBeforeCleanup": true,
+      "originalRunClosed": {
+        "code": null,
+        "signal": "SIGKILL",
+        "stdout": "",
+        "stderr": "",
+        "at": "2026-11-15T16:04:15.217Z"
+      },
+      "orphanEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "orphan",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.475Z",
+          "uptime": 0.0432386,
+          "connected": true,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "orphan",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.476Z",
+          "uptime": 0.0441605,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ownedLifetime-installed",
+          "role": "orphan",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.511Z",
+          "uptime": 0.0793396,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closing": false,
+          "forced": false,
+          "hardTimeoutMs": 300
+        },
+        {
+          "event": "ready",
+          "role": "orphan",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.512Z",
+          "uptime": 0.0797025,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "worker-spawn",
+          "role": "preview",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.512Z",
+          "uptime": 0.0801403,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 9020
+        },
+        {
+          "event": "worker-spawn",
+          "role": "check",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.512Z",
+          "uptime": 0.0802532,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 26640
+        },
+        {
+          "event": "worker-spawn",
+          "role": "asset",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.512Z",
+          "uptime": 0.080327,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 66936
+        },
+        {
+          "event": "worker-spawn",
+          "role": "frontend-worker",
+          "pid": 46200,
+          "ppid": 68640,
+          "at": "2026-11-15T16:04:14.512Z",
+          "uptime": 0.0804145,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 56032
+        }
+      ],
+      "parentEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "parent",
+          "pid": 68640,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:14.411Z",
+          "uptime": 0.0212454,
+          "connected": false,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "parent",
+          "pid": 68640,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:14.413Z",
+          "uptime": 0.0223126,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ready",
+          "role": "parent",
+          "pid": 68640,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:14.419Z",
+          "uptime": 0.0286191,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ]
+        },
+        {
+          "event": "orphan-spawn",
+          "role": "parent",
+          "pid": 68640,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:14.420Z",
+          "uptime": 0.0292001,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 46200,
+          "stdio": "inherit stdout/stderr; IPC parent-owned"
+        }
+      ],
+      "orphanLocalStderr": "",
+      "markerInParentCapturedStderr": false,
+      "markerInOrphanLocalStderr": false,
+      "runtimeCleanup": null,
+      "closeCalled": false,
+      "closeCompleted": false,
+      "explicitDisconnectObserved": false,
+      "observationComplete": true,
+      "finalKnownIdentities": [
+        {
+          "pid": 66936,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5034900Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\asset-66936"
+        },
+        {
+          "pid": 26640,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4985430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\check-26640"
+        },
+        {
+          "pid": 56032,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5087750Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\frontend-worker-56032"
+        },
+        {
+          "pid": 46200,
+          "parent": 68640,
+          "created": "2026-11-15T16:04:14.4166090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan-46200"
+        },
+        {
+          "pid": 68640,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3774440Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent-68640"
+        },
+        {
+          "pid": 9020,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4939130Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\preview-9020"
+        },
+        {
+          "pid": 16732,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3832450Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\unrelated-16732"
+        },
+        {
+          "pid": 66936,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5034900Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\asset-66936"
+        },
+        {
+          "pid": 26640,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4985430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\check-26640"
+        },
+        {
+          "pid": 56032,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.5087750Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\frontend-worker-56032"
+        },
+        {
+          "pid": 46200,
+          "parent": 68640,
+          "created": "2026-11-15T16:04:14.4166090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan-46200"
+        },
+        {
+          "pid": 68640,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3774440Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\parent-68640"
+        },
+        {
+          "pid": 9020,
+          "parent": 46200,
+          "created": "2026-11-15T16:04:14.4939130Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\preview-9020"
+        },
+        {
+          "pid": 16732,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:14.3832450Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-complete\\unrelated-16732"
+        }
+      ],
+      "finished": "2026-11-15T16:04:26.192Z"
+    },
+    {
+      "action": "disconnect",
+      "closeMode": "hung",
+      "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung",
+      "events": [
+        {
+          "role": "parent",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:26.219Z",
+          "pid": 56456
+        },
+        {
+          "role": "unrelated",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:26.219Z",
+          "pid": 26048
+        },
+        {
+          "role": "driver",
+          "event": "disconnect-command-written",
+          "at": "2026-11-15T16:04:27.066Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-data",
+          "at": "2026-11-15T16:04:27.585Z",
+          "bytes": 80
+        },
+        {
+          "role": "parent",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:38.477Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:38.477Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:38.477Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:38.477Z"
+        },
+        {
+          "role": "parent",
+          "event": "exit",
+          "at": "2026-11-15T16:04:38.482Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "parent",
+          "event": "close",
+          "at": "2026-11-15T16:04:38.482Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "DEMO_ORPHAN_TIMEOUT: owned child exceeded its parent-disconnect shutdown budget\n"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:39.609Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:39.609Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:39.609Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:39.609Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "exit",
+          "at": "2026-11-15T16:04:39.614Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "unrelated",
+          "event": "close",
+          "at": "2026-11-15T16:04:39.614Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "observations": [
+        {
+          "at": "2026-11-15T16:04:27.671Z",
+          "parentClosed": false,
+          "remainingFamily": [
+            {
+              "role": "asset",
+              "pid": 59984,
+              "created": "2026-11-15T16:04:26.3500090Z"
+            },
+            {
+              "role": "check",
+              "pid": 45984,
+              "created": "2026-11-15T16:04:26.3433240Z"
+            },
+            {
+              "role": "frontend-worker",
+              "pid": 62296,
+              "created": "2026-11-15T16:04:26.3555690Z"
+            },
+            {
+              "role": "orphan",
+              "pid": 39740,
+              "created": "2026-11-15T16:04:26.2609760Z"
+            },
+            {
+              "role": "preview",
+              "pid": 37944,
+              "created": "2026-11-15T16:04:26.3373240Z"
+            }
+          ],
+          "unrelatedAlive": true
+        },
+        {
+          "at": "2026-11-15T16:04:28.535Z",
+          "parentClosed": false,
+          "remainingFamily": [
+            {
+              "role": "asset",
+              "pid": 59984,
+              "created": "2026-11-15T16:04:26.3500090Z"
+            },
+            {
+              "role": "check",
+              "pid": 45984,
+              "created": "2026-11-15T16:04:26.3433240Z"
+            },
+            {
+              "role": "frontend-worker",
+              "pid": 62296,
+              "created": "2026-11-15T16:04:26.3555690Z"
+            },
+            {
+              "role": "orphan",
+              "pid": 39740,
+              "created": "2026-11-15T16:04:26.2609760Z"
+            },
+            {
+              "role": "preview",
+              "pid": 37944,
+              "created": "2026-11-15T16:04:26.3373240Z"
+            }
+          ],
+          "unrelatedAlive": true
+        },
+        {
+          "at": "2026-11-15T16:04:29.408Z",
+          "parentClosed": false,
+          "remainingFamily": [
+            {
+              "role": "orphan",
+              "pid": 39740,
+              "created": "2026-11-15T16:04:26.2609760Z"
+            }
+          ],
+          "unrelatedAlive": true
+        },
+        {
+          "at": "2026-11-15T16:04:30.345Z",
+          "parentClosed": false,
+          "remainingFamily": [],
+          "unrelatedAlive": true
+        }
+      ],
+      "cleanup": {
+        "kills": [
+          {
+            "role": "parent",
+            "pid": 56456,
+            "created": "2026-11-15T16:04:26.2102690Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          },
+          {
+            "role": "unrelated",
+            "pid": 26048,
+            "created": "2026-11-15T16:04:26.2165010Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          }
+        ],
+        "errors": [],
+        "remaining": []
+      },
+      "errors": [],
+      "identities": [
+        {
+          "pid": 59984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3500090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\asset-59984"
+        },
+        {
+          "pid": 45984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3433240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\check-45984"
+        },
+        {
+          "pid": 62296,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3555690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\frontend-worker-62296"
+        },
+        {
+          "pid": 39740,
+          "parent": 56456,
+          "created": "2026-11-15T16:04:26.2609760Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan-39740"
+        },
+        {
+          "pid": 56456,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2102690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent-56456"
+        },
+        {
+          "pid": 37944,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3373240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\preview-37944"
+        },
+        {
+          "pid": 26048,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2165010Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\unrelated-26048"
+        },
+        {
+          "pid": 59984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3500090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\asset-59984"
+        },
+        {
+          "pid": 45984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3433240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\check-45984"
+        },
+        {
+          "pid": 62296,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3555690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\frontend-worker-62296"
+        },
+        {
+          "pid": 39740,
+          "parent": 56456,
+          "created": "2026-11-15T16:04:26.2609760Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan-39740"
+        },
+        {
+          "pid": 56456,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2102690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent-56456"
+        },
+        {
+          "pid": 37944,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3373240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\preview-37944"
+        },
+        {
+          "pid": 26048,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2165010Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\unrelated-26048"
+        }
+      ],
+      "allWorkersReadyAt": "2026-11-15T16:04:27.066Z",
+      "actionAt": "2026-11-15T16:04:27.066Z",
+      "familyGoneBeforeFallback": true,
+      "unrelatedAliveBeforeCleanup": true,
+      "originalRunClosed": {
+        "pending": true,
+        "stdout": "",
+        "stderr": "DEMO_ORPHAN_TIMEOUT: owned child exceeded its parent-disconnect shutdown budget\n"
+      },
+      "orphanEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.331Z",
+          "uptime": 0.0511136,
+          "connected": true,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.333Z",
+          "uptime": 0.0522813,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ownedLifetime-installed",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.0772345,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closing": false,
+          "forced": false,
+          "hardTimeoutMs": 300
+        },
+        {
+          "event": "ready",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.0775222,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "worker-spawn",
+          "role": "preview",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.0778911,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 37944
+        },
+        {
+          "event": "worker-spawn",
+          "role": "check",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.0780103,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 45984
+        },
+        {
+          "event": "worker-spawn",
+          "role": "asset",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.078082,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 59984
+        },
+        {
+          "event": "worker-spawn",
+          "role": "frontend-worker",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:26.358Z",
+          "uptime": 0.078142,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 62296
+        },
+        {
+          "event": "ipc-disconnect",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:27.273Z",
+          "uptime": 0.9927128,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "close-called",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:27.273Z",
+          "uptime": 0.9930323,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closeMode": "hung"
+        },
+        {
+          "event": "exit",
+          "role": "orphan",
+          "pid": 39740,
+          "ppid": 56456,
+          "at": "2026-11-15T16:04:29.631Z",
+          "uptime": 3.3503996,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "code": 1
+        }
+      ],
+      "parentEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:26.252Z",
+          "uptime": 0.0299987,
+          "connected": false,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:26.255Z",
+          "uptime": 0.0317505,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ready",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:26.265Z",
+          "uptime": 0.0415653,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ]
+        },
+        {
+          "event": "orphan-spawn",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:26.266Z",
+          "uptime": 0.0424441,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 39740,
+          "stdio": "inherit stdout/stderr; IPC parent-owned"
+        },
+        {
+          "event": "explicit-disconnect-call",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:27.273Z",
+          "uptime": 1.0495543,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 39740,
+          "childConnected": true
+        },
+        {
+          "event": "explicit-disconnect-return",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:27.273Z",
+          "uptime": 1.0497714,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childConnected": false
+        },
+        {
+          "event": "orphan-exit",
+          "role": "parent",
+          "pid": 56456,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:29.641Z",
+          "uptime": 3.4177779,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 39740,
+          "code": 1,
+          "signal": null
+        }
+      ],
+      "orphanLocalStderr": "DEMO_ORPHAN_TIMEOUT: owned child exceeded its parent-disconnect shutdown budget\n",
+      "markerInParentCapturedStderr": true,
+      "markerInOrphanLocalStderr": true,
+      "runtimeCleanup": {
+        "at": "2026-11-15T16:04:27.585Z",
+        "parentPid": 39740,
+        "forced": true,
+        "children": [
+          {
+            "pid": 37944,
+            "parent": 39740,
+            "created": "2026-11-15T16:04:26.3373240Z",
+            "depth": 1
+          },
+          {
+            "pid": 45984,
+            "parent": 39740,
+            "created": "2026-11-15T16:04:26.3433240Z",
+            "depth": 1
+          },
+          {
+            "pid": 59984,
+            "parent": 39740,
+            "created": "2026-11-15T16:04:26.3500090Z",
+            "depth": 1
+          },
+          {
+            "pid": 62296,
+            "parent": 39740,
+            "created": "2026-11-15T16:04:26.3555690Z",
+            "depth": 1
+          }
+        ],
+        "errors": [],
+        "remaining": []
+      },
+      "closeCalled": true,
+      "closeCompleted": false,
+      "explicitDisconnectObserved": true,
+      "observationComplete": true,
+      "finalKnownIdentities": [
+        {
+          "pid": 59984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3500090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\asset-59984"
+        },
+        {
+          "pid": 45984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3433240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\check-45984"
+        },
+        {
+          "pid": 62296,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3555690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\frontend-worker-62296"
+        },
+        {
+          "pid": 39740,
+          "parent": 56456,
+          "created": "2026-11-15T16:04:26.2609760Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan-39740"
+        },
+        {
+          "pid": 56456,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2102690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent-56456"
+        },
+        {
+          "pid": 37944,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3373240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\preview-37944"
+        },
+        {
+          "pid": 26048,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2165010Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\unrelated-26048"
+        },
+        {
+          "pid": 59984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3500090Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\asset-59984"
+        },
+        {
+          "pid": 45984,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3433240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\check-45984"
+        },
+        {
+          "pid": 62296,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3555690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\frontend-worker-62296"
+        },
+        {
+          "pid": 39740,
+          "parent": 56456,
+          "created": "2026-11-15T16:04:26.2609760Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan-39740"
+        },
+        {
+          "pid": 56456,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2102690Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\parent-56456"
+        },
+        {
+          "pid": 37944,
+          "parent": 39740,
+          "created": "2026-11-15T16:04:26.3373240Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\preview-37944"
+        },
+        {
+          "pid": 26048,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:26.2165010Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-hung\\unrelated-26048"
+        }
+      ],
+      "finished": "2026-11-15T16:04:40.703Z"
+    },
+    {
+      "action": "disconnect",
+      "closeMode": "complete",
+      "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete",
+      "events": [
+        {
+          "role": "parent",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:40.725Z",
+          "pid": 25252
+        },
+        {
+          "role": "unrelated",
+          "event": "spawn",
+          "at": "2026-11-15T16:04:40.725Z",
+          "pid": 61152
+        },
+        {
+          "role": "driver",
+          "event": "disconnect-command-written",
+          "at": "2026-11-15T16:04:41.551Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:50.274Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:50.274Z"
+        },
+        {
+          "role": "parent",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:50.274Z"
+        },
+        {
+          "role": "parent",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:50.274Z"
+        },
+        {
+          "role": "parent",
+          "event": "exit",
+          "at": "2026-11-15T16:04:50.278Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "parent",
+          "event": "close",
+          "at": "2026-11-15T16:04:50.278Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-end",
+          "at": "2026-11-15T16:04:51.448Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-end",
+          "at": "2026-11-15T16:04:51.448Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stdout-close",
+          "at": "2026-11-15T16:04:51.448Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "stderr-close",
+          "at": "2026-11-15T16:04:51.449Z"
+        },
+        {
+          "role": "unrelated",
+          "event": "exit",
+          "at": "2026-11-15T16:04:51.452Z",
+          "code": 1,
+          "signal": null
+        },
+        {
+          "role": "unrelated",
+          "event": "close",
+          "at": "2026-11-15T16:04:51.453Z",
+          "code": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "observations": [
+        {
+          "at": "2026-11-15T16:04:42.136Z",
+          "parentClosed": false,
+          "remainingFamily": [],
+          "unrelatedAlive": true
+        }
+      ],
+      "cleanup": {
+        "kills": [
+          {
+            "role": "parent",
+            "pid": 25252,
+            "created": "2026-11-15T16:04:40.7182300Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          },
+          {
+            "role": "unrelated",
+            "pid": 61152,
+            "created": "2026-11-15T16:04:40.7239860Z",
+            "reason": "diagnostic fallback or final stop; not autonomous proof"
+          }
+        ],
+        "errors": [],
+        "remaining": []
+      },
+      "errors": [],
+      "identities": [
+        {
+          "pid": 67948,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8456430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\asset-67948"
+        },
+        {
+          "pid": 3904,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8409050Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\check-3904"
+        },
+        {
+          "pid": 64676,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8497200Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\frontend-worker-64676"
+        },
+        {
+          "pid": 62116,
+          "parent": 25252,
+          "created": "2026-11-15T16:04:40.7710250Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan-62116"
+        },
+        {
+          "pid": 25252,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7182300Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent-25252"
+        },
+        {
+          "pid": 66076,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8356190Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\preview-66076"
+        },
+        {
+          "pid": 61152,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7239860Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\unrelated-61152"
+        },
+        {
+          "pid": 67948,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8456430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\asset-67948"
+        },
+        {
+          "pid": 3904,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8409050Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\check-3904"
+        },
+        {
+          "pid": 64676,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8497200Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\frontend-worker-64676"
+        },
+        {
+          "pid": 62116,
+          "parent": 25252,
+          "created": "2026-11-15T16:04:40.7710250Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan-62116"
+        },
+        {
+          "pid": 25252,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7182300Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent-25252"
+        },
+        {
+          "pid": 66076,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8356190Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\preview-66076"
+        },
+        {
+          "pid": 61152,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7239860Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\unrelated-61152"
+        }
+      ],
+      "allWorkersReadyAt": "2026-11-15T16:04:41.551Z",
+      "actionAt": "2026-11-15T16:04:41.551Z",
+      "familyGoneBeforeFallback": true,
+      "unrelatedAliveBeforeCleanup": true,
+      "originalRunClosed": {
+        "pending": true,
+        "stdout": "",
+        "stderr": ""
+      },
+      "orphanEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.830Z",
+          "uptime": 0.0456545,
+          "connected": true,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.831Z",
+          "uptime": 0.0465091,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ownedLifetime-installed",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.852Z",
+          "uptime": 0.0672885,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closing": false,
+          "forced": false,
+          "hardTimeoutMs": 300
+        },
+        {
+          "event": "ready",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.852Z",
+          "uptime": 0.0676377,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "worker-spawn",
+          "role": "preview",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.853Z",
+          "uptime": 0.0680585,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 66076
+        },
+        {
+          "event": "worker-spawn",
+          "role": "check",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.853Z",
+          "uptime": 0.0681775,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 3904
+        },
+        {
+          "event": "worker-spawn",
+          "role": "asset",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.853Z",
+          "uptime": 0.0682531,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 67948
+        },
+        {
+          "event": "worker-spawn",
+          "role": "frontend-worker",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:40.853Z",
+          "uptime": 0.068324,
+          "connected": true,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 64676
+        },
+        {
+          "event": "ipc-disconnect",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.776Z",
+          "uptime": 0.9911424,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "close-called",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.777Z",
+          "uptime": 0.9918038,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "closeMode": "complete"
+        },
+        {
+          "event": "complete-close-stop-worker",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.777Z",
+          "uptime": 0.9919516,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 66076
+        },
+        {
+          "event": "complete-close-stop-worker",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.777Z",
+          "uptime": 0.9921799,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 3904
+        },
+        {
+          "event": "complete-close-stop-worker",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.777Z",
+          "uptime": 0.9923702,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 67948
+        },
+        {
+          "event": "complete-close-stop-worker",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.777Z",
+          "uptime": 0.99257,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "PipeWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 64676
+        },
+        {
+          "event": "worker-exit",
+          "role": "frontend-worker",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.784Z",
+          "uptime": 0.9995801,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 64676,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-close",
+          "role": "frontend-worker",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 0.9997957,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 64676,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-exit",
+          "role": "check",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 0.9999351,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 3904,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-close",
+          "role": "check",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.0000622,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 3904,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-exit",
+          "role": "preview",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.0001551,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 66076,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-close",
+          "role": "preview",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.0002187,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 66076,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-exit",
+          "role": "asset",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.000288,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 67948,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "worker-close",
+          "role": "asset",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.0003482,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ],
+          "childPid": 67948,
+          "code": null,
+          "signal": "SIGTERM"
+        },
+        {
+          "event": "close-completed",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.785Z",
+          "uptime": 1.0003971,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap",
+            "ProcessWrap"
+          ]
+        },
+        {
+          "event": "beforeExit",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.786Z",
+          "uptime": 1.0007347,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ],
+          "code": 1
+        },
+        {
+          "event": "exit",
+          "role": "orphan",
+          "pid": 62116,
+          "ppid": 25252,
+          "at": "2026-11-15T16:04:41.786Z",
+          "uptime": 1.0008253,
+          "connected": false,
+          "exitCode": 1,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ],
+          "code": 1
+        }
+      ],
+      "parentEvents": [
+        {
+          "event": "instrument-before-stdio",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:40.751Z",
+          "uptime": 0.0212201,
+          "connected": false,
+          "exitCode": null,
+          "resources": []
+        },
+        {
+          "event": "instrument-after-stdio",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:40.752Z",
+          "uptime": 0.0221266,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap"
+          ]
+        },
+        {
+          "event": "ready",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:40.774Z",
+          "uptime": 0.0436555,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ]
+        },
+        {
+          "event": "orphan-spawn",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:40.774Z",
+          "uptime": 0.0442603,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 62116,
+          "stdio": "inherit stdout/stderr; IPC parent-owned"
+        },
+        {
+          "event": "explicit-disconnect-call",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:41.776Z",
+          "uptime": 1.0456427,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 62116,
+          "childConnected": true
+        },
+        {
+          "event": "explicit-disconnect-return",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:41.776Z",
+          "uptime": 1.0458793,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childConnected": false
+        },
+        {
+          "event": "orphan-exit",
+          "role": "parent",
+          "pid": 25252,
+          "ppid": 45060,
+          "at": "2026-11-15T16:04:41.794Z",
+          "uptime": 1.0643076,
+          "connected": false,
+          "exitCode": null,
+          "resources": [
+            "PipeWrap",
+            "PipeWrap",
+            "ProcessWrap",
+            "Timeout"
+          ],
+          "childPid": 62116,
+          "code": 1,
+          "signal": null
+        }
+      ],
+      "orphanLocalStderr": "",
+      "markerInParentCapturedStderr": false,
+      "markerInOrphanLocalStderr": false,
+      "runtimeCleanup": null,
+      "closeCalled": true,
+      "closeCompleted": true,
+      "explicitDisconnectObserved": true,
+      "observationComplete": true,
+      "finalKnownIdentities": [
+        {
+          "pid": 67948,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8456430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\asset-67948"
+        },
+        {
+          "pid": 3904,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8409050Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\check-3904"
+        },
+        {
+          "pid": 64676,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8497200Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\frontend-worker-64676"
+        },
+        {
+          "pid": 62116,
+          "parent": 25252,
+          "created": "2026-11-15T16:04:40.7710250Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan-62116"
+        },
+        {
+          "pid": 25252,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7182300Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent-25252"
+        },
+        {
+          "pid": 66076,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8356190Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\preview-66076"
+        },
+        {
+          "pid": 61152,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7239860Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\unrelated-61152"
+        },
+        {
+          "pid": 67948,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8456430Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs asset",
+          "role": "asset",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\asset-67948"
+        },
+        {
+          "pid": 3904,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8409050Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs check",
+          "role": "check",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\check-3904"
+        },
+        {
+          "pid": 64676,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8497200Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs frontend-worker",
+          "role": "frontend-worker",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\frontend-worker-64676"
+        },
+        {
+          "pid": 62116,
+          "parent": 25252,
+          "created": "2026-11-15T16:04:40.7710250Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs",
+          "role": "orphan",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan-62116"
+        },
+        {
+          "pid": 25252,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7182300Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent.mjs",
+          "role": "parent",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\parent-25252"
+        },
+        {
+          "pid": 66076,
+          "parent": 62116,
+          "created": "2026-11-15T16:04:40.8356190Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs preview",
+          "role": "preview",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\preview-66076"
+        },
+        {
+          "pid": 61152,
+          "parent": 45060,
+          "created": "2026-11-15T16:04:40.7239860Z",
+          "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\orphan.mjs unrelated",
+          "role": "unrelated",
+          "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\disconnect-complete\\unrelated-61152"
+        }
+      ],
+      "finished": "2026-11-15T16:04:52.569Z"
+    }
+  ],
+  "errors": [],
+  "exit": 0,
+  "before": {
+    "head": "97bd68652108b808b8f5de9117ceefd8a8c888f9",
+    "status": "?? fallback/lux3d-4969293.glb\n?? fallback/lux3d-4969298.glb\n?? fallback/lux3d-split-4969889.glb",
+    "apps": "017d26c179de4226d77dca405fcfd26589848f68",
+    "scripts": "bf8fe1553e4be8372e4dff36dcaa6c29bfb5f206",
+    "files": {
+      "apps/server/d3-diagnostic.mjs": "6d0edc1b050f644d053fbdc6d0f7d9daffdd62511a1e1cca46f510fda10b1e5f",
+      "apps/server/m2-validation.mjs": "79c14f676673d766ea81e6ff30ea76c2fbcf63f4c68e3763565049ba7a91f645",
+      "apps/server/package.json": "b9247d2888068b900144c2f3ffe0d28d241647189f2e0cdaf3654ba723ac81cb",
+      "apps/server/scripts/m3a-full-validation.mjs": "4b15370a1052bd472c15f8a10e03bab07f983bfc69fa0e1e9d3ef6e96383e29d",
+      "apps/server/scripts/m3a-native-import.mjs": "6ee785836e45537253b663bc2736cc54c4cc43113ddf2221f8b4f496abf70824",
+      "apps/server/scripts/m3a-verify.mjs": "5cc61ccc5ba6e3cf4f27be94e82505b1c32f0eb0fcc3169b1cc81b55b075082f",
+      "apps/server/src/agent/client.test.ts": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+      "apps/server/src/agent/client.ts": "0d05ab4b6440d18fc97903c16e74e5c6095c067ac7a50c83156538c4b7616e0c",
+      "apps/server/src/agent/limits.test.ts": "236c07b4f08c2a77ba452c89d1c3b5ac2208c0c2985817a7f4e545c09041e48a",
+      "apps/server/src/agent/mock-cli.ts": "6221a384ba30caa6c7d18c0c1bc855b862855533a8331ceade595d06d0e8f4fe",
+      "apps/server/src/agent/mock-server.ts": "134c66d604fc4583790d5c02c457b9e38a79cbdee5049ed0e650a896e51f2f9a",
+      "apps/server/src/agent/tools.test.ts": "f33e64bfd6c5c33c9612859de3fe4d718d286dc447fabc7aca733f8bde75a6f3",
+      "apps/server/src/agent/tools.ts": "e811879502da82f852bf6332d0467f480917863a6e08b97818656cecb1682c8c",
+      "apps/server/src/app.test.ts": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+      "apps/server/src/app.ts": "a60a9356fc225ce1f72c7b770e9a88a45d20729837b6ef08af7619848b35645b",
+      "apps/server/src/approvals/policy.test.ts": "967bf3201df0412f88c405bb53e34160b1191426528d04835d7d682ecc3bdc49",
+      "apps/server/src/approvals/policy.ts": "6aad428721d3bdf30610d3c4573d3a82db43c0a7f81156dd9a5155b0ab3d1cd8",
+      "apps/server/src/approvals/routes.test.ts": "78b21c63a1f8b965d121743bcfc3449ec53c48f8e3bc0a5df22f0a4b40aa20cf",
+      "apps/server/src/assets/atomic-file.ts": "4eceb8ee62b769602cfb25661c62a94ba2217d87a82d64a55b90dea294f65e9c",
+      "apps/server/src/assets/cleanup.test.ts": "06757df03f1a01122269c5313cffa16f79e1f1a83460325097a3a77451dbc216",
+      "apps/server/src/assets/cleanup.ts": "f24413230982a94b9246ebb4159bfeab40fd466e2465a2b3e6fd00bcabfe1da0",
+      "apps/server/src/assets/download.test.ts": "21458928c3a5f7e7a90a2c4341dc2f239f2bc36c059a0f477149f982c796d8e7",
+      "apps/server/src/assets/download.ts": "16078cdf6b1dda38080cb539724e3d63ebb8a1308b8b440361ca81568649893e",
+      "apps/server/src/assets/fallback-process-lifecycle.test.ts": "fedde617e7eaa2bce54a1000e67390921b2e63cb1d21cd303bc5da38a0307668",
+      "apps/server/src/assets/fallbacks.test.ts": "4acc49666d86a11591f6a0aac002ff44c0d941ca65290b34660f185d3a4a984c",
+      "apps/server/src/assets/fallbacks.ts": "472ff3c2a8a13cb44396708659ac9262ecd62d6763d19a276592a71c0444613e",
+      "apps/server/src/assets/instance-lock.test.ts": "a62cc745dd88dabb721bd6f4205da8087882cf49bd71e85148fb5a5d16c89b2e",
+      "apps/server/src/assets/instance-lock.ts": "68e25968176a7a44388184874e08a9c93f0c901f98abfa8b4e54e98485898091",
+      "apps/server/src/assets/lux3d.test.ts": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+      "apps/server/src/assets/lux3d.ts": "32d79bf61e1823c49a0e1150942085e8564c14aceadab3c2597b1a62c0116691",
+      "apps/server/src/assets/mock-server.test.ts": "8db3d71af5be031b5e1feb508b32cc1fef2debc9252b49c0cf6871c9a103dc05",
+      "apps/server/src/assets/mock-server.ts": "3a5a2e97bd5c12eab2da2cba40cb7a506299a80c6189065eb8945d632206a963",
+      "apps/server/src/assets/parts.test.ts": "d1698ecbffee8ecba44151528d9238f9c1323b613870380d258f9443a7ec39d2",
+      "apps/server/src/assets/parts.ts": "494a487f347dbd5ef291224c1ee1b2097463d65a86c32dbff2f6f3f6f1d80d04",
+      "apps/server/src/assets/process-cli.ts": "8afcd3861eeed94b1ebc0955b38e48593c63586a7cc4bc9f1cc56b454d9243b6",
+      "apps/server/src/assets/process-isolated.test.ts": "0fa5c6444d5f6f21ad9d41d32a9fa7bed741f515b17e2ebab1422855780b83ed",
+      "apps/server/src/assets/process-isolated.ts": "46bdcd6dbc410042ea29245d21529a59dcffac4a1b4ae95556629b308b461dd2",
+      "apps/server/src/assets/process-model.test.ts": "f64ceb7fffb164b6b9966e6be4952d6c5c8400920e28e8150869c3796b491107",
+      "apps/server/src/assets/process-model.ts": "43c9401d16e8a5b3502c7e00d011d156e3570e55785cab12ebf38c3a49728d18",
+      "apps/server/src/assets/process-worker.ts": "e9fd2cb1d5a3e7bc2fa7f23292f34198cf83d63f72faf61616acbf72227f640a",
+      "apps/server/src/assets/provenance.ts": "d7de964cc2cbf8b454186fbd25f26fc5a46f5c0999b3cfe07112674e2bd9550c",
+      "apps/server/src/assets/recovery.test.ts": "5259123d8f230ec19f548ab3c2d84fee55abfe9fdeb8c8051aebf251091ccde1",
+      "apps/server/src/assets/service.test.ts": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+      "apps/server/src/assets/service.ts": "491c9d4ac2aac0856a689e890da294585ef106c65ffca8f91a8d2f455cf904e7",
+      "apps/server/src/checks/artifacts.ts": "070a5833b90cdb16dfdb6d7c8e3981b4b23fd5432211bd9c332b4e0bb5c6119e",
+      "apps/server/src/checks/browser-boundary.test.ts": "c8d2a51fe62fea30a43a5a21ca9007841623b245e0dc7a8dfb26867efe190ea6",
+      "apps/server/src/checks/browser.ts": "4a53ac96e952b59b4a689ea012859739f107aeaf81fa3627aaa61cdbc312caf5",
+      "apps/server/src/checks/build.test.ts": "aa2ecd1152e8da5a52e9564b7c9a50caa10a337ec7576d02de11a1743f684be8",
+      "apps/server/src/checks/build.ts": "54483799c8902e1aab8bcc12b548eabd676e4cb51521dc5b80a4891e0be9e9f6",
+      "apps/server/src/checks/handoff.test.ts": "dd0b601b23f483b8118ccf841b642d7cf3702f4cd104b7c2d86641abd0d536e6",
+      "apps/server/src/checks/network-guard.ts": "31db29dff6d35af6dfd9678fb3098a87788419978443b79e8938bb83eef34f0f",
+      "apps/server/src/checks/paths.ts": "77bcd73f639ebbd6f1e0e32f1fb731356829052e19c7a7cd9257f995215ed337",
+      "apps/server/src/checks/protocol.ts": "376e842f8ea0f324a1c31731bd7d7bf0da387d96b705684ab06abbb9b275bed7",
+      "apps/server/src/checks/reliability.test.ts": "a2899849edfc465d08e6b4fac2c7813ab6967aec345d883209d188be94d158d5",
+      "apps/server/src/checks/routes.test.ts": "2b7fdb7b1375820f4df02a629bc66addf653552801e4de6fde435f5dc1e3b45b",
+      "apps/server/src/checks/routes.ts": "4805d649baf2ee4117afd31c05e935834ff3fefa91eff51a59f4e183efa8807a",
+      "apps/server/src/checks/runner.ts": "4d1e1e48a21559229b685d50dd859ea41bd10ae47634960dac351fd15b695818",
+      "apps/server/src/checks/scheduler.test.ts": "743b837e0a7dcf94f935d1a213505df12f27312466a25a05f60756ab5455fa03",
+      "apps/server/src/checks/schema.ts": "198e2fbe00388a97d5ac51df24af04f53a707408dac23c38c87fbeb36e1b21cc",
+      "apps/server/src/checks/snapshot.test.ts": "856c978d7e157bd26284e5c6421da47918fad033d3a1bfd125aa7bd39d573373",
+      "apps/server/src/checks/snapshot.ts": "b530e907e2095bc57c4a70046dc359e9f46971a87b13f09ae8c7376ee221bc50",
+      "apps/server/src/checks/static-origin.ts": "ba827febf72382d3570d2242e0a73277c33fea904bbec49325b7b3404021dde3",
+      "apps/server/src/checks/test-support/lifecycle-parent.mjs": "3c0c1d516a1a04d21d3b03a451427340748e418605fdf1a571f3f97210a23e6e",
+      "apps/server/src/checks/tools.ts": "a47373e6c8b0a09e565a373a8238a21e3364e644aad52f1681684a376ff84d38",
+      "apps/server/src/checks/worker-boundary.test.ts": "d639c5aa8b18bfb5af70d935e980cb07a9bb4a069c1fd9f4dfa9c658ddbf3868",
+      "apps/server/src/checks/worker-entry.ts": "3c1bfa86c79283a033c9b8f4069dc72978fcc7623e1c95715c5cb486d7b8664e",
+      "apps/server/src/checks/worker-lifecycle.test.ts": "bc9a52914f5b5156a2263f7aa0eeef446dede201956f13ddf6fd069444c0033a",
+      "apps/server/src/checks/worker-stop-failure.test.ts": "507ada30df639cc194695470f3e86d3d80da6ac3cfea188179015863d0a6871c",
+      "apps/server/src/checks/worker.ts": "7d2d05f46c22a2190cfeb8d34a43a9375acd4b753d70cdeada10d0484b19b282",
+      "apps/server/src/events-lock.test.ts": "dc85b1337cc8fe068a38e9e75f42f067e46f8bf3c0eef1c8fff73ec2b42896d2",
+      "apps/server/src/events.test.ts": "39f48b66173decd92513db1bfc4fffc7704bfaaaefcb0cf90bd7ef5dc90f3a12",
+      "apps/server/src/events.ts": "0adee73264f5aecd85fdc749f8201a5e99640efe87dd3a4aa1adaeac63898801",
+      "apps/server/src/index.ts": "fa941fdca7d0fe1891bd894b248eed2ec971e582e2cdd38487e547e1b234ea17",
+      "apps/server/src/isolation.test.ts": "fb4b643ef7b44623f94a791d7f83efc4ec3cbd8b7d181ce0226d763cdabe8568",
+      "apps/server/src/m2-api.test.ts": "86f12de318aedec679074842f038e636acee3702c8cba4541567c4d23aa84aae",
+      "apps/server/src/scene/service.test.ts": "c07ca926dd1fff96ea9cfea6950c2e431008ef2c62080b4d24c1b834d41ca61f",
+      "apps/server/src/scene/service.ts": "3ce1be357239bd9c395fd4dab1d9263f807f21f5e780ad6df50b7df460d61acb",
+      "apps/server/src/speech/boundary.test.ts": "194acbc84ced1c05e8c50c64acd88303475abcd7adaed68a0decdc1436a5f81b",
+      "apps/server/src/speech/client.ts": "6fc69e72bf8fd95b904a7cfd68d461637927056bbee8512d2ccdb5a94d3ca236",
+      "apps/server/src/speech/lifecycle.test.ts": "479acdbc25f88c5ef04d3ca5a303c864021bc9598e98b72cfe76ebbf11488140",
+      "apps/server/src/speech/routes.test.ts": "aa8c3909559253b1b9eebcb1b9440b1c7c3f47be26c7fcf115e8694b956ed935",
+      "apps/server/src/speech/routes.ts": "340cbe81c31d8d46e7c3137496c86af82e71393606dfea83e5799bc57bf0bb55",
+      "apps/server/src/speech/service.ts": "caa14fe2d4ce54140c0f3422ddfea6aed3acd8f82b2d72d1a86110d4e75b1f3c",
+      "apps/server/src/task-id.test.ts": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+      "apps/server/src/test-support/asset-loader-register.mjs": "a43382f077185ac97635ea0faf8dfce97cdc3dbef78c4546c52bccd55784a34b",
+      "apps/server/src/test-support/asset-model-loader.mjs": "86ffc438424f2b569ed118a59cfa49354f37a1819f6f3f584e87942ccc3e4049",
+      "apps/server/src/test-support/asset-parent.ts": "61b303a25cda09a76304cc1af32804468a17fe5d1ad3500a7c12794ab9d18e1c",
+      "apps/server/src/test-support/asset-persistence-parent.ts": "c53672fb507b8f762317225203232c76707725701d7681faefd8ba760668c9c3",
+      "apps/server/src/test-support/asset-persistence-register.mjs": "bf1d3017e12b06820755fe89d663101ad0d04f60979e0a428d2f7b6e6c9a1358",
+      "apps/server/src/test-support/check-executor.ts": "da81aef0cd14892941549a0e98869ae49733cf53c9b8274c2c481c01b57d20d7",
+      "apps/server/src/test-support/fetch-listener.test.ts": "30c9df51dc99158d50c3939cfce91b3e3296155b0b8f00678b566a118dc5b092",
+      "apps/server/src/test-support/fetch-listener.ts": "23c19e7532c3aa10d2440a06e5ffccf1f757636905cab4d526ce5c953eac5828",
+      "apps/server/src/test-support/fixture-diagnostics.ts": "30ee4d3f040deded0b9542e999fac3113e784555fe7c0b8065ad170e3492d3c2",
+      "apps/server/src/test-support/http-get.test.ts": "f49469fc311421fab436421aff4cc831759e14d890060293331092aede4d4631",
+      "apps/server/src/test-support/http-get.ts": "4374f31bc055fe781740de4a0df712957905f9c4905f743bc31d9a7bdc9ad2fd",
+      "apps/server/src/work/approvals.test.ts": "586558b831388b761e884f0d0ef9da08c909192e1e2b4a4959c66ac326fc0f13",
+      "apps/server/src/work/checks-real.test.ts": "bad194029c1add3889f618bbce41296d8587622dca4f5fd03fbfc6aca79b3ca5",
+      "apps/server/src/work/checks.test.ts": "e4b24b76b42f297a1b92b3ab71fb2adc85e58790d6370f1600ec2daae77e86e9",
+      "apps/server/src/work/fs-boundary.test.ts": "f4929f5c75a497453be84dc17e8eece16ab190f8ff8f2efa598a78abcc84b420",
+      "apps/server/src/work/preview-origin.test.ts": "9363e036dfe2827fc87904b59340918ac45d9683bfa29860e926c1ac3b32f527",
+      "apps/server/src/work/preview-origin.ts": "31c082533fcb7ac4fe726df7b7398d4594d1977111f0dd77e1111727aec5a731",
+      "apps/server/src/work/preview-recovery.test.ts": "f0fabaf481767bd6c485eeef00c1c81e17e24379821a845cc9e9db96f4c3d01a",
+      "apps/server/src/work/preview-worker.ts": "10ed6db2c9fb1bdd07c605856f861b0c9c0d8a4bfa78d3c09848df18a7d4fc1c",
+      "apps/server/src/work/preview.test.ts": "40ec42bbd5bfbea67414e58a7936a37cbea03ff4f17cefd6732bf7036fe47f26",
+      "apps/server/src/work/preview.ts": "f3cc0617ff09116b7dc0ee4044c1750a70781ad7ac6f8da48ce2b899e1bbd69f",
+      "apps/server/src/work/recovery-fix.test.ts": "e49a00199f682cfbcdf7c0ad48a67498070cd922d8b1ccab59ed0458a7bbf4a8",
+      "apps/server/src/work/repo.test.ts": "7527291100e206c2449825c35fb966765726952bf545453f460c4fb381ec2e93",
+      "apps/server/src/work/repo.ts": "964303f81e4a7309d35c52bcadf007eb002515e1be27a94147a8539d9ff87d7d",
+      "apps/server/src/work/service.test.ts": "00e610b20eafabe64b4aea4c1085b535c6b9b1b707cbf563d0fd94a1e8188916",
+      "apps/server/src/work/service.ts": "c00abd18e7196e5da7e9eacdc74af6af348fd69f3ce254b83260b94991cdda06",
+      "apps/server/tsconfig.json": "9e0dca5b82520eb1315459869d9fc6e9a25d93d9249da4e1977f27d8b35d1865",
+      "apps/server/vitest.config.ts": "d13fec821a74cc58d42bd9ae547f12e5e0b5c4e519eeaf3094f1ed7c49fd2796",
+      "apps/studio/index.html": "15f47d97100167c290dc8f2b86d8395bc02a16e2b1701e2d3a456fb43847da94",
+      "apps/studio/package.json": "b4cf8be7bdec587fff79a0489fd8348bceae2fc3d3eeff5b4ec9afd2e7a6198a",
+      "apps/studio/src/App.tsx": "5570aa375c4a0e2ba193ded97482283447654ddfb1faae37568d5013f48d29a1",
+      "apps/studio/src/ApprovalPanel.tsx": "bdf42e5ccfa214e09d601b6338e32fcc1c0abbc3c5f0b4b50ad961228585860f",
+      "apps/studio/src/AssetPanel.tsx": "2a3b342df7ff23571e8a69f8eda2746bd389de3e33ba7614bd7c2a6ac428fc54",
+      "apps/studio/src/CandidatePanel.tsx": "dab7c63f33abb0fd48340feec6bc8536ccd0bd8d91d127d0dfa3c86ee41f2161",
+      "apps/studio/src/CheckPanel.tsx": "49890236f544c4ee7e314b576c0218657d8c3987ae5ed819ddae4539cf286706",
+      "apps/studio/src/EventCenter.tsx": "d33bb8f541cdf46bf296c0e3a38691b0548b2a0fc6f272034725ed52ec30a22b",
+      "apps/studio/src/PointSpeak.tsx": "74a24af767c54e200aa5aab48a51d7f6c8da456098b3e20683b2706a454fa658",
+      "apps/studio/src/SceneEditor.tsx": "15f85e01917a44a61f65219f8ea23674091b298fbc8b1d0a21aba6c9f8a2d863",
+      "apps/studio/src/SpeechInput.tsx": "9670845109adf0c31132ea21e045b5dc62eca0670149b6b666aff46daf12c205",
+      "apps/studio/src/adoption-gate.test.ts": "2ebc64f22c786743dde099f4e7042a1897fc34e6500498b6b5b1314aaf98d80d",
+      "apps/studio/src/adoption-gate.ts": "fbd2003f8eb56673bbc6c964a3215d6475b35b88a368009efb43597b18e1c716",
+      "apps/studio/src/api.ts": "d21616983081aa138b9fb91bd2ff1a41600736ffe48d3d9ecc75aa08d02425d0",
+      "apps/studio/src/approval-render.test.tsx": "610532b3c9f2e611140d485f5f551a4ae82ec4aa2a00e92832125cec0af3d0ce",
+      "apps/studio/src/approval-state.test.ts": "c4cb2704dc229653f2567ab2b6a262b134462181fcb13c81f3020cb40237214f",
+      "apps/studio/src/approval-state.ts": "e3889fb3d2c26b96a8a3916bfd3d518ef674713302aa8bb8341890d71c004a4b",
+      "apps/studio/src/assets.css": "f72d8bbe81686926a5ccaa92777564022718f63485df212b591fba0974d2d339",
+      "apps/studio/src/check-evidence.test.ts": "bd6ad35a5a3a0d1eb73b0b390958694d21e6e76275e9e6e021db1720430e9b55",
+      "apps/studio/src/check-render.test.tsx": "21429486c529adf3d241aa6aa5a5f243af8a105f2f3b9e0929dc76f52c1c8f93",
+      "apps/studio/src/check-state.test.ts": "f692071328dbc381f0603476579560b15c8aac9e9582547485dbbc82f5411b00",
+      "apps/studio/src/check-state.ts": "580a98611ef290e2d7f83ca622ec977e51cf594b05b04cca2d1f3a6eb7d89fce",
+      "apps/studio/src/dev-proxy.test.ts": "fd30e714ed45221162ada3bae2f64576540d7350a0e712388f1eb5116a05f71f",
+      "apps/studio/src/diff-render.test.tsx": "5b9d1bb3da3f1442a0b5354fc0079f9b75993de4ba2de4bd06c8728fc762d3a0",
+      "apps/studio/src/diff.test.ts": "02ead92469c0179f18731c57526951f21a32649b6d0233093cddb65880bd4b9d",
+      "apps/studio/src/diff.ts": "d7d17b7a8262d7a4808e9ccfbff23e7c343ec75f188837ec73a0b1718c7c838e",
+      "apps/studio/src/m2-state.test.ts": "0a70b252d362ac90410167af13734a582bed4ea4a9e6fd7337a601f604c82aa2",
+      "apps/studio/src/m2-state.ts": "4d2da0b18fbb52f810e73f094cd736b8b1a6cbc45235e1d038881f6e4b299611",
+      "apps/studio/src/main.tsx": "7421558f4a7228c37aa94e01ec12c94330a9a7edfecac2c08f0e9735cb4e8554",
+      "apps/studio/src/model-provenance.tsx": "6faddc7baee411ba178592baac796e5badade4bc59f72216c66a5379ca7337d9",
+      "apps/studio/src/mutation-locks.ts": "ac5a9c7682cd1cf37fd30f77916c56cc64a7f15490dce314282a2daf3fdf8ff4",
+      "apps/studio/src/pick-state.test.ts": "56fbac545abd811d209d31c92f37a5b9caac351fa085fc63a62930844339b9cd",
+      "apps/studio/src/pick-state.ts": "107291e5605a4ef948fb11c3b105f67b6fe4781bf46b93c6ade0da6232ca763b",
+      "apps/studio/src/preview-origin.ts": "72d5d75a34bc1ce245fb33e56464b1ad96dbf18d769bfc9c0e073385f2bc2b74",
+      "apps/studio/src/scene-draft.test.ts": "659c2d379d78e4dc089c08780b11e82ee464191ce6ec3b6d7f5f9ebb42e1c0cd",
+      "apps/studio/src/scene-draft.ts": "bbfdd082cbc0979a3c76ad4041b5d511733dc644085a28ba56c96cecbb49d991",
+      "apps/studio/src/scene-editor.css": "264b461bfa27b8a5d0b62c8f5022e5985185b5406779e0495453c7e0b14d4f1b",
+      "apps/studio/src/speech-api.test.ts": "4102e8f681ab48e2d33f323f6a121868fa41eb8e804b6cca01724a171b09b450",
+      "apps/studio/src/speech-api.ts": "d0dd4eb1c7f8ac0475e22f3f1f35e7273e45f0832f06de24423e53b4a7a1de2c",
+      "apps/studio/src/speech-app.browser.test.ts": "510eaa969b67cbb276c22322d4961ce6452f1b11bd69f9223c427d016229907c",
+      "apps/studio/src/speech-browser.test.ts": "388e7a02dc1b001604110836b3a791f4bbf01809c67b28f3313f2c27a4e143a9",
+      "apps/studio/src/speech-input.css": "1ef3ef856e09a4cc5b71cfe28a03086ef0d656389b58231ec7de2909e84ef583",
+      "apps/studio/src/speech-input.test.ts": "89c9f700d9bd30d1ed5ca1b1e469b1f76bec928943ce9756d9add3b3cc5c39d8",
+      "apps/studio/src/speech-input.ts": "82586716ace5944d3a117caca908b42934e967e0973cd691e6b5f66b04130b07",
+      "apps/studio/src/speech-render.test.tsx": "0d460c130e9de7459c4e745339049cb98e34b5a84f55b8614e7ad850df362021",
+      "apps/studio/src/speech-review.test.ts": "6de9738232f8581e50924827d729138f1dd6d94fb2d32f79ccf99e2b3872a1e5",
+      "apps/studio/src/speech-review.ts": "ac64756d9b9b98dcfbe2ffafac781f71b74f2be29f73613c396107e5d3549590",
+      "apps/studio/src/style.css": "9c73a0a05915b26b24e2de4659a7f346d733d1b52f857bac8bb535ea5122ddf6",
+      "apps/studio/src/sync-state.test.ts": "78faca71bbe291b97a626ac0674cc2b385ae68aa1b59d349b98498cd913f4534",
+      "apps/studio/src/sync-state.ts": "7c3d04ba9ccd3d7b18d3e3165d93fa51c9debb2700071941bcae520c9ba193f6",
+      "apps/studio/src/test-support/speech-app.tsx": "a14adaddf3a6c51f7e80c44b082483c677d9bc772180b4f611da0da70be1fe05",
+      "apps/studio/src/test-support/speech-browser-fixture.ts": "1bfeb9e9944a80ec85fd34484a93e8d9947d9c2234acfd1493c251c6bbdc0c65",
+      "apps/studio/src/test-support/speech-center.tsx": "a49078bc21854db570a67becb72559852f7ea013795608b76201babae0077fb5",
+      "apps/studio/src/test-support/speech-fakes.ts": "a7d2cc54973cf43fc8769220b4e804b377cef72eb3791a6a0ae2797dbff4615c",
+      "apps/studio/src/test-support/speech-harness.tsx": "7520fb9285e62c44ac1a0ad732d2da71838b5826604dc32157b8cd578a7abe55",
+      "apps/studio/tsconfig.json": "7815a6f9e2993592862782b1148d28bcad2829ad1b37662dde39df84aabc664b",
+      "apps/studio/verify-proxy-isolation.mjs": "b6503c51a8772a1acbf116f2da12da3152f4c21873525f8e5ad4b51328457709",
+      "apps/studio/vite.config.ts": "a63a8e3ff729d2efc0386ed35eded1f28fdcdd4aa91d2ba69f0052492e03fa48",
+      "package.json": "c080c92609ba44ba4cb31c48b11054d5506d4e4d3fac2c5730e1a659b49fcacc",
+      "packages/bridge/package.json": "94398bf8aaf7dd3a38f1c60fcfc633621d92186b354ee325d843328f673225e4",
+      "packages/bridge/src/index.test.mjs": "960a5e5625763293fe6b70cc013867ffca6690bedd1d19a280abe98d26deb7be",
+      "packages/bridge/src/index.ts": "8361260b0e7860e296fd216cb3d6337789ae076d79c1cf80373f2208505b3f75",
+      "packages/bridge/tsconfig.json": "905cfe1a4ed8daedd8037b43078b77f46acdefcb6504f5d2ecb621b7fd5e9c6f",
+      "packages/scene-renderer/package.json": "4ea69f48764f358cb78ee2d4dce6afa44a47a75a213bb5182e9a5b7ac73b40a4",
+      "packages/scene-renderer/src/index.tsx": "288cd3fa650d8cc04fa719ef3c1699083f52e41e88ff21a1c527aee1721b7b33",
+      "packages/scene-renderer/src/pose.test.ts": "b5e5c07dd6cb93e71bd32b7576e3225577c02cdace9a9ff6c88ebc6afa55b5cb",
+      "packages/scene-renderer/src/pose.ts": "783a3ddd94a32312d8386272620527c62ef15b67898005a3e563e857edd6f16e",
+      "packages/scene-renderer/tsconfig.json": "5fdd7494df924db0a7ef00b5b6b71b7cd0ea120e1555d03e49fc10de14929be5",
+      "packages/shared/package.json": "00673ab032bce1e3fc769e1d50fda3b657973b76a1694acdae5b3edff0f3564d",
+      "packages/shared/src/index.ts": "500f471e6befbab8f241b68c00f02bee2e25875d8863d7ac80968cd5ec86a648",
+      "packages/shared/src/scene-config.test.ts": "5a77a9d01b5fd4628c5e587d235fa3ad5101b201aa0b40820198fa6e8c24ef26",
+      "packages/shared/src/scene-config.ts": "305c1727200fa5486a2e1afdd4065b7cabc0ce62e352e440f837eca11b7f07e2",
+      "packages/shared/src/scene-edit.test.ts": "c85234518c37b3c6c2aa49d9514b7291c53d184f8d3c623e56573097f7f95ea7",
+      "packages/shared/src/scene-edit.ts": "dc9062c57b8b522676b33b62d0e730b4f73063c48cd04a2e74395b062d6c4556",
+      "packages/shared/tsconfig.json": "5fdd7494df924db0a7ef00b5b6b71b7cd0ea120e1555d03e49fc10de14929be5",
+      "packages/vite-plugin-source-tag/package.json": "590f9c2b4bae6553780db52402e31c4722b2e885a517eeeb1ac08c0456fafac9",
+      "packages/vite-plugin-source-tag/src/component-name.test.ts": "57c06bfa11ca703de1cc7a4f398e1f378911c9cc410ff408ecf6b5e78d080c7b",
+      "packages/vite-plugin-source-tag/src/index.test.ts": "a50bf0757e22092e68cf0aba231967bb55274f9242612aede0a5da5bd0366814",
+      "packages/vite-plugin-source-tag/src/index.ts": "6488564762d532c312aeb2259340415997f10d30e9fcc72377b2b0a10b2a337c",
+      "packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts": "0834e884a17fff55aa8b91df7e3562ae091a65382c66ddf2b236ab6f515a8736",
+      "packages/vite-plugin-source-tag/tsconfig.json": "905cfe1a4ed8daedd8037b43078b77f46acdefcb6504f5d2ecb621b7fd5e9c6f",
+      "pnpm-lock.yaml": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "scripts/demo/backend.mjs": "c99912612e9e2673631a5b51bb1d0f6ce4f79b8200fa2a70e64688baec105e62",
+      "scripts/demo/body.test.mjs": "4785de65ef8256aada48b6effa7082e0c24d2e8cb2be39af31a01dded38b1895",
+      "scripts/demo/frontends.mjs": "54f6f7924e25149b914c9e8093955c8c99d3d34462541c0455b11a368234ef46",
+      "scripts/demo/launch.mjs": "14cb7435182f087749737ac99458fe56758ec637a445a0bf9dc0c22f4c3836d0",
+      "scripts/demo/mock.mjs": "fda82ff02872381129122885268391c81ceb0c836a644b76b5c964e8ecdcf6e7",
+      "scripts/demo/mocks.mjs": "fdd96dcfe0cefdfb790eb92433b89ac651c7530015898213c591740e21a849f9",
+      "scripts/demo/network-guard.cjs": "257759d9d88610d9e0bc67efe3397817f1bc7df8b91af39ecc5e9b4c42727518",
+      "scripts/demo/prepare.mjs": "e90178f3a028551a05b78b998855ccf9ade69de1f1a9f39e732204f9ac4c63ef",
+      "scripts/demo/real.mjs": "c8503d97bc32ca60c50a9e6704d424b3547257d8501ce8bd8a50bcc7ed021e80",
+      "scripts/demo/runtime.mjs": "94c7cfdd66c1a8162d8075c2d95adc595a38a740f180ba354a05222057db4871",
+      "scripts/demo/safety.mjs": "184cd4d668621d87a4ac38032d76ab544f0326ee113ffea1bbeb6cc3fd2c4e5e",
+      "scripts/demo/safety.test.mjs": "31d6a96cadd9ad552e7114f3fc01a86cbf68898cb31f54ab73daed470273ff8c",
+      "templates/product-page/index.html": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b",
+      "templates/product-page/package.json": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c",
+      "templates/product-page/public/assets/diffuser-4969889.glb": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46",
+      "templates/product-page/public/assets/diffuser-4969889.provenance.json": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333",
+      "templates/product-page/public/assets/parts.json": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49",
+      "templates/product-page/src/App.tsx": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778",
+      "templates/product-page/src/components/Button.tsx": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412",
+      "templates/product-page/src/components/ProductHero.tsx": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369",
+      "templates/product-page/src/main.tsx": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57",
+      "templates/product-page/src/scene-config-store.ts": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4",
+      "templates/product-page/src/scene.config.json": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a",
+      "templates/product-page/src/style.css": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc",
+      "templates/product-page/tsconfig.json": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0",
+      "templates/product-page/vite.config.ts": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+    }
+  },
+  "instrumentation": [
+    "Own event files use sync writes, no observation timers in orphan",
+    "Stream write mirrors and passive exit/stdio listeners may expose extra stdio wrappers; before/after active-resource lists are retained",
+    "Hung orphan does not retain worker handles in a new array or add a keepalive timer",
+    "Complete close control intentionally kills/awaits its own worker handles",
+    "No production file or assertion is changed; unexpected observations do not mean a product pass"
+  ],
+  "after": {
+    "head": "97bd68652108b808b8f5de9117ceefd8a8c888f9",
+    "status": "?? fallback/lux3d-4969293.glb\n?? fallback/lux3d-4969298.glb\n?? fallback/lux3d-split-4969889.glb",
+    "apps": "017d26c179de4226d77dca405fcfd26589848f68",
+    "scripts": "bf8fe1553e4be8372e4dff36dcaa6c29bfb5f206",
+    "files": {
+      "apps/server/d3-diagnostic.mjs": "6d0edc1b050f644d053fbdc6d0f7d9daffdd62511a1e1cca46f510fda10b1e5f",
+      "apps/server/m2-validation.mjs": "79c14f676673d766ea81e6ff30ea76c2fbcf63f4c68e3763565049ba7a91f645",
+      "apps/server/package.json": "b9247d2888068b900144c2f3ffe0d28d241647189f2e0cdaf3654ba723ac81cb",
+      "apps/server/scripts/m3a-full-validation.mjs": "4b15370a1052bd472c15f8a10e03bab07f983bfc69fa0e1e9d3ef6e96383e29d",
+      "apps/server/scripts/m3a-native-import.mjs": "6ee785836e45537253b663bc2736cc54c4cc43113ddf2221f8b4f496abf70824",
+      "apps/server/scripts/m3a-verify.mjs": "5cc61ccc5ba6e3cf4f27be94e82505b1c32f0eb0fcc3169b1cc81b55b075082f",
+      "apps/server/src/agent/client.test.ts": "cdb26a88edefc24ec785fa8eaf2f195b8180b9afea20e7e0f2cad27411d6e98e",
+      "apps/server/src/agent/client.ts": "0d05ab4b6440d18fc97903c16e74e5c6095c067ac7a50c83156538c4b7616e0c",
+      "apps/server/src/agent/limits.test.ts": "236c07b4f08c2a77ba452c89d1c3b5ac2208c0c2985817a7f4e545c09041e48a",
+      "apps/server/src/agent/mock-cli.ts": "6221a384ba30caa6c7d18c0c1bc855b862855533a8331ceade595d06d0e8f4fe",
+      "apps/server/src/agent/mock-server.ts": "134c66d604fc4583790d5c02c457b9e38a79cbdee5049ed0e650a896e51f2f9a",
+      "apps/server/src/agent/tools.test.ts": "f33e64bfd6c5c33c9612859de3fe4d718d286dc447fabc7aca733f8bde75a6f3",
+      "apps/server/src/agent/tools.ts": "e811879502da82f852bf6332d0467f480917863a6e08b97818656cecb1682c8c",
+      "apps/server/src/app.test.ts": "c719a14065c313a548aa6bbc13781b1a776e9996483e7e08b8450cded5436182",
+      "apps/server/src/app.ts": "a60a9356fc225ce1f72c7b770e9a88a45d20729837b6ef08af7619848b35645b",
+      "apps/server/src/approvals/policy.test.ts": "967bf3201df0412f88c405bb53e34160b1191426528d04835d7d682ecc3bdc49",
+      "apps/server/src/approvals/policy.ts": "6aad428721d3bdf30610d3c4573d3a82db43c0a7f81156dd9a5155b0ab3d1cd8",
+      "apps/server/src/approvals/routes.test.ts": "78b21c63a1f8b965d121743bcfc3449ec53c48f8e3bc0a5df22f0a4b40aa20cf",
+      "apps/server/src/assets/atomic-file.ts": "4eceb8ee62b769602cfb25661c62a94ba2217d87a82d64a55b90dea294f65e9c",
+      "apps/server/src/assets/cleanup.test.ts": "06757df03f1a01122269c5313cffa16f79e1f1a83460325097a3a77451dbc216",
+      "apps/server/src/assets/cleanup.ts": "f24413230982a94b9246ebb4159bfeab40fd466e2465a2b3e6fd00bcabfe1da0",
+      "apps/server/src/assets/download.test.ts": "21458928c3a5f7e7a90a2c4341dc2f239f2bc36c059a0f477149f982c796d8e7",
+      "apps/server/src/assets/download.ts": "16078cdf6b1dda38080cb539724e3d63ebb8a1308b8b440361ca81568649893e",
+      "apps/server/src/assets/fallback-process-lifecycle.test.ts": "fedde617e7eaa2bce54a1000e67390921b2e63cb1d21cd303bc5da38a0307668",
+      "apps/server/src/assets/fallbacks.test.ts": "4acc49666d86a11591f6a0aac002ff44c0d941ca65290b34660f185d3a4a984c",
+      "apps/server/src/assets/fallbacks.ts": "472ff3c2a8a13cb44396708659ac9262ecd62d6763d19a276592a71c0444613e",
+      "apps/server/src/assets/instance-lock.test.ts": "a62cc745dd88dabb721bd6f4205da8087882cf49bd71e85148fb5a5d16c89b2e",
+      "apps/server/src/assets/instance-lock.ts": "68e25968176a7a44388184874e08a9c93f0c901f98abfa8b4e54e98485898091",
+      "apps/server/src/assets/lux3d.test.ts": "532311206b8c8033bb242817cd6daaaa3c7a911d5c2c8505a271c8b35aef25dd",
+      "apps/server/src/assets/lux3d.ts": "32d79bf61e1823c49a0e1150942085e8564c14aceadab3c2597b1a62c0116691",
+      "apps/server/src/assets/mock-server.test.ts": "8db3d71af5be031b5e1feb508b32cc1fef2debc9252b49c0cf6871c9a103dc05",
+      "apps/server/src/assets/mock-server.ts": "3a5a2e97bd5c12eab2da2cba40cb7a506299a80c6189065eb8945d632206a963",
+      "apps/server/src/assets/parts.test.ts": "d1698ecbffee8ecba44151528d9238f9c1323b613870380d258f9443a7ec39d2",
+      "apps/server/src/assets/parts.ts": "494a487f347dbd5ef291224c1ee1b2097463d65a86c32dbff2f6f3f6f1d80d04",
+      "apps/server/src/assets/process-cli.ts": "8afcd3861eeed94b1ebc0955b38e48593c63586a7cc4bc9f1cc56b454d9243b6",
+      "apps/server/src/assets/process-isolated.test.ts": "0fa5c6444d5f6f21ad9d41d32a9fa7bed741f515b17e2ebab1422855780b83ed",
+      "apps/server/src/assets/process-isolated.ts": "46bdcd6dbc410042ea29245d21529a59dcffac4a1b4ae95556629b308b461dd2",
+      "apps/server/src/assets/process-model.test.ts": "f64ceb7fffb164b6b9966e6be4952d6c5c8400920e28e8150869c3796b491107",
+      "apps/server/src/assets/process-model.ts": "43c9401d16e8a5b3502c7e00d011d156e3570e55785cab12ebf38c3a49728d18",
+      "apps/server/src/assets/process-worker.ts": "e9fd2cb1d5a3e7bc2fa7f23292f34198cf83d63f72faf61616acbf72227f640a",
+      "apps/server/src/assets/provenance.ts": "d7de964cc2cbf8b454186fbd25f26fc5a46f5c0999b3cfe07112674e2bd9550c",
+      "apps/server/src/assets/recovery.test.ts": "5259123d8f230ec19f548ab3c2d84fee55abfe9fdeb8c8051aebf251091ccde1",
+      "apps/server/src/assets/service.test.ts": "42b267b28cb03156461685388251eeac26eb51d995c4df53554a59adb24c7f11",
+      "apps/server/src/assets/service.ts": "491c9d4ac2aac0856a689e890da294585ef106c65ffca8f91a8d2f455cf904e7",
+      "apps/server/src/checks/artifacts.ts": "070a5833b90cdb16dfdb6d7c8e3981b4b23fd5432211bd9c332b4e0bb5c6119e",
+      "apps/server/src/checks/browser-boundary.test.ts": "c8d2a51fe62fea30a43a5a21ca9007841623b245e0dc7a8dfb26867efe190ea6",
+      "apps/server/src/checks/browser.ts": "4a53ac96e952b59b4a689ea012859739f107aeaf81fa3627aaa61cdbc312caf5",
+      "apps/server/src/checks/build.test.ts": "aa2ecd1152e8da5a52e9564b7c9a50caa10a337ec7576d02de11a1743f684be8",
+      "apps/server/src/checks/build.ts": "54483799c8902e1aab8bcc12b548eabd676e4cb51521dc5b80a4891e0be9e9f6",
+      "apps/server/src/checks/handoff.test.ts": "dd0b601b23f483b8118ccf841b642d7cf3702f4cd104b7c2d86641abd0d536e6",
+      "apps/server/src/checks/network-guard.ts": "31db29dff6d35af6dfd9678fb3098a87788419978443b79e8938bb83eef34f0f",
+      "apps/server/src/checks/paths.ts": "77bcd73f639ebbd6f1e0e32f1fb731356829052e19c7a7cd9257f995215ed337",
+      "apps/server/src/checks/protocol.ts": "376e842f8ea0f324a1c31731bd7d7bf0da387d96b705684ab06abbb9b275bed7",
+      "apps/server/src/checks/reliability.test.ts": "a2899849edfc465d08e6b4fac2c7813ab6967aec345d883209d188be94d158d5",
+      "apps/server/src/checks/routes.test.ts": "2b7fdb7b1375820f4df02a629bc66addf653552801e4de6fde435f5dc1e3b45b",
+      "apps/server/src/checks/routes.ts": "4805d649baf2ee4117afd31c05e935834ff3fefa91eff51a59f4e183efa8807a",
+      "apps/server/src/checks/runner.ts": "4d1e1e48a21559229b685d50dd859ea41bd10ae47634960dac351fd15b695818",
+      "apps/server/src/checks/scheduler.test.ts": "743b837e0a7dcf94f935d1a213505df12f27312466a25a05f60756ab5455fa03",
+      "apps/server/src/checks/schema.ts": "198e2fbe00388a97d5ac51df24af04f53a707408dac23c38c87fbeb36e1b21cc",
+      "apps/server/src/checks/snapshot.test.ts": "856c978d7e157bd26284e5c6421da47918fad033d3a1bfd125aa7bd39d573373",
+      "apps/server/src/checks/snapshot.ts": "b530e907e2095bc57c4a70046dc359e9f46971a87b13f09ae8c7376ee221bc50",
+      "apps/server/src/checks/static-origin.ts": "ba827febf72382d3570d2242e0a73277c33fea904bbec49325b7b3404021dde3",
+      "apps/server/src/checks/test-support/lifecycle-parent.mjs": "3c0c1d516a1a04d21d3b03a451427340748e418605fdf1a571f3f97210a23e6e",
+      "apps/server/src/checks/tools.ts": "a47373e6c8b0a09e565a373a8238a21e3364e644aad52f1681684a376ff84d38",
+      "apps/server/src/checks/worker-boundary.test.ts": "d639c5aa8b18bfb5af70d935e980cb07a9bb4a069c1fd9f4dfa9c658ddbf3868",
+      "apps/server/src/checks/worker-entry.ts": "3c1bfa86c79283a033c9b8f4069dc72978fcc7623e1c95715c5cb486d7b8664e",
+      "apps/server/src/checks/worker-lifecycle.test.ts": "bc9a52914f5b5156a2263f7aa0eeef446dede201956f13ddf6fd069444c0033a",
+      "apps/server/src/checks/worker-stop-failure.test.ts": "507ada30df639cc194695470f3e86d3d80da6ac3cfea188179015863d0a6871c",
+      "apps/server/src/checks/worker.ts": "7d2d05f46c22a2190cfeb8d34a43a9375acd4b753d70cdeada10d0484b19b282",
+      "apps/server/src/events-lock.test.ts": "dc85b1337cc8fe068a38e9e75f42f067e46f8bf3c0eef1c8fff73ec2b42896d2",
+      "apps/server/src/events.test.ts": "39f48b66173decd92513db1bfc4fffc7704bfaaaefcb0cf90bd7ef5dc90f3a12",
+      "apps/server/src/events.ts": "0adee73264f5aecd85fdc749f8201a5e99640efe87dd3a4aa1adaeac63898801",
+      "apps/server/src/index.ts": "fa941fdca7d0fe1891bd894b248eed2ec971e582e2cdd38487e547e1b234ea17",
+      "apps/server/src/isolation.test.ts": "fb4b643ef7b44623f94a791d7f83efc4ec3cbd8b7d181ce0226d763cdabe8568",
+      "apps/server/src/m2-api.test.ts": "86f12de318aedec679074842f038e636acee3702c8cba4541567c4d23aa84aae",
+      "apps/server/src/scene/service.test.ts": "c07ca926dd1fff96ea9cfea6950c2e431008ef2c62080b4d24c1b834d41ca61f",
+      "apps/server/src/scene/service.ts": "3ce1be357239bd9c395fd4dab1d9263f807f21f5e780ad6df50b7df460d61acb",
+      "apps/server/src/speech/boundary.test.ts": "194acbc84ced1c05e8c50c64acd88303475abcd7adaed68a0decdc1436a5f81b",
+      "apps/server/src/speech/client.ts": "6fc69e72bf8fd95b904a7cfd68d461637927056bbee8512d2ccdb5a94d3ca236",
+      "apps/server/src/speech/lifecycle.test.ts": "479acdbc25f88c5ef04d3ca5a303c864021bc9598e98b72cfe76ebbf11488140",
+      "apps/server/src/speech/routes.test.ts": "aa8c3909559253b1b9eebcb1b9440b1c7c3f47be26c7fcf115e8694b956ed935",
+      "apps/server/src/speech/routes.ts": "340cbe81c31d8d46e7c3137496c86af82e71393606dfea83e5799bc57bf0bb55",
+      "apps/server/src/speech/service.ts": "caa14fe2d4ce54140c0f3422ddfea6aed3acd8f82b2d72d1a86110d4e75b1f3c",
+      "apps/server/src/task-id.test.ts": "7f281999e7bab1e31f1844ec8f93f117033a261acaaa14903c9fa0664004fa4c",
+      "apps/server/src/test-support/asset-loader-register.mjs": "a43382f077185ac97635ea0faf8dfce97cdc3dbef78c4546c52bccd55784a34b",
+      "apps/server/src/test-support/asset-model-loader.mjs": "86ffc438424f2b569ed118a59cfa49354f37a1819f6f3f584e87942ccc3e4049",
+      "apps/server/src/test-support/asset-parent.ts": "61b303a25cda09a76304cc1af32804468a17fe5d1ad3500a7c12794ab9d18e1c",
+      "apps/server/src/test-support/asset-persistence-parent.ts": "c53672fb507b8f762317225203232c76707725701d7681faefd8ba760668c9c3",
+      "apps/server/src/test-support/asset-persistence-register.mjs": "bf1d3017e12b06820755fe89d663101ad0d04f60979e0a428d2f7b6e6c9a1358",
+      "apps/server/src/test-support/check-executor.ts": "da81aef0cd14892941549a0e98869ae49733cf53c9b8274c2c481c01b57d20d7",
+      "apps/server/src/test-support/fetch-listener.test.ts": "30c9df51dc99158d50c3939cfce91b3e3296155b0b8f00678b566a118dc5b092",
+      "apps/server/src/test-support/fetch-listener.ts": "23c19e7532c3aa10d2440a06e5ffccf1f757636905cab4d526ce5c953eac5828",
+      "apps/server/src/test-support/fixture-diagnostics.ts": "30ee4d3f040deded0b9542e999fac3113e784555fe7c0b8065ad170e3492d3c2",
+      "apps/server/src/test-support/http-get.test.ts": "f49469fc311421fab436421aff4cc831759e14d890060293331092aede4d4631",
+      "apps/server/src/test-support/http-get.ts": "4374f31bc055fe781740de4a0df712957905f9c4905f743bc31d9a7bdc9ad2fd",
+      "apps/server/src/work/approvals.test.ts": "586558b831388b761e884f0d0ef9da08c909192e1e2b4a4959c66ac326fc0f13",
+      "apps/server/src/work/checks-real.test.ts": "bad194029c1add3889f618bbce41296d8587622dca4f5fd03fbfc6aca79b3ca5",
+      "apps/server/src/work/checks.test.ts": "e4b24b76b42f297a1b92b3ab71fb2adc85e58790d6370f1600ec2daae77e86e9",
+      "apps/server/src/work/fs-boundary.test.ts": "f4929f5c75a497453be84dc17e8eece16ab190f8ff8f2efa598a78abcc84b420",
+      "apps/server/src/work/preview-origin.test.ts": "9363e036dfe2827fc87904b59340918ac45d9683bfa29860e926c1ac3b32f527",
+      "apps/server/src/work/preview-origin.ts": "31c082533fcb7ac4fe726df7b7398d4594d1977111f0dd77e1111727aec5a731",
+      "apps/server/src/work/preview-recovery.test.ts": "f0fabaf481767bd6c485eeef00c1c81e17e24379821a845cc9e9db96f4c3d01a",
+      "apps/server/src/work/preview-worker.ts": "10ed6db2c9fb1bdd07c605856f861b0c9c0d8a4bfa78d3c09848df18a7d4fc1c",
+      "apps/server/src/work/preview.test.ts": "40ec42bbd5bfbea67414e58a7936a37cbea03ff4f17cefd6732bf7036fe47f26",
+      "apps/server/src/work/preview.ts": "f3cc0617ff09116b7dc0ee4044c1750a70781ad7ac6f8da48ce2b899e1bbd69f",
+      "apps/server/src/work/recovery-fix.test.ts": "e49a00199f682cfbcdf7c0ad48a67498070cd922d8b1ccab59ed0458a7bbf4a8",
+      "apps/server/src/work/repo.test.ts": "7527291100e206c2449825c35fb966765726952bf545453f460c4fb381ec2e93",
+      "apps/server/src/work/repo.ts": "964303f81e4a7309d35c52bcadf007eb002515e1be27a94147a8539d9ff87d7d",
+      "apps/server/src/work/service.test.ts": "00e610b20eafabe64b4aea4c1085b535c6b9b1b707cbf563d0fd94a1e8188916",
+      "apps/server/src/work/service.ts": "c00abd18e7196e5da7e9eacdc74af6af348fd69f3ce254b83260b94991cdda06",
+      "apps/server/tsconfig.json": "9e0dca5b82520eb1315459869d9fc6e9a25d93d9249da4e1977f27d8b35d1865",
+      "apps/server/vitest.config.ts": "d13fec821a74cc58d42bd9ae547f12e5e0b5c4e519eeaf3094f1ed7c49fd2796",
+      "apps/studio/index.html": "15f47d97100167c290dc8f2b86d8395bc02a16e2b1701e2d3a456fb43847da94",
+      "apps/studio/package.json": "b4cf8be7bdec587fff79a0489fd8348bceae2fc3d3eeff5b4ec9afd2e7a6198a",
+      "apps/studio/src/App.tsx": "5570aa375c4a0e2ba193ded97482283447654ddfb1faae37568d5013f48d29a1",
+      "apps/studio/src/ApprovalPanel.tsx": "bdf42e5ccfa214e09d601b6338e32fcc1c0abbc3c5f0b4b50ad961228585860f",
+      "apps/studio/src/AssetPanel.tsx": "2a3b342df7ff23571e8a69f8eda2746bd389de3e33ba7614bd7c2a6ac428fc54",
+      "apps/studio/src/CandidatePanel.tsx": "dab7c63f33abb0fd48340feec6bc8536ccd0bd8d91d127d0dfa3c86ee41f2161",
+      "apps/studio/src/CheckPanel.tsx": "49890236f544c4ee7e314b576c0218657d8c3987ae5ed819ddae4539cf286706",
+      "apps/studio/src/EventCenter.tsx": "d33bb8f541cdf46bf296c0e3a38691b0548b2a0fc6f272034725ed52ec30a22b",
+      "apps/studio/src/PointSpeak.tsx": "74a24af767c54e200aa5aab48a51d7f6c8da456098b3e20683b2706a454fa658",
+      "apps/studio/src/SceneEditor.tsx": "15f85e01917a44a61f65219f8ea23674091b298fbc8b1d0a21aba6c9f8a2d863",
+      "apps/studio/src/SpeechInput.tsx": "9670845109adf0c31132ea21e045b5dc62eca0670149b6b666aff46daf12c205",
+      "apps/studio/src/adoption-gate.test.ts": "2ebc64f22c786743dde099f4e7042a1897fc34e6500498b6b5b1314aaf98d80d",
+      "apps/studio/src/adoption-gate.ts": "fbd2003f8eb56673bbc6c964a3215d6475b35b88a368009efb43597b18e1c716",
+      "apps/studio/src/api.ts": "d21616983081aa138b9fb91bd2ff1a41600736ffe48d3d9ecc75aa08d02425d0",
+      "apps/studio/src/approval-render.test.tsx": "610532b3c9f2e611140d485f5f551a4ae82ec4aa2a00e92832125cec0af3d0ce",
+      "apps/studio/src/approval-state.test.ts": "c4cb2704dc229653f2567ab2b6a262b134462181fcb13c81f3020cb40237214f",
+      "apps/studio/src/approval-state.ts": "e3889fb3d2c26b96a8a3916bfd3d518ef674713302aa8bb8341890d71c004a4b",
+      "apps/studio/src/assets.css": "f72d8bbe81686926a5ccaa92777564022718f63485df212b591fba0974d2d339",
+      "apps/studio/src/check-evidence.test.ts": "bd6ad35a5a3a0d1eb73b0b390958694d21e6e76275e9e6e021db1720430e9b55",
+      "apps/studio/src/check-render.test.tsx": "21429486c529adf3d241aa6aa5a5f243af8a105f2f3b9e0929dc76f52c1c8f93",
+      "apps/studio/src/check-state.test.ts": "f692071328dbc381f0603476579560b15c8aac9e9582547485dbbc82f5411b00",
+      "apps/studio/src/check-state.ts": "580a98611ef290e2d7f83ca622ec977e51cf594b05b04cca2d1f3a6eb7d89fce",
+      "apps/studio/src/dev-proxy.test.ts": "fd30e714ed45221162ada3bae2f64576540d7350a0e712388f1eb5116a05f71f",
+      "apps/studio/src/diff-render.test.tsx": "5b9d1bb3da3f1442a0b5354fc0079f9b75993de4ba2de4bd06c8728fc762d3a0",
+      "apps/studio/src/diff.test.ts": "02ead92469c0179f18731c57526951f21a32649b6d0233093cddb65880bd4b9d",
+      "apps/studio/src/diff.ts": "d7d17b7a8262d7a4808e9ccfbff23e7c343ec75f188837ec73a0b1718c7c838e",
+      "apps/studio/src/m2-state.test.ts": "0a70b252d362ac90410167af13734a582bed4ea4a9e6fd7337a601f604c82aa2",
+      "apps/studio/src/m2-state.ts": "4d2da0b18fbb52f810e73f094cd736b8b1a6cbc45235e1d038881f6e4b299611",
+      "apps/studio/src/main.tsx": "7421558f4a7228c37aa94e01ec12c94330a9a7edfecac2c08f0e9735cb4e8554",
+      "apps/studio/src/model-provenance.tsx": "6faddc7baee411ba178592baac796e5badade4bc59f72216c66a5379ca7337d9",
+      "apps/studio/src/mutation-locks.ts": "ac5a9c7682cd1cf37fd30f77916c56cc64a7f15490dce314282a2daf3fdf8ff4",
+      "apps/studio/src/pick-state.test.ts": "56fbac545abd811d209d31c92f37a5b9caac351fa085fc63a62930844339b9cd",
+      "apps/studio/src/pick-state.ts": "107291e5605a4ef948fb11c3b105f67b6fe4781bf46b93c6ade0da6232ca763b",
+      "apps/studio/src/preview-origin.ts": "72d5d75a34bc1ce245fb33e56464b1ad96dbf18d769bfc9c0e073385f2bc2b74",
+      "apps/studio/src/scene-draft.test.ts": "659c2d379d78e4dc089c08780b11e82ee464191ce6ec3b6d7f5f9ebb42e1c0cd",
+      "apps/studio/src/scene-draft.ts": "bbfdd082cbc0979a3c76ad4041b5d511733dc644085a28ba56c96cecbb49d991",
+      "apps/studio/src/scene-editor.css": "264b461bfa27b8a5d0b62c8f5022e5985185b5406779e0495453c7e0b14d4f1b",
+      "apps/studio/src/speech-api.test.ts": "4102e8f681ab48e2d33f323f6a121868fa41eb8e804b6cca01724a171b09b450",
+      "apps/studio/src/speech-api.ts": "d0dd4eb1c7f8ac0475e22f3f1f35e7273e45f0832f06de24423e53b4a7a1de2c",
+      "apps/studio/src/speech-app.browser.test.ts": "510eaa969b67cbb276c22322d4961ce6452f1b11bd69f9223c427d016229907c",
+      "apps/studio/src/speech-browser.test.ts": "388e7a02dc1b001604110836b3a791f4bbf01809c67b28f3313f2c27a4e143a9",
+      "apps/studio/src/speech-input.css": "1ef3ef856e09a4cc5b71cfe28a03086ef0d656389b58231ec7de2909e84ef583",
+      "apps/studio/src/speech-input.test.ts": "89c9f700d9bd30d1ed5ca1b1e469b1f76bec928943ce9756d9add3b3cc5c39d8",
+      "apps/studio/src/speech-input.ts": "82586716ace5944d3a117caca908b42934e967e0973cd691e6b5f66b04130b07",
+      "apps/studio/src/speech-render.test.tsx": "0d460c130e9de7459c4e745339049cb98e34b5a84f55b8614e7ad850df362021",
+      "apps/studio/src/speech-review.test.ts": "6de9738232f8581e50924827d729138f1dd6d94fb2d32f79ccf99e2b3872a1e5",
+      "apps/studio/src/speech-review.ts": "ac64756d9b9b98dcfbe2ffafac781f71b74f2be29f73613c396107e5d3549590",
+      "apps/studio/src/style.css": "9c73a0a05915b26b24e2de4659a7f346d733d1b52f857bac8bb535ea5122ddf6",
+      "apps/studio/src/sync-state.test.ts": "78faca71bbe291b97a626ac0674cc2b385ae68aa1b59d349b98498cd913f4534",
+      "apps/studio/src/sync-state.ts": "7c3d04ba9ccd3d7b18d3e3165d93fa51c9debb2700071941bcae520c9ba193f6",
+      "apps/studio/src/test-support/speech-app.tsx": "a14adaddf3a6c51f7e80c44b082483c677d9bc772180b4f611da0da70be1fe05",
+      "apps/studio/src/test-support/speech-browser-fixture.ts": "1bfeb9e9944a80ec85fd34484a93e8d9947d9c2234acfd1493c251c6bbdc0c65",
+      "apps/studio/src/test-support/speech-center.tsx": "a49078bc21854db570a67becb72559852f7ea013795608b76201babae0077fb5",
+      "apps/studio/src/test-support/speech-fakes.ts": "a7d2cc54973cf43fc8769220b4e804b377cef72eb3791a6a0ae2797dbff4615c",
+      "apps/studio/src/test-support/speech-harness.tsx": "7520fb9285e62c44ac1a0ad732d2da71838b5826604dc32157b8cd578a7abe55",
+      "apps/studio/tsconfig.json": "7815a6f9e2993592862782b1148d28bcad2829ad1b37662dde39df84aabc664b",
+      "apps/studio/verify-proxy-isolation.mjs": "b6503c51a8772a1acbf116f2da12da3152f4c21873525f8e5ad4b51328457709",
+      "apps/studio/vite.config.ts": "a63a8e3ff729d2efc0386ed35eded1f28fdcdd4aa91d2ba69f0052492e03fa48",
+      "package.json": "c080c92609ba44ba4cb31c48b11054d5506d4e4d3fac2c5730e1a659b49fcacc",
+      "packages/bridge/package.json": "94398bf8aaf7dd3a38f1c60fcfc633621d92186b354ee325d843328f673225e4",
+      "packages/bridge/src/index.test.mjs": "960a5e5625763293fe6b70cc013867ffca6690bedd1d19a280abe98d26deb7be",
+      "packages/bridge/src/index.ts": "8361260b0e7860e296fd216cb3d6337789ae076d79c1cf80373f2208505b3f75",
+      "packages/bridge/tsconfig.json": "905cfe1a4ed8daedd8037b43078b77f46acdefcb6504f5d2ecb621b7fd5e9c6f",
+      "packages/scene-renderer/package.json": "4ea69f48764f358cb78ee2d4dce6afa44a47a75a213bb5182e9a5b7ac73b40a4",
+      "packages/scene-renderer/src/index.tsx": "288cd3fa650d8cc04fa719ef3c1699083f52e41e88ff21a1c527aee1721b7b33",
+      "packages/scene-renderer/src/pose.test.ts": "b5e5c07dd6cb93e71bd32b7576e3225577c02cdace9a9ff6c88ebc6afa55b5cb",
+      "packages/scene-renderer/src/pose.ts": "783a3ddd94a32312d8386272620527c62ef15b67898005a3e563e857edd6f16e",
+      "packages/scene-renderer/tsconfig.json": "5fdd7494df924db0a7ef00b5b6b71b7cd0ea120e1555d03e49fc10de14929be5",
+      "packages/shared/package.json": "00673ab032bce1e3fc769e1d50fda3b657973b76a1694acdae5b3edff0f3564d",
+      "packages/shared/src/index.ts": "500f471e6befbab8f241b68c00f02bee2e25875d8863d7ac80968cd5ec86a648",
+      "packages/shared/src/scene-config.test.ts": "5a77a9d01b5fd4628c5e587d235fa3ad5101b201aa0b40820198fa6e8c24ef26",
+      "packages/shared/src/scene-config.ts": "305c1727200fa5486a2e1afdd4065b7cabc0ce62e352e440f837eca11b7f07e2",
+      "packages/shared/src/scene-edit.test.ts": "c85234518c37b3c6c2aa49d9514b7291c53d184f8d3c623e56573097f7f95ea7",
+      "packages/shared/src/scene-edit.ts": "dc9062c57b8b522676b33b62d0e730b4f73063c48cd04a2e74395b062d6c4556",
+      "packages/shared/tsconfig.json": "5fdd7494df924db0a7ef00b5b6b71b7cd0ea120e1555d03e49fc10de14929be5",
+      "packages/vite-plugin-source-tag/package.json": "590f9c2b4bae6553780db52402e31c4722b2e885a517eeeb1ac08c0456fafac9",
+      "packages/vite-plugin-source-tag/src/component-name.test.ts": "57c06bfa11ca703de1cc7a4f398e1f378911c9cc410ff408ecf6b5e78d080c7b",
+      "packages/vite-plugin-source-tag/src/index.test.ts": "a50bf0757e22092e68cf0aba231967bb55274f9242612aede0a5da5bd0366814",
+      "packages/vite-plugin-source-tag/src/index.ts": "6488564762d532c312aeb2259340415997f10d30e9fcc72377b2b0a10b2a337c",
+      "packages/vite-plugin-source-tag/src/reserved-jsx-r2.test.ts": "0834e884a17fff55aa8b91df7e3562ae091a65382c66ddf2b236ab6f515a8736",
+      "packages/vite-plugin-source-tag/tsconfig.json": "905cfe1a4ed8daedd8037b43078b77f46acdefcb6504f5d2ecb621b7fd5e9c6f",
+      "pnpm-lock.yaml": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "scripts/demo/backend.mjs": "c99912612e9e2673631a5b51bb1d0f6ce4f79b8200fa2a70e64688baec105e62",
+      "scripts/demo/body.test.mjs": "4785de65ef8256aada48b6effa7082e0c24d2e8cb2be39af31a01dded38b1895",
+      "scripts/demo/frontends.mjs": "54f6f7924e25149b914c9e8093955c8c99d3d34462541c0455b11a368234ef46",
+      "scripts/demo/launch.mjs": "14cb7435182f087749737ac99458fe56758ec637a445a0bf9dc0c22f4c3836d0",
+      "scripts/demo/mock.mjs": "fda82ff02872381129122885268391c81ceb0c836a644b76b5c964e8ecdcf6e7",
+      "scripts/demo/mocks.mjs": "fdd96dcfe0cefdfb790eb92433b89ac651c7530015898213c591740e21a849f9",
+      "scripts/demo/network-guard.cjs": "257759d9d88610d9e0bc67efe3397817f1bc7df8b91af39ecc5e9b4c42727518",
+      "scripts/demo/prepare.mjs": "e90178f3a028551a05b78b998855ccf9ade69de1f1a9f39e732204f9ac4c63ef",
+      "scripts/demo/real.mjs": "c8503d97bc32ca60c50a9e6704d424b3547257d8501ce8bd8a50bcc7ed021e80",
+      "scripts/demo/runtime.mjs": "94c7cfdd66c1a8162d8075c2d95adc595a38a740f180ba354a05222057db4871",
+      "scripts/demo/safety.mjs": "184cd4d668621d87a4ac38032d76ab544f0326ee113ffea1bbeb6cc3fd2c4e5e",
+      "scripts/demo/safety.test.mjs": "31d6a96cadd9ad552e7114f3fc01a86cbf68898cb31f54ab73daed470273ff8c",
+      "templates/product-page/index.html": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b",
+      "templates/product-page/package.json": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c",
+      "templates/product-page/public/assets/diffuser-4969889.glb": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46",
+      "templates/product-page/public/assets/diffuser-4969889.provenance.json": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333",
+      "templates/product-page/public/assets/parts.json": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49",
+      "templates/product-page/src/App.tsx": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778",
+      "templates/product-page/src/components/Button.tsx": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412",
+      "templates/product-page/src/components/ProductHero.tsx": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369",
+      "templates/product-page/src/main.tsx": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57",
+      "templates/product-page/src/scene-config-store.ts": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4",
+      "templates/product-page/src/scene.config.json": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a",
+      "templates/product-page/src/style.css": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc",
+      "templates/product-page/tsconfig.json": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0",
+      "templates/product-page/vite.config.ts": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+    }
+  },
+  "identityUnchanged": true,
+  "finished": "2026-11-15T16:04:52.737Z"
+}
