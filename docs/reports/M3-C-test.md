@@ -218,3 +218,64 @@
 
 > 说明：这两次定向轮只证明"该用例的截断恢复前提已修正且能通过"，**不构成** M3-C 的验收结论；
 > 正式判定仍取决于随后从头执行的 12 步 174 例全量回归。
+## 12. 正式结论：M3-C 第二正式轮全量通过（12 步 / 174 例 + 501 单测）
+
+- 作业 `job_01305fef`，run `docs/reports/artifacts/M3-C/regression/2026-11-15T03-24-30-188Z-full/`，
+  总时长 21m22s，`exit 0`。
+- 受测 HEAD `9294cccfa9ab1212619a28b23f368ea5af1f0da6`：测试侧修正为 `fb906ea`，`9294ccc` 只是其上的 docs/证据归档，
+  **不含任何代码改动**；后续归档提交同样只新增 docs/证据，不改受测代码。
+- 身份基线：`identity = cf5b92b3cd7f…`、锁 SHA256 `67af36b7…18960`；12 步 `code=0`、`identityStable=true`、`report.ok=true`。
+
+### 12.1 计数（逐份原始 JSON 复核）
+
+| 步骤 | 结果 | 计数 |
+| --- | --- | --- |
+| typecheck | exit 0 | — |
+| build | exit 0 | — |
+| 全量单测 | exit 0 | **501** = shared 68 + vite-plugin-source-tag 20 + scene-renderer 5 + bridge 1 + server 321 + studio 86 |
+| M0-B | exit 0 | 24 |
+| M0-A | exit 0 | 27 |
+| M1-A | exit 0 | 7 |
+| M1-B | exit 0 | **23（本轮冻结身份真实重跑，非历史 GREEN 抵扣）** |
+| M2-A | exit 0 | 35 |
+| M2-B | exit 0 | 12（含上一轮失败的"历史截断"用例） |
+| M3-A | exit 0 | 11 |
+| M3-B | exit 0 | 7 |
+| M3-C | exit 0 | 28 = **real 20 / mock 8**（按 spec 文件分类） |
+| **E2E 合计** | | **174** |
+
+独立复核脚本逐 test 递归检查九套原始 JSON：`errors[]` 为空、`expectedStatus='passed'`、`test.status='expected'`、
+**恰好一条** `results` 且 `status='passed'`、`retry=0`、`result.errors` 为空、`stats.skipped|unexpected|flaky=0`、
+`stats.expected` 与逐条计数一致 → **problems 为空**。结果落在同目录 `verification.json`。
+
+### 12.2 身份、产品基准与清理
+
+- 产品/锁相对受审实现 `393fe9f`：`git diff --name-only 393fe9f HEAD -- apps packages templates pnpm-lock.yaml` = **0**；
+  `HEAD:apps = 8df06a9b57fd8e00e98a0eb946ad9b6b5c8f64a8`；根主线 `2db6d59` 仍是祖先。
+- 收尾观测（`cleanup.json`）：3001/4011/5173/5174/5175 **无监听**；本工作树**无自有 node/chrome 残留**；
+  `templates`、`apps/studio`、`apps/server` 工作区干净；`scene.config.json` 复原（哈希已记录）；
+  临时 `.git/info/exclude` **无本轮路径残留**；`fallback/` 仍未入库（`?? fallback/`）。
+- 本轮未广杀任何进程：没有需要清理的自有残留，故未执行额外 kill。
+
+### 12.3 归档
+
+- 本轮原件齐备：`manifest.json`/`manifest.log`、九套 `e2e-*-results.json` + `e2e-*-log` + `e2e-*-output/`、
+  `unit.log`/`typecheck.log`/`build.log`、`evidence-refresh/`（各套刷新的历史证据新字节）、
+  `launcher/`（job 的 `cmd`/`exit`/`job.json`/`output.log`）、`verification.json`、`cleanup.json`、
+  `sha256-manifest.json`（**189 个文件**逐字节 SHA256）。
+- 历史不改写：第一正式轮失败原件（`…21-19-15-445Z-full`）、collect 原件、两次定向轮原件均保持原样。
+
+### 12.4 边界（写实）
+
+- 浏览器覆盖**仅 Chromium**（1440×900、deviceScaleFactor 1），不声明跨浏览器。
+- 本轮**没有新增真实后端重启**覆盖；重启/断线恢复仍引用历史 M3-A 证据与页面 reload 路径；
+  "过时后端快照"不在本轮合同内。
+- 模型上游全部是本机 loopback mock + fake key；Lux3D 指向无人监听的 loopback 端口；
+  **无任何真实模型/语音/Lux3D 付费调用**；未读真实 `apps/server/.env`、`orbital/ASKS.md` 或凭据。
+- Claude 的 4 条非阻断建议保留给后续（M4）打磨，本轮不新增用例、不改产品。
+
+### 12.5 判定
+
+在"mock 上游 + 本机 loopback + 仅 Chromium"这一已声明范围内，**M3-C 第二正式轮 12 步全部通过**：
+501 单测 + 174 例 E2E（M3-C real 20 / mock 8），身份稳定、产品与受审实现零差异。
+本分支不自行合并；合并与设计收口由 Codex 执行。

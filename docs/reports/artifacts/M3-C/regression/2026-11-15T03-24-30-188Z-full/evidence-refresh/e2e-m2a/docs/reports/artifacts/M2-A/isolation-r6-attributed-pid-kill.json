@@ -1,0 +1,122 @@
+{
+  "environment": {
+    "head": "9294cccfa9ab1212619a28b23f368ea5af1f0da6",
+    "baselines": [
+      "5377b52",
+      "81558a7"
+    ],
+    "files": [
+      {
+        "file": "apps/server/src/work/preview.ts",
+        "headHash": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+        "baselines": {
+          "5377b52": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde",
+          "81558a7": "08487d8d4cce5639bbdd9729f595bbfb3a5fe8a53d39aa6e7adac59933ef8fde"
+        },
+        "identicalToAllBaselines": true
+      },
+      {
+        "file": "apps/server/src/work/preview-worker.ts",
+        "headHash": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+        "baselines": {
+          "5377b52": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f",
+          "81558a7": "a0ef69aa0f760304510c233a7a79bd832daadf828773ccb82ac1f7e13cdf291f"
+        },
+        "identicalToAllBaselines": true
+      }
+    ],
+    "identicalToAllBaselines": true
+  },
+  "kind": "backend-pid-only",
+  "backend": {
+    "pid": 13504,
+    "created": "2026-11-15T11:35:33.6441210+08:00",
+    "base": "http://127.0.0.1:29882",
+    "previewOrigin": "http://127.0.0.1:26960"
+  },
+  "candidate": {
+    "id": "611c9e67d89c4b80b4945f8bc7d13083",
+    "previewUrl": "/preview/c/611c9e67d89c4b80b4945f8bc7d13083/"
+  },
+  "preview": {
+    "originStatus": 200,
+    "workerPorts": [
+      6523
+    ],
+    "directStatuses": [
+      {
+        "port": 6523,
+        "status": 200
+      }
+    ]
+  },
+  "worker": {
+    "pid": 36232,
+    "ppid": 13504,
+    "created": "2026-11-15T11:35:36.8992740+08:00",
+    "summary": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m3c-acceptance\\apps\\server\\src\\work\\preview-worker.ts E:\\�ռ仯AI����̨\\.worktrees\\m3c-acceptance\\node_modules\\.pnpm\\vite@"
+  },
+  "oldMetric": {
+    "oldStyleCount": 3,
+    "matcher": {
+      "selfPid": 44948,
+      "selfMatched": true,
+      "pids": [
+        66664,
+        44948
+      ],
+      "nodePids": [
+        66664
+      ]
+    },
+    "nodePidsOtherThanDecoy": [],
+    "note": "实际 worker 的命令行含 preview-worker.ts 与 vite.js，缓存目录只在环境变量里，旧口径看不见它"
+  },
+  "decoy": {
+    "pid": 66664,
+    "created": "2026-11-15T11:35:32.6432320+08:00",
+    "summary": "E:\\Node\\node.exe -e \"setInterval(() => {}, 1000)\" vite.js preview-cache-d3-decoy",
+    "alive": true
+  },
+  "kill": {
+    "method": "taskkill /F /PID 13504（无 /T）",
+    "killStartedAtWall": "2026-11-15T03:35:40.858Z",
+    "killCommandDurationMs": 162,
+    "snapshots": [
+      {
+        "label": "immediately-after-kill-command",
+        "requestedOffsetMs": 0,
+        "sampleStartedOffsetMs": 163,
+        "sampleFinishedOffsetMs": 655,
+        "alive": []
+      },
+      {
+        "label": "confirm-at-1000ms",
+        "requestedOffsetMs": 1006,
+        "sampleStartedOffsetMs": 1006,
+        "sampleFinishedOffsetMs": 1550,
+        "alive": []
+      }
+    ],
+    "gone": true,
+    "stillAlive": [],
+    "firstSnapshotAlive": [],
+    "aliveLastSeenAtMs": null,
+    "goneFirstSeenAtMs": 655,
+    "timingNote": "快照只说明采样时仍存活/已消失；真实退出时刻位于最后一次存活快照与首次消失快照之间，不把标签当精确退出时间",
+    "previewStatusAfter": 0,
+    "leftoverIdentities": [],
+    "decoyAliveAfter": true,
+    "matcherAfter": {
+      "selfPid": 33288,
+      "selfMatched": true,
+      "pids": [
+        66664,
+        33288
+      ],
+      "nodePids": [
+        66664
+      ]
+    }
+  }
+}

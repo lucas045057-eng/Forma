@@ -1,0 +1,11 @@
+{
+  "startSeq": 98,
+  "currentAfterAdopt": 107,
+  "versionAfterAdopt": "9c3b21745be924040ebcc5eea078a51a14e6bafd",
+  "historyRequests": [
+    "http://127.0.0.1:5173/events/history?since=98"
+  ],
+  "eventsSeqText": "107",
+  "workVersionText": "9c3b21745b",
+  "candidateStillPending": false
+}

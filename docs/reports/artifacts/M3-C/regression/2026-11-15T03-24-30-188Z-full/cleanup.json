@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-15T03:51:31.643Z",
+  "runDir": "docs/reports/artifacts/M3-C/regression/2026-11-15T03-24-30-188Z-full",
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "templateAndAppsStatus": "",
+  "sceneConfigSha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a",
+  "sceneConfigHasDefaultHero": true,
+  "excludeHasRunPaths": false,
+  "fallbackUntracked": [
+    "?? fallback/"
+  ],
+  "head": "9294cccfa9ab1212619a28b23f368ea5af1f0da6",
+  "productDiffVsAccepted": []
+}

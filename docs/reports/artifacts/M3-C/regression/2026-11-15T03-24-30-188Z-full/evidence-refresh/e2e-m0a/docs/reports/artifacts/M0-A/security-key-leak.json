@@ -1,0 +1,18 @@
+{
+  "sentinel": "mock-only",
+  "leaks": [],
+  "authorizationHeader": [],
+  "modelHeaders": {
+    "cache-control": "no-cache",
+    "connection": "keep-alive",
+    "content-type": "model/gltf-binary",
+    "date": "Sun, 15 Nov 2026 03:29:58 GMT",
+    "keep-alive": "timeout=72",
+    "transfer-encoding": "chunked"
+  },
+  "eventCount": 1,
+  "mockStats": {
+    "creates": 5,
+    "gets": 24
+  }
+}
