@@ -156,3 +156,7 @@ download.test.ts 完整11项 passed、failed0、pending0；下载阶段没有守
 本次精确docs-only提交，最终归档HEAD由交付回报提供。**它不是受测HEAD d005c23**，没有为该新文档提交重跑标准测试。相对cb2237a的apps/packages/templates/tests/依赖清单/锁零diff，产品apps树应保持 `5dbf6d65e388daf36409565e08957900c4777fd1`；锁实际SHA256保持 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960`，提交后tracked应干净。
 
 后续由Codex交Claude只读代码审查，之后仍需Pi独立验收。当前只有实现侧mock/loopback标准验证通过；未读取真实.env/ASKS/凭据、未调用真实阿里语音或付费模型/Lux3D，无真实语音质量或Pi E2E结论。D1尚未正式收口，不自行merge、不开展D2–D5，项目及M4不能标为全部完成。
+
+## 后续统一M4开发的静态兼容修正（不改写上述历史）
+
+用户后来授权连续完成D2–D5再集中测试。为独立Node入口的TypeScript擦除兼容，SpeechError和SpeechService的构造器参数属性改成显式字段与赋值，未改D1端点、错误码、预算、缓存或取消/关闭规则。本次没有原生导入、类型、构建或测试运行，因此原547通过/独立审查结论只对应其原冻结字节，不能外推覆盖这次及D3–D5的新增代码。完整交付与待集中验证见M4-development-handoff.md。

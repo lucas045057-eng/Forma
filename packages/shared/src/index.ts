@@ -25,6 +25,17 @@ export interface ModelMetrics {
   bounds: { min: number[]; max: number[] };
 }
 export type AssetStatus = 'submitting' | 'submit_unknown' | 'polling' | 'downloading' | 'processing' | 'ready' | 'failed' | 'cancelled';
+export interface AssetProvenance {
+  kind: 'fallback' | 'lux3d' | 'unknown';
+  presetId?: string;
+  sourceTaskId?: string;
+  sourceHash?: string;
+  outputHash?: string;
+  importedAt?: string;
+}
+export interface ModelProvenance extends AssetProvenance { schemaVersion: 1; note?: string }
+export interface ModelProvenanceView { model: string; verified: boolean; provenance: ModelProvenance; reason?: string }
+export interface FallbackPreset { id: string; title: string; available: boolean; description: string; reason?: string }
 export interface Asset {
   id: string;
   taskId?: string;
@@ -33,6 +44,7 @@ export interface Asset {
   updatedAt: string;
   modelUrl?: string;
   metrics?: ModelMetrics;
+  provenance?: AssetProvenance;
   error?: { code: string; message: string };
 }
 export interface AssetEvent {

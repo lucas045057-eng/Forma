@@ -1,9 +1,12 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, open, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, open } from 'node:fs/promises';
 import { writeAtomic } from './atomic-file.ts';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { Asset, AssetEvent, ModelMetrics } from '@spatial/shared';
+import type { Asset, AssetEvent, AssetProvenance, FallbackPreset, ModelMetrics } from '@spatial/shared';
+import {assertPlainPath,readPlainFile} from '../checks/paths.ts';
+import {FALLBACK_PRESETS,DEFAULT_FALLBACK_DIRECTORY,readFallback,sha256} from './fallbacks.ts';
+import {cleanAssetProvenance} from './provenance.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './lux3d.ts';
 import { downloadGlb } from './download.ts';
 import { processModelIsolated } from './process-isolated.ts';
@@ -14,6 +17,10 @@ type RecordEntry = Asset & { keyHash?: string; fingerprint?: string; deadline?: 
 export interface ServiceOptions {
   directory: string;
   client: Lux3DClient;
+  fallbackDirectory?: string;
+  /** Internal fixture digests only; production AppOptions/HTTP/env do not expose this. */
+  presetDigests?: Readonly<Record<string,string>>;
+  mockUpstream?: boolean;
   pollMs?: number;
   timeoutMs?: number;
   downloadTimeoutMs?: number;
@@ -25,7 +32,7 @@ const safeId = /^[a-zA-Z0-9_-]{1,80}$/;
 export function validAssetId(id: string) { return safeId.test(id); }
 function publicAsset(entry: RecordEntry): Asset {
   const { keyHash: _key, fingerprint: _fingerprint, deadline: _deadline, ...asset } = entry;
-  return structuredClone(asset);
+  return structuredClone({...asset,provenance:cleanAssetProvenance(asset.provenance)});
 }
 function failure(error: unknown): { code: string; message: string } {
   return error instanceof AssetError ? { code: error.code, message: error.message } :
@@ -40,6 +47,7 @@ export class AssetService {
   private jobs = new Map<string, Promise<void>>();
   private abort = new AbortController();
   private sequence = 0;
+  private jobFailure?: unknown;
   private releaseLock?: () => Promise<void>;
   constructor(options: ServiceOptions) { this.options = options; }
   async init() {
@@ -60,6 +68,9 @@ export class AssetService {
         entry.status = 'failed';
         entry.modelUrl = undefined;
         entry.error = { code: 'MODEL_MISSING', message: '模型文件缺失，请按原任务编号重新导入修复' };
+      }
+      if (!entry.taskId && ['polling', 'downloading', 'processing'].includes(entry.status)) {
+        entry.status='failed';entry.error={code:'LOCAL_IMPORT_INTERRUPTED',message:'本地处理被中断，请明确重新导入备用资产'};entry.modelUrl=undefined;
       }
       if (entry.taskId && ['polling', 'downloading', 'processing'].includes(entry.status)) {
         entry.status = 'polling';
@@ -98,6 +109,7 @@ export class AssetService {
   get(id: string) { const entry = this.entries.find(item => item.id === id); return entry ? publicAsset(entry) : undefined; }
   private async modelExists(entry: RecordEntry) {
     try {
+      if(entry.provenance?.outputHash){const denied=()=>new AssetError('ASSET_PATH_DENIED','资产路径未通过检查');const bytes=await readPlainFile(path.join(this.options.directory,entry.taskId??entry.id,'model.glb'),100*1024*1024,denied,denied,this.abort.signal);return sha256(bytes)===entry.provenance.outputHash;}
       const file = await open(path.join(this.options.directory, entry.taskId ?? entry.id, 'model.glb'), 'r');
       try { const info = await file.stat(); return info.isFile() && info.size > 0; }
       finally { await file.close(); }
@@ -123,7 +135,7 @@ export class AssetService {
       await this.save();
       try {
         const taskId = input.prompt ? await this.options.client.createTextTo3d(input, this.abort.signal) : await this.options.client.createImgTo3d(input, this.abort.signal);
-        await this.update(entry, { taskId, status: 'polling', deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
+        await this.update(entry, { taskId, status: 'polling', provenance:{kind:this.options.mockUpstream?'unknown':'lux3d',sourceTaskId:taskId,importedAt:entry.createdAt}, deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
         this.start(entry);
       } catch (error) {
         await this.update(entry, { status: 'submit_unknown', error: failure(error) });
@@ -140,26 +152,48 @@ export class AssetService {
       const now = new Date().toISOString();
       const entry: RecordEntry = existing ?? { id: `lux3d-${taskId}`, taskId, status: 'polling', createdAt: now, updatedAt: now };
       if (!existing) this.entries.push(entry);
-      await this.update(entry, { status: 'polling', modelUrl: undefined, error: undefined, deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
+      await this.update(entry, { status: 'polling', modelUrl: undefined, error: undefined, provenance:{kind:this.options.mockUpstream?'unknown':'lux3d',sourceTaskId:taskId,importedAt:entry.provenance?.importedAt??now}, deadline: Date.now() + (this.options.timeoutMs ?? 900_000) });
       // Re-import always queries current remote state before downloading; it never creates another paid task.
       this.start(entry);
       return publicAsset(entry);
     });
   }
-  async importLocal(input: string, id: string): Promise<Asset> {
-    if (!validAssetId(id)) throw new AssetError('INVALID_ID', '本地资产编号无效');
-    const existing = this.entries.find(entry => entry.id === id);
-    if (existing && (existing.taskId || existing.status !== 'failed')) throw new AssetError('ASSET_EXISTS', '该本地资产编号已存在');
-    const now = new Date().toISOString();
-    const entry: RecordEntry = existing ?? { id, status: 'processing', createdAt: now, updatedAt: now };
-    if (!existing) this.entries.push(entry);
-    await this.update(entry, { status: 'processing', error: undefined });
-    try {
-      const directory = path.join(this.options.directory, id);
-      await mkdir(directory, { recursive: true });
-      await copyFile(input, path.join(directory, 'raw.glb'));
-      await this.process(entry);
-    } catch (error) { await this.update(entry, { status: 'failed', error: failure(error) }); }
+  async listFallbacks():Promise<FallbackPreset[]> {
+    return Promise.all(FALLBACK_PRESETS.map(async preset=>{
+      try {await readFallback(this.options.fallbackDirectory??DEFAULT_FALLBACK_DIRECTORY,preset.id,this.abort.signal,this.options.presetDigests);return {id:preset.id,title:preset.title,available:true,description:'备用资产，预先生成；时间未记录'};}
+      catch {return {id:preset.id,title:preset.title,available:false,description:'备用资产，预先生成；时间未记录',reason:'本地文件缺失、过大或未通过路径/格式检查'};}
+    }));
+  }
+  importFallback(presetId:string):Promise<Asset> {
+    return this.exclusive(async()=>{
+      const {binary,sourceHash}=await readFallback(this.options.fallbackDirectory??DEFAULT_FALLBACK_DIRECTORY,presetId,this.abort.signal,this.options.presetDigests);
+      return this.prepareLocal(binary,`fallback-${sourceHash.slice(0,24)}`,{kind:'fallback',presetId,sourceHash,importedAt:new Date().toISOString()});
+    });
+  }
+  async importLocal(input:string,id:string):Promise<Asset> {
+    if(!validAssetId(id))throw new AssetError('INVALID_ID','本地资产编号无效');
+    const asset=await this.exclusive(async()=>{
+      const bytes=await readPlainFile(input,32*1024*1024,()=>new AssetError('LOCAL_PATH_DENIED','本地模型路径不得包含链接'),()=>new AssetError('MODEL_TOO_LARGE','本地模型超过32MiB'),this.abort.signal);
+      return this.prepareLocal(bytes,id,{kind:'unknown',sourceHash:sha256(bytes),importedAt:new Date().toISOString()});
+    });
+    await this.jobs.get(asset.id);
+    return this.get(asset.id)!;
+  }
+  private async prepareLocal(binary:Buffer,id:string,provenance:AssetProvenance):Promise<Asset> {
+    this.abort.signal.throwIfAborted();
+    const fingerprint=sha256(binary);const existing=this.entries.find(entry=>entry.id===id);
+    if(existing?.taskId||existing&&existing.fingerprint!==fingerprint)throw new AssetError('ASSET_EXISTS','本地资产编号已用于不同的内容');
+    if(existing&&(this.jobs.has(id)||existing.status==='ready'&&await this.modelExists(existing)))return publicAsset(existing);
+    const now=new Date().toISOString();const entry:RecordEntry=existing??{id,status:'processing',createdAt:now,updatedAt:now,fingerprint};
+    if(!existing)this.entries.push(entry);
+    const directory=path.join(this.options.directory,id);
+    await assertPlainPath(directory,()=>new AssetError('LOCAL_PATH_DENIED','资产写入目录不得包含链接'),true);await mkdir(directory,{recursive:true});
+    const raw=path.join(directory,'raw.glb');await assertPlainPath(raw,()=>new AssetError('LOCAL_PATH_DENIED','资产文件不得包含链接'),true);
+    await this.update(entry,{status:'processing',modelUrl:undefined,error:undefined,provenance:existing?.provenance??provenance});
+    try {await writeAtomic(raw,binary);this.abort.signal.throwIfAborted();}
+    catch(error){await this.update(entry,{status:'failed',error:failure(error)});throw error;}
+    const job=this.process(entry).catch(async error=>{await this.update(entry,{status:this.abort.signal.aborted?'cancelled':'failed',modelUrl:undefined,error:this.abort.signal.aborted?{code:'LOCAL_IMPORT_CANCELLED',message:'本地处理已停止，请明确重新导入'}:failure(error)});}).finally(()=>this.jobs.delete(id));
+    this.jobs.set(id,job);void job.catch(error=>{this.jobFailure??=error;});
     return publicAsset(entry);
   }
   private start(entry: RecordEntry) {
@@ -170,7 +204,7 @@ export class AssetService {
     }).finally(() => this.jobs.delete(entry.id));
     this.jobs.set(entry.id, job);
     // A persistence failure must not become an unhandled rejection or expose upstream data.
-    void job.catch(() => {});
+    void job.catch(error => { this.jobFailure ??= error; });
   }
   private async run(entry: RecordEntry) {
     while (true) {
@@ -205,9 +239,16 @@ export class AssetService {
       ? await this.options.process(input, output)
       : await processModelIsolated(input, output, { signal: this.abort.signal });
     this.abort.signal.throwIfAborted();
-    await this.update(entry, { status: 'ready', metrics, modelUrl: `/assets/${entry.id}/model.glb?revision=${randomUUID()}`, error: undefined });
+    let provenance=entry.provenance;
+    if(!this.options.process||provenance?.kind==='fallback'){
+      const denied=()=>new AssetError('ASSET_PATH_DENIED','处理产物路径未通过检查');const large=()=>new AssetError('MODEL_TOO_LARGE','处理产物超过100MiB');
+      const [source,processed]=await Promise.all([readPlainFile(input,100*1024*1024,denied,large,this.abort.signal),readPlainFile(output,100*1024*1024,denied,large,this.abort.signal)]);
+      const origin:AssetProvenance=provenance??{kind:'unknown'};
+      provenance={...origin,sourceHash:sha256(source),outputHash:sha256(processed)};
+    }
+    await this.update(entry, { status: 'ready', metrics, provenance, modelUrl: `/assets/${entry.id}/model.glb?revision=${randomUUID()}`, error: undefined });
   }
-  async idle() { await Promise.allSettled([...this.jobs.values()]); await this.writes; }
+  async idle() { const results=await Promise.allSettled([...this.jobs.values()]); await this.writes; const failed=results.find((item):item is PromiseRejectedResult=>item.status==='rejected');if(this.jobFailure||failed)throw this.jobFailure??failed!.reason; }
   async close() {
     this.abort.abort(); await this.submissions; await this.idle();
     const release = this.releaseLock; this.releaseLock = undefined;

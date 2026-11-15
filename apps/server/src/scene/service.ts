@@ -6,6 +6,10 @@ import { isSceneConfig, sceneConfigSchema, type SceneConfig } from '@spatial/sha
 import { sceneDiff, type SceneChanged } from '@spatial/shared/scene-edit';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import type { AssetService } from '../assets/service.ts';
+import type {ModelProvenance,ModelProvenanceView} from '@spatial/shared';
+import {readPlainFile} from '../checks/paths.ts';
+import {parseProvenance,cleanAssetProvenance} from '../assets/provenance.ts';
+import {sha256} from '../assets/fallbacks.ts';
 
 export class SceneError extends Error {
   code: string;
@@ -122,6 +126,22 @@ export class SceneService {
       return this.commit(previous, next, 'undo', stack);
     });
   }
+  modelProvenance():Promise<ModelProvenanceView>{
+    return this.serial(async()=>{
+      await this.load();const config=await this.read();const model=config.model;
+      const unknown=(reason:string):ModelProvenanceView=>({model,verified:false,provenance:{schemaVersion:1,kind:'unknown'},reason});
+      const match=/^\/assets\/([a-zA-Z0-9_-]{1,80})\.glb$/.exec(model);if(!match)return {...unknown('当前模型没有可核实的本地来源'),model:''};
+      try {
+        const denied=()=>new SceneError('PATH_DENIED','来源路径未通过检查',403);
+        const file=await safeWorkPath(this.options.workRoot,`public/assets/${match[1]}.glb`);
+        const sidecar=await safeWorkPath(this.options.workRoot,`public/assets/${match[1]}.provenance.json`);
+        const [binary,metadata]=await Promise.all([readPlainFile(file,100*1024*1024,denied,denied),readPlainFile(sidecar,16384,denied,denied)]);
+        const provenance=parseProvenance(JSON.parse(metadata.toString('utf8')));
+        if(!provenance||provenance.outputHash!==sha256(binary))return unknown('来源记录无效或模型字节已变化');
+        return {model,verified:provenance.kind!=='unknown',provenance,...(provenance.kind==='unknown'?{reason:'未记录可核实来源'}:{})};
+      }catch{return unknown('来源缺失或未通过路径/字节检查');}
+    });
+  }
   adopt(service: AssetService, id: string, force: boolean) {
     return this.serial(async () => {
       if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) throw new SceneError('INVALID_ASSET', '资产编号无效');
@@ -129,13 +149,24 @@ export class SceneService {
       if (!asset || !source || asset.status !== 'ready') throw new SceneError('ASSET_NOT_READY', '模型尚未就绪', 409);
       if (asset.metrics?.webReady === false && !force) throw new SceneError('FORCE_REQUIRED', '模型超过网页门槛，需要明确强制采用', 409);
       const metadata = asset.metrics?.parts ?? { recognized: false, nodes: [], reason: 'No part metadata' };
-      const binary = await readFile(source);
+      const binary = await readPlainFile(source,100*1024*1024,()=>new SceneError('PATH_DENIED','资产模型路径含链接',403),()=>new SceneError('MODEL_TOO_LARGE','资产模型超过100MiB'));
+      const trusted=cleanAssetProvenance(asset.provenance);
+      if(trusted.outputHash&&trusted.outputHash!==sha256(binary))throw new SceneError('ASSET_CONTENT_CHANGED','资产处理产物已变化，请重新导入',409);
+      const provenance:ModelProvenance={schemaVersion:1,...trusted,outputHash:sha256(binary)};
       await this.load();
       const previous = await this.read();
       const next = { ...previous, model: `/assets/${id}.glb` };
       validateScene(next);
       const destination = await safeWorkPath(this.options.workRoot, `public/assets/${id}.glb`);
       const parts = await safeWorkPath(this.options.workRoot, `public/assets/${id}.parts.json`);
+      const sidecar=await safeWorkPath(this.options.workRoot,`public/assets/${id}.provenance.json`);
+      let provenanceBytes=Buffer.from(JSON.stringify(provenance,null,2)+'\n');
+      try {
+        const existingBytes=await readPlainFile(sidecar,16384,()=>new SceneError('PATH_DENIED','来源文件路径含链接',403),()=>new SceneError('ASSET_NAME_CONFLICT','已有来源记录无效',409));
+        const existing=parseProvenance(JSON.parse(existingBytes.toString('utf8')));
+        if(!existing||!(['kind','presetId','sourceTaskId','sourceHash','outputHash'] as const).every(key=>existing[key]===provenance[key]))throw new SceneError('ASSET_NAME_CONFLICT','作品已有同名但来源不同的模型',409);
+        provenanceBytes=existingBytes;
+      }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
       await mkdir(path.dirname(destination), { recursive: true });
       // Stable URLs are immutable: undo must not silently reference overwritten model bytes.
       try {
@@ -143,7 +174,10 @@ export class SceneService {
       } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
       await safeWorkPath(this.options.workRoot, `public/assets/${id}.glb`);
       await writeAtomic(destination, binary);
+      await safeWorkPath(this.options.workRoot,`public/assets/${id}.parts.json`);
       await writeAtomic(parts, JSON.stringify(metadata, null, 2));
+      await safeWorkPath(this.options.workRoot,`public/assets/${id}.provenance.json`);
+      await writeAtomic(sidecar,provenanceBytes);
       return this.commit(previous, next, 'write', [...this.state!.stack, previous]);
     });
   }

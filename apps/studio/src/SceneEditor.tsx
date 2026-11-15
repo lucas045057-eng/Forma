@@ -9,6 +9,7 @@ import './scene-editor.css';
 import { useEventCenter } from './EventCenter.tsx';
 import { previewOrigin } from './preview-origin.ts';
 import { SceneDraftGuard } from './scene-draft.ts';
+import {assetOriginLabel} from './model-provenance.tsx';
 
 function LightHandle({ direction, change }: { direction: Vec3; change: (direction: Vec3) => void }) {
   const dragging = useRef(false);
@@ -57,6 +58,13 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
   const [tool, setTool] = useState<'camera' | 'rotate' | 'light'>('camera');
   const [temperature, setTemperature] = useState(4000);
   const [size, setSize] = useState(400);
+  const canvasScroll=useRef<HTMLDivElement>(null);
+  const [canvasOverflow,setCanvasOverflow]=useState(false);
+  useEffect(()=>{
+    const root=canvasScroll.current;if(!root)return;
+    const measure=()=>{const viewport=root.querySelector<HTMLElement>('[data-testid="scene-viewport"]');if(!viewport){setCanvasOverflow(false);return;}const canvas=viewport.getBoundingClientRect(),bounds=root.getBoundingClientRect();setCanvasOverflow(canvas.width>bounds.width+0.5||canvas.left<bounds.left-0.5||canvas.right>bounds.right+0.5||root.scrollWidth>root.clientWidth+1);};
+    const observer=new ResizeObserver(measure);observer.observe(root);root.addEventListener('scroll',measure,{passive:true});measure();return()=>{observer.disconnect();root.removeEventListener('scroll',measure);};
+  },[size,compare]);
   const { subscribe, syncReady, status, acquire, awaiting, locked, reload } = useEventCenter();
   const writeBlocked = !syncReady || status !== 'connected' || locked(['work']);
   const currentAt = useRef(at); currentAt.current = at;
@@ -135,6 +143,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     <header><h2>3D 场景编辑</h2><button data-testid="scene-close" onClick={onClose}>关闭</button></header>
     {writeBlocked && <p role="status">状态待同步或作品操作待确认，请刷新状态后继续。</p>}
     <p>预览滚动位置 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></p>
+    <div className="scene-canvas-scroll" ref={canvasScroll} tabIndex={0} role="region" aria-label="场景画布，可横向滚动">
     <div className="scene-viewport" style={{ width: compare ? size : '100%', aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="scene-viewport" data-loaded={loaded}>
       {saved && <ProductScene config={config} modelUrl={modelUrl} scrollAt={compare ? at : 0} controls={!compare && !busy && !writeBlocked}
         canvasTestId="scene-canvas" onReady={() => setLoaded(true)} onError={() => { setLoaded(false); setError('3D 模型加载失败'); }}
@@ -143,7 +152,8 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
         onRotationChange={!compare && !busy && !writeBlocked && tool === 'rotate' ? editRotation : undefined}>
         {!compare && !busy && !writeBlocked && tool === 'light' && <LightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
       </ProductScene>}
-    </div>
+    </div></div>
+    {canvasOverflow&&<p className="notice" data-testid="scene-size-hint" role="status">画布超出可用宽度，请在画布区域横向滚动；尺寸未缩放。</p>}
     <fieldset disabled={!saved || busy || compare || writeBlocked}>
       <legend>调整场景</legend>
       <label>工具 <select data-testid="scene-tool" value={tool} onChange={e => setTool(e.target.value as typeof tool)}><option value="camera">相机轨道</option><option value="rotate">旋转模型</option><option value="light">主光方向手柄</option></select></label>
@@ -159,7 +169,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     </fieldset>
     <button data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
     <fieldset disabled={busy || !saved || writeBlocked}><legend>采用模型</legend>
-      <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id}{a.metrics?.webReady === false ? '（超过网页门槛）' : ''}</option>)}</select>
+      <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id} · {assetOriginLabel(a.provenance)}{a.metrics?.webReady === false ? '（超过网页门槛）' : ''}</option>)}</select>
       <label><input type="checkbox" data-testid="scene-force-adopt" checked={force} onChange={e => setForce(e.target.checked)}/>允许采用超过网页门槛的模型</label>
       <button data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>
     </fieldset>

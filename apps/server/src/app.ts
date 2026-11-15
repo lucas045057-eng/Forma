@@ -27,6 +27,9 @@ export interface AppOptions {
   workRoot?: string;
   historyDirectory?: string;
   dataDirectory?: string;
+  fallbackDirectory?: string;
+  /** Dedicated offline demo only; never set by HTTP or provider env. */
+  mockAssets?: boolean;
   workDataDirectory?: string;
   base?: string;
   key?: string;
@@ -89,7 +92,7 @@ export async function createApp(options: AppOptions = {}) {
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
-    pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs,
+    pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs, fallbackDirectory:options.fallbackDirectory,mockUpstream:options.mockAssets,
     emit,
   });
   closers.push(() => service.close());
@@ -219,6 +222,12 @@ export async function createApp(options: AppOptions = {}) {
     }
     return reply.code(202).send(await service.importTask(String(taskId)));
   });
+  app.get('/assets/fallbacks', async request => {if(Object.keys(request.query as object).length)throw new AssetError('INVALID_FALLBACK_INPUT','备用列表不接受路径或URL参数');return service.listFallbacks();});
+  app.post<{Params:{presetId:string};Body:unknown}>('/assets/fallbacks/:presetId/import',async(request,reply)=>{
+    const body=request.body;
+    if((body!==undefined&&(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length))||Object.keys(request.query as object).length)throw new AssetError('INVALID_FALLBACK_INPUT','备用导入只接受固定preset编号，不接受路径、URL或来源字段');
+    const asset=await service.importFallback(request.params.presetId);return reply.code(asset.status==='ready'?200:202).send(asset);
+  });
   app.get('/assets', async () => service.list());
   app.get<{ Params: { id: string } }>('/assets/:id', async (request, reply) => {
     const asset = service.get(request.params.id);
@@ -230,6 +239,7 @@ export async function createApp(options: AppOptions = {}) {
     try { await stat(filename); } catch { return reply.code(404).send({ error: { code: 'MODEL_MISSING', message: '模型文件已丢失，请重新导入资产' } }); }
     return reply.type('model/gltf-binary').header('Cache-Control', 'no-cache').send(createReadStream(filename));
   });
+  app.get('/scene/model-provenance',async(request,reply)=>{if(Object.keys(request.query as object).length)throw new SceneError('INVALID_INPUT','来源查询不接受路径或URL参数');reply.header('Cache-Control','no-store');return work.repo.exclusive(()=>scene.modelProvenance());});
   app.get('/scene', async () => work.repo.exclusive(() => scene.get()));
   app.put('/scene', async request => work.repo.exclusive(() => scene.put(request.body)));
   app.post('/scene/undo', async () => work.repo.exclusive(() => scene.undo()));
