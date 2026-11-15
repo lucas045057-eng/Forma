@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { DEMO_RUNS, REPO_ROOT } from './env';
+import { BACKEND_BASE, DEMO_RUNS, GUARD_LOG, REPO_ROOT } from './env';
 import { wait, waitFor, writeArtifact } from './helpers';
 
 /**
@@ -378,6 +378,16 @@ test.describe('M4-D5 演示入口（mock）', () => {
       } else {
         record.ownProbe = false;
         expect(listener.created, '已占用 5175 的监听必须有可核的创建时间').toBeTruthy();
+        // 主预览源与 API 同属本轮 start-backend 进程；仅有任意 PID/创建时间不构成归属。
+        const backendListener = listenerOf(3001);
+        expect(backendListener, '必须确认主验收 API 的监听身份').not.toBeNull();
+        expect(listener).toEqual(backendListener);
+        const guardMarker = readJson(`${GUARD_LOG}.loaded`);
+        expect(guardMarker.active).toBe(true);
+        expect(guardMarker.pid).toBe(listener.pid);
+        expect((await fetch(`${BACKEND_BASE}/health`)).status).toBe(200);
+        expect((await fetch('http://127.0.0.1:5175/preview/main/')).status).toBe(200);
+        record.ownership = { backendListener, guardPid: guardMarker.pid, guardActive: guardMarker.active };
       }
 
       const handle = await startMockDemo();
@@ -387,7 +397,7 @@ test.describe('M4-D5 演示入口（mock）', () => {
       expect((await fetch(`http://127.0.0.1:${handle.plan.ports.api}/health`)).status).toBe(200);
       // 不串实例：demo 的预览源真的在它自己的随机端口上应答。
       const previewStatus = (await fetch(`http://127.0.0.1:${handle.plan.ports.preview}/preview/main/`)).status;
-      expect([200, 404], `demo 预览源没有在自己端口应答：${previewStatus}`).toContain(previewStatus);
+      expect(previewStatus, 'demo 主预览必须在自己的随机端口实际返回作品页面').toBe(200);
       record.previewStatus = previewStatus;
       writeArtifact('demo-port-5175-occupied.json', record);
       await stopHandle(handle);

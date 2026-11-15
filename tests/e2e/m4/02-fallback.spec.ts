@@ -83,7 +83,8 @@ test.describe('M4-D3 本地备用模型与来源', () => {
       const text = JSON.stringify(provenance ?? asset);
       expect(text, `${preset.id} 的来源没有绑定 preset/hash`).toContain(preset.hash);
       const modelHash = await assetModelHash(assetId);
-      expect(modelHash, `${preset.id} 实际 model.glb 字节与 preset 不一致`).toBe(preset.hash);
+      expect(asset.provenance?.sourceHash, `${preset.id} 来源必须绑定原始素材`).toBe(preset.hash);
+      expect(asset.provenance?.outputHash, `${preset.id} 输出必须绑定实际优化后 model.glb 字节`).toBe(modelHash);
       imported.push({ id: assetId, preset: preset.id, status: asset.status, provenance, modelHash });
     }
 
@@ -94,8 +95,12 @@ test.describe('M4-D3 本地备用模型与来源', () => {
     expect(adopted.status, adopted.text.slice(0, 300)).toBe(200);
 
     const provenanceAfter = (await modelProvenance()).body;
+    expect(provenanceAfter.verified, '采用后的作品来源必须通过模型字节核验').toBe(true);
+    expect(provenanceAfter.provenance?.outputHash).toBe(target.modelHash);
     expect(JSON.stringify(provenanceAfter), '采用后来源里没有 fallback 的字节哈希').toContain(PRESETS[0].hash);
     const sceneAfter = (await getScene()).body;
+    expect(sceneAfter.model).toBe(`/assets/${target.id}.glb`);
+    expect(sha256(readFileSync(path.join(WORK_ROOT, 'public', 'assets', `${target.id}.glb`)))).toBe(target.modelHash);
     expect(JSON.stringify(sceneAfter), '采用后场景没有指向新模型').not.toBe(JSON.stringify(sceneBefore));
 
     // 真实还原路径：scene undo（SceneService 自己压的 history 栈）。
@@ -140,27 +145,29 @@ test.describe('M4-D3 本地备用模型与来源', () => {
       sidecar: path.join(assetsDir, `${assetId}.provenance.json`),
       scene: TEMPLATE_SCENE_CONFIG,
     };
-    const before = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
-
     const writeFile = (await import('node:fs')).writeFileSync;
-    const valid = JSON.parse(readFileSync(files.sidecar, 'utf8'));
+    const validBytes = readFileSync(files.sidecar);
+    const valid = JSON.parse(validBytes.toString('utf8'));
     const cases = [
       { name: 'bad-json', bytes: Buffer.from('{not json', 'utf8') },
       { name: 'too-large', bytes: Buffer.concat([Buffer.from(JSON.stringify(valid), 'utf8'), Buffer.alloc(16385, 0x20)]) },
       { name: 'different-provenance', bytes: Buffer.from(JSON.stringify({ ...valid, sourceHash: '0'.repeat(64) }), 'utf8') },
     ];
     const results: Array<{ name: string; status: number; code: string }> = [];
-    for (const item of cases) {
+    try { for (const item of cases) {
       writeFile(files.sidecar, item.bytes);
+      // 请求前已被测试写坏的 sidecar 也是基准的一部分：拒绝采用不得偷偷覆盖它。
+      const before = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
       const retry = await adoptAsset(assetId);
+      const after = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
+      writeArtifact(`fallback-bad-sidecar-${item.name}.json`, { assetId, before, after, status: retry.status, body: retry.body });
       expect(retry.status, `${item.name} 没有被安全拒绝：${retry.text.slice(0, 200)}`).toBe(409);
       const code = (retry.body as any)?.error?.code ?? '';
       expect(['ASSET_NAME_CONFLICT', 'ASSET_NAME_CONFLICT_SAFE', 'CONFLICT'].includes(code) || /CONFLICT/.test(code), `${item.name} 的错误码不安全：${code}`).toBe(true);
-      const after = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
       expect(after, `${item.name} 之后作品字节被改动了`).toEqual(before);
       results.push({ name: item.name, status: retry.status, code });
-    }
-    writeArtifact('fallback-bad-sidecar.json', { assetId, results, bytes: before });
+    } } finally { writeFile(files.sidecar, validBytes); }
+    writeArtifact('fallback-bad-sidecar.json', { assetId, results });
   });
 
 });
