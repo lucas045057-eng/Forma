@@ -1,0 +1,243 @@
+{
+    "testedHead":  "c8f35b0d5a4eaf7684a2b721b93169edf20c6832",
+    "actualCounts":  {
+                         "tests":  8,
+                         "pass":  7,
+                         "fail":  1,
+                         "cancelled":  0,
+                         "skipped":  0,
+                         "todo":  0
+                     },
+    "changed":  [
+
+                ],
+    "cases":  [
+                  {
+                      "kind":  "no-request",
+                      "primary":  null,
+                      "closed":  {
+                                     "code":  0,
+                                     "signal":  null
+                                 },
+                      "status":  "stopped",
+                      "cleanup":  {
+                                      "problems":  [
+
+                                                   ],
+                                      "children":  [
+                                                       {
+                                                           "role":  "backend",
+                                                           "pid":  9320,
+                                                           "startedAt":  "2026-11-15T18:35:43.753Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  true,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       },
+                                                       {
+                                                           "role":  "frontends",
+                                                           "pid":  55276,
+                                                           "startedAt":  "2026-11-15T18:35:45.213Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  false,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       }
+                                                   ],
+                                      "note":  "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+                                  },
+                      "cleanupErrors":  [
+
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "fallbackKills":  [
+
+                                        ],
+                      "listenersAfter":  [
+
+                                         ],
+                      "finalListeners":  [
+
+                                         ],
+                      "hmr":  null
+                  },
+                  {
+                      "kind":  "consumed",
+                      "primary":  null,
+                      "closed":  {
+                                     "code":  0,
+                                     "signal":  null
+                                 },
+                      "status":  "stopped",
+                      "cleanup":  {
+                                      "problems":  [
+
+                                                   ],
+                                      "children":  [
+                                                       {
+                                                           "role":  "backend",
+                                                           "pid":  8836,
+                                                           "startedAt":  "2026-11-15T18:35:54.885Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  true,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       },
+                                                       {
+                                                           "role":  "frontends",
+                                                           "pid":  31068,
+                                                           "startedAt":  "2026-11-15T18:35:56.203Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  true,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       }
+                                                   ],
+                                      "note":  "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+                                  },
+                      "cleanupErrors":  [
+
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "fallbackKills":  [
+
+                                        ],
+                      "listenersAfter":  [
+
+                                         ],
+                      "finalListeners":  [
+
+                                         ],
+                      "hmr":  {
+                                  "marker":  "focused-1794767759811",
+                                  "workCss":  "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-54.783Z-df6c8413-f726-4258-a847-f8c7cd326c5f\\work\\src\\style.css",
+                                  "beforeHash":  "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc",
+                                  "afterHash":  "47fd2df5e7f9dd772482ad3e2a45a63975a6480b7a577c4579bae76a37d85880",
+                                  "updates":  [
+                                                  {
+                                                      "at":  "2026-11-15T18:35:59.819Z",
+                                                      "origin":  "ws://127.0.0.1:27537",
+                                                      "path":  "/preview/main/hmr",
+                                                      "type":  "update",
+                                                      "updates":  [
+                                                                      {
+                                                                          "type":  "js-update",
+                                                                          "path":  "/src/style.css",
+                                                                          "acceptedPath":  "/src/style.css"
+                                                                      }
+                                                                  ]
+                                                  }
+                                              ],
+                                  "frames":  [
+                                                 {
+                                                     "at":  "2026-11-15T18:35:59.586Z",
+                                                     "origin":  "ws://127.0.0.1:27537",
+                                                     "path":  "/preview/main/hmr",
+                                                     "type":  "connected"
+                                                 },
+                                                 {
+                                                     "at":  "2026-11-15T18:35:59.819Z",
+                                                     "origin":  "ws://127.0.0.1:27537",
+                                                     "path":  "/preview/main/hmr",
+                                                     "type":  "update",
+                                                     "updates":  [
+                                                                     {
+                                                                         "type":  "js-update",
+                                                                         "path":  "/src/style.css",
+                                                                         "acceptedPath":  "/src/style.css"
+                                                                     }
+                                                                 ]
+                                                 }
+                                             ],
+                                  "pageErrors":  [
+
+                                                 ],
+                                  "denied":  [
+
+                                             ],
+                                  "navigationsBefore":  1,
+                                  "navigationsAfter":  1,
+                                  "computedMarker":  "focused-1794767759811",
+                                  "scope":  "Only new isolated demo work CSS changed; original template untouched"
+                              }
+                  },
+                  {
+                      "kind":  "status-only",
+                      "primary":  null,
+                      "closed":  {
+                                     "code":  0,
+                                     "signal":  null
+                                 },
+                      "status":  "stopped",
+                      "cleanup":  {
+                                      "problems":  [
+
+                                                   ],
+                                      "children":  [
+                                                       {
+                                                           "role":  "backend",
+                                                           "pid":  24748,
+                                                           "startedAt":  "2026-11-15T18:36:10.529Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  true,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       },
+                                                       {
+                                                           "role":  "frontends",
+                                                           "pid":  59396,
+                                                           "startedAt":  "2026-11-15T18:36:11.795Z",
+                                                           "exit":  0,
+                                                           "signal":  null,
+                                                           "forced":  false,
+                                                           "stderrObserved":  true,
+                                                           "stderrCodes":  [
+
+                                                                           ]
+                                                       }
+                                                   ],
+                                      "note":  "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+                                  },
+                      "cleanupErrors":  [
+                                            {
+                                                "name":  "TypeError",
+                                                "message":  "terminated",
+                                                "stack":  "TypeError: terminated\n    at Fetch.onAborted (node:internal/deps/undici/undici:13602:53)\n    at Fetch.emit (node:events:508:28)\n    at Fetch.terminate (node:internal/deps/undici/undici:12732:14)\n    at Object.onError (node:internal/deps/undici/undici:13728:38)\n    at Request.onError (node:internal/deps/undici/undici:3073:31)\n    at Object.errorRequest (node:internal/deps/undici/undici:1932:17)\n    at Socket.onHttpSocketClose (node:internal/deps/undici/undici:7726:14)\n    at Socket.emit (node:events:520:35)\n    at TCP.\u003canonymous\u003e (node:net:346:12)"
+                                            }
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "fallbackKills":  [
+
+                                        ],
+                      "listenersAfter":  [
+
+                                         ],
+                      "finalListeners":  [
+
+                                         ],
+                      "hmr":  null
+                  }
+              ],
+    "interpretation":  "Old run remains 7/8. All three real production shutdowns naturally closed; status-only has one unassociated final cancellation error. No new test executed."
+}
