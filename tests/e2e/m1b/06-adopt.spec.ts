@@ -94,6 +94,10 @@ test.describe('采用模型', () => {
     const originalConfig = readSceneFile();
     const adoptedFile = path.join(TEMPLATE_ASSETS, `${imported.id}.glb`);
     const adoptedParts = path.join(TEMPLATE_ASSETS, `${imported.id}.parts.json`);
+    // 采用会写 provenance sidecar（M4-D3）。测试前先记录它的原状（是否存在 + 原字节），
+    // finally 里恢复原状：原本不存在就删掉；原本已存在则按原字节写回——不能删历史文件、也不能留残留。
+    const adoptedSidecar = path.join(TEMPLATE_ASSETS, `${imported.id}.provenance.json`);
+    const sidecarBefore = existsSync(adoptedSidecar) ? readFileSync(adoptedSidecar) : null;
     try {
       const { frame } = await openEditor(page);
       const beforeModel = originalConfig.model;
@@ -126,9 +130,16 @@ test.describe('采用模型', () => {
       restoreSceneFile();
       rmSync(adoptedFile, { force: true });
       rmSync(adoptedParts, { force: true });
+      // sidecar 按原状恢复（原字节 / 原本不存在则删除），并留证。
+      let sidecarRestored = 'absent';
+      if (sidecarBefore) { writeFileSync(adoptedSidecar, sidecarBefore); sidecarRestored = 'restored-original'; }
+      else { rmSync(adoptedSidecar, { force: true }); sidecarRestored = 'removed'; }
+      writeArtifactFrom('adopt-provenance-cleanup.json', { sidecar: adoptedSidecar, existedBefore: Boolean(sidecarBefore), action: sidecarRestored, existsAfter: existsSync(adoptedSidecar) });
       await page.waitForTimeout(1_500).catch(() => {});
       expect(readFileSync(SCENE_CONFIG, 'utf8'), '配置没有还原').toContain('diffuser-4969889');
       expect(existsSync(adoptedFile), '测试产物没有清理').toBe(false);
+      expect(existsSync(adoptedParts), 'parts.json 没有清理').toBe(false);
+      expect(existsSync(adoptedSidecar), 'provenance sidecar 没有恢复原状').toBe(Boolean(sidecarBefore));
     }
   });
 });

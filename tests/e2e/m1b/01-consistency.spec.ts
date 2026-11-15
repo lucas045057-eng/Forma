@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { ARTIFACT_DIR } from './env';
-import { getScene, putScene, sameJson, snapshotSceneFile, restoreSceneFile, readSceneFile, waitFor } from './api';
+import { getScene, putScene, sameJson, snapshotSceneFile, restoreSceneFile, readSceneFile } from './api';
 import { captureCanvases, enableCompare, openEditor, readPanelConfig, readScrollAt, scrollPreview, setSlider } from './editor';
+import { waitForPairChange } from './window-compare';
 import { compareAligned, compareNormalized } from '../m1a/visual';
 import { writeArtifactFrom } from './artifact';
 
@@ -62,10 +63,9 @@ test.describe('一致性与配置来源', () => {
     const baseline = await captureCanvases(page, frame);
     await page.getByTestId('scene-save-hero').click();
     // 作品页通过 HMR 更新（不是整页刷新）
-    const ms = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio > 0.02;
-    }, 30_000, 250);
+    // 写入成功后等"提示消失 + 几何窗口回到基线"，再用**基线窗口**截图比较（原 30s 预算与 0.02 阈值不变）。
+    const changed = await waitForPairChange(page, frame, baseline, { threshold: 0.02, timeoutMs: 30_000, intervalMs: 250 });
+    const ms = changed.elapsedMs;
 
     const afterHero = (await getScene()).body;
     expect(afterHero.hero.lights.ambient).toBeCloseTo(2.4, 1);
@@ -89,6 +89,8 @@ test.describe('一致性与配置来源', () => {
 
     writeArtifactFrom('consistency-after-edit.json', {
       writeLatencyMs: ms,
+      captureAttempts: changed.attempts.length,
+      captureTail: changed.attempts.slice(-3).map((item) => ({ ok: item.ok, reason: item.reason, size: item.window?.size, visibleHeight: item.window?.visibleHeight, start: item.window?.start })),
       heroConfig: afterHero.hero,
       writtenCamera: variant.hero.camera,
       config: panel,
