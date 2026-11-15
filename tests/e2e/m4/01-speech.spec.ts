@@ -41,7 +41,8 @@ async function installSpeechStubs(page: import('@playwright/test').Page): Promis
       probe.streams += 1;
       probe.liveTracks += 1;
       probe.events.push('stream-live');
-      const track = { kind: 'audio', stop() { probe.stops += 1; probe.liveTracks -= 1; probe.events.push('track-ended'); } };
+      let ended = false;
+      const track = { kind: 'audio', stop() { if (ended) return; ended = true; probe.stops += 1; probe.liveTracks -= 1; probe.events.push('track-ended'); } };
       return { getTracks: () => [track] };
     };
     Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => makeStream() } });
@@ -126,7 +127,7 @@ async function pressRecord(page: import('@playwright/test').Page): Promise<{ rel
     const now = await probe(page);
     return { starts: now.recorderStarts - before.recorderStarts, liveTracks: now.liveTracks };
   };
-  return { release: async () => { pressOutstanding = false; await page.mouse.up(); }, delta };
+  return { release: async () => { await page.mouse.up(); pressOutstanding = false; }, delta };
 }
 
 test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显）', () => {
@@ -136,8 +137,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
   // 失败安全：任何用例中途抛错都要把按住的指针松开，否则后续用例会继承"按住"状态。
   test.afterEach(async ({ page }) => {
     if (!pressOutstanding) return;
-    pressOutstanding = false;
-    await page.mouse.up().catch(() => {});
+    try { await page.mouse.up(); } finally { pressOutstanding = false; }
   });
 
   test('按住录音 → 松手转写 → 可编辑 review → 确认写入指令，只有点生成才提交任务', async ({ page }) => {
@@ -272,14 +272,16 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
           getUserMedia: () => {
             gate.pending += 1;
             gate.established = true;
-            return new Promise((resolve) => { gate.resolve = () => resolve({ getTracks: () => [makeTrack()] }); });
+            return new Promise((resolve) => { gate.resolve = () => { const track = makeTrack(); resolve({ getTracks: () => [track] }); }; });
           },
         },
       });
     });
     const button = page.getByTestId('speech-record');
+    await expect(button).toBeEnabled();
     await button.hover();
     await page.mouse.down();
+    pressOutstanding = true;
     await expect(page.getByTestId('speech-status')).toContainText('权限', { timeout: 15_000 });
     // 前提必须是"权限真的在等待"：gate 已建立且有一个 pending 调用。
     const gateState = await page.evaluate(() => {
@@ -301,6 +303,8 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     const after = await probe(page);
     expect(after.liveTracks, '迟到权限的轨道没有被释放').toBe(0);
     expect(after.recorderStarts, '权限未返回就不该启动 recorder').toBe(0);
+    expect(after.streams - before.streams, '必须实际放行一条迟到权限轨道').toBe(1);
+    expect(after.events.slice(before.events.length)).toEqual(['stream-live', 'track-ended']);
     writeArtifact('speech-late-permission.json', { gateState, before, after });
   });
 

@@ -10,12 +10,12 @@ import { wait, waitFor, writeArtifact } from './helpers';
  * M4-D5：演示入口（只测 mock，绝不启动 real、不接阿里/厂商）。
  *
  * 覆盖：
- * 1. Sigint 正常关闭：manifest status=stopped、cleanup.perfect、forced 全 false、端口释放；
+ * 1. 进程内 SIGINT 处理模拟：manifest status=stopped、forced 全 false、端口释放；
  * 2. 真实候选链路：mock 编码上游 → 生成候选 → 候选预览实际连到 plan.preview 的 HMR，
  *    10 秒内不出现循环导航（旧缺陷是连错 5175 导致无限刷新）；
  * 3. 固定 5175 被占用时不串实例：demo 用自己的随机端口照常工作；
  * 4. 父启动器被**硬杀**：真实 backend/frontends 及其孙进程（候选预览 Vite 等）按 PID+创建时间
- *    在有限时间内回收，且留下 orphan-cleanup 证据（不再只做观测就判过）。
+ *    在有限时间内原身份全部消失；不据此推断 watchdog 是否执行。
  */
 
 interface DemoHandle {
@@ -26,6 +26,7 @@ interface DemoHandle {
   stdout: string;
   stderr: string;
 }
+const activeDemos = new Set<DemoHandle>();
 
 /** 测试专用 driver：普通文件入口 import 产品 launch，用进程内 SIGINT 事件模拟 graceful 关闭。 */
 const DRIVER = path.join(REPO_ROOT, 'tests', 'e2e', 'm4', 'support', 'demo-launch-driver.mjs');
@@ -121,7 +122,7 @@ function snapshotProcesses(): Map<number, string> | null {
  * - 快照失败 → unknown（不算 gone）；
  * - 快照里没有 → gone；
  * - 记录或观测到的创建时间无效（NaN / ≤0 / epoch 0）→ unknown，不参与 alive/reused 判定；
- * - 创建时间一致（≤2s 窗口）→ alive，否则 reused（PID 被复用）。
+ * - 创建时间一致 → alive，否则 reused（PID 被复用）。
  */
 function stillOwn(pid: number, created: string, snapshot: Map<number, string> | null): 'gone' | 'alive' | 'reused' | 'unknown' {
   const recorded = Date.parse(created);
@@ -131,19 +132,20 @@ function stillOwn(pid: number, created: string, snapshot: Map<number, string> | 
   if (observedRaw === undefined) return 'gone';
   const observed = Date.parse(observedRaw);
   if (!Number.isFinite(observed) || observed <= 0) return 'unknown';
-  return Math.abs(observed - recorded) <= 2000 ? 'alive' : 'reused';
+  return observed === recorded ? 'alive' : 'reused';
 }
 
 async function startMockDemo(): Promise<DemoHandle> {
   const before = recentRun();
   const env: Record<string, string> = { ...process.env } as Record<string, string>;
   delete env.NODE_OPTIONS;
-  const child = spawn(process.execPath, ['scripts/demo/mock.mjs'], { cwd: REPO_ROOT, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, [DRIVER], { cwd: REPO_ROOT, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
   const handle: DemoHandle = { child, runDir: '', plan: null, manifest: null, stdout: '', stderr: '' };
+  activeDemos.add(handle);
   child.stdout!.on('data', (chunk) => { handle.stdout += String(chunk); });
   child.stderr!.on('data', (chunk) => { handle.stderr += String(chunk); });
-  const started = await waitAsync(() => handle.stdout.includes('Demo mode=mock') || child.exitCode !== null, 180_000);
-  expect(started && child.exitCode === null, `mock 演示启动失败：${handle.stderr.slice(-800)}`).toBe(true);
+  const started = await waitAsync(() => handle.stdout.includes('Demo mode=mock') || child.exitCode !== null || child.signalCode !== null, 180_000);
+  expect(started && child.exitCode === null && child.signalCode === null, `mock 演示启动失败：${handle.stderr.slice(-800)}`).toBe(true);
   const runDir = recentRun();
   expect(runDir, '没有生成新的 demo run 目录').not.toBeNull();
   expect(runDir, '复用了旧 demo run 目录').not.toBe(before);
@@ -155,13 +157,43 @@ async function startMockDemo(): Promise<DemoHandle> {
 }
 
 async function stopHandle(handle: DemoHandle): Promise<void> {
-  if (handle.child.exitCode !== null) return;
-  handle.child.kill('SIGINT');
-  await waitAsync(() => handle.child.exitCode !== null, 90_000);
+  const child = handle.child;
+  if (child.exitCode !== null || child.signalCode !== null) {
+    activeDemos.delete(handle);
+    expect({ code: child.exitCode, signal: child.signalCode }, 'demo 不能在收尾前异常退出').toEqual({ code: 0, signal: null });
+    return;
+  }
+  if (!child.connected) throw new Error('Owned demo is alive without its test IPC shutdown channel');
+  const closed = new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Owned demo did not close within 90s')), 90_000);
+    child.once('close', () => { clearTimeout(timer); resolve(); });
+  });
+  child.send({ type: 'sigint' });
+  await closed;
+  expect({ code: child.exitCode, signal: child.signalCode }, '模拟 SIGINT 后必须正常退出').toEqual({ code: 0, signal: null });
+  if (handle.runDir) {
+    const manifest = readJson(path.join(handle.runDir, 'manifest.json'));
+    expect(manifest.status).toBe('stopped');
+    expect(manifest.cleanup?.problems).toEqual([]);
+    expect(manifest.cleanup.children.some((item: any) => item.forced)).toBe(false);
+  }
+  activeDemos.delete(handle);
 }
 
 test.describe('M4-D5 演示入口（mock）', () => {
   test.describe.configure({ mode: 'serial' });
+  test.afterEach(async () => {
+    const errors: unknown[] = [];
+    for (const handle of activeDemos) {
+      try { await stopHandle(handle); }
+      catch (error) {
+        errors.push(error);
+        // 失败兜底只作用于自己持有的 ChildProcess；强制结束不算正常关闭。
+        if (handle.child.exitCode === null && handle.child.signalCode === null) handle.child.kill('SIGKILL');
+      } finally { activeDemos.delete(handle); }
+    }
+    if (errors.length) throw new AggregateError(errors, 'Owned demo cleanup failed');
+  });
 
   test('进程内 SIGINT 处理模拟：launch 自身的 graceful 收尾（非真实控制台 Ctrl+C）', async () => {
     test.setTimeout(420_000);
@@ -191,6 +223,12 @@ test.describe('M4-D5 演示入口（mock）', () => {
       const manifestBefore = readJson(path.join(runDir!, 'manifest.json'));
       expect(manifestBefore.credentials, 'mock 不应声明任何真实凭据').toEqual({ speech: false, coding: false, lux3d: false });
       const tracked = descendantsOf(child.pid!);
+      expect(manifestBefore.children.map((item: any) => item.role).sort()).toEqual(['backend', 'frontends']);
+      for (const direct of manifestBefore.children) {
+        const identity = tracked.find((item) => item.pid === direct.pid);
+        expect(identity, `真实角色 ${direct.role} 必须有创建时间证据`).toBeDefined();
+        expect(Number.isFinite(Date.parse(identity!.created)) && Date.parse(identity!.created) > 0).toBe(true);
+      }
       const ports = Object.values(plan.ports) as number[];
       const portsOpenBefore: number[] = [];
       for (const port of ports) if (await portOpen(port)) portsOpenBefore.push(port);
@@ -210,12 +248,16 @@ test.describe('M4-D5 演示入口（mock）', () => {
       const closeMs = await Promise.race([closed, wait(30_000).then(() => 'timeout' as const)]);
       record.exit = exitInfo;
       record.closeMs = closeMs;
+      record.stdout = stdout;
+      record.stderr = stderr;
+      expect(exitInfo, '驱动必须自然以 0 退出，不能超时或信号结束').toMatchObject({ code: 0, signal: null });
+      expect(typeof closeMs, '必须收到原生 close，不能用 manifest 代替').toBe('number');
 
       // 关键判据：不是"进程没了"，而是 manifest 真的由 launch 写成 stopped 且没有 forced。
       await waitFor(() => existsSync(path.join(runDir!, 'manifest.json')) && readJson(path.join(runDir!, 'manifest.json')).status !== 'running', 120_000, 300);
       const finalManifest = readJson(path.join(runDir!, 'manifest.json'));
       expect(finalManifest.status, `退出后状态不是 stopped：${finalManifest.status}`).toBe('stopped');
-      expect(finalManifest.cleanup?.problems ?? [], '正常 SIGINT 不应该有清理问题').toEqual([]);
+      expect(finalManifest.cleanup?.problems, '正常 SIGINT 必须写出无错误的清理记录').toEqual([]);
       const forced = (finalManifest.cleanup?.children ?? []).filter((item: any) => item.forced);
       expect(forced, `正常 SIGINT 出现 forced 回收：${JSON.stringify(forced)}`).toEqual([]);
 
@@ -233,8 +275,16 @@ test.describe('M4-D5 演示入口（mock）', () => {
       primary = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error;
     } finally {
       // 主错误、清理错误、证据写入分别保留，互不覆盖。
-      if (child && child.exitCode === null) {
-        try { spawnSync('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' }); } catch (error) { cleanupErrors.push(String(error)); }
+      if (child && child.exitCode === null && child.signalCode === null) {
+        try {
+          const closed = new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Owned driver did not close after forced cleanup')), 10_000);
+            child!.once('close', () => { clearTimeout(timer); resolve(); });
+          });
+          child.kill('SIGKILL');
+          await closed;
+          cleanupErrors.push('Forced cleanup of owned driver was required');
+        } catch (error) { cleanupErrors.push(String(error)); }
       }
     }
     writeArtifact('demo-sigint-in-process.json', { ...record, primary, cleanupErrors });
@@ -322,11 +372,16 @@ test.describe('M4-D5 演示入口（mock）', () => {
     }, 180_000, 500);
 
     const owned = descendantsOf(handle.child.pid!);
-    const tracked = [{ pid: handle.child.pid!, created: new Date(0).toISOString(), depth: 0 }, ...owned];
+    const initialSnapshot = snapshotProcesses();
+    const launcherCreated = initialSnapshot?.get(handle.child.pid!);
+    expect(launcherCreated, '硬杀前必须取得真实启动器创建时间').toBeTruthy();
+    expect(Number.isFinite(Date.parse(launcherCreated!)) && Date.parse(launcherCreated!) > 0).toBe(true);
+    const tracked = [{ pid: handle.child.pid!, created: launcherCreated!, depth: 0 }, ...owned];
     expect(owned.length, '硬杀前没有找到任何孙进程').toBeGreaterThan(0);
 
-    // 只杀启动器本身（不 /T），把回收责任交给子进程的 IPC 断开处理。
-    spawnSync('taskkill', ['/F', '/PID', String(handle.child.pid)], { stdio: 'ignore' });
+    // 只结束自己持有的启动器句柄；后续仅核对原身份消失，不推断退出机制。
+    expect(handle.child.kill('SIGKILL')).toBe(true);
+    activeDemos.delete(handle); // 此用例主动硬杀，由下方完整身份与端口断言独立检查。
     await wait(2000);
 
     const deadline = Date.now() + 90_000;
