@@ -262,7 +262,9 @@
 - 本轮原件齐备：`manifest.json`/`manifest.log`、九套 `e2e-*-results.json` + `e2e-*-log` + `e2e-*-output/`、
   `unit.log`/`typecheck.log`/`build.log`、`evidence-refresh/`（各套刷新的历史证据新字节）、
   `launcher/`（job 的 `cmd`/`exit`/`job.json`/`output.log`）、`verification.json`、`cleanup.json`、
-  `sha256-manifest.json`（**196 个文件**逐字节 SHA256）。
+  `sha256-manifest.json`（**195 个载荷文件**逐字节 SHA256 + 清单自身 1 份；清单**不登记自身**，避免写入后立刻失效）。
+  事实说明：先前那份清单登记了 196 条，其中唯一不一致的就是 `sha256-manifest.json` 自己（登记 37806B，实际 39181B）——
+  生成时把旧清单也枚举进去、写完后自身字节又变了；本轮改为只登记载荷文件，静态重算 **195/195 全部匹配、0 mismatch**。
 - M3-B 套件的 artifact helper 写死 `docs/reports/artifacts/M3-B/formal-20261115/checks/`，本轮跑完留下 6 个**未跟踪**中间证据
   （`fault-classes.json`、`gate.json`、`lifecycle-*.json`）。已把它们作为**本 run 的原件**归档到
   `e2e-m3b-artifacts/M3-B/formal-20261115/checks/`（含 `relocation.json` 记录路径/字节/SHA256），并从历史证据目录移除——
