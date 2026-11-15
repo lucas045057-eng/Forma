@@ -300,3 +300,79 @@ Exit status 2
 
 S1 由我（测试侧）在下一轮修入口；S2/S3 与实现/夹具问题一起进 Codex 的统一返工批次；修复后我仍从头跑同一集中入口。
 本轮不改产品、不改测试、不自行派实现者、不 merge、不自动补跑。
+---
+
+# 附录：集中第五轮（返工四后）—— 编译通过，2 失败已定位到测试接线
+
+> 仍然**不是全仓单测通过**：server **376 passed / 2 failed（378）**；Studio 单测、`demo-safety`、全部 E2E（11 步）未执行。
+> 本轮两条失败都有**明确、可验证的测试接线根因**，不是产品合同被判坏。
+
+## D1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `d6d46e6e70c8876a0ef31861a83eb84ecdae957e`（merge 返工四 `c79fbfc`，Pi runner 修正在位） |
+| 冻结产品 | `c79fbfca89e8a04161be42b4b0f9ee4943ab2da5` |
+| 身份摘要 / 锁 | `3615ef0f8f5f…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `c79fbfc` **0 差异**（`HEAD:apps = c79:apps = 18a5fd66…`） |
+| 证据目录起跑前 | 脏项 **0** |
+
+## D2. 执行与结果（命令失败 / 身份漂移分开）
+
+| 步骤 | 结果 |
+| --- | --- |
+| typecheck | exit 0 / 9s（含 `apps/studio`、`templates/product-page`） |
+| build | exit 0 / 10s |
+| unit | **exit 1 / 243s**：server **376 passed / 2 failed（378）** |
+| demo-safety、M4 19、旧九套 174 | 未执行 |
+
+- **命令失败**：`pnpm test` 退出码 1（`signal=null`）。
+- **身份漂移：无**（`problems` 仅退出码；起跑 `evidenceDirtyAtStart=[]`；产品/脚本/锁与 `c79fbfc` 字节一致）。
+- 逐包实际数：shared 68、plugin 20、scene-renderer 5、bridge 1、server 376/378；**`apps/studio` 未启动**（server 首败即停）。不沿用历史通过数。
+- **runner 修复生效（实测）**：unit 步骤 `preparedDirs = [{ label: 'D2_RUN_DIR', dir: '…/d2-browser', ok: true }]`，两份诊断文件真的写成了：
+  `d2-browser/asset-lifecycle/cleanup-25608.json`（5990B）、`d2-browser/asset-recovery/persistence-25920.json`（5811B）。
+- **`approvals.test.ts` 的 terminal-save 分支本轮通过**（失败数从 3 降到 2，总数 376 通过）；新增的阶段计时保留，但**不用它反推历史超时根因**。
+
+## D3. 两条失败：根因已确认（测试接线，不是产品）
+
+两条都是 `ERR_UNSUPPORTED_ESM_URL_SCHEME`：
+
+```
+Error [ERR_UNSUPPORTED_ESM_URL_SCHEME]: Only URLs with a scheme in: file, data, and node are supported
+by the default ESM loader. On Windows, absolute paths must be valid file:// URLs. Received protocol 'e:'
+```
+
+1. **`fallback-process-lifecycle.test.ts`**（worker 在屏障前退出）
+   - 阶段：`spawn 7.4ms → identity 124.5ms → cleanup 728.4ms`；事件 `ready(60372)` → `worker-spawned(23100)` → `worker-closed(23100, code 1, signal null)`，**exit 0 / signal null**；
+   - 即：worker 启动后立刻因 **`--import` 收到裸 Windows 路径**（`E:\…`）被 ESM loader 拒绝，**根本没走到模型加载屏障**；
+   - 失败现场按测试约定保留：`C:\Users\Admin\AppData\Local\Temp\fallback-parent-death-PxCzE3`（4 个文件，含 `assets/.instance.lock` 指向已退出 PID 60372、`index.json` 记录 `failed` + preset 来源）。
+2. **`recovery.test.ts`**（persistence 在 entry 前退出）
+   - 阶段：`spawn 5.6 → spawned 5.6 → preload 30.5 → IPC-disconnected 37.7 → exit:1 42.1 → closed:1 42.1 → cleanup 61.3ms`；
+   - `exit 1`、`ipcDisconnected=true`、`messages=[]`、`stdout=""`，**stderr 同样是 `ERR_UNSUPPORTED_ESM_URL_SCHEME`** → 子进程在 preload 阶段就崩了，没进入被测的写盘失败路径；
+   - 失败现场保留：`.data/recovery-test-z3E6cB`（0 文件，空目录）。
+
+**结论（有证据）**：两处失败都发生在 **preload/`--import` 的 URL 形式**上（Windows 绝对路径需为 `file://`），归测试接线；**不能据此说产品的 asset 合同、实例锁或 worker 回收被跑坏**。根任务卡 `a4b545a` 返工五正是只修这两处 `--import` URL 接线。
+
+## D4. 清理与证据
+
+- 3001/4011/5173/5174/5175 无监听；本树无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；无 `.model-stage-*` 残留。
+- 记录在诊断里的 PID 23100 / 25920 / 25608 / 60372 **全部 gone**；未执行任何 kill（没有活跃自有进程，历史现场按证据保留、不擅删）。
+- 两处失败现场按**原字节**复制到本轮归档：`retained/fallback-parent-death/`、`retained/recovery-test/`，清单见 `retained-evidence.json`；原目录未删未改。
+- 本步未刷新任何 tracked 证据（`evidenceArchived: []`）。
+- 归档：`manifest.json`、`manifest.log`、`typecheck.log`、`build.log`、`unit.log`、`cleanup.json`、`retained-evidence.json`、`launcher/`、`d2-browser/`（两份诊断原文）；
+  `sha256-manifest.json` **17 载荷、排除自身、静态复算 0 mismatch**。
+
+## D5. 统一问题清单（第五轮）
+
+1. **T1（阻断，测试接线，已定位）** 两处 `--import` 传裸 Windows 路径 → `ERR_UNSUPPORTED_ESM_URL_SCHEME`（协议 `e:`）：生命周期 worker 在屏障前退出、recovery 子进程在 entry 前退出。归返工五（`a4b545a`），**不改产品**。
+2. **T2（已通过，保留观察）** `approvals.test.ts` terminal-save 本轮通过；阶段计时保留，不据此推断历史 5s 超时的根因。
+3. **T3（覆盖缺口）** Studio 单测、`demo-safety`、M4 19、旧九套 174（含 M1-B 23 像素）本轮全部未执行。
+4. **T4（保留现场）** 两处失败现场（temp 4 文件 / `.data` 空目录）按其自身约定保留，未清理；待 T1 修复后由集中轮重新产生"干净"证据再评估是否可清。
+5. **T5（边界）** 真实 Windows 控制台 Ctrl+C、生产资产 worker 整链回收、真实模板 iframe 点选与候选 HMR 端口仍未跑到；真实阿里/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+6. **T6（审查缺口）** Claude 独立复审因三次外部 ECONNRESET 仍无报告；本轮的"运行到但失败"**不构成**审查通过。
+
+## D6. 下一步
+
+返工五（`a4b545a`，仅两处 `--import` URL）冻结后，我仍从头跑同一 `full-regression.mjs`。
+本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。

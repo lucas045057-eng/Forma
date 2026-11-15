@@ -1,0 +1,41 @@
+{
+  "at": "2026-11-15T14:32:04.083Z",
+  "note": "两处失败现场由测试自身保留（retained on failure）；这里按原字节复制到本 run 归档，原目录未删除、未改动。",
+  "retained": [
+    {
+      "label": "fallback-parent-death",
+      "dir": "C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-PxCzE3",
+      "exists": true,
+      "fileCount": 4,
+      "files": [
+        {
+          "path": "assets/.instance.lock",
+          "bytes": 99,
+          "sha256": "3b556208170a8b6ae90439171bc92810d995b907ce882a3b92e23879181c024c"
+        },
+        {
+          "path": "assets/fallback-afd91ee90c9afef673d8d7a5/raw.glb",
+          "bytes": 744,
+          "sha256": "afd91ee90c9afef673d8d7a58b5593c7f31010d4a3c87d37c155a4879df6a898"
+        },
+        {
+          "path": "assets/index.json",
+          "bytes": 624,
+          "sha256": "941eccd20a62f1320882c307607525c6784edf9cb551009e9fb926d3bf79a75b"
+        },
+        {
+          "path": "presets/lux3d-split-4969889.glb",
+          "bytes": 744,
+          "sha256": "afd91ee90c9afef673d8d7a58b5593c7f31010d4a3c87d37c155a4879df6a898"
+        }
+      ]
+    },
+    {
+      "label": "recovery-test",
+      "dir": ".data\\recovery-test-z3E6cB",
+      "exists": true,
+      "fileCount": 0,
+      "files": []
+    }
+  ]
+}

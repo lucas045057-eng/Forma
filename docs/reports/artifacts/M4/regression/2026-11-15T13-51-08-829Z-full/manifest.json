@@ -1,0 +1,131 @@
+{
+  "runId": "2026-11-15T13-51-08-829Z-full",
+  "mode": "full",
+  "suite": "M4",
+  "startedAt": "2026-11-15T13:51:09.455Z",
+  "cwd": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance",
+  "node": "v24.14.1",
+  "pid": 49708,
+  "playwrightCli": "node_modules\\@playwright\\test\\cli.js",
+  "envKeys": [
+    "PATH",
+    "Path",
+    "PATHEXT",
+    "SystemRoot",
+    "SystemDrive",
+    "WINDIR",
+    "ComSpec",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "LOCALAPPDATA",
+    "APPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "HOME",
+    "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE",
+    "PROCESSOR_IDENTIFIER",
+    "OS",
+    "PNPM_HOME",
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "npm_config_cache",
+    "npm_config_store_dir"
+  ],
+  "baseline": {
+    "identity": {
+      "head": "d6d46e6e70c8876a0ef31861a83eb84ecdae957e",
+      "branch": "test/m4-acceptance",
+      "files": 335,
+      "digest": "3615ef0f8f5fdb5f614b06f004a1015e009a12896f34d77b3b870c3dd6b2bd16",
+      "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+      "dirty": []
+    },
+    "evidence": {},
+    "dirty": {}
+  },
+  "evidenceDirtyAtStart": [],
+  "steps": [
+    {
+      "step": "typecheck",
+      "command": "pnpm typecheck",
+      "pid": 66628,
+      "startedAt": "2026-11-15T13:51:09.458Z",
+      "finishedAt": "2026-11-15T13:51:17.887Z",
+      "durationMs": 8967,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M4\\regression\\2026-11-15T13-51-08-829Z-full\\typecheck.log",
+      "evidenceArchived": [],
+      "problems": [],
+      "ok": true
+    },
+    {
+      "step": "build",
+      "command": "pnpm build",
+      "pid": 8708,
+      "startedAt": "2026-11-15T13:51:18.427Z",
+      "finishedAt": "2026-11-15T13:51:27.873Z",
+      "durationMs": 9990,
+      "code": 0,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M4\\regression\\2026-11-15T13-51-08-829Z-full\\build.log",
+      "evidenceArchived": [],
+      "problems": [],
+      "ok": true
+    },
+    {
+      "step": "unit",
+      "command": "pnpm test",
+      "pid": 31304,
+      "startedAt": "2026-11-15T13:51:28.418Z",
+      "finishedAt": "2026-11-15T13:55:30.953Z",
+      "durationMs": 243075,
+      "code": 1,
+      "signal": null,
+      "spawnError": null,
+      "log": "docs\\reports\\artifacts\\M4\\regression\\2026-11-15T13-51-08-829Z-full\\unit.log",
+      "evidenceArchived": [],
+      "problems": [
+        "退出码 1（signal=null）"
+      ],
+      "ok": false,
+      "preparedDirs": [
+        {
+          "label": "D2_RUN_DIR",
+          "dir": "docs/reports/artifacts/M4/regression/2026-11-15T13-51-08-829Z-full/d2-browser",
+          "ok": true
+        }
+      ]
+    }
+  ],
+  "plan": "typecheck → build → pnpm test → demo-safety → M4 E2E → 旧九套 E2E",
+  "failure": {
+    "step": "unit",
+    "problems": [
+      "退出码 1（signal=null）"
+    ],
+    "executed": [
+      "typecheck",
+      "build",
+      "unit"
+    ],
+    "notExecuted": [
+      "demo-safety",
+      "e2e-m4",
+      "e2e-m0b",
+      "e2e-m0a",
+      "e2e-m1a",
+      "e2e-m1b",
+      "e2e-m2a",
+      "e2e-m2b",
+      "e2e-m3a",
+      "e2e-m3b",
+      "e2e-m3c"
+    ]
+  }
+}
