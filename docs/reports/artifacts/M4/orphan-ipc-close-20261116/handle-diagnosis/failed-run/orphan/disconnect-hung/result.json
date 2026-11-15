@@ -1,0 +1,95 @@
+{
+  "kind": "disconnect-hung",
+  "pid": 3296,
+  "begun": "2026-11-15T16:35:02.939Z",
+  "root": "C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM",
+  "events": [
+    {
+      "event": "spawn",
+      "role": "orphan",
+      "pid": 15312
+    },
+    {
+      "event": "spawn",
+      "role": "unrelated",
+      "pid": 38004
+    },
+    {
+      "event": "close",
+      "role": "unrelated",
+      "pid": 38004,
+      "code": 1,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "identities": [
+    {
+      "pid": 53628,
+      "parent": 15312,
+      "created": "2026-11-15T16:35:03.0167790Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs asset C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "asset"
+    },
+    {
+      "pid": 46400,
+      "parent": 15312,
+      "created": "2026-11-15T16:35:03.0118320Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs check C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "check"
+    },
+    {
+      "pid": 12700,
+      "parent": 15312,
+      "created": "2026-11-15T16:35:03.0230570Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs frontend-worker C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "frontend-worker"
+    },
+    {
+      "pid": 15312,
+      "parent": 3296,
+      "created": "2026-11-15T16:35:02.9447680Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs orphan C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "orphan"
+    },
+    {
+      "pid": 35232,
+      "parent": 15312,
+      "created": "2026-11-15T16:35:03.0053340Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs preview C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "preview"
+    },
+    {
+      "pid": 38004,
+      "parent": 3296,
+      "created": "2026-11-15T16:35:02.9503550Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs unrelated C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM hung",
+      "role": "unrelated"
+    }
+  ],
+  "fallbackKills": [
+    {
+      "role": "unrelated",
+      "pid": 38004,
+      "created": "2026-11-15T16:35:02.9503550Z",
+      "reason": "final unrelated stop"
+    }
+  ],
+  "cleanupErrors": [
+    {
+      "name": "Error",
+      "message": "Owned fixture handle not settled during cleanup",
+      "stack": "Error: Owned fixture handle not settled during cleanup\n    at Timeout.<anonymous> (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/scripts/demo/test-support/orphan-case.mjs:10:144)\n    at listOnTimeout (node:internal/timers:605:17)\n    at process.processTimers (node:internal/timers:541:7)"
+    }
+  ],
+  "primary": {
+    "name": "Error",
+    "message": "Owned action did not close its actual log-producing process",
+    "stack": "Error: Owned action did not close its actual log-producing process\n    at Timeout.<anonymous> (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/scripts/demo/test-support/orphan-case.mjs:10:144)\n    at listOnTimeout (node:internal/timers:605:17)\n    at process.processTimers (node:internal/timers:541:7)"
+  },
+  "readyAt": "2026-11-15T16:35:04.941Z",
+  "actionAt": "2026-11-15T16:35:04.941Z",
+  "finished": "2026-11-15T16:35:31.469Z",
+  "retained": "C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-IH6VCM"
+}
