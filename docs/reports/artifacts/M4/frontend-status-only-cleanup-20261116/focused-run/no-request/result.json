@@ -1,0 +1,721 @@
+{
+  "kind": "no-request",
+  "started": "2026-11-15T18:35:43.578Z",
+  "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\frontend-close-focused-2026-11-15T18-35-43.132Z\\no-request",
+  "identities": [
+    {
+      "pid": 15768,
+      "parent": 56804,
+      "created": "2026-11-15T18:35:43.5823080Z",
+      "depth": 0
+    },
+    {
+      "pid": 60312,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:43.5872160Z",
+      "depth": 1
+    },
+    {
+      "pid": 9320,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:43.7573340Z",
+      "depth": 1
+    },
+    {
+      "pid": 55276,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:45.2166160Z",
+      "depth": 1
+    },
+    {
+      "pid": 17820,
+      "parent": 55276,
+      "created": "2026-11-15T18:35:45.6307660Z",
+      "depth": 2
+    }
+  ],
+  "native": [
+    {
+      "at": "2026-11-15T18:35:43.594Z",
+      "event": "spawn",
+      "pid": 15768,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": true
+    },
+    {
+      "at": "2026-11-15T18:35:43.748Z",
+      "event": "ipc-message",
+      "type": "prepared",
+      "pid": 15768,
+      "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47"
+    },
+    {
+      "at": "2026-11-15T18:35:48.175Z",
+      "event": "disconnect",
+      "pid": 15768,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.180Z",
+      "event": "stdout:end",
+      "destroyed": false,
+      "readableEnded": true,
+      "closed": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.180Z",
+      "event": "stderr:end",
+      "destroyed": false,
+      "readableEnded": true,
+      "closed": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.180Z",
+      "event": "stderr:close",
+      "destroyed": true,
+      "readableEnded": true,
+      "closed": true
+    },
+    {
+      "at": "2026-11-15T18:35:48.180Z",
+      "event": "stdout:close",
+      "destroyed": true,
+      "readableEnded": true,
+      "closed": true
+    },
+    {
+      "at": "2026-11-15T18:35:48.183Z",
+      "event": "exit",
+      "pid": 15768,
+      "code": 0,
+      "signal": null,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.184Z",
+      "event": "close",
+      "pid": 15768,
+      "code": 0,
+      "signal": null,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false
+    }
+  ],
+  "requests": [],
+  "fallbackKills": [],
+  "cleanupErrors": [],
+  "pid": 15768,
+  "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47",
+  "initialQuery": {
+    "ok": true
+  },
+  "before": {
+    "schemaVersion": 1,
+    "mode": "mock",
+    "status": "running",
+    "createdAt": "2026-11-15T18:35:43.652Z",
+    "head": "c8f35b0d5a4eaf7684a2b721b93169edf20c6832",
+    "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47\\work",
+    "files": [
+      {
+        "path": "index.html",
+        "bytes": 286,
+        "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+      },
+      {
+        "path": "package.json",
+        "bytes": 515,
+        "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+      },
+      {
+        "path": "vite.config.ts",
+        "bytes": 1666,
+        "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 410,
+        "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.glb",
+        "bytes": 988116,
+        "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.provenance.json",
+        "bytes": 311,
+        "sha256": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333"
+      },
+      {
+        "path": "public/assets/parts.json",
+        "bytes": 2098,
+        "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+      },
+      {
+        "path": "src/App.tsx",
+        "bytes": 2751,
+        "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+      },
+      {
+        "path": "src/components/Button.tsx",
+        "bytes": 288,
+        "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+      },
+      {
+        "path": "src/components/ProductHero.tsx",
+        "bytes": 2079,
+        "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+      },
+      {
+        "path": "src/main.tsx",
+        "bytes": 316,
+        "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+      },
+      {
+        "path": "src/scene-config-store.ts",
+        "bytes": 1259,
+        "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+      },
+      {
+        "path": "src/scene.config.json",
+        "bytes": 539,
+        "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+      },
+      {
+        "path": "src/style.css",
+        "bytes": 3505,
+        "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+      }
+    ],
+    "dependencies": [
+      {
+        "name": "@spatial/bridge",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge"
+      },
+      {
+        "name": "@spatial/shared",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared"
+      },
+      {
+        "name": "@spatial/scene-renderer",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer"
+      },
+      {
+        "name": "react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+      },
+      {
+        "name": "react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+      },
+      {
+        "name": "@spatial/vite-plugin-source-tag",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\vite-plugin-source-tag"
+      },
+      {
+        "name": "vite",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+      },
+      {
+        "name": "@vitejs/plugin-react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+      },
+      {
+        "name": "@types/react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+      },
+      {
+        "name": "@types/react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+      }
+    ],
+    "credentials": {
+      "speech": false,
+      "coding": false,
+      "lux3d": false
+    },
+    "realParticipants": false,
+    "rehearsalExecuted": false,
+    "mockServices": true,
+    "children": [
+      {
+        "role": "backend",
+        "pid": 9320,
+        "startedAt": "2026-11-15T18:35:43.753Z"
+      },
+      {
+        "role": "frontends",
+        "pid": 55276,
+        "startedAt": "2026-11-15T18:35:45.213Z"
+      }
+    ],
+    "ports": {
+      "api": 53315,
+      "studio": 51310,
+      "main": 21439,
+      "preview": 55626,
+      "coding": 26920,
+      "lux3d": 22248,
+      "speech": 20561
+    },
+    "startedAt": "2026-11-15T18:35:45.623Z"
+  },
+  "plan": {
+    "schemaVersion": 1,
+    "mode": "mock",
+    "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47",
+    "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47\\work",
+    "ports": {
+      "api": 53315,
+      "studio": 51310,
+      "main": 21439,
+      "preview": 55626,
+      "coding": 26920,
+      "lux3d": 22248,
+      "speech": 20561
+    }
+  },
+  "listenersBefore": [
+    {
+      "port": 55626,
+      "pid": 9320,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 53315,
+      "pid": 9320,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 51310,
+      "pid": 55276,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 26920,
+      "pid": 9320,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 22248,
+      "pid": 9320,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 21439,
+      "pid": 55276,
+      "address": "127.0.0.1"
+    },
+    {
+      "port": 20561,
+      "pid": 9320,
+      "address": "127.0.0.1"
+    }
+  ],
+  "shutdownRequested": "2026-11-15T18:35:48.135Z",
+  "closed": {
+    "code": 0,
+    "signal": null
+  },
+  "after": {
+    "schemaVersion": 1,
+    "mode": "mock",
+    "status": "stopped",
+    "createdAt": "2026-11-15T18:35:43.652Z",
+    "head": "c8f35b0d5a4eaf7684a2b721b93169edf20c6832",
+    "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47\\work",
+    "files": [
+      {
+        "path": "index.html",
+        "bytes": 286,
+        "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+      },
+      {
+        "path": "package.json",
+        "bytes": 515,
+        "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+      },
+      {
+        "path": "vite.config.ts",
+        "bytes": 1666,
+        "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 410,
+        "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.glb",
+        "bytes": 988116,
+        "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.provenance.json",
+        "bytes": 311,
+        "sha256": "7ee5b28630e81af0e9c60f1b3f9f9c39e4e78320bb4743fd7113ae23c4d26333"
+      },
+      {
+        "path": "public/assets/parts.json",
+        "bytes": 2098,
+        "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+      },
+      {
+        "path": "src/App.tsx",
+        "bytes": 2751,
+        "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+      },
+      {
+        "path": "src/components/Button.tsx",
+        "bytes": 288,
+        "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+      },
+      {
+        "path": "src/components/ProductHero.tsx",
+        "bytes": 2079,
+        "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+      },
+      {
+        "path": "src/main.tsx",
+        "bytes": 316,
+        "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+      },
+      {
+        "path": "src/scene-config-store.ts",
+        "bytes": 1259,
+        "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+      },
+      {
+        "path": "src/scene.config.json",
+        "bytes": 539,
+        "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+      },
+      {
+        "path": "src/style.css",
+        "bytes": 3505,
+        "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+      }
+    ],
+    "dependencies": [
+      {
+        "name": "@spatial/bridge",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\bridge"
+      },
+      {
+        "name": "@spatial/shared",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\shared"
+      },
+      {
+        "name": "@spatial/scene-renderer",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\scene-renderer"
+      },
+      {
+        "name": "react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+      },
+      {
+        "name": "react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+      },
+      {
+        "name": "@spatial/vite-plugin-source-tag",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\packages\\vite-plugin-source-tag"
+      },
+      {
+        "name": "vite",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+      },
+      {
+        "name": "@vitejs/plugin-react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+      },
+      {
+        "name": "@types/react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+      },
+      {
+        "name": "@types/react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+      }
+    ],
+    "credentials": {
+      "speech": false,
+      "coding": false,
+      "lux3d": false
+    },
+    "realParticipants": false,
+    "rehearsalExecuted": false,
+    "mockServices": true,
+    "children": [
+      {
+        "role": "backend",
+        "pid": 9320,
+        "startedAt": "2026-11-15T18:35:43.753Z"
+      },
+      {
+        "role": "frontends",
+        "pid": 55276,
+        "startedAt": "2026-11-15T18:35:45.213Z"
+      }
+    ],
+    "ports": {
+      "api": 53315,
+      "studio": 51310,
+      "main": 21439,
+      "preview": 55626,
+      "coding": 26920,
+      "lux3d": 22248,
+      "speech": 20561
+    },
+    "startedAt": "2026-11-15T18:35:45.623Z",
+    "finishedAt": "2026-11-15T18:35:48.172Z",
+    "cleanup": {
+      "problems": [],
+      "children": [
+        {
+          "role": "backend",
+          "pid": 9320,
+          "startedAt": "2026-11-15T18:35:43.753Z",
+          "exit": 0,
+          "signal": null,
+          "forced": false,
+          "stderrObserved": true,
+          "stderrCodes": []
+        },
+        {
+          "role": "frontends",
+          "pid": 55276,
+          "startedAt": "2026-11-15T18:35:45.213Z",
+          "exit": 0,
+          "signal": null,
+          "forced": false,
+          "stderrObserved": false,
+          "stderrCodes": []
+        }
+      ],
+      "note": "Only directly owned ChildProcess handles are signalled; no global PID/port kills. Retained runs are never removed."
+    }
+  },
+  "roleEvents": [
+    {
+      "at": "2026-11-15T18:35:43.647Z",
+      "pid": 15768,
+      "event": "launch-begin"
+    },
+    {
+      "at": "2026-11-15T18:35:43.746Z",
+      "pid": 15768,
+      "event": "real-prepare-returned",
+      "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47"
+    },
+    {
+      "at": "2026-11-15T18:35:43.759Z",
+      "pid": 15768,
+      "event": "role:spawn",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": true
+    },
+    {
+      "at": "2026-11-15T18:35:45.218Z",
+      "pid": 15768,
+      "event": "role:spawn",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": true
+    },
+    {
+      "at": "2026-11-15T18:35:48.135Z",
+      "pid": 15768,
+      "event": "sigint-simulation"
+    },
+    {
+      "at": "2026-11-15T18:35:48.138Z",
+      "pid": 15768,
+      "event": "role:disconnect",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.148Z",
+      "pid": 15768,
+      "event": "role:stderr:end",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.149Z",
+      "pid": 15768,
+      "event": "role:stderr:close",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.154Z",
+      "pid": 15768,
+      "event": "role:exit",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-11-15T18:35:48.154Z",
+      "pid": 15768,
+      "event": "role:close",
+      "role": "frontends",
+      "childPid": 55276,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-11-15T18:35:48.159Z",
+      "pid": 15768,
+      "event": "role:disconnect",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.168Z",
+      "pid": 15768,
+      "event": "role:stderr:end",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.168Z",
+      "pid": 15768,
+      "event": "role:stderr:close",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": null,
+      "signalCode": null,
+      "connected": false
+    },
+    {
+      "at": "2026-11-15T18:35:48.172Z",
+      "pid": 15768,
+      "event": "role:exit",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-11-15T18:35:48.172Z",
+      "pid": 15768,
+      "event": "role:close",
+      "role": "backend",
+      "childPid": 9320,
+      "exitCode": 0,
+      "signalCode": null,
+      "connected": false,
+      "code": 0,
+      "signal": null
+    },
+    {
+      "at": "2026-11-15T18:35:48.173Z",
+      "pid": 15768,
+      "event": "launch-returned",
+      "code": 0
+    },
+    {
+      "at": "2026-11-15T18:35:48.173Z",
+      "pid": 15768,
+      "event": "disconnect-called"
+    },
+    {
+      "at": "2026-11-15T18:35:48.174Z",
+      "pid": 15768,
+      "event": "disconnect"
+    },
+    {
+      "at": "2026-11-15T18:35:48.174Z",
+      "pid": 15768,
+      "event": "beforeExit",
+      "code": 0
+    },
+    {
+      "at": "2026-11-15T18:35:48.174Z",
+      "pid": 15768,
+      "event": "exit",
+      "code": 0
+    }
+  ],
+  "afterIdentities": [
+    {
+      "pid": 15768,
+      "parent": 56804,
+      "created": "2026-11-15T18:35:43.5823080Z",
+      "depth": 0,
+      "state": "gone"
+    },
+    {
+      "pid": 60312,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:43.5872160Z",
+      "depth": 1,
+      "state": "gone"
+    },
+    {
+      "pid": 9320,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:43.7573340Z",
+      "depth": 1,
+      "state": "gone"
+    },
+    {
+      "pid": 55276,
+      "parent": 15768,
+      "created": "2026-11-15T18:35:45.2166160Z",
+      "depth": 1,
+      "state": "gone"
+    },
+    {
+      "pid": 17820,
+      "parent": 55276,
+      "created": "2026-11-15T18:35:45.6307660Z",
+      "depth": 2,
+      "state": "gone"
+    }
+  ],
+  "listenersAfter": [],
+  "remaining": [],
+  "finalListeners": [],
+  "finished": "2026-11-15T18:35:54.715Z"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "mode": "mock",
+  "run": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-36-10.429Z-f98d5536-5420-4d68-81eb-cb2f6237f2a5",
+  "work": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-36-10.429Z-f98d5536-5420-4d68-81eb-cb2f6237f2a5\\work",
+  "ports": {
+    "api": 22549,
+    "studio": 43138,
+    "main": 33493,
+    "preview": 25032,
+    "coding": 45683,
+    "lux3d": 56688,
+    "speech": 48510
+  }
+}
