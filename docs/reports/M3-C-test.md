@@ -116,3 +116,22 @@
 ## 9. 一句话总结
 
 受测字节与冻结提交 `0860fbb` 完全一致（`HEAD:apps` = `66e7ec77…`，产品/锁/模板差异 0 行），前七步（typecheck / build / unit / m0b 24 / m0a 27 / m1a 7）全过；**第 8 步 `e2e-m1b` 有 5 例失败，全部指向 Studio 3D 视口不再随场景配置更新（lid 位移 0px）与像素一致性 0.5291% 略超 0.5% 阈值**，归类为**产品侧可疑回归**（M3-B run6 时这 5 条全过，本轮唯一增量是 M3-C 的 `apps/studio`）。本轮停手、未重跑、未改任何判据；待实现侧定位修复后重跑同口径全量。
+
+
+## 10. 第二正式轮：合入冻结主线后的受测身份（2026-11-15）
+
+前 9 节是第一正式轮（`2026-11-14T21-19-15-445Z-full`）的原件与定性，**不改写、不重跑**。
+本节记录第二正式轮在**已合入冻结主线**的测试分支上实际受测的身份与入口。
+
+- 测试分支：`test/m3c-acceptance`；把冻结主线 `2db6d5968265dbb0cc42d7d96b7c37b31b8984fe`（其内含 merge `caa0ef0` → 受审实现 `393fe9f`）合入；
+- 合并提交（受测 HEAD）：`248ba7ed6e3ec63dcd2d4f0921cd3fd84d46937e`；
+- 祖先核验：`393fe9f` 与 `2db6d59` **都是** 受测 HEAD 的祖先（`git merge-base --is-ancestor` 均为真）；
+- 产品/锁零差异：`git diff --name-only 393fe9f HEAD -- apps packages templates pnpm-lock.yaml` = 空；
+  `HEAD:apps` = `393fe9f:apps` = `8df06a9b57fd8e00e98a0eb946ad9b6b5c8f64a8`；
+  `pnpm-lock.yaml` 真实字节 SHA256 = `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960`；
+- 起跑前环境：3001/4011/5173/5174/5175 均无监听，本工作树无自有 node/chrome 残留；
+  `fallback/` 未入库（按 LESSONS 从本地根复制，m0a 需要的 `lux3d-4969293.glb` 在位）；
+- 正式入口：`tests/e2e/m3c/full-regression.mjs`（12 步：typecheck → build → 全量 `pnpm test` → 原八套 E2E → M3-C 28 例）；
+  每套 JSON 与 `--output`、以及 `M3C_ARTIFACT_DIR` 的结构化中间证据全部定向到本轮新 run 目录；
+- 本轮**必须从头真正重跑**：原 M1-B 23 例要在该冻结身份上重新全部通过，不复用 `job_8b19c345` 的 GREEN，
+  不从中间续跑、不 grep、不 skip、不 retry、首败后不自动补跑。
