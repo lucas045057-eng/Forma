@@ -1,6 +1,6 @@
 import type {SpeechConfig,SpeechResult} from '@spatial/shared';
 import {ApiError} from './api.ts';
-const safeMessages:Record<string,string>={SPEECH_NOT_CONFIGURED:'尚未配置语音识别，请继续使用文字输入。',SPEECH_BUSY:'另一个语音请求正在处理，请稍后重新录音。',SPEECH_CANCELLED:'语音识别已取消。',SPEECH_TOO_LARGE:'录音超过大小上限，请缩短录音。',SPEECH_UNSUPPORTED_MEDIA:'此录音格式不可用，请使用文字输入。',SPEECH_INVALID_AUDIO:'录音无效，请重新录音或使用文字输入。',SPEECH_TIMEOUT:'语音识别超时，请重新录音或使用文字输入。',SPEECH_UPSTREAM:'语音识别服务暂不可用，请使用文字输入。',SPEECH_CLOSING:'语音服务正在关闭，请使用文字输入。',SPEECH_REQUEST_CONFLICT:'请求编号冲突，请重新录音。'};
+const safeMessages:Record<string,string>={SPEECH_EMPTY:'未识别到语音，请重新录音或使用文字输入。',SPEECH_NOT_CONFIGURED:'尚未配置语音识别，请继续使用文字输入。',SPEECH_BUSY:'另一个语音请求正在处理，请稍后重新录音。',SPEECH_CANCELLED:'语音识别已取消。',SPEECH_TOO_LARGE:'录音超过大小上限，请缩短录音。',SPEECH_UNSUPPORTED_MEDIA:'此录音格式不可用，请使用文字输入。',SPEECH_INVALID_AUDIO:'录音无效，请重新录音或使用文字输入。',SPEECH_TIMEOUT:'语音识别超时，请重新录音或使用文字输入。',SPEECH_UPSTREAM:'语音识别服务暂不可用，请使用文字输入。',SPEECH_CLOSING:'语音服务正在关闭，请使用文字输入。',SPEECH_REQUEST_CONFLICT:'请求编号冲突，请重新录音。'};
 export function speechMessage(cause:unknown){
  if(cause instanceof ApiError)return safeMessages[cause.code]??'无法读取语音结果，请使用文字输入。';
  const name=cause instanceof Error?cause.name:'';

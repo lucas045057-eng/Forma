@@ -13,6 +13,9 @@ export async function cleanupAssetTemporaries(directory: string) {
     const folder = join(directory, entry.name);
     for (const file of await readdir(folder, { withFileTypes: true })) {
       if (file.isFile() && asset.test(file.name)) await rm(join(folder, file.name));
+      // A hard-killed parent cannot run process-isolated's finally. The instance lock proves
+      // no live writer owns this precisely named staging directory; links are not directories.
+      if (file.isDirectory() && file.name.startsWith('.model-stage-')) await rm(join(folder, file.name), { recursive: true, force: true });
     }
   }
 }

@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 :root { font-family: "Microsoft YaHei", sans-serif; color: #d7e4ee; background: #101820; font-synthesis: none; }
 body { margin: 0; background: radial-gradient(ellipse at 5% 0%, #173b48 0, transparent 45%), #101820; }
-.studio { isolation: isolate; position: relative; }
+.studio { isolation: isolate; position: relative; display: flex; flex-direction: column; height: 100dvh; min-height: 560px; }
 .studio::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 79px, #68d1d208 79px 80px); }
 button, select, input, textarea, a { -webkit-tap-highlight-color: transparent; }
 :where(button, select, input, textarea, a, summary, [tabindex]):focus-visible { outline: 2px solid #a0ede2; outline-offset: 3px; }
@@ -26,7 +26,8 @@ h1 { font-size: 18px; font-weight: 500; margin: 8px 0 0; }
 .connection { font-size: 12px; color: #8fa6b6; }
 button { padding: 11px 20px; border-radius: 5px; border: 1px solid #4d7986; color: #bcf6f3; background: #1c3b47; cursor: pointer; }
 button[aria-pressed="true"] { background: #a0ede2; color: #122c32; }
-.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 18px; padding: 20px; height: calc(100vh - 97px); min-height: 560px; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 18px; padding: 20px; flex: 1; min-height: 0; }
+.toolbar, .state-sync, .demo-banner { flex: none; }
 .preview-panel { border: 1px solid #34424d; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
 .panel-title { display: flex; justify-content: space-between; gap: 10px; padding: 12px 16px; font-size: 11px; color: #9aafbd; background: #182630; }
 iframe { width: 100%; flex: 1; border: 0; background: #faf6ee; }
@@ -90,4 +91,4 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .approval-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .approval-panel summary { cursor: pointer; padding: 12px 0; }
 @media (max-width: 900px) { .workspace { grid-template-columns: minmax(0, 1fr) 280px; padding: 10px; gap: 10px; } .inspector { padding: 14px; } }
-@media (max-width: 650px) { .workspace { display: flex; flex-direction: column; height: auto; } .preview-panel { height: 75vh; } .toolbar { padding: 14px; } .connection { display: inline; font-size: 11px; } .tools { gap: 8px; justify-content: flex-start; } h1 { font-size: 14px; } }
+@media (max-width: 650px) { .studio { height: auto; min-height: 100dvh; } .workspace { display: flex; flex-direction: column; flex: none; } .preview-panel { height: 75vh; } .toolbar { padding: 14px; } .connection { display: inline; font-size: 11px; } .tools { gap: 8px; justify-content: flex-start; } h1 { font-size: 14px; } }

@@ -17,6 +17,7 @@ export interface SpeechSnapshot {phase:'idle'|'permission'|'recording'|'transcri
 interface Session {token:number;context:SpeechContext;provider:SpeechProvider;id:string;config:SpeechConfig;stream?:StreamPort;recorder?:RecorderPort;recognition?:RecognitionPort;timer?:unknown;uploadTimer?:unknown;upload?:AbortController;sent:boolean;chunks:Blob[];bytes:number;finishing:boolean;notice:string;recognized:string}
 const initial:SpeechSnapshot={phase:'idle',notice:''};
 export function speechBusy(state:SpeechSnapshot){return ['permission','recording','transcribing','review'].includes(state.phase);}
+export function speechInflight(state:SpeechSnapshot){return ['permission','recording','transcribing'].includes(state.phase);}
 export class SpeechController {
  private token=0;private active?:Session;private snapshot:SpeechSnapshot=initial;private listeners=new Set<()=>void>();
  constructor(private readonly ports:SpeechPorts){}
@@ -90,7 +91,8 @@ export class SpeechController {
   }catch(cause){if(this.current(session)){session.sent=false;this.fail(session,cause);}}
  }
  private review(session:Session,text:string){
-  if(typeof text!=='string'||!text.trim()||text.length>4000){this.fail(session,new ApiError(502,'SPEECH_UPSTREAM','转写文字无效'));return;}
+  if(typeof text!=='string'||text.length>4000){this.fail(session,new ApiError(502,'SPEECH_UPSTREAM','转写文字无效'));return;}
+ if(!text.trim()){this.fail(session,new ApiError(400,'SPEECH_EMPTY','未识别到语音'));return;}
   const failed=this.release(session);this.active=undefined;
   this.update({phase:'review',review:{text,context:session.context,provider:session.provider},notice:failed?'本地资源释放异常，请检查麦克风状态。':session.notice});
  }

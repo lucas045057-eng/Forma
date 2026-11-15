@@ -1,9 +1,9 @@
-export interface SpeechFakeState {streams:number;liveTracks:number;recorderStarts:number;recorderStops:number;vendorStarts:number;vendorAborts:number;holdPermission:boolean;mimeSupported:boolean;releasePermissions:()=>void}
+export interface SpeechFakeState {streams:number;liveTracks:number;recorderStarts:number;recorderStops:number;vendorStarts:number;vendorAborts:number;parentBlurs:number;holdPermission:boolean;mimeSupported:boolean;releasePermissions:()=>void}
 declare global {interface Window {__speechTest:SpeechFakeState}}
 /** Browser API substitutes only; no real microphone or recognition service is requested. */
 export function installSpeechFakes(){
  const pending:Array<()=>void>=[];
- const state:SpeechFakeState={streams:0,liveTracks:0,recorderStarts:0,recorderStops:0,vendorStarts:0,vendorAborts:0,holdPermission:false,mimeSupported:true,releasePermissions:()=>{for(const resolve of pending.splice(0))resolve();}};
+ const state:SpeechFakeState={streams:0,liveTracks:0,recorderStarts:0,recorderStops:0,vendorStarts:0,vendorAborts:0,parentBlurs:0,holdPermission:false,mimeSupported:true,releasePermissions:()=>{for(const resolve of pending.splice(0))resolve();}};
  window.__speechTest=state;
  function stream(){++state.streams;++state.liveTracks;const track={readyState:'live',stop(){if(this.readyState==='live'){this.readyState='ended';--state.liveTracks;}}};return {getTracks:()=>[track]} as unknown as MediaStream;}
  Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:()=>new Promise<MediaStream>(resolve=>{const done=()=>resolve(stream());if(state.holdPermission)pending.push(done);else done();})}});
