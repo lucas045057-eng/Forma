@@ -376,3 +376,84 @@ by the default ESM loader. On Windows, absolute paths must be valid file:// URLs
 
 返工五（`a4b545a`，仅两处 `--import` URL）冻结后，我仍从头跑同一 `full-regression.mjs`。
 本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。
+---
+
+# 附录：集中第六轮（返工五后）—— server 全过，Studio 首次运行 118/142
+
+> 仍然**不是全仓通过**：shared/plugin/renderer/bridge/server 全过（server **378/378**），
+> **`apps/studio` 首次实际运行：118 passed / 24 failed（142）**；`demo-safety`、M4 19、旧九套 174 **全部未执行**。
+
+## E1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `2463dd15015fbba89f4868fe4ebda27e49ec7ee8`（merge 返工五 `1722861`） |
+| 冻结产品 | `17228617b46acb66f1e1d4999328f755fc084aaf` |
+| 身份摘要 / 锁 | `d19da6319be6…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `1722861` **0 差异**（`HEAD:apps = 172:apps = 48e15880…`） |
+| 证据目录起跑前 | 脏项 **0**；unit 步骤 `preparedDirs = D2_RUN_DIR ok=true` |
+
+## E2. 逐包实际计数（命令失败 ≠ 身份漂移）
+
+| 包 | 结果 |
+| --- | --- |
+| shared | 68 passed（2 files） |
+| vite-plugin-source-tag | 20 passed（3 files） |
+| scene-renderer | 5 passed（1 file） |
+| bridge | 1 passed |
+| **server** | **378 passed / 378（49 files 全过）** |
+| **apps/studio** | **118 passed / 24 failed（142，19 files 中 2 文件失败）** |
+| demo-safety / M4 19 / 旧 174 | 未执行 |
+
+- **命令失败**：`pnpm test` 退出码 1（`signal=null`）。
+- **身份漂移：无**（`problems` 仅退出码；`evidenceDirtyAtStart=[]`；产品/脚本/锁与 `1722861` 字节一致）。
+- **首次实际执行的两条资产夹具通过**（按真实诊断 JSON，不是推断）：
+  - `asset-lifecycle/cleanup-12216.json`：`spawn 7.7 → identity 128.6 → barrier 794.8 → kill-parent 795.0 → autonomous-worker-exit 826.8 → restart 1397.5 → assertions-complete 1964.1ms`，
+    `primary: null`、`autonomousWorkerExit: true`、`cleanupKills: []`、stderr 为空 → 自主退出、raw 保留、重启清理 staging 的断言均通过。
+  - `asset-recovery/persistence-27380.json`：`preload 36.2 → entry-imported 67.3 → identity 123.9 → held 752.1 → kill 754.4 → IPC-disconnected 756.5 → exit SIGKILL → restart 1315.8 → assertions-complete 1564.2ms`，`primary: null` → 写盘失败持锁 + 死亡 PID 接管断言通过。
+  - **边界**：这是**测试替身链路**（模型加载用替身屏障、父进程 preload 注入），**不等于**生产 `process-isolated` 的完整优化/发布链已被验证。
+- **审批 `terminal-save` 本轮通过**（上轮已通过），阶段计时保留；不据此反推历史 5s 超时根因。
+
+## E3. Studio 24 条失败（原文与映射，不普遍同因）
+
+- 失败文件：`src/speech-browser.test.ts`（**23 failed**）、`src/speech-app.browser.test.ts`（**1 failed**）。
+- **日志里 47 段 `FAIL` 不是 47 个测试**：实际失败测试 = 24，日志把同一批又以摘要形式重复打印了一次（24 + 23 = 47 段）。
+- `speech-browser.test.ts` 的 23 例**共用同一个页面错误 + 前置钩子超时**：
+  ```
+  → Hook timed out in 10000ms.
+  +  "The requested module '/@fs/…/node_modules/.pnpm/react@19.3.1/node_modules/react/jsx-dev-runtime.js?v=78e592dc'
+      does not provide an export named 'jsxDEV'"
+  ```
+  即该 fixture 的 Vite 依赖预构建/模块解析把 `react/jsx-dev-runtime` 解析成了 dev runtime 但未提供 `jsxDEV`，`beforeEach` 起页即失败；`afterEach` 再重复报错。**能确认**的是"起页阶段模块解析失败 + 钩子 10s 超时"；**不能**逐例断言这 23 条都是同一个独立产品缺陷——它们共享同一前置失败。
+- `speech-app.browser.test.ts` 的 1 例**另有原文**，不要一概同因：
+  ```
+  × real App keeps review across cross-origin iframe pick pending and WS reconnect, then frees the submitted binding 5708ms
+  → expect(locator).toHaveAttribute(expected) failed
+  Locator: getByTestId('events-status')  Expected: "connected"  Timeout: 5000ms
+  Error: element(s) not found
+  ```
+  能确认：该用例里 `events-status` 元素**始终没有出现**（连元素都没有，不是状态值不同）。它是否由 `jsxDEV` 那条页面错误导致，**现有日志无法证明**，因此**不合并归因**。
+
+## E4. 清理与证据
+
+- 3001/4011/5173/5174/5175 无监听；本树无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；无 `.model-stage-*` 残留；未执行任何 kill。
+- 诊断记录里的 PID 51932 / 51412 / 25896 / 12216 / 27380 **全部 gone**。
+- **本轮两条资产夹具成功并自行清理了自己新建的现场**（无新 `fallback-parent-death-*` 目录）；历史保留现场按"不擅删"原则保留，并把上一轮未归档的 `fallback-parent-death-1Z4Qum`（创建于 `2026-11-15T13:07:08Z`，第四轮）按原字节补档；`retained-evidence.json` 记录三个现场的存在、归属、逐文件 SHA256。
+- 归档内容：`manifest.json`、`manifest.log`、`typecheck.log`、`build.log`、`unit.log`、`cleanup.json`、`retained-evidence.json`、`launcher/`、
+  `d2-browser/`（**23 组 component JSON+PNG**、`component-cleanup.json`、`real-app-cleanup.json`、`asset-lifecycle/cleanup-12216.json`、`asset-recovery/persistence-27380.json`）；
+  `sha256-manifest.json` **65 载荷、排除自身、静态复算 0 mismatch**。
+
+## E5. 统一问题清单（第六轮）
+
+1. **U1（阻断，测试夹具）** `speech-browser.test.ts` 起页模块解析失败：`react/jsx-dev-runtime.js` 未提供 `jsxDEV`，导致 `beforeEach` 10s 超时（23 例共享）。归根任务卡 `6bfd58b` 返工六（浏览器 fixture 加载/启动诊断），**不动生产**。
+2. **U2（阻断，需单独诊断）** `speech-app.browser.test.ts` 唯一失败：`events-status` 元素从未出现；与 `jsxDEV` 的因果关系**未证明**，需独立证据（返工六同批）。
+3. **U3（已通过，保留观察）** 两条资产夹具（自主退出 / 死 PID 接管）本轮首次真实通过，但仅证明**替身链路**，生产完整 optimize/publish 链仍未覆盖。
+4. **U4（覆盖缺口）** `demo-safety`、M4 独立 19、旧九套 174（含 M1-B 23 像素）**全部未执行**。
+5. **U5（边界）** 真实 Windows 控制台 Ctrl+C、生产资产 worker 整链回收、真实模板 iframe 点选与候选 HMR 端口仍未跑到；真实阿里/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+6. **U6（审查缺口）** Claude 独立复审仍无正式报告；server 全过**不等于** M4 收口。
+
+## E6. 下一步
+
+返工六（`6bfd58b`，仅浏览器 fixture 加载/启动诊断）冻结后，我仍从头跑同一 `full-regression.mjs`。
+本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。
