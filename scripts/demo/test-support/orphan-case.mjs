@@ -21,12 +21,19 @@ async function tree(root,ready){
 async function waitUntil(read,label,timeoutMs=10000,intervalMs=100){const end=Date.now()+timeoutMs;while(Date.now()<end){const value=await read();if(value)return value;await sleep(intervalMs);}throw new Error(label);}
 async function readReady(directory){const result=[];for(const name of await readdir(directory)){if(!/^ready-.*\.json$/.test(name))continue;try{result.push(JSON.parse(await readFile(path.join(directory,name),'utf8')));}catch(error){if(!(error instanceof SyntaxError))throw error;}}return result;}
 async function eventLog(directory,role,pid){try{return (await readFile(path.join(directory,`${role}-${pid}.events.jsonl`),'utf8')).split('\n').filter(Boolean).map(line=>JSON.parse(line));}catch(error){if(error.code==='ENOENT')return [];throw error;}}
+function streamState(stream){return {destroyed:stream.destroyed,readableEnded:stream.readableEnded,closed:stream.closed,readable:stream.readable};}
 function launch(role,directory,mode,log){
  const entry=path.join(repository,'scripts/demo/test-support/orphan-role.mjs');
  const child=spawn(process.execPath,[entry,role,directory,mode],{env:{...systemEnvironment(),DEMO_PLAN:path.join(directory,'plan.json')},stdio:['ignore','pipe','pipe','ipc']});
- let stdout='',stderr='',failure;let result;child.stdout.on('data',bytes=>stdout+=String(bytes));child.stderr.on('data',bytes=>stderr+=String(bytes));child.once('error',error=>{failure=error;log.push({event:'spawn-error',role,message:error.message});});child.once('spawn',()=>log.push({event:'spawn',role,pid:child.pid}));
- const closed=new Promise(resolve=>child.once('close',(code,signal)=>{result={code,signal,stdout,stderr};log.push({event:'close',role,pid:child.pid,...result});resolve(result);}));
- return {child,closed,get result(){return result;},get failure(){return failure;},get stdout(){return stdout;},get stderr(){return stderr;}};
+ let stdout='',stderr='',failure;let result;const nativeEvents=[];
+ const state=()=>({exitCode:child.exitCode,signalCode:child.signalCode,connected:child.connected,stdout:streamState(child.stdout),stderr:streamState(child.stderr)});
+ const note=(event,extra={})=>{const entry={event,role,pid:child.pid,at:new Date().toISOString(),...extra,state:state()};nativeEvents.push(entry);log.push(entry);};
+ const failed=error=>{failure=failure?new AggregateError([failure,error],'Owned process or stream errors'):error;};
+ child.stdout.on('data',bytes=>stdout+=String(bytes));child.stderr.on('data',bytes=>stderr+=String(bytes));
+ child.on('error',error=>{failed(error);note('error',{error:detail(error)});});child.once('spawn',()=>note('spawn'));child.once('exit',(code,signal)=>note('exit',{code,signal}));child.once('disconnect',()=>note('disconnect'));
+ for(const name of ['stdout','stderr'])for(const event of ['end','close','error'])child[name].on(event,value=>{if(event==='error')failed(value);note(`${name}:${event}`,event==='error'?{error:detail(value)}:event==='close'?{hadError:!!value}:{});});
+ const closed=new Promise(resolve=>child.once('close',(code,signal)=>{result={code,signal,stdout,stderr};note('close',{code,signal});resolve(result);}));
+ return {child,closed,nativeEvents,state,get result(){return result;},get failure(){return failure;},get stdout(){return stdout;},get stderr(){return stderr;}};
 }
 function detail(error){return error instanceof AggregateError?{message:error.message,errors:error.errors.map(detail)}:error instanceof Error?{name:error.name,message:error.message,stack:error.stack}:String(error);}
 export async function runOrphanCase(kind){
@@ -45,15 +52,20 @@ export async function runOrphanCase(kind){
   const orphan=known.find(item=>item.role==='orphan');
   for(const role of roles){const matches=family.filter(item=>item.role===role&&String(item.command).includes('orphan-role.mjs')&&String(item.command).split(/\s+/).some(part=>part.replaceAll('"','')===role));assert.equal(matches.length,1,`Own ${role} command/ready identity required`);assert.equal(matches[0].parent,orphan.pid);}
   report.readyAt=new Date().toISOString();report.actionAt=new Date().toISOString();
-  if(kind==='hard-kill')main.child.kill('SIGKILL');else if(kind==='disconnect-hung')main.child.disconnect();else main.child.send({type:'shutdown'});
+  if(kind==='hard-kill')main.child.kill('SIGKILL');else if(kind==='disconnect-hung')main.child.send({type:'fixture-orphan-disconnect'});else main.child.send({type:'shutdown'});
   const result=await bounded(main.closed,kind==='normal-close'?15000:20000,'Owned action did not close its actual log-producing process');report.actionResult=result;
+  if(main.failure)throw main.failure;
+  assert.ok(main.nativeEvents.some(item=>item.event==='exit'),'Actual native process exit must be observed');
+  for(const name of ['stdout','stderr'])assert.ok(main.nativeEvents.some(item=>item.event===`${name}:close`),`Actual ${name} close must be observed`);
   if(kind==='hard-kill')assert.notEqual(result.code,0);else if(kind==='disconnect-hung')assert.notEqual(result.code,0);else assert.equal(result.code,0,result.stderr);
   await waitUntil(async()=>{const live=await snapshot(family.map(item=>item.pid));return !live.some(item=>family.some(old=>old.pid===item.pid&&old.created===item.created));},'Every original descendant, including auxiliary processes, must exit',10000,250);
   report.familyGoneBeforeFallback=true;assert.ok((await snapshot([other.pid])).some(item=>item.created===other.created),'Unrelated fixture must remain alive');report.unrelatedAliveBeforeCleanup=true;
   report.orphanEvents=await eventLog(root,'orphan',orphan.pid);let cleanup;
   try{cleanup=JSON.parse(await readFile(path.join(root,`orphan-cleanup-${orphan.pid}.json`),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;cleanup=null;}report.runtimeCleanup=cleanup;
   if(kind==='disconnect-hung'){
-   assert.ok(report.orphanEvents.some(item=>item.event==='disconnect'));assert.ok(report.orphanEvents.some(item=>item.event==='close-called'&&item.closeMode==='hung'));assert.equal(report.orphanEvents.some(item=>item.event==='close-completed'),false);
+   const received=report.orphanEvents.findIndex(item=>item.event==='fixture-disconnect-message');const called=report.orphanEvents.findIndex(item=>item.event==='fixture-disconnect-called');const disconnected=report.orphanEvents.findIndex(item=>item.event==='disconnect');const closing=report.orphanEvents.findIndex(item=>item.event==='close-called'&&item.closeMode==='hung');const exited=report.orphanEvents.findIndex(item=>item.event==='exit'&&item.code===1);
+   assert.ok(received>=0&&called>received&&disconnected>called&&closing>disconnected&&exited>closing,'Fixture message must precede role-initiated disconnect, hung close and exit');
+   assert.ok(main.nativeEvents.some(item=>item.event==='disconnect'),'Parent must observe native IPC EOF/disconnect');assert.equal(report.orphanEvents.some(item=>item.event==='close-completed'),false);
    assert.match(result.stderr,/DEMO_ORPHAN_TIMEOUT/);assert.equal(cleanup?.parentPid,orphan.pid);assert.equal(cleanup.forced,true);assert.deepEqual(cleanup.errors,[]);assert.deepEqual(cleanup.remaining,[]);
    for(const item of family.filter(value=>roles.includes(value.role)))assert.ok(cleanup.children.some(value=>value.pid===item.pid&&value.created===item.created),`Watchdog cleanup must own ${item.role}`);
   }else if(kind==='normal-close'){
@@ -73,12 +85,12 @@ export async function runOrphanCase(kind){
    const roots=known.filter(item=>native.some(now=>now.pid===item.pid&&now.created===item.created));for(const ancestor of roots)for(const item of await tree(ancestor,ready))if(!known.some(value=>value.pid===item.pid))known.push(item);
    const current=await snapshot(known.map(item=>item.pid));
    for(const item of [...known].sort((a,b)=>(b.depth??0)-(a.depth??0)))if(current.some(now=>now.pid===item.pid&&now.created===item.created)){try{process.kill(item.pid,'SIGKILL');report.fallbackKills.push({role:item.role,pid:item.pid,created:item.created,reason:item.role==='unrelated'?'final unrelated stop':'failure cleanup; not action proof'});}catch(error){if(error.code!=='ESRCH')throw error;}}
-   for(const record of [main,unrelated])if(record)await bounded(record.closed,5000,'Owned fixture handle not settled during cleanup');
+   for(const record of [main,unrelated])if(record){await bounded(record.closed,5000,'Owned fixture handle not settled during cleanup');if(record.failure)throw record.failure;}
    const after=await snapshot(known.map(item=>item.pid));report.remaining=known.filter(item=>after.some(now=>now.pid===item.pid&&now.created===item.created));assert.deepEqual(report.remaining,[]);
   }catch(error){cleanup.push(error);}
   report.identities=known;report.cleanupErrors=cleanup.map(detail);report.finished=new Date().toISOString();
   try{
-   for(const [name,record]of [['main',main],['unrelated',unrelated]])if(record){await writeFile(path.join(root,`${name}.captured.stdout.log`),record.stdout);await writeFile(path.join(root,`${name}.captured.stderr.log`),record.stderr);}
+   for(const [name,record]of [['main',main],['unrelated',unrelated]])if(record){await writeFile(path.join(root,`${name}.captured.stdout.log`),record.stdout);await writeFile(path.join(root,`${name}.captured.stderr.log`),record.stderr);await writeFile(path.join(root,`${name}.native-events.json`),JSON.stringify({events:record.nativeEvents,final:record.state()},null,2)+'\n');}
    await writeFile(path.join(root,'result.json'),JSON.stringify(report,null,2)+'\n');
    const base=process.env.M4_SCRIPT_RUN_DIR??path.join(repository,'.data','demo-script-evidence',`${process.pid}-${Date.now()}`);destination=path.join(base,'orphan',kind);await mkdir(path.dirname(destination),{recursive:true});await cp(root,destination,{recursive:true,errorOnExist:true,force:false});
   }catch(error){cleanup.push(error);}
