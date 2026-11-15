@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { BACKEND_BASE, FALLBACK_DIR, REPO_ROOT, TEMPLATE_SCENE_CONFIG, WORK_ROOT } from './env';
 import {
-  adoptAsset, getAsset, getScene, importFallback, listFallbacks, modelProvenance, restoreTemplate, revertVersion, waitFor, writeArtifact,
+  adoptAsset, assetModelHash, getAsset, getScene, importFallback, listFallbacks, modelProvenance, restoreTemplate, undoScene, waitFor, writeArtifact,
 } from './helpers';
 
 /**
@@ -67,46 +67,48 @@ test.describe('M4-D3 本地备用模型与来源', () => {
     writeArtifact('fallback-list-and-rejects.json', { ids, unknown: unknown.status, bodyRejected: bodyRejected.status });
   });
 
-  test('导入 → 来源 sidecar 绑定真实字节 → 采用 → 回退', async () => {
-    const imported: Array<{ id: string; preset: string; status: string; provenance: unknown }> = [];
+  test('导入 → 来源 sidecar 绑定真实字节 → 采用 → scene undo 还原（不是 /version/revert）', async () => {
+    // 说明：资产的采用是 SceneService.adopt（会压 scene history）；还原必须走 POST /scene/undo，
+    // POST /version/revert 属于 WorkService 的候选采用回退，在没有 adopted 候选时正确返回 409 NO_ADOPTION。
+    const imported: Array<{ id: string; preset: string; status: string; provenance: unknown; modelHash: string }> = [];
     for (const preset of PRESETS) {
       const response = await importFallback(preset.id);
       expect([200, 202], `${preset.id} 导入返回 ${response.status} ${response.text.slice(0, 200)}`).toContain(response.status);
       const assetId: string = (response.body as any)?.id;
       expect(assetId, `${preset.id} 没有返回 asset id`).toBeTruthy();
-      const ready = await waitFor(async () => {
-        const asset = await getAsset(assetId);
-        return asset.status === 200 && asset.body?.status === 'ready' ? asset : false;
-      }, 180_000, 500);
-      void ready;
+      await waitFor(async () => (await getAsset(assetId)).body?.status === 'ready', 180_000, 500);
       const asset = (await getAsset(assetId)).body;
       expect(asset.status).toBe('ready');
       const provenance = asset.provenance ?? asset.model?.provenance ?? null;
       const text = JSON.stringify(provenance ?? asset);
       expect(text, `${preset.id} 的来源没有绑定 preset/hash`).toContain(preset.hash);
-      imported.push({ id: assetId, preset: preset.id, status: asset.status, provenance });
+      const modelHash = await assetModelHash(assetId);
+      expect(modelHash, `${preset.id} 实际 model.glb 字节与 preset 不一致`).toBe(preset.hash);
+      imported.push({ id: assetId, preset: preset.id, status: asset.status, provenance, modelHash });
     }
 
+    const sceneBefore = (await getScene()).body;
+    const provenanceBefore = (await modelProvenance()).body;
     const target = imported[0];
     const adopted = await adoptAsset(target.id);
     expect(adopted.status, adopted.text.slice(0, 300)).toBe(200);
-    const afterAdopt = await modelProvenance();
-    expect(afterAdopt.status).toBe(200);
-    const adoptedText = JSON.stringify(afterAdopt.body);
-    expect(adoptedText, '采用后来源里没有 fallback 的字节哈希').toContain(PRESETS[0].hash);
-    const sceneAfter = await getScene();
 
-    const reverted = await revertVersion();
-    expect(reverted.status, reverted.text.slice(0, 300)).toBe(200);
-    const afterRevert = await modelProvenance();
-    expect(afterRevert.status).toBe(200);
-    expect(JSON.stringify(afterRevert.body)).not.toBe(adoptedText);
-    const sceneReverted = await getScene();
-    expect(JSON.stringify(sceneReverted.body)).toBe(JSON.stringify(sceneAfter.body));
+    const provenanceAfter = (await modelProvenance()).body;
+    expect(JSON.stringify(provenanceAfter), '采用后来源里没有 fallback 的字节哈希').toContain(PRESETS[0].hash);
+    const sceneAfter = (await getScene()).body;
+    expect(JSON.stringify(sceneAfter), '采用后场景没有指向新模型').not.toBe(JSON.stringify(sceneBefore));
+
+    // 真实还原路径：scene undo（SceneService 自己压的 history 栈）。
+    const undone = await undoScene();
+    expect(undone.status, undone.text.slice(0, 300)).toBe(200);
+    expect(JSON.stringify((await getScene()).body), 'undo 后场景没有回到采用前').toBe(JSON.stringify(sceneBefore));
+    expect(JSON.stringify((await modelProvenance()).body), 'undo 后来源没有回到采用前').toBe(JSON.stringify(provenanceBefore));
 
     writeArtifact('fallback-import-provenance.json', {
       imported, adopted: adopted.status,
-      provenanceAfterAdopt: afterAdopt.body, provenanceAfterRevert: afterRevert.body,
+      sceneBoundToModel: JSON.stringify(sceneAfter) !== JSON.stringify(sceneBefore),
+      provenanceAfterAdopt: provenanceAfter, provenanceAfterUndo: provenanceBefore,
+      undo: undone.status,
     });
   });
   test('F5 preset 导入接受界面真实发出的空对象 POST，危险字段仍被拒', async () => {
