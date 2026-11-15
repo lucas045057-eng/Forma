@@ -1,3 +1,5 @@
+export {};
+
 let finished=false;
 process.once('disconnect',()=>{if(!finished)process.exit(1);});
 if(process.send&&!process.connected)process.exit(1);
