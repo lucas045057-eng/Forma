@@ -1,7 +1,7 @@
 {
-  "at": "2026-11-15T03:51:37.719Z",
+  "at": "2026-11-15T03:52:16.709Z",
   "runId": "2026-11-15T03-24-30-188Z-full",
-  "files": 189,
+  "files": 196,
   "entries": [
     {
       "path": "build.log",
@@ -127,6 +127,41 @@
       "path": "e2e-m3a.log",
       "bytes": 2090,
       "sha256": "68d03e8b20f407ced3191353bef71691d37096a4d9ea4d05e4a0da2fc2617f93"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/fault-classes.json",
+      "bytes": 14473,
+      "sha256": "cbbb23f4c89d37955d73b2cd96ca39a265fa62435354d7becd1bae8725e7302f"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/gate.json",
+      "bytes": 7914,
+      "sha256": "ad8b302059615a66adf683d0785c3f7aaeafed3d59614ab11302d648023a23b7"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/lifecycle-cancel.json",
+      "bytes": 975,
+      "sha256": "98fdbfa986574e7e8d28ed105650c93c289ca7a2e0a50f51903ea5d24c6d9aac"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/lifecycle-missing-browser.json",
+      "bytes": 3838,
+      "sha256": "f0970ac999e7065c0c14886c53b0b0947edb3f5510733db8d8d07a8cfc8e2088"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/lifecycle-restart.json",
+      "bytes": 1534,
+      "sha256": "d0789077272ee40c703512dba1b224a866c4c6b30a359e63466a1b623d385177"
+    },
+    {
+      "path": "e2e-m3b-artifacts/M3-B/formal-20261115/checks/lifecycle-serial.json",
+      "bytes": 6596,
+      "sha256": "5a458e9704cc3ba5abef7c8a492301f35ded6ce1cac54437e98e9d4861cb54df"
+    },
+    {
+      "path": "e2e-m3b-artifacts/relocation.json",
+      "bytes": 2581,
+      "sha256": "a19263b6feb59ffeddcc14ebfab51a8e6dde15cfb6ffe4377ca5ae649df4691c"
     },
     {
       "path": "e2e-m3b-output/.last-run.json",
@@ -930,8 +965,8 @@
     },
     {
       "path": "sha256-manifest.json",
-      "bytes": 37650,
-      "sha256": "57a58c2a853dac5fc39489bf8f50f8c7182e6b8afc8fade42e78e4cc8aaa7023"
+      "bytes": 37806,
+      "sha256": "a2e4f2593d21a4c64157496fa71051dfa9041ddea445fb746067c92b1853f00f"
     },
     {
       "path": "typecheck.log",

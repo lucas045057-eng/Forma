@@ -1,0 +1,291 @@
+{
+  "a": {
+    "id": "c1d64a87813c4a9885102460a7715c94",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-15T03:41:12.884Z",
+    "finishedAt": "2026-11-15T03:41:19.932Z",
+    "durationMs": 7048,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 9
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3907
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "040f9c237e1053cca319c89e799e97a543bc89d758487af4c865fc788b9d9b16",
+        "durationMs": 879
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "c52cb566b7b99f1e74615e3265d2af805f42230e25b52a649dba5512f5537397",
+        "durationMs": 86
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "040f9c237e1053cca319c89e799e97a543bc89d758487af4c865fc788b9d9b16"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2717,
+        "hash": "c52cb566b7b99f1e74615e3265d2af805f42230e25b52a649dba5512f5537397"
+      }
+    ]
+  },
+  "b": {
+    "id": "f572793b25a84a12a7ad65616a213499",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-15T03:41:13.316Z",
+    "finishedAt": "2026-11-15T03:41:27.111Z",
+    "durationMs": 13795,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 10
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3879
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "0954154f8ed97b83673250af57a269ee58b0086b012f3e67c43865fcdb378fa4",
+        "durationMs": 899
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "7118f2ebd1dd896de92980043ec78fb579723bfcd8b56d5a5fd76feffcfc1263",
+        "durationMs": 110
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 106167,
+        "hash": "ebee72bede49a128a4cc64d96574213c5d860a9f31c0bfc729843d9ae63152f4"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "0954154f8ed97b83673250af57a269ee58b0086b012f3e67c43865fcdb378fa4"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 106167,
+        "hash": "ebee72bede49a128a4cc64d96574213c5d860a9f31c0bfc729843d9ae63152f4"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "7118f2ebd1dd896de92980043ec78fb579723bfcd8b56d5a5fd76feffcfc1263"
+      }
+    ]
+  },
+  "samples": [
+    {
+      "at": 2,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 263,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 514,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 774,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1035,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1297,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1556,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1818,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2069,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2336,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2589,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2854,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3120,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3372,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3639,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3904,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4168,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4420,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4672,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4937,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5202,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5464,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5730,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6004,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6263,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6528,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6791,
+      "a": "completed",
+      "b": "running"
+    }
+  ],
+  "sawSerial": true,
+  "sawOverlap": false,
+  "ordering": {
+    "aFinishedAt": "2026-11-15T03:41:19.932Z",
+    "bStartedAt": "2026-11-15T03:41:20.344Z"
+  }
+}
