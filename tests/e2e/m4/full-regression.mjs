@@ -22,7 +22,7 @@
  * - 服务型步骤失败即停，后续步骤不会执行（如实记为未执行）；
  * - git 全部 `-c core.longpaths=true`；环境按白名单构造，不继承/不打印整个 process.env。
  */
-import { createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync, appendFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import { dirname, join, relative } from 'node:path';
 import {
@@ -105,12 +105,33 @@ function playwrightStep(suite) {
   };
 }
 
+/** 递归创建步骤前置目录；失败必须记入口失败，绝不能带病启动子进程。 */
+function prepareDirs(step) {
+  const targets = step.prepare ?? [];
+  const prepared = [];
+  const failures = [];
+  for (const target of targets) {
+    try {
+      mkdirSync(target.dir, { recursive: true });
+      if (!statSync(target.dir).isDirectory()) throw new Error('not a directory');
+      prepared.push({ label: target.label, dir: relative(ROOT, target.dir).split('\\').join('/'), ok: true });
+    } catch (error) {
+      prepared.push({ label: target.label, dir: relative(ROOT, target.dir).split('\\').join('/'), ok: false, error: String(error).slice(0, 300) });
+      failures.push({ label: target.label, dir: relative(ROOT, target.dir).split('\\').join('/'), error: String(error).slice(0, 300) });
+    }
+  }
+  return { prepared, failures, ok: failures.length === 0 };
+}
+
 function steps() {
   if (MODE === 'collect') return [M4_SUITE, ...OLD_SUITES].map(playwrightStep);
   return [
     { name: 'typecheck', command: 'pnpm', args: ['typecheck'], env: {}, shell: true },
     { name: 'build', command: 'pnpm', args: ['build'], env: {}, shell: true },
-    { name: 'unit', command: 'pnpm', args: ['test'], env: { D2_RUN_DIR: join(OUT, 'd2-browser') }, shell: true },
+    { name: 'unit', command: 'pnpm', args: ['test'], env: { D2_RUN_DIR: join(OUT, 'd2-browser') }, shell: true,
+      // 单元阶段会往 D2_RUN_DIR 写诊断证据；必须在子进程启动前就递归创建好，
+      // 否则写入会 ENOENT 并遮蔽原始断言/子进程错误（第四轮 C3-1 的入口缺陷）。
+      prepare: [{ label: 'D2_RUN_DIR', dir: join(OUT, 'd2-browser') }] },
     { name: 'demo-safety', command: process.execPath, args: ['--test', 'scripts/demo/safety.test.mjs'], env: {} },
     playwrightStep(M4_SUITE),
     ...OLD_SUITES.map(playwrightStep),
@@ -203,8 +224,24 @@ if (baseline.dirty.size > 0) {
 }
 
 for (const step of steps()) {
+  const preparation = prepareDirs(step);
+  if (!preparation.ok) {
+    // 入口失败（不是产品失败）：目录都建不出来时一律不启动子进程。
+    const allSteps = steps().map((item) => item.name);
+    manifest.entryFailure = {
+      kind: 'entry', abort: 'prepareDir', exitCode: 3, step: step.name,
+      failures: preparation.failures, prepared: preparation.prepared,
+      executed: manifest.steps.map((item) => item.step), notExecuted: allSteps.filter((name) => !manifest.steps.some((item) => item.step === name)),
+    };
+    writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+    appendFileSync(join(OUT, 'manifest.log'), `entry-failure prepareDir step=${step.name} failures=${preparation.failures.length}\n`);
+    console.error(`[m4] 入口失败（不是产品失败）：${step.name} 的前置目录无法创建，未启动子进程`);
+    for (const failure of preparation.failures) console.error(`  ${failure.label}: ${failure.dir} -> ${failure.error}`);
+    process.exit(3);
+  }
   console.log(`[m4] ${step.name} …`);
   const record = await runStep(step, baseline);
+  if (preparation.prepared.length) record.preparedDirs = preparation.prepared;
   manifest.steps.push(record);
   writeFileSync(join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   appendFileSync(join(OUT, 'manifest.log'), `${record.step} ok=${record.ok} code=${record.code} report=${record.report?.ok ?? '-'} archived=${record.evidenceArchived.length}\n`);
