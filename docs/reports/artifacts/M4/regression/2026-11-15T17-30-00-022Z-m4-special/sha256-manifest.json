@@ -1,12 +1,32 @@
 {
-  "at": "2026-11-15T17:33:11.049Z",
-  "payloadFiles": 5,
+  "at": "2026-11-15T17:36:15.706Z",
+  "payloadFiles": 10,
   "manifestExcluded": "sha256-manifest.json",
   "entries": [
     {
       "path": "gitlink-evidence.json",
       "bytes": 1211,
       "sha256": "9a4d6a5a6e66f5d63a9413af9934de179032ad087d7edb766b04449b50011061"
+    },
+    {
+      "path": "launcher-precheck/cmd",
+      "bytes": 68,
+      "sha256": "d0c4f515c2142be2ffcdb0dc4613b30c6e92abf91c8aeece919abc5f32449c66"
+    },
+    {
+      "path": "launcher-precheck/exit",
+      "bytes": 5,
+      "sha256": "13dd7ea678df22565726506d4db2bb4dd1cefd02a9d9772620ce4d4d9315e47b"
+    },
+    {
+      "path": "launcher-precheck/job.json",
+      "bytes": 418,
+      "sha256": "19d1df2c3d0f90e3d58e378b8164030a2268cd756e0003929fd63afd7b42f1b4"
+    },
+    {
+      "path": "launcher-precheck/output.log",
+      "bytes": 787,
+      "sha256": "ecebbe7af853cc71fde76ebdae0d87d246c000dad0c92d1def5f9454a7f17b97"
     },
     {
       "path": "launcher/cmd",
@@ -27,6 +47,11 @@
       "path": "launcher/output.log",
       "bytes": 1093,
       "sha256": "aa6a33563c64d0da1b7d2b8a8915df186a74d6856f26032ddc640d46881a3d92"
+    },
+    {
+      "path": "tool-identity.json",
+      "bytes": 991,
+      "sha256": "1a3e4132e6ef9f82efe757055f2438f34e7f6f1b1b6ebd38970604e9e2febad1"
     }
   ]
 }

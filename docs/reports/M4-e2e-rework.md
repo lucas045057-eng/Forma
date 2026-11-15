@@ -215,3 +215,33 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/`�
   并对上一轮 **857 载荷**逐条对照"磁盘字节 vs 归档清单"、统计其中落在 gitlink 容器内的条目数。
 - **禁止**再对验收归档 `git add` 嵌套仓库；gitlink 载荷变化**不得**套普通 `git checkout` 还原；
   报告与清单里不把 gitlink 冒充普通文件，也不因为 Git 表示差异就抹掉实际载荷。
+## 11. 只读预检失败原因、Codex 直接修正、以及我补齐的普通证据容器
+
+### 11.1 上一轮预检为什么也失败（0 测试）
+
+`job_a7ab82b5`（exit 1 / 2s）不是用例问题，而是预检工具本身两处错误：
+
+1. **HEAD 读法错**：读的是 worktree 的 `.git/HEAD` 文件（工作树里 `.git` 是文件而非目录），应 `git rev-parse --verify HEAD`；
+2. **857 清单路径根错**：`sha256-manifest.json` 里的 `path` 是**相对 run 目录**的，旧代码 `join(ROOT, entry.path)` 必然全部 absent。
+
+Codex 已直接修好并**保全旧入口**为 `.data/m4-gitlink-precheck.failed-head.mjs`（SHA256 `58114a1b5c96035a6308b6fd2b5aa8b7db22232c7c1b904e1f350010f0094fb1`），
+当前工具 SHA256 记在 `tool-identity.json`；失败预检的 launcher 也归档到 `launcher-precheck/`。
+
+### 11.2 本轮补齐（7dd269d 未做完的部分）
+
+- **普通证据容器**：`materializeContainer()` 把 gitlink 目录**只复制普通文件**（不跟随链接、不复制 `.git`）到
+  `gitlink-container/`，并写 `gitlink-container-mapping.json`：**originalPath / mode / sha256 / bytes / containerPath**。
+  原 gitlink 与 857 清单**保持不动**；将来可把这些普通文件正常 `git add`，**不需要**再提交嵌套仓库。
+- **目录摘要更完整**：容器摘要覆盖 **文件字节 + 链接目标文本**（`file\0path\0sha` 与 `link\0path\0target`）；
+  `links`（符号链接/junction，只记目标不跟随）、`gitPointers`（`.git` 目录/文件指针）、`errors`（真实 I/O 异常）**分开记录**。
+  `.git` 指针若指向容器外部 → 物化直接失败（不跟随、不静默）。
+- **失败门禁收紧**：普通文件 `missing`/不可读、未知 mode、容器内 `errors`、审计 mismatch/absent、物化失败 → **入口失败（exit 1）**；
+  「正常跳过链接」只计入 `links`，不当错误、也不当绿。**不再把 stable missing 当通过**。
+- 审计口径：磁盘 857 载荷匹配 **不等于**"全部已正确入库"——其中落在 gitlink 容器内的条目，Git 记录形式是 `160000` 而不是普通文件，
+  报告会把"磁盘匹配数"与"Git 表示差异（gitlink 容器内条目数）"分别列出。
+
+### 11.3 边界
+
+- 本轮只允许**一次无服务只读预检重试**：不跑 M4/19 例、不 full、不 collect、614/12/旧 174 均未执行；不启动 Playwright/browser/server。
+- 产品与 19 例字节保持 `6aecd30` 不动；失败原件（含失败预检 launcher、工具身份）已保全，历史 JSON 未改写。
+- 入口失败与运行失败在报告里分开记录；真实 Windows 控制台 Ctrl+C、真实阿里/厂商/编码/Lux3D、真人 A/B、完整彩排仍未执行。
