@@ -1,0 +1,87 @@
+{
+  "test": "real pointer release includes final audio once, editable review requires explicit B then generates only via original button",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.9535000000000764
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 127.00410000000011
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 268.38350000000014
+      },
+      {
+        "phase": "interaction",
+        "ms": 271.60619999999994
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "posts": [
+    {
+      "id": "2c217539-7f31-47b6-8507-db0bb5d51a60",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "编辑后的语音指令",
+      "selection": {
+        "cid": "B",
+        "src": "src/B.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

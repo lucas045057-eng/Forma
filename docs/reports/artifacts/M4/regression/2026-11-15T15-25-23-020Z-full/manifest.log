@@ -1,0 +1,3 @@
+typecheck ok=true code=0 report=- archived=0
+build ok=true code=0 report=- archived=0
+unit ok=false code=1 report=- archived=0

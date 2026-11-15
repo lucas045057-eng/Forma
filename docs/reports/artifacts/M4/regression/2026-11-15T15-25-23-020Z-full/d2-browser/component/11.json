@@ -1,0 +1,66 @@
+{
+  "test": "failed speech task submission conservatively retains its binding until explicit reconfirmation or discard",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.4147999999995591
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 60.17689999999948
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 119.02889999999934
+      },
+      {
+        "phase": "interaction",
+        "ms": 121.26859999999942
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "posts": [
+    {
+      "id": "6c31fa87-93fd-48ec-aab4-7ba881273b92",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

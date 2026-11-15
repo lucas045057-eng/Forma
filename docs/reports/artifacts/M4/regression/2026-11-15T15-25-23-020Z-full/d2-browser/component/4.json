@@ -1,0 +1,87 @@
+{
+  "test": "Space repeat and synthetic click never double-record; changed accepted selection blocks Ctrl+Enter until reconfirmed",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.43540000000029977
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 91.86560000000009
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 173.43520000000035
+      },
+      {
+        "phase": "interaction",
+        "ms": 175.73250000000007
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "posts": [
+    {
+      "id": "3d541d63-cbaf-48fa-a3da-8a1929363d76",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "把这个改成圆角",
+      "selection": {
+        "cid": "B",
+        "src": "src/B.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}
