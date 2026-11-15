@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { BACKEND_BASE, FALLBACK_DIR } from './env';
+import { BACKEND_BASE, FALLBACK_DIR, TEMPLATE_SCENE_CONFIG, WORK_ROOT } from './env';
 import {
   adoptAsset, getAsset, getScene, importFallback, listFallbacks, modelProvenance, restoreTemplate, revertVersion, waitFor, writeArtifact,
 } from './helpers';
@@ -93,4 +93,56 @@ test.describe('M4-D3 本地备用模型与来源', () => {
       provenanceAfterAdopt: afterAdopt.body, provenanceAfterRevert: afterRevert.body,
     });
   });
+  test('F5 preset 导入接受界面真实发出的空对象 POST，危险字段仍被拒', async () => {
+    for (const preset of PRESETS) {
+      const response = await fetch(`${BACKEND_BASE}/assets/fallbacks/${preset.id}/import`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+      });
+      expect([200, 202], `${preset.id} 空对象 POST 返回 ${response.status}`).toContain(response.status);
+    }
+    const unsafe = await fetch(`${BACKEND_BASE}/assets/fallbacks/diffuser-split/import`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: '/etc/passwd' }),
+    });
+    expect([400]).toContain(unsafe.status);
+    writeArtifact('fallback-empty-body-post.json', { accepted: PRESETS.map((preset) => preset.id), unsafe: unsafe.status });
+  });
+
+  test('F4 坏来源 sidecar 三类都安全 409，作品四份字节不变', async () => {
+    const response = await importFallback('diffuser-split');
+    expect([200, 202]).toContain(response.status);
+    const assetId = (response.body as any)?.id;
+    await waitFor(async () => (await getAsset(assetId)).body?.status === 'ready', 180_000, 500);
+    const adopted = await adoptAsset(assetId);
+    expect(adopted.status, adopted.text.slice(0, 300)).toBe(200);
+
+    const assetsDir = path.join(WORK_ROOT, 'public', 'assets');
+    const files = {
+      glb: path.join(assetsDir, `${assetId}.glb`),
+      parts: path.join(assetsDir, `${assetId}.parts.json`),
+      sidecar: path.join(assetsDir, `${assetId}.provenance.json`),
+      scene: TEMPLATE_SCENE_CONFIG,
+    };
+    const before = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
+
+    const writeFile = (await import('node:fs')).writeFileSync;
+    const valid = JSON.parse(readFileSync(files.sidecar, 'utf8'));
+    const cases = [
+      { name: 'bad-json', bytes: Buffer.from('{not json', 'utf8') },
+      { name: 'too-large', bytes: Buffer.concat([Buffer.from(JSON.stringify(valid), 'utf8'), Buffer.alloc(16385, 0x20)]) },
+      { name: 'different-provenance', bytes: Buffer.from(JSON.stringify({ ...valid, sourceHash: '0'.repeat(64) }), 'utf8') },
+    ];
+    const results: Array<{ name: string; status: number; code: string }> = [];
+    for (const item of cases) {
+      writeFile(files.sidecar, item.bytes);
+      const retry = await adoptAsset(assetId);
+      expect(retry.status, `${item.name} 没有被安全拒绝：${retry.text.slice(0, 200)}`).toBe(409);
+      const code = (retry.body as any)?.error?.code ?? '';
+      expect(['ASSET_NAME_CONFLICT', 'ASSET_NAME_CONFLICT_SAFE', 'CONFLICT'].includes(code) || /CONFLICT/.test(code), `${item.name} 的错误码不安全：${code}`).toBe(true);
+      const after = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, sha256(readFileSync(file))]));
+      expect(after, `${item.name} 之后作品字节被改动了`).toEqual(before);
+      results.push({ name: item.name, status: retry.status, code });
+    }
+    writeArtifact('fallback-bad-sidecar.json', { assetId, results, bytes: before });
+  });
+
 });
