@@ -66,11 +66,25 @@ export async function canvasRect(locator: Locator): Promise<Rect> {
   return { x: box.x, y: box.y, width: box.width, height: box.height };
 }
 
+/** 截图的"坐标窗口"：两次比较只有在同一窗口下才有意义。 */
+export interface CaptureWindow {
+  size: number;
+  start: number;
+  end: number;
+  visibleHeight: number;
+  previewRect: Rect;
+  studioRect: Rect;
+  frameRect: Rect;
+  viewport: { width: number; height: number };
+}
+
 export interface CanvasPair {
   size: number;
   preview: { rect: Rect; png: Buffer; offsetY: number; visibleHeight: number };
   studio: { rect: Rect; png: Buffer };
   backing: { preview: number; studio: number; dpr: number };
+  /** 该次截图实际使用的坐标窗口（用于"前后同一窗口"判定与诊断）。 */
+  window: CaptureWindow;
 }
 
 /**
@@ -126,7 +140,9 @@ export async function captureCanvases(page: Page, frame: Frame): Promise<CanvasP
     const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement;
     return { studio: studioCanvas.width, dpr: window.devicePixelRatio };
   });
+  const captureWindow: CaptureWindow = { size, start, end, visibleHeight, previewRect, studioRect, frameRect, viewport };
   return {
+    window: captureWindow,
     size,
     preview: { rect: previewRect, png: preview.png, offsetY: start, visibleHeight },
     studio: { rect: studioRect, png: studio.png },

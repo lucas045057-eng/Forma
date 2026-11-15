@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { getScene, putScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, undoScene, waitFor } from './api';
 import { captureCanvases, openEditor, setSlider } from './editor';
-import { compareAligned } from '../m1a/visual';
+import { waitForPairChange } from './window-compare';
 import { writeArtifactFrom } from './artifact';
 
 /** 撤回：配置值与网页画面都恢复；历史为空时 409 且界面有错误提示。 */
@@ -17,10 +17,8 @@ test.describe('撤回', () => {
 
     await setSlider(page, 'scene-ambient', 3.4);
     await page.getByTestId('scene-save-hero').click();
-    const changedMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio > 0.01;
-    }, 30_000, 100);
+    const changed = await waitForPairChange(page, frame, baseline, { threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 });
+    const changedMs = changed.elapsedMs;
     const afterWrite = (await getScene()).body;
     expect(afterWrite.hero.lights.ambient).toBeCloseTo(3.4, 1);
 
@@ -32,12 +30,16 @@ test.describe('撤回', () => {
     expect(sameJson(readSceneFile(), original), '撤回后文件内容没有恢复').toBe(true);
 
     // 作品页画面也应恢复（允许与基线有极小的抗锯齿差异）
-    const recoveredMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio < 0.002;
-    }, 30_000, 150);
+    // 撤回后画面回到基线：同一窗口下等差异降到 0.002 以下（原预算/阈值不变）。
+    const recovered = await waitForPairChange(page, frame, baseline, { threshold: 0.002, timeoutMs: 30_000, intervalMs: 150, mode: 'decrease' });
+    const recoveredMs = recovered.elapsedMs;
 
-    writeArtifactFrom('undo-ui.json', { changedMs, recoveredMs, originalAmbient: original.hero.lights.ambient, afterWriteAmbient: afterWrite.hero.lights.ambient });
+    writeArtifactFrom('undo-ui.json', {
+      changedMs, recoveredMs,
+      changedRatio: changed.changedRatio, recoveredRatio: recovered.changedRatio,
+      captureAttempts: { changed: changed.attempts.length, recovered: recovered.attempts.length },
+      originalAmbient: original.hero.lights.ambient, afterWriteAmbient: afterWrite.hero.lights.ambient,
+    });
   });
 
   test('历史为空时撤回返回 409，界面显示错误提示', async ({ page }) => {

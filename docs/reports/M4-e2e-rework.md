@@ -416,3 +416,49 @@ demo run 内的 **2 个嵌套 candidates 仓库**物化为 `gitlink-container/01
 ### 15.5 边界
 
 真实 Windows 控制台 Ctrl+C、真实服务/真人 A/B/完整彩排仍未验证；本轮未改测试/helper/runner/产品，未启动任何新验证。
+## 16. M1-B 同窗口前后比较（测试侧最小修正，未运行）
+
+针对 §15 的三条失败（同一个预览在写入前后两次截图的尺寸 378x378 vs 378x341），只改 **M1-B 测试与 helper**；
+`../m1a/visual.ts`（`compareAligned` 阈值/算法）、`runner`、产品、实现侧测试、依赖、模板**均未改**。
+
+### 16.1 新增 `tests/e2e/m1b/window-compare.ts`
+
+- `readCaptureWindow(page, frame)`：**只读**几何（不重置滚动、不截图）。窗口仍按原逻辑算：
+  `size = min(预览 canvas 宽, Studio canvas 宽)`，高度取 `previewRows`（受预览 iframe `frameRect` 限制）与 `studioRows` 的交集。
+- `sameWindow(a, b)`：`size/start/end` 相等 + 两类 rect 与 iframe rect 的 x/y/height 容差 ≤1px。
+- `readGate(page)`：真实 UI 状态——`scene-undo` 是否可用（= 不在 busy / 未持作品锁 / `syncReady` 且已连接），
+  以及页面上是否仍存在含"状态待同步"的 `[role="status"]`。
+- `captureWithWindow(page, frame, win)`：用**基线窗口的坐标**截两边（不 resize、不缩小基线）。
+- `captureWhenStable(page, frame, baseline)`：先做与基线相同的滚动归零，再要求
+  **(a) 写回控件可用 + (b) 提示消失 + (c) 窗口几何与基线一致** 三者同时成立才截图；
+  否则返回 `ok:false` + 具体原因（**继续在预算内观察**，不静默对齐）。
+- `waitForPairChange(page, frame, baseline, {threshold, timeoutMs, intervalMs, mode})`：预算/阈值/间隔全部由调用方传入，
+  内部不额外 sleep、不放宽阈值、不吞异常；`compareAligned` 的真实异常（含尺寸不一致）原样抛出；
+  超时抛错时附带最近 4 次的几何/UI 诊断（尺寸、visibleHeight、start、undoEnabled、hints）。
+
+### 16.2 三处调用点（预算与阈值均未变）
+
+| 用例 | 原调用 | 现在 |
+| --- | --- | --- |
+| `01-consistency` 写入后一致性 | `waitFor(..., 30_000, 250)` 内 `captureCanvases` + `changedRatio > 0.02` | `waitForPairChange(..., {threshold: 0.02, timeoutMs: 30_000, intervalMs: 250})` |
+| `02-writeback` 设为首屏即时同步 | `waitFor(..., 30_000, 100)` + `> 0.01`，`latencyMs` 后续断言 `< 10_000` | 同上参数，`latencyMs = changed.elapsedMs`（**计时起点仍是点击时刻**） |
+| `03-undo` 写入 | `waitFor(..., 30_000, 100)` + `> 0.01` | 同上 |
+| `03-undo` 撤回恢复 | `waitFor(..., 30_000, 150)` + `< 0.002` | `mode:'decrease'`，阈值 0.002、预算 30s 不变 |
+
+- 候选中的"瞬态尺寸变化"只作为证据记录（`captureTail` 写入 `writeback-hero.json` / `consistency-after-edit.json` / `undo-ui.json`）；
+  **持久不一致、同步失败、提示一直不消失、写回失败仍会失败**（要么超时并带诊断，要么 `compareAligned` 直接抛）。
+- 未改：像素阈值、10 秒延迟断言、HMR/落盘/撤回断言、`expect(...)` 语义；未加固定 sleep、未 retry/skip、未主动刷新页面。
+
+### 16.3 `06-adopt` 的 provenance sidecar 清理
+
+- 采用现在会写 `public/assets/<id>.provenance.json`；旧 `finally` 只删 `.glb` 与 `.parts.json`，所以出现过残留。
+- 现在在测试开始前记录 sidecar **原状**（是否存在 + 原字节）；`finally` 按原状恢复：原本不存在则删除、原本存在则按原字节写回，
+  并断言 `existsSync(sidecar) === Boolean(sidecarBefore)`、`.parts.json` 也已清理；证据写入 `adopt-provenance-cleanup.json`。
+- 不删历史文件、不用测试"造"出 sidecar 再当历史。
+
+### 16.4 状态
+
+- 本轮**只做静态修改与提交**：未运行 tsc/build/test/collect/服务/探针/预检/job，也未做 syntax check（按卡要求）。
+- 类型/控制流/计时的静态自查要点：`CaptureWindow` 只做只读几何；局部变量改名避免遮蔽浏览器 `window`（`evaluate` 里仍用全局）；
+  删除因改造而无用的 import（`01` 的 `waitFor`、`03` 的 `compareAligned`）。
+- 待根复核后才安排**一次** M1-B 原 23 例 focused；真实 Windows 控制台 Ctrl+C、真实服务、真人 A/B、完整彩排仍未验证。

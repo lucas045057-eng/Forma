@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { SCENE_CONFIG, getScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, waitFor } from './api';
 import { captureCanvases, enableCompare, openEditor, readScrollAt, setSlider } from './editor';
+import { waitForPairChange } from './window-compare';
 import { compareAligned } from '../m1a/visual';
 import { writeArtifactFrom } from './artifact';
 import { readFileSync } from 'node:fs';
@@ -29,10 +30,9 @@ test.describe('写回与即时同步', () => {
     await setSlider(page, 'scene-rotation-y', 1.24);
     const clickedAt = Date.now();
     await page.getByTestId('scene-save-hero').click();
-    const latencyMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio > 0.01;
-    }, 30_000, 100);
+    // 同一窗口下等待画面变化：先等写回完成/提示消失/几何回到基线，再用基线窗口比较（原 30s 预算与 0.01 阈值不变）。
+    const changed = await waitForPairChange(page, frame, baseline, { threshold: 0.01, timeoutMs: 30_000, intervalMs: 100 });
+    const latencyMs = changed.elapsedMs;
 
     const identity = await page.evaluate(() => (window as unknown as { __m1bIdentity?: number }).__m1bIdentity);
     const frameIdentityAfter = await frame.evaluate(() => window.name || 'preview');
