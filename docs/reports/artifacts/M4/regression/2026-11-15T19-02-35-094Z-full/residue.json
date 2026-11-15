@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-15T19:17:57.840Z",
+  "note": "M1-B 06-adopt 的 finally 只删 adoptedFile(.glb) 与 adoptedParts，没有清 provenance sidecar，导致作品目录残留该文件。先按原字节保存到 residue/ 再删除 Workspace 里这一份（本轮产生，非历史证据）。",
+  "leaked": {
+    "path": "templates/product-page/public/assets/lux3d-8400001.provenance.json",
+    "bytes": 285,
+    "sha256": "b084c100eb4b793a82dca5f310de7b11c7dc385d17f5461c2038d0e7cae8f204"
+  },
+  "templatesStatusAfterCleanup": null
+}

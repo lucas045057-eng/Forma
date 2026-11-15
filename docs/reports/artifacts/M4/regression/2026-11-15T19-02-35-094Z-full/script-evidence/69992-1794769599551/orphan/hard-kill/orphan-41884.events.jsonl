@@ -1,0 +1,5 @@
+{"event":"spawned-child","role":"orphan","pid":41884,"parent":22912,"at":"2026-11-15T19:06:34.363Z","connected":true,"childPid":19720,"childRole":"preview"}
+{"event":"spawned-child","role":"orphan","pid":41884,"parent":22912,"at":"2026-11-15T19:06:34.368Z","connected":true,"childPid":21684,"childRole":"check"}
+{"event":"spawned-child","role":"orphan","pid":41884,"parent":22912,"at":"2026-11-15T19:06:34.373Z","connected":true,"childPid":49868,"childRole":"asset"}
+{"event":"spawned-child","role":"orphan","pid":41884,"parent":22912,"at":"2026-11-15T19:06:34.378Z","connected":true,"childPid":2760,"childRole":"frontend-worker"}
+{"event":"ready","role":"orphan","pid":41884,"parent":22912,"at":"2026-11-15T19:06:34.379Z","connected":true}

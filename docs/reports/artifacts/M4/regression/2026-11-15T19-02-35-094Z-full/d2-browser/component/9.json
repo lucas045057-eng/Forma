@@ -1,0 +1,61 @@
+{
+  "test": "real gate event releases active resources and never uploads",
+  "url": "http://127.0.0.1:10692/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:10692/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.379399999999805
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 58.758999999999105
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 120.15399999999954
+      },
+      {
+        "phase": "interaction",
+        "ms": 122.08719999999994
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}
