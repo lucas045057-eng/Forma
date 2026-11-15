@@ -1,7 +1,9 @@
 {
-  "at": "2026-11-15T03:52:16.709Z",
+  "at": "2026-11-15T03:54:23.523Z",
   "runId": "2026-11-15T03-24-30-188Z-full",
-  "files": 196,
+  "payloadFiles": 195,
+  "manifestExcluded": "sha256-manifest.json",
+  "note": "清单只登记载荷文件，不登记自身（自引用会让字节数与哈希在写入后立刻失效）。磁盘上共 payloadFiles + 1 份清单。",
   "entries": [
     {
       "path": "build.log",
@@ -194,34 +196,9 @@
       "sha256": "d44fca0bb9d4ac47694dda00286c2b77fe8f578155f9d88bea69b234c1e3c3e8"
     },
     {
-      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
-      "bytes": 918,
-      "sha256": "459f54afd8c75dea73e95927a3e119462f3904efcefee99131960cc1108cb2c4"
-    },
-    {
-      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
-      "bytes": 827,
-      "sha256": "eb8008b3268a99723676df23e5ad4a0155178925f98e40f62e4ab2311b8ec6a4"
-    },
-    {
-      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
-      "bytes": 809,
-      "sha256": "cfc44d312b019534c21eca5736bade5923c428923f98b76aea4a9422534e0228"
-    },
-    {
-      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
-      "bytes": 855,
-      "sha256": "9db3430469b0a0b843e69ef6ad131aefcb2b9880b944b5f0ac7ab5a786186c5f"
-    },
-    {
       "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-并发超限-create-返回-c-错误码-.json",
       "bytes": 1018,
       "sha256": "1d010831e96e93e9197c808c1502e4d814fcb22093affa536e527f311efa4cc6"
-    },
-    {
-      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-未知任务状态.json",
-      "bytes": 813,
-      "sha256": "f5945c71958b719cdf3ece2872defb4284bdc881917b7b20d0b34ba70db5d91d"
     },
     {
       "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-结果-URL-过期-403.json",
@@ -237,6 +214,31 @@
       "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-轮询超时.json",
       "bytes": 892,
       "sha256": "68fe58edcbcfc7573ae8bc3227c40a1c987d1915eb0497abccc1c0c167f3c6e5"
+    },
+    {
+      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务成功但没有-GLB-输出.json",
+      "bytes": 855,
+      "sha256": "9db3430469b0a0b843e69ef6ad131aefcb2b9880b944b5f0ac7ab5a786186c5f"
+    },
+    {
+      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务取消-status-6.json",
+      "bytes": 827,
+      "sha256": "eb8008b3268a99723676df23e5ad4a0155178925f98e40f62e4ab2311b8ec6a4"
+    },
+    {
+      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-任务失败-status-4.json",
+      "bytes": 809,
+      "sha256": "cfc44d312b019534c21eca5736bade5923c428923f98b76aea4a9422534e0228"
+    },
+    {
+      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-未知任务状态.json",
+      "bytes": 813,
+      "sha256": "f5945c71958b719cdf3ece2872defb4284bdc881917b7b20d0b34ba70db5d91d"
+    },
+    {
+      "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/failure-create-返回-HTTP-500-结果不明-.json",
+      "bytes": 918,
+      "sha256": "459f54afd8c75dea73e95927a3e119462f3904efcefee99131960cc1108cb2c4"
     },
     {
       "path": "evidence-refresh/e2e-m0a/docs/reports/artifacts/M0-A/guard-selftest.json",
@@ -962,11 +964,6 @@
       "path": "manifest.log",
       "bytes": 545,
       "sha256": "a3b5514791b5f099d18300b55070b585025b51ab5bb0e5c3c52d56ea7381fc66"
-    },
-    {
-      "path": "sha256-manifest.json",
-      "bytes": 37806,
-      "sha256": "a2e4f2593d21a4c64157496fa71051dfa9041ddea445fb746067c92b1853f00f"
     },
     {
       "path": "typecheck.log",
