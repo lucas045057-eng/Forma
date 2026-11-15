@@ -1,0 +1,602 @@
+{
+  "action": "kill",
+  "closeMode": "hung",
+  "directory": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung",
+  "events": [
+    {
+      "role": "parent",
+      "event": "spawn",
+      "at": "2026-11-15T16:04:02.580Z",
+      "pid": 56772
+    },
+    {
+      "role": "unrelated",
+      "event": "spawn",
+      "at": "2026-11-15T16:04:02.580Z",
+      "pid": 54544
+    },
+    {
+      "role": "driver",
+      "event": "original-parent-SIGKILL",
+      "pid": 56772,
+      "at": "2026-11-15T16:04:03.442Z"
+    },
+    {
+      "role": "parent",
+      "event": "stderr-end",
+      "at": "2026-11-15T16:04:03.460Z"
+    },
+    {
+      "role": "parent",
+      "event": "stdout-end",
+      "at": "2026-11-15T16:04:03.460Z"
+    },
+    {
+      "role": "parent",
+      "event": "exit",
+      "at": "2026-11-15T16:04:03.460Z",
+      "code": null,
+      "signal": "SIGKILL"
+    },
+    {
+      "role": "parent",
+      "event": "stdout-close",
+      "at": "2026-11-15T16:04:03.460Z"
+    },
+    {
+      "role": "parent",
+      "event": "close",
+      "at": "2026-11-15T16:04:03.460Z",
+      "code": null,
+      "signal": "SIGKILL",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "role": "parent",
+      "event": "stderr-close",
+      "at": "2026-11-15T16:04:03.460Z"
+    },
+    {
+      "role": "unrelated",
+      "event": "stdout-end",
+      "at": "2026-11-15T16:04:13.245Z"
+    },
+    {
+      "role": "unrelated",
+      "event": "stderr-end",
+      "at": "2026-11-15T16:04:13.245Z"
+    },
+    {
+      "role": "unrelated",
+      "event": "stderr-close",
+      "at": "2026-11-15T16:04:13.245Z"
+    },
+    {
+      "role": "unrelated",
+      "event": "stdout-close",
+      "at": "2026-11-15T16:04:13.245Z"
+    },
+    {
+      "role": "unrelated",
+      "event": "exit",
+      "at": "2026-11-15T16:04:13.250Z",
+      "code": 1,
+      "signal": null
+    },
+    {
+      "role": "unrelated",
+      "event": "close",
+      "at": "2026-11-15T16:04:13.250Z",
+      "code": 1,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "observations": [
+    {
+      "at": "2026-11-15T16:04:04.071Z",
+      "parentClosed": true,
+      "remainingFamily": [],
+      "unrelatedAlive": true
+    }
+  ],
+  "cleanup": {
+    "kills": [
+      {
+        "role": "unrelated",
+        "pid": 54544,
+        "created": "2026-11-15T16:04:02.5782230Z",
+        "reason": "diagnostic fallback or final stop; not autonomous proof"
+      }
+    ],
+    "errors": [],
+    "remaining": []
+  },
+  "errors": [],
+  "identities": [
+    {
+      "pid": 48928,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6891500Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+      "role": "asset",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+    },
+    {
+      "pid": 60628,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6850020Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+      "role": "check",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+    },
+    {
+      "pid": 60992,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6935490Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+      "role": "frontend-worker",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+    },
+    {
+      "pid": 16440,
+      "parent": 56772,
+      "created": "2026-11-15T16:04:02.6122220Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+      "role": "orphan",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+    },
+    {
+      "pid": 56772,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5735560Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+      "role": "parent",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+    },
+    {
+      "pid": 31984,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6802740Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+      "role": "preview",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+    },
+    {
+      "pid": 54544,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5782230Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+      "role": "unrelated",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+    },
+    {
+      "pid": 48928,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6891500Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+      "role": "asset",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+    },
+    {
+      "pid": 60628,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6850020Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+      "role": "check",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+    },
+    {
+      "pid": 60992,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6935490Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+      "role": "frontend-worker",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+    },
+    {
+      "pid": 16440,
+      "parent": 56772,
+      "created": "2026-11-15T16:04:02.6122220Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+      "role": "orphan",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+    },
+    {
+      "pid": 56772,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5735560Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+      "role": "parent",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+    },
+    {
+      "pid": 31984,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6802740Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+      "role": "preview",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+    },
+    {
+      "pid": 54544,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5782230Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+      "role": "unrelated",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+    }
+  ],
+  "allWorkersReadyAt": "2026-11-15T16:04:03.442Z",
+  "actionAt": "2026-11-15T16:04:03.442Z",
+  "killReturn": true,
+  "familyGoneBeforeFallback": true,
+  "unrelatedAliveBeforeCleanup": true,
+  "originalRunClosed": {
+    "code": null,
+    "signal": "SIGKILL",
+    "stdout": "",
+    "stderr": "",
+    "at": "2026-11-15T16:04:03.460Z"
+  },
+  "orphanEvents": [
+    {
+      "event": "instrument-before-stdio",
+      "role": "orphan",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.675Z",
+      "uptime": 0.0494483,
+      "connected": true,
+      "exitCode": null,
+      "resources": []
+    },
+    {
+      "event": "instrument-after-stdio",
+      "role": "orphan",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.676Z",
+      "uptime": 0.0503442,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap"
+      ]
+    },
+    {
+      "event": "ownedLifetime-installed",
+      "role": "orphan",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.696Z",
+      "uptime": 0.0698474,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ],
+      "closing": false,
+      "forced": false,
+      "hardTimeoutMs": 300
+    },
+    {
+      "event": "ready",
+      "role": "orphan",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.696Z",
+      "uptime": 0.0701641,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ]
+    },
+    {
+      "event": "worker-spawn",
+      "role": "preview",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.697Z",
+      "uptime": 0.0705967,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ],
+      "childPid": 31984
+    },
+    {
+      "event": "worker-spawn",
+      "role": "check",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.697Z",
+      "uptime": 0.0708103,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ],
+      "childPid": 60628
+    },
+    {
+      "event": "worker-spawn",
+      "role": "asset",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.697Z",
+      "uptime": 0.0709983,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ],
+      "childPid": 48928
+    },
+    {
+      "event": "worker-spawn",
+      "role": "frontend-worker",
+      "pid": 16440,
+      "ppid": 56772,
+      "at": "2026-11-15T16:04:02.697Z",
+      "uptime": 0.0711647,
+      "connected": true,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "PipeWrap",
+        "ProcessWrap"
+      ],
+      "childPid": 60992
+    }
+  ],
+  "parentEvents": [
+    {
+      "event": "instrument-before-stdio",
+      "role": "parent",
+      "pid": 56772,
+      "ppid": 45060,
+      "at": "2026-11-15T16:04:02.607Z",
+      "uptime": 0.0209673,
+      "connected": false,
+      "exitCode": null,
+      "resources": []
+    },
+    {
+      "event": "instrument-after-stdio",
+      "role": "parent",
+      "pid": 56772,
+      "ppid": 45060,
+      "at": "2026-11-15T16:04:02.609Z",
+      "uptime": 0.0219195,
+      "connected": false,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap"
+      ]
+    },
+    {
+      "event": "ready",
+      "role": "parent",
+      "pid": 56772,
+      "ppid": 45060,
+      "at": "2026-11-15T16:04:02.615Z",
+      "uptime": 0.0280835,
+      "connected": false,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "Timeout"
+      ]
+    },
+    {
+      "event": "orphan-spawn",
+      "role": "parent",
+      "pid": 56772,
+      "ppid": 45060,
+      "at": "2026-11-15T16:04:02.615Z",
+      "uptime": 0.0285702,
+      "connected": false,
+      "exitCode": null,
+      "resources": [
+        "PipeWrap",
+        "PipeWrap",
+        "PipeWrap",
+        "ProcessWrap",
+        "Timeout"
+      ],
+      "childPid": 16440,
+      "stdio": "inherit stdout/stderr; IPC parent-owned"
+    }
+  ],
+  "orphanLocalStderr": "",
+  "markerInParentCapturedStderr": false,
+  "markerInOrphanLocalStderr": false,
+  "runtimeCleanup": null,
+  "closeCalled": false,
+  "closeCompleted": false,
+  "explicitDisconnectObserved": false,
+  "observationComplete": true,
+  "finalKnownIdentities": [
+    {
+      "pid": 48928,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6891500Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+      "role": "asset",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+    },
+    {
+      "pid": 60628,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6850020Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+      "role": "check",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+    },
+    {
+      "pid": 60992,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6935490Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+      "role": "frontend-worker",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+    },
+    {
+      "pid": 16440,
+      "parent": 56772,
+      "created": "2026-11-15T16:04:02.6122220Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+      "role": "orphan",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+    },
+    {
+      "pid": 56772,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5735560Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+      "role": "parent",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+    },
+    {
+      "pid": 31984,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6802740Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+      "role": "preview",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+    },
+    {
+      "pid": 54544,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5782230Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+      "role": "unrelated",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+    },
+    {
+      "pid": 48928,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6891500Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs asset",
+      "role": "asset",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\asset-48928"
+    },
+    {
+      "pid": 60628,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6850020Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs check",
+      "role": "check",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\check-60628"
+    },
+    {
+      "pid": 60992,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6935490Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs frontend-worker",
+      "role": "frontend-worker",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\frontend-worker-60992"
+    },
+    {
+      "pid": 16440,
+      "parent": 56772,
+      "created": "2026-11-15T16:04:02.6122220Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs",
+      "role": "orphan",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan-16440"
+    },
+    {
+      "pid": 56772,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5735560Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent.mjs",
+      "role": "parent",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\parent-56772"
+    },
+    {
+      "pid": 31984,
+      "parent": 16440,
+      "created": "2026-11-15T16:04:02.6802740Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs preview",
+      "role": "preview",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\preview-31984"
+    },
+    {
+      "pid": 54544,
+      "parent": 45060,
+      "created": "2026-11-15T16:04:02.5782230Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\orphan.mjs unrelated",
+      "role": "unrelated",
+      "prefix": "E:\\空间化AI工作台\\.worktrees\\m4\\.data\\orphan-diagnosis-2026-11-15T16-04-02.325Z\\kill-hung\\unrelated-54544"
+    }
+  ],
+  "finished": "2026-11-15T16:04:14.363Z"
+}
