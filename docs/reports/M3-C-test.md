@@ -174,3 +174,30 @@
 新增断言：`truncatedSeen.length > 0`（真的走过截断路径）、`since=0` 的 head 请求确实发生、截断之后确实有请求走真实后端。
 原有 connected / `events-seq` / 两个候选 / 版本 / 全量重载请求断言全部保留，未删截断场景、未伪造 connected。
 用 `tests/e2e/m2b/targeted-truncation.mjs` 只跑这一例（新目录、0 retry、记录身份与真实计数）。
+
+### 11.4 第一次定向轮（`b655aec`）：通过，但只证明"不再永久截断"
+
+- run：`docs/reports/artifacts/M3-C/regression/2026-11-15T03-14-28-406Z-m2b-targeted/`，1 passed（13.6s），
+  `--grep 历史截断`、0 retry、单 worker。
+- 这次 fixture 只做到"过旧 cursor 截断一次、其余放行"，但注入的响应是 `oldest = current + 50`——
+  一个伪造的未来 oldest，不是真实保留尾段的元数据。所以它只能证明"不再永远截断"，不能代表
+  "合法的 truncated 元数据能被恢复"。按 Codex 反馈如实降级，不当作修正已生效的证据。
+- 该轮 `tests/e2e/m2b/artifact.ts` 写死 `docs/reports/artifacts/M2-B`，把 tracked 历史证据
+  `M2-B/takeover-events-truncated.json` 刷新了。已先归档本轮新字节（563B，sha256 `71bd995b…`）到
+  该 run 的 `evidence-refresh/`，再按 blob 还原（`headBlobId = restoredObjectId = 82cb7d17…`，
+  `git status` 该路径为空），记录在 `evidence-restore.json`；新字节归属本 run，不冒充历史证据。
+
+### 11.5 第二次定向轮前的两处补正（测试侧，未改产品）
+
+1. 自洽截断元数据：`02-takeover.spec.ts` 改为用真实后端 `history(0)` 的保留尾段构造一次注入——
+   `events` 全为真实事件、`current` 为真实 current、`oldest` 取尾段首 seq，并要求
+   `oldest <= current`、`0 < since < oldest - 1`；注入用 `injection.used` 保证恰好一次；
+   `since=0` 与新 anchor 补拉一律 `route.continue()` 走真实后端。真实事件不足（`current < since + 2`）时
+   先产生一条真实任务补足，不伪造未来 oldest。新增断言：恰好注入一次、元数据关系合法、尾段非空且
+   末事件等于真实 current、轨迹里截断之后确实出现 `since=0` 与 `since=caught.current`。
+   原 connected / `events-seq` / 两候选 / 版本 / 全量重载请求断言与超时全部保留。
+2. 定向入口的历史证据保护：`tests/e2e/m2b/targeted-truncation.mjs` 不再只定向 JSON/output。
+   起跑前若 `docs/reports/artifacts` 已脏（归属不明）直接停止不跑（exit 3）；跑完先为本步刷新/新增的
+   tracked 证据归档新字节与哈希，再按 blob 还原并用对象 id + `git status` 校验；同时记录受测 HEAD、
+   锁 SHA256、spec SHA256、前后身份摘要与工作区状态。不声称 M2-B 的 artifact helper 支持
+   `M3C_ARTIFACT_DIR`（它并不支持）。

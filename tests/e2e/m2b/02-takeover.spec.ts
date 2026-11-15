@@ -449,6 +449,23 @@ test.describe('M2-B 接管后专项', () => {
       const caught = (await history(0)).body;
       expect(caught.current).toBeGreaterThan(opened.current);
 
+      // 用**真实后端**的保留尾段构造自洽截断：events 全是真实事件、current 是真实 current、
+      // oldest 取保留尾段首 seq，并保证要注入的过旧 cursor 满足 0 < since < oldest - 1。
+      // 只注入一次；head（since=0）与新 anchor 的补拉一律放行到真实后端。
+      const staleSince = opened.current;
+      let caughtNow = caught;
+      if (caughtNow.current < staleSince + 2) {
+        await waitForTask((await submitTask('候选 B2（补足真实事件）')).body.id);
+        caughtNow = (await history(0)).body;
+      }
+      expect(caughtNow.current, '真实事件不足以构造合法截断尾段').toBeGreaterThanOrEqual(staleSince + 2);
+      const tailStart = staleSince + 2;
+      const tail = caughtNow.events.filter((event) => event.seq >= tailStart);
+      expect(tail.length, '保留尾段为空，构造不出合法截断').toBeGreaterThan(0);
+      expect(tail.at(-1)!.seq, '保留尾段末事件不是真实 current').toBe(caughtNow.current);
+      expect(tailStart, 'oldest 必须 <= current').toBeLessThanOrEqual(caughtNow.current);
+      expect(staleSince, 'since 必须严格小于 oldest-1').toBeLessThan(tailStart - 1);
+
       const reloadRequests: string[] = [];
       const track = (request: { url(): string }) => {
         const url = new URL(request.url());
@@ -456,39 +473,45 @@ test.describe('M2-B 接管后专项', () => {
       };
       page.on('request', track);
       const historySeen: string[] = [];
-      // 只模拟一次合法截断：客户端手里的 cursor（重连前的 seq）已被日志裁掉。
-      // 关键点：真实后端对 since=0（取新 head）和 since=caught.current（新 anchor 补拉）会返回一致历史；
-      // 若把这两种请求也永远截断，任何符合真实 History 合同的客户端都只能报错（旧客户端只是“重置 + 假连接”）。
-      const truncatedSeen: Array<{ since: number; oldest: number; current: number }> = [];
+      const injection = { used: 0 };
+      const truncatedSeen: Array<{ since: number; oldest: number; current: number; events: number }> = [];
       const routePredicate = (url: URL) => url.port === String(STUDIO_PORT) && url.pathname === '/events/history';
       const routeHandler = async (route: Route) => {
         const request = route.request();
         const since = Number(new URL(request.url()).searchParams.get('since') ?? '0');
         historySeen.push(request.url());
-        if (since > 0 && since < caught.current) {
-          const oldest = caught.current + 50;
-          truncatedSeen.push({ since, oldest, current: caught.current });
+        if (injection.used === 0 && since === staleSince) {
+          injection.used += 1;
+          truncatedSeen.push({ since, oldest: tailStart, current: caughtNow.current, events: tail.length });
           await route.fulfill({
             status: 200, contentType: 'application/json',
-            body: JSON.stringify({ events: [], current: caught.current, oldest, truncated: true }),
+            body: JSON.stringify({ events: tail, current: caughtNow.current, oldest: tailStart, truncated: true }),
           });
           return;
         }
-        // head 与新 cursor 的补拉走真实后端：必须是可恢复的一致历史。
         await route.continue();
       };
       await page.route(routePredicate, routeHandler);
       try {
         await waitFor(() => socketMock.sockets.length >= 2, 20_000, 200);
-        socketMock.sendReady(caught.current);
+        socketMock.sendReady(caughtNow.current);
         await expect(page.getByTestId('events-status')).toHaveAttribute('data-status', 'connected', { timeout: 20_000 });
-        // 必须真的走过 truncated 恢复路径：过旧 cursor 被截断，随后从真实 head/新 cursor 补拉成功。
-        expect(truncatedSeen.length, '没有真实触发 truncated 恢复路径').toBeGreaterThan(0);
-        expect(truncatedSeen.every((item) => item.since < caught.current)).toBe(true);
-        expect(historySeen.filter((url) => Number(new URL(url).searchParams.get('since')) === 0).length,
-          '恢复时没有重新取 head（since=0）').toBeGreaterThan(0);
-        expect(historySeen.length, '截断后没有任何请求走真实后端').toBeGreaterThan(truncatedSeen.length);
-        await expect(page.getByTestId('events-seq')).toHaveText(String(caught.current), { timeout: 20_000 });
+        // 必须真的走过截断恢复路径：恰好注入一次，且随后确实取了新 head 与新的 cursor 补拉。
+        expect(injection.used, '没有真实触发 truncated 恢复路径').toBe(1);
+        expect(truncatedSeen).toHaveLength(1);
+        const injected = truncatedSeen[0];
+        expect(injected.since).toBe(staleSince);
+        expect(injected.since).toBeGreaterThan(0);
+        expect(injected.oldest).toBeLessThanOrEqual(injected.current);
+        expect(injected.since).toBeLessThan(injected.oldest - 1);
+        expect(injected.events).toBeGreaterThan(0);
+        const sinceTrail = historySeen.map((url) => Number(new URL(url).searchParams.get('since')));
+        const injectedIndex = sinceTrail.indexOf(staleSince);
+        expect(injectedIndex, '截断请求不在轨迹里').toBeGreaterThanOrEqual(0);
+        const after = sinceTrail.slice(injectedIndex + 1);
+        expect(after, '截断后没有重新取 head（since=0）').toContain(0);
+        expect(after, '截断后没有按新 anchor 补拉').toContain(caughtNow.current);
+        await expect(page.getByTestId('events-seq')).toHaveText(String(caughtNow.current), { timeout: 20_000 });
         await expect(page.getByTestId('candidate-select').locator('option')).toHaveCount(2, { timeout: 30_000 });
         const options = await page.getByTestId('candidate-select').locator('option').allInnerTexts();
         expect(options.join('\n')).toContain(second.candidateId!.slice(0, 8));
@@ -496,9 +519,12 @@ test.describe('M2-B 接管后专项', () => {
 
         writeArtifactFrom('takeover-events-truncated.json', {
           startSeq: opened.current,
-          currentAfterSecond: caught.current,
+          currentAfterSecond: caughtNow.current,
           truncatedHistoryRequests: historySeen,
           truncatedSeen,
+          truncatedTail: { oldest: tailStart, current: caughtNow.current, events: tail.length, firstSeq: tail[0]?.seq, lastSeq: tail.at(-1)?.seq },
+          injectionUsed: injection.used,
+          sinceTrail,
           reloadRequests,
           candidateOptions: options,
           eventsSeqText: await page.getByTestId('events-seq').innerText(),
