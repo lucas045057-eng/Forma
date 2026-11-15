@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,readdir,rm,symlink,copyFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,readdir,rm,symlink,copyFile,unlink,lstat,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {spawn,execFileSync} from 'node:child_process';
@@ -18,7 +18,7 @@ async function child(entry,args=[],options={}){
 }
 async function bounded(promise,ms=15_000){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Fixture exceeded explicit budget')),ms);})]);}finally{clearTimeout(timer);}}
 async function waitFor(read,ms=10_000){const deadline=Date.now()+ms;while(Date.now()<deadline){const value=await read();if(value)return value;await new Promise(resolve=>setTimeout(resolve,20));}throw new Error('Fixture state deadline exceeded');}
-function processIdentities(){const value=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process | Where-Object { $null -ne $_.CreationDate } | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;parent=$_.ParentProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o')} })"],{encoding:'utf8',timeout:10_000})||'[]');return value;}
+function processIdentities(){const value=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process | Where-Object { $null -ne $_.CreationDate } | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;parent=$_.ParentProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o');command=$_.CommandLine} })"],{encoding:'utf8',timeout:10_000})||'[]');return value;}
 async function settleFixture(record){
  if(!record)return;const table=processIdentities();const root=table.find(item=>item.pid===record.processHandle.pid);const owned=root?[root]:[];
  for(let index=0;index<owned.length;index++)for(const item of table)if(item.parent===owned[index].pid&&Date.parse(item.created)>=Date.parse(owned[index].created)&&!owned.some(old=>old.pid===item.pid))owned.push(item);
@@ -30,7 +30,16 @@ test('prepare copies only tracked public/source names and leaves decoy env and e
  const f=await fixture();try{const first=await prepareDemo('mock',{repositoryRoot:f.root});const second=await prepareDemo('mock',{repositoryRoot:f.root});assert.notEqual(first.run,second.run);assert.equal(await readFile(path.join(first.work,'src/App.tsx'),'utf8'),'export default 1;');assert.deepEqual(await readdir(path.join(first.work,'src')),['App.tsx']);assert.deepEqual(await readdir(path.join(first.work,'public')),['info.json']);assert.equal(JSON.stringify(first.manifest).includes('DECOY_SECRET'),false);}finally{await rm(f.root,{recursive:true,force:true});}
 });
 test('prepare refuses a junction in the destination ancestry without following it',async()=>{
- const f=await fixture();const outside=await mkdtemp(path.join(tmpdir(),'demo-outside-'));try{await symlink(outside,path.join(f.root,'.data'),'junction');await assert.rejects(prepareDemo('mock',{repositoryRoot:f.root}));assert.deepEqual(await readdir(outside),[]);}finally{await rm(path.join(f.root,'.data'),{force:true});await rm(f.root,{recursive:true,force:true});await rm(outside,{recursive:true,force:true});}
+ const f=await fixture();const outside=await mkdtemp(path.join(tmpdir(),'demo-outside-'));try{await symlink(outside,path.join(f.root,'.data'),'junction');await assert.rejects(prepareDemo('mock',{repositoryRoot:f.root}));assert.deepEqual(await readdir(outside),[]);}finally{
+ const errors=[];const link=path.resolve(f.root,'.data');
+ try{assert.equal(path.isAbsolute(link),true);assert.equal(path.dirname(link),path.resolve(f.root));assert.equal(path.basename(link),'.data');assert.equal(path.resolve(await realpath(f.root)),path.resolve(f.root),'Fixture root ancestry changed');assert.equal(path.resolve(await realpath(outside)),path.resolve(outside),'Outside fixture ancestry changed');
+ let info;try{info=await lstat(link);}catch(error){if(error?.code!=='ENOENT')throw error;}
+ if(info){assert.equal(info.isSymbolicLink(),true,'Destination junction identity changed');assert.equal(path.resolve(await realpath(link)),path.resolve(outside),'Destination junction target changed');await unlink(link);}
+ }catch(error){errors.push(error);}
+ if(errors.length)throw new AggregateError(errors,'Owned junction cleanup failed; fixture directories retained');
+ for(const target of [f.root,outside])try{await rm(target,{recursive:true,force:true});}catch(error){errors.push(error);}
+ if(errors.length)throw new AggregateError(errors,'Owned junction fixture directory cleanup failed');
+ }
 });
 test('plan reader refuses escaped paths, duplicate/out-of-range ports and unexpected port names',async()=>{
  const f=await fixture();try{const prepared=await prepareDemo('mock',{repositoryRoot:f.root});const ports={api:21001,studio:21002,main:21003,preview:21004,coding:21005,lux3d:21006,speech:21007};const plan={schemaVersion:1,mode:'mock',run:prepared.run,work:prepared.work,ports};const file=path.join(prepared.run,'plan.json');await writeFile(file,JSON.stringify(plan));assert.equal((await readPlan(file,f.root)).ports.preview,21004);
@@ -66,7 +75,11 @@ test('orphan watchdog terminates identified worker descendants after parent IPC 
  await writeFile(entry,`import {fork} from 'node:child_process';import {ownedLifetime} from ${JSON.stringify(runtime)};import {writeFile} from 'node:fs/promises';import path from 'node:path';const worker=process.argv[2];if(worker){setInterval(()=>{},1000);}else{ownedLifetime(()=>new Promise(()=>{}),{hardTimeoutMs:300});for(const role of ['preview','check','asset','frontend-worker']){const child=fork(import.meta.filename,[role],{execArgv:[],stdio:['ignore','ignore','ignore','ipc']});}await writeFile(path.join(path.dirname(process.env.DEMO_PLAN),'ready'),String(process.pid));}`);
  const parentEntry=path.join(root,'parent.mjs');await writeFile(parentEntry,`import {fork} from 'node:child_process';fork(${JSON.stringify(entry)},[],{execArgv:[],stdio:['ignore','inherit','inherit','ipc']});setInterval(()=>{},1000);`);
  run=await child(parentEntry,[],{env:{...systemEnvironment(),DEMO_PLAN:plan}});unrelated=await child(entry,['unrelated']);const orphanPid=Number(await waitFor(async()=>{try{return await readFile(path.join(root,'ready'),'utf8');}catch{return;}}));
- const table=processIdentities();const workers=table.filter(item=>item.parent===orphanPid);assert.equal(workers.length,4);identities=[table.find(item=>item.pid===orphanPid),...workers];assert.ok(identities[0]);const unrelatedIdentity=table.find(item=>item.pid===unrelated.processHandle.pid);assert.ok(unrelatedIdentity);
+ const table=processIdentities();const orphan=table.find(item=>item.pid===orphanPid);assert.ok(orphan);
+ const descendants=[];const queue=[orphan];for(let index=0;index<queue.length;index++){const parent=queue[index];for(const item of table)if(item.parent===parent.pid&&Date.parse(item.created)>=Date.parse(parent.created)&&!descendants.some(old=>old.pid===item.pid)){descendants.push(item);queue.push(item);}}
+ const rolePart=(command,role)=>typeof command==='string'&&command.replaceAll('\\','/').includes(entry.replaceAll('\\','/'))&&command.split(/\s+/).some(part=>part.replaceAll('"','')===role);
+ for(const role of ['preview','check','asset','frontend-worker'])assert.equal(descendants.filter(item=>rolePart(item.command,role)).length,1,`Owned ${role} process must be identifiable by role`);
+ identities=[orphan,...descendants];const unrelatedIdentity=table.find(item=>item.pid===unrelated.processHandle.pid);assert.ok(unrelatedIdentity);
  run.processHandle.kill('SIGKILL');const result=await bounded(run.closed,20_000);assert.match(result.stderr,/DEMO_ORPHAN_TIMEOUT/);
  await waitFor(async()=>!processIdentities().some(item=>identities.some(old=>old.pid===item.pid&&old.created===item.created)));assert.ok(processIdentities().some(item=>item.pid===unrelatedIdentity.pid&&item.created===unrelatedIdentity.created));const cleanup=JSON.parse(await readFile(path.join(root,`orphan-cleanup-${orphanPid}.json`),'utf8'));assert.equal(cleanup.forced,true);assert.equal(cleanup.errors.length,0);
  }finally{for(const identity of identities)if(identity&&processIdentities().some(item=>item.pid===identity.pid&&item.created===identity.created))process.kill(identity.pid,'SIGKILL');await settleFixture(run);await settleFixture(unrelated);await rm(root,{recursive:true,force:true});}
