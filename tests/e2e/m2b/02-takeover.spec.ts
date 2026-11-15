@@ -456,19 +456,38 @@ test.describe('M2-B 接管后专项', () => {
       };
       page.on('request', track);
       const historySeen: string[] = [];
+      // 只模拟一次合法截断：客户端手里的 cursor（重连前的 seq）已被日志裁掉。
+      // 关键点：真实后端对 since=0（取新 head）和 since=caught.current（新 anchor 补拉）会返回一致历史；
+      // 若把这两种请求也永远截断，任何符合真实 History 合同的客户端都只能报错（旧客户端只是“重置 + 假连接”）。
+      const truncatedSeen: Array<{ since: number; oldest: number; current: number }> = [];
       const routePredicate = (url: URL) => url.port === String(STUDIO_PORT) && url.pathname === '/events/history';
       const routeHandler = async (route: Route) => {
-        historySeen.push(route.request().url());
-        await route.fulfill({
-          status: 200, contentType: 'application/json',
-          body: JSON.stringify({ events: [], current: caught.current, oldest: caught.current + 50, truncated: true }),
-        });
+        const request = route.request();
+        const since = Number(new URL(request.url()).searchParams.get('since') ?? '0');
+        historySeen.push(request.url());
+        if (since > 0 && since < caught.current) {
+          const oldest = caught.current + 50;
+          truncatedSeen.push({ since, oldest, current: caught.current });
+          await route.fulfill({
+            status: 200, contentType: 'application/json',
+            body: JSON.stringify({ events: [], current: caught.current, oldest, truncated: true }),
+          });
+          return;
+        }
+        // head 与新 cursor 的补拉走真实后端：必须是可恢复的一致历史。
+        await route.continue();
       };
       await page.route(routePredicate, routeHandler);
       try {
         await waitFor(() => socketMock.sockets.length >= 2, 20_000, 200);
         socketMock.sendReady(caught.current);
         await expect(page.getByTestId('events-status')).toHaveAttribute('data-status', 'connected', { timeout: 20_000 });
+        // 必须真的走过 truncated 恢复路径：过旧 cursor 被截断，随后从真实 head/新 cursor 补拉成功。
+        expect(truncatedSeen.length, '没有真实触发 truncated 恢复路径').toBeGreaterThan(0);
+        expect(truncatedSeen.every((item) => item.since < caught.current)).toBe(true);
+        expect(historySeen.filter((url) => Number(new URL(url).searchParams.get('since')) === 0).length,
+          '恢复时没有重新取 head（since=0）').toBeGreaterThan(0);
+        expect(historySeen.length, '截断后没有任何请求走真实后端').toBeGreaterThan(truncatedSeen.length);
         await expect(page.getByTestId('events-seq')).toHaveText(String(caught.current), { timeout: 20_000 });
         await expect(page.getByTestId('candidate-select').locator('option')).toHaveCount(2, { timeout: 30_000 });
         const options = await page.getByTestId('candidate-select').locator('option').allInnerTexts();
@@ -479,6 +498,7 @@ test.describe('M2-B 接管后专项', () => {
           startSeq: opened.current,
           currentAfterSecond: caught.current,
           truncatedHistoryRequests: historySeen,
+          truncatedSeen,
           reloadRequests,
           candidateOptions: options,
           eventsSeqText: await page.getByTestId('events-seq').innerText(),

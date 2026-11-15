@@ -1,0 +1,13 @@
+{
+  "probe": {
+    "output": "BLOCKED ENETGUARD\n",
+    "exitCode": 0
+  },
+  "entries": [
+    {
+      "kind": "net.Socket.connect",
+      "detail": "api.aholo3d.cn",
+      "pid": 51272
+    }
+  ]
+}

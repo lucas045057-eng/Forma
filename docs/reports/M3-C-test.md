@@ -135,3 +135,42 @@
   每套 JSON 与 `--output`、以及 `M3C_ARTIFACT_DIR` 的结构化中间证据全部定向到本轮新 run 目录；
 - 本轮**必须从头真正重跑**：原 M1-B 23 例要在该冻结身份上重新全部通过，不复用 `job_8b19c345` 的 GREEN，
   不从中间续跑、不 grep、不 skip、不 retry、首败后不自动补跑。
+
+
+## 11. 第二正式轮结果：停在 `e2e-m2b` 的 1 例（归档与定性）
+
+- 作业 `job_e0aa2e21`，run 目录 `docs/reports/artifacts/M3-C/regression/2026-11-15T02-53-39-669Z-full/`，
+  用时 13m55s，`exit 1`；受测 HEAD `e284906`，身份摘要 `b71066cc4477…`，锁 `67af36b7…18960`。
+- **已执行 9 步**：typecheck ✓、build ✓、全量单测 **501** 通过（68+20+1+5+321+86）、
+  E2E：M0-B 24/24、M0-A 27/27、M1-A 7/7、**M1-B 23/23（在本轮冻结身份真实重跑，未复用实现侧 GREEN）**、
+  M2-A 35/35、M2-B **11/12**。
+- **实际 E2E**：127 passed / 1 failed；**M3-A 11 + M3-B 7 + M3-C 28 = 46 例未执行**。
+  因此本轮**不是** 173 通过，而是 "127 过 + 1 失败 + 46 未执行"。
+- 失败用例：`02-takeover.spec.ts › 历史截断：补拉返回 truncated 时整体重载任务/候选/版本`，
+  报错为 `events-status` 20s 内一直 `reconnecting`（期望 `connected`）；原始 JSON、`error-context.md`、
+  `test-failed-1.png` 都在本轮 `e2e-m2b-output/` 下，未改写。
+
+### 11.1 `identityStable=false` 不是源码漂移
+
+本轮 runner 把"退出码/报告核对失败"和"身份偏离基线"写进了同一个 `identityProblems` 数组（测试工具表述问题）。
+实际核验该步：`identity.before.digest = identity.after.digest = b71066cc4477…`、`HEAD` 均为 `e284906`、
+锁均为 `67af36b7…`、`dirty` 均为 `[]`、`drift` 为空。**没有任何源码/配置/锁漂移**。
+
+### 11.2 定性：这是测试前提错误，不是产品回归
+
+- M3-C 把同步逻辑收进了 `sync-state.ts`：`reconcileSnapshot` 在 `history.truncated` 时返回 `null`，
+  客户端最多 3 次"取新 head → 重载快照 → 按新 anchor 补拉"，仍截断就如实报"事件历史无法连续补齐"。
+- 旧实现（`6f6ff49`）遇 `truncated` 只做一次全量重载并把 seq 抬到 `history.current`，不校验回放连续性——
+  所以旧代码在"永远截断"的 mock 下也能显示 connected，但那是**假连接**。
+- 失败用例的 route 对**所有** `/events/history`（含 `since=0` 的 head 与新 anchor 的补拉）永久返回
+  `{events:[], current: caught.current, oldest: caught.current+50, truncated: true}`。真实后端对
+  `since >= current` 的请求不可能返回 truncated，因此任何遵守真实 History 合同的客户端都只能报错。
+- 结论：**测试前提错误**（mock 让恢复不可达），产品行为符合合同；不改产品、不放宽断言。
+
+### 11.3 最小测试侧修正（待定向验证）
+
+`tests/e2e/m2b/02-takeover.spec.ts` 的 route 改为：只对**确实过旧的 cursor**（`0 < since < caught.current`）
+返回一次合法截断；`since=0`（取新 head）与 `since>=caught.current`（新 anchor 补拉）**放行到真实后端**。
+新增断言：`truncatedSeen.length > 0`（真的走过截断路径）、`since=0` 的 head 请求确实发生、截断之后确实有请求走真实后端。
+原有 connected / `events-seq` / 两个候选 / 版本 / 全量重载请求断言全部保留，未删截断场景、未伪造 connected。
+用 `tests/e2e/m2b/targeted-truncation.mjs` 只跑这一例（新目录、0 retry、记录身份与真实计数）。

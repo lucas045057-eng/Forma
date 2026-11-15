@@ -1,0 +1,87 @@
+{
+  "at": "2026-11-15T02:53:23.645Z",
+  "runId": "2026-11-15T02-50-53-906Z-collect",
+  "mode": "collect",
+  "head": "e2849065eabb6ba862b22db20acdfd342909eeb3",
+  "identityDigest": "b71066cc4477f9b2305d0176986343fd6f8c0f716c12c398534b39da390903b8",
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "evidenceDirtyAtStart": [],
+  "steps": [
+    {
+      "step": "collect-m0b",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1422,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m0b.log"
+    },
+    {
+      "step": "collect-m0a",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1442,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m0a.log"
+    },
+    {
+      "step": "collect-m1a",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1375,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m1a.log"
+    },
+    {
+      "step": "collect-m1b",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1487,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m1b.log"
+    },
+    {
+      "step": "collect-m2a",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1592,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m2a.log"
+    },
+    {
+      "step": "collect-m2b",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1317,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m2b.log"
+    },
+    {
+      "step": "collect-m3a",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1291,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m3a.log"
+    },
+    {
+      "step": "collect-m3b",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1336,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m3b.log"
+    },
+    {
+      "step": "collect-m3c",
+      "code": 0,
+      "identityStable": true,
+      "durationMs": 1352,
+      "log": "docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T02-50-53-906Z-collect\\collect-m3c.log"
+    }
+  ],
+  "collectedCounts": {
+    "m0b": 24,
+    "m0a": 27,
+    "m1a": 7,
+    "m1b": 23,
+    "m2a": 35,
+    "m2b": 12,
+    "m3a": 11,
+    "m3b": 7,
+    "m3c": 28
+  },
+  "total": 174,
+  "note": "本轮收集由 tests/e2e/m3c/full-regression.mjs --collect 真实执行（各套件 --list，--reporter=list）；这不是验收结果，只证明收集身份与例数。九步 exit 0、identityStable=true，合计 174 例。"
+}
