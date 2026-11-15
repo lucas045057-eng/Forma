@@ -1,0 +1,16 @@
+{
+  "oldUrl": "/assets/lux3d-7000003/model.glb?revision=be8c096c-951c-4721-bc7f-93c41e0a16b3",
+  "newUrl": "/assets/lux3d-7000003/model.glb?revision=54021f82-5b72-4675-892b-2978b3c63171",
+  "creates": 0,
+  "canvas": {
+    "width": 1056,
+    "height": 1056,
+    "uniqueColors": 3971,
+    "mean": 163.90951118667738,
+    "stdDev": 96.63283328850403
+  },
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}

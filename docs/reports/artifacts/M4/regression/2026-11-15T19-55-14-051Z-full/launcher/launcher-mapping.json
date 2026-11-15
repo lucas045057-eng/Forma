@@ -1,0 +1,42 @@
+{
+  "at": "2026-11-15T20:24:21.228Z",
+  "job": "job_b72fc460",
+  "note": "bg-root.cmd 启动原命令与退出记录原字节，未改写。",
+  "files": [
+    {
+      "name": "cmd",
+      "source": "../../orbital/jobs/job_b72fc460/cmd",
+      "archivedTo": "docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/launcher/cmd",
+      "bytes": 71,
+      "sha256": "aedbaa1a5003a3460c3815e2328a793853032cb1195a18f6a305aa420d0c9809"
+    },
+    {
+      "name": "exit",
+      "source": "../../orbital/jobs/job_b72fc460/exit",
+      "archivedTo": "docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/launcher/exit",
+      "bytes": 5,
+      "sha256": "043b5ae7334040ef63298adca08912d5287ad37e66f9425316adc50d2c1ab652"
+    },
+    {
+      "name": "job.json",
+      "source": "../../orbital/jobs/job_b72fc460/job.json",
+      "archivedTo": "docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/launcher/job.json",
+      "bytes": 437,
+      "sha256": "f88d80f5efdea3c05410ab5ae0f447926021e3d2334e26873a909a1dbb781f23"
+    },
+    {
+      "name": "output.log",
+      "source": "../../orbital/jobs/job_b72fc460/output.log",
+      "archivedTo": "docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/launcher/output.log",
+      "bytes": 745,
+      "sha256": "c83e8c1024720348681124dd35ae9d8f787be99ed95ff943e19135ad730c1f27"
+    },
+    {
+      "name": "path",
+      "source": "../../orbital/jobs/job_b72fc460/path",
+      "archivedTo": "docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/launcher/path",
+      "bytes": 970,
+      "sha256": "344b60bfa0db1f04f8b6e0d37892ec565d01791c27ee1f56530270ddda2e1c6c"
+    }
+  ]
+}

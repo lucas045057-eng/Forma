@@ -1,0 +1,34 @@
+{
+  "attempts": [
+    {
+      "name": "PUT /scene",
+      "ok": false,
+      "error": "TypeError: Failed to fetch"
+    },
+    {
+      "name": "POST /assets/lux3d",
+      "ok": false,
+      "error": "TypeError: Failed to fetch"
+    },
+    {
+      "name": "POST /tasks",
+      "ok": false,
+      "error": "TypeError: Failed to fetch"
+    },
+    {
+      "name": "POST adopt",
+      "ok": false,
+      "error": "TypeError: Failed to fetch"
+    },
+    {
+      "name": "POST revert",
+      "ok": false,
+      "error": "TypeError: Failed to fetch"
+    }
+  ],
+  "sceneUnchanged": true,
+  "candidatesBefore": 17,
+  "candidatesAfter": 17,
+  "generationsBefore": 3,
+  "generationsAfter": 3
+}

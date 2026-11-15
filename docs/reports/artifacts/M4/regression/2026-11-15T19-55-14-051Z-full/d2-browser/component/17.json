@@ -1,0 +1,74 @@
+{
+  "test": "selected to none requires explicit whole-page confirmation before task submission",
+  "url": "http://127.0.0.1:4508/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:4508/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.4394000000002052
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 60.720900000000256
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 120.6226000000006
+      },
+      {
+        "phase": "interaction",
+        "ms": 123.41750000000047
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [
+    {
+      "id": "36ad8e97-e829-4154-9fa8-c25e06243fe6",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "把这个改成圆角",
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

@@ -1,0 +1,18 @@
+{
+  "tree": [
+    "index.html",
+    "package.json",
+    "public/assets/diffuser-4969889.glb",
+    "public/assets/diffuser-4969889.provenance.json",
+    "public/assets/parts.json",
+    "src/App.tsx",
+    "src/components/Button.tsx",
+    "src/components/ProductHero.tsx",
+    "src/main.tsx",
+    "src/scene-config-store.ts",
+    "src/scene.config.json",
+    "src/style.css",
+    "tsconfig.json",
+    "vite.config.ts"
+  ]
+}

@@ -610,3 +610,66 @@ AssertionError: The input did not match the regular expression /DEMO_ORPHAN_TIME
 
 按根 `0210911`：**暂停 full**，CodeBuddy 只做一次有界 focused 诊断（成品保持不变），定位 W1 后再决定是否重跑集中轮。
 本轮不改产品/测试/runner、不派实现者、不 merge 主线、不自动补跑。
+
+## H. 唯一一次从头完整回归（job_b72fc460）
+
+### H1. 身份与启动
+
+- **受测 HEAD**：`3c0cc27bde1de33f8889166c5edf8d67b290d5ae`（`test/m4-acceptance`）。产品 `ea32d48`、源测试 `4d34bce` 在该提交上 **0 diff**（本轮只改测试侧 helper 与 docs）。
+- 启动方式：`orbital\coordination\m2-takeover\bg-root.cmd "cd /d .worktrees\m4-acceptance&& node tests\e2e\m4\full-regression.mjs"`，job `job_b72fc460`，**exit 0，23m31s**。
+- run 目录：`docs/reports/artifacts/M4/regression/2026-11-15T19-55-14-051Z-full/`；runner 未改（`tests/e2e/m4/full-regression.mjs` 原样），`--retries=0 --workers=1`，原始预算与像素阈值不变，`skip/flaky` 均为 0。
+- 启动原命令与退出记录按原字节保全在 `launcher/`（`cmd`、`exit`、`job.json`、`output.log`、`path`），另附 `launcher-mapping.json`。
+
+### H2. 14 步全通过（runner 判定：每步 `ok=true`、`problems=[]`）
+
+| 步骤 | 结果 | 计数（来自该步 JSON 报告） |
+| --- | --- | --- |
+| typecheck | ok | — |
+| build | ok | — |
+| unit（`pnpm test`） | ok | **614**：shared 68 / vite-plugin-source-tag 20 / scene-renderer 5 / bridge 1（node:test）/ server 378 / studio 142 |
+| demo-safety（`scripts/demo/safety.test.mjs`） | ok | **23/23**（tests 23 / pass 23 / fail 0 / skipped 0） |
+| M4 E2E（`playwright.m4.config.ts`） | ok | 19 |
+| M0-B | ok | 24 |
+| M0-A | ok | 27 |
+| M1-A | ok | 7 |
+| **M1-B** | ok | **23** |
+| M2-A | ok | 35 |
+| M2-B | ok | 12 |
+| M3-A | ok | 11 |
+| M3-B | ok | 7 |
+| M3-C | ok | 28 |
+
+- E2E 合计 **193**（19+24+27+7+23+35+12+11+7+28），断言/脚本/单元合计 **830**。
+- 10 份 `*-results.json` 逐 test 核对：`expected` 与 `tests` 相等、每例**单 result**、`passed`、`retry=0`、报告 `errors[]` 为空、无 `skipped/flaky`。
+- **后五套 93 例**（M2-A 35 / M2-B 12 / M3-A 11 / M3-B 7 / M3-C 28）这次是实际执行并通过，不是沿用历史成绩。
+- 首败即停逻辑未触发（无失败步骤），`notExecuted` 未产生。
+
+### H3. M1-B 本次实际跑通的原始证据（本轮新采样，不外推）
+
+- 四次界面操作真实返回 **HTTP 200**（三次 `PUT /scene` + 一次 `POST /scene/undo`），`errors[]` 为空：
+  consistency 1242ms / 差异 0.08334；writeback 1200ms / 0.08191；undo 写入 1240ms / 0.10086；undo 撤回 1253ms / **0**。
+- 三次写入期间预览可见高度先为 **341**（"同步/写回尚未就绪"），约 1.2 秒后**自然回到 378**；末次采样满足严格同窗口（坐标/rect/viewport/backing，无 1px 容差）后才用基线窗口比较。
+- adopt：`sceneRestored=true`、`sidecarBytesMatch=true`、`cleanupErrors=[]`（GLB/parts 清理、sidecar 按原字节恢复）。
+- 这组证据只说明**本次** 23 例的时序，不用来倒推此前 full 轮或 focused 轮当时发生了什么。
+
+### H4. 证据归档
+
+- **suite 刷新证据**：`evidence-refresh/` 保留本轮各步刷新过的已跟踪证据新字节（e2e-m0a 29、e2e-m0b 21、e2e-m1a 7、e2e-m1b 23、e2e-m2a 35、e2e-m2b 12、e2e-m3b 8，共 135 个），随后按 `HEAD` blob 逐文件还原并核对 `hash-object` 与 `status`。
+- **固定 artifact 目录新增文件**：runner 只扫已跟踪证据，不会自动归档新增文件。本轮新增 **32 个**（M1-B 8 + M3-B `formal-20261115/checks` 6 + M3-C 18）先原字节保全到 `fixed-additions/<原相对路径>`，写 `fixed-additions-mapping.json`（`originalPath/mode=100644/bytes/sha256/archivedPath/byteEqual/removedFromFixedDir`），核对字节后**逐文件**删除固定目录副本（单文件删除，未用 `git clean/reset`、未删历史 tracked 或历史 run 原件）。
+- 运行输出全部保留：`d2-browser/`、`e2e-*-output/`、`e2e-*-results.json`、各步 `.log`、`manifest.json`、`manifest.log`、`post-run-hygiene.json`。
+- `sha256-manifest.json`：**291 个 payload**，排除自身，静态复算 0 不符；清单自身 sha256 = `d74d1388edf8dc0aef79d29c67ba3f80ff1ace031723f1036a17686743e0cd99`（本轮 docs 归档提交的锚点）。
+- **原字节（CRLF）不静默 LF 化**：`launcher/exit` 原始内容是 `0 0\r\n`；仓库 `core.autocrlf=true` 会把它规范化，因此 run 目录放了局部 `.gitattributes`（`launcher/exit -text`）。已用 `git cat-file blob` 复核：入库 blob 5 字节、十六进制 `3020300d0a`，与磁盘一致；291 个条目全部按 Git 对象字节（不是工作树、不受过滤器影响）逐条比对通过。
+- 本 run 目录内无嵌套仓库/符号链接，因此**没有新增 gitlink**；`docs/reports/artifacts/M4/...` 里原有的那 1 条历史 gitlink（`...work-data/candidates/ffac7609...`）未改动。
+
+### H5. 运行后卫生（只读核对，`post-run-hygiene.json`）
+
+- 端口 3001/4010/4011/5173/5174/5175：`netstat` 查询成功（`ok`），**未见 LISTENING** → 记为 `absent-as-observed`。
+- 本树 node/chrome：CIM 查询成功，命令行含 `m4-acceptance` 的匹配数 **0** → `absent-as-observed`。
+- `templates/`、`apps/`、`packages/`、`scripts/` 的 `git status` 全空；证据目录内除本 run 目录外无新增/修改；模板 `public/assets` 只有历史基线三件（`diffuser-4969889.glb`、`diffuser-4969889.provenance.json`、`parts.json`）。
+- `unknown` 一律不当作 gone（本轮查询返回 `ok`，故按"本次未见"记录，不作为"证明不存在"）。
+
+### H6. 审查结论与未执行项
+
+- 审查**已完成**，不再欠审查：M1-B 正式审查 `ccdc609`（`docs/reports/M4-M1B-sampling-review.md`，0 blocker / 0 should-fix / 3 建议，本卡未实现建议）；watch-gate 审查 `772c591`（`docs/reports/M4-watch-gate-review.md`，0 blocker / 0 should-fix / 4 建议，同样只记录）。
+- **未执行、不得视为已验证**：真实 Windows 控制台 Ctrl+C 交互、真实阿里云语音 / 真实厂商识别 / 真实编码模型 / 真实 Lux3D、真人 A/B 演示走查、完整演示彩排。本报告只覆盖 fake key / loopback / 白名单下的自动化回归。
+- 归档身份：本报告与 run 目录一起放进**本 docs-only 提交**（父提交 `ccdc609`）；受测代码字节仍是 `3c0cc27`，docs 归档不改变产品/测试字节。

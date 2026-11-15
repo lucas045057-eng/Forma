@@ -1,0 +1,27 @@
+{
+  "samples": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "directStatus": 409,
+  "directCode": "CHECKS_NOT_PASSED",
+  "gateReason": "证明已失效，作品已变化，请重新生成候选"
+}

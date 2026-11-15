@@ -1,0 +1,72 @@
+{
+  "parent": {
+    "pid": 63608,
+    "parent": 27380,
+    "created": "2026-11-15T19:58:42.6044130Z",
+    "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4-acceptance\\apps\\server\\src\\test-support\\asset-parent.ts C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\assets C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\presets afd91ee90c9afef673d8d7a58b5593c7f31010d4a3c87d37c155a4879df6a898"
+  },
+  "workers": [
+    {
+      "pid": 68828,
+      "parent": 63608,
+      "created": "2026-11-15T19:58:42.7054710Z",
+      "command": "E:\\Node\\node.exe --import file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/apps/server/src/test-support/asset-loader-register.mjs E:\\�ռ仯AI����̨\\.worktrees\\m4-acceptance\\apps\\server\\src\\assets\\process-worker.ts C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\assets\\fallback-afd91ee90c9afef673d8d7a5\\raw.glb C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\assets\\fallback-afd91ee90c9afef673d8d7a5\\.model-stage-7HLUVN\\model.glb"
+    }
+  ],
+  "stages": [
+    {
+      "phase": "spawn",
+      "ms": 5.495399999999989
+    },
+    {
+      "phase": "identity",
+      "ms": 122.16019999999997
+    },
+    {
+      "phase": "barrier",
+      "ms": 676.0858
+    },
+    {
+      "phase": "kill-parent",
+      "ms": 676.3253
+    },
+    {
+      "phase": "autonomous-worker-exit",
+      "ms": 704.2698
+    },
+    {
+      "phase": "restart",
+      "ms": 1225.987
+    },
+    {
+      "phase": "assertions-complete",
+      "ms": 1747.906
+    },
+    {
+      "phase": "cleanup",
+      "ms": 1747.9079000000002
+    }
+  ],
+  "events": [
+    {
+      "type": "ready",
+      "pid": 63608
+    },
+    {
+      "type": "worker-spawned",
+      "pid": 68828,
+      "stage": "C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\assets\\fallback-afd91ee90c9afef673d8d7a5\\.model-stage-7HLUVN"
+    },
+    {
+      "type": "worker-blocked",
+      "pid": 68828,
+      "stage": "C:\\Users\\Admin\\AppData\\Local\\Temp\\fallback-parent-death-j9I1nm\\assets\\fallback-afd91ee90c9afef673d8d7a5\\.model-stage-7HLUVN"
+    }
+  ],
+  "stderr": "",
+  "autonomousWorkerExit": true,
+  "cleanupKills": [],
+  "primary": null,
+  "cleanup": [],
+  "directoryPolicy": "retain on any failure"
+}

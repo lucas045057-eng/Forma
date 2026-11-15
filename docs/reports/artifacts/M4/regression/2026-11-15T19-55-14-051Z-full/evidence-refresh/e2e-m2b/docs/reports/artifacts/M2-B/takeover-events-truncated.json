@@ -1,0 +1,43 @@
+{
+  "startSeq": 123,
+  "currentAfterSecond": 138,
+  "truncatedHistoryRequests": [
+    "http://127.0.0.1:5173/events/history?since=123",
+    "http://127.0.0.1:5173/events/history?since=0",
+    "http://127.0.0.1:5173/events/history?since=138"
+  ],
+  "truncatedSeen": [
+    {
+      "since": 123,
+      "oldest": 125,
+      "current": 138,
+      "events": 14
+    }
+  ],
+  "truncatedTail": {
+    "oldest": 125,
+    "current": 138,
+    "events": 14,
+    "firstSeq": 125,
+    "lastSeq": 138
+  },
+  "injectionUsed": 1,
+  "sinceTrail": [
+    123,
+    0,
+    138
+  ],
+  "reloadRequests": [
+    "/tasks",
+    "/candidates",
+    "/version",
+    "/tasks",
+    "/candidates",
+    "/version"
+  ],
+  "candidateOptions": [
+    "候选 d71a12fa",
+    "候选 7992dc03"
+  ],
+  "eventsSeqText": "138"
+}
