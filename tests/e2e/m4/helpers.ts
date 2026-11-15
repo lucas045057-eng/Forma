@@ -100,7 +100,7 @@ export async function previewFrame(page: Page): Promise<Frame> {
  * 1. 观测父窗口真实收到的 `pick:result` 消息（只记录，不伪造）；
  * 2. 先在 iframe 里用**实际点击坐标**做 elementFromPoint 审计，记录命中元素与其 data-src；
  * 3. 点击后必须同时满足：**新的 pick:result 出现**（序号增加）、其 payload 的 src 与命中元素同源、
- *    面板文本**与点击前不同**，才读取 selection；
+ *    本次版本响应已返回、面板与消息一致，才读取 selection（允许重复选择同一个对象）；
  * 4. 返回 { selection, hit, message } 供用例在证据里记录坐标/命中/message 序列。
  *    不删除任何 notEqual 或冲突断言，也不改目标选择。
  */
@@ -119,8 +119,10 @@ export async function pickElement(page: Page, testId: string): Promise<PickAudit
     target.__pickResults = [];
     window.addEventListener('message', (event) => {
       const data = (event as MessageEvent).data;
-      if (!data || data.type !== 'pick:result') return;
-      target.__pickResults.push({ at: Date.now(), src: data.payload?.src ?? null, origin: event.origin ?? null });
+      const preview = document.querySelector<HTMLIFrameElement>('[data-testid="preview-frame"]');
+      if (!preview || event.source !== preview.contentWindow || event.origin !== new URL(preview.src, location.href).origin) return;
+      if (!data || data.type !== 'pick:result' || typeof data.payload?.src !== 'string' || typeof data.payload?.cid !== 'string') return;
+      target.__pickResults.push({ at: Date.now(), src: data.payload.src, cid: data.payload.cid, origin: event.origin });
     });
   });
 
@@ -155,16 +157,22 @@ export async function pickElement(page: Page, testId: string): Promise<PickAudit
         src: marked?.getAttribute('data-src') ?? null,
         point: { x: probeX, y: probeY },
       };
-    }, { expected: testId }).catch(() => ({ tag: null, testId: null, src: null, point: { x: 0, y: 0 } }));
+    }, { expected: testId });
+    if (!hit.src) throw new Error(`实际点击坐标未命中可选元素：${JSON.stringify({ testId, hit, x, y })}`);
 
+    const versionResponse = page.waitForResponse(response => response.request().method() === 'GET' && new URL(response.url()).pathname === '/version' && response.status() === 200, { timeout: 30_000 });
     await page.mouse.click(x, y);
 
-    // 屏障：新的 pick:result + 面板文本变化，二者同时成立才算"这一次"完成。
+    const version = (await (await versionResponse).json()).version;
+    if (typeof version !== 'string' || !version) throw new Error('点选期间没有取得有效作品版本');
+    // 新消息与真实版本响应必需；不以文本变化作为前提，同一对象的新一次点选也有真实意义。
     await waitFor(async () => {
-      const messages = await page.evaluate(() => ((window as any).__pickResults?.length ?? 0) as number);
-      if (messages <= before.messages) return false;
-      const text = (await panel.count()) > 0 ? await panel.innerText().catch(() => '') : '';
-      return text !== '' && text !== before.panelText;
+      const messages = await page.evaluate(() => (window as any).__pickResults as Array<{ src: string; cid: string }>);
+      if (messages.length <= before.messages || (await panel.count()) === 0) return false;
+      const latest = messages[messages.length - 1];
+      if (latest.src !== hit.src) throw new Error(`实际命中与本次消息不一致：hit=${hit.src}, message=${latest.src}`);
+      const current = JSON.parse(await panel.innerText());
+      return current.src === latest.src && current.cid === latest.cid && current.baseVersion === version;
     }, 30_000, 100);
 
     const selection = JSON.parse(await panel.innerText());
