@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
-import {
-  getVersion, openStudio, pickElement, resetMock, restoreTemplate, waitFor, writeArtifact,
-} from './helpers';
+import { base, getScene, getVersion, http, jsonRequest, openStudio, pickElement, resetMock, restoreTemplate, setScript, waitFor, writeArtifact } from './helpers';
 
 /**
  * M4-D2：录音 → 可编辑转写 → 明确确认才写入指令 → 用户点"生成候选版本"才提交。
@@ -176,6 +174,52 @@ test.describe('M4-D2 语音确认闭环（转写与提交均为替身）', () =>
     expect(await page.getByTestId('speech-review').count(), '取消后仍然弹出了 review').toBe(0);
     const probe = await page.evaluate(() => (window as any).__speechProbe as { stops: number; recorded: number });
     writeArtifact('speech-late-permission.json', { probe });
+  });
+  test('F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦', async ({ page }) => {
+    await openStudio(page);
+    await pickElement(page, 'buy-button');
+    await page.getByTestId('speech-record').click();
+    await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
+    // 真实 iframe 里再点一个元素：父窗口失焦 + 点选 pending，旧实现会把转写直接丢掉。
+    const second = await pickElement(page, 'save-button');
+    await expect(page.getByTestId('speech-review'), '重新点选后转写被丢弃了').toBeVisible();
+    const reviewText = await page.getByTestId('speech-review-text').inputValue();
+    expect(reviewText.length, 'review 文本被清空').toBeGreaterThan(0);
+    await expect(page.getByTestId('speech-selection-conflict')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('speech-use')).toBeDisabled();
+    // 必须显式选择，绝不自动套到新对象上
+    await page.getByTestId('speech-use-current').click();
+    await expect(page.getByTestId('speech-review')).toHaveCount(0);
+    // 确认后再改选：必须重新确认才能生成
+    await pickElement(page, 'buy-button');
+    await expect(page.getByTestId('speech-binding-conflict')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('generate-candidate')).toBeDisabled();
+    await page.getByTestId('speech-reconfirm').click();
+    await expect(page.getByTestId('generate-candidate')).toBeEnabled({ timeout: 20_000 });
+    writeArtifact('speech-iframe-repick.json', { reviewText, second: second.src, instruction: await page.getByTestId('instruction-input').inputValue() });
+  });
+
+  test('F2 语音提交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）', async ({ page }) => {
+    await resetMock();
+    await setScript([
+      [{ name: 'read_file', args: { path: 'src/App.tsx' } }],
+      [{ name: 'replace_in_file', args: { path: 'src/App.tsx', old: '<div className="actions">', new: '<div className="actions" style={{ paddingTop: 16 }}>' } }],
+      [{ name: 'finish', args: { summary: '购买区下移' } }],
+    ]);
+    await openStudio(page);
+    await page.getByTestId('speech-record').click();
+    await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.getByTestId('speech-use').click();
+    await expect(page.getByTestId('instruction-input')).toHaveValue(/改成圆角/);
+    await page.getByTestId('generate-candidate').click();
+    await expect(page.getByTestId('task-status')).toHaveAttribute('data-status', 'done', { timeout: 150_000 });
+    // 制造版本变化（场景写回会推进主版本），再输入全新文字
+    const scene = await getScene();
+    const bumped = await http(base('/scene'), jsonRequest('PUT', scene.body));
+    expect(bumped.status, bumped.text.slice(0, 200)).toBe(200);
+    await page.getByTestId('instruction-input').fill('换成另一句完全无关的文字指令');
+    await expect(page.getByTestId('generate-candidate'), '提交成功后旧语音绑定仍阻塞生成').toBeEnabled({ timeout: 30_000 });
+    writeArtifact('speech-post-submit-newtext.json', { instruction: await page.getByTestId('instruction-input').inputValue(), version: (await getVersion()).body.version });
   });
 });
 
