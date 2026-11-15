@@ -647,7 +647,13 @@ AssertionError: The input did not match the regular expression /DEMO_ORPHAN_TIME
 ### H3. M1-B 本次实际跑通的原始证据（本轮新采样，不外推）
 
 - 四次界面操作真实返回 **HTTP 200**（三次 `PUT /scene` + 一次 `POST /scene/undo`），`errors[]` 为空：
-  consistency 1242ms / 差异 0.08334；writeback 1200ms / 0.08191；undo 写入 1240ms / 0.10086；undo 撤回 1253ms / **0**。
+  计时**取自本 full run 的 `fixed-additions/` 里那 4 份 sampling JSON**（`startedAt` 与 `elapsedMs` 原值）：
+  consistency 写入 `startedAt=1794773046733` / **1214ms** / 差异 0.08334033201758069；
+  writeback 写入 `1794773062043` / **1159ms** / 0.08191260043111895；
+  undo 前写入 `1794773071358` / **1202ms** / 0.10085803868872652；
+  undo 恢复 `1794773072563` / **1102ms** / **0**。
+  （更正：本节早先误抄了 focused 轮的 1242/1200/1240/1253ms —— 那组数字属于 `2b70dac` 归档的 focused run；
+  以上数值取自本 run 的原始 JSON，两者不再混用。）
 - 三次写入期间预览可见高度先为 **341**（"同步/写回尚未就绪"），约 1.2 秒后**自然回到 378**；末次采样满足严格同窗口（坐标/rect/viewport/backing，无 1px 容差）后才用基线窗口比较。
 - adopt：`sceneRestored=true`、`sidecarBytesMatch=true`、`cleanupErrors=[]`（GLB/parts 清理、sidecar 按原字节恢复）。
 - 这组证据只说明**本次** 23 例的时序，不用来倒推此前 full 轮或 focused 轮当时发生了什么。
@@ -672,4 +678,23 @@ AssertionError: The input did not match the regular expression /DEMO_ORPHAN_TIME
 
 - 审查**已完成**，不再欠审查：M1-B 正式审查 `ccdc609`（`docs/reports/M4-M1B-sampling-review.md`，0 blocker / 0 should-fix / 3 建议，本卡未实现建议）；watch-gate 审查 `772c591`（`docs/reports/M4-watch-gate-review.md`，0 blocker / 0 should-fix / 4 建议，同样只记录）。
 - **未执行、不得视为已验证**：真实 Windows 控制台 Ctrl+C 交互、真实阿里云语音 / 真实厂商识别 / 真实编码模型 / 真实 Lux3D、真人 A/B 演示走查、完整演示彩排。本报告只覆盖 fake key / loopback / 白名单下的自动化回归。
-- 归档身份：本报告与 run 目录一起放进**本 docs-only 提交**（父提交 `ccdc609`）；受测代码字节仍是 `3c0cc27`，docs 归档不改变产品/测试字节。
+- 归档身份：本报告、run 目录与补档目录一起放进**本 docs-only 提交**（父提交 `3c0cc27bde1de33f8889166c5edf8d67b290d5ae`）；受测代码字节仍是 `3c0cc27`，docs 归档不改变产品/测试字节。（更正：上一版写成父提交 `ccdc609` 有误 —— `ccdc609` 只是 M1-B 审查报告的 docs 提交，不是本归档的父提交。）
+
+### H7. 补档：`757b3f4` 漏掉的运行时自有产物（`supplement-owned-runs/`）
+
+`757b3f4` 的原 291 条载荷只覆盖 runner 自己写进 run 目录的内容，**漏掉了测试运行时落在 `.data/` 下的自有产物**（orphan 分支证据、真实 demo run 及其 plan.json/manifest）。本次补档按原字节补进**同一个** run 目录的 `supplement-owned-runs/`；原 291 清单、原 JSON、真实源目录一律不改不删。
+
+**归属核对（不是按时间新旧猜）**
+
+| 补档对象 | 归属证据 | 结论 |
+| --- | --- | --- |
+| `.data/demo-script-evidence/68828-1794772762028`、`…768904`、`…773742` | 每份 `orphan/<kind>/result.json` 的 `pid=68828`、`cleanupErrors=[]`；`begun` = 19:59:16.678Z / 19:59:22.061Z / 19:59:28.930Z，全落在 **demo-safety 步**窗口 19:59:12.108Z–19:59:33.792Z；kind = hard-kill / disconnect-hung / normal-close；生成者 `scripts/demo/test-support/orphan-case.mjs` 目录名即 `${process.pid}-${Date.now()}` | 本 run 的 demo-safety 步 |
+| `.data/demo-runs/2026-11-15T19-59-59.459Z-9f3e7b64…`、`…20-00-02.858Z-562cbd1f…`、`…20-00-21.729Z-c05a4e68…`、`…20-00-23.833Z-0303c0ee…` | 各自 `manifest.json`：`head=3c0cc27`、`mode=mock`、`createdAt` = 19:59:59.462Z / 20:00:02.862Z / 20:00:21.732Z / 20:00:23.836Z，全落在 **e2e-m4 步**窗口 19:59:35.420Z–20:00:34.061Z；3 个 `status=stopped` + 1 个 `status=running`（hard-kill 用例故意留下） | 本 run 的 M4 E2E 步 |
+
+- **复制**：363 个普通文件逐字节复制并复算（0 不符），保持 `demo-script-evidence/<dir>/…` 与 `demo-runs/<runId>/…` 结构；每个文件的 `source / archivedPath / bytes / sha256 / byteEqual` 都写在 `supplement-owned-runs/mapping.json`。
+- **显式省略的缓存（352 个文件，205,921,292 字节）**：`demo-runs/<runId>/cache-<name>/…`（Vite optimizeDeps，88 个/轮）与 `demo-runs/<runId>/work-data/preview-cache/…`（预览依赖缓存）。每个省略文件在 `mapping.json` 的 `omitted` 里都有 `source/bytes/sha256/reason`，不是"只挑 manifest 就算完整"。
+- **符号链接（40 个）不跟随**：都是 `work/node_modules/@spatial/*` 一类链接，`mapping.json` 的 `links` 只记 `source` 与原始 `target`。
+- **嵌套 candidate 仓库（2 个）物化**：`work-data/candidates/9143e852…` 与 `4f0a997c…` 用现有 `materializeContainer` 打成 flat payload（各 15 个 `payload-*.bin` + `.git` 指针原字节），各自带 `mapping.json`（`digest`、原始路径、每个 payload 的 sha256）；**不跟随 `.git`、不制造 gitlink**。
+- **独立清单**：`supplement-owned-runs/sha256-manifest.json` 只覆盖补档目录自身（**397 条**，排除自身，静态复算 0 不符，清单 sha `9d1ef183eb1b8947710aef26af05239212d83ef1f58c695bad67732a3cd18c9e`）；提交后按 `git cat-file blob` 的 Git 对象字节逐条复核 **397/397 一致**；原 `sha256-manifest.json`（291 条，sha `d74d1388…`）**未改动**（与父提交逐字节比对相同）。
+- **CRLF 原字节不被规范化**：demo 模板与部分证据是 CRLF，仓库 `core.autocrlf=true` 会把它 LF 化；补档目录放了局部 `.gitattributes`（`* -text`），并用 `git add --renormalize` 重算已暂存字节，最终以 Git 对象字节核对通过（不是靠工作树 `stat`）。
+- **范围偏差记录（不重写历史）**：早前把 `orbital/jobs/job_b72fc460/path` 当作 launcher 原件复制进了 `launcher/`，而前一张卡明确禁止复制该文件。这里只记录偏差：**不再读取/不复述其内容、不再复制**，也不重写历史、不改动原 291 清单。
