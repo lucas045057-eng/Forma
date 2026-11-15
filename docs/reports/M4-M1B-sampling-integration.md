@@ -15,3 +15,51 @@ Pi 的 bc710f1、79c5223 是静态交付，均没有运行。Codex 在 79c5223 �
 范围仅 `tests/e2e/m1b/` 六个文件与本报告。`apps/packages/templates/scripts/package.json/pnpm-lock.yaml` 相对 ea32d48 无差异，`tests/e2e/m1a/visual.ts` 不变。静态差异检查不等于运行通过；本批尚未执行类型检查、构建、测试、服务、浏览器、collect、focused 或 full。
 
 后续只安排一次原 M1-B 23 例专项：0 retry、0 skip/flaky、原像素阈值，类型感知证据身份枚举，刷新证据先保存再按 Git blob 还原，清理失败不得判绿。完整回归与后五套 93 例继续等待；历史通过计数不抵本批新测试的运行证据。
+
+## 1. 唯一一次 focused 运行结果（受测 `4d34bce`，产品 `ea32d48`）
+
+`job_3cb0021d`，exit 0，1m51s，run 目录
+`docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/`。
+命令：`playwright test -c playwright.m1b.config.ts --retries=0 --workers=1 --reporter=list,json`
+（入口 `.data/m1b-focused-run.mjs`，`.data` 独立文件，不入库；只跑这一套，未跑 typecheck/build/collect/预检/探针/其他套件/full）。
+
+- **23/23**：`expected=23 / unexpected=0 / skipped=0 / flaky=0`，`counts.tests=23`，逐例单 result，`retry=0`，报告 `errors[]` 为空，`report.problems=[]`。
+- 身份：baseline 与 after 均为 `4d34bcee1eb777dda42bd3e4cfbdacda2395ebe8`（`test/m4-acceptance`），`identityStable=true`，清单内工作树无 dirty。
+- 清理：`cleanup.json` 里 3001/4010/4011/5173/5174/5175 **监听为空**，`m4-acceptance` 相关 node/chrome **为 0**。
+- 证据刷新：本轮变脏的 **23 个已跟踪证据**全部"先归档新字节 → 按 `HEAD` blob 还原 → `hash-object` 比对 + `status` 干净"（`manifest.evidenceArchived` 23 条，`restoredObjectId === headBlobId`），`plan.conflicts` 为空。
+
+### 1.1 四次场景操作（真实 HTTP 200，`errors[]` 为空）
+
+| 阶段 | 证据文件 | 真实响应 | 用时 | 差异率 | 尝试数 | 首次/末次可见高度 |
+| --- | --- | --- | --- | --- | --- | --- |
+| consistency 写入 | `consistency-write-sampling.json` | `PUT /scene` **200** | 1242ms | 0.08334 | 4 | 341 → 378 |
+| writeback 即时同步 | `writeback-hero-sampling.json` | `PUT /scene` **200** | 1200ms | 0.08191 | 7 | 341 → 378 |
+| undo 写入 | `undo-ui-write-sampling.json` | `PUT /scene` **200** | 1240ms | 0.10086 | 7 | 341 → 378 |
+| undo 撤回 | `undo-ui-recover-sampling.json` | `POST /scene/undo` **200** | 1253ms | **0**（降回基线） | 6 | 341 → 378 |
+
+- 四次都用同一起点（点击前 `startedAt`）与同一 30s 截止时间，`finishedAt <= deadline`；`attempts[].at` 是相对 `startedAt` 的毫秒。
+- 三次写入期间预览可见高度**自然恢复** 341 → 378（写盘过渡期提示消失后的正常布局回弹），不是测试放宽容差：末次尝试时 `sameWindow`（坐标/rect/viewport/backing 严格相等，无 1px 容差、无固定 sleep）成立后才用**基线窗口**截图比较。
+- 撤回 `changedRatio = 0`：撤回后与基线像素完全一致。
+- 06-adopt：`sceneRestored=true`、`sidecarBytesMatch=true`，`cleanupErrors=[]`（`adopt-provenance-cleanup.json`）；GLB/parts 已清理，sidecar 按原字节恢复，历史 tracked 文件未动。
+
+### 1.2 归档补充：固定目录里 8 个新增 JSON
+
+本轮在固定 artifact 目录 `docs/reports/artifacts/M1-B/` 产出 8 个**新增未跟踪** JSON，未进入 run 的 28 条载荷清单。
+后处理做法（`.data/m1b-archive-additions.mjs`，未改受测源码）：
+
+1. 先原字节复制到 `<run>/fixed-additions/`，逐文件核对 `byteEqual=true` 与 SHA256；
+2. 写 `fixed-additions-mapping.json`（`origin / archivedTo / mode=100644 / bytes / sha256 / trackedBefore=false / removedFromFixedDir`）；
+3. 只对这一轮**未跟踪**的固定目录副本做 `git clean -f --`，并复核文件已不存在、`ls-files` 仍为空；历史 tracked 证据与 run 原件未删除、未改写；
+4. 在已保全文件上**重新生成** `sha256-manifest.json`：`payloadFiles=37`、排除自身、静态复算 0 不符。
+
+8 个文件（bytes / sha256 前 12 位）：
+`adopt-provenance-cleanup.json` 323B `3f6fc5c4db11`、`consistency-write-baseline.json` 2193B `6b3dde5fe33a`、
+`consistency-write-sampling.json` 9141B `3c65fcd46e1b`、`writeback-hero-baseline.json` 2193B `720359678318`、
+`writeback-hero-sampling.json` 13422B `579bc3e9dafe`、`undo-ui-baseline.json` 2193B `ca64b98657f8`、
+`undo-ui-write-sampling.json` 13223B `2dd3fcda7cfe`、`undo-ui-recover-sampling.json` 11716B `20d6bd044adb`。
+
+### 1.3 归档后状态与未执行项
+
+- 提交只含 docs（run 目录 + 本报告）；`git ls-files --stage` 复核 **stage 无新增 gitlink（160000）**，全部为 `100644`。
+- **未执行**：真实 Windows 控制台 Ctrl+C、真实阿里云语音/厂商识别/编码模型/Lux3D、真人 A/B 走查、完整彩排；完整回归剩余 93 例（M2-A 35 / M2-B 12 / M3-A 11 / M3-B 7 / M3-C 28）仍未跑，等待根安排。
+- 本卡只做了"原字节归档 + docs-only 固定"；没有重跑、没有改源码/runner/阈值/依赖，也没有把 23 例 focused 与未执行的 93 例合成"全部通过"。
