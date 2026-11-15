@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-15T17:07:44.769Z",
+  "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full",
+  "head": "280e2829173eee470dc4254ec2e8a29d3c9c398b",
+  "job": {
+    "id": "job_e585899e",
+    "pid": 24272,
+    "exitCode": 1
+  },
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "stagingLeftovers": [],
+  "templateAndProductDirty": [],
+  "productDiffVsAccepted": [],
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "retainedScenes": [
+    "fallback-parent-death-1Z4Qum|2026-11-15T13:07:08.1299293Z",
+    "fallback-parent-death-PxCzE3|2026-11-15T13:51:32.0319424Z"
+  ],
+  "note": "typecheck/build/unit(614)/demo-safety(12) 全过；M4 19 例 4 过 8 败 7 跳过；旧九套 174 未执行。本树无自有 node/chrome、无端口、无 staging 残留，未执行 kill。"
+}

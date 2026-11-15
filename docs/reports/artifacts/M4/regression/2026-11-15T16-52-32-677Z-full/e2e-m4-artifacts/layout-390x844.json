@@ -1,0 +1,28 @@
+{
+  "viewport": {
+    "name": "390x844",
+    "width": 390,
+    "height": 844
+  },
+  "metrics": {
+    "canvas": {
+      "left": 27,
+      "right": 363,
+      "width": 336
+    },
+    "scroll": {
+      "left": 27,
+      "right": 363,
+      "width": 336,
+      "scrollWidth": 336,
+      "clientWidth": 336
+    },
+    "hintVisible": false,
+    "pageOverflow": 0,
+    "viewportWidth": 390
+  },
+  "focusable": {
+    "tabIndex": 0,
+    "isActive": true
+  }
+}

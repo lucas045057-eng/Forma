@@ -86,9 +86,21 @@ function descendantsOf(pid: number): Array<{ pid: number; created: string; depth
   return out.sort((a, b) => b.depth - a.depth);
 }
 
-function alive(pid: number): boolean {
-  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', `if (Get-Process -Id ${pid} -ErrorAction SilentlyContinue) { 'alive' }`], { encoding: 'utf8', timeout: 10000 });
-  return (result.stdout ?? '').includes('alive');
+function processCreated(pid: number): string | null {
+  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', `try { (Get-Process -Id ${pid} -ErrorAction Stop).StartTime.ToUniversalTime().ToString('o') } catch { '' }`], { encoding: 'utf8', timeout: 10000 });
+  const text = (result.stdout ?? '').trim();
+  return result.status === 0 && text ? text : null;
+}
+
+/**
+ * 只按 PID 存活判断会被 PID 复用误红（更糟的是可能把别人的进程当自己的）。
+ * 这里用"存活 + 创建时间一致"认定仍是本次受测的进程；创建时间不同一律记为 pid-reused，不当作自有残留。
+ */
+function stillOwn(pid: number, created: string): 'gone' | 'alive' | 'reused' {
+  const now = processCreated(pid);
+  if (now === null) return 'gone';
+  const same = Math.abs(Date.parse(now) - Date.parse(created)) <= 2000;
+  return same ? 'alive' : 'reused';
 }
 
 async function startMockDemo(): Promise<DemoHandle> {
@@ -230,9 +242,12 @@ test.describe('M4-D5 演示入口（mock）', () => {
     await wait(2000);
 
     const deadline = Date.now() + 90_000;
-    let remaining: typeof tracked = [];
+    let remaining: Array<{ pid: number; created: string; depth: number }> = [];
+    let reused: number[] = [];
     while (Date.now() < deadline) {
-      remaining = tracked.filter((item) => item.pid !== process.pid && alive(item.pid));
+      const verdicts = tracked.map((item) => ({ item, verdict: stillOwn(item.pid, item.created) }));
+      remaining = verdicts.filter((entry) => entry.verdict === 'alive').map((entry) => entry.item);
+      reused = verdicts.filter((entry) => entry.verdict === 'reused').map((entry) => entry.item.pid);
       if (remaining.length === 0) break;
       await wait(1000);
     }
@@ -243,7 +258,7 @@ test.describe('M4-D5 演示入口（mock）', () => {
     for (const port of Object.values(ports) as number[]) if (await portOpen(port)) stillOpen.push(port);
     writeArtifact('demo-hard-kill-reclaim.json', {
       launcherPid: handle.child.pid, tracked, remaining, orphanFiles, portsStillListening: stillOpen,
-      note: '硬杀父启动器后，由子进程 IPC 断开处理回收；这里断言的是实际 PID 全部退出，而不是只做观测。',
+      note: '硬杀父启动器后，这里只断言"本次受测的 PID（以创建时间核对）全部消失"；它不能证明是 IPC 断开处理器或 watchdog 执行的回收——在 Windows 上无 detached 的子进程可能由系统直接终止（推断，未泛化证实）。watchdog 的因果证据只来自 fixture 角色主动断开 IPC + close 挂起那条分支。',
     });
     expect(stillOpen, `硬杀回收后端口仍可连接：${stillOpen.join(',')}`).toEqual([]);
   });
