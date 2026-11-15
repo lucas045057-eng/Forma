@@ -235,3 +235,68 @@ Exit status 2
 
 实现/测试双方由 Codex 统一返工三（根 `17a9249`）处理 R1–R3；修复后我再从头跑同一 `full-regression.mjs`。
 本轮不改产品、不改测试、不自行派实现者、不 merge、不自动补跑。
+---
+
+# 附录：集中第四轮（返工三后）—— 编译通过，单测换了一批 3 失败
+
+> 仍然**不是全仓单测通过**：server **375 passed / 3 failed（378）**；Studio 单测未启动；`demo-safety` 与全部 E2E（11 步）未执行；193 仍只是收集数。
+> 本轮三条失败与上一轮**不同**，其中第 1 条的日志被我的 runner 缺陷遮蔽，无法据现有原件回溯根因。
+
+## C1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `047cae7913dd2fbe15b43ba40186a7e06e232fee`（merge 返工三 `6fc11de`） |
+| 冻结产品 | `6fc11de8d6e6fb67fdac8bbc5d9d8bfea3d446df` |
+| 身份摘要 / 锁 | `f2c1184e1fd6…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `6fc11de` **0 差异** |
+| 证据目录起跑前 | 脏项 **0** |
+
+## C2. 执行与结果（命令失败 / 身份漂移分开）
+
+| 步骤 | 结果 |
+| --- | --- |
+| typecheck | exit 0 / 9s（含 `apps/studio`、`templates/product-page`） |
+| build | exit 0 / 10s |
+| unit | **exit 1 / 253s**：server 375 通过 / 3 失败（378） |
+| demo-safety、M4 19、旧九套 174 | 未执行 |
+
+- **命令失败**：`pnpm test` 退出码 1（`signal=null`）。
+- **身份漂移：无**（`problems` 仅退出码；起跑 `evidenceDirtyAtStart=[]`；产品/脚本/锁与 `6fc11de` 字节一致）。
+- 逐包实际数：shared 68、plugin 20、scene-renderer 5、bridge 1、server 375/378；**`apps/studio` 未启动**（server 首败即停）。不沿用历史通过数。
+
+## C3. 三条失败与"能确认 / 无法回溯"
+
+1. **`asset/fallback-process-lifecycle.test.ts:73`**
+   `Error: ENOENT ... 2026-11-15T13-06-44-442Z-full\d2-browser\asset-parent-cleanup-38104.json`
+   - **能确认**：失败发生在用例 `finally` 里写"清理诊断"这一步；目标目录 `d2-browser` 不存在（`cleanup.json` 里 `d2RunDir.exists=false` 已留证）。
+     这个路径来自我的 runner：它把 `D2_RUN_DIR` 指向 `<run>/d2-browser` 却没有 `mkdir`，**属测试侧（我的入口）缺陷**。
+   - **无法回溯**：诊断写入抛 ENOENT 后，原始断言/子进程错误/loader 阶段事件被覆盖，现有日志不足以判定该 fixture 究竟卡在屏障、IPC 还是早退。**不据此定性产品**。
+2. **`asset/recovery.test.ts:96`** `AssertionError: expected undefined to be defined`（owner identity undefined）
+   - 能确认：断言处拿到的"子进程所有者身份"是 `undefined`。
+   - 无法回溯：本轮日志没有保留该子进程的早退/stderr 原始诊断，**不能先定性为 CIM 查询失败或产品缺陷**。
+3. **`work/approvals.test.ts:452`**（`it.each(['cleanup','terminal-save'])('recovers another card before cancel, including repeated terminal-save failure')`）`Error: Test timed out in 5000ms.`
+   - 能确认：5s 默认预算内未完成；上一轮该用例通过。
+   - 无法回溯：新旧源码差异、并发负载只能静态核对；**不加超时、不重试重跑**（那会掩盖问题）。
+
+## C4. 清理与证据
+
+- 静态核对：3001/4011/5173/5174/5175 无监听；无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；**无 `.model-stage-*` 残留**；未执行任何 kill。
+- 本步未刷新任何 tracked 证据（`evidenceArchived: []`）。
+- 归档：`manifest.json`、`manifest.log`、`typecheck.log`、`build.log`、`unit.log`、`cleanup.json`（含 d2RunDir 证据）、`launcher/`；
+  `sha256-manifest.json` **10 载荷、排除自身、0 mismatch**。
+
+## C5. 统一问题清单（第四轮）
+
+1. **S1（阻断，测试侧=我的入口）** runner 未创建 `D2_RUN_DIR`，导致 fixture 的清理诊断 ENOENT 并**遮蔽原始错误**。下一轮我需要：创建该目录、并让该 fixture 的失败诊断在目录不可写时也不覆盖原始断言（保留阶段事件/stdout/stderr/loader 字节）。
+2. **S2（阻断，待诊断）** `recovery.test.ts:96` owner identity `undefined`：需先保存该子进程早退/错误原始诊断，再判定是测试夹具（CIM 早退）还是产品。
+3. **S3（阻断，待诊断）** `approvals.test.ts:452` 5s 超时：需要静态 diff + 计时证据判定是新增真实子进程负载还是竞态；**不加超时/不重试**。
+4. **S4（覆盖缺口）** Studio 单测、`demo-safety`、M4 19、旧九套 174（含 M1-B 23 像素）**全未执行**。
+5. **S5（边界）** 真实 Windows 控制台 Ctrl+C、生产资产 worker 整链回收、真实模板 iframe 点选与 HMR 端口仍未跑到。
+6. **S6（未执行外部项）** 真实阿里语音/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+
+## C6. 下一步
+
+S1 由我（测试侧）在下一轮修入口；S2/S3 与实现/夹具问题一起进 Codex 的统一返工批次；修复后我仍从头跑同一集中入口。
+本轮不改产品、不改测试、不自行派实现者、不 merge、不自动补跑。
