@@ -201,3 +201,20 @@
    tracked 证据归档新字节与哈希，再按 blob 还原并用对象 id + `git status` 校验；同时记录受测 HEAD、
    锁 SHA256、spec SHA256、前后身份摘要与工作区状态。不声称 M2-B 的 artifact helper 支持
    `M3C_ARTIFACT_DIR`（它并不支持）。
+### 11.6 第二次定向轮（新版本，`fb906ea`）：通过
+
+- run：`docs/reports/artifacts/M3-C/regression/2026-11-15T03-20-18-991Z-m2b-targeted/`，
+  受测 HEAD `fb906eab0eb9621badf25baa297b11ea5876783b`，spec SHA256 `1bb5bae2…`，
+  锁 SHA256 `67af36b7…18960`，`identityStable=true`，`problems=[]`。
+- 报告：1 spec / 1 test / 1 result，`expected=1`、`skipped=0`、`unexpected=0`、`flaky=0`；单例 8.9s、总 13.8s。
+- 真实截断元数据（来自归档的 `takeover-events-truncated.json` 原件）：
+  `injectionUsed=1`（恰好一次）；`since=15`、`oldest=17`、`current=30`，满足 `0 < 15 < 17-1` 与 `17 <= 30`；
+  尾段 14 个真实事件（首 17、末 30）；请求轨迹 `15 → 0 → 30`，`since=0` 与 `since=30` 均走真实后端。
+- 恢复后：`/tasks`、`/candidates`、`/version` 全量重载齐全；界面 `events-seq=30`；候选下拉两项（`e8426f62`、`1f929f68`）。
+- 证据保护：本步刷新的 `M2-B/takeover-events-truncated.json` 新字节 769B（sha256 `c07ffea5…`）先归档到
+  本 run 的 `evidence-refresh/run/`，再按 blob 还原（`headBlobId = restoredObjectId = 82cb7d17…`，`statusClean=true`）；
+  新字节归属本 run，历史原件未被改写。
+- 收尾核验：`templates`、`apps/studio`、`apps/server` 工作区干净；3001/4011/5173/5174/5175 无监听；本工作树无自有 node/chrome 残留。
+
+> 说明：这两次定向轮只证明"该用例的截断恢复前提已修正且能通过"，**不构成** M3-C 的验收结论；
+> 正式判定仍取决于随后从头执行的 12 步 174 例全量回归。

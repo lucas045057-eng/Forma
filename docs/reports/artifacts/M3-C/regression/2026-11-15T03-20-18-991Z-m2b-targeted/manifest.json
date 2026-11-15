@@ -1,0 +1,61 @@
+{
+  "runId": "2026-11-15T03-20-18-991Z-m2b-targeted",
+  "scope": "单一用例（--grep 历史截断）",
+  "startedAt": "2026-11-15T03:20:19.459Z",
+  "finishedAt": "2026-11-15T03:20:33.662Z",
+  "command": "node E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\node_modules\\@playwright\\test\\cli.js test -c playwright.m2b.config.ts --grep 历史截断 --retries=0 --workers=1 --reporter=list,json --output=E:\\空间化AI工作台\\.worktrees\\m3c-acceptance\\docs\\reports\\artifacts\\M3-C\\regression\\2026-11-15T03-20-18-991Z-m2b-targeted\\output",
+  "out": "docs/reports/artifacts/M3-C/regression/2026-11-15T03-20-18-991Z-m2b-targeted",
+  "pid": 3288,
+  "code": 0,
+  "signal": null,
+  "spawnError": null,
+  "identity": {
+    "head": "fb906eab0eb9621badf25baa297b11ea5876783b",
+    "branch": "test/m3c-acceptance",
+    "identityDigest": "cf5b92b3cd7f19f1d6cf674a5a91e9f074f74c3279c91d94512b169788f8c6c8",
+    "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+    "specSha256": "1bb5bae2ef701a3fe24cda5a4112c83974638b14050250bc551c6481a4d98e22",
+    "productDirty": ""
+  },
+  "afterIdentity": {
+    "head": "fb906eab0eb9621badf25baa297b11ea5876783b",
+    "digest": "cf5b92b3cd7f19f1d6cf674a5a91e9f074f74c3279c91d94512b169788f8c6c8",
+    "lock": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960"
+  },
+  "identityStable": true,
+  "evidenceArchived": [
+    {
+      "file": "docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+      "beforeSha256": "6f2d1227f76b5d85ce10a117f156f23f59201c1228cdf450648a95d04cbf930d",
+      "afterSha256": "c07ffea5b0ee7907e32f65ae831b97d9cb24e1aff991b61c942dafe2c6fa6f40",
+      "archivedTo": "docs/reports/artifacts/M3-C/regression/2026-11-15T03-20-18-991Z-m2b-targeted/evidence-refresh/run/docs/reports/artifacts/M2-B/takeover-events-truncated.json",
+      "archivedBytes": 769,
+      "headBlobId": "82cb7d17d27c1f225bec8e7adc7edbd7006d4e6a",
+      "restoredObjectId": "82cb7d17d27c1f225bec8e7adc7edbd7006d4e6a",
+      "statusClean": true
+    }
+  ],
+  "report": {
+    "ok": true,
+    "problems": [],
+    "counts": {
+      "suites": 2,
+      "specs": 1,
+      "tests": 1,
+      "results": 1,
+      "projects": [
+        "chromium"
+      ]
+    },
+    "stats": {
+      "startTime": "2026-11-15T03:20:19.804Z",
+      "duration": 13845.435,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "problems": [],
+  "verdict": "passed"
+}
