@@ -1,6 +1,6 @@
 # M4-D1 语音后端实现记录
 
-状态：D1 原47项定向验证通过，产品固定 cb2237a；首轮标准459通过/2失败、Studio未运行。新守卫定向已通过五组canary与download原11项，失败原件和新证据已归档，尚待文档冻结后的完整标准轮。不能把新守卫冒称为旧47项GREEN的同一身份。Claude独立代码审查与Pi验收未完成，D1未正式收口。
+状态：D1 实现侧标准全仓 typecheck、build 与547项单测全部通过（job_fe569815）。受测HEAD为d005c23，产品实现固定cb2237a，本次仅追加docs归档，未在新归档HEAD上重跑。原47项定向、失败轮、新守卫定向和本轮标准分别保留身份；Claude独立代码审查与Pi验收尚未完成，无真实阿里调用、无Pi E2E结论，D1未正式收口、M4未完成。
 
 ## 基线与本轮范围
 
@@ -122,3 +122,37 @@ download.test.ts 完整11项 passed、failed0、pending0；下载阶段没有守
 精确文档归档提交（提交号随交付回报），相对cb2237a的apps/packages/templates/tests/依赖清单/锁必须零diff、tracked干净。随后创建明确新版本 `.data/d1-standard-v2.mjs`，expectedHead固定该docs提交；其守卫门禁要求SHA等于已归档 validated-guard-identity.json，并逐文件核该证明的载荷与当前守卫/归档字节，同时核旧产品字节不变。不是删除或绕过旧身份检查，不修改旧入口。
 
 使用新入口从头执行且仅执行一次 `pnpm typecheck → pnpm build → pnpm test`，首败即停、新run目录、fake key/loopback白名单、无dev/env-file。拿job立即冻结交回；实际返回后才从日志计数，不预填通过数量。未重跑安装、RED、47定向、守卫定向或Pi E2E，不改产品凑绿。全轮通过后仍需Claude独立审查，D1未收口、不merge、不做D2–D5。
+
+## 标准 v2 最终结果交付（仅原件核验与文档归档）
+
+`job_fe569815` 已结束 exit0，受测提交 **d005c23edd2e7e5efda5a0c5086cb2d370dabc0b**，产品提交 **cb2237a40da8aa7a5ebe720085038e558fdb8f73**。原 run `.data/d1-standard-v2-2026-11-15T07-04-08.991Z/`，启动2026-11-15T07:04:08.992Z；typecheck/build/test三步均exit0，逐步及整体identityUnchanged=true。实际入口为 `.data/d1-standard-v2.mjs`，通过带通知bg-root运行，无第二监视作业。本轮交付未运行任何测试/安装/build/collect/服务。
+
+按原始 test.log 的 Vitest 与 Node test runner 汇总分别解析：
+
+| 包 | 实际通过 | 实际失败 |
+| --- | --- | --- |
+| @spatial/shared | 68 | 0 |
+| @spatial/vite-plugin-source-tag | 20 | 0 |
+| @spatial/bridge | 1 | 0 |
+| @spatial/scene-renderer | 5 | 0 |
+| @spatial/server | 367 | 0 |
+| @spatial/studio | 86 | 0 |
+| 总计 | 547 | 0 |
+
+各包汇总没有skip，bridge的fail/cancelled/skipped/todo均0。这些计数来自标准命令实际日志与exit/身份，不冒称该标准轮产生了逐条547项JSON报告。此前首轮459通过/2失败、Studio未运行的事实及原件保持不变，不把两轮混成一次。
+
+新守卫SHA256 `aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136`，标准v2已显式校验 guard-targeted-20261115 的21个载荷及validated证明、probe/download原件hash，与当前守卫字节一致；本轮无network-denied.jsonl，说明预加载守卫未记录拒绝，不将其称为完整网络包捕获。新守卫身份不借用旧47项GREEN。
+
+### 清理、默认配置与资源
+
+15份speech cleanup均errors=[]，各记录的app/server/upstream监听状态均false；HTTP fixture目录已删除，生命周期fixture未保留故障目录。静态核对290份本轮身份文件与受测前记录完全一致，templates及默认 `scene.config.json` 精确复原；报告/新证据之外无源码变化。默认scene实际SHA及lock SHA、完整文件身份保存在verification/manifest。
+
+2026-11-15T07:10:01.4140277Z只读OS核验：m4自有node/chrome、原run/步骤/cleanup记录PID及记录端口均无存活/监听。PID行若存在会记录OS创建时间；本次为空，不杜撰已结束worker的创建时间。launcher原件保留PID10772的create_time=1794726248.8858829，当前无进程需要结束，本轮没有执行kill。
+
+### 归档与固定身份
+
+专用目录 `docs/reports/artifacts/M4/D1/standard-v2-20261115/`，保存原manifest、typecheck/build/test三日志、15份清理记录、launcher的cmd/job/exit/output.log、实际运行入口与新守卫、原SHA清单（另存original-sha256-manifest.json），另有静态verification.json。新SHA清单排除自身，28个载荷文件逐字节保存并在清单写完后静态复算，0 mismatch；`.gitattributes`禁换行转换。旧失败/RED/类型错误/守卫定向归档均未改写。
+
+本次精确docs-only提交，最终归档HEAD由交付回报提供。**它不是受测HEAD d005c23**，没有为该新文档提交重跑标准测试。相对cb2237a的apps/packages/templates/tests/依赖清单/锁零diff，产品apps树应保持 `5dbf6d65e388daf36409565e08957900c4777fd1`；锁实际SHA256保持 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960`，提交后tracked应干净。
+
+后续由Codex交Claude只读代码审查，之后仍需Pi独立验收。当前只有实现侧mock/loopback标准验证通过；未读取真实.env/ASKS/凭据、未调用真实阿里语音或付费模型/Lux3D，无真实语音质量或Pi E2E结论。D1尚未正式收口，不自行merge、不开展D2–D5，项目及M4不能标为全部完成。

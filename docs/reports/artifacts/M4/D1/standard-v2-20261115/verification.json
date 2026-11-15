@@ -1,0 +1,226 @@
+{
+  "job": "job_fe569815",
+  "testedHead": "d005c23edd2e7e5efda5a0c5086cb2d370dabc0b",
+  "productHead": "cb2237a40da8aa7a5ebe720085038e558fdb8f73",
+  "productAppsTree": "5dbf6d65e388daf36409565e08957900c4777fd1",
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "steps": [
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "exit": 0,
+      "identityUnchanged": true
+    },
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "exit": 0,
+      "identityUnchanged": true
+    },
+    {
+      "name": "test",
+      "command": "pnpm test",
+      "exit": 0,
+      "identityUnchanged": true
+    }
+  ],
+  "identityUnchanged": true,
+  "sourceFilesVerified": 290,
+  "counts": {
+    "packages/shared": {
+      "passed": 68,
+      "failed": 0
+    },
+    "packages/vite-plugin-source-tag": {
+      "passed": 20,
+      "failed": 0
+    },
+    "packages/scene-renderer": {
+      "passed": 5,
+      "failed": 0
+    },
+    "packages/bridge": {
+      "passed": 1,
+      "failed": 0
+    },
+    "apps/server": {
+      "passed": 367,
+      "failed": 0
+    },
+    "apps/studio": {
+      "passed": 86,
+      "failed": 0
+    }
+  },
+  "total": {
+    "passed": 547,
+    "failed": 0,
+    "skipped": 0
+  },
+  "countSource": "Actual Vitest and Node test runner summaries from original test.log; no invented per-test JSON for the standard run.",
+  "bridgeStatus": {
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "guard": {
+    "sha256": "aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136",
+    "archivedProofPayloadsVerified": 21,
+    "denialLog": "absent",
+    "note": "No denied log is not a packet capture."
+  },
+  "cleanups": [
+    {
+      "file": "speech-cleanup-19912.json",
+      "pid": 19912,
+      "at": "2026-11-15T07:07:29.831Z",
+      "directory": "C:\\Users\\Admin\\AppData\\Local\\Temp\\speech-http-QvufD2",
+      "upstream": "http://127.0.0.1:52114",
+      "configured": "closed",
+      "disabled": "closed",
+      "serverListening": false,
+      "port": 52114,
+      "portClosed": true,
+      "directoryRemoved": true,
+      "errors": []
+    },
+    {
+      "file": "speech-lifecycle-4fRIib-cleanup.json",
+      "pid": 37860,
+      "at": "2026-11-15T07:07:27.491Z",
+      "origin": "http://127.0.0.1:11346",
+      "upstream": "http://127.0.0.1:60160",
+      "appListening": false,
+      "upstreamListening": false,
+      "calls": 1,
+      "retainedDirectory": null,
+      "errors": []
+    },
+    {
+      "file": "speech-lifecycle-6eUcAh-cleanup.json",
+      "pid": 37860,
+      "at": "2026-11-15T07:07:28.569Z",
+      "origin": "http://127.0.0.1:11373",
+      "upstream": "http://127.0.0.1:28223",
+      "appListening": false,
+      "upstreamListening": false,
+      "calls": 1,
+      "retainedDirectory": null,
+      "errors": []
+    },
+    {
+      "file": "speech-lifecycle-ahgB1S-cleanup.json",
+      "pid": 37860,
+      "at": "2026-11-15T07:07:28.212Z",
+      "origin": "http://127.0.0.1:11367",
+      "upstream": "http://127.0.0.1:56879",
+      "appListening": false,
+      "upstreamListening": false,
+      "calls": 1,
+      "retainedDirectory": null,
+      "errors": []
+    },
+    {
+      "file": "speech-lifecycle-By9oVT-cleanup.json",
+      "pid": 37860,
+      "at": "2026-11-15T07:07:27.855Z",
+      "origin": "http://127.0.0.1:11350",
+      "upstream": "http://127.0.0.1:36663",
+      "appListening": false,
+      "upstreamListening": false,
+      "calls": 1,
+      "retainedDirectory": null,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-0518bbd6-e6f9-40d8-8f31-218ababd9369-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:57594",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-06b80e3c-f367-4038-91eb-82fc8b9902a3-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:37373",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-59b1b283-179a-44e1-a781-db744f11e92f-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:47616",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-662259c6-8d4b-401b-947f-9f62f8e50c4f-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:47653",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-86e9f43e-7db5-47ae-af88-300433a90cdf-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:38742",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-8e77ba97-c9dc-4bce-ba63-8c252a0350eb-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:61651",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-91ddc08c-ffbf-4fbd-bb9d-f09cff5c118f-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:41800",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-9c6e0a71-d692-4338-976b-b3c7e9d0176b-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:41853",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-ab215591-6420-4eed-88ce-fae2ee7d86e2-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:22657",
+      "listening": false,
+      "errors": []
+    },
+    {
+      "file": "speech-mock-bb7c1703-3a0b-46f4-b734-ab4cefe678ab-cleanup.json",
+      "pid": 23400,
+      "base": "http://127.0.0.1:41115",
+      "listening": false,
+      "errors": []
+    }
+  ],
+  "resources": {
+    "checkedAt": "2026-11-15T07:10:01.4140277Z",
+    "ownedProcesses": [],
+    "priorPidsNow": [],
+    "recordedPortsListening": [],
+    "processesKilled": [],
+    "launcherCreation": {
+      "pid": 10772,
+      "creationEpochFromLauncher": 1794726248.8858829,
+      "note": "Exited worker creation times cannot be queried retroactively; current PID rows include OS creation time if present."
+    }
+  },
+  "sceneConfigSha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a",
+  "sceneConfigMatchesTested": true,
+  "productTestsLockDependencyDiff": [],
+  "trackedCleanBeforeArchive": true,
+  "independentClaudeReview": false,
+  "piE2E": false,
+  "realAliyunCall": false
+}
