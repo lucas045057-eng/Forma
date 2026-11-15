@@ -1,0 +1,25 @@
+{
+    "sourceUnchanged":  true,
+    "copies":  [
+                   {
+                       "file":  "manifest.json",
+                       "sha256":  "89E131674E87E5CF5A7222F59DE1BFC0E5C7EB7660467EB528B1364C39E8FF81"
+                   },
+                   {
+                       "file":  "plan.json",
+                       "sha256":  "8C60AFBA7E88B32C9F730FE10EC0038D184A1F47E1A36986CA3F562F84AD5F96"
+                   },
+                   {
+                       "file":  "backend-diagnostic.stderr.log",
+                       "sha256":  "96E90EEF14946CB4E1520E0C2DCF1B827CF77F84439A2A3FDE6AE1AAC54515F5"
+                   },
+                   {
+                       "file":  "frontends-diagnostic.stderr.log",
+                       "sha256":  "01BE23514461FA587D88ADD75915008A62721BB825DD7DC6EACEF0B1CFB8DEC2"
+                   }
+               ],
+    "missing":  [
+
+                ],
+    "noRepositoryDirectoriesCopied":  true
+}

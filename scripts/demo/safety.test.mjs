@@ -2,6 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {systemEnvironment,realEnvironment,assertMockEndpoint,descendant,templateNameAllowed} from './safety.mjs';
 import './body.test.mjs';
+import './frontend-watch-gate.test.mjs';
+import './retained-response.test.mjs';
 test('mock child environment drops injected loaders, proxies and real provider keys',()=>{
  const value=systemEnvironment({PATH:'local-tool-path',NODE_OPTIONS:'--require unsafe',HTTPS_PROXY:'http://invalid.example',DASHSCOPE_API_KEY:'fake-canary',CODING_AGENT_API_KEY:'fake-canary',LUX3D_API_KEY:'fake-canary'});assert.deepEqual(value,{PATH:'local-tool-path'});
 });

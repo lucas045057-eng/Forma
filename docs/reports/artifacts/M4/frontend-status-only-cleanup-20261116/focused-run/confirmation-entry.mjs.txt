@@ -1,0 +1,36 @@
+import {spawn,execFileSync} from 'node:child_process';
+import {mkdirSync,readFileSync,writeFileSync,createWriteStream,readdirSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {systemEnvironment} from '../scripts/demo/safety.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const env=systemEnvironment();
+const git=(...args)=>execFileSync('git',['-c','core.longpaths=true','-C',root,...args],{encoding:'utf8',env});
+const out=path.join(root,'.data','frontend-close-focused-'+new Date().toISOString().replaceAll(':','-'));mkdirSync(out);
+if(git('status','--porcelain','--untracked-files=no').trim())throw new Error('Tracked tree must be clean before the unique focused confirmation');
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const names=git('ls-files','-z','--','apps','packages','templates','scripts','package.json','pnpm-lock.yaml').split('\0').filter(Boolean).filter(name=>!/(?:^|\/)(?:\.env(?:\.|$)|[^/]*\.env(?:\.|$))/i.test(name));
+const identity=()=>Object.fromEntries(names.map(name=>[name,sha(readFileSync(path.join(root,name)))]));
+const record={started:new Date().toISOString(),head:git('rev-parse','HEAD').trim(),statusBefore:git('status','--porcelain'),node:process.version,launcherPid:process.pid,run:out,identityBefore:identity(),events:[],errors:[]};
+record.expectedFromSource={contracts:(readFileSync(path.join(root,'scripts/demo/frontend-watch-gate.test.mjs'),'utf8').match(/test\('/g)??[]).length,realScenarios:3};
+writeFileSync(path.join(out,'confirmation-entry.mjs.txt'),readFileSync(fileURLToPath(import.meta.url)));
+const save=()=>writeFileSync(path.join(out,'run.json'),JSON.stringify(record,null,2)+'\n');save();
+const command=['--test','--test-concurrency=1','--test-reporter=tap','scripts/demo/frontend-close.focused.test.mjs'];record.command=[process.execPath,...command];
+const stdout=createWriteStream(path.join(out,'stdout.log'));const stderr=createWriteStream(path.join(out,'stderr.log'));
+const child=spawn(process.execPath,command,{cwd:root,env:{...env,FRONTEND_CLOSE_RUN_DIR:out},execArgv:[],stdio:['ignore','pipe','pipe'],windowsHide:true});record.pid=child.pid;
+const note=(event,value={})=>{record.events.push({at:new Date().toISOString(),event,...value,exitCode:child.exitCode,signalCode:child.signalCode});save();};
+for(const event of ['spawn','exit','close','error'])child.on(event,(code,signal)=>note(event,{code:typeof code==='number'?code:undefined,signal,error:code?.stack}));
+child.stdout.pipe(stdout);child.stderr.pipe(stderr);child.stdout.on('data',bytes=>process.stdout.write(bytes));child.stderr.on('data',bytes=>process.stderr.write(bytes));
+for(const [name,stream]of [['stdout-file',stdout],['stderr-file',stderr]])stream.on('error',error=>{record.errors.push({stage:name,message:error.message});save();});
+for(const name of ['stdout','stderr'])for(const event of ['end','close','error'])child[name].on(event,error=>{if(event==='error')record.errors.push({stage:name,message:error.message});note(name+':'+event);});
+child.once('spawn',()=>{try{record.processIdentity=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',`ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process -Filter 'ProcessId=${child.pid}' | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;parent=$_.ParentProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o')} })`],{env,encoding:'utf8',timeout:10000}));}catch(error){record.errors.push({stage:'test-process-identity',message:error.message});}save();});
+child.once('close',async(code,signal)=>{
+ record.code=code;record.signal=signal;record.finished=new Date().toISOString();
+ await Promise.all([new Promise(resolve=>stdout.closed?resolve():stdout.once('close',resolve)),new Promise(resolve=>stderr.closed?resolve():stderr.once('close',resolve))]);
+ try{record.identityAfter=identity();record.changed=names.filter(name=>record.identityBefore[name]!==record.identityAfter[name]);record.headAfter=git('rev-parse','HEAD').trim();record.statusAfter=git('status','--porcelain');const tap=readFileSync(path.join(out,'stdout.log'),'utf8');record.actualCounts={};for(const label of ['tests','pass','fail','cancelled','skipped','todo']){const matches=[...tap.matchAll(new RegExp('^# '+label+' (\\d+)\\s*$','gm'))];record.actualCounts[label]=matches.length?Number(matches.at(-1)[1]):null;}record.caseResults={};record.notExecuted=[];for(const kind of ['no-request','consumed','status-only']){try{const result=JSON.parse(readFileSync(path.join(out,kind,'result.json'),'utf8'));record.caseResults[kind]={closed:result.closed,status:result.after?.status,primary:result.primary??null,cleanupErrors:result.cleanupErrors,remaining:result.remaining,fallbackKills:result.fallbackKills,hmr:result.hmr};}catch(error){record.notExecuted.push({kind,reason:error.message});}}
+ }catch(error){record.errors.push({stage:'finalize',message:error.message,stack:error.stack});}
+ const counts=record.actualCounts??{};record.accepted=code===0&&signal===null&&!record.errors.length&&!record.changed?.length&&record.headAfter===record.head&&counts.tests===record.expectedFromSource.contracts+record.expectedFromSource.realScenarios&&counts.pass===counts.tests&&counts.fail===0&&counts.cancelled===0&&counts.skipped===0&&counts.todo===0&&record.notExecuted?.length===0;save();
+ const payloads=[];function collect(dir,prefix=''){for(const entry of readdirSync(dir,{withFileTypes:true})){const rel=path.join(prefix,entry.name);if(entry.isDirectory())collect(path.join(dir,entry.name),rel);else if(entry.isFile())payloads.push({file:rel.replaceAll('\\','/'),sha256:sha(readFileSync(path.join(dir,entry.name)))});}}collect(out);writeFileSync(path.join(out,'sha256-manifest.json'),JSON.stringify({excludesSelf:true,files:payloads},null,2)+'\n');
+ console.log(JSON.stringify({run:out,head:record.head,code,signal,actualCounts:record.actualCounts,changed:record.changed,notExecuted:record.notExecuted,accepted:record.accepted,errors:record.errors}));process.exitCode=record.accepted?0:1;
+});
+console.log(JSON.stringify({run:out,head:record.head,pid:child.pid,command:record.command,scope:'Focused gate contracts plus three true production HTTP shutdown cases; live HMR included in consumed; no original diagnostic copies'}));
