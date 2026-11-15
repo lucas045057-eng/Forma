@@ -1,0 +1,27 @@
+{
+    "job":  "job_e6488103",
+    "head":  "393fe9f98c64822593591301518e246df8aa45e2",
+    "exit":  0,
+    "identityUnchanged":  true,
+    "scope":  "Studio typecheck and production build only; not full regression or independent acceptance",
+    "steps":  [
+                  {
+                      "command":  "pnpm --filter @spatial/studio typecheck",
+                      "pid":  38440,
+                      "exit":  0,
+                      "signal":  null,
+                      "started":  "2026-11-15T02:39:05.442Z",
+                      "finished":  "2026-11-15T02:39:19.812Z",
+                      "identityUnchanged":  true
+                  },
+                  {
+                      "command":  "pnpm --filter @spatial/studio build",
+                      "pid":  3348,
+                      "exit":  0,
+                      "signal":  null,
+                      "started":  "2026-11-15T02:39:19.888Z",
+                      "finished":  "2026-11-15T02:39:26.344Z",
+                      "identityUnchanged":  true
+                  }
+              ]
+}

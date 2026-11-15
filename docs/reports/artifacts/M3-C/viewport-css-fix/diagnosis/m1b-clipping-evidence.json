@@ -1,0 +1,67 @@
+{
+  "screenshot": "E:\\空间化AI工作台\\.worktrees\\m3c\\.data\\m1b-repro\\2026-11-14T21-34-09.744Z\\output\\04-keyframe-关键帧-记为此处关键帧：写入-83bfa--的-lid-0-12，视口在该位置的开盖量与配置一致-chromium\\test-failed-1.png",
+  "canvas": {
+    "x": 1020,
+    "y": 304,
+    "size": 378
+  },
+  "columns": [
+    {
+      "offset": 372,
+      "colors": [
+        [
+          "239,232,220",
+          378
+        ]
+      ]
+    },
+    {
+      "offset": 373,
+      "colors": [
+        [
+          "239,232,220",
+          378
+        ]
+      ]
+    },
+    {
+      "offset": 374,
+      "colors": [
+        [
+          "239,232,220",
+          378
+        ]
+      ]
+    },
+    {
+      "offset": 375,
+      "colors": [
+        [
+          "239,232,220",
+          378
+        ]
+      ]
+    },
+    {
+      "offset": 376,
+      "colors": [
+        [
+          "52,66,77",
+          378
+        ]
+      ]
+    },
+    {
+      "offset": 377,
+      "colors": [
+        [
+          "23,35,45",
+          378
+        ]
+      ]
+    }
+  ],
+  "fullHeightClippedColumns": 2,
+  "predictedChangedRatio": 0.005291005291005291,
+  "measuredChangedRatio": 0.005291005291005291
+}

@@ -1,0 +1,130 @@
+{
+  "head": "0860fbb5dd44f23ab9f99e9827d949e50b86b141",
+  "apps": "66e7ec7776b4d67a3d494cbd03652e127d1fd4f8",
+  "run": ".data/m1b-repro/2026-11-14T21-34-09.744Z",
+  "command": "pnpm exec playwright test -c playwright.m1b.config.ts --workers=1 --retries=0 --reporter=list,json",
+  "started": "2026-11-14T21:34:09.792Z",
+  "originalEvidence": [
+    {
+      "path": "adopt-guard.json",
+      "hash": "de348a5acff70beaace3456200e40f32b629145b31289cc6a9bd5c5fcb7262c6"
+    },
+    {
+      "path": "adopt-primary.json",
+      "hash": "f4fde70271eb1fe50c397fc9ea36f3404d13690bb57d4cbe60159c6773d48489"
+    },
+    {
+      "path": "adopt-sandbox-ok.json",
+      "hash": "b0be9bce8ba55dd5323213f089e48ce1a76af8719aac9a40fdab8c21284c0b25"
+    },
+    {
+      "path": "api-concurrent.json",
+      "hash": "b0ea1b512367e71dd4457a1b4f06bf1f375d6ba326613f97f1c8ab3ff9282cef"
+    },
+    {
+      "path": "api-invalid-page.json",
+      "hash": "82596f30269ca18acecf00ba9ad3c28099890c8ce8d3f3abed404d16b875071f"
+    },
+    {
+      "path": "api-invalid.json",
+      "hash": "48364573db7f599ee437ae6745f6559ada53d58980f5d732dcf3d1b268c50e8f"
+    },
+    {
+      "path": "api-paths.json",
+      "hash": "3041cfabbbd236d07fc0da4f545c9f7f9faab0de7348c07fc2a66aaebc93f0df"
+    },
+    {
+      "path": "consistency-after-edit.json",
+      "hash": "ece0c8126a692225ae8b9d5b48d00c7e0068c460499a7390611b9faf47857554"
+    },
+    {
+      "path": "consistency-canvas-content.json",
+      "hash": "24fdd512a7bc41885ca3e65b72f6a49040a383e15b298cf6348302f1f49196fc"
+    },
+    {
+      "path": "consistency-default.json",
+      "hash": "7a03ed9c94f8331d28fe8818616d2d12002689457532d450c74b3aca1af2b3f2"
+    },
+    {
+      "path": "consistency-scroll-06.json",
+      "hash": "c288df6ce47fefd17e99e2bf9b965cf012d95583d0c98bfe94284044ea8f9d60"
+    },
+    {
+      "path": "fix-b1-host.json",
+      "hash": "fa007fca6aad34f3f2420f2fe8aa956a5683b1568a5358ac519367bacbaa6eb9"
+    },
+    {
+      "path": "fix-r2-lid-gating.json",
+      "hash": "d159bbebd4eadc558a05903b14b8457851772e69ab8df6b3e09ab40f8bb56e27"
+    },
+    {
+      "path": "fix-r3-instance-lock.json",
+      "hash": "2b630e63f7fe82535cb7b7727fbca778abafdc469d082803a3ac564a64711b84"
+    },
+    {
+      "path": "fix-s1-unwrap.json",
+      "hash": "033feb1fa59a64411517a7add44bc424ca680560b01bc6dbdbe9478a00f26c47"
+    },
+    {
+      "path": "keyframe-overwrite.json",
+      "hash": "ac2e2aada2488cd332dbaeb51355eabf61ad2aa6bf36f76f3e88b5283ab1e26e"
+    },
+    {
+      "path": "keyframe-scroll-shipped.json",
+      "hash": "02cdb55a42c90e6151bed7a1a04af92ddd0842c012e317ba0f1ecbcc5c4b1ea4"
+    },
+    {
+      "path": "keyframe-write.json",
+      "hash": "68fd6f486c6383106f319b688d2eec4a72a3c7000e12757e0301bb3617208b99"
+    },
+    {
+      "path": "output\\.last-run.json",
+      "hash": "d73c748bbd999a5ec3437ec97303e04ac1e89ce51cc1c336c1b9f179ffe82420"
+    },
+    {
+      "path": "playwright-results.json",
+      "hash": "9c92ea6ca6d7c3fec73e0369cb54a8a4ea58d27ca9ddf1d888b53663011ae02d"
+    },
+    {
+      "path": "probe-at0-preview.png",
+      "hash": "31125adecdb2e2cc8e1d8cec2cb67cc256f946cb46e44463fb81c103dbc2e4db"
+    },
+    {
+      "path": "probe-at0-studio.png",
+      "hash": "fb9f39aea7ca0a882ab1f133e2bbfe7b55bdb6c8c2001f43cc4bc074a97550d8"
+    },
+    {
+      "path": "probe-at6-preview.png",
+      "hash": "4c18b2fc1cb6bb684dc8985309ae490f66456f853fe43e9146a91c9432bcb5d9"
+    },
+    {
+      "path": "probe-at6-studio.png",
+      "hash": "d9ea2e1027415bc9fd875dbb79a3b0973d15cebd04d10a5df356bb053c4fdb66"
+    },
+    {
+      "path": "undo-api.json",
+      "hash": "7a494f8c107459e49fa98a5cff472d990cf7c15b9319b4134f2208bac42ee544"
+    },
+    {
+      "path": "undo-empty.json",
+      "hash": "aab2c5f5a7248fe32e923c7ed05710d52579ee46b08b20b92040278260728374"
+    },
+    {
+      "path": "undo-ui.json",
+      "hash": "43c24e41f52ca303f9b0b27abc603717824f9d4647faf78a1c308b8796a7f2a6"
+    },
+    {
+      "path": "writeback-hero.json",
+      "hash": "27895433343d0f73881afbcbb5934a1dde5714e903d29f0328eb06b0a2a41853"
+    },
+    {
+      "path": "writeback-keyframe.json",
+      "hash": "4300ad35a8b47e680adea1afedec7c1a4d7dc72f008e6945270a395ef35a3fe9"
+    }
+  ],
+  "signal": null,
+  "evidenceRestored": true,
+  "finished": "2026-11-14T21:35:46.342Z",
+  "exit": 1,
+  "statusAfter": "?? fallback/"
+}
