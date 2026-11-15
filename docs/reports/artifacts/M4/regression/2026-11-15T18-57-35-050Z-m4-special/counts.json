@@ -1,0 +1,272 @@
+{
+  "at": "2026-11-15T19:00:43.093Z",
+  "stats": {
+    "startTime": "2026-11-15T18:57:37.231Z",
+    "duration": 60279.282,
+    "expected": 19,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "summary": {
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0
+  },
+  "note": "19/19 全部通过，skip/flaky/unexpected/errors 均为 0；旧九套 174、614 单测、脚本套件本轮未执行。",
+  "specs": [
+    {
+      "title": "按住录音 → 松手转写 → 可编辑 review → 确认写入指令，只有点生成才提交任务",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "录音中页面隐藏：立即取消并释放轨道；录音阶段无上传，因此不应发送 DELETE",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "转写返回 499：只显示安全文案，重试用新的 request id",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "权限未返回时取消：Escape 确定性取消，迟到的权限不会启动录音也不残留轨道",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "F2 语音提交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "三份本地素材的字节哈希与 preset 声明一致（不联网）",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "列表只暴露固定 preset，非法输入被拒",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "导入 → 来源 sidecar 绑定真实字节 → 采用 → scene undo 还原（不是 /version/revert）",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "F5 preset 导入接受界面真实发出的空对象 POST，危险字段仍被拒",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "F4 坏来源 sidecar 三类都安全 409，作品四份字节不变",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "1440x900：场景画布不被裁切、横向滚动可用、聚焦可达",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "1280x800：场景画布不被裁切、横向滚动可用、聚焦可达",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "390x844：场景画布不被裁切、横向滚动可用、聚焦可达",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "进程内 SIGINT 处理模拟：launch 自身的 graceful 收尾（非真实控制台 Ctrl+C）",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "真实候选链路：候选 HMR 连 plan.preview，10s 内无循环导航",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口）",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "父启动器被硬杀：真实 backend/frontends 及孙进程按 PID+创建时间回收，并留失败证据",
+      "status": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    }
+  ],
+  "copiedEvidence": 656,
+  "skippedEvidence": [
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-00.942Z-7a9a6130-ac5b-45b5-b887-a370756f2cd4/work/node_modules/vite (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work/node_modules/vite (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-04.665Z-d9c45372-b423-4d64-b0ef-0e8e9c829460/work-data/candidates/f1930815f5b64ff5b6ca489c8eaae3dc/node_modules/vite (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-24.379Z-2fc54982-7638-4d1b-a135-5389f6321172/work/node_modules/vite (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work/node_modules/vite (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@spatial/bridge (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@spatial/scene-renderer (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@spatial/shared (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@spatial/vite-plugin-source-tag (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@types/react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@types/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/@vitejs/plugin-react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/react (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/react-dom (symlink)",
+    "demo-runs/2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08/work-data/candidates/f94d49c6ee3544b8aa507a875acc5c91/node_modules/vite (symlink)"
+  ]
+}

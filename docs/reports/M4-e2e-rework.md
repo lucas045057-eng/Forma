@@ -316,3 +316,32 @@ SHA 清单 554 载荷、排除自身、0 mismatch；`git ls-files --stage` 复�
 3. `git ls-files --stage` 复核：新 run 归档 **572 条全部 `100644`，0 条 `160000`**；`docs/reports/artifacts` 下仍**只有 1 条历史 gitlink**（旧原件保留）。
 
 因此"普通平面容器不产生新 gitlink"这一条是**按 stage 实际验证**的，不是口头声明。
+## 14. M4 专项第四轮（merge 6161e86，产品 ea32d48）：19/19 全过
+
+run `docs/reports/artifacts/M4/regression/2026-11-15T18-57-35-050Z-m4-special/`，`job_f17f54bb`，**exit 0 / 67s**：
+
+- `stats`：**expected=19 / unexpected=0 / skipped=0 / flaky=0**；`errors=[]`；每条用例**单 result、retry=0**。
+- 入口 `manifest`：`code=0`、`ok=true`、`problems=[]`、`identityStable=true`；`cleanup`：端口空、自有 node/chrome 空。
+- 硬杀用例：`remaining / reused / unknown / ports` **全为空**（按"存在 + 创建时间"三态+unknown 判定，没把查询失败当 gone）。
+- 关闭路径：仍只称"**进程内 SIGINT 处理模拟**"；**真实 Windows 控制台 Ctrl+C 未执行**。
+
+### 14.1 归档
+
+- launcher（`job_f17f54bb` 的 cmd/exit/job.json/output.log）、`counts.json`（19 条逐例状态）、本轮 **4 个真实 demo run**（`7a9a6130`/`d9c45372`/`2fc54982`/`50784724`，最后一个是被硬杀的，manifest 停 `running` 属预期）、656 个证据文件。
+- demo run 内的**嵌套 candidates 仓库**（2 个）先物化为 `gitlink-container/01|02` 的普通 `payload-*.bin`（各 15 个，含惰性 `.git` 指针字节）+ `mapping.json`，**覆盖后才从归档副本删除**；
+  `git ls-files --stage` 复核：新 run 归档 **694 条全部 `100644`、0 条 `160000`**，`docs/reports/artifacts` 下仍**只有 1 条历史 gitlink**。
+- SHA 清单 **693 载荷、排除自身、0 mismatch**；本轮之前的失败轮（16/2/1、7/8 等）与原件**一律保留**。
+
+### 14.2 身份区分
+
+- **受测 merge HEAD**：`6161e86f79bbf82ca887d3fffefaef1492495bfe`；**产品实现**：`ea32d48`（`apps/packages/templates/scripts/package/lock` 与 `ea32d48` 零差异）。
+- **本文档归档 HEAD** 是紧随其后的 docs-only 提交；**归档提交不是在测身份**，报告与证据都会写明这一点。
+
+### 14.3 静态准备：完整回归入口（本轮不启动）
+
+- `tests/e2e/m4/full-regression.mjs` 的证据枚举已换成类型感知的 `scanEvidence()`（gitlink/链接/未知 mode 不再 readFileSync）；
+  脚本步骤仍是 `node --test scripts/demo/safety.test.mjs`。
+- `scripts/demo/safety.test.mjs` 现在还会 **import** `body.test.mjs`、`frontend-watch-gate.test.mjs`（5 例）、`retained-response.test.mjs`（6 例）。
+  所以"脚本套件 = 12 例"的说法**已过时**：**实际数必须在完整轮里运行得出**（预计 12+5+6，但**不预填、不沿用作成绩**）。
+- 旧 **614 单测 / 12 脚本**成绩**不能抵新生产字节**（本轮生产确有 `c8f35b0` 的 watcher 门禁与 `ea32d48` 接线变化）；完整回归待 Codex 整合审查后另行安排。
+- M1-B 23 例仍按**原像素阈值**，不在本轮执行。
