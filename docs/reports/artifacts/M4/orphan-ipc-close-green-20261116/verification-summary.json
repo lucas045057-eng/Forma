@@ -1,0 +1,332 @@
+{
+    "checkedAt":  "2026-11-15T16:53:44.3099110Z",
+    "testedHead":  "f9e21f56697e24d126fd8e98ecc4aa57597acbb0",
+    "headAfter":  "f9e21f56697e24d126fd8e98ecc4aa57597acbb0",
+    "job":  "job_deb351c9",
+    "jobExit":  0,
+    "command":  [
+                    "E:\\Node\\node.exe",
+                    "--test",
+                    "scripts/demo/safety.test.mjs"
+                ],
+    "pid":  23188,
+    "processIdentity":  [
+                            {
+                                "pid":  23188,
+                                "parent":  51172,
+                                "created":  "2026-11-15T16:49:57.3481430Z"
+                            }
+                        ],
+    "started":  "2026-11-15T16:49:57.279Z",
+    "ended":  "2026-11-15T16:50:19.774Z",
+    "signal":  null,
+    "identityFiles":  222,
+    "changed":  [
+
+                ],
+    "tests":  12,
+    "pass":  12,
+    "fail":  0,
+    "cancelled":  0,
+    "skipped":  0,
+    "todo":  0,
+    "cases":  [
+                  {
+                      "kind":  "hard-kill",
+                      "primary":  null,
+                      "cleanupErrors":  [
+
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "familyGoneBeforeFallback":  true,
+                      "unrelatedAliveBeforeCleanup":  true,
+                      "nativeCloseCode":  null,
+                      "nativeCloseSignal":  "SIGKILL",
+                      "streamsClosed":  true,
+                      "runtimeCleanup":  null,
+                      "fallbackKills":  [
+                                            {
+                                                "role":  "unrelated",
+                                                "pid":  45284,
+                                                "created":  "2026-11-15T16:50:00.5981390Z",
+                                                "reason":  "final unrelated stop"
+                                            }
+                                        ]
+                  },
+                  {
+                      "kind":  "disconnect-hung",
+                      "primary":  null,
+                      "cleanupErrors":  [
+
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "familyGoneBeforeFallback":  true,
+                      "unrelatedAliveBeforeCleanup":  true,
+                      "nativeCloseCode":  1,
+                      "nativeCloseSignal":  null,
+                      "streamsClosed":  true,
+                      "runtimeCleanup":  {
+                                             "at":  "2026-11-15T16:50:08.849Z",
+                                             "parentPid":  19524,
+                                             "forced":  true,
+                                             "children":  [
+                                                              {
+                                                                  "pid":  30576,
+                                                                  "parent":  19524,
+                                                                  "created":  "2026-11-15T16:50:06.6403350Z",
+                                                                  "depth":  1
+                                                              },
+                                                              {
+                                                                  "pid":  35936,
+                                                                  "parent":  19524,
+                                                                  "created":  "2026-11-15T16:50:06.6465320Z",
+                                                                  "depth":  1
+                                                              },
+                                                              {
+                                                                  "pid":  69176,
+                                                                  "parent":  19524,
+                                                                  "created":  "2026-11-15T16:50:06.6524980Z",
+                                                                  "depth":  1
+                                                              },
+                                                              {
+                                                                  "pid":  32164,
+                                                                  "parent":  19524,
+                                                                  "created":  "2026-11-15T16:50:06.6584260Z",
+                                                                  "depth":  1
+                                                              }
+                                                          ],
+                                             "errors":  [
+
+                                                        ],
+                                             "remaining":  [
+
+                                                           ]
+                                         },
+                      "fallbackKills":  [
+                                            {
+                                                "role":  "unrelated",
+                                                "pid":  20360,
+                                                "created":  "2026-11-15T16:50:06.5866430Z",
+                                                "reason":  "final unrelated stop"
+                                            }
+                                        ]
+                  },
+                  {
+                      "kind":  "normal-close",
+                      "primary":  null,
+                      "cleanupErrors":  [
+
+                                        ],
+                      "remaining":  [
+
+                                    ],
+                      "familyGoneBeforeFallback":  true,
+                      "unrelatedAliveBeforeCleanup":  true,
+                      "nativeCloseCode":  0,
+                      "nativeCloseSignal":  null,
+                      "streamsClosed":  true,
+                      "runtimeCleanup":  null,
+                      "fallbackKills":  [
+                                            {
+                                                "role":  "unrelated",
+                                                "pid":  43212,
+                                                "created":  "2026-11-15T16:50:14.2281630Z",
+                                                "reason":  "final unrelated stop"
+                                            }
+                                        ]
+                  }
+              ],
+    "residualChecks":  [
+                           {
+                               "pid":  21076,
+                               "role":  "asset",
+                               "created":  "2026-11-15T16:50:00.7178570Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  3044,
+                               "role":  "check",
+                               "created":  "2026-11-15T16:50:00.7115440Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  38316,
+                               "role":  "frontend-worker",
+                               "created":  "2026-11-15T16:50:00.7388640Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  23408,
+                               "role":  "orphan",
+                               "created":  "2026-11-15T16:50:00.6477740Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  30988,
+                               "role":  "parent",
+                               "created":  "2026-11-15T16:50:00.5911580Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  41024,
+                               "role":  "preview",
+                               "created":  "2026-11-15T16:50:00.7050650Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  45284,
+                               "role":  "unrelated",
+                               "created":  "2026-11-15T16:50:00.5981390Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  69176,
+                               "role":  "asset",
+                               "created":  "2026-11-15T16:50:06.6524980Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  35936,
+                               "role":  "check",
+                               "created":  "2026-11-15T16:50:06.6465320Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  32164,
+                               "role":  "frontend-worker",
+                               "created":  "2026-11-15T16:50:06.6584260Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  19524,
+                               "role":  "orphan",
+                               "created":  "2026-11-15T16:50:06.5810390Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  30576,
+                               "role":  "preview",
+                               "created":  "2026-11-15T16:50:06.6403350Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  20360,
+                               "role":  "unrelated",
+                               "created":  "2026-11-15T16:50:06.5866430Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  27196,
+                               "role":  "asset",
+                               "created":  "2026-11-15T16:50:14.2955480Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  41036,
+                               "role":  "check",
+                               "created":  "2026-11-15T16:50:14.2907760Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  17108,
+                               "role":  "frontend-worker",
+                               "created":  "2026-11-15T16:50:14.3161770Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  6520,
+                               "role":  "orphan",
+                               "created":  "2026-11-15T16:50:14.2225830Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  62988,
+                               "role":  "preview",
+                               "created":  "2026-11-15T16:50:14.2848480Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  43212,
+                               "role":  "unrelated",
+                               "created":  "2026-11-15T16:50:14.2281630Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           },
+                           {
+                               "pid":  23188,
+                               "role":  null,
+                               "created":  "2026-11-15T16:49:57.3481430Z",
+                               "state":  "gone",
+                               "current":  [
+
+                                           ]
+                           }
+                       ],
+    "ownedRemaining":  [
+
+                       ],
+    "killsPerformed":  [
+
+                       ],
+    "scope":  "read-only PID and creation-time checks; no process termination"
+}
