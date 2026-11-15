@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-15T12:34:56.144Z",
+  "job": "job_6d61d4ca",
+  "command": "node node_modules/@playwright/test/cli.js test --list --reporter=list",
+  "exitCode": 0,
+  "collected": {
+    "tests": 24,
+    "files": 4
+  },
+  "expected": {
+    "tests": 24,
+    "files": 4
+  },
+  "configFix": "playwright.config.ts testIgnore 新增 '**/m4/**'（原有排除项保留）",
+  "note": "定向复核只验证默认 M0-B 回到 24/4；用 --reporter=list 覆盖 JSON reporter，未刷新任何历史证据 JSON；未重跑十套、未重跑 M4、未重装依赖。",
+  "ok": true
+}
