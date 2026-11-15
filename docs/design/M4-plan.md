@@ -1,6 +1,6 @@
 # M4：视觉、语音、备用资产与演示
 
-状态：设计已独立审查，0 blocker、8 should-fix、9 suggestions；本修订落实S1–S8及相应建议，按审查给定条件可派D1。尚未实现或验收。基线 master `276f0f9`（M3验收归档132a661，产品393fe9f）。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收。用户已授权持续推进；本计划不授权新增真实付费调用、不代替真实凭据或参与者。
+状态：D1已实现、标准验证547项通过、独立代码审查0 blocker/0 should-fix，交付aa43c2a已合主线，可接D2。D1尚无Pi正式验收，D2–D5未实现，M4未收口。原设计审查0 blocker/8 should-fix/9 suggestions已在d6ec495修订回应S1–S8。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收；不授权新增真实付费调用、不代替真实凭据或参与者。
 
 ## 1. 目标与交付边界
 
@@ -40,7 +40,7 @@ M3准入已满足：501单测+174 E2E，独立审查无阻断/应修。M4保持M
 
 仅在语音路由的Fastify封装子作用域注册binary parser（parseAs buffer）与转写路由4MiB `bodyLimit`，不放宽全站16KiB JSON限制。先检查路由Content-Type，不能让继承的JSON parser把非音频作为合法音频；带codecs参数形式也应实测。该作用域错误handler识别`FST_ERR_CTP_*`且statusCode为4xx，保留状态码并映射安全码：413 `SPEECH_TOO_LARGE`、415 `SPEECH_UNSUPPORTED_MEDIA`、400 `SPEECH_INVALID_AUDIO`；其余委托原错误处理，不泛化信任任意error.statusCode、不回显Fastify message。非音频/空body/超大body在任何上游请求前拒绝（415/400/413）。缺配置503 `SPEECH_NOT_CONFIGURED`；后端一次只允许一条上游转写，不同ID忙时429 `SPEECH_BUSY`，不排队暗中计费。配置查询缺key返回enabled=false，不能伪返回转写文字。
 
-前端录音上限60秒、字节上限4MiB；后端不信任客户端duration，以上限字节和总35秒wall clock限制资源（从接受有效请求到响应读取/解析结束，含DNS/连接/响应体）。无需解码就能确认的格式头做校验，格式损坏/不支持由适配器返回安全错误；不宣称仅MIME即可证明真实时长。上游响应按流累计限256KiB，超限立即取消reader/fetch，不能先整体json()后检查；text为非空字符串且≤4000字符（与任务指令上限一致），超限或协议异常失败，不静默截断指令。错误统一为安全码：`SPEECH_INVALID_AUDIO`、`SPEECH_UPSTREAM`、`SPEECH_TIMEOUT`、`SPEECH_CANCELLED`；不回显原始body/headers/上游message，界面不显示key或音频Data URI。
+前端录音上限60秒、字节上限4MiB；后端不信任客户端duration，限制音频字节。D1实际35秒预算从发起上游请求开始，包含DNS/连接/响应体读取/解析，**不包含HTTP上传录音的时间**；慢上传可能延迟Fastify关闭，这是仅本机使用场景下已记录的非阻断限制，不宣称35秒覆盖整个HTTP生命周期。无需解码就能确认的格式头做校验，格式损坏/不支持由适配器返回安全错误；不宣称仅MIME即可证明真实时长。上游响应按流累计限256KiB，超限立即取消reader/fetch，不能先整体json()后检查；text为非空字符串且≤4000字符（与任务指令上限一致），超限或协议异常失败，不静默截断指令。错误统一为安全码：`SPEECH_INVALID_AUDIO`、`SPEECH_UPSTREAM`、`SPEECH_TIMEOUT`、`SPEECH_CANCELLED`；不回显原始body/headers/上游message，界面不显示key或音频Data URI。
 
 请求ID在进程内仅保留当前在途1条（独立于缓存，不可淘汰）+最多32条最近结束的安全结果、5分钟TTL，不做复杂队列。同ID同MIME/bytes摘要复用同一进行中promise/已结束结果；同ID不同摘要409，校验在busy判断之前完成。缓存只留requestId/摘要/安全终态/文字，不留音频。上游fetch归speech服务所有：同ID多个连接分别登记仍在等待的消费者；只有最后一个消费者异常断开才abort，单个断开不得连带取消其它消费者。正常响应触发close时用`reply.raw.writableFinished`辨别，不记为取消；每个消费者的监听器均须移除。显式DELETE取消、总预算或服务关闭则取消整个共享请求，晚到成功不能覆盖终态；取消记录仍按上述有界TTL保留。重启不续跑、不重放；进程内去重不是跨崩溃exactly-once，界面明确“取消/断网不保证未计费”。一次用户动作只发一次上游请求，无SDK自动重试、失败回退或断网自动重传；明确重试是用户新动作。
 
@@ -58,7 +58,7 @@ M3准入已满足：501单测+174 E2E，独立审查无阻断/应修。M4保持M
 
 PointSpeak切场景模式只是hidden，不能依赖组件卸载释放。`blocked`变true、document.visibilityState=hidden、窗口失焦、卸载任一触发：立即废弃token，停止所有MediaStream tracks/录音器/timer，若已发转写则显式DELETE该requestId并abort本地等待（DELETE失败也不能保留麦克风或接受晚到结果）；取消请求有界且不自动重试。转写中进入blocked不进入review。权限晚到发现会话废弃也立即stop tracks。单测必须覆盖录音中切场景、转写中进影响模式、权限pending时隐藏三种路径。
 
-浏览器API不支持、非安全上下文、权限拒绝、无麦克风时给出可读提示并继续文字输入。录音器MIME从服务支持集合与`MediaRecorder.isTypeSupported`交集选取，不能把不支持的格式改名冒充WebM。录音期间累计chunk体积，越界立即取消，不发送大包；transcribing期间不能开始第二段，不自动创建任务。
+浏览器API不支持、非安全上下文、权限拒绝、无麦克风时给出可读提示并继续文字输入。录音器MIME从服务支持集合与`MediaRecorder.isTypeSupported`交集选取，不能把不支持的格式改名冒充WebM。录音期间累计chunk体积，越界立即取消，不发送大包；transcribing期间不能开始第二段，不自动创建任务。上传/取消都用有界AbortController；HTTP499按`error.code === 'SPEECH_CANCELLED'`处理，不以状态码推断业务成功。用户每次新录音/显式重试均生成新UUID，失败/取消后绝不复用旧ID（D1会缓存旧终态5分钟），不自动重试或切换服务。
 
 **文字和对象保护**：开始录音记下指令revision及完整选择身份（src、cid、baseVersion；无选择也作为明确身份）。识别文字先放独立review草稿，展示来源与“使用此文字”按钮；已有指令被用户改动时提供显式替换/取消，绝不覆盖新输入。若确认前选择由A变B（含无选择↔有选择），同时显示录音时A与当前B，禁用普通确认，要求明确选择“用于当前对象B”或“放弃并重新点选A”；不能静默用B，也不能自动恢复A。确认选择后仍需当前基线/同步门禁有效，选择再次变化重新确认；已确认草稿若提交前再换对象也再次阻止并提示，不允许指令脱离已确认对象。基线变化时必须重选，不提供沿用过期A的分支。
 
@@ -136,3 +136,9 @@ Pi独立验证离线导入无Lux3D请求、新数据目录默认模型来源可�
 | S8 | §7专用白名单loopback mock入口，禁止dev/.env加载，真实入口分离 |
 
 建议1–9纳入：局部parser、流式响应限额、单活跃+小型终态缓存、Space repeat与指针捕获、语音门禁、处理不确定冲突说明、复用安全文件读工具、实际裁剪布局护栏、彩排模板mode字段。D1任务卡另列具体交付与受测范围，CodeBuddy本卡不得提前实现D2–D5。
+
+## 11. D1代码审查与D2准入（2026-11-15）
+
+独立[M4-D1-review.md](../reports/M4-D1-review.md)针对aa43c2a（产品cb2237a），0 blocker/0 should-fix/7建议，允许接D2。实际标准受测d005c23的typecheck/build/547单测通过，归档aa43c2a已快进主线；Pi正式验收仍留最终M4冻结版本，当前不是D1/M4正式收口。D2卡见`orbital/coordination/m4/d2-speech-ui.md`，在同一m4树先快进设计交接提交再实现。
+
+非阻断建议处理：保持非法语音配置使后端快速失败，D5 runbook必须写清安全排查办法；35秒不含上传已在§3.2更正；首次真实阿里调用另核协议/地域/质量；401/429暂用原安全通用错误，不在D2扩后端错误码；D2按取消code处理499、每次重试新UUID；代理GET/DELETE已在冻结源码中覆盖，详见[M4-D1-integration.md](../reports/M4-D1-integration.md)的证据校正，不重复加测。S5/S6已在§4明确，本卡须实现并先写失败验证。
