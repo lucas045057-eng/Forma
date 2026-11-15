@@ -1,0 +1,11 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/.worktrees/m4/apps/studio[39m
+
+ [32m✓[39m src/dev-proxy.test.ts[2m > [22mroutes Studio API requests and check evidence through the real Vite proxy instead of SPA fallback[32m 82[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 14:39:45
+[2m   Duration [22m 519ms[2m (transform 31ms, setup 0ms, collect 186ms, tests 83ms, environment 0ms, prepare 93ms)[22m
+
+JSON report written to E:/空间化AI工作台/.worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/studio-results.json

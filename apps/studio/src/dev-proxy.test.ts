@@ -12,7 +12,14 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
   const seen: string[] = [];
   const upstream = createHttpServer((request, response) => {
     seen.push(`${request.method} ${request.url}`);
-    if (request.url === '/checks/run001/artifacts/smoke.png') {
+    if (request.url === '/speech/transcribe' && request.method === 'POST') {
+      const chunks: Buffer[] = [];
+      request.on('data', chunk => chunks.push(Buffer.from(chunk)));
+      request.on('end', () => {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ path: request.url, method: request.method, contentType: request.headers['content-type'], requestId: request.headers['x-speech-request-id'], audio: [...Buffer.concat(chunks)] }));
+      });
+    } else if (request.url === '/checks/run001/artifacts/smoke.png') {
       response.writeHead(200, { 'Content-Type': 'image/png' });
       response.end(Buffer.from([137, 80, 78, 71]));
     } else {
@@ -38,7 +45,7 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
       studio!.httpServer!.listen(0, '127.0.0.1', resolve);
     });
     const origin = `http://127.0.0.1:${(studio.httpServer!.address() as AddressInfo).port}`;
-    for (const path of ['/health', '/approvals', '/approvals/card001', '/checks/run001', '/checks/run001/artifacts/schema.json', '/tasks', '/candidates', '/version', '/scene', '/assets', '/events/history?since=0']) {
+    for (const path of ['/health', '/approvals', '/approvals/card001', '/checks/run001', '/checks/run001/artifacts/schema.json', '/tasks', '/candidates', '/version', '/scene', '/assets', '/events/history?since=0', '/speech/config']) {
       const response = await fetch(origin + path);
       expect(response.headers.get('content-type')).toContain('application/json');
       expect(await response.json()).toEqual({ path, method: 'GET' });
@@ -50,7 +57,13 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
     const image = await fetch(origin + '/checks/run001/artifacts/smoke.png');
     expect(image.headers.get('content-type')).toBe('image/png');
     expect([...new Uint8Array(await image.arrayBuffer())]).toEqual([137, 80, 78, 71]);
-    expect(seen).toHaveLength(15);
+    const requestId = '123e4567-e89b-42d3-a456-426614174000';
+    const speech = await fetch(origin + '/speech/transcribe', { method: 'POST', headers: { 'Content-Type': 'audio/webm;codecs=opus', 'X-Speech-Request-Id': requestId }, body: Buffer.from([0x1a, 0x45, 0xdf, 0xa3]) });
+    expect(speech.headers.get('content-type')).toContain('application/json');
+    expect(await speech.json()).toEqual({ path: '/speech/transcribe', method: 'POST', contentType: 'audio/webm;codecs=opus', requestId, audio: [0x1a, 0x45, 0xdf, 0xa3] });
+    const cancelled = await fetch(origin + `/speech/transcribe/${requestId}`, { method: 'DELETE' });
+    expect(await cancelled.json()).toEqual({ path: `/speech/transcribe/${requestId}`, method: 'DELETE' });
+    expect(seen).toHaveLength(18);
   } finally {
     try {
       const httpServer = studio?.httpServer as unknown as { closeAllConnections?: () => void } | null | undefined;

@@ -16,6 +16,9 @@ import { WorkError } from './work/repo.ts';
 import { registerCheckRoutes } from './checks/routes.ts';
 import { ArtifactError } from './checks/artifacts.ts';
 import { SnapshotError } from './checks/snapshot.ts';
+import { SpeechClient, type SpeechClientOptions } from './speech/client.ts';
+import { SpeechService } from './speech/service.ts';
+import { registerSpeechRoutes } from './speech/routes.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
@@ -38,6 +41,8 @@ export interface AppOptions {
   previewStartTimeoutMs?: number;
   /** Internal construction only; no HTTP request can override the checker. */
   checks?: WorkServiceOptions['checks'];
+  /** Internal speech configuration; the loopback exception is never read from env. */
+  speech?: SpeechClientOptions & { timeoutMs?: number };
   logger?: boolean;
 }
 
@@ -100,9 +105,13 @@ export async function createApp(options: AppOptions = {}) {
     },
   });
   closers.push(() => work.close());
+  const speech = new SpeechService(new SpeechClient(options.speech ?? {
+    baseUrl: process.env.SPEECH_BASE_URL, apiKey: process.env.DASHSCOPE_API_KEY, model: process.env.SPEECH_MODEL,
+  }), { timeoutMs: options.speech?.timeoutMs });
+  closers.push(() => speech.close());
   await work.init();
   await service.init();
-  app.addHook('preClose', async () => { closing = true; });
+  app.addHook('preClose', async () => { closing = true; speech.beginClose(); });
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -232,8 +241,9 @@ export async function createApp(options: AppOptions = {}) {
   });
   // preClose must not wait for handlers: Fastify drains HTTP after this hook.
   // Keep admitted handlers and their nested repo operations usable until onClose.
+  await registerSpeechRoutes(app, speech);
   app.addHook('onClose', closeAll);
-  return { app, service, scene, work, events };
+  return { app, service, scene, work, events, speech };
   } catch (error) {
     await closeAll().catch(() => {});
     throw error;

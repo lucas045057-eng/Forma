@@ -11,6 +11,7 @@ export default defineConfig({
     host: '127.0.0.1', port: Number(process.env.STUDIO_PORT ?? 5173), strictPort: true,
     proxy: {
       '/health': { target: backend },
+      '/speech': { target: backend },
       '/approvals': { target: backend },
       '/checks': { target: backend },
       '/scene': { target: backend },
