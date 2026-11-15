@@ -1,0 +1,52 @@
+{
+  "pid": 13324,
+  "checks": [
+    {
+      "name": "literal IPv4 and IPv6 callback/promise lookup stays local",
+      "passed": true
+    },
+    {
+      "name": "non-loopback domain DNS rejected before both native lookup boundaries",
+      "passed": true
+    },
+    {
+      "name": "private/public/mapped TCP rejected before native connect",
+      "passed": true
+    },
+    {
+      "name": "private/public/domain fetch rejected before native fetch",
+      "passed": true
+    },
+    {
+      "name": "loopback DNS TCP and fetch still work with the same guard",
+      "passed": true
+    }
+  ],
+  "lowerBoundaryCalls": {
+    "dns": [
+      "10.0.0.1",
+      "8.8.8.8",
+      "::ffff:7f00:1",
+      "2001:4860:4860::8888",
+      "localhost",
+      "127.0.0.1"
+    ],
+    "promiseDns": [
+      "10.0.0.1",
+      "8.8.8.8",
+      "::ffff:7f00:1",
+      "2001:4860:4860::8888",
+      "127.0.0.1"
+    ],
+    "connect": [
+      "127.0.0.1",
+      "127.0.0.1"
+    ],
+    "fetch": [
+      "127.0.0.1"
+    ]
+  },
+  "serverListening": false,
+  "exit": 0,
+  "note": "Same guard explicitly required after installing native-boundary canaries and before any network operation; canaries forbid negative probes from reaching real external syscalls."
+}

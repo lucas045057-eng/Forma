@@ -1,0 +1,9 @@
+{
+  "productHead": "cb2237a40da8aa7a5ebe720085038e558fdb8f73",
+  "guardSha256": "aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136",
+  "previousGuardSha256": "cfaee3abbae61a06691220c669f129613279739227fc5bf1d58bc66b00fe05e4",
+  "guardProbeSha256": "3ceea798be2c5c475f897b2f30205fc41f7a942dcdae796d8df9437b168efc29",
+  "downloadReportSha256": "f4728e046cb14f27a2fe0ba2a8ed086f42eee15b2b005936873194be1e2e25fc",
+  "originalProductAndTestsUnchanged": true,
+  "note": "New guard identity is proved only by this targeted run, not by old speech GREEN. Standard full rerun is not scheduled here; its gate must explicitly reference this evidence after review."
+}
