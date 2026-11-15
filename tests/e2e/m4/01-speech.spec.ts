@@ -172,7 +172,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
 
   test('录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用', async ({ page }) => {
     await openStudio(page);
-    const first = await pickElement(page, 'buy-button');
+    const first = (await pickElement(page, 'buy-button')).selection;
     const pressed = await pressRecord(page);
     await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
@@ -181,14 +181,15 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
 
     // buy-button 与 save-button 都是共享 Button 组件 → data-src 相同（src/components/Button.tsx:5:5），
     // 用它证明"两个对象不同"是无效前提。改用真实不同来源的 DOM 目标（ul.benefits，src/App.tsx）。
-    const second = await pickElement(page, 'benefits');
+    const pickedSecond = await pickElement(page, 'benefits');
+    const second = pickedSecond.selection;
     expect(second.src, '两次点选没落到不同对象').not.toBe(first.src);
     await expect(page.getByTestId('speech-selection-conflict')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('speech-use')).toBeDisabled();
     await page.getByTestId('speech-use-current').click();
     await expect(page.getByTestId('speech-review')).toHaveCount(0);
     await expect(page.getByTestId('instruction-input')).toHaveValue(/改成圆角/);
-    writeArtifact('speech-selection-conflict.json', { captured, first: first.src, second: second.src });
+    writeArtifact('speech-selection-conflict.json', { captured, first: first.src, second: second.src, hit: pickedSecond.hit, message: pickedSecond.message, before: pickedSecond.before });
   });
 
   test('录音中页面隐藏：立即取消并释放轨道；录音阶段无上传，因此不应发送 DELETE', async ({ page }) => {
@@ -316,7 +317,8 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     const pressed = await pressRecord(page);
     await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
-    const second = await pickElement(page, 'benefits');
+    const pickedSecond = await pickElement(page, 'benefits');
+    const second = pickedSecond.selection;
     await expect(page.getByTestId('speech-review'), '重新点选后转写被丢弃了').toBeVisible();
     const reviewText = await page.getByTestId('speech-review-text').inputValue();
     expect(reviewText.length, 'review 文本被清空').toBeGreaterThan(0);
@@ -330,7 +332,7 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     await expect(page.getByTestId('generate-candidate')).toBeDisabled();
     await page.getByTestId('speech-reconfirm').click();
     await expect(page.getByTestId('generate-candidate')).toBeEnabled({ timeout: 20_000 });
-    writeArtifact('speech-iframe-repick.json', { reviewText, second: second.src });
+    writeArtifact('speech-iframe-repick.json', { reviewText, second: second.src, hit: pickedSecond.hit, message: pickedSecond.message, before: pickedSecond.before });
   });
 
   test('F2 语音提交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）', async ({ page }) => {

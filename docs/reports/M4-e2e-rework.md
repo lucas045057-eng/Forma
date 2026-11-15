@@ -274,3 +274,45 @@ Codex 已直接修 helper 并固定 `f803d94`（读 `docs/reports/M4-container-s
 - **保留原 gitlink 的旧 SHA 清单不变**。
 
 边界：只跑预检（无服务、0 用例）；不 M4/full/collect/614/12/旧 174；产品与 19 例字节保持 `6aecd30`；入口失败与运行失败继续分开记录。
+## 13. M4 专项第三轮（62ea1c8）：16 过 / 2 败 / 1 未执行
+
+run `docs/reports/artifacts/M4/regression/2026-11-15T17-41-59-337Z-m4-special/`，`job_d91528ad`，exit 1 / 1m40s：
+**16 passed / 2 unexpected / 1 skipped**（`flaky=0`）。归档 launcher、`counts.json`、3 个真实 demo run 目录（含失败那次）与 518 个证据文件；
+SHA 清单 554 载荷、排除自身、0 mismatch；`git ls-files --stage` 复核归档仍为普通 `100644`，**没有新增 gitlink**（历史 1 条保留）。
+
+### 13.1 失败一：`helpers.pickElement` 读到了上一次的选择（A）
+
+- 现象：A/B 用例 `second.src != first.src` 失败——两次都拿到 `src/components/Button.tsx:5:5`。
+- 根因（静态可确认）：旧 `pickElement` 点击后只 `waitFor(selection-json 可见)`。该面板在**上一次**选择后**一直可见**，
+  于是立刻返回并读到 A；`App.tsx:135` 的收消息 `pending`、异步 `/version`、`ready` 都会让"可见即完成"变成假前提。
+- 修（`helpers.ts`）：改为对"**这一次**"的屏障与真实事件证据，**不删除任何 notEqual/冲突断言、不换目标、不造假消息**：
+  1. 观测父窗口真实收到的 `pick:result`（只记录，不伪造）；
+  2. 点前记录 `{panelText, messages}` 基线；
+  3. 点击后用**实际坐标**在 iframe 内做 `elementFromPoint` 审计，记录命中元素与其 `data-src`；
+  4. 屏障要求 **新 `pick:result` 出现 + 面板文本与点前不同**，并核对该 message 的 `src` 与面板 `selection.src` 一致；
+  5. 返回 `{selection, hit, message, before}`，用例把坐标/命中/message 序列写进证据。
+- 边界：坐标命中与因果只在**本轮证据**里记录，不凭静态把所有原因写死；同一对象重复点选也要求"本次选择已完成"的证据。
+
+### 13.2 失败二：5175 冲突对照用例 `stopHandle` 失败（frontends 45s forced）
+
+- 已确证：5175 由**自有** 3001 API 进程持有（PID 与 guard loaded 一致），demo 自己的 preview 端口实际 200；
+  失败发生在收尾：`manifest.status=cleanup_failed`，`frontends` PID 45s 后被 **forced SIGKILL**，`backend` exit 0，
+  且该角色没有 close 阶段日志。
+- 这**不是**"端口占用"前提错误，也**不是**可以把 45s 预算调大就能解决的问题：确证的是 **frontends 关闭路径**。
+  该路径由 CodeBuddy 独立诊断（本报告只保全原件：失败 demo run 的 manifest/plan 与 main/studio cache 已按原字节归档）。
+- 本轮我**没有**改 runtime、没有提高预算、也没有重试该用例。
+
+### 13.3 未执行
+
+`1` 条 serial skipped（硬杀用例，因前一条失败未执行）；旧九套 `174`、`614` 单测、`12` 脚本本轮均未执行；
+真实 Windows 控制台 Ctrl+C、真实阿里/厂商/编码/Lux3D、真人 A/B、完整彩排仍未执行。
+### 13.4 归档里的嵌套 candidates 仓库（不产生新 gitlink）
+
+本轮专项的 demo run 目录里含 **嵌套 git 仓库**（`work-data/candidates/<id>`，`.git` 为指针文件）。归档时我：
+
+1. 先用同一套 `materializeContainer()` 把它物化成 **`gitlink-container/` 的普通 `payload-*.bin`** + `mapping.json`（originalPath / mode / sha256 / bytes / containerPath），
+   其中包含 1 份**惰性 `.git` 指针原始字节**（不解析、不跟随）；
+2. 只有在 mapping 能覆盖该嵌套路径之后，才删除**归档副本**里的这个嵌套仓库目录（原始 `.data/demo-runs` 不动）；
+3. `git ls-files --stage` 复核：新 run 归档 **572 条全部 `100644`，0 条 `160000`**；`docs/reports/artifacts` 下仍**只有 1 条历史 gitlink**（旧原件保留）。
+
+因此"普通平面容器不产生新 gitlink"这一条是**按 stage 实际验证**的，不是口头声明。
