@@ -12,4 +12,8 @@
 .scene-editor button:disabled { opacity: .5; cursor: default; }
 .scene-viewport { position: relative; background: #efe8dc; flex: none; }
 .scene-viewport canvas { touch-action: none; }
+.scene-canvas-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-color: #5ccac6 #14212c; }
+.scene-canvas-scroll:focus-visible { outline: 2px solid #a0ede2; outline-offset: 2px; }
+.workspace.scene-editing > .inspector > .approval-panel { padding: 14px 16px; margin: 12px 0 0; }
+.scene-editor { min-width: 0; }
 @media (max-width: 650px) { .scene-editor { overflow: auto; } }

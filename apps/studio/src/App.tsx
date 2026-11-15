@@ -8,6 +8,7 @@ import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
 import { api } from './api.ts';
 import { previewOrigin, previewUrl } from './preview-origin.ts';
+import ModelOriginBadge from './model-provenance.tsx';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
@@ -190,6 +191,8 @@ function Studio() {
           <button type="button" aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
         </div>
       </header>
+      {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示：语音为固定示例转写，编码与生成上游为模拟；不代表真实语音识别或现场模型生成。</p>}
+      {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner" data-testid="demo-mode" role="status">真实服务模式：录音使用阿里云百炼，用户提交的服务请求可能计费。</p>}
       <div className="state-sync">
         {!syncReady && <span role="status">状态待同步</span>}
         {syncError && <span role="alert">{syncError}</span>}
@@ -198,6 +201,7 @@ function Studio() {
       <div className={`workspace${showScene ? ' scene-editing' : ''}`}>
         <section className="preview-panel" aria-label="作品预览">
           <div className="panel-title"><span>作品 / 木间香薰</span><span>{impact ? '查看影响位置' : picking ? '选取模式 · 点击查看源码' : '浏览模式'} · {Math.round(progress * 100)}%</span></div>
+          <div className="preview-source"><ModelOriginBadge/></div>
           <CandidatePanel selectedId={candidate?.id ?? ''} onSelect={setCandidateId} mode={mode} onMode={setMode}>
             {mainFrame}
             {mode !== 'current' && candidateFrame}

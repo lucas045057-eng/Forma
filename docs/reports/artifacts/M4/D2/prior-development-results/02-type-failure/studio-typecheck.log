@@ -1,0 +1,6 @@
+$ tsc
+src/speech-browser.test.ts(49,45): error TS2322: Type 'HttpServer' is not assignable to type 'Server<typeof IncomingMessage, typeof ServerResponse>'.
+  Type 'Http2SecureServer<typeof IncomingMessage, typeof ServerResponse, typeof Http2ServerRequest, typeof Http2ServerResponse>' is missing the following properties from type 'Server<typeof IncomingMessage, typeof ServerResponse>': maxHeadersCount, maxRequestsPerSocket, timeout, headersTimeout, and 5 more.
+E:\空间化AI工作台\.worktrees\m4\apps\studio:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/studio@ typecheck: `tsc`
+Exit status 2
