@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-15T17:33:10.996Z",
+  "head": "6aecd306a7da3bfa9c60a0466ae6f8bbf8f588a8",
+  "note": "入口在 spawnAndAwait 之前 exit 1/2s：证据枚举把 Git gitlink（mode 160000）当目录 readFileSync → EISDIR。本文件保全 mode/OID/路径证据，不改写历史 JSON，不删除原始嵌套 .git 指针。",
+  "job": "job_fe46b6a4",
+  "gitlinkCount": 1,
+  "gitlinks": [
+    "160000 e4f8738d53abdad4a640a8705cb723b9ba51be12 0\tdocs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/demo-runs/2026-11-15T17-21-29.137Z-25e15516-e68a-4b16-88ec-f137f5aa3f27/work-data/candidates/ffac7609daff433f8ceb5942c706182f"
+  ],
+  "problemPath": "docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/demo-runs/2026-11-15T17-21-29.137Z-25e15516-e68a-4b16-88ec-f137f5aa3f27/work-data/candidates/ffac7609daff433f8ceb5942c706182f",
+  "lsTreeHead": "160000 commit e4f8738d53abdad4a640a8705cb723b9ba51be12\tdocs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/demo-runs/2026-11-15T17-21-29.137Z-25e15516-e68a-4b16-88ec-f137f5aa3f27/work-data/candidates/ffac7609daff433f8ceb5942c706182f",
+  "historicalCommit": "fc5caf5e554e13eaa657702670fa3a15bb3022fd"
+}

@@ -180,3 +180,38 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/`�
   60 个文件因运行中已消失/是链接而记录为 skipped，不伪造。
 - `F4`（坏 sidecar 三类 409）与**硬杀**本轮因 serial 未执行，下一轮专项覆盖；这两个用例的前提**未**改动。
 - 关闭路径仍只称“**进程内 SIGINT 处理模拟**”；真实 Windows 控制台 Ctrl+C、真实阿里/厂商/编码/Lux3D、真人 A/B、完整彩排均未执行。
+## 10. 入口 EISDIR（gitlink）修复与只读预检
+
+### 10.1 现象与根因（有具体 gitlink，不是猜测）
+
+`job_fe46b6a4` 在 **spawnAndAwait 之前**就 exit 1 / 2s，**0 用例执行**。原因：
+
+- `fc5caf5` 归档里包含一个 **Git gitlink（mode 160000）**：
+  `docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/demo-runs/…/work-data/candidates/ffac7609daff433f8ceb5942c706182f`
+  在 index/HEAD 里是 `160000 commit e4f8738d53abdad4a640a8705cb723b9ba51be12`，磁盘上是**真实目录**。
+- 旧的证据枚举用 `git ls-files` + `readFileSync`，把目录当文件读 → `EISDIR`，入口在启动前崩掉。
+  `.data/m4-special-run.mjs` 与 `tests/e2e/m4/full-regression.mjs`（第 88 行 `evidenceHashes`）**同源**。
+
+### 10.2 修复（测试侧，产品 6aecd30 字节未动）
+
+新增 `tests/e2e/m4/evidence-index.mjs`：**类型感知**枚举
+
+- `git ls-files --stage -z` 取 **mode + OID + path**，按 `100644/100755`（普通文件）、`120000`（符号链接）、
+  `160000`（gitlink）、其它（未知 mode）分开；
+- 普通文件：`lstat` 确认是普通文件再读字节算 SHA256；读不到/不存在 → 显式 `missing`（**不静默过滤目录**）；
+- 符号链接：只记 `linkTarget`，不跟随；
+- gitlink：记 index OID + 磁盘类型（missing/link/directory/file），目录存在时产**容器摘要**（逐文件 SHA256，跳过 `.git` 与链接），
+  **不把 OID 当载荷内容**；
+- `planRestore` 明确：非普通文件**不得**走普通文件还原。
+
+两个入口都用它：`.data/m4-special-run.mjs`（gitlink 记为 `gitlink:<oid>:<containerDigest>`，还原阶段拒绝非普通文件）、
+`tests/e2e/m4/full-regression.mjs`（同规则；**full 仍不启动**，等这张卡批准后的恢复条件）。
+
+### 10.3 归档与审计
+
+- 失败 run `2026-11-15T17-30-00-022Z-m4-special` 已保全：launcher（`job_fe46b6a4` 的 cmd/exit/job.json/output.log）+ `gitlink-evidence.json`
+  （`gitlinkCount=1`、完整 `ls-files --stage` 记录、`ls-tree HEAD` 证据、历史提交 `fc5caf5`），**未改写任何历史 JSON、未删原始嵌套 `.git` 指针**。
+- 只读预检 `precheck.json`（`bg-root.cmd` 单次 job）：枚举 mode、原问题路径、完整载荷摘要、缺失/链接/未知 mode 清单，
+  并对上一轮 **857 载荷**逐条对照"磁盘字节 vs 归档清单"、统计其中落在 gitlink 容器内的条目数。
+- **禁止**再对验收归档 `git add` 嵌套仓库；gitlink 载荷变化**不得**套普通 `git checkout` 还原；
+  报告与清单里不把 gitlink 冒充普通文件，也不因为 Git 表示差异就抹掉实际载荷。

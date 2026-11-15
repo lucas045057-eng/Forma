@@ -28,6 +28,7 @@ import { dirname, join, relative } from 'node:path';
 import {
   buildIdentity, evidenceArchiveTarget, identityDiff, planEvidenceRestore, sha256Hex, spawnAndAwait, verifyPlaywrightReport,
 } from '../m3b/runner-support.mjs';
+import { scanEvidence } from './evidence-index.mjs';
 
 const ROOT = process.cwd();
 const MODE = process.argv.includes('--collect') ? 'collect' : 'full';
@@ -85,7 +86,19 @@ function currentIdentity() {
   return buildIdentity({ head: git(['rev-parse', 'HEAD']).trim(), branch: git(['rev-parse', '--abbrev-ref', 'HEAD']).trim(), entries, dirty, lockSha: readHash(LOCK_FILE) });
 }
 
-const evidenceHashes = () => new Map(splitZ(git(['ls-files', '-z', '--', EVIDENCE_DIR])).map((file) => [file, readHash(file)]));
+/**
+ * 同 `.data` 专项入口的类型感知版本：gitlink（mode 160000）不能 readFileSync（会 EISDIR），
+ * 也不能按普通文件 checkout 还原。普通文件才用磁盘字节 SHA256。
+ */
+const evidenceHashes = () => {
+  const scan = scanEvidence(ROOT, EVIDENCE_DIR);
+  const map = new Map();
+  for (const file of scan.files) map.set(file.path, file.missing ? 'missing' : file.sha256);
+  for (const link of scan.links) map.set(link.path, `link:${link.linkTarget ?? 'unreadable'}`);
+  for (const gitlink of scan.gitlinks) map.set(gitlink.path, `gitlink:${gitlink.oid}:${gitlink.container?.digest ?? gitlink.disk}`);
+  for (const item of scan.unknown) map.set(item.path, `mode:${item.mode}`);
+  return map;
+};
 const evidenceDirty = () => new Set(splitZ(git(['status', '--porcelain', '-z', '--untracked-files=all', '--', EVIDENCE_DIR])).map((line) => line.replace(/^.../, '')));
 
 function playwrightStep(suite) {
@@ -179,8 +192,13 @@ async function runStep(step, baseline) {
   problems.push(...identityDiff(baseline.identity, before.identity).map((item) => `步骤开始前偏离基线：${item}`));
   problems.push(...identityDiff(baseline.identity, after.identity).map((item) => `步骤结束后偏离基线：${item}`));
   const plan = planEvidenceRestore({ before: before.evidence, after: after.evidence, dirtyBefore: before.dirty });
+  // 非普通文件（gitlink/符号链接/未知 mode）变化时不能走普通文件还原，单独记为问题。
+  const nonFilePrefixes = ['gitlink:', 'link:', 'mode:'];
+  const nonFileChanges = plan.restorable.filter((item) => nonFilePrefixes.some((prefix) => String(before.evidence.get(item.file) ?? '').startsWith(prefix)));
+  const filePlan = { ...plan, restorable: plan.restorable.filter((item) => !nonFileChanges.includes(item)) };
+  for (const item of nonFileChanges) problems.push(`非普通文件证据发生变化，拒绝普通文件还原：${item.file}`);
   const archived = [];
-  try { problems.push(...archiveAndRestore(step.name, plan, archived)); }
+  try { problems.push(...archiveAndRestore(step.name, filePlan, archived)); }
   catch (error) { problems.push(`归档/还原证据失败：${String(error).slice(0, 300)}`); }
   const record = {
     step: step.name, command: `${step.command} ${step.args.join(' ')}`, pid: spawnResult.pid,
