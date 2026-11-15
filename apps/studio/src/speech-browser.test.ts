@@ -65,9 +65,9 @@ beforeEach(async()=>{
  }catch(error){setupFailure=error;console.error('[speech component bootstrap]',JSON.stringify({primary:browserFailure(error),bootstrap:bootstrap?.snapshot(),pageErrors,denied}));throw error;}
 });
 afterEach(async test=>{
- const cleanup:unknown[]=[];let beforeUnmount:unknown;let afterUnmount:unknown;
+ const cleanup:unknown[]=[];let beforeUnmount:unknown;let afterUnmount:unknown;let pointerEvents:unknown;
  if(casePage&&!casePage.isClosed()){
-  try{beforeUnmount=await casePage.evaluate(()=>window.__speechTest?({...window.__speechTest,releasePermissions:undefined}):null);}catch(error){cleanup.push(error);}
+  try{beforeUnmount=await casePage.evaluate(()=>window.__speechTest?({...window.__speechTest,releasePermissions:undefined}):null);pointerEvents=await casePage.evaluate(()=>JSON.parse(document.querySelector<HTMLButtonElement>('[data-testid="speech-record"]')?.dataset.fixturePointerEvents??'[]'));}catch(error){cleanup.push(error);}
   if(output)try{await mkdir(path.join(output,'component'),{recursive:true});await casePage.screenshot({path:path.join(output,`component/${serial}.png`)});}catch(error){cleanup.push(error);}
   try{
    if(await casePage.getByTestId('speech-input').count())await casePage.getByTestId('fixture-unmount').click();
@@ -82,7 +82,7 @@ afterEach(async test=>{
  try{expect(denied).toEqual([]);}catch(error){cleanup.push(error);}
  bootstrap?.dispose();try{await context?.close();}catch(error){cleanup.push(error);}
  for(const response of state.pending.values())try{response.destroy();}catch(error){cleanup.push(error);}state.pending.clear();
- if(output)try{await writeSpeechEvidence(output,`component/${serial}.json`,{test:test.task.name,url:casePage?.url(),apiSubstitutes:true,realChromium:true,primary:setupFailure===undefined?(test.task.result?.errors??[]).map(browserFailure):browserFailure(setupFailure),bootstrap:bootstrap?.snapshot(),beforeUnmount,afterUnmount,posts:state.posts,deletes:state.deletes,tasks:state.tasks,pageErrors,denied,cleanup:cleanup.map(browserFailure)});}catch(error){cleanup.push(error);}
+ if(output)try{await writeSpeechEvidence(output,`component/${serial}.json`,{test:test.task.name,url:casePage?.url(),apiSubstitutes:true,realChromium:true,primary:setupFailure===undefined?(test.task.result?.errors??[]).map(browserFailure):browserFailure(setupFailure),bootstrap:bootstrap?.snapshot(),beforeUnmount,afterUnmount,pointerEvents,posts:state.posts,deletes:state.deletes,tasks:state.tasks,pageErrors,denied,cleanup:cleanup.map(browserFailure)});}catch(error){cleanup.push(error);}
  if(cleanup.length){console.error('[speech component cleanup]',JSON.stringify({primary:setupFailure===undefined?test.task.result?.errors?.map(browserFailure):browserFailure(setupFailure),cleanup:cleanup.map(browserFailure),bootstrap:bootstrap?.snapshot()}));throw new AggregateError([...(setupFailure===undefined?[]:[setupFailure]),...cleanup],'Speech component case/cleanup failed');}
 });
 afterAll(async()=>{
@@ -97,9 +97,18 @@ afterAll(async()=>{
  if(output)try{await writeSpeechEvidence(output,'component-cleanup.json',{pid:process.pid,origin,chromeVersion:browser?.version(),chrome:ownedChrome,chromeExitCode:native?.process().exitCode,chromeSignalCode:native?.process().signalCode,remaining,serverListening:vite?.httpServer?.listening??false,cacheRetained:errors.length?cache:null,setupFailure:suiteFailure===undefined?null:browserFailure(suiteFailure),vite:{mode:vite?.config.mode,optimizeDeps:vite?.config.optimizeDeps.include},errors:errors.map(browserFailure)});}catch(error){errors.push(error);}
  if(errors.length){console.error('[speech component suite cleanup]',JSON.stringify({setupFailure:suiteFailure===undefined?null:browserFailure(suiteFailure),cleanup:errors.map(browserFailure)}));throw new AggregateError([...(suiteFailure===undefined?[]:[suiteFailure]),...errors],'Speech component fixture cleanup failed');}
 },30_000);
+async function pointerTrace(){await page.evaluate(()=>{
+ const button=document.querySelector<HTMLButtonElement>('[data-testid="speech-record"]')!;
+ const events:Array<{type:string;trusted:boolean;id:number;buttons:number;capture:boolean;tracks:number}>=[];button.dataset.fixturePointerEvents='[]';
+ for(const type of ['pointerdown','gotpointercapture','lostpointercapture','pointercancel','pointerup'] as const)button.addEventListener(type,event=>{
+  if(type==='pointerdown')button.dataset.fixturePointer=String(event.pointerId);
+  events.push({type:event.type,trusted:event.isTrusted,id:event.pointerId,buttons:event.buttons,capture:button.hasPointerCapture(event.pointerId),tracks:window.__speechTest.liveTracks});button.dataset.fixturePointerEvents=JSON.stringify(events);
+ },{capture:true,passive:true});
+});}
+async function readPointerTrace(){return page.getByTestId('speech-record').evaluate(button=>JSON.parse((button as HTMLElement).dataset.fixturePointerEvents??'[]') as Array<{type:string;trusted:boolean;id:number;buttons:number;capture:boolean;tracks:number}>);}
 async function record(){const button=page.getByTestId('speech-record');await button.hover();await page.mouse.down();await expect.poll(()=>page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(1);await page.mouse.up();await page.getByTestId('speech-review').waitFor();}
 it('real pointer release includes final audio once, editable review requires explicit B then generates only via original button',async()=>{
- await record();expect(state.posts).toHaveLength(1);expect(state.posts[0].bytes).toBe(5);expect(state.tasks).toHaveLength(0);
+ await pointerTrace();await record();expect((await readPointerTrace()).some(event=>event.type==='pointerup'&&event.trusted&&event.buttons===0)).toBe(true);expect(state.posts).toHaveLength(1);expect(state.posts[0].bytes).toBe(5);expect(state.tasks).toHaveLength(0);
  await page.getByTestId('speech-review-text').fill('编辑后的语音指令');await page.getByTestId('fixture-B').click();await page.getByTestId('speech-selection-conflict').waitFor();
  expect(await page.getByTestId('speech-use').isDisabled()).toBe(true);expect(await page.getByTestId('generate-candidate').isDisabled()).toBe(true);
  expect(await page.getByTestId('speech-capture-object').textContent()).toContain('A');expect(await page.getByTestId('speech-current-object').textContent()).toContain('B');
@@ -134,10 +143,19 @@ it('hidden mode immediately stops active tracks even though PointSpeak stays mou
  expect(await page.getByTestId('speech-input').count()).toBe(1);await page.getByTestId('fixture-block').click();
 },30_000);
 it('abnormal native pointer-capture loss cancels without uploading',async()=>{
- await page.evaluate(()=>{const button=document.querySelector<HTMLButtonElement>('[data-testid="speech-record"]')!;button.addEventListener('pointerdown',event=>{button.dataset.fixturePointer=String(event.pointerId);},{once:true,capture:true});});
- await page.getByTestId('speech-record').hover();await page.mouse.down();await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(1);
- await page.evaluate(()=>{const button=document.querySelector<HTMLButtonElement>('[data-testid="speech-record"]')!;button.releasePointerCapture(Number(button.dataset.fixturePointer));});
- await page.mouse.move(20,20);await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(0);await page.mouse.up();expect(state.posts).toHaveLength(0);
+ await pointerTrace();const button=page.getByTestId('speech-record');await button.hover();await page.mouse.down();await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(1);expect(await page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(1);
+ // setPointerCapture sets a pending target. A real pointer move makes capture effective;
+ // merely waiting for the asynchronous microphone/recorder does not establish gotcapture.
+ const bounds=await button.boundingBox();if(!bounds)throw new Error('Recording button has no bounds');await page.mouse.move(bounds.x+2,bounds.y+2);
+ await expect.poll(async()=> (await readPointerTrace()).filter(event=>event.type==='gotpointercapture'&&event.trusted&&event.buttons===1&&event.capture).length).toBe(1);
+ const id=Number(await button.getAttribute('data-fixture-pointer'));expect(Number.isSafeInteger(id)).toBe(true);expect((await readPointerTrace()).some(event=>event.type==='pointerdown'&&event.id===id&&event.trusted)).toBe(true);
+ expect(await button.evaluate((element,pointerId)=>element.hasPointerCapture(pointerId),id)).toBe(true);
+ await button.evaluate((element,pointerId)=>element.releasePointerCapture(pointerId),id);
+ await page.mouse.move(20,20);
+ await expect.poll(async()=> (await readPointerTrace()).filter(event=>event.type==='lostpointercapture'&&event.trusted&&event.id===id&&event.buttons===1).length).toBe(1);
+ expect((await readPointerTrace()).some(event=>event.type==='pointerup')).toBe(false);
+ await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(0);expect(await page.evaluate(()=>window.__speechTest.recorderStops)).toBe(1);expect(state.posts).toHaveLength(0);
+ await expect.poll(()=>page.getByTestId('speech-status').textContent()).toContain('录音指针捕获已丢失');await page.mouse.up();expect(state.posts).toHaveLength(0);expect(await page.getByTestId('speech-review').count()).toBe(0);expect(state.tasks).toHaveLength(0);
 },30_000);
 it.each(['visibility','blur','gate','unmount'])('real %s event releases active resources and never uploads',async reason=>{
  await page.getByTestId('speech-record').hover();await page.mouse.down();await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(1);
