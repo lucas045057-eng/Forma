@@ -104,3 +104,68 @@ Exit status 2
 
 Codex 汇总 Claude 统一只读审查（限额 19:10 后）与本清单 → **一次返工**（P1 由实现方修）→ 我在修复后的固定提交上
 从头跑同一 `tests/e2e/m4/full-regression.mjs`，不拆轮、不跳过、不预写通过。M4 与整个项目仍未验收。
+---
+
+# 附录：集中第二轮（返工一后）—— 仍停在 typecheck，未进入任何测试
+
+> 本轮同样**没有执行任何测试**：0 单测、0 脚本安全测试、0 E2E。193 只是**收集数**，不是通过数。
+> 产品侧 `01c85fe` 未改，问题归实现方统一返工批次处理。
+
+## A1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `eece9e100a2c4a0bcf0e6ff84667d0a2bcea4cdd` |
+| 冻结产品 | `01c85fe18ebcb24c0a010621e53f71f475e7320f`（返工一起点 `9d717fc`） |
+| 身份摘要 / 锁 | `ef0fe1a11e44…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `01c85fe` **0 差异**；`HEAD:apps = 01:apps = 1f106d347c8c0bc0258f215f2516e69393295d60` |
+| 证据目录起跑前 | 脏项 **0**（未触发入口守卫） |
+
+## A2. 失败原件（与上一轮**不是**同一个错误）
+
+`job_9415a4a3`，run `docs/reports/artifacts/M4/regression/2026-11-15T12-35-07-124Z-full/`，整体 `exit 1`，14s；`typecheck` 子步骤 `exit 2`、11.757s：
+
+```
+packages/shared typecheck: Done
+packages/vite-plugin-source-tag typecheck: Done
+packages/bridge typecheck: Done
+apps/server typecheck: src/assets/process-worker.ts(8,28): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
+apps/server typecheck: src/assets/process-worker.ts(9,18): error TS1375: (同上)
+apps/server typecheck: Failed
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/server@ typecheck: `tsc`
+Exit status 2
+```
+
+- **不是**上一轮的 `scene/service.ts` Buffer 泛型错误复发：那一处已消除（本轮 typecheck 没再报它）。
+- 成因（静态）：`process-worker.ts` 现在只有语句（`process.once('disconnect', ...)`）与**动态** `await import('./process-model.ts')`，
+  没有任何静态 `import`/`export`，因此从"模块"退化成"脚本"，顶层 `await` 非法（TS1375）。
+- 归属：冻结产品代码（`01c85fe` 的返工改动），与测试侧文件无关；`apps/server` 首败即停，**Studio typecheck 也未执行**。
+
+## A3. 执行 / 未执行（与命令失败分开记录）
+
+- **命令失败**：`pnpm -r typecheck` 退出码 2（子步骤），因 `apps/server` 类型错误；`signal=null`，不是超时或被信号打断。
+- **身份漂移**：**无**。`manifest` 里该步 `problems` 只有 `退出码 2（signal=null）` 一条；起跑前 `evidenceDirtyAtStart=[]`；
+  产品/脚本/锁与本轮起点 `01c85fe` 字节一致（`productDiffVsAccepted=[]`）。所以这是**命令失败**，不是"身份漂移"（runner 把两者写在同一个 problems 数组里，这里按事实分开）。
+- **未执行 13 步**：`build`、`unit`、`demo-safety`、`e2e-m4`、`e2e-m0b`、`e2e-m0a`、`e2e-m1a`、`e2e-m1b`、`e2e-m2a`、`e2e-m2b`、`e2e-m3a`、`e2e-m3b`、`e2e-m3c`。
+- **计数**：E2E 执行 0 例；单测 0 项；脚本安全 0 项。**193（M4 19 + 旧九套 174）仅为本轮收集数**，不代表执行或通过。
+
+## A4. 清理与证据
+
+- 只跑 typecheck：3001/4011/5173/5174/5175 无监听，本树无自有 node/chrome，模板/产品脏项 0，未执行任何 kill。
+- 本步未刷新任何 tracked 证据（`evidenceArchived: []`），历史证据未改写。
+- 归档：`manifest.json`、`manifest.log`、`typecheck.log`、`cleanup.json`、`launcher/`（job 的 cmd/exit/job.json/output.log）；
+  `sha256-manifest.json` 登记 **8 个载荷文件、排除自身，静态复算 0 mismatch**。
+
+## A5. 统一问题清单（合并 Claude 返工一复审）
+
+1. **Q1（阻断，产品编译错误，新）** `apps/server/src/assets/process-worker.ts` 顶层 `await` + 无静态 import/export → TS1375（两处）。归实现方下一批统一修。
+2. **Q2（已代码层关闭，待运行确认）** 上一轮 `scene/service.ts` Buffer 泛型（B1）在本轮 typecheck 中未再出现；仍需在修复后的版本上真正跑过 typecheck 才能关闭。
+3. **Q3（Claude 复审：0 blocker / 0 should-fix，但零运行）** 返工一 8 项均为"代码层关闭"，运行证据为零；本轮又因 Q1 停在第 1 步，仍然没有任何运行结论。
+4. **Q4（Claude 建议，交 Codex 决定是否吸收）** 真实 App 测试补"父窗口确实失焦"断言；回收测试"恰好 4 个子进程"易受 conhost 干扰；中间层先死的孙进程与正常 Ctrl+C 下 45s 强杀两个回收缺口需实测；语音提交成功后输入框保留旧文案；保存失败持锁在 Windows 偶发占用会记为清理失败；父死测试绕开生产启动代码且仅 Windows；测试收尾删除 junction 可能导致清理假失败。
+5. **Q5（本机覆盖边界）** 真实阿里语音/厂商识别/编码/Lux3D、真人 A/B、完整彩排仍未执行；Windows 真实控制台 Ctrl+C 只能以信号模拟，不能冒称实测。
+
+## A6. 下一步
+
+实现方在下一批统一返工里修 Q1（并处理 Q4 中决定吸收的建议）→ 冻结新提交 → 我从头再跑同一 `full-regression.mjs`。
+本轮不改产品、不改测试、不自行派实现者、不 merge、不自动重跑。
