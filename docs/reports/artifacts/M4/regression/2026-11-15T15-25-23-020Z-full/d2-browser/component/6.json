@@ -1,0 +1,66 @@
+{
+  "test": "abnormal native pointer-capture loss cancels without uploading",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [
+    {
+      "name": "Error",
+      "message": "Matcher did not succeed in time.",
+      "stack": "Error: Matcher did not succeed in time.\n    at Proxy.<anonymous> (file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/node_modules/.pnpm/vitest@3.2.7_@types+node@24.19.2/node_modules/vitest/dist/chunks/vi.bdSIJ99Y.js:43:31)\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\apps\\studio\\src\\speech-browser.test.ts:140:104\n    at file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+    }
+  ],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.4272000000000844
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 68.72859999999991
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 133.36159999999973
+      },
+      {
+        "phase": "interaction",
+        "ms": 135.41219999999976
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 1,
+    "recorderStarts": 1,
+    "recorderStops": 0,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "posts": [],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

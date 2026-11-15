@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-15T19:49:12.140Z",
+  "note": "本轮 focused 新增、未进入 run 28 条载荷清单的固定目录 JSON：先原字节保全，再仅清未跟踪副本；历史 tracked 与 run 原件未动。",
+  "fixedDir": "docs/reports/artifacts/M1-B",
+  "count": 8,
+  "files": [
+    {
+      "origin": "docs/reports/artifacts/M1-B/adopt-provenance-cleanup.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/adopt-provenance-cleanup.json",
+      "mode": "100644",
+      "bytes": 323,
+      "sha256": "3f6fc5c4db114f4032753a562042976d092058b3d0538c1faece7d0c0e49dfcb",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "3f6fc5c4db114f4032753a562042976d092058b3d0538c1faece7d0c0e49dfcb"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/consistency-write-baseline.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/consistency-write-baseline.json",
+      "mode": "100644",
+      "bytes": 2193,
+      "sha256": "6b3dde5fe33ae8629875f06cd96f33546d9bfb5131fa5882354919b7b0ce40f5",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "6b3dde5fe33ae8629875f06cd96f33546d9bfb5131fa5882354919b7b0ce40f5"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/consistency-write-sampling.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/consistency-write-sampling.json",
+      "mode": "100644",
+      "bytes": 9141,
+      "sha256": "3c65fcd46e1b6f8790c8f655bf9fcacd4a8f6b5a1184b4d5053e781a6962a23a",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "3c65fcd46e1b6f8790c8f655bf9fcacd4a8f6b5a1184b4d5053e781a6962a23a"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/writeback-hero-baseline.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/writeback-hero-baseline.json",
+      "mode": "100644",
+      "bytes": 2193,
+      "sha256": "72035967831877e843f3e224ad03d4fb96e42efc16703762dd22c4378ea88741",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "72035967831877e843f3e224ad03d4fb96e42efc16703762dd22c4378ea88741"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/writeback-hero-sampling.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/writeback-hero-sampling.json",
+      "mode": "100644",
+      "bytes": 13422,
+      "sha256": "579bc3e9dafec449c6ef6256185a9d9c7abd5efe07d27ec2fe08207875ba6203",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "579bc3e9dafec449c6ef6256185a9d9c7abd5efe07d27ec2fe08207875ba6203"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/undo-ui-baseline.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/undo-ui-baseline.json",
+      "mode": "100644",
+      "bytes": 2193,
+      "sha256": "ca64b98657f807e1999a85f77583d6d595393f9f03816ff703cdda2ea75acf0d",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "ca64b98657f807e1999a85f77583d6d595393f9f03816ff703cdda2ea75acf0d"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/undo-ui-write-sampling.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/undo-ui-write-sampling.json",
+      "mode": "100644",
+      "bytes": 13223,
+      "sha256": "2dd3fcda7cfeeca5883c64e95eb04afa78f9ccea0ab0b389e67e30c448f1ee55",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "2dd3fcda7cfeeca5883c64e95eb04afa78f9ccea0ab0b389e67e30c448f1ee55"
+    },
+    {
+      "origin": "docs/reports/artifacts/M1-B/undo-ui-recover-sampling.json",
+      "archivedTo": "docs/reports/artifacts/M1-B/focused/2026-11-15T19-44-36-408Z-m1b-focused/fixed-additions/undo-ui-recover-sampling.json",
+      "mode": "100644",
+      "bytes": 11716,
+      "sha256": "20d6bd044adbc352fcd409e171ffa2b609af551b9b49ff72b60ba272bb4f7b73",
+      "byteEqual": true,
+      "trackedBefore": false,
+      "removedFromFixedDir": true,
+      "fixedDirCopySha256": "20d6bd044adbc352fcd409e171ffa2b609af551b9b49ff72b60ba272bb4f7b73"
+    }
+  ],
+  "problems": []
+}

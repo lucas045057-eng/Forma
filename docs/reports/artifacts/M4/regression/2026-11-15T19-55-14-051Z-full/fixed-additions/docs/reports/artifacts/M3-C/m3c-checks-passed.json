@@ -1,0 +1,75 @@
+{
+  "candidateId": "e114f268e7cb46fb9642d5656f4126de",
+  "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+  "requestBody": {},
+  "postCount": 1,
+  "checks": [
+    {
+      "name": "schema",
+      "status": "passed"
+    },
+    {
+      "name": "build",
+      "status": "passed"
+    },
+    {
+      "name": "smoke",
+      "status": "passed"
+    },
+    {
+      "name": "occlusion",
+      "status": "passed"
+    }
+  ],
+  "evidence": [
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "schema.json",
+      "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/schema.json",
+      "download": "schema.json"
+    },
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "build.log",
+      "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/build.log",
+      "download": "build.log"
+    },
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "smoke.png",
+      "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/smoke.png",
+      "download": "smoke.png"
+    },
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "smoke.json",
+      "hash": "914a475ee890e37ec8d104964b4c14db8b23e808d43dbf9de3e97e42e0076fac",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/smoke.json",
+      "download": "smoke.json"
+    },
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "occlusion.png",
+      "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/occlusion.png",
+      "download": "occlusion.png"
+    },
+    {
+      "runId": "550ef70de1c44be4b55ee3b696ab27f7",
+      "name": "occlusion.json",
+      "hash": "d80d85fff9fabdc00781f8ae7c6bc92db84e2293ce4446eec49fdeb12ad614e7",
+      "href": "/checks/550ef70de1c44be4b55ee3b696ab27f7/artifacts/occlusion.json",
+      "download": "occlusion.json"
+    }
+  ],
+  "backendOutcome": "passed",
+  "backendStatuses": [
+    "passed",
+    "passed",
+    "passed",
+    "passed"
+  ]
+}

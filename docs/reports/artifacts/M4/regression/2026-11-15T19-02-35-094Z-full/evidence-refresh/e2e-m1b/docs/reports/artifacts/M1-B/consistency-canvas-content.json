@@ -1,0 +1,21 @@
+{
+  "studio": {
+    "width": 378,
+    "height": 378,
+    "background": [
+      239,
+      232,
+      220
+    ],
+    "bbox": {
+      "minX": 145,
+      "minY": 56,
+      "maxX": 235,
+      "maxY": 323
+    },
+    "widthPx": 91,
+    "heightPx": 268,
+    "pixelCount": 15093
+  },
+  "artifactDir": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M1-B"
+}

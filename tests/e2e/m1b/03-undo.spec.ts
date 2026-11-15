@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { getScene, putScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, undoScene, waitFor } from './api';
 import { captureCanvases, openEditor, setSlider } from './editor';
-import { compareAligned } from '../m1a/visual';
+import { captureReadyBaseline, runPairChange, summarizeAttempts } from './window-compare';
 import { writeArtifactFrom } from './artifact';
 
 /** 撤回：配置值与网页画面都恢复；历史为空时 409 且界面有错误提示。 */
@@ -13,31 +13,42 @@ test.describe('撤回', () => {
   test('界面写入 → 撤回：配置与网页画面都恢复', async ({ page }) => {
     const { frame } = await openEditor(page);
     const original = (await getScene()).body;
-    const baseline = await captureCanvases(page, frame);
+    const readiness = await captureReadyBaseline(page, frame, 'undo-ui-baseline.json');
+    const baseline = readiness.pair;
 
     await setSlider(page, 'scene-ambient', 3.4);
-    await page.getByTestId('scene-save-hero').click();
-    const changedMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio > 0.01;
-    }, 30_000, 100);
+    const changed = await runPairChange(page, frame, baseline, {
+      method: 'PUT', pathname: '/scene', button: 'scene-save-hero', artifact: 'undo-ui-write-sampling.json',
+      threshold: 0.01, timeoutMs: 30_000, intervalMs: 100,
+    });
+    const writeResult = changed.response;
+    expect(writeResult.status, 'PUT /scene 未成功：' + JSON.stringify(writeResult).slice(0, 300)).toBe(200);
+    const changedMs = changed.elapsedMs;
     const afterWrite = (await getScene()).body;
     expect(afterWrite.hero.lights.ambient).toBeCloseTo(3.4, 1);
 
-    await page.getByTestId('scene-undo').click();
+    const recovered = await runPairChange(page, frame, baseline, {
+      method: 'POST', pathname: '/scene/undo', button: 'scene-undo', artifact: 'undo-ui-recover-sampling.json',
+      threshold: 0.002, timeoutMs: 30_000, intervalMs: 150, mode: 'decrease',
+    });
     // 界面撤回后配置应恢复到写入前
     await waitFor(async () => sameJson((await getScene()).body, original), 20_000, 200);
     const restored = (await getScene()).body;
     expect(sameJson(restored, original), '撤回后配置没有恢复').toBe(true);
     expect(sameJson(readSceneFile(), original), '撤回后文件内容没有恢复').toBe(true);
 
-    // 作品页画面也应恢复（允许与基线有极小的抗锯齿差异）
-    const recoveredMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio < 0.002;
-    }, 30_000, 150);
+    const undoResult = recovered.response;
+    expect(undoResult.status, 'POST /scene/undo 未成功').toBe(200);
+    const recoveredMs = recovered.elapsedMs;
 
-    writeArtifactFrom('undo-ui.json', { changedMs, recoveredMs, originalAmbient: original.hero.lights.ambient, afterWriteAmbient: afterWrite.hero.lights.ambient });
+    writeArtifactFrom('undo-ui.json', {
+      changedMs, recoveredMs,
+      changedRatio: changed.changedRatio, recoveredRatio: recovered.changedRatio,
+      write: writeResult, undo: undoResult,
+      readiness: readiness.gate, baselineWindow: readiness.window,
+      captureAttempts: { changed: summarizeAttempts(changed.attempts), recovered: summarizeAttempts(recovered.attempts) },
+      originalAmbient: original.hero.lights.ambient, afterWriteAmbient: afterWrite.hero.lights.ambient,
+    });
   });
 
   test('历史为空时撤回返回 409，界面显示错误提示', async ({ page }) => {

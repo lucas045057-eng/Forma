@@ -1,0 +1,211 @@
+{
+  "events": [
+    {
+      "event": "spawn",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:16.688Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        }
+      }
+    },
+    {
+      "event": "stderr:end",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.964Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stderr:close",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.964Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "disconnect",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.964Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:end",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.964Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:close",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.964Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "exit",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.968Z",
+      "code": null,
+      "signal": "SIGKILL",
+      "state": {
+        "exitCode": null,
+        "signalCode": "SIGKILL",
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "close",
+      "role": "parent",
+      "pid": 49448,
+      "at": "2026-11-15T19:59:18.968Z",
+      "code": null,
+      "signal": "SIGKILL",
+      "state": {
+        "exitCode": null,
+        "signalCode": "SIGKILL",
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    }
+  ],
+  "final": {
+    "exitCode": null,
+    "signalCode": "SIGKILL",
+    "connected": false,
+    "stdout": {
+      "destroyed": true,
+      "readableEnded": true,
+      "closed": true,
+      "readable": false
+    },
+    "stderr": {
+      "destroyed": true,
+      "readableEnded": true,
+      "closed": true,
+      "readable": false
+    }
+  }
+}

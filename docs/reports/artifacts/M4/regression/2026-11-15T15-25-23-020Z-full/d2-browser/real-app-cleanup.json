@@ -1,0 +1,47 @@
+{
+  "pid": 63108,
+  "origin": "http://127.0.0.1:5245",
+  "previewOrigin": "http://127.0.0.1:5242",
+  "stage": "interaction",
+  "primary": null,
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5245/__speech_app__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-real-app",
+        "ms": 14.529199999999946
+      },
+      {
+        "phase": "event-center-ready",
+        "ms": 187.98019999999997
+      },
+      {
+        "phase": "interaction",
+        "ms": 333.8959
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "pageErrors": [],
+  "denied": [],
+  "chromiumPid": 64020,
+  "chromiumExit": 0,
+  "chromiumSignal": null,
+  "serverListening": false,
+  "previewListening": false,
+  "cacheRetained": null,
+  "vite": {
+    "mode": "development",
+    "optimizeDeps": [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime"
+    ]
+  },
+  "errors": []
+}

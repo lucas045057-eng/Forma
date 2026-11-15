@@ -1,0 +1,1237 @@
+{
+  "config": {
+    "argv": [
+      "E:\\Node\\node.exe",
+      "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "-c",
+      "playwright.m4.config.ts",
+      "--retries=0",
+      "--workers=1",
+      "--reporter=list,json",
+      "--output=E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output"
+    ],
+    "configFile": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\playwright.m4.config.ts",
+    "rootDir": "E:/空间化AI工作台/.worktrees/m4-acceptance/tests/e2e/m4",
+    "failOnFlakyTests": false,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/空间化AI工作台/.worktrees/m4-acceptance/docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/e2e-m4-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "E:/空间化AI工作台/.worktrees/m4-acceptance/tests/e2e/m4",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 480000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4",
+        "snapshotDir": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 480000,
+        "use": {
+          "baseURL": "http://127.0.0.1:5173/",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "trace": "off",
+          "video": "off",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "01-speech.spec.ts",
+      "file": "01-speech.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M4-D2 语音确认闭环（转写与提交均为替身）",
+          "file": "01-speech.spec.ts",
+          "line": 76,
+          "column": 6,
+          "specs": [
+            {
+              "title": "录音 → 可编辑 review → 确认写入指令，只有点生成才提交任务",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 30889,
+                      "error": {
+                        "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:90:18",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                          "column": 18,
+                          "line": 90
+                        },
+                        "snippet": " \u001b[90m 88 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 89 |\u001b[39m     \u001b[36mconst\u001b[39m review \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 90 |\u001b[39m     \u001b[36mawait\u001b[39m review\u001b[33m.\u001b[39mwaitFor({ state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 91 |\u001b[39m     \u001b[36mconst\u001b[39m textarea \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review-text'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 92 |\u001b[39m     \u001b[36mawait\u001b[39m expect(textarea)\u001b[33m.\u001b[39mtoHaveValue(\u001b[32m'把这个改成圆角'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 93 |\u001b[39m     \u001b[36mawait\u001b[39m textarea\u001b[33m.\u001b[39mfill(\u001b[32m'把购买按钮改成圆角，文案不动'\u001b[39m)\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                            "column": 18,
+                            "line": 90
+                          },
+                          "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n\n  88 |     await page.getByTestId('speech-record').click();\n  89 |     const review = page.getByTestId('speech-review');\n> 90 |     await review.waitFor({ state: 'visible', timeout: 30_000 });\n     |                  ^\n  91 |     const textarea = page.getByTestId('speech-review-text');\n  92 |     await expect(textarea).toHaveValue('把这个改成圆角');\n  93 |     await textarea.fill('把购买按钮改成圆角，文案不动');\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:90:18"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:57:06.343Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-56960--review-→-确认写入指令，只有点生成才提交任务-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-56960--review-→-确认写入指令，只有点生成才提交任务-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-56960--review-→-确认写入指令，只有点生成才提交任务-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                        "column": 18,
+                        "line": 90
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-6f7eab52d85491e28eec",
+              "file": "01-speech.spec.ts",
+              "line": 81,
+              "column": 3
+            },
+            {
+              "title": "录音时指着 A、确认前改点 B：必须提示并禁止直接套用",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 31037,
+                      "error": {
+                        "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:106:45",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                          "column": 45,
+                          "line": 106
+                        },
+                        "snippet": " \u001b[90m 104 |\u001b[39m     \u001b[36mconst\u001b[39m first \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m pickElement(page\u001b[33m,\u001b[39m \u001b[32m'buy-button'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 105 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 106 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m.\u001b[39mwaitFor({ state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 107 |\u001b[39m     \u001b[36mconst\u001b[39m captured \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-capture-object'\u001b[39m)\u001b[33m.\u001b[39minnerText()\u001b[33m;\u001b[39m\n \u001b[90m 108 |\u001b[39m     expect(captured\u001b[33m.\u001b[39mlength\u001b[33m,\u001b[39m \u001b[32m'没有显示录音时指着的对象'\u001b[39m)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 109 |\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                            "column": 45,
+                            "line": 106
+                          },
+                          "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n\n  104 |     const first = await pickElement(page, 'buy-button');\n  105 |     await page.getByTestId('speech-record').click();\n> 106 |     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });\n      |                                             ^\n  107 |     const captured = await page.getByTestId('speech-capture-object').innerText();\n  108 |     expect(captured.length, '没有显示录音时指着的对象').toBeGreaterThan(0);\n  109 |\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:106:45"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:57:37.808Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-60a6e-录音时指着-A、确认前改点-B：必须提示并禁止直接套用-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-60a6e-录音时指着-A、确认前改点-B：必须提示并禁止直接套用-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-60a6e-录音时指着-A、确认前改点-B：必须提示并禁止直接套用-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                        "column": 45,
+                        "line": 106
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-3514de0892212fd64636",
+              "file": "01-speech.spec.ts",
+              "line": 102,
+              "column": 3
+            },
+            {
+              "title": "录音中页面隐藏：立即取消并发送 DELETE，麦克风轨道被释放",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 15747,
+                      "error": {
+                        "message": "Error: 等待条件超时（15000ms）",
+                        "stack": "Error: 等待条件超时（15000ms）\n    at waitFor (E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\helpers.ts:32:9)\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:126:5",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\helpers.ts",
+                          "column": 9,
+                          "line": 32
+                        },
+                        "snippet": "\u001b[90m   at \u001b[39mhelpers.ts:32\n\n \u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m wait(intervalMs)\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m   }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m   \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m`等待条件超时（${timeoutMs}ms）`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m }\n \u001b[90m 34 |\u001b[39m\n \u001b[90m 35 |\u001b[39m \u001b[90m/** 证据写到本轮 run 目录（M4_ARTIFACT_DIR），不写死历史路径。 */\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\helpers.ts",
+                            "column": 9,
+                            "line": 32
+                          },
+                          "message": "Error: 等待条件超时（15000ms）\n\n   at helpers.ts:32\n\n  30 |     await wait(intervalMs);\n  31 |   }\n> 32 |   throw new Error(`等待条件超时（${timeoutMs}ms）`);\n     |         ^\n  33 | }\n  34 |\n  35 | /** 证据写到本轮 run 目录（M4_ARTIFACT_DIR），不写死历史路径。 */\n    at waitFor (E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\helpers.ts:32:9)\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:126:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:58:09.390Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6a79d-面隐藏：立即取消并发送-DELETE，麦克风轨道被释放-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6a79d-面隐藏：立即取消并发送-DELETE，麦克风轨道被释放-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6a79d-面隐藏：立即取消并发送-DELETE，麦克风轨道被释放-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\helpers.ts",
+                        "column": 9,
+                        "line": 32
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-35e5d0f6efa7ab863fd4",
+              "file": "01-speech.spec.ts",
+              "line": 122,
+              "column": 3
+            },
+            {
+              "title": "转写返回 499：界面显示取消，重试必须使用新的 request id",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 20710,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('speech-record')\nExpected: enabled\nReceived: disabled\nTimeout:  20000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByTestId('speech-record') with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('speech-record')\u001b[22m\n\u001b[2m    43 × locator resolved to <button disabled type=\"button\" data-testid=\"speech-record\">按住说话（或按住空格）</button>\u001b[22m\n\u001b[2m       - unexpected value \"disabled\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('speech-record')\nExpected: enabled\nReceived: disabled\nTimeout:  20000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByTestId('speech-record') with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('speech-record')\u001b[22m\n\u001b[2m    43 × locator resolved to <button disabled type=\"button\" data-testid=\"speech-record\">按住说话（或按住空格）</button>\u001b[22m\n\u001b[2m       - unexpected value \"disabled\"\u001b[22m\n\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:155:53",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                          "column": 53,
+                          "line": 155
+                        },
+                        "snippet": " \u001b[90m 153 |\u001b[39m     \u001b[36mconst\u001b[39m statusText \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-status'\u001b[39m)\u001b[33m.\u001b[39minnerText()\u001b[33m;\u001b[39m\n \u001b[90m 154 |\u001b[39m     expect(statusText)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoContain(\u001b[32m'内部取消细节'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 155 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m))\u001b[33m.\u001b[39mtoBeEnabled({ timeout\u001b[33m:\u001b[39m \u001b[35m20_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 156 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 157 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m.\u001b[39mwaitFor({ state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 158 |\u001b[39m     expect(stub\u001b[33m.\u001b[39mrecordIds\u001b[33m.\u001b[39mlength\u001b[33m,\u001b[39m \u001b[32m'没有得到两次转写请求'\u001b[39m)\u001b[33m.\u001b[39mtoBeGreaterThanOrEqual(\u001b[35m2\u001b[39m)\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                            "column": 53,
+                            "line": 155
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByTestId('speech-record')\nExpected: enabled\nReceived: disabled\nTimeout:  20000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByTestId('speech-record') with timeout 20000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('speech-record')\u001b[22m\n\u001b[2m    43 × locator resolved to <button disabled type=\"button\" data-testid=\"speech-record\">按住说话（或按住空格）</button>\u001b[22m\n\u001b[2m       - unexpected value \"disabled\"\u001b[22m\n\n\n  153 |     const statusText = await page.getByTestId('speech-status').innerText();\n  154 |     expect(statusText).not.toContain('内部取消细节');\n> 155 |     await expect(page.getByTestId('speech-record')).toBeEnabled({ timeout: 20_000 });\n      |                                                     ^\n  156 |     await page.getByTestId('speech-record').click();\n  157 |     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });\n  158 |     expect(stub.recordIds.length, '没有得到两次转写请求').toBeGreaterThanOrEqual(2);\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:155:53"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:58:25.714Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-d46b1-：界面显示取消，重试必须使用新的-request-id-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-d46b1-：界面显示取消，重试必须使用新的-request-id-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-d46b1-：界面显示取消，重试必须使用新的-request-id-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                        "column": 53,
+                        "line": 155
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-0c2091fa3d8c27459d32",
+              "file": "01-speech.spec.ts",
+              "line": 140,
+              "column": 3
+            },
+            {
+              "title": "权限晚到后已取消：不得出现 review，也不得残留录音",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 18225,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:58:46.996Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-b887c3399248e29ef14d",
+              "file": "01-speech.spec.ts",
+              "line": 163,
+              "column": 3
+            },
+            {
+              "title": "F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 31065,
+                      "error": {
+                        "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:182:45",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                          "column": 45,
+                          "line": 182
+                        },
+                        "snippet": " \u001b[90m 180 |\u001b[39m     \u001b[36mawait\u001b[39m pickElement(page\u001b[33m,\u001b[39m \u001b[32m'buy-button'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 181 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 182 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m.\u001b[39mwaitFor({ state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[90m// 真实 iframe 里再点一个元素：父窗口失焦 + 点选 pending，旧实现会把转写直接丢掉。\u001b[39m\n \u001b[90m 184 |\u001b[39m     \u001b[36mconst\u001b[39m second \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m pickElement(page\u001b[33m,\u001b[39m \u001b[32m'save-button'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 185 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m,\u001b[39m \u001b[32m'重新点选后转写被丢弃了'\u001b[39m)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                            "column": 45,
+                            "line": 182
+                          },
+                          "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n\n  180 |     await pickElement(page, 'buy-button');\n  181 |     await page.getByTestId('speech-record').click();\n> 182 |     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });\n      |                                             ^\n  183 |     // 真实 iframe 里再点一个元素：父窗口失焦 + 点选 pending，旧实现会把转写直接丢掉。\n  184 |     const second = await pickElement(page, 'save-button');\n  185 |     await expect(page.getByTestId('speech-review'), '重新点选后转写被丢弃了').toBeVisible();\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:182:45"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:59:05.405Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-bf457-选：review-保留、必须显式确认，确认后再改选仍拦-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-bf457-选：review-保留、必须显式确认，确认后再改选仍拦-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-bf457-选：review-保留、必须显式确认，确认后再改选仍拦-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                        "column": 45,
+                        "line": 182
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-9d038fb47e690a0c2311",
+              "file": "01-speech.spec.ts",
+              "line": 178,
+              "column": 3
+            },
+            {
+              "title": "F2 语音提交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 30711,
+                      "error": {
+                        "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:211:45",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                          "column": 45,
+                          "line": 211
+                        },
+                        "snippet": " \u001b[90m 209 |\u001b[39m     \u001b[36mawait\u001b[39m openStudio(page)\u001b[33m;\u001b[39m\n \u001b[90m 210 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-record'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-review'\u001b[39m)\u001b[33m.\u001b[39mwaitFor({ state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m timeout\u001b[33m:\u001b[39m \u001b[35m30_000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'speech-use'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 213 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'instruction-input'\u001b[39m))\u001b[33m.\u001b[39mtoHaveValue(\u001b[35m/改成圆角/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 214 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'generate-candidate'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                            "column": 45,
+                            "line": 211
+                          },
+                          "message": "TimeoutError: locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByTestId('speech-review') to be visible\u001b[22m\n\n\n  209 |     await openStudio(page);\n  210 |     await page.getByTestId('speech-record').click();\n> 211 |     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });\n      |                                             ^\n  212 |     await page.getByTestId('speech-use').click();\n  213 |     await expect(page.getByTestId('instruction-input')).toHaveValue(/改成圆角/);\n  214 |     await page.getByTestId('generate-candidate').click();\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts:211:45"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T16:59:36.851Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6ba5a-交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6ba5a-交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\01-speech-M4-D2-语音确认闭环（转写与-6ba5a-交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞）-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\01-speech.spec.ts",
+                        "column": 45,
+                        "line": 211
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "adabfd2ffe86a365afdc-99e43df65157136622ef",
+              "file": "01-speech.spec.ts",
+              "line": 202,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "02-fallback.spec.ts",
+      "file": "02-fallback.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M4-D3 本地备用模型与来源",
+          "file": "02-fallback.spec.ts",
+          "line": 27,
+          "column": 6,
+          "specs": [
+            {
+              "title": "三份本地素材的字节哈希与 preset 声明一致（不联网）",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 40,
+                      "error": {
+                        "message": "Error: [{\"id\":\"diffuser-split\",\"file\":\"lux3d-split-4969889.glb\",\"bytes\":11192096,\"sha256\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"expected\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"match\":true},{\"id\":\"diffuser-original\",\"file\":\"lux3d-4969293.glb\",\"bytes\":13345788,\"sha256\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"expected\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"match\":true},{\"id\":\"diffuser-alternate\",\"file\":\"lux3d-4969298.glb\",\"bytes\":11107988,\"sha256\":\"09f9085858ace106b7dc5c7b9355320e5d05253a565eb01a73d670c1754ac9bf\",\"expected\":\"09f9085858ace106b7dc5c7b9355320e5d05352a565eb01a73d670c1754ac9bf\",\"match\":false}]\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                        "stack": "Error: [{\"id\":\"diffuser-split\",\"file\":\"lux3d-split-4969889.glb\",\"bytes\":11192096,\"sha256\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"expected\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"match\":true},{\"id\":\"diffuser-original\",\"file\":\"lux3d-4969293.glb\",\"bytes\":13345788,\"sha256\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"expected\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"match\":true},{\"id\":\"diffuser-alternate\",\"file\":\"lux3d-4969298.glb\",\"bytes\":11107988,\"sha256\":\"09f9085858ace106b7dc5c7b9355320e5d05253a565eb01a73d670c1754ac9bf\",\"expected\":\"09f9085858ace106b7dc5c7b9355320e5d05352a565eb01a73d670c1754ac9bf\",\"match\":false}]\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts:36:72",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                          "column": 72,
+                          "line": 36
+                        },
+                        "snippet": " \u001b[90m 34 |\u001b[39m       \u001b[36mreturn\u001b[39m { id\u001b[33m:\u001b[39m preset\u001b[33m.\u001b[39mid\u001b[33m,\u001b[39m file\u001b[33m:\u001b[39m preset\u001b[33m.\u001b[39mfile\u001b[33m,\u001b[39m bytes\u001b[33m:\u001b[39m bytes\u001b[33m.\u001b[39mlength\u001b[33m,\u001b[39m sha256\u001b[33m:\u001b[39m sha256(bytes)\u001b[33m,\u001b[39m expected\u001b[33m:\u001b[39m preset\u001b[33m.\u001b[39mhash\u001b[33m,\u001b[39m match\u001b[33m:\u001b[39m sha256(bytes) \u001b[33m===\u001b[39m preset\u001b[33m.\u001b[39mhash }\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     expect(actual\u001b[33m.\u001b[39mevery((item) \u001b[33m=>\u001b[39m item\u001b[33m.\u001b[39mmatch)\u001b[33m,\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mstringify(actual))\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     writeArtifact(\u001b[32m'fallback-factor-presets.json'\u001b[39m\u001b[33m,\u001b[39m { presets\u001b[33m:\u001b[39m actual })\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 39 |\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                            "column": 72,
+                            "line": 36
+                          },
+                          "message": "Error: [{\"id\":\"diffuser-split\",\"file\":\"lux3d-split-4969889.glb\",\"bytes\":11192096,\"sha256\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"expected\":\"239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0\",\"match\":true},{\"id\":\"diffuser-original\",\"file\":\"lux3d-4969293.glb\",\"bytes\":13345788,\"sha256\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"expected\":\"7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7\",\"match\":true},{\"id\":\"diffuser-alternate\",\"file\":\"lux3d-4969298.glb\",\"bytes\":11107988,\"sha256\":\"09f9085858ace106b7dc5c7b9355320e5d05253a565eb01a73d670c1754ac9bf\",\"expected\":\"09f9085858ace106b7dc5c7b9355320e5d05352a565eb01a73d670c1754ac9bf\",\"match\":false}]\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  34 |       return { id: preset.id, file: preset.file, bytes: bytes.length, sha256: sha256(bytes), expected: preset.hash, match: sha256(bytes) === preset.hash };\n  35 |     });\n> 36 |     expect(actual.every((item) => item.match), JSON.stringify(actual)).toBe(true);\n     |                                                                        ^\n  37 |     writeArtifact('fallback-factor-presets.json', { presets: actual });\n  38 |   });\n  39 |\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts:36:72"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.159Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                            "line": 0,
+                            "column": 0
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\02-fallback-M4-D3-本地备用模型与来源-三份本地素材的字节哈希与-preset-声明一致（不联网）-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\02-fallback-M4-D3-本地备用模型与来源-三份本地素材的字节哈希与-preset-声明一致（不联网）-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "column": 72,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4a89c38002f04b93e6a5-d96f86ca17d9f487cf7e",
+              "file": "02-fallback.spec.ts",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "列表只暴露固定 preset，非法输入被拒",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.433Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "4a89c38002f04b93e6a5-4afdbabe74f89ed1a791",
+              "file": "02-fallback.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "导入 → 来源 sidecar 绑定真实字节 → 采用 → 回退",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.433Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "4a89c38002f04b93e6a5-a060f501020a87024ea2",
+              "file": "02-fallback.spec.ts",
+              "line": 54,
+              "column": 3
+            },
+            {
+              "title": "F5 preset 导入接受界面真实发出的空对象 POST，危险字段仍被拒",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.433Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "4a89c38002f04b93e6a5-fa4f2ec9a1fff8c0535c",
+              "file": "02-fallback.spec.ts",
+              "line": 96,
+              "column": 3
+            },
+            {
+              "title": "F4 坏来源 sidecar 三类都安全 409，作品四份字节不变",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\02-fallback.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.433Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "4a89c38002f04b93e6a5-f65df295f90c09ceeb0e",
+              "file": "02-fallback.spec.ts",
+              "line": 110,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "03-layout.spec.ts",
+      "file": "03-layout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M4-D4 布局与焦点",
+          "file": "03-layout.spec.ts",
+          "line": 19,
+          "column": 6,
+          "specs": [
+            {
+              "title": "1440x900：场景画布不被裁切、横向滚动可用、聚焦可达",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1654,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:08.711Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1298d3424f66ddcdd4be-bea7391a2c8e2833c7a3",
+              "file": "03-layout.spec.ts",
+              "line": 24,
+              "column": 5
+            },
+            {
+              "title": "1280x800：场景画布不被裁切、横向滚动可用、聚焦可达",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1532,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:10.562Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1298d3424f66ddcdd4be-8b319a77c1e8e0c2ebe5",
+              "file": "03-layout.spec.ts",
+              "line": 24,
+              "column": 5
+            },
+            {
+              "title": "390x844：场景画布不被裁切、横向滚动可用、聚焦可达",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1448,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:12.107Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1298d3424f66ddcdd4be-17a592d0647926a4f5b9",
+              "file": "03-layout.spec.ts",
+              "line": 24,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "04-demo.spec.ts",
+      "file": "04-demo.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "M4-D5 演示入口（mock）",
+          "file": "04-demo.spec.ts",
+          "line": 120,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SIGINT 正常关闭：stopped、forced 全 false、端口释放",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 300000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                        "line": 120,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 92065,
+                      "error": {
+                        "message": "Error: 父进程没有在 90s 内退出\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+                        "stack": "Error: 父进程没有在 90s 内退出\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts:133:38",
+                        "location": {
+                          "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                          "column": 38,
+                          "line": 133
+                        },
+                        "snippet": " \u001b[90m 131 |\u001b[39m     handle\u001b[33m.\u001b[39mchild\u001b[33m.\u001b[39mkill(\u001b[32m'SIGINT'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 132 |\u001b[39m     \u001b[36mconst\u001b[39m exited \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m waitAsync(() \u001b[33m=>\u001b[39m handle\u001b[33m.\u001b[39mchild\u001b[33m.\u001b[39mexitCode \u001b[33m!==\u001b[39m \u001b[36mnull\u001b[39m\u001b[33m,\u001b[39m \u001b[35m90_000\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 133 |\u001b[39m     expect(exited\u001b[33m,\u001b[39m \u001b[32m'父进程没有在 90s 内退出'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[36mtrue\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 134 |\u001b[39m     \u001b[36mconst\u001b[39m finalManifest \u001b[33m=\u001b[39m readJson(path\u001b[33m.\u001b[39mjoin(handle\u001b[33m.\u001b[39mrunDir\u001b[33m,\u001b[39m \u001b[32m'manifest.json'\u001b[39m))\u001b[33m;\u001b[39m\n \u001b[90m 135 |\u001b[39m     expect(finalManifest\u001b[33m.\u001b[39mstatus\u001b[33m,\u001b[39m \u001b[32m`退出状态：${finalManifest.status}`\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[32m'stopped'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 136 |\u001b[39m     expect(finalManifest\u001b[33m.\u001b[39mcleanup\u001b[33m?.\u001b[39mproblems \u001b[33m??\u001b[39m []\u001b[33m,\u001b[39m \u001b[32m'正常关闭不应该有清理问题'\u001b[39m)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                            "column": 38,
+                            "line": 133
+                          },
+                          "message": "Error: 父进程没有在 90s 内退出\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\n  131 |     handle.child.kill('SIGINT');\n  132 |     const exited = await waitAsync(() => handle.child.exitCode !== null, 90_000);\n> 133 |     expect(exited, '父进程没有在 90s 内退出').toBe(true);\n      |                                      ^\n  134 |     const finalManifest = readJson(path.join(handle.runDir, 'manifest.json'));\n  135 |     expect(finalManifest.status, `退出状态：${finalManifest.status}`).toBe('stopped');\n  136 |     expect(finalManifest.cleanup?.problems ?? [], '正常关闭不应该有清理问题').toEqual([]);\n    at E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts:133:38"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:00:13.657Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                            "line": 120,
+                            "column": 6
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\docs\\reports\\artifacts\\M4\\regression\\2026-11-15T16-52-32-677Z-full\\e2e-m4-output\\04-demo-M4-D5-演示入口（mock）-S-b8e63-stopped、forced-全-false、端口释放-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                        "column": 38,
+                        "line": 133
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "19f1c6c69ee649657827-c64a70581194f98b0c37",
+              "file": "04-demo.spec.ts",
+              "line": 123,
+              "column": 3
+            },
+            {
+              "title": "真实候选链路：候选 HMR 连 plan.preview，10s 内无循环导航",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                        "line": 120,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:01:45.767Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "19f1c6c69ee649657827-a9bed941032663ee472f",
+              "file": "04-demo.spec.ts",
+              "line": 145,
+              "column": 3
+            },
+            {
+              "title": "固定 5175 被占用时不串实例（demo 用自己的随机预览端口）",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                        "line": 120,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:01:45.767Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "19f1c6c69ee649657827-b0ef992644526ff944c0",
+              "file": "04-demo.spec.ts",
+              "line": 192,
+              "column": 3
+            },
+            {
+              "title": "父启动器被硬杀：真实 backend/frontends 及孙进程按 PID+创建时间回收，并留失败证据",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 480000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\tests\\e2e\\m4\\04-demo.spec.ts",
+                        "line": 120,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-15T17:01:45.767Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "19f1c6c69ee649657827-ecf91904a75365e58adf",
+              "file": "04-demo.spec.ts",
+              "line": 209,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-15T16:57:02.697Z",
+    "duration": 284313.222,
+    "expected": 4,
+    "skipped": 7,
+    "unexpected": 8,
+    "flaky": 0
+  }
+}

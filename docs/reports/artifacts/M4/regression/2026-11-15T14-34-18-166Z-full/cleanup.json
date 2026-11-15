@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-15T15:09:09.354Z",
+  "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T14-34-18-166Z-full",
+  "head": "2463dd15015fbba89f4868fe4ebda27e49ec7ee8",
+  "job": {
+    "id": "job_49d083b5",
+    "pid": 64832,
+    "exitCode": 1
+  },
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "stagingLeftovers": [],
+  "templateAndProductDirty": [],
+  "productDiffVsAccepted": [],
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "recordedPids": [
+    "gone:51932",
+    "gone:51412",
+    "gone:25896",
+    "gone:12216",
+    "gone:27380"
+  ],
+  "note": "typecheck/build/unit 真实执行；unit 失败后 demo-safety 与全部 E2E 未执行。本轮两条资产夹具成功并清理了自建现场；历史保留现场只补档不删除。无自有进程/端口/staging 残留，未执行任何 kill。"
+}

@@ -1,0 +1,8 @@
+{"at":"2026-11-15T17:58:35.291Z","pid":48184,"event":"launch-begin"}
+{"at":"2026-11-15T17:58:38.777Z","pid":48184,"event":"sigint-received"}
+{"at":"2026-11-15T17:58:38.823Z","pid":48184,"event":"launch-returned","exitCode":0}
+{"at":"2026-11-15T17:58:38.824Z","pid":48184,"event":"disconnect-called"}
+{"at":"2026-11-15T17:58:38.824Z","pid":48184,"event":"driver-finished"}
+{"at":"2026-11-15T17:58:38.824Z","pid":48184,"event":"disconnect"}
+{"at":"2026-11-15T17:58:38.824Z","pid":48184,"event":"beforeExit","code":0}
+{"at":"2026-11-15T17:58:38.824Z","pid":48184,"event":"exit","code":0}

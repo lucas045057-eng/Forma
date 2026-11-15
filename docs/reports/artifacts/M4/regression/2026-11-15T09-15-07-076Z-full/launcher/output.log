@@ -1,0 +1,5 @@
+[m4] mode=full out=docs\reports\artifacts\M4\regression\2026-11-15T09-15-07-076Z-full identity=0e6edcc3b5d0 lock=67af36b7a1b8
+[m4] typecheck …
+(node:22704) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[m4] typecheck 未通过：退出码 2（signal=null）；证据 docs\reports\artifacts\M4\regression\2026-11-15T09-15-07-076Z-full\typecheck.log

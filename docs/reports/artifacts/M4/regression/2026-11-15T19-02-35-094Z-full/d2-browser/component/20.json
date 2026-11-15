@@ -1,0 +1,61 @@
+{
+  "test": "browser recognition starts only after explicit provider choice and shares editable review",
+  "url": "http://127.0.0.1:10692/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:10692/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.4033999999992375
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 57.96669999999904
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 116.78420000000006
+      },
+      {
+        "phase": "interaction",
+        "ms": 118.33059999999932
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 0,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 1,
+    "vendorAborts": 1,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 0,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 1,
+    "vendorAborts": 1,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

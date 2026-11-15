@@ -1,0 +1,22 @@
+{
+  "excluded": [
+    "sha256-manifest.json"
+  ],
+  "files": [
+    {
+      "path": "manifest.json",
+      "bytes": 64600,
+      "sha256": "b1a4cfb4c5f2c54ce62a97b5fb57ab4997cc6f8bb020139a35c4e08423d80199"
+    },
+    {
+      "path": "render-red.log",
+      "bytes": 3177,
+      "sha256": "ecd641a4a2c1caa64cd520e2698ce3f09dd760e03c4f1633f935893b1f512c63"
+    },
+    {
+      "path": "results.json",
+      "bytes": 3257,
+      "sha256": "ed6b3ed2564e1f58113ee0856516d63920a34c4da1b56d4ef2ab323621036e46"
+    }
+  ]
+}

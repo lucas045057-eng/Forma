@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { SCENE_CONFIG, getScene, readSceneFile, restoreSceneFile, sameJson, snapshotSceneFile, waitFor } from './api';
 import { captureCanvases, enableCompare, openEditor, readScrollAt, setSlider } from './editor';
+import { captureReadyBaseline, runPairChange, summarizeAttempts } from './window-compare';
 import { compareAligned } from '../m1a/visual';
 import { writeArtifactFrom } from './artifact';
 import { readFileSync } from 'node:fs';
@@ -23,16 +24,21 @@ test.describe('写回与即时同步', () => {
     const frameIdentityBefore = await frame.evaluate(() => window.name || 'preview');
 
     const before = await getScene();
-    const baseline = await captureCanvases(page, frame);
+    const readiness = await captureReadyBaseline(page, frame, 'writeback-hero-baseline.json');
+    const baseline = readiness.pair;
 
     await setSlider(page, 'scene-ambient', 2.6);
     await setSlider(page, 'scene-rotation-y', 1.24);
+    // 同一预算包含点击、真实响应、自然同步及像素变化；另保留端到端记录。
     const clickedAt = Date.now();
-    await page.getByTestId('scene-save-hero').click();
-    const latencyMs = await waitFor(async () => {
-      const current = await captureCanvases(page, frame);
-      return (await compareAligned(baseline.preview.png, current.preview.png, 3)).changedRatio > 0.01;
-    }, 30_000, 100);
+    const changed = await runPairChange(page, frame, baseline, {
+      method: 'PUT', pathname: '/scene', button: 'scene-save-hero', artifact: 'writeback-hero-sampling.json',
+      threshold: 0.01, timeoutMs: 30_000, intervalMs: 100,
+    });
+    const writeResult = changed.response;
+    const latencyMs = changed.elapsedMs;
+    // 本次 PUT /scene 必须真的成功，不能只看画面有没有变。
+    expect(writeResult.status, 'PUT /scene 未成功：' + JSON.stringify(writeResult).slice(0, 300)).toBe(200);
 
     const identity = await page.evaluate(() => (window as unknown as { __m1bIdentity?: number }).__m1bIdentity);
     const frameIdentityAfter = await frame.evaluate(() => window.name || 'preview');
@@ -43,6 +49,11 @@ test.describe('写回与即时同步', () => {
 
     writeArtifactFrom('writeback-hero.json', {
       latencyMs,
+      write: writeResult,
+      readiness: readiness.gate,
+      baselineWindow: readiness.window,
+      changedRatio: changed.changedRatio,
+      captureAttempts: summarizeAttempts(changed.attempts),
       wallClockMs: Date.now() - clickedAt,
       identity: { before: IDENTITY, after: identity },
       frameIdentity: { before: frameIdentityBefore, after: frameIdentityAfter },

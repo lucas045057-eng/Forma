@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "mode": "mock",
+  "run": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08",
+  "work": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T18-58-26.595Z-50784724-9bbc-44be-bfc7-a2bf5f44da08\\work",
+  "ports": {
+    "api": 26207,
+    "studio": 56479,
+    "main": 37731,
+    "preview": 38877,
+    "coding": 26871,
+    "lux3d": 31874,
+    "speech": 42956
+  }
+}

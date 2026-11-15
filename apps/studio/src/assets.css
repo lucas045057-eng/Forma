@@ -1,5 +1,10 @@
 .asset-dialog { position: fixed; inset: 0; z-index: 100; background: #101820; padding: 22px; display: flex; flex-direction: column; }
-.asset-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.asset-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.asset-controls { min-width: 0; }
+.fallback-preset { padding: 12px 0; border-bottom: 1px solid #425860; font-size: 12px; line-height: 1.6; }
+.fallback-preset strong { color: #a0ede2; }
+.fallback-preset p { overflow-wrap: anywhere; }
+.asset-dialog { overflow: auto; box-shadow: inset 0 0 80px #4dbbbe09; }
 .asset-header h2 { margin: 8px 0 0; }
 .asset-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; min-height: 0; flex: 1; }
 .model-area { position: relative; background: #efe8dc; border-radius: 10px; overflow: hidden; width: 100%; align-self: start; color: #514635; }

@@ -1,0 +1,24 @@
+{
+ "summary": {
+  "indexed": 4840,
+  "files": 4839,
+  "presentFiles": 4839,
+  "missingFiles": 0,
+  "links": 0,
+  "gitlinks": 1,
+  "unknownModes": 0,
+  "payloadBytes": 275489452,
+  "payloadDigest": "413ae72c82ab2847e0149c757b4e8002dae4939c17983aa93322ecfc3b609268"
+ },
+ "gitlinkCount": 1,
+ "missing": 0,
+ "audit": {
+  "match": 857,
+  "mismatch": 0,
+  "absent": 0,
+  "insideGitlink": 15
+ },
+ "problems": [
+  "物化普通容器失败：Error: 容器内 .git 指针指向外部：[{\"path\":\"docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special/demo-runs/2026-11-15T17-21-29.137Z-25e15516-e68a-4b16-88ec-f137f5aa3f27/work-data/candidates/ffac7609daff433f8ceb5942c706182f/.git\",\"kind\":\"file\",\"target\":\"E:/空间化AI工作台/.worktrees/m4-acceptance/."
+ ]
+}

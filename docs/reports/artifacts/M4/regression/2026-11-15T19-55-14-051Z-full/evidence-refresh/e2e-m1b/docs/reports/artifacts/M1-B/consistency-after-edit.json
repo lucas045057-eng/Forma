@@ -1,0 +1,742 @@
+{
+  "writeLatencyMs": 1214,
+  "write": {
+    "status": 200,
+    "body": "{\"type\":\"scene.changed\",\"sequence\":38,\"ts\":\"2026-11-15T20:04:06.744Z\",\"config\":{\"model\":\"/assets/diffuser-4969889.glb\",\"hero\":{\"camera\":{\"position\":[1.6,1.1,1.6],\"target\":[0,0.5,0],\"fov\":35},\"model\":{\"rotation\":[0,1.89840734641021,0],\"scale\":1},\"lights\":{\"key\":{\"intensity\":4.2,\"color\":\"#ffe8d5\",\"direction\":[3,5,4]},\"ambient\":2.4}},\"scroll\":[{\"at\":0,\"model\":{\"rotation\":[0,1.89840734641021,0]},\"parts\":{\"lid\":{\"offset\":[0,0,0]}}},{\"at\":0.6,\"model\":{\"rotation\":[0,1.8,0]},\"parts\":{\"lid\":{\"offset\":[0,0.08,0]}}}]},\"diff\":[{\"path\":\"/hero/model/rotation/1\",\"oldValue\":0.52,\"newValue\":1.89840734641021},{\"path\":\"/hero/lights/key/intensity\",\"oldValue\":3,\"newValue\":4.2},{\"path\":\"/hero/lights/key/color\",\"oldValue\":\"#ffd9a8\",\"newValue\":\"#ffe8d5\"},{\"path\":\"/hero/lights/ambient\",\"oldValue\":1.2,\"newValue\":2.4},{\"path\":\"/scroll/0/model/rotation/1\",\"oldValue\":0.52,\"newValue\":1.89840734641021}]}",
+    "url": "http://127.0.0.1:5173/scene",
+    "requestedAt": 1794773046744,
+    "respondedAt": 1794773046787,
+    "completedAt": 1794773046796
+  },
+  "readiness": {
+    "undoEnabled": true,
+    "saveEnabled": true,
+    "sceneLoaded": "true",
+    "hints": [],
+    "errors": []
+  },
+  "baselineWindow": {
+    "size": 378,
+    "start": 0,
+    "end": 378,
+    "visibleHeight": 378,
+    "previewRect": {
+      "x": 525.921875,
+      "y": 484.34375,
+      "width": 378.6875,
+      "height": 378.6875
+    },
+    "studioRect": {
+      "x": 997,
+      "y": 281.21875,
+      "width": 406,
+      "height": 406
+    },
+    "frameRect": {
+      "x": 21,
+      "y": 282.5,
+      "width": 940,
+      "height": 596.5
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "previewRows": {
+      "start": 0,
+      "end": 378
+    },
+    "studioRows": {
+      "start": 0,
+      "end": 406
+    },
+    "backing": {
+      "preview": 378,
+      "studio": 406,
+      "previewHeight": 378,
+      "studioHeight": 406,
+      "previewDpr": 1,
+      "studioDpr": 1,
+      "dpr": 1
+    },
+    "previewState": "ready"
+  },
+  "captureChangedRatio": 0.08334033201758069,
+  "captureAttempts": [
+    {
+      "at": 153,
+      "ok": false,
+      "reason": "同步/写回尚未就绪",
+      "window": {
+        "size": 378,
+        "start": 0,
+        "end": 341,
+        "visibleHeight": 341,
+        "previewRect": {
+          "x": 525.921875,
+          "y": 537.34375,
+          "width": 378.6875,
+          "height": 378.6875
+        },
+        "studioRect": {
+          "x": 997,
+          "y": 318.21875,
+          "width": 406,
+          "height": 406
+        },
+        "frameRect": {
+          "x": 21,
+          "y": 335.5,
+          "width": 940,
+          "height": 543.5
+        },
+        "previewRows": {
+          "start": 0,
+          "end": 341
+        },
+        "studioRows": {
+          "start": 0,
+          "end": 406
+        },
+        "backing": {
+          "preview": 378,
+          "studio": 406,
+          "previewHeight": 378,
+          "studioHeight": 406,
+          "previewDpr": 1,
+          "studioDpr": 1,
+          "dpr": 1
+        }
+      },
+      "gate": {
+        "undoEnabled": false,
+        "saveEnabled": false,
+        "sceneLoaded": "true",
+        "hints": [
+          "状态待同步",
+          "当前作品模型：来源状态待同步",
+          "状态待同步或作品操作待确认，请刷新状态后继续。",
+          "状态待同步，暂不可回答"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "at": 437,
+      "ok": false,
+      "reason": "同步/写回尚未就绪",
+      "window": {
+        "size": 378,
+        "start": 0,
+        "end": 341,
+        "visibleHeight": 341,
+        "previewRect": {
+          "x": 525.921875,
+          "y": 537.34375,
+          "width": 378.6875,
+          "height": 378.6875
+        },
+        "studioRect": {
+          "x": 997,
+          "y": 318.21875,
+          "width": 406,
+          "height": 406
+        },
+        "frameRect": {
+          "x": 21,
+          "y": 335.5,
+          "width": 940,
+          "height": 543.5
+        },
+        "previewRows": {
+          "start": 0,
+          "end": 341
+        },
+        "studioRows": {
+          "start": 0,
+          "end": 406
+        },
+        "backing": {
+          "preview": 378,
+          "studio": 406,
+          "previewHeight": 378,
+          "studioHeight": 406,
+          "previewDpr": 1,
+          "studioDpr": 1,
+          "dpr": 1
+        }
+      },
+      "gate": {
+        "undoEnabled": false,
+        "saveEnabled": false,
+        "sceneLoaded": "true",
+        "hints": [
+          "状态待同步",
+          "当前作品模型：来源状态待同步",
+          "状态待同步或作品操作待确认，请刷新状态后继续。",
+          "状态待同步，暂不可回答"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "at": 714,
+      "ok": false,
+      "reason": "同步/写回尚未就绪",
+      "window": {
+        "size": 378,
+        "start": 0,
+        "end": 341,
+        "visibleHeight": 341,
+        "previewRect": {
+          "x": 525.921875,
+          "y": 537.34375,
+          "width": 378.6875,
+          "height": 378.6875
+        },
+        "studioRect": {
+          "x": 997,
+          "y": 318.21875,
+          "width": 406,
+          "height": 406
+        },
+        "frameRect": {
+          "x": 21,
+          "y": 335.5,
+          "width": 940,
+          "height": 543.5
+        },
+        "previewRows": {
+          "start": 0,
+          "end": 341
+        },
+        "studioRows": {
+          "start": 0,
+          "end": 406
+        },
+        "backing": {
+          "preview": 378,
+          "studio": 406,
+          "previewHeight": 378,
+          "studioHeight": 406,
+          "previewDpr": 1,
+          "studioDpr": 1,
+          "dpr": 1
+        }
+      },
+      "gate": {
+        "undoEnabled": false,
+        "saveEnabled": false,
+        "sceneLoaded": "true",
+        "hints": [
+          "状态待同步",
+          "当前作品模型：来源状态待同步",
+          "状态待同步或作品操作待确认，请刷新状态后继续。",
+          "状态待同步，暂不可回答"
+        ],
+        "errors": []
+      }
+    },
+    {
+      "at": 993,
+      "ok": true,
+      "changedRatio": 0.08334033201758069,
+      "window": {
+        "size": 378,
+        "start": 0,
+        "end": 378,
+        "visibleHeight": 378,
+        "previewRect": {
+          "x": 525.921875,
+          "y": 484.34375,
+          "width": 378.6875,
+          "height": 378.6875
+        },
+        "studioRect": {
+          "x": 997,
+          "y": 281.21875,
+          "width": 406,
+          "height": 406
+        },
+        "frameRect": {
+          "x": 21,
+          "y": 282.5,
+          "width": 940,
+          "height": 596.5
+        },
+        "previewRows": {
+          "start": 0,
+          "end": 378
+        },
+        "studioRows": {
+          "start": 0,
+          "end": 406
+        },
+        "backing": {
+          "preview": 378,
+          "studio": 406,
+          "previewHeight": 378,
+          "studioHeight": 406,
+          "previewDpr": 1,
+          "studioDpr": 1,
+          "dpr": 1
+        }
+      },
+      "gate": {
+        "undoEnabled": true,
+        "saveEnabled": true,
+        "sceneLoaded": "true",
+        "hints": [],
+        "errors": []
+      },
+      "afterWindow": {
+        "size": 378,
+        "start": 0,
+        "end": 378,
+        "visibleHeight": 378,
+        "previewRect": {
+          "x": 525.921875,
+          "y": 484.34375,
+          "width": 378.6875,
+          "height": 378.6875
+        },
+        "studioRect": {
+          "x": 997,
+          "y": 281.21875,
+          "width": 406,
+          "height": 406
+        },
+        "frameRect": {
+          "x": 21,
+          "y": 282.5,
+          "width": 940,
+          "height": 596.5
+        },
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "previewRows": {
+          "start": 0,
+          "end": 378
+        },
+        "studioRows": {
+          "start": 0,
+          "end": 406
+        },
+        "backing": {
+          "preview": 378,
+          "studio": 406,
+          "previewHeight": 378,
+          "studioHeight": 406,
+          "previewDpr": 1,
+          "studioDpr": 1,
+          "dpr": 1
+        },
+        "previewState": "ready"
+      },
+      "afterGate": {
+        "undoEnabled": true,
+        "saveEnabled": true,
+        "sceneLoaded": "true",
+        "hints": [],
+        "errors": []
+      }
+    }
+  ],
+  "heroConfig": {
+    "camera": {
+      "position": [
+        1.6,
+        1.1,
+        1.6
+      ],
+      "target": [
+        0,
+        0.5,
+        0
+      ],
+      "fov": 35
+    },
+    "model": {
+      "rotation": [
+        0,
+        1.89840734641021,
+        0
+      ],
+      "scale": 1
+    },
+    "lights": {
+      "key": {
+        "intensity": 4.2,
+        "color": "#ffe8d5",
+        "direction": [
+          3,
+          5,
+          4
+        ]
+      },
+      "ambient": 2.4
+    }
+  },
+  "writtenCamera": {
+    "position": [
+      2.4,
+      1.5,
+      2.4
+    ],
+    "target": [
+      0,
+      0.45,
+      0
+    ],
+    "fov": 42
+  },
+  "config": {
+    "model": "/assets/diffuser-4969889.glb",
+    "hero": {
+      "camera": {
+        "position": [
+          2.4,
+          1.5,
+          2.4
+        ],
+        "target": [
+          0,
+          0.45,
+          0
+        ],
+        "fov": 42
+      },
+      "model": {
+        "rotation": [
+          0,
+          1.89840734641021,
+          0
+        ],
+        "scale": 1
+      },
+      "lights": {
+        "key": {
+          "intensity": 4.2,
+          "color": "#9fd0ff",
+          "direction": [
+            3,
+            5,
+            4
+          ]
+        },
+        "ambient": 2.4
+      }
+    },
+    "scroll": [
+      {
+        "at": 0,
+        "model": {
+          "rotation": [
+            0,
+            1.89840734641021,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "at": 0.6,
+        "model": {
+          "rotation": [
+            0,
+            1.8,
+            0
+          ]
+        },
+        "parts": {
+          "lid": {
+            "offset": [
+              0,
+              0.08,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "canvas": {
+    "size": 378,
+    "visibleHeight": 378
+  },
+  "diff": {
+    "aligned": {
+      "shift": {
+        "x": 0,
+        "y": 1
+      },
+      "meanAbsDiff": 1.7715183922080473,
+      "maxDiff": 18,
+      "changedRatio": 0,
+      "pixels": 142506,
+      "tried": [
+        {
+          "x": -3,
+          "y": -3,
+          "changedRatio": 0.022926222222222223
+        },
+        {
+          "x": -2,
+          "y": -3,
+          "changedRatio": 0.017652482269503545
+        },
+        {
+          "x": -1,
+          "y": -3,
+          "changedRatio": 0.01191865605658709
+        },
+        {
+          "x": 0,
+          "y": -3,
+          "changedRatio": 0.008479717813051147
+        },
+        {
+          "x": 1,
+          "y": -3,
+          "changedRatio": 0.011954022988505748
+        },
+        {
+          "x": 2,
+          "y": -3,
+          "changedRatio": 0.016645390070921987
+        },
+        {
+          "x": 3,
+          "y": -3,
+          "changedRatio": 0.02181688888888889
+        },
+        {
+          "x": -3,
+          "y": -2,
+          "changedRatio": 0.02229078014184397
+        },
+        {
+          "x": -2,
+          "y": -2,
+          "changedRatio": 0.01685576052512449
+        },
+        {
+          "x": -1,
+          "y": -2,
+          "changedRatio": 0.010095095660025961
+        },
+        {
+          "x": 0,
+          "y": -2,
+          "changedRatio": 0.00576241134751773
+        },
+        {
+          "x": 1,
+          "y": -2,
+          "changedRatio": 0.010229132569558102
+        },
+        {
+          "x": 2,
+          "y": -2,
+          "changedRatio": 0.01565329334540516
+        },
+        {
+          "x": 3,
+          "y": -2,
+          "changedRatio": 0.021290780141843973
+        },
+        {
+          "x": -3,
+          "y": -1,
+          "changedRatio": 0.021531388152077807
+        },
+        {
+          "x": -2,
+          "y": -1,
+          "changedRatio": 0.01566115469270275
+        },
+        {
+          "x": -1,
+          "y": -1,
+          "changedRatio": 0.00821085070604873
+        },
+        {
+          "x": 0,
+          "y": -1,
+          "changedRatio": 0.0038594866181073076
+        },
+        {
+          "x": 1,
+          "y": -1,
+          "changedRatio": 0.008471177592187379
+        },
+        {
+          "x": 2,
+          "y": -1,
+          "changedRatio": 0.014948642699926632
+        },
+        {
+          "x": 3,
+          "y": -1,
+          "changedRatio": 0.020753315649867373
+        },
+        {
+          "x": -3,
+          "y": 0,
+          "changedRatio": 0.02078306878306878
+        },
+        {
+          "x": -2,
+          "y": 0,
+          "changedRatio": 0.014289935832489024
+        },
+        {
+          "x": -1,
+          "y": 0,
+          "changedRatio": 0.0062313165761441625
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "changedRatio": 0.002113602642703172
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "changedRatio": 0.006469903021627159
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "changedRatio": 0.013945176179218732
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "changedRatio": 0.020098765432098764
+        },
+        {
+          "x": -3,
+          "y": 1,
+          "changedRatio": 0.02003183023872679
+        },
+        {
+          "x": -2,
+          "y": 1,
+          "changedRatio": 0.013248490321124217
+        },
+        {
+          "x": -1,
+          "y": 1,
+          "changedRatio": 0.004918067389484201
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "changedRatio": 0
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "changedRatio": 0.004918067389484201
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "changedRatio": 0.013248490321124217
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "changedRatio": 0.02003183023872679
+        },
+        {
+          "x": -3,
+          "y": 2,
+          "changedRatio": 0.02020567375886525
+        },
+        {
+          "x": -2,
+          "y": 2,
+          "changedRatio": 0.014019352648257129
+        },
+        {
+          "x": -1,
+          "y": 2,
+          "changedRatio": 0.006504317399401772
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "changedRatio": 0.0021248452099515928
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "changedRatio": 0.006264461877081099
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "changedRatio": 0.014365946129470349
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "changedRatio": 0.020893617021276595
+        },
+        {
+          "x": -3,
+          "y": 3,
+          "changedRatio": 0.020864
+        },
+        {
+          "x": -2,
+          "y": 3,
+          "changedRatio": 0.01502836879432624
+        },
+        {
+          "x": -1,
+          "y": 3,
+          "changedRatio": 0.008516357206012378
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "changedRatio": 0.0038800705467372134
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "changedRatio": 0.008254641909814323
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "changedRatio": 0.01574468085106383
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "changedRatio": 0.021646222222222223
+        }
+      ]
+    },
+    "normalized": {
+      "meanAbsDiff": 2.0738754272460938,
+      "maxDiff": 125,
+      "changedRatio": 0.0020294189453125,
+      "pixels": 262144
+    }
+  }
+}

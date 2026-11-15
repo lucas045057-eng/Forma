@@ -1,0 +1,580 @@
+{
+  "kind": "disconnect-hung",
+  "pid": 67420,
+  "begun": "2026-11-15T16:50:06.577Z",
+  "root": "C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me",
+  "events": [
+    {
+      "event": "spawn",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:06.589Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        }
+      }
+    },
+    {
+      "event": "spawn",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:06.589Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        }
+      }
+    },
+    {
+      "event": "disconnect",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:08.541Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        }
+      }
+    },
+    {
+      "event": "stderr:end",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.789Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:end",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.789Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:close",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.789Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stderr:close",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.789Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "exit",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.794Z",
+      "code": 1,
+      "signal": null,
+      "state": {
+        "exitCode": 1,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "close",
+      "role": "orphan",
+      "pid": 19524,
+      "at": "2026-11-15T16:50:10.794Z",
+      "code": 1,
+      "signal": null,
+      "state": {
+        "exitCode": 1,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stderr:end",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.633Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stderr:close",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.633Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": false,
+          "closed": false,
+          "readable": true
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:end",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.633Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": true,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "disconnect",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.633Z",
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": false,
+          "readableEnded": true,
+          "closed": false,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "stdout:close",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.633Z",
+      "hadError": false,
+      "state": {
+        "exitCode": null,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "exit",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.640Z",
+      "code": 1,
+      "signal": null,
+      "state": {
+        "exitCode": 1,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    },
+    {
+      "event": "close",
+      "role": "unrelated",
+      "pid": 20360,
+      "at": "2026-11-15T16:50:13.640Z",
+      "code": 1,
+      "signal": null,
+      "state": {
+        "exitCode": 1,
+        "signalCode": null,
+        "connected": false,
+        "stdout": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        },
+        "stderr": {
+          "destroyed": true,
+          "readableEnded": true,
+          "closed": true,
+          "readable": false
+        }
+      }
+    }
+  ],
+  "identities": [
+    {
+      "pid": 69176,
+      "parent": 19524,
+      "created": "2026-11-15T16:50:06.6524980Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs asset C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "asset"
+    },
+    {
+      "pid": 35936,
+      "parent": 19524,
+      "created": "2026-11-15T16:50:06.6465320Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs check C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "check"
+    },
+    {
+      "pid": 32164,
+      "parent": 19524,
+      "created": "2026-11-15T16:50:06.6584260Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs frontend-worker C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "frontend-worker"
+    },
+    {
+      "pid": 19524,
+      "parent": 67420,
+      "created": "2026-11-15T16:50:06.5810390Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs orphan C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "orphan"
+    },
+    {
+      "pid": 30576,
+      "parent": 19524,
+      "created": "2026-11-15T16:50:06.6403350Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs preview C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "preview"
+    },
+    {
+      "pid": 20360,
+      "parent": 67420,
+      "created": "2026-11-15T16:50:06.5866430Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs unrelated C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-q4F6Me hung",
+      "role": "unrelated"
+    }
+  ],
+  "fallbackKills": [
+    {
+      "role": "unrelated",
+      "pid": 20360,
+      "created": "2026-11-15T16:50:06.5866430Z",
+      "reason": "final unrelated stop"
+    }
+  ],
+  "cleanupErrors": [],
+  "primary": null,
+  "readyAt": "2026-11-15T16:50:08.540Z",
+  "actionAt": "2026-11-15T16:50:08.540Z",
+  "actionResult": {
+    "code": 1,
+    "signal": null,
+    "stdout": "",
+    "stderr": "DEMO_ORPHAN_TIMEOUT: owned child exceeded its parent-disconnect shutdown budget\n"
+  },
+  "familyGoneBeforeFallback": true,
+  "unrelatedAliveBeforeCleanup": true,
+  "orphanEvents": [
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:06.642Z",
+      "connected": true,
+      "childPid": 30576,
+      "childRole": "preview"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:06.648Z",
+      "connected": true,
+      "childPid": 35936,
+      "childRole": "check"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:06.654Z",
+      "connected": true,
+      "childPid": 69176,
+      "childRole": "asset"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:06.660Z",
+      "connected": true,
+      "childPid": 32164,
+      "childRole": "frontend-worker"
+    },
+    {
+      "event": "ready",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:06.660Z",
+      "connected": true
+    },
+    {
+      "event": "fixture-disconnect-message",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:08.540Z",
+      "connected": true
+    },
+    {
+      "event": "fixture-disconnect-called",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:08.540Z",
+      "connected": true
+    },
+    {
+      "event": "disconnect",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:08.540Z",
+      "connected": false
+    },
+    {
+      "event": "close-called",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:08.541Z",
+      "connected": false,
+      "closeMode": "hung"
+    },
+    {
+      "event": "exit",
+      "role": "orphan",
+      "pid": 19524,
+      "parent": 67420,
+      "at": "2026-11-15T16:50:10.785Z",
+      "connected": false,
+      "code": 1
+    }
+  ],
+  "runtimeCleanup": {
+    "at": "2026-11-15T16:50:08.849Z",
+    "parentPid": 19524,
+    "forced": true,
+    "children": [
+      {
+        "pid": 30576,
+        "parent": 19524,
+        "created": "2026-11-15T16:50:06.6403350Z",
+        "depth": 1
+      },
+      {
+        "pid": 35936,
+        "parent": 19524,
+        "created": "2026-11-15T16:50:06.6465320Z",
+        "depth": 1
+      },
+      {
+        "pid": 69176,
+        "parent": 19524,
+        "created": "2026-11-15T16:50:06.6524980Z",
+        "depth": 1
+      },
+      {
+        "pid": 32164,
+        "parent": 19524,
+        "created": "2026-11-15T16:50:06.6584260Z",
+        "depth": 1
+      }
+    ],
+    "errors": [],
+    "remaining": []
+  },
+  "remaining": [],
+  "finished": "2026-11-15T16:50:14.188Z",
+  "retained": null
+}

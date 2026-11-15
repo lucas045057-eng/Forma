@@ -1,0 +1,193 @@
+{
+  "at": "2026-11-15T19:49:12.151Z",
+  "note": "运行后追加 fixed-additions（本轮新增 8 个固定目录 JSON 的原字节）与其映射表，清单排除自身并静态复算。",
+  "payloadFiles": 37,
+  "manifestExcluded": "sha256-manifest.json",
+  "entries": [
+    {
+      "path": "cleanup.json",
+      "bytes": 455,
+      "sha256": "8b668f29f5cfb77d609e99a7485a827942c342a927318ad8d3f31783271fa7e1"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/adopt-guard.json",
+      "bytes": 170,
+      "sha256": "c610746c438d04c4cda54ff3fc40612509fc017597f4260b98b0807fc9e42dc4"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/adopt-primary.json",
+      "bytes": 338,
+      "sha256": "49bfc1d03e0a5bd6a19bc7d1eda0491f6ec677d2c1d3aff789f4bbb18da5e972"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/adopt-sandbox-ok.json",
+      "bytes": 2445,
+      "sha256": "4b67b25dd04ca8c8ce8bb4620c2b5d1842c70c0bb0167fb2dae3bbe8138f4ab9"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/api-concurrent.json",
+      "bytes": 77,
+      "sha256": "41eec58947e8205355d3ad4148990beb3a438f26824ce5467a1401a5731f6da9"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/api-invalid-page.json",
+      "bytes": 174,
+      "sha256": "57539ab9a73bda4defedb1f7720fe30fede390f214889af18d6d04be79e29e27"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/api-invalid.json",
+      "bytes": 947,
+      "sha256": "2d8a56ca95400a63d49b5909fe281029281268e9ac5627323d060b4f8d909c31"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/api-paths.json",
+      "bytes": 628,
+      "sha256": "5ee0b7fa74ccaa5d044577f7ee1e2b752aa718217568a0aa612efd7c70c8390b"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/consistency-after-edit.json",
+      "bytes": 16126,
+      "sha256": "d4681c13e18fc2477d565f2376930405b24f66ce044f1ae718e04e8810798118"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/consistency-canvas-content.json",
+      "bytes": 381,
+      "sha256": "f96e6e0add03023e3eb2f6c51459d73c5b3af078177163f3641cd8ece1ff5194"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/consistency-default.json",
+      "bytes": 6900,
+      "sha256": "ea8259535fd0c8b616d612d60e169432e8b000be381d9b9b1ed95fef73ec56d7"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/consistency-scroll-06.json",
+      "bytes": 5657,
+      "sha256": "60a6e2025e7f094a1e9bea5ad999fab68168e49d02874f8e1fe995435fc1ff93"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/fix-b1-host.json",
+      "bytes": 246,
+      "sha256": "86d5e11a05f0e52389394c4c35a53a6080655a660e584258597cef45f578b43b"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/fix-r2-lid-gating.json",
+      "bytes": 241,
+      "sha256": "15c298d455b33a3cf5a9eb8b2a2f64bb798774f5c557da5d67584e3e45c5f847"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/fix-r3-instance-lock.json",
+      "bytes": 172,
+      "sha256": "18c25590ddad7c35d66ce7ddeac490fb43e63545463d7ccfb114e8d8e6de9986"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/fix-s1-unwrap.json",
+      "bytes": 120,
+      "sha256": "1db00bf6cd020c41912e7d3729c827983760d6deef859e96d26cc31f24c4e73a"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/keyframe-overwrite.json",
+      "bytes": 310,
+      "sha256": "9b0e169620df323e719e8c310e5ee2471776f87d11f993bc47d3ba54656cd31b"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/keyframe-scroll-shipped.json",
+      "bytes": 247,
+      "sha256": "59b60c10d66abc05342c68179bb657865542de229c5ed34fc2a469657eb3d2b8"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/keyframe-write.json",
+      "bytes": 573,
+      "sha256": "464bcc9b40f287dc524ebcbd5d7e4e3f533ce83149f5513a3c3fe9fd54ac8983"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/undo-api.json",
+      "bytes": 36,
+      "sha256": "986bf28c8a1ed4140f120c4d55761b7ad59128e1d4940224c36eee521b42b8b5"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/undo-empty.json",
+      "bytes": 194,
+      "sha256": "fbe80cab47efbc175093e39fa9b280fe6a876789033ced5e12386c7031cb1721"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/undo-ui.json",
+      "bytes": 24226,
+      "sha256": "bf88aa2711306a63ed1dddb2b294e59af5dcab6d0d02e80da3590b314f6753c9"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/writeback-hero.json",
+      "bytes": 14696,
+      "sha256": "36513700887b67e0b0c294674240ff6c463f250aa0e3afd443f64812d02152d1"
+    },
+    {
+      "path": "evidence-refresh/m1b-focused/docs/reports/artifacts/M1-B/writeback-keyframe.json",
+      "bytes": 898,
+      "sha256": "61b4f9a4f14abd4905cff9e74ba6058f824ea3a08822e45726ed1733ee7a368b"
+    },
+    {
+      "path": "fixed-additions-mapping.json",
+      "bytes": 4666,
+      "sha256": "caf896a73f4324c67a02dc8d28d29041d748f3c51bbe8ffa9c54dacc98845a7c"
+    },
+    {
+      "path": "fixed-additions/adopt-provenance-cleanup.json",
+      "bytes": 323,
+      "sha256": "3f6fc5c4db114f4032753a562042976d092058b3d0538c1faece7d0c0e49dfcb"
+    },
+    {
+      "path": "fixed-additions/consistency-write-baseline.json",
+      "bytes": 2193,
+      "sha256": "6b3dde5fe33ae8629875f06cd96f33546d9bfb5131fa5882354919b7b0ce40f5"
+    },
+    {
+      "path": "fixed-additions/consistency-write-sampling.json",
+      "bytes": 9141,
+      "sha256": "3c65fcd46e1b6f8790c8f655bf9fcacd4a8f6b5a1184b4d5053e781a6962a23a"
+    },
+    {
+      "path": "fixed-additions/undo-ui-baseline.json",
+      "bytes": 2193,
+      "sha256": "ca64b98657f807e1999a85f77583d6d595393f9f03816ff703cdda2ea75acf0d"
+    },
+    {
+      "path": "fixed-additions/undo-ui-recover-sampling.json",
+      "bytes": 11716,
+      "sha256": "20d6bd044adbc352fcd409e171ffa2b609af551b9b49ff72b60ba272bb4f7b73"
+    },
+    {
+      "path": "fixed-additions/undo-ui-write-sampling.json",
+      "bytes": 13223,
+      "sha256": "2dd3fcda7cfeeca5883c64e95eb04afa78f9ccea0ab0b389e67e30c448f1ee55"
+    },
+    {
+      "path": "fixed-additions/writeback-hero-baseline.json",
+      "bytes": 2193,
+      "sha256": "72035967831877e843f3e224ad03d4fb96e42efc16703762dd22c4378ea88741"
+    },
+    {
+      "path": "fixed-additions/writeback-hero-sampling.json",
+      "bytes": 13422,
+      "sha256": "579bc3e9dafec449c6ef6256185a9d9c7abd5efe07d27ec2fe08207875ba6203"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 15294,
+      "sha256": "e1a2c01e86ccc26ed38b01dbc48b15c47077390a3ad597fda2f86ca026b25635"
+    },
+    {
+      "path": "output/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "playwright.log",
+      "bytes": 4198,
+      "sha256": "5ca73858539278ebc53ae17288950f372cfeda9b94894ac3d99a0337e6e017ab"
+    },
+    {
+      "path": "results.json",
+      "bytes": 33750,
+      "sha256": "b972a249c6e20c29ff32bb427824ef393679fa5ef25de7baa48cb3dc82e3b90d"
+    }
+  ]
+}

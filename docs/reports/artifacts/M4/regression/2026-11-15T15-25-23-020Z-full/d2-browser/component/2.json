@@ -1,0 +1,87 @@
+{
+  "test": "cross-origin iframe blur and pending pick preserve review, then reconnect restores explicit B confirmation",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.46669999999994616
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 63.420900000000074
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 122.15570000000002
+      },
+      {
+        "phase": "interaction",
+        "ms": 124.02739999999994
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 1,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 1,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "posts": [
+    {
+      "id": "15d2d08c-a106-4c86-8a6f-a43fb1aba4ae",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "把这个改成圆角",
+      "selection": {
+        "cid": "B",
+        "src": "src/B.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

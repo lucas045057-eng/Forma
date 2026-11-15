@@ -21,7 +21,9 @@ export class SpeechService {
   private closing = false;
   private readonly timeoutMs: number;
   private readonly now: () => number;
-  constructor(private readonly client: Client, options: { timeoutMs?: number; now?: () => number } = {}) {
+  private readonly client:Client;
+  constructor(client: Client, options: { timeoutMs?: number; now?: () => number } = {}) {
+    this.client=client;
     this.timeoutMs = options.timeoutMs ?? SPEECH_TIMEOUT_MS;
     if (!Number.isFinite(this.timeoutMs) || this.timeoutMs <= 0 || this.timeoutMs > SPEECH_TIMEOUT_MS) throw new Error('Invalid speech timeout');
     this.now = options.now ?? Date.now;

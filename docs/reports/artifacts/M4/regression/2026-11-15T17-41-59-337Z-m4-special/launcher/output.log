@@ -1,0 +1,153 @@
+[WebServer] (node:54772) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 19 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\m4\01-speech.spec.ts:143:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 按住录音 → 松手转写 → 可编辑 review → 确认写入指令，只有点生成才提交任务 (923ms)
+  x   2 [chromium] › tests\e2e\m4\01-speech.spec.ts:173:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 (1.3s)
+  ok  3 [chromium] › tests\e2e\m4\01-speech.spec.ts:194:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 录音中页面隐藏：立即取消并释放轨道；录音阶段无上传，因此不应发送 DELETE (694ms)
+  ok  4 [chromium] › tests\e2e\m4\01-speech.spec.ts:216:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 转写返回 499：只显示安全文案，重试用新的 request id (809ms)
+  ok  5 [chromium] › tests\e2e\m4\01-speech.spec.ts:247:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 权限未返回时取消：Escape 确定性取消，迟到的权限不会启动录音也不残留轨道 (628ms)
+  ok  6 [chromium] › tests\e2e\m4\01-speech.spec.ts:313:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦 (1.5s)
+  ok  7 [chromium] › tests\e2e\m4\01-speech.spec.ts:336:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › F2 语音提交成功后版本变化：新手输文字仍可提交（旧绑定不再阻塞） (4.7s)
+  ok  8 [chromium] › tests\e2e\m4\02-fallback.spec.ts:40:3 › M4-D3 本地备用模型与来源 › 三份本地素材的字节哈希与 preset 声明一致（不联网） (43ms)
+  ok  9 [chromium] › tests\e2e\m4\02-fallback.spec.ts:56:3 › M4-D3 本地备用模型与来源 › 列表只暴露固定 preset，非法输入被拒 (56ms)
+  ok 10 [chromium] › tests\e2e\m4\02-fallback.spec.ts:70:3 › M4-D3 本地备用模型与来源 › 导入 → 来源 sidecar 绑定真实字节 → 采用 → scene undo 还原（不是 /version/revert） (3.3s)
+  ok 11 [chromium] › tests\e2e\m4\02-fallback.spec.ts:119:3 › M4-D3 本地备用模型与来源 › F5 preset 导入接受界面真实发出的空对象 POST，危险字段仍被拒 (136ms)
+  ok 12 [chromium] › tests\e2e\m4\02-fallback.spec.ts:133:3 › M4-D3 本地备用模型与来源 › F4 坏来源 sidecar 三类都安全 409，作品四份字节不变 (123ms)
+  ok 13 [chromium] › tests\e2e\m4\03-layout.spec.ts:24:5 › M4-D4 布局与焦点 › 1440x900：场景画布不被裁切、横向滚动可用、聚焦可达 (1.6s)
+  ok 14 [chromium] › tests\e2e\m4\03-layout.spec.ts:24:5 › M4-D4 布局与焦点 › 1280x800：场景画布不被裁切、横向滚动可用、聚焦可达 (1.5s)
+  ok 15 [chromium] › tests\e2e\m4\03-layout.spec.ts:24:5 › M4-D4 布局与焦点 › 390x844：场景画布不被裁切、横向滚动可用、聚焦可达 (1.4s)
+  ok 16 [chromium] › tests\e2e\m4\04-demo.spec.ts:217:3 › M4-D5 演示入口（mock） › 进程内 SIGINT 处理模拟：launch 自身的 graceful 收尾（非真实控制台 Ctrl+C） (3.2s)
+  ok 17 [chromium] › tests\e2e\m4\04-demo.spec.ts:314:3 › M4-D5 演示入口（mock） › 真实候选链路：候选 HMR 连 plan.preview，10s 内无循环导航 (15.8s)
+  x  18 [chromium] › tests\e2e\m4\04-demo.spec.ts:361:3 › M4-D5 演示入口（mock） › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） (49.7s)
+  -  19 [chromium] › tests\e2e\m4\04-demo.spec.ts:409:3 › M4-D5 演示入口（mock） › 父启动器被硬杀：真实 backend/frontends 及孙进程按 PID+创建时间回收，并留失败证据
+
+
+  1) [chromium] › tests\e2e\m4\01-speech.spec.ts:173:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 
+
+    Error: 两次点选没落到不同对象
+
+    expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not "src/components/Button.tsx:5:5"
+
+      183 |     // 用它证明"两个对象不同"是无效前提。改用真实不同来源的 DOM 目标（ul.benefits，src/App.tsx）。
+      184 |     const second = await pickElement(page, 'benefits');
+    > 185 |     expect(second.src, '两次点选没落到不同对象').not.toBe(first.src);
+          |                                           ^
+      186 |     await expect(page.getByTestId('speech-selection-conflict')).toBeVisible({ timeout: 20_000 });
+      187 |     await expect(page.getByTestId('speech-use')).toBeDisabled();
+      188 |     await page.getByTestId('speech-use-current').click();
+        at E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\01-speech.spec.ts:185:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    docs\reports\artifacts\M4\regression\2026-11-15T17-41-59-337Z-m4-special\output\01-speech-M4-D2-语音确认闭环（真实按-8327d--A、确认前改点-B：提示并要求明确确认，不得自动套用-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: docs\reports\artifacts\M4\regression\2026-11-15T17-41-59-337Z-m4-special\output\01-speech-M4-D2-语音确认闭环（真实按-8327d--A、确认前改点-B：提示并要求明确确认，不得自动套用-chromium\error-context.md
+
+    Error Context: docs\reports\artifacts\M4\regression\2026-11-15T17-41-59-337Z-m4-special\output\01-speech-M4-D2-语音确认闭环（真实按-8327d--A、确认前改点-B：提示并要求明确确认，不得自动套用-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\m4\04-demo.spec.ts:361:3 › M4-D5 演示入口（mock） › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） 
+
+    Error: 模拟 SIGINT 后必须正常退出
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": 0,
+    +   "code": 1,
+        "signal": null,
+      }
+
+      190 |   child.send({ type: 'sigint' });
+      191 |   await closed;
+    > 192 |   expect({ code: child.exitCode, signal: child.signalCode }, '模拟 SIGINT 后必须正常退出').toEqual({ code: 0, signal: null });
+          |                                                                                   ^
+      193 |   if (handle.runDir) {
+      194 |     const manifest = readJson(path.join(handle.runDir, 'manifest.json'));
+      195 |     expect(manifest.status).toBe('stopped');
+        at stopHandle (E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\04-demo.spec.ts:192:83)
+        at E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\04-demo.spec.ts:403:7
+
+    AggregateError: Owned demo cleanup failed
+
+      212 |       } finally { activeDemos.delete(handle); }
+      213 |     }
+    > 214 |     if (errors.length) throw new AggregateError(errors, 'Owned demo cleanup failed');
+          |                              ^
+      215 |   });
+      216 |
+      217 |   test('进程内 SIGINT 处理模拟：launch 自身的 graceful 收尾（非真实控制台 Ctrl+C）', async () => {
+        at E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\04-demo.spec.ts:214:30
+
+    Error: demo 不能在收尾前异常退出
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "code": 0,
+    +   "code": 1,
+        "signal": null,
+      }
+
+      180 |   if (child.exitCode !== null || child.signalCode !== null) {
+      181 |     activeDemos.delete(handle);
+    > 182 |     expect({ code: child.exitCode, signal: child.signalCode }, 'demo 不能在收尾前异常退出').toEqual({ code: 0, signal: null });
+          |                                                                                   ^
+      183 |     return;
+      184 |   }
+      185 |   if (!child.connected) throw new Error('Owned demo is alive without its test IPC shutdown channel');
+        at stopHandle (E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\04-demo.spec.ts:182:83)
+        at E:\空间化AI工作台\.worktrees\m4-acceptance\tests\e2e\m4\04-demo.spec.ts:207:19
+
+    Error Context: docs\reports\artifacts\M4\regression\2026-11-15T17-41-59-337Z-m4-special\output\04-demo-M4-D5-演示入口（mock）-固-921e7-时不串实例（复用确认的自有监听作为冲突对照，不抢端口）-chromium\error-context.md
+
+  2 failed
+    [chromium] › tests\e2e\m4\01-speech.spec.ts:173:3 › M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显） › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 
+    [chromium] › tests\e2e\m4\04-demo.spec.ts:361:3 › M4-D5 演示入口（mock） › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） 
+  1 did not run
+  16 passed (1.6m)
+{
+ "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T17-41-59-337Z-m4-special",
+ "code": 1,
+ "tests": 19,
+ "stats": {
+  "startTime": "2026-11-15T17:42:00.892Z",
+  "duration": 93549.587,
+  "expected": 16,
+  "skipped": 1,
+  "unexpected": 2,
+  "flaky": 0
+ },
+ "problems": [
+  "退出码 1（signal=null）",
+  "报告核对失败：stats.unexpected=2（必须为 0）",
+  "报告核对失败：stats.skipped=1（必须为 0）",
+  "报告核对失败：spec 未通过：01-speech.spec.ts › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用",
+  "报告核对失败：test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：01-speech.spec.ts › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 [chromium]",
+  "报告核对失败：results[0].status=failed（要求 passed）：01-speech.spec.ts › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 [chromium]",
+  "报告核对失败：results[0] 带错误信息：01-speech.spec.ts › 录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用 [chromium]",
+  "报告核对失败：spec 未通过：04-demo.spec.ts › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口）",
+  "报告核对失败：test.status=unexpected（要求 expected，skip/flaky/unexpected 都拒绝）：04-demo.spec.ts › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） [chromium]",
+  "报告核对失败：results[0].status=failed（要求 passed）：04-demo.spec.ts › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） [chromium]",
+  "报告核对失败：results[0] 带错误信息：04-demo.spec.ts › 固定 5175 已被占用时不串实例（复用确认的自有监听作为冲突对照，不抢端口） [chromium]",
+  "报告核对失败：test.status=skipped（要求 expected，skip/flaky/unexpected 都拒绝）：04-demo.spec.ts › 父启动器被硬杀：真实 backend/frontends 及孙进程按 PID+创建时间回收，并留失败证据 [chromium]",
+  "报告核对失败：results[0].status=skipped（要求 passed）：04-demo.spec.ts › 父启动器被硬杀：真实 backend/frontends 及孙进程按 PID+创建时间回收，并留失败证据 [chromium]",
+  "报告核对失败：stats.expected=16 与实际 test 记录数 19 不一致"
+ ],
+ "shaMismatch": 0,
+ "archived": 0,
+ "cleanup": {
+  "ports": [],
+  "procs": [],
+  "identityStable": true
+ }
+}

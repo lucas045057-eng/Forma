@@ -1,0 +1,12 @@
+{
+  "sockets": [
+    "ws://127.0.0.1:5173/?token=9MPCCNst4ebu",
+    "ws://127.0.0.1:5173/events",
+    "ws://127.0.0.1:5175/preview/main/hmr?token=tse8cUXbiH1l"
+  ],
+  "eventSockets": 1,
+  "seqBefore": 188,
+  "seqAfter": 189,
+  "sceneFov": 37,
+  "sceneConfigMirrored": true
+}

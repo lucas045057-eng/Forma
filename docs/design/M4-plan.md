@@ -1,6 +1,6 @@
 # M4：视觉、语音、备用资产与演示
 
-状态：D1已实现、标准验证547项通过、独立代码审查0 blocker/0 should-fix，交付aa43c2a已合主线，可接D2。D1尚无Pi正式验收，D2–D5未实现，M4未收口。原设计审查0 blocker/8 should-fix/9 suggestions已在d6ec495修订回应S1–S8。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收；不授权新增真实付费调用、不代替真实凭据或参与者。
+状态：D2–D5已按统一任务完成开发交付（实现fd38840，详见[M4-development-handoff.md](../reports/M4-development-handoff.md)），尚未集中测试与统一审查，M4未收口。此前D1标准547项/独立审查0 blocker/0 should-fix只对应原冻结字节aa43c2a，不外推覆盖这次完整开发；D1尚无Pi正式验收。原设计审查0 blocker/8 should-fix/9 suggestions已在d6ec495修订回应S1–S8。Codex设计/集成，CodeBuddy独立工作树实现，Claude Code独立审查，Pi独立验收；不授权新增真实付费调用、不代替真实凭据或参与者。
 
 **执行顺序更新（用户2026-11-15）**：正式语音使用阿里云百炼配置。等待当前返工交回后，先连贯完成D2–D5全部开发，再集中测试和统一独立审查；不再逐卡RED/GREEN、逐卡全仓验证或交审。下文各卡的功能/安全/最终验收合同不变，旧逐卡执行指令由本条及§8更新取代。已有验证结果保留，不重跑以往基线；开发完成与验证通过分别报告。
 
@@ -58,13 +58,13 @@ M3准入已满足：501单测+174 E2E，独立审查无阻断/应修。M4保持M
 
 在PointSpeak增加独立 `SpeechInput` 与可测试录音控制器。状态为idle→requesting_permission→recording→transcribing→review或error/cancelled；每次会话递增token，旧权限promise/旧转写晚到不能覆盖新会话。按住按钮或Space开始、释放停止；keydown忽略repeat并preventDefault，抑制Space释放产生的合成click；键盘焦点局限于录音按钮，不劫持textarea空格。指针开始用setPointerCapture，pointercancel/lostpointercapture取消，60秒自动停止并提示上限。只有syncReady、connected、未blocked、task:create未锁且选择仍可提交时能开始，额外提供明确取消按钮。
 
-PointSpeak切场景模式只是hidden，不能依赖组件卸载释放。`blocked`变true、document.visibilityState=hidden、窗口失焦、卸载任一触发：立即废弃token，停止所有MediaStream tracks/录音器/timer，若已发转写则显式DELETE该requestId并abort本地等待（DELETE失败也不能保留麦克风或接受晚到结果）；取消请求有界且不自动重试。转写中进入blocked不进入review。权限晚到发现会话废弃也立即stop tracks。单测必须覆盖录音中切场景、转写中进影响模式、权限pending时隐藏三种路径。
+PointSpeak切场景模式只是hidden，不能依赖组件卸载释放。`permission/recording/transcribing`在`blocked`变true、document.visibilityState=hidden、窗口失焦、卸载任一触发时：立即废弃token，停止所有MediaStream tracks/录音器/timer，若已发转写则显式DELETE该requestId并abort本地等待（DELETE失败也不能保留麦克风或接受晚到结果）；取消请求有界且不自动重试。转写中进入blocked不进入review。权限晚到发现会话废弃也立即stop tracks。已完成的review与在途请求分开：真实预览iframe点选造成的父窗口blur、点选pending、短暂SSE重连/任务锁只禁用确认并保留review，待当前对象ready后仍要求显式A/B确认；document真正hidden或卸载则明确放弃review。单测必须覆盖录音中切场景、转写中进影响模式、权限pending时隐藏，以及跨源iframe点选与重连时review保留。
 
 浏览器API不支持、非安全上下文、权限拒绝、无麦克风时给出可读提示并继续文字输入。录音器MIME从服务支持集合与`MediaRecorder.isTypeSupported`交集选取，不能把不支持的格式改名冒充WebM。录音期间累计chunk体积，越界立即取消，不发送大包；transcribing期间不能开始第二段，不自动创建任务。上传/取消都用有界AbortController；HTTP499按`error.code === 'SPEECH_CANCELLED'`处理，不以状态码推断业务成功。用户每次新录音/显式重试均生成新UUID，失败/取消后绝不复用旧ID（D1会缓存旧终态5分钟），不自动重试或切换服务。
 
 **文字和对象保护**：开始录音记下指令revision及完整选择身份（src、cid、baseVersion；无选择也作为明确身份）。识别文字先放独立review草稿，展示来源与“使用此文字”按钮；已有指令被用户改动时提供显式替换/取消，绝不覆盖新输入。若确认前选择由A变B（含无选择↔有选择），同时显示录音时A与当前B，禁用普通确认，要求明确选择“用于当前对象B”或“放弃并重新点选A”；不能静默用B，也不能自动恢复A。确认选择后仍需当前基线/同步门禁有效，选择再次变化重新确认；已确认草稿若提交前再换对象也再次阻止并提示，不允许指令脱离已确认对象。基线变化时必须重选，不提供沿用过期A的分支。
 
-识别完成不自动生成候选；原生成按钮、Ctrl/⌘+Enter、canSubmit、同步/影响模式/场景模式锁及STALE_SELECTION重选全部保留。录音/转写及未解决对象冲突的review期间禁止任务提交；真正提交用经过明确确认且仍是当前的选择。
+识别完成不自动生成候选；原生成按钮、Ctrl/⌘+Enter、canSubmit、同步/影响模式/场景模式锁及STALE_SELECTION重选全部保留。录音/转写及未解决对象冲突的review期间禁止任务提交；真正提交用经过明确确认且仍是当前的选择。任务POST明确成功后释放本次语音绑定，但沿用原有提交后不清空输入框的行为；此时留下的文字成为普通文字草稿，用户改选对象后再次点击生成或按提交快捷键，会按当前选择作为新的普通文字任务提交，不再重复语音确认。原选择/版本/同步门禁仍有效；POST失败或结果未知时不释放绑定，也不自动重发。
 
 按首次录音动作旁说明“录音会发送到阿里云百炼识别；转写需确认后提交”，提交任务处说明“指令、选中对象与必要源码发送到已配置的编码模型服务”，资产处说明Lux3D图片/提示词去向。产品文案不展示调试配置和内部实现术语。
 

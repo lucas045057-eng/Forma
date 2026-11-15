@@ -1,0 +1,58 @@
+{
+  "at": "2026-11-15T13:13:00.916Z",
+  "runId": "2026-11-15T13-06-44-442Z-full",
+  "payloadFiles": 10,
+  "manifestExcluded": "sha256-manifest.json",
+  "entries": [
+    {
+      "path": "build.log",
+      "bytes": 3955,
+      "sha256": "ed8524814b25ef05827ac4955fde4175fe8b41feab651c41b774ff2238be4fb1"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 1038,
+      "sha256": "48e46f976d822bd44dfd713a7277c02349783764fa930be836195c2aa5265417"
+    },
+    {
+      "path": "launcher/cmd",
+      "bytes": 71,
+      "sha256": "ae10897c2fb70cad28ea94d26af7c64921418ec056e0843e984aa462fcb170e1"
+    },
+    {
+      "path": "launcher/exit",
+      "bytes": 5,
+      "sha256": "13dd7ea678df22565726506d4db2bb4dd1cefd02a9d9772620ce4d4d9315e47b"
+    },
+    {
+      "path": "launcher/job.json",
+      "bytes": 434,
+      "sha256": "708d9e9b3db1ae0529ab8defc5e5165d5ca4b51e8ddf6f2fdc2e13d9b6e53761"
+    },
+    {
+      "path": "launcher/output.log",
+      "bytes": 574,
+      "sha256": "b53455e402725bf49aea4dab5217b7b350a2e5f4bac2c028430cef4401afa85c"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 3054,
+      "sha256": "8f3fe774f4a517e181851f61fa2a6abf1ad157fb5ab6aac06b2261bf8bc2a7b1"
+    },
+    {
+      "path": "manifest.log",
+      "bytes": 127,
+      "sha256": "541865e8886e997f1351f44865ad3c0f6f5683210a5cabd5657968b26ebcdf69"
+    },
+    {
+      "path": "typecheck.log",
+      "bytes": 603,
+      "sha256": "a0f0bd331ff3a33fa28916fba3e98669404a10d97f6ef79fcb1627c7e8e0ac6f"
+    },
+    {
+      "path": "unit.log",
+      "bytes": 71394,
+      "sha256": "14460e1419bc789b55b39dbe18ca095128dde15a52e276028fa8f6d7ff557a2b"
+    }
+  ]
+}

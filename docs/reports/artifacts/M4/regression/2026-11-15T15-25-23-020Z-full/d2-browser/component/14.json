@@ -1,0 +1,60 @@
+{
+  "test": "permission released before approval stops late tracks without starting recorder",
+  "url": "http://127.0.0.1:5244/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:5244/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.4000999999998385
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 59.420099999999366
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 117.64059999999972
+      },
+      {
+        "phase": "interaction",
+        "ms": 119.3787999999995
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": true,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": true,
+    "mimeSupported": true
+  },
+  "posts": [],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

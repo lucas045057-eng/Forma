@@ -1,0 +1,82 @@
+{
+  "test": "the original plain typed instruction still submits without ever opening a recorder",
+  "url": "http://127.0.0.1:4508/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:4508/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.3901000000005297
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 59.45130000000063
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 116.62379999999939
+      },
+      {
+        "phase": "interaction",
+        "ms": 118.77590000000055
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 0,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 0,
+    "liveTracks": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "直接文字修改",
+      "selection": {
+        "cid": "A",
+        "src": "src/A.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}
