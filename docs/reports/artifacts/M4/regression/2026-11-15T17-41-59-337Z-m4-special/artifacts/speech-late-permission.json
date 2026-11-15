@@ -1,0 +1,29 @@
+{
+  "gateState": {
+    "established": true,
+    "pending": 1
+  },
+  "before": {
+    "stops": 0,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "errors": 0,
+    "timeslice": 0,
+    "liveTracks": 0,
+    "streams": 0,
+    "events": []
+  },
+  "after": {
+    "stops": 1,
+    "recorderStarts": 0,
+    "recorderStops": 0,
+    "errors": 0,
+    "timeslice": 0,
+    "liveTracks": 0,
+    "streams": 1,
+    "events": [
+      "stream-live",
+      "track-ended"
+    ]
+  }
+}

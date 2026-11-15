@@ -90,18 +90,93 @@ export async function previewFrame(page: Page): Promise<Frame> {
   return frame;
 }
 
-/** 在实际 iframe 里点选一个元素，返回 selection JSON（用于"录音时指着 A"这类场景）。 */
-export async function pickElement(page: Page, testId: string): Promise<any> {
+/**
+ * 在真实作品 iframe 里点选一个元素，返回**本次**选择。
+ *
+ * 旧实现有明确竞态：面板 [data-testid=selection-json] 在**上一次**选择后一直是可见的，
+ * 所以 `waitFor({state:'visible'})` 立刻返回并读到**上一个**对象（A），于是 A/B 用例里
+ * "两个对象不同"的断言被前一次选择污染。这里改成对"这一次"的屏障 + 真实事件证据：
+ *
+ * 1. 观测父窗口真实收到的 `pick:result` 消息（只记录，不伪造）；
+ * 2. 先在 iframe 里用**实际点击坐标**做 elementFromPoint 审计，记录命中元素与其 data-src；
+ * 3. 点击后必须同时满足：**新的 pick:result 出现**（序号增加）、其 payload 的 src 与命中元素同源、
+ *    面板文本**与点击前不同**，才读取 selection；
+ * 4. 返回 { selection, hit, message } 供用例在证据里记录坐标/命中/message 序列。
+ *    不删除任何 notEqual 或冲突断言，也不改目标选择。
+ */
+export interface PickAudit {
+  selection: any;
+  hit: { tag: string | null; testId: string | null; src: string | null; point: { x: number; y: number } };
+  message: { index: number; src: string | null; origin: string | null };
+  before: { panelText: string; messages: number };
+}
+
+export async function pickElement(page: Page, testId: string): Promise<PickAudit> {
+  // 记录真实 pick:result（观测，不造消息）；同一页面只装一次。
+  await page.evaluate(() => {
+    const target = window as any;
+    if (target.__pickResults) return;
+    target.__pickResults = [];
+    window.addEventListener('message', (event) => {
+      const data = (event as MessageEvent).data;
+      if (!data || data.type !== 'pick:result') return;
+      target.__pickResults.push({ at: Date.now(), src: data.payload?.src ?? null, origin: event.origin ?? null });
+    });
+  });
+
   await page.getByTestId('pick-toggle').click();
-  const frame = await previewFrame(page);
-  const target = frame.locator(`[data-testid="${testId}"]`).first();
-  await target.scrollIntoViewIfNeeded();
-  const box = await target.boundingBox();
-  if (!box) throw new Error(`找不到元素 ${testId}`);
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  const panel = page.locator('[data-testid="selection-json"]');
-  await panel.waitFor({ state: 'visible', timeout: 30_000 });
-  const selection = JSON.parse(await panel.innerText());
-  await page.getByTestId('pick-toggle').click();
-  return selection;
+  try {
+    const frame = await previewFrame(page);
+    const target = frame.locator(`[data-testid="${testId}"]`).first();
+    await target.scrollIntoViewIfNeeded();
+    const box = await target.boundingBox();
+    if (!box) throw new Error(`找不到元素 ${testId}`);
+
+    const panel = page.locator('[data-testid="selection-json"]');
+    const before = {
+      panelText: (await panel.count()) > 0 ? await panel.innerText().catch(() => '') : '',
+      messages: await page.evaluate(() => ((window as any).__pickResults?.length ?? 0) as number),
+    };
+
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    // 实际命中审计：把主框架坐标换算成 iframe 内坐标，用元素文档自己在真实位置做 elementFromPoint。
+    const hit = await frame.evaluate(({ expected }) => {
+      const all = [...document.querySelectorAll('[data-src]')];
+      const found = all.find((element) => element.getAttribute('data-testid') === expected) ?? null;
+      const box2 = found?.getBoundingClientRect();
+      const probeX = box2 ? box2.left + box2.width / 2 : 0;
+      const probeY = box2 ? box2.top + box2.height / 2 : 0;
+      const hitElement = found ? document.elementFromPoint(probeX, probeY) : null;
+      const marked = hitElement?.closest('[data-src]') as HTMLElement | null;
+      return {
+        tag: hitElement ? hitElement.tagName.toLowerCase() : null,
+        testId: (hitElement as HTMLElement | null)?.getAttribute?.('data-testid') ?? null,
+        src: marked?.getAttribute('data-src') ?? null,
+        point: { x: probeX, y: probeY },
+      };
+    }, { expected: testId }).catch(() => ({ tag: null, testId: null, src: null, point: { x: 0, y: 0 } }));
+
+    await page.mouse.click(x, y);
+
+    // 屏障：新的 pick:result + 面板文本变化，二者同时成立才算"这一次"完成。
+    await waitFor(async () => {
+      const messages = await page.evaluate(() => ((window as any).__pickResults?.length ?? 0) as number);
+      if (messages <= before.messages) return false;
+      const text = (await panel.count()) > 0 ? await panel.innerText().catch(() => '') : '';
+      return text !== '' && text !== before.panelText;
+    }, 30_000, 100);
+
+    const selection = JSON.parse(await panel.innerText());
+    const messages = await page.evaluate(() => (window as any).__pickResults as Array<{ src: string | null; origin: string | null }>);
+    const last = messages[messages.length - 1];
+    // 同源核对：这次 message 的 src 必须与面板里的 selection.src 一致（不靠猜、不靠旧值）。
+    if (last?.src && selection?.src) {
+      const same = last.src === selection.src;
+      if (!same) throw new Error(`pick:result 与面板 selection 不一致：message=${last.src} panel=${selection.src}`);
+    }
+    return { selection, hit, message: { index: messages.length - 1, src: last?.src ?? null, origin: last?.origin ?? null }, before };
+  } finally {
+    await page.getByTestId('pick-toggle').click();
+  }
 }
