@@ -1,6 +1,6 @@
 # M4-D1 语音后端实现记录
 
-状态：D1 定向验证通过，后端46项与真实代理1项，共47项；shared/server/studio 作用域类型检查均有实际通过证据。实现与原件进入固定提交，下一步仅单轮全仓 typecheck/build/pnpm test。全仓结果、独立 Claude 代码审查与 Pi 验收尚未完成，本文不代表 D1 正式收口。
+状态：D1 原47项定向验证通过，产品固定 cb2237a；首轮标准459通过/2失败、Studio未运行。新守卫定向已通过五组canary与download原11项，失败原件和新证据已归档，尚待文档冻结后的完整标准轮。不能把新守卫冒称为旧47项GREEN的同一身份。Claude独立代码审查与Pi验收未完成，D1未正式收口。
 
 ## 基线与本轮范围
 
@@ -89,6 +89,36 @@
 
 在新固定 HEAD 上通过根 `orbital/coordination/m2-takeover/bg-root.cmd` 启动单轮 `pnpm typecheck` → `pnpm build` → 标准 `pnpm test`，首败即停。输出新的 `.data/d1-standard-<UTC>/`，白名单环境、fake keys、loopback守卫、无dev/env-file，记录 HEAD/锁/真实源码测试字节、命令/PID/时间/退出和原始日志及排除自身的SHA清单。取得 job 即结束本轮，期间冻结，不预写全仓通过或预填测试总数；不拿M3的501项抵扣新验证，不额外启动服务或原生服务入口。
 
-标准全仓检查尚未完成；结果返回后归档并交 Claude 独立代码审查，Pi 正式独立验收仍待进行。不自行合并、不抢做D2–D5。
+标准轮实际失败及后续守卫定向处理见下节；不自行合并、不抢做D2–D5。
 
 未运行真实阿里语音或验证语音质量/延迟，没有付费模型或 Lux3D 调用、真实录音 UI、正式 Pi E2E 或整体验收结论。
+
+## 标准失败：验证守卫抢先拦截纯 IP lookup
+
+`job_71627189` exit1，受测固定 `cb2237a40da8aa7a5ebe720085038e558fdb8f73`，run `.data/d1-standard-2026-11-15T06-46-35.875Z/`，整体 identityUnchanged=true。typecheck exit0、build exit0、test exit1。按原始日志分别解析 Vitest 与 Node test runner：shared68、source-tag插件20、renderer5、bridge1、server365通过/2失败；实际合计459通过/2失败。Studio单测未调度，不能写成547减2或全仓接近通过。
+
+两项均为旧 `assets/download.test.ts:58` 的重定向安全负例：`https://10.0.0.1` 与 IPv4-mapped IPv6 期望 UNSAFE_OUTPUT_URL，却得到 DOWNLOAD_DNS。原守卫日志恰有两条 blockedHost=10.0.0.1、::ffff:7f00:1。download.ts先做lookup再做publicAddress；旧守卫把纯IP字面量的本地lookup也提前拒绝，导致尚未进入产品安全地址判断就变为DNS错误。这是验证守卫干预，不改产品或旧安全断言来迁就守卫。
+
+本轮归档 `docs/reports/artifacts/M4/D1/standard-20261115-guard-interference/`：原标准日志/manifest/守卫日志/全部cleanup与原SHA清单、launcher原件、失败时准确守卫 `guard-before.cjs` 和标准入口 `standard-entry-before.mjs`。原清单另存 original-sha256-manifest.json，避免与新归档清单混名；新清单排除自身，29个载荷生成后逐字节静态复算一致。原 `.data` 与既有已提交历史证据均未改写。
+
+`verification.json`记录15份cleanup均无错误，290份当时来源文件字节核对；2026-11-15T06:53:46.9208563Z只读OS核验原PID、m4自有node/chrome、记录端口均无残留，未结束任何进程。
+
+### 本次仅守卫 DNS 分支修正
+
+`.data/d1-loopback.cjs` 仅在 dns.lookup 与 dns/promises.lookup 分支增加 `typeof host === 'string' && net.isIP(host)` 的本地解析快路径，交给原生lookup处理字面量；不放行其它域名DNS，不改net.Socket.connect和global.fetch的loopback限制，私网/公网IP实际连接依旧禁止。不增加任何阿里域名/DNS后缀例外，不关闭守卫，不删除拒绝日志。生产、原download实现/11项测试、依赖、锁及Pi E2E完全不改。静态复核其余289份原身份文件字节未变，旧标准入口及其门禁亦未变；守卫SHA256从 `cfaee3abbae61a06691220c669f129613279739227fc5bf1d58bc66b00fe05e4` 变为 `aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136`，精确差异只有两个DNS字面量分支。
+
+`.data/d1-guard-targeted.mjs` 在新run先验证守卫，再跑旧download.test.ts完整11项；只有前一步通过才进入下一步，不重跑标准全轮、安装或speech定向。运行身份同时记录固定产品HEAD、新旧守卫SHA与源码/原测试SHA，并精确验证guard只变了两个DNS分支。
+
+守卫探针 `.data/d1-guard-probe.cjs` 先装原生边界canary，再无条件加载同一新守卫，任何网络动作都在加载后；这样能证明非loopback域名DNS、TCP、fetch在原生调用前就被拒绝，即使守卫有错canary也会阻止负例外联。原生边界计数检查、私网/公网/mapped IPv6/域名负例与loopback真实连接正例分别记录；单独拒绝日志保留预期负例，不与download阶段日志混淆。实际download进程仍使用NODE_OPTIONS预加载同一守卫，没有无守卫测试窗口。
+
+### 守卫定向实际结果与文档冻结
+
+`job_3154fb57` exit0，原 run `.data/d1-guard-targeted-2026-11-15T06-58-56.026Z/`。guard-verification.json 五组全 passed：IPv4/IPv6 字面量 callback/promise 本地lookup；非loopback域名DNS在两个原生边界前拒绝；私网/公网/mapped TCP 在原生connect前拒绝；域名/IP fetch 在原生fetch前拒绝；loopback DNS/TCP/fetch正常。原生 canary 调用只含允许的IP字面量和loopback，28个预期拒绝均另存探针日志，关闭后 probe serverListening=false。
+
+download.test.ts 完整11项 passed、failed0、pending0；下载阶段没有守卫拒绝日志。manifest identityUnchanged=true，产品/原测试仍为cb2237a字节，旧 `.data/d1-standard.mjs` 和原旧GREEN哈希门禁保持原字节。新 guard SHA256 为 `aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136`，与 guard-before/after 及 validated-guard-identity.json 一致；该证明仅覆盖本轮守卫+11下载，不扩展为47项 speech GREEN 的新身份。
+
+新增归档 `docs/reports/artifacts/M4/D1/guard-targeted-20261115/`：原manifest/日志/下载JSON、guard-verification及28拒绝日志、validated-guard-identity、guard前后、五组探针、目标入口/旧标准入口原件、launcher及原SHA清单；新清单排除自身，21载荷生成后静态复算一致。本轮无app实例，不虚构独立app cleanup；download沿用原afterEach真实服务器关闭，probe关闭状态已记录。2026-11-15T07:01:51.4053638Z只读核验相关PID和m4自有进程无残留，未kill任何进程。
+
+精确文档归档提交（提交号随交付回报），相对cb2237a的apps/packages/templates/tests/依赖清单/锁必须零diff、tracked干净。随后创建明确新版本 `.data/d1-standard-v2.mjs`，expectedHead固定该docs提交；其守卫门禁要求SHA等于已归档 validated-guard-identity.json，并逐文件核该证明的载荷与当前守卫/归档字节，同时核旧产品字节不变。不是删除或绕过旧身份检查，不修改旧入口。
+
+使用新入口从头执行且仅执行一次 `pnpm typecheck → pnpm build → pnpm test`，首败即停、新run目录、fake key/loopback白名单、无dev/env-file。拿job立即冻结交回；实际返回后才从日志计数，不预填通过数量。未重跑安装、RED、47定向、守卫定向或Pi E2E，不改产品凑绿。全轮通过后仍需Claude独立审查，D1未收口、不merge、不做D2–D5。

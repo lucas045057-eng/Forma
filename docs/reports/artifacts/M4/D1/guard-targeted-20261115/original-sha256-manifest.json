@@ -1,0 +1,57 @@
+{
+  "excluded": [
+    "sha256-manifest.json"
+  ],
+  "files": [
+    {
+      "path": "download-results.json",
+      "bytes": 3386,
+      "sha256": "f4728e046cb14f27a2fe0ba2a8ed086f42eee15b2b005936873194be1e2e25fc"
+    },
+    {
+      "path": "download.log",
+      "bytes": 2051,
+      "sha256": "b631a95011c606902ed271444d521431b537b5d6dbcf108bef60cd8149b9d5e1"
+    },
+    {
+      "path": "guard-after.cjs",
+      "bytes": 1847,
+      "sha256": "aef54b3cb7bd72c338aacd1784ced2ac6cf1a2d0da1549841f61b0d5ee6a2136"
+    },
+    {
+      "path": "guard-before.cjs",
+      "bytes": 1751,
+      "sha256": "cfaee3abbae61a06691220c669f129613279739227fc5bf1d58bc66b00fe05e4"
+    },
+    {
+      "path": "guard-probe-denied.jsonl",
+      "bytes": 1300,
+      "sha256": "41dcb7298895850e5db86e92850e9f802f8d92a87b3b78e2a79af5a7853027b7"
+    },
+    {
+      "path": "guard-probe.cjs",
+      "bytes": 6285,
+      "sha256": "69ada0a29412f2cbf4c991972d76d719680f7c769e5a69489f2db1cc3d55cc3e"
+    },
+    {
+      "path": "guard-probe.log",
+      "bytes": 929,
+      "sha256": "cf1fd41a8e4dbaa807caaf5636ea18bb9970bf30d8787e7c65b962304a31fb45"
+    },
+    {
+      "path": "guard-verification.json",
+      "bytes": 1232,
+      "sha256": "3ceea798be2c5c475f897b2f30205fc41f7a942dcdae796d8df9437b168efc29"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 67116,
+      "sha256": "bf95008021276e06899396d818ccdaa91e1f00ae73da3d5a58e10a2558f5fe34"
+    },
+    {
+      "path": "validated-guard-identity.json",
+      "bytes": 670,
+      "sha256": "b9ee4dd3965bdbd7af5d675dab8736c97d73da201bcf3f8862536104b13931a6"
+    }
+  ]
+}
