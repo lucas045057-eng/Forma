@@ -536,3 +536,77 @@ Caused by: AssertionError: expected 1 to be +0   // Object.is equality
 
 返工七（静态定位 V1）冻结后，我仍从头跑同一 `full-regression.mjs`。
 本轮不改产品/测试、不派实现者、不 merge 主线、不自动补跑。
+---
+
+# 附录：集中第八轮（返工七后）—— **614 单测全过**，停在 demo-safety 的 1 项
+
+> 首次做到 **单测全绿**：shared 68 + plugin 20 + scene-renderer 5 + bridge 1 + server 378 + **Studio 142/142** = **614**。
+> 但 `demo-safety` 10 项中 **9 过 1 败**；M4 独立 19 与旧九套 174（合计 193）**全部未执行**。
+> 因此本轮**不是**"全仓通过"，也没有任何 E2E 结论。
+
+## G1. 受测身份
+
+| 项 | 值 |
+| --- | --- |
+| 验收树 | `.worktrees/m4-acceptance`，分支 `test/m4-acceptance` |
+| 受测 HEAD（测试侧） | `ba3e61bd0e32ac8b51a44b04c7a52a8af0b04690`（merge 返工七 `97bd686`） |
+| 冻结产品 | `97bd68652108b808b8f5de9117ceefd8a8c888f9` |
+| 身份摘要 / 锁 | `dad99fd6ba1c…` / SHA256 `67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960` |
+| 产品/脚本/锁差异 | 相对 `97bd686` **0 差异**（`HEAD:apps = 97b:apps = 017d26c1…`） |
+| 证据目录起跑前 | 脏项 **0** |
+
+## G2. 执行与计数（命令失败 ≠ 身份漂移）
+
+| 步骤 | 结果 |
+| --- | --- |
+| typecheck | exit 0 / 7s（含 `apps/studio`、`templates`） |
+| build | exit 0 / 8s |
+| unit | **exit 0 / 218s：614/614 全过**（68+20+5+1+378+142） |
+| **demo-safety** | **exit 1 / 11s：10 项 9 过 1 败** |
+| M4 19 / 旧九套 174 | 未执行 |
+
+- **身份漂移：无**（`evidenceDirtyAtStart=[]`；产品/脚本/锁与 `97bd686` 字节一致）。
+- **上一轮 V1 的 pointer-capture 用例本轮通过，且有原生事件原件**（`component/6.json`）：
+  ```
+  pointerdown        trusted id=1 buttons=1 capture=false tracks=0
+  gotpointercapture  trusted id=1 buttons=1 capture=true  tracks=1
+  lostpointercapture trusted id=1 buttons=1 capture=false tracks=1   ← 同一指针、仍按住、此间无 pointerup
+  ```
+  随后 `beforeUnmount = { liveTracks:0, recorderStops:1 }`、`posts=[]`、`deletes=[]`、`tasks=[]`、`primary=[]`（即通过）。
+  → 事件前提（trusted got/lost、同 ID、buttons=1、无 up）**成立**，异常失捕获确实触发了停录与零上传。
+
+## G3. demo-safety 唯一失败（原文，暂不定性）
+
+`scripts/demo/body.test.mjs:72` 的用例 **orphan watchdog terminates identified worker descendants after parent IPC closes, not unrelated processes**（6617ms），
+在 `body.test.mjs:83` 断言：
+
+```
+AssertionError: The input did not match the regular expression /DEMO_ORPHAN_TIMEOUT/. Input: ''
+```
+
+- **能确认**：被检查的 `run.closed.stderr` 是**空字符串**，与期望的 `DEMO_ORPHAN_TIMEOUT` 不匹配；这是该用例中**第一条失败断言**。
+- **不能确认（且不能当作结论）**：断言在 `:83` 就抛错，**其后的后代逐个退出、cleanup JSON 归属断言都没有执行**；因此**既不能说"自主回收失败"，也不能说"回收成功"**。
+- **原件缺口**：该用例自身未保留诊断——本轮归档时 `.data/demo-runs` **不存在**、临时目录已按其 `finally` 自清；日志里也只有用例名与耗时，没有 PID/创建时间/cleanup 记录。
+  **无法回溯**它究竟是"没写出 DEMO_ORPHAN_TIMEOUT"、"输出走了别的通道"还是"超时被别的分支吞掉"，不臆造。
+- 其余 9 项通过（prepare 白名单/诱饵 env/junction、plan 校验、网络守卫、mock+real 预览端口与 SIGINT、mock 环境隔离、端点拒绝、real 需显式配置、拷贝白名单）。
+
+## G4. 清理与证据
+
+- 3001/4011/5173/5174/5175 无监听；本树无自有 node/chrome；`templates`/`apps`/`packages`/`scripts` 脏项 0；无 `.model-stage-*` 残留；`.data/demo-runs` 不存在。
+- 未执行任何 kill；历史上两个保留现场（`fallback-parent-death-1Z4Qum` / `PxCzE3`）继续保留，不删不改。
+- 归档：`manifest.json`、`manifest.log`、`typecheck.log`、`build.log`、`unit.log`、`demo-safety.log`、`cleanup.json`、`launcher/`、
+  `d2-browser/`（**23 组 component JSON+PNG**、三个 cleanup、asset-lifecycle/asset-recovery 诊断）；
+  `sha256-manifest.json` **63 载荷、排除自身、静态复算 0 mismatch**。
+
+## G5. 统一问题清单（第八轮）
+
+1. **W1（阻断，待诊断）** `demo-safety` 的 orphan-watchdog 用例：`run.closed.stderr` 为空、缺 `DEMO_ORPHAN_TIMEOUT`；后续回收断言未执行，**不定性**。已按根任务卡 `0210911`（diagnose-orphan-before-retry）暂停 full、交由 CodeBuddy 做一次有界 focused 诊断。
+2. **W2（已关闭，有原件）** 上一轮 pointer-capture 用例通过，原生 got/lost 前提与"轨道归零 / stops=1 / 零上传 / 无 tasks"齐全。
+3. **W3（覆盖缺口）** M4 独立 19 与旧九套 174（**10 套 / 193 例**，含 M1-B 23 像素）**全部未执行**。
+4. **W4（边界）** 真实 Windows 控制台 Ctrl+C、生产资产 worker 整链、真实模板 iframe 点选与候选 HMR 端口未跑到；真实阿里/厂商识别/编码/Lux3D、真人 A/B、完整彩排未执行。
+5. **W5（审查缺口）** Claude 独立复审仍无正式报告；**614 单测全绿不等于 M4 验收通过**。
+
+## G6. 下一步
+
+按根 `0210911`：**暂停 full**，CodeBuddy 只做一次有界 focused 诊断（成品保持不变），定位 W1 后再决定是否重跑集中轮。
+本轮不改产品/测试/runner、不派实现者、不 merge 主线、不自动补跑。

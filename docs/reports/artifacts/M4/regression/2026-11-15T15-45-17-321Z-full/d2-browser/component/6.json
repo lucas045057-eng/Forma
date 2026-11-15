@@ -1,0 +1,86 @@
+{
+  "test": "abnormal native pointer-capture loss cancels without uploading",
+  "url": "http://127.0.0.1:13663/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:13663/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.3818999999998596
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 58.578599999999824
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 116.81079999999974
+      },
+      {
+        "phase": "interaction",
+        "ms": 118.5310999999997
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "id": 1,
+      "buttons": 1,
+      "capture": false,
+      "tracks": 0
+    },
+    {
+      "type": "gotpointercapture",
+      "trusted": true,
+      "id": 1,
+      "buttons": 1,
+      "capture": true,
+      "tracks": 1
+    },
+    {
+      "type": "lostpointercapture",
+      "trusted": true,
+      "id": 1,
+      "buttons": 1,
+      "capture": false,
+      "tracks": 1
+    }
+  ],
+  "posts": [],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

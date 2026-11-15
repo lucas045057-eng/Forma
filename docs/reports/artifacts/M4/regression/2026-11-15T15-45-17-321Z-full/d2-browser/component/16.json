@@ -1,0 +1,72 @@
+{
+  "test": "new text is not overwritten; none to A is explicit and each retry uses a new UUID",
+  "url": "http://127.0.0.1:13663/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:13663/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.40460000000075524
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 67.24060000000009
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 124.66300000000047
+      },
+      {
+        "phase": "interaction",
+        "ms": 126.5644000000002
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 2,
+    "liveTracks": 0,
+    "recorderStarts": 2,
+    "recorderStops": 2,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 2,
+    "liveTracks": 0,
+    "recorderStarts": 2,
+    "recorderStops": 2,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [
+    {
+      "id": "cb5c4df4-2d74-43f1-845c-1778a3dd37ef",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    },
+    {
+      "id": "52fd9d3d-92ed-4065-97c0-cce4459cd9c1",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}
