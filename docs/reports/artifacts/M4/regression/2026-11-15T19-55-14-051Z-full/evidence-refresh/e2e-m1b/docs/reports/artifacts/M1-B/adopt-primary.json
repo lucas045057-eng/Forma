@@ -1,0 +1,17 @@
+{
+  "beforeModel": "/assets/diffuser-4969889.glb",
+  "afterModel": "/assets/lux3d-8400001.glb",
+  "loaded": 357,
+  "file": {
+    "glb": true,
+    "parts": true
+  },
+  "fileBytes": 988116,
+  "diff": [
+    {
+      "path": "/model",
+      "oldValue": "/assets/diffuser-4969889.glb",
+      "newValue": "/assets/lux3d-8400001.glb"
+    }
+  ]
+}

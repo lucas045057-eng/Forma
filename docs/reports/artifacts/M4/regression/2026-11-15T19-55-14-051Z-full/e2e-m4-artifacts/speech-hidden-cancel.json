@@ -1,0 +1,19 @@
+{
+  "probe": {
+    "stops": 1,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "errors": 0,
+    "timeslice": 250,
+    "liveTracks": 0,
+    "streams": 1,
+    "events": [
+      "stream-live",
+      "recorder-start",
+      "recorder-stop",
+      "track-ended"
+    ]
+  },
+  "posts": 0,
+  "deletes": []
+}

@@ -1,0 +1,2 @@
+# 归档原字节：launcher 的退出记录是 CRLF 原始字节，禁止自动换行规范化。
+launcher/exit -text

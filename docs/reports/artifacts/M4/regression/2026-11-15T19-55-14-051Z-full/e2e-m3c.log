@@ -1,0 +1,37 @@
+# e2e-m3c: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m4-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m3c.config.ts --retries=0 --workers=1 --reporter=list,json --output=E:\空间化AI工作台\.worktrees\m4-acceptance\docs\reports\artifacts\M4\regression\2026-11-15T19-55-14-051Z-full\e2e-m3c-output
+# started=2026-11-15T20:14:36.313Z
+[WebServer] (node:29996) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 28 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\m3c\01-approval.spec.ts:24:1 › 请示卡持久显示：刷新页面与手动刷新状态后仍是同 id 单卡，且公开候选为空 (3.3s)
+  ok  2 [chromium] › tests\e2e\m3c\01-approval.spec.ts:60:1 › 影响模式：共享 Button 三处青色高亮，点击页面不改写高亮，退出后清理且不替换 Selection (3.1s)
+  ok  3 [chromium] › tests\e2e\m3c\01-approval.spec.ts:134:1 › 批准：body 为 {option:0}，不增加 mock 调用，不自动创建候选、不自动运行检查 (4.7s)
+  ok  4 [chromium] › tests\e2e\m3c\01-approval.spec.ts:172:1 › 拒绝：body 为 {option:1}，不产生候选，主作品不变 (2.8s)
+  ok  5 [chromium] › tests\e2e\m3c\01-approval.spec.ts:197:1 › 重复点击与键盘：同一张卡只发一次 POST，另一个回答立即 disabled (4.6s)
+  ok  6 [chromium] › tests\e2e\m3c\01-approval.spec.ts:210:1 › 取消任务：待请示卡变为不可继续，回答按钮禁用 (2.8s)
+  ok  7 [chromium] › tests\e2e\m3c\01-approval.spec.ts:220:1 › 断线期间完成回答：重连后按服务器持久状态恢复，不需要手动刷新 (4.6s)
+  ok  8 [chromium] › tests\e2e\m3c\01-approval.spec.ts:241:1 › 请示卡在页面重载后不重复：同 id 单卡（反复刷新比一次更严格） (3.3s)
+  ok  9 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:48:1 › 真实四检查：只发一次 POST body={}，四项通过，六份证据可读，候选 iframe 不参与选取 (12.9s)
+  ok 10 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:118:1 › 采用门禁与采用：证据未就绪前 disabled，六证据就绪后可采用并切换作品 (13.3s)
+  ok 11 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:153:1 › 显式重新检查：body 为 {rerun:true}，旧绿灯立即关闭，新 run 通过后才恢复 (19.9s)
+  ok 12 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:182:1 › 取消检查：running 时取消只作用于该 run，未运行项不变绿，不能采用 (5.6s)
+  ok 13 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:202:1 › 三候选与多 run 切换：状态与证据按候选隔离，迟到的旧 run 不覆盖当前候选 (17.6s)
+  ok 14 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:246:1 › 断线跨检查完成：重连补拉后四项与证据就绪，不需要手动刷新 (11.6s)
+  ok 15 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:263:1 › 采用另一个候选（version.changed）让旧候选的采用门禁立即失效 (16.1s)
+  ok 16 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:291:1 › M1 场景写回：写入落盘并使旧候选证明失效（采用仍关灯） (4.9s)
+  ok 17 [chromium] › tests\e2e\m3c\02-checks-adopt.spec.ts:321:1 › M1 场景写回后不刷新就直接采用：界面无可采用窗口，绕过界面直打接口也被 409 拒绝 (15.2s)
+  ok 18 [chromium] › tests\e2e\m3c\03-failures.spec.ts:74:1 › 真实构建失败：schema 通过、build 失败、后续未运行，界面给出构建日志提示 (7.9s)
+  ok 19 [chromium] › tests\e2e\m3c\03-failures.spec.ts:92:1 › 真实运行错误：build 通过、冒烟失败并给出运行错误提示与截图证据 (11.4s)
+  ok 20 [chromium] › tests\e2e\m3c\03-failures.spec.ts:108:1 › 真实遮挡：build/冒烟通过、遮挡失败并提示查看报告与截图 (11.4s)
+  ok 21 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:45:1 › mock：事件历史被截断时重新取锚点，不跳过触发事件（终态仍按权威状态恢复） (4.8s)
+  ok 22 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:73:1 › mock：旧代次的迟到快照响应被丢弃，不回滚已批准 (7.9s)
+  ok 23 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:101:1 › mock：写请求响应丢失时显示“无法确认服务器状态”，不自动重发；刷新后按服务器状态显示 (6.1s)
+  ok 24 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:124:1 › mock：必需证据 404 时提示无法读取并关闭采用 (11.3s)
+  ok 25 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:137:1 › mock：证据字节被篡改（hash 不符）时不采用、不渲染伪造内容 (11.3s)
+  ok 26 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:152:1 › mock：adopt 返回 409 CHECKS_NOT_PASSED —— 关绿灯、给准确文案、不自动再采用 (12.4s)
+  ok 27 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:172:1 › mock：startChecks 返回 409 STALE_CANDIDATE —— 提示重新生成，关掉运行/重跑与采用 (4.0s)
+  ok 28 [chromium] › tests\e2e\m3c\04-mock-boundaries.spec.ts:184:1 › mock：恶意 reason/evidence 按文本渲染，不执行、不注入 DOM (2.8s)
+
+  28 passed (4.1m)

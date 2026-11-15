@@ -1,0 +1,77 @@
+{
+  "selection": {
+    "src": "src/components/Button.tsx:5:5",
+    "cid": "Button",
+    "text": "立即购买",
+    "bbox": [
+      61.796875,
+      275.375,
+      104,
+      47
+    ],
+    "styles": {
+      "display": "block",
+      "position": "static",
+      "color": "rgb(255, 250, 240)",
+      "backgroundColor": "rgb(117, 96, 68)",
+      "fontSize": "13px",
+      "fontFamily": "\"Microsoft YaHei\", sans-serif",
+      "fontWeight": "400",
+      "lineHeight": "normal",
+      "padding": "14px 25px",
+      "margin": "0px",
+      "borderRadius": "3px",
+      "width": "104px",
+      "height": "47px"
+    },
+    "instances": 3,
+    "ancestors": [
+      "src/App.tsx:26:11",
+      "src/App.tsx:21:9",
+      "src/App.tsx:20:7"
+    ],
+    "baseVersion": "40be90b2831cbb4a5e3c725a7d855083bac49228"
+  },
+  "versionBefore": "40be90b2831cbb4a5e3c725a7d855083bac49228",
+  "versionAfter": "de62d8c9dbb23ca85372287442183a9a04c030d0",
+  "candidate": {
+    "id": "36e49a1f107a44ac97a7018eb5946eaf",
+    "diff": [
+      "src/App.tsx"
+    ],
+    "outOfScope": [],
+    "checks": [
+      {
+        "name": "build",
+        "status": "not_run"
+      },
+      {
+        "name": "smoke",
+        "status": "not_run"
+      },
+      {
+        "name": "occlusion",
+        "status": "not_run"
+      },
+      {
+        "name": "schema",
+        "status": "not_run"
+      }
+    ]
+  },
+  "eventTypes": [
+    "ready",
+    "task.updated",
+    "candidate.ready",
+    "check.started",
+    "check.updated",
+    "check.finished",
+    "version.changed",
+    "candidate.closed"
+  ],
+  "seqRange": {
+    "oldest": 1,
+    "current": 23,
+    "count": 23
+  }
+}

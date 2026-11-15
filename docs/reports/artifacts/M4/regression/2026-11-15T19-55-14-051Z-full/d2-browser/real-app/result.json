@@ -1,0 +1,55 @@
+{
+  "realApp": true,
+  "realEventCenter": true,
+  "crossOriginPreview": "http://127.0.0.1:6637",
+  "parentBlurs": 2,
+  "blursBeforeCrossOriginPick": 1,
+  "apiSubstitutes": true,
+  "tasks": [
+    {
+      "instruction": "后续纯文字",
+      "id": "task-2",
+      "status": "queued",
+      "events": []
+    },
+    {
+      "instruction": "语音修改",
+      "selection": {
+        "cid": "B",
+        "src": "src/B.tsx:1:1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {
+          "display": "",
+          "position": "",
+          "color": "",
+          "backgroundColor": "",
+          "fontSize": "",
+          "fontFamily": "",
+          "fontWeight": "",
+          "lineHeight": "",
+          "padding": "",
+          "margin": "",
+          "borderRadius": "",
+          "width": "",
+          "height": ""
+        },
+        "instances": 1,
+        "ancestors": [],
+        "baseVersion": "v1"
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "posts": [
+    "437b0da0-efbb-4ada-932d-313bd59ac1cc"
+  ],
+  "errors": [],
+  "denied": []
+}

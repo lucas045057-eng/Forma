@@ -1,0 +1,4 @@
+{
+  "retryDisabledWhilePending": true,
+  "retryDisabledWhileFailed": true
+}
