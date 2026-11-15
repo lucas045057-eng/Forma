@@ -1,32 +1,32 @@
 import {beforeAll,beforeEach,afterEach,afterAll,expect,it} from 'vitest';
 import {chromium,expect as browserExpect,type Browser,type BrowserServer,type BrowserContext,type Page} from '@playwright/test';
 import {createServer,type ViteDevServer} from 'vite';
-import {mkdtemp,readFile,writeFile,rm,mkdir} from 'node:fs/promises';
+import {mkdtemp,readFile,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {createConnection} from 'node:net';
 import {installSpeechFakes} from './test-support/speech-fakes.ts';
+import {speechBrowserVite,observeSpeechBootstrap,browserFailure,writeSpeechEvidence,speechPortClosed as portClosed,type SpeechBootstrap} from './test-support/speech-browser-fixture.ts';
 import type {ServerResponse} from 'node:http';
 
 const studio=path.resolve(import.meta.dirname,'..');
-let vite:ViteDevServer;let native:BrowserServer;let browser:Browser;let context:BrowserContext;let page:Page;let cache:string;let origin:string;let serial=0;
+let vite:ViteDevServer;let native:BrowserServer;let browser:Browser;let context:BrowserContext|undefined;let page:Page;let casePage:Page|undefined;let bootstrap:SpeechBootstrap|undefined;let setupFailure:unknown;let suiteFailure:unknown;let cache:string;let origin:string;let serial=0;
 const state={posts:[] as Array<{id:string;mime:string;bytes:number}>,deletes:[] as string[],tasks:[] as Array<Record<string,unknown>>,configReads:0,hold:false,deleteFailure:false,taskStatus:202,status:200,text:'把这个改成圆角',pending:new Map<string,ServerResponse>()};
 const output=process.env.D2_RUN_DIR;
 const pageErrors:string[]=[];const denied:string[]=[];
 let ownedChrome:Array<{pid:number;parent:number;created:string}>=[];
 function chromeProcesses(){return JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"ConvertTo-Json -Compress -InputObject @(Get-CimInstance Win32_Process | Where-Object { $null -ne $_.CreationDate } | ForEach-Object { [pscustomobject]@{pid=$_.ProcessId;parent=$_.ParentProcessId;created=$_.CreationDate.ToUniversalTime().ToString('o')} })"],{encoding:'utf8',timeout:10000})||'[]') as Array<{pid:number;parent:number;created:string}>;}
-async function portClosed(endpoint:string){const url=new URL(endpoint);await new Promise<void>((resolve,reject)=>{const socket=createConnection({host:url.hostname,port:Number(url.port)});socket.once('connect',()=>{socket.destroy();reject(new Error('Owned component port still listening'));});socket.once('error',(error:NodeJS.ErrnoException)=>{socket.destroy();if(error.code==='ECONNREFUSED')resolve();else reject(error);});socket.setTimeout(1000,()=>{socket.destroy();reject(new Error('Component port close probe timed out'));});});}
 function answer(response:ServerResponse,id:string){response.setHeader('Content-Type','application/json');response.statusCode=state.status;response.end(JSON.stringify(state.status===200?{requestId:id,text:state.text,provider:'aliyun',model:'qwen3-asr-flash'}:{error:{code:state.status===499?'SPEECH_CANCELLED':'SPEECH_UPSTREAM',message:'fake private upstream message'}}));}
 beforeAll(async()=>{
+ try{
  cache=await mkdtemp(path.join(tmpdir(),'speech-component-'));
- vite=await createServer({configFile:false,envFile:false,root:studio,cacheDir:cache,logLevel:'silent',esbuild:{jsx:'automatic'},optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime']},
+ vite=await createServer({...speechBrowserVite(),root:studio,cacheDir:cache,logLevel:'silent',
   plugins:[{name:'speech-component-local-fixture',enforce:'pre',resolveId(source,importer){
    if(source==='./EventCenter.tsx'&&importer?.endsWith('/PointSpeak.tsx'))return path.join(studio,'src/test-support/speech-center.tsx').replaceAll('\\','/');
    if(source==='./speech-input.css')return '\0speech-component-css';
   },load(id){if(id==='\0speech-component-css')return 'export default {};';},configureServer(server){server.middlewares.use(async(request,response,next)=>{
    if(request.url==='/__speech_component__/'){
-    const css=await readFile(path.join(studio,'src/speech-input.css'),'utf8');response.setHeader('Content-Type','text/html; charset=utf-8');response.end(`<html><head><meta charset="utf-8"><style>body{font-family:sans-serif;background:#17232d;color:#d7e4ee;padding:20px}button,select{margin:4px;padding:8px}textarea{display:block;width:600px}nav{display:flex}${css}</style></head><body><div id="root"></div><script type="module" src="/src/test-support/speech-harness.tsx"></script></body></html>`);return;
+    try{const css=await readFile(path.join(studio,'src/speech-input.css'),'utf8');response.setHeader('Content-Type','text/html; charset=utf-8');response.end(`<html><head><meta charset="utf-8"><style>body{font-family:sans-serif;background:#17232d;color:#d7e4ee;padding:20px}button,select{margin:4px;padding:8px}textarea{display:block;width:600px}nav{display:flex}${css}</style></head><body><div id="root"></div><script type="module" src="/src/test-support/speech-harness.tsx"></script></body></html>`);}catch(error){next(error);}return;
    }
    if(request.url==='/speech/config'){++state.configReads;response.setHeader('Content-Type','application/json');response.end(JSON.stringify({enabled:true,provider:'aliyun',model:'qwen3-asr-flash',supportedMimeTypes:['audio/webm'],maxBytes:4194304,maxDurationMs:60000,notice:'mock only'}));return;}
    if(request.url==='/speech/transcribe'&&request.method==='POST'){
@@ -50,24 +50,40 @@ beforeAll(async()=>{
  const address=http.address();if(!address||typeof address==='string')throw new Error('Component listener has no TCP address');origin=`http://127.0.0.1:${address.port}`;
  native=await chromium.launchServer({headless:true,args:['--disable-background-networking','--disable-component-update','--disable-features=MediaRouter,OptimizationHints,Translate']});
  browser=await chromium.connect(native.wsEndpoint());
+ }catch(error){suiteFailure=error;console.error('[speech component setup]',JSON.stringify({origin,cache,primary:browserFailure(error)}));throw error;}
 },60_000);
 beforeEach(async()=>{
+ context=undefined;casePage=undefined;bootstrap=undefined;setupFailure=undefined;++serial;
  state.posts=[];state.deletes=[];state.tasks=[];state.configReads=0;state.hold=false;state.deleteFailure=false;state.taskStatus=202;state.status=200;state.text='把这个改成圆角';state.pending.clear();pageErrors.length=0;denied.length=0;
+ try{
  context=await browser.newContext({viewport:{width:1440,height:1000}});await context.addInitScript(installSpeechFakes);
  await context.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===origin)return route.continue();denied.push(url.origin);return route.abort();});
- page=await context.newPage();page.on('pageerror',error=>pageErrors.push(error.message));await page.goto(origin+'/__speech_component__/');await page.getByTestId('speech-record').waitFor();await expect.poll(()=>page.getByTestId('speech-record').isEnabled()).toBe(true);
+ page=await context.newPage();casePage=page;bootstrap=observeSpeechBootstrap(page,pageErrors);
+ await bootstrap.run('navigate-component',()=>page.goto(origin+'/__speech_component__/'));
+ await bootstrap.run('react-component-mounted',()=>page.getByTestId('speech-record').waitFor());
+ await bootstrap.run('speech-config-ready',async()=>{await expect.poll(()=>page.getByTestId('speech-record').isEnabled()).toBe(true);});bootstrap.ready();
+ }catch(error){setupFailure=error;console.error('[speech component bootstrap]',JSON.stringify({primary:browserFailure(error),bootstrap:bootstrap?.snapshot(),pageErrors,denied}));throw error;}
 });
-afterEach(async()=>{
- try {
-  if(page&&!page.isClosed()){
-   const beforeUnmount=await page.evaluate(()=>({...window.__speechTest,releasePermissions:undefined}));
-   if(output){await mkdir(path.join(output,'component'),{recursive:true});await page.screenshot({path:path.join(output,`component/${++serial}.png`)});}
-   if(await page.getByTestId('speech-input').count())await page.getByTestId('fixture-unmount').click();
-   await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(0);
-   if(output)await writeFile(path.join(output,`component/${serial}.json`),JSON.stringify({url:page.url(),apiSubstitutes:true,realChromium:true,beforeUnmount,afterUnmount:await page.evaluate(()=>({...window.__speechTest,releasePermissions:undefined})),posts:state.posts,deletes:state.deletes,tasks:state.tasks,pageErrors,denied},null,2));
-  }
-  expect(pageErrors).toEqual([]);expect(denied).toEqual([]);
- } finally {await context?.close();for(const response of state.pending.values())response.destroy();state.pending.clear();}
+afterEach(async test=>{
+ const cleanup:unknown[]=[];let beforeUnmount:unknown;let afterUnmount:unknown;
+ if(casePage&&!casePage.isClosed()){
+  try{beforeUnmount=await casePage.evaluate(()=>window.__speechTest?({...window.__speechTest,releasePermissions:undefined}):null);}catch(error){cleanup.push(error);}
+  if(output)try{await mkdir(path.join(output,'component'),{recursive:true});await casePage.screenshot({path:path.join(output,`component/${serial}.png`)});}catch(error){cleanup.push(error);}
+  try{
+   if(await casePage.getByTestId('speech-input').count())await casePage.getByTestId('fixture-unmount').click();
+   if(beforeUnmount!==null&&beforeUnmount!==undefined)await expect.poll(()=>casePage!.evaluate(()=>window.__speechTest.liveTracks)).toBe(0);
+   else if(setupFailure===undefined)throw new Error('Speech API fixture did not initialize');
+   afterUnmount=await casePage.evaluate(()=>window.__speechTest?({...window.__speechTest,releasePermissions:undefined}):null);
+  }catch(error){cleanup.push(error);}
+ }
+ // A beforeEach failure already reports the original module error; do not duplicate it as
+ // another afterEach assertion. Interactive tests still require an entirely clean browser.
+ if(setupFailure===undefined)try{expect(pageErrors).toEqual([]);bootstrap?.assertHealthy();}catch(error){cleanup.push(error);}
+ try{expect(denied).toEqual([]);}catch(error){cleanup.push(error);}
+ bootstrap?.dispose();try{await context?.close();}catch(error){cleanup.push(error);}
+ for(const response of state.pending.values())try{response.destroy();}catch(error){cleanup.push(error);}state.pending.clear();
+ if(output)try{await writeSpeechEvidence(output,`component/${serial}.json`,{test:test.task.name,url:casePage?.url(),apiSubstitutes:true,realChromium:true,primary:setupFailure===undefined?(test.task.result?.errors??[]).map(browserFailure):browserFailure(setupFailure),bootstrap:bootstrap?.snapshot(),beforeUnmount,afterUnmount,posts:state.posts,deletes:state.deletes,tasks:state.tasks,pageErrors,denied,cleanup:cleanup.map(browserFailure)});}catch(error){cleanup.push(error);}
+ if(cleanup.length){console.error('[speech component cleanup]',JSON.stringify({primary:setupFailure===undefined?test.task.result?.errors?.map(browserFailure):browserFailure(setupFailure),cleanup:cleanup.map(browserFailure),bootstrap:bootstrap?.snapshot()}));throw new AggregateError([...(setupFailure===undefined?[]:[setupFailure]),...cleanup],'Speech component case/cleanup failed');}
 });
 afterAll(async()=>{
  const errors:unknown[]=[];
@@ -76,10 +92,10 @@ afterAll(async()=>{
  try{if(vite){const http= vite.httpServer as unknown as {closeAllConnections?:()=>void}|undefined;http?.closeAllConnections?.();await vite.close();expect(vite.httpServer?.listening??false).toBe(false);}}catch(error){errors.push(error);}
  try{if(origin)await portClosed(origin);if(native)await portClosed(native.wsEndpoint());}catch(error){errors.push(error);}
  let remaining:typeof ownedChrome=[];
- try{remaining=chromeProcesses().filter(p=>ownedChrome.some(old=>old.pid===p.pid&&old.created===p.created));expect(remaining).toEqual([]);if(native)expect(native.process().exitCode!==null||native.process().signalCode!==null).toBe(true);}catch(error){errors.push(error);}
+ try{if(native){remaining=chromeProcesses().filter(p=>ownedChrome.some(old=>old.pid===p.pid&&old.created===p.created));expect(remaining).toEqual([]);expect(native.process().exitCode!==null||native.process().signalCode!==null).toBe(true);}}catch(error){errors.push(error);}
  if(!errors.length&&cache){try{await rm(cache,{recursive:true,force:true});}catch(error){errors.push(error);}}
- if(output)await writeFile(path.join(output,'component-cleanup.json'),JSON.stringify({pid:process.pid,origin,chromeVersion:browser?.version(),chrome:ownedChrome,chromeExitCode:native?.process().exitCode,chromeSignalCode:native?.process().signalCode,remaining,serverListening:vite?.httpServer?.listening??false,cacheRetained:errors.length?cache:null,errors:errors.map(String)},null,2));
- if(errors.length)throw new AggregateError(errors,'Speech component fixture cleanup failed');
+ if(output)try{await writeSpeechEvidence(output,'component-cleanup.json',{pid:process.pid,origin,chromeVersion:browser?.version(),chrome:ownedChrome,chromeExitCode:native?.process().exitCode,chromeSignalCode:native?.process().signalCode,remaining,serverListening:vite?.httpServer?.listening??false,cacheRetained:errors.length?cache:null,setupFailure:suiteFailure===undefined?null:browserFailure(suiteFailure),vite:{mode:vite?.config.mode,optimizeDeps:vite?.config.optimizeDeps.include},errors:errors.map(browserFailure)});}catch(error){errors.push(error);}
+ if(errors.length){console.error('[speech component suite cleanup]',JSON.stringify({setupFailure:suiteFailure===undefined?null:browserFailure(suiteFailure),cleanup:errors.map(browserFailure)}));throw new AggregateError([...(suiteFailure===undefined?[]:[suiteFailure]),...errors],'Speech component fixture cleanup failed');}
 },30_000);
 async function record(){const button=page.getByTestId('speech-record');await button.hover();await page.mouse.down();await expect.poll(()=>page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(1);await page.mouse.up();await page.getByTestId('speech-review').waitFor();}
 it('real pointer release includes final audio once, editable review requires explicit B then generates only via original button',async()=>{
