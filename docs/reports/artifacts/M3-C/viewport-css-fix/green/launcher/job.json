@@ -1,0 +1,1 @@
+{"id": "job_8b19c345", "group_id": "grp_3fcadf8d", "project_id": "proj_ed0266f65331", "session_id": "", "agent": "", "source": "launcher", "command": "cd /d .worktrees/m3c&& node .data/reproduce-m1b.mjs", "pid": 31628, "create_time": 1794709810.075578, "started_at": 1794709810.0, "state": "exited", "exit_code": 0, "ended_at": 1794709922.7217336, "noted": true}

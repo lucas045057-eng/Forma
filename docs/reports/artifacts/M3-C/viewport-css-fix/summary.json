@@ -1,0 +1,266 @@
+{
+  "baseHead": "0860fbb5dd44f23ab9f99e9827d949e50b86b141",
+  "cssSha256": "18f9e413956f6b332067a62d7cede878e93e7afe1ebd9856ce50bd9eb346b8eb",
+  "runs": {
+    "red": {
+      "run": "2026-11-14T21-34-09.744Z",
+      "job": "job_72b0a612",
+      "head": "0860fbb5dd44f23ab9f99e9827d949e50b86b141",
+      "command": "pnpm exec playwright test -c playwright.m1b.config.ts --workers=1 --retries=0 --reporter=list,json",
+      "started": "2026-11-14T21:34:09.792Z",
+      "finished": "2026-11-14T21:35:46.342Z",
+      "exit": 1,
+      "stats": {
+        "startTime": "2026-11-14T21:34:10.578Z",
+        "duration": 95717.131,
+        "expected": 18,
+        "skipped": 0,
+        "unexpected": 5,
+        "flaky": 0
+      },
+      "count": 23,
+      "identityUnchanged": null,
+      "evidenceRestored": true,
+      "metrics": {
+        "consistency-default.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 378,
+            "backing": {
+              "preview": 378,
+              "studio": 378,
+              "dpr": 1
+            }
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 2.818167184569301,
+            "maxDiff": 227,
+            "changedRatio": 0.005291005291005291,
+            "pixels": 142884
+          }
+        },
+        "consistency-after-edit.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 378
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 2.818097197726827,
+            "maxDiff": 227,
+            "changedRatio": 0.005291005291005291,
+            "pixels": 142884
+          }
+        },
+        "consistency-scroll-06.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 251,
+            "hiddenTop": 127
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 1.1139463310778053,
+            "maxDiff": 227,
+            "changedRatio": 0.005291005291005291,
+            "pixels": 94878
+          }
+        },
+        "keyframe-write.json": {
+          "at": 0.549,
+          "configUpdateMs": 163,
+          "interpolatedBefore": 0.07836426,
+          "expectedShiftPx": 15.738309719999997,
+          "measuredShiftPx": 0,
+          "modelHeightPx": 378,
+          "ratio": 0,
+          "consistencyAtFrame": {
+            "changed": 0.005291005291005291,
+            "visibleHeight": 279
+          },
+          "frames": [
+            {
+              "at": 0,
+              "lid": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "at": 0.5494505494505495,
+              "lid": [
+                0,
+                0.12,
+                0
+              ]
+            },
+            {
+              "at": 0.6,
+              "lid": [
+                0,
+                0.08,
+                0
+              ]
+            }
+          ]
+        },
+        "fix-r2-lid-gating.json": {
+          "fake": {
+            "recognized": false,
+            "markedNodes": [],
+            "shiftPx": 0,
+            "changed": 0,
+            "heightPx": 378
+          },
+          "factory": {
+            "shiftPx": 0,
+            "expectedPx": 45.36,
+            "heightPx": 378,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    "green": {
+      "run": "2026-11-15T02-30-10.199Z",
+      "job": "job_8b19c345",
+      "head": "0860fbb5dd44f23ab9f99e9827d949e50b86b141",
+      "command": "node node_modules/@playwright/test/cli.js test -c playwright.m1b.config.ts --workers=1 --retries=0 --reporter=list,json",
+      "started": "2026-11-15T02:30:10.256Z",
+      "finished": "2026-11-15T02:32:01.665Z",
+      "exit": 0,
+      "stats": {
+        "startTime": "2026-11-15T02:30:12.770Z",
+        "duration": 108839.961,
+        "expected": 23,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "count": 23,
+      "identityUnchanged": true,
+      "evidenceRestored": true,
+      "metrics": {
+        "consistency-default.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 378,
+            "backing": {
+              "preview": 378,
+              "studio": 378,
+              "dpr": 1
+            }
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 1.7672237619327567,
+            "maxDiff": 18,
+            "changedRatio": 0,
+            "pixels": 142884
+          }
+        },
+        "consistency-after-edit.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 378
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 1.7672237619327567,
+            "maxDiff": 18,
+            "changedRatio": 0,
+            "pixels": 142884
+          }
+        },
+        "consistency-scroll-06.json": {
+          "canvas": {
+            "size": 378,
+            "visibleHeight": 251,
+            "hiddenTop": 127
+          },
+          "diff": {
+            "shift": {
+              "x": 0,
+              "y": 0
+            },
+            "meanAbsDiff": 0.0520247054111596,
+            "maxDiff": 18,
+            "changedRatio": 0,
+            "pixels": 94878
+          }
+        },
+        "keyframe-write.json": {
+          "at": 0.549,
+          "configUpdateMs": 162,
+          "interpolatedBefore": 0.07836426,
+          "expectedShiftPx": 12.032728859999997,
+          "measuredShiftPx": 11,
+          "modelHeightPx": 289,
+          "ratio": 0.9141733457127034,
+          "consistencyAtFrame": {
+            "changed": 0,
+            "visibleHeight": 279
+          },
+          "frames": [
+            {
+              "at": 0,
+              "lid": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "at": 0.5494505494505495,
+              "lid": [
+                0,
+                0.12,
+                0
+              ]
+            },
+            {
+              "at": 0.6,
+              "lid": [
+                0,
+                0.08,
+                0
+              ]
+            }
+          ]
+        },
+        "fix-r2-lid-gating.json": {
+          "fake": {
+            "recognized": false,
+            "markedNodes": [],
+            "shiftPx": 0,
+            "changed": 0,
+            "heightPx": 266
+          },
+          "factory": {
+            "shiftPx": 32,
+            "expectedPx": 32.16,
+            "heightPx": 268,
+            "ratio": 0.9950248756218907
+          }
+        }
+      }
+    }
+  }
+}
