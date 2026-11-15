@@ -18,8 +18,8 @@
  */
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 
 export const sha256Hex = (buffer) => createHash('sha256').update(buffer).digest('hex');
 
@@ -75,7 +75,12 @@ function directoryDigest(root, absoluteDir) {
         walk(full);
         continue;
       }
-      if (entry.name === ".git") { gitPointers.push({ path: rel, kind: "file" }); continue; }
+      if (entry.name === ".git") {
+        // 只读取指针文件自己的字节，不解析/读取它指向的仓库。
+        try { const bytes = readFileSync(full); gitPointers.push({ path: rel, kind: "file", bytes: bytes.length, sha256: sha256Hex(bytes) }); }
+        catch (error) { errors.push({ path: rel, reason: `read git pointer bytes: ${String(error).slice(0, 80)}` }); }
+        continue;
+      }
       try {
         const bytes = readFileSync(full);
         files.push({ path: rel, bytes: bytes.length, sha256: sha256Hex(bytes) });
@@ -90,32 +95,13 @@ function directoryDigest(root, absoluteDir) {
   const digest = sha256Hex(Buffer.from([
     ...files.map((file) => `file\0${file.path}\0${file.sha256}`),
     ...links.map((link) => `link\0${link.path}\0${link.target}`),
+    ...gitPointers.map((pointer) => `git-metadata\0${pointer.path}\0${pointer.kind}\0${pointer.sha256 ?? ''}`),
   ].sort().join("\n")));
   return { digest, files, links, gitPointers, errors };
 }
 
-/** 只读判断：容器里的 .git 指针是否指向容器外部（外部指针不跟随、只记录并判失败）。 */
-function externalGitPointers(root, absoluteDir, gitPointers) {
-  const external = [];
-  for (const pointer of gitPointers) {
-    const full = join(root, pointer.path);
-    if (pointer.kind === "directory") continue;
-    try {
-      const text = readFileSync(full, "utf8").trim();
-      const match = /^gitdir:\s*(.+)$/m.exec(text);
-      if (!match) { external.push({ ...pointer, reason: "unparsable .git pointer" }); continue; }
-      const target = match[1].trim();
-      const resolved = target.startsWith("/") || /^[A-Za-z]:[\\/]/.test(target) ? target : join(absoluteDir, target);
-      if (!resolved.startsWith(absoluteDir)) external.push({ ...pointer, target: resolved, reason: "gitdir points outside container" });
-    } catch (error) {
-      external.push({ ...pointer, reason: `read .git: ${String(error).slice(0, 80)}` });
-    }
-  }
-  return external;
-}
-
 /**
- * 把 gitlink 目录**物化**成可普通入库的容器：只复制普通文件（不跟随链接、不复制 .git），
+ * 把 gitlink 目录物化成普通 .bin 容器：保存普通文件及 .git 指针自身字节，不激活 Git 元数据。
  * 并写 `mapping.json`（originalPath / mode / sha256 / bytes / containerPath）。
  * 任何 I/O 异常都抛出（入口失败），不静默跳过。
  */
@@ -123,28 +109,40 @@ export function materializeContainer(root, gitlinkPath, targetDir, options = {})
   const source = join(root, gitlinkPath);
   const container = directoryDigest(root, source);
   if (container.errors.length) throw new Error(`容器内存在不可读条目：${JSON.stringify(container.errors).slice(0, 300)}`);
-  const external = externalGitPointers(root, source, container.gitPointers);
-  if (external.length) throw new Error(`容器内 .git 指针指向外部：${JSON.stringify(external).slice(0, 300)}`);
+  // 外部 gitdir 是 worktree 的正常元数据。保存指针文件本身为惰性 .bin，绝不跟随。
+  // 此容器只支持指针文件；真实 .git 目录需要单独完整枚举，不允许静默丢弃。
+  if (container.gitPointers.some(pointer => pointer.kind !== 'file')) throw new Error('Nested .git directory metadata requires explicit enumeration');
   const mapping = {
     originalPath: gitlinkPath.split(sep).join("/"),
     mode: "160000",
     containerPath: relative(join(root, "docs"), targetDir).split(sep).join("/"),
+    containerPathBase: 'docs',
     digest: container.digest,
     files: [],
     links: container.links.map((link) => ({ path: link.path, target: link.target })),
     gitPointers: container.gitPointers.map((pointer) => ({ path: pointer.path, kind: pointer.kind })),
     errors: [],
   };
-  for (const file of container.files) {
-    const from = join(source, file.path);
-    const to = join(targetDir, file.path);
+  let sequence = 0;
+  for (const file of [...container.files, ...container.gitPointers]) {
+    // directoryDigest.path 相对 root；不能再拼到 source（否则整个路径重复一次）。
+    const from = resolve(root, file.path);
+    const sourceRelative = relative(source, from);
+    if (sourceRelative === '..' || sourceRelative.startsWith(`..${sep}`) || !sourceRelative) throw new Error(`Source is outside gitlink container: ${file.path}`);
+    const storageName = `payload-${String(sequence++).padStart(6, '0')}.bin`;
+    const to = join(targetDir, storageName);
     try {
       mkdirSync(dirname(to), { recursive: true });
-      copyFileSync(from, to);
+      if (!lstatSync(from).isFile()) throw new Error(`Source is not a plain file: ${file.path}`);
+      const originalBytes = readFileSync(from);
+      if (sha256Hex(originalBytes) !== file.sha256) throw new Error(`Source changed during packaging: ${file.path}`);
+      if (existsSync(to)) {
+        if (sha256Hex(readFileSync(to)) !== file.sha256) throw new Error(`Refusing to overwrite existing container payload: ${to}`);
+      } else writeFileSync(to, originalBytes, { flag: 'wx' });
       const bytes = readFileSync(to);
       const sha = sha256Hex(bytes);
       if (sha !== file.sha256) throw new Error(`复制后字节不一致：${file.path}`);
-      mapping.files.push({ originalPath: `${gitlinkPath.split(sep).join("/")}/${file.path}`, mode: "100644", bytes: bytes.length, sha256: sha, containerPath: `${mapping.containerPath}/${file.path}` });
+      mapping.files.push({ originalPath: file.path, mode: "100644", kind: file.kind === 'file' ? 'git-pointer-raw' : 'payload', bytes: bytes.length, sha256: sha, containerPath: `${mapping.containerPath}/${storageName}` });
     } catch (error) {
       mapping.errors.push({ path: file.path, reason: String(error).slice(0, 160) });
     }
