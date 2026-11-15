@@ -1,0 +1,76 @@
+{
+  "asset": {
+    "id": "283226a3-08d5-49e1-b28f-93972d293d17",
+    "status": "ready",
+    "createdAt": "2026-11-15T02:58:27.389Z",
+    "updatedAt": "2026-11-15T02:58:28.340Z",
+    "taskId": "9000002",
+    "metrics": {
+      "before": {
+        "bytes": 13345788,
+        "vertices": 117010
+      },
+      "after": {
+        "bytes": 983560,
+        "vertices": 85436
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 1,
+            "name": "geometry_0",
+            "bounds": {
+              "min": [
+                -0.15895565660573138,
+                0,
+                -0.16475417340617085
+              ],
+              "max": [
+                0.15895565660573138,
+                1,
+                0.16475417340617085
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 520,
+      "bounds": {
+        "min": [
+          -0.15895565660573138,
+          0,
+          -0.16475417340617085
+        ],
+        "max": [
+          0.15895565660573138,
+          1,
+          0.16475417340617085
+        ]
+      }
+    },
+    "modelUrl": "/assets/283226a3-08d5-49e1-b28f-93972d293d17/model.glb?revision=856f67f3-c4bb-4b2a-8bb5-9e3e6ca93f87"
+  },
+  "invalid": {
+    "both": 400,
+    "badVersion": 400,
+    "noKey": 400,
+    "httpImg": 400
+  },
+  "mockStats": {
+    "before": {
+      "creates": 1,
+      "gets": 3
+    },
+    "after": {
+      "creates": 2,
+      "gets": 6
+    },
+    "afterInvalid": {
+      "creates": 2,
+      "gets": 6
+    }
+  }
+}

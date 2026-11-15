@@ -1,0 +1,16 @@
+{
+  "baseVersion": "926ccf31ed5b786198aa381af3ab84124eaeb9b8",
+  "first": {
+    "id": "4b10ee7d45634667badd5ab51a130833",
+    "decision": "adopted"
+  },
+  "second": {
+    "id": "8cdf3f1eb4da4aac852298cf4e1c4070",
+    "restartStatus": 409,
+    "restartCode": "STALE_CANDIDATE",
+    "adoptStatus": 409,
+    "adoptCode": "CHECKS_NOT_PASSED",
+    "decision": "discarded"
+  },
+  "mergeConflictReachable": false
+}

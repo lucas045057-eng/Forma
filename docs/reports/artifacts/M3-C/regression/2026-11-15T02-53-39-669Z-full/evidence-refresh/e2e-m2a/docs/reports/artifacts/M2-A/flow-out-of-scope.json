@@ -1,0 +1,9 @@
+{
+  "selectionSrc": "src/App.tsx:37:9",
+  "outOfScope": [
+    "src/tmp-scope.css"
+  ],
+  "diff": [
+    "src/tmp-scope.css"
+  ]
+}

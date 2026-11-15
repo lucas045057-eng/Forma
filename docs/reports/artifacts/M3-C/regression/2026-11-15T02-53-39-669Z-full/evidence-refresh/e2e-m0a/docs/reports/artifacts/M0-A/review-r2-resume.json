@@ -1,0 +1,74 @@
+{
+  "record": {
+    "id": "3aba902f-f5f8-46b8-9bcd-f185dd627b13",
+    "status": "polling",
+    "createdAt": "2026-11-15T02:59:27.337Z",
+    "updatedAt": "2026-11-15T02:59:27.534Z",
+    "keyHash": "c4339ddfe72a5dbdace4a034802c4120c593efe9b76df571321f59a41ec0217d",
+    "fingerprint": "760e2ea4f13096c77266c1113fbf8086db3f02537cf4210e912cfa3bfec280f5",
+    "taskId": "9000001",
+    "error": {
+      "code": "SERVICE_STOPPED",
+      "message": "服务已停止，重启后继续查询原任务"
+    }
+  },
+  "resumed": {
+    "id": "3aba902f-f5f8-46b8-9bcd-f185dd627b13",
+    "status": "ready",
+    "createdAt": "2026-11-15T02:59:27.337Z",
+    "updatedAt": "2026-11-15T02:59:29.104Z",
+    "taskId": "9000001",
+    "metrics": {
+      "before": {
+        "bytes": 488,
+        "vertices": 3
+      },
+      "after": {
+        "bytes": 1300,
+        "vertices": 3
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 0,
+            "name": "",
+            "bounds": {
+              "min": [
+                -0.5,
+                0,
+                0
+              ],
+              "max": [
+                0.5,
+                1,
+                0
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 12,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          0
+        ],
+        "max": [
+          0.5,
+          1,
+          0
+        ]
+      }
+    },
+    "modelUrl": "/assets/3aba902f-f5f8-46b8-9bcd-f185dd627b13/model.glb?revision=e8137101-faaa-4d37-907c-3e72d5d7c576"
+  },
+  "stats": {
+    "creates": 0,
+    "gets": 3
+  },
+  "modelBytes": 1300
+}
