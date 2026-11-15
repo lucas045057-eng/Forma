@@ -1,5 +1,5 @@
 import {beforeAll,beforeEach,afterEach,afterAll,expect,it} from 'vitest';
-import {chromium,type Browser,type BrowserServer,type BrowserContext,type Page} from '@playwright/test';
+import {chromium,expect as browserExpect,type Browser,type BrowserServer,type BrowserContext,type Page} from '@playwright/test';
 import {createServer,type ViteDevServer} from 'vite';
 import {mkdtemp,readFile,writeFile,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -11,7 +11,7 @@ import type {ServerResponse} from 'node:http';
 
 const studio=path.resolve(import.meta.dirname,'..');
 let vite:ViteDevServer;let native:BrowserServer;let browser:Browser;let context:BrowserContext;let page:Page;let cache:string;let origin:string;let serial=0;
-const state={posts:[] as Array<{id:string;mime:string;bytes:number}>,deletes:[] as string[],tasks:[] as Array<Record<string,unknown>>,hold:false,deleteFailure:false,status:200,text:'把这个改成圆角',pending:new Map<string,ServerResponse>()};
+const state={posts:[] as Array<{id:string;mime:string;bytes:number}>,deletes:[] as string[],tasks:[] as Array<Record<string,unknown>>,configReads:0,hold:false,deleteFailure:false,taskStatus:202,status:200,text:'把这个改成圆角',pending:new Map<string,ServerResponse>()};
 const output=process.env.D2_RUN_DIR;
 const pageErrors:string[]=[];const denied:string[]=[];
 let ownedChrome:Array<{pid:number;parent:number;created:string}>=[];
@@ -28,7 +28,7 @@ beforeAll(async()=>{
    if(request.url==='/__speech_component__/'){
     const css=await readFile(path.join(studio,'src/speech-input.css'),'utf8');response.setHeader('Content-Type','text/html; charset=utf-8');response.end(`<html><head><meta charset="utf-8"><style>body{font-family:sans-serif;background:#17232d;color:#d7e4ee;padding:20px}button,select{margin:4px;padding:8px}textarea{display:block;width:600px}nav{display:flex}${css}</style></head><body><div id="root"></div><script type="module" src="/src/test-support/speech-harness.tsx"></script></body></html>`);return;
    }
-   if(request.url==='/speech/config'){response.setHeader('Content-Type','application/json');response.end(JSON.stringify({enabled:true,provider:'aliyun',model:'qwen3-asr-flash',supportedMimeTypes:['audio/webm'],maxBytes:4194304,maxDurationMs:60000,notice:'mock only'}));return;}
+   if(request.url==='/speech/config'){++state.configReads;response.setHeader('Content-Type','application/json');response.end(JSON.stringify({enabled:true,provider:'aliyun',model:'qwen3-asr-flash',supportedMimeTypes:['audio/webm'],maxBytes:4194304,maxDurationMs:60000,notice:'mock only'}));return;}
    if(request.url==='/speech/transcribe'&&request.method==='POST'){
     let bytes=0;request.on('data',chunk=>{bytes+=chunk.length;});request.on('end',()=>{
      const id=String(request.headers['x-speech-request-id']);state.posts.push({id,mime:String(request.headers['content-type']),bytes});
@@ -41,7 +41,7 @@ beforeAll(async()=>{
    if(request.url==='/tasks'){
     response.setHeader('Content-Type','application/json');
     if(request.method==='GET'){response.end(JSON.stringify(state.tasks));return;}
-    if(request.method==='POST'){let body='';request.on('data',chunk=>{body+=chunk;});request.on('end',()=>{const input=JSON.parse(body);const task={...input,id:`task-${state.tasks.length+1}`,status:'queued',events:[]};state.tasks.unshift(task);response.statusCode=202;response.end(JSON.stringify(task));});return;}
+    if(request.method==='POST'){let body='';request.on('data',chunk=>{body+=chunk;});request.on('end',()=>{if(state.taskStatus!==202){response.statusCode=state.taskStatus;response.end(JSON.stringify({error:{code:'TASK_FAILED',message:'fixture task failure'}}));return;}const input=JSON.parse(body);const task={...input,id:`task-${state.tasks.length+1}`,status:'queued',events:[]};state.tasks.unshift(task);response.statusCode=202;response.end(JSON.stringify(task));});return;}
    }
    next();
   });}}],server:{host:'127.0.0.1',cors:false,hmr:false,watch:null}});
@@ -52,7 +52,7 @@ beforeAll(async()=>{
  browser=await chromium.connect(native.wsEndpoint());
 },60_000);
 beforeEach(async()=>{
- state.posts=[];state.deletes=[];state.tasks=[];state.hold=false;state.deleteFailure=false;state.status=200;state.text='把这个改成圆角';state.pending.clear();pageErrors.length=0;denied.length=0;
+ state.posts=[];state.deletes=[];state.tasks=[];state.configReads=0;state.hold=false;state.deleteFailure=false;state.taskStatus=202;state.status=200;state.text='把这个改成圆角';state.pending.clear();pageErrors.length=0;denied.length=0;
  context=await browser.newContext({viewport:{width:1440,height:1000}});await context.addInitScript(installSpeechFakes);
  await context.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===origin)return route.continue();denied.push(url.origin);return route.abort();});
  page=await context.newPage();page.on('pageerror',error=>pageErrors.push(error.message));await page.goto(origin+'/__speech_component__/');await page.getByTestId('speech-record').waitFor();await expect.poll(()=>page.getByTestId('speech-record').isEnabled()).toBe(true);
@@ -90,6 +90,23 @@ it('real pointer release includes final audio once, editable review requires exp
  await page.getByTestId('speech-use-current').click();expect(await page.getByTestId('instruction-input').inputValue()).toBe('编辑后的语音指令');expect(state.tasks).toHaveLength(0);
  await page.getByTestId('generate-candidate').click();await expect.poll(()=>state.tasks.length).toBe(1);expect(state.tasks[0].selection).toMatchObject({cid:'B'});expect(state.tasks[0].instruction).toBe('编辑后的语音指令');expect(state.posts).toHaveLength(1);
 },30_000);
+it('cross-origin iframe blur and pending pick preserve review, then reconnect restores explicit B confirmation',async()=>{
+ await record();const before=await page.evaluate(()=>window.__speechTest.parentBlurs);
+ await page.frameLocator('iframe[title="跨源点选夹具"]').getByRole('button',{name:'在跨源预览中点选 B'}).click();
+ await expect.poll(()=>page.evaluate(()=>window.__speechTest.parentBlurs)).toBeGreaterThan(before);
+ await browserExpect(page.getByTestId('pick-state')).toHaveAttribute('data-kind','pending');
+ await browserExpect(page.getByTestId('speech-review')).toBeVisible();expect(await page.getByTestId('speech-use').isDisabled()).toBe(true);
+ await page.getByTestId('fixture-resolve-b').click();await page.getByTestId('speech-selection-conflict').waitFor();
+ await page.getByTestId('fixture-gate').click();await browserExpect(page.getByTestId('speech-review')).toBeVisible();expect(await page.getByTestId('speech-use-current').count()).toBe(0);expect(await page.getByTestId('speech-use').isDisabled()).toBe(true);
+ await page.getByTestId('fixture-gate').click();await page.getByTestId('speech-use-current').click();
+ await page.getByTestId('generate-candidate').click();await expect.poll(()=>state.tasks.length).toBe(1);expect(state.tasks[0].selection).toMatchObject({cid:'B'});
+},30_000);
+it('successful speech submission releases binding so later text and version changes do not block a new task',async()=>{
+ await record();await page.getByTestId('speech-use').click();await page.getByTestId('generate-candidate').click();await expect.poll(()=>state.tasks.length).toBe(1);
+ await page.getByTestId('fixture-version').click();await page.getByTestId('instruction-input').fill('提交后的全新文字指令');
+ expect(await page.getByTestId('speech-binding-conflict').count()).toBe(0);expect(await page.getByTestId('generate-candidate').isEnabled()).toBe(true);
+ await page.getByTestId('generate-candidate').click();await expect.poll(()=>state.tasks.length).toBe(2);expect(state.tasks[0].instruction).toBe('提交后的全新文字指令');
+},30_000);
 it('Space repeat and synthetic click never double-record; changed accepted selection blocks Ctrl+Enter until reconfirmed',async()=>{
  await page.getByTestId('speech-record').focus();await page.keyboard.down('Space');await expect.poll(()=>page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(1);await page.keyboard.down('Space');await page.keyboard.up('Space');await page.getByTestId('speech-review').waitFor();expect(state.posts).toHaveLength(1);
  await page.getByTestId('speech-use').click();await page.getByTestId('fixture-B').click();await page.getByTestId('speech-binding-conflict').waitFor();
@@ -111,6 +128,14 @@ it.each(['visibility','blur','gate','unmount'])('real %s event releases active r
  await page.evaluate(kind=>{if(kind==='visibility'){Object.defineProperty(document,'visibilityState',{configurable:true,get:()=> 'hidden'});document.dispatchEvent(new Event('visibilitychange'));}else if(kind==='blur')window.dispatchEvent(new Event('blur'));else document.querySelector<HTMLButtonElement>(`[data-testid="fixture-${kind}"]`)!.click();},reason);
  await expect.poll(()=>page.evaluate(()=>window.__speechTest.liveTracks)).toBe(0);await page.mouse.up();expect(state.posts).toHaveLength(0);
 },30_000);
+it('failed speech task submission conservatively retains its binding until explicit reconfirmation or discard',async()=>{
+ state.taskStatus=500;await record();await page.getByTestId('speech-use').click();await page.getByTestId('generate-candidate').click();await page.getByTestId('task-action-error').waitFor();await page.getByTestId('fixture-B').click();await page.getByTestId('speech-binding-conflict').waitFor();
+ expect(await page.getByTestId('generate-candidate').isDisabled()).toBe(true);expect(state.tasks).toHaveLength(0);
+});
+it('discarding an old unsubmitted speech binding preserves subsequent manual text',async()=>{
+ await record();await page.getByTestId('speech-use').click();await page.getByTestId('fixture-B').click();await page.getByTestId('instruction-input').fill('我后来输入的文字');await page.getByTestId('speech-clear-binding').click();
+ expect(await page.getByTestId('instruction-input').inputValue()).toBe('我后来输入的文字');expect(await page.getByTestId('speech-binding-conflict').count()).toBe(0);expect(state.tasks).toHaveLength(0);
+});
 it('version changes prohibit review acceptance and require a fresh pick and recording',async()=>{
  await record();await page.getByTestId('fixture-version').click();expect(await page.getByTestId('speech-use').isDisabled()).toBe(true);expect(await page.getByTestId('speech-use-current').count()).toBe(0);await page.getByTestId('instruction-input').press('Control+Enter');expect(state.tasks).toHaveLength(0);
 },30_000);
@@ -146,6 +171,10 @@ it('original task retry keeps its original selection and cannot run while a spee
  await page.getByTestId('instruction-input').fill('原任务指令');await page.getByTestId('generate-candidate').click();await expect.poll(()=>state.tasks.length).toBe(1);state.tasks[0].status='failed';state.tasks[0].error={code:'TASK_FAILED',message:'fake failure'};await page.getByTestId('fixture-refresh').click();await page.getByTestId('task-retry').waitFor();await page.getByTestId('fixture-B').click();
  await record();expect(await page.getByTestId('task-retry').isDisabled()).toBe(true);await page.getByTestId('speech-discard').click();await page.getByTestId('task-retry').click();await expect.poll(()=>state.tasks.length).toBe(2);expect(state.tasks[0].instruction).toBe('原任务指令');expect(state.tasks[0].selection).toMatchObject({cid:'A'});
 },30_000);
+it('reconnection rereads read-only speech config without starting a recording or upload',async()=>{
+ expect(state.configReads).toBe(1);await page.getByTestId('fixture-gate').click();await page.getByTestId('fixture-gate').click();await expect.poll(()=>state.configReads).toBe(2);
+ expect(state.posts).toHaveLength(0);expect(await page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(0);
+});
 it('the original plain typed instruction still submits without ever opening a recorder',async()=>{
  await page.getByTestId('instruction-input').fill('直接文字修改');await page.getByTestId('instruction-input').press('Control+Enter');await expect.poll(()=>state.tasks.length).toBe(1);expect(state.tasks[0].instruction).toBe('直接文字修改');expect(await page.evaluate(()=>window.__speechTest.recorderStarts)).toBe(0);expect(state.posts).toHaveLength(0);
 },30_000);

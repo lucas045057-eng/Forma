@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import type { Selection } from '@spatial/shared';
 import { SceneService, SceneError } from './scene/service.ts';
-import { AssetService } from './assets/service.ts';
+import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
 import { WorkService, type WorkServiceOptions } from './work/service.ts';
@@ -28,6 +28,8 @@ export interface AppOptions {
   historyDirectory?: string;
   dataDirectory?: string;
   fallbackDirectory?: string;
+  /** Internal synthetic-fixture hashes only; not available from HTTP or provider env. */
+  presetDigests?: AssetServiceOptions['presetDigests'];
   /** Dedicated offline demo only; never set by HTTP or provider env. */
   mockAssets?: boolean;
   workDataDirectory?: string;
@@ -92,7 +94,7 @@ export async function createApp(options: AppOptions = {}) {
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
-    pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs, fallbackDirectory:options.fallbackDirectory,mockUpstream:options.mockAssets,
+    pollMs: options.pollMs, timeoutMs: options.timeoutMs, downloadTimeoutMs, fallbackDirectory:options.fallbackDirectory,presetDigests:options.presetDigests,mockUpstream:options.mockAssets,
     emit,
   });
   closers.push(() => service.close());

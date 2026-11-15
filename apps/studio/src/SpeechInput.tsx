@@ -2,24 +2,25 @@ import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import type {SpeechConfig} from '@spatial/shared';
 import {readSpeechConfig,speechMessage} from './speech-api.ts';
 import {identityLabel,PressGesture,reviewDecision,type ReviewMode,type SpeechContext} from './speech-review.ts';
-import {speechBusy,type SpeechController,type SpeechProvider,type SpeechReview,type SpeechSnapshot} from './speech-input.ts';
+import {speechBusy,speechInflight,type SpeechController,type SpeechProvider,type SpeechReview,type SpeechSnapshot} from './speech-input.ts';
 import './speech-input.css';
-interface Props {controller:SpeechController;snapshot:SpeechSnapshot;context:SpeechContext;allowed:boolean;onUse:(review:SpeechReview,mode:ReviewMode)=>void}
+interface Props {controller:SpeechController;snapshot:SpeechSnapshot;context:SpeechContext;allowed:boolean;connected:boolean;onUse:(review:SpeechReview,mode:ReviewMode)=>void}
 const phaseLabels:Record<SpeechSnapshot['phase'],string>={idle:'按住说话，松开转写',permission:'正在申请权限，松开可取消',recording:'正在录音，松开结束',transcribing:'正在转写，请稍候',review:'请编辑并确认转写',cancelled:'语音已取消',error:'语音输入未完成'};
-export default function SpeechInput({controller,snapshot,context,allowed,onUse}:Props){
+export default function SpeechInput({controller,snapshot,context,allowed,connected,onUse}:Props){
  const [config,setConfig]=useState<SpeechConfig>();const [configError,setConfigError]=useState('');const [provider,setProvider]=useState<SpeechProvider>('aliyun');
  const press=useRef(new PressGesture());const button=useRef<HTMLButtonElement>(null);const current=useRef(context);current.current=context;
  const gate=useRef(allowed);gate.current=allowed;
  function clearPress(){const held=press.current.clear();if(held?.kind==='pointer'&&held.id!==undefined&&button.current?.hasPointerCapture(held.id))button.current.releasePointerCapture(held.id);return held;}
  function cancel(reason:string){clearPress();controller.cancel(reason);}
  useEffect(()=>{
+  if(!connected)return;
   const abort=new AbortController();const timer=setTimeout(()=>abort.abort(),5000);let active=true;
   void readSpeechConfig(abort.signal).then(value=>{if(active){setConfig(value);setConfigError('');}}).catch(cause=>{if(active)setConfigError(speechMessage(cause));}).finally(()=>clearTimeout(timer));
   return()=>{active=false;abort.abort();clearTimeout(timer);};
- },[]);
- useLayoutEffect(()=>{if(!allowed)cancel('当前模式或提交权限已变化。');},[allowed,controller]);
+ },[connected]);
+ useLayoutEffect(()=>{if(!allowed&&speechInflight(controller.getSnapshot()))cancel('当前模式或提交权限已变化。');},[allowed,controller]);
  useEffect(()=>{
-  const hidden=()=>{if(document.visibilityState==='hidden')cancel('页面已隐藏。');};const blur=()=>cancel('窗口已失焦。');
+  const hidden=()=>{if(document.visibilityState==='hidden')cancel('页面已隐藏；未确认的转写也已放弃。');};const blur=()=>{if(speechInflight(controller.getSnapshot()))cancel('窗口已失焦。');};
   document.addEventListener('visibilitychange',hidden);window.addEventListener('blur',blur);
   return()=>{document.removeEventListener('visibilitychange',hidden);window.removeEventListener('blur',blur);clearPress();controller.dispose();};
  },[controller]);

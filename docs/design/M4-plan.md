@@ -58,7 +58,7 @@ M3准入已满足：501单测+174 E2E，独立审查无阻断/应修。M4保持M
 
 在PointSpeak增加独立 `SpeechInput` 与可测试录音控制器。状态为idle→requesting_permission→recording→transcribing→review或error/cancelled；每次会话递增token，旧权限promise/旧转写晚到不能覆盖新会话。按住按钮或Space开始、释放停止；keydown忽略repeat并preventDefault，抑制Space释放产生的合成click；键盘焦点局限于录音按钮，不劫持textarea空格。指针开始用setPointerCapture，pointercancel/lostpointercapture取消，60秒自动停止并提示上限。只有syncReady、connected、未blocked、task:create未锁且选择仍可提交时能开始，额外提供明确取消按钮。
 
-PointSpeak切场景模式只是hidden，不能依赖组件卸载释放。`blocked`变true、document.visibilityState=hidden、窗口失焦、卸载任一触发：立即废弃token，停止所有MediaStream tracks/录音器/timer，若已发转写则显式DELETE该requestId并abort本地等待（DELETE失败也不能保留麦克风或接受晚到结果）；取消请求有界且不自动重试。转写中进入blocked不进入review。权限晚到发现会话废弃也立即stop tracks。单测必须覆盖录音中切场景、转写中进影响模式、权限pending时隐藏三种路径。
+PointSpeak切场景模式只是hidden，不能依赖组件卸载释放。`permission/recording/transcribing`在`blocked`变true、document.visibilityState=hidden、窗口失焦、卸载任一触发时：立即废弃token，停止所有MediaStream tracks/录音器/timer，若已发转写则显式DELETE该requestId并abort本地等待（DELETE失败也不能保留麦克风或接受晚到结果）；取消请求有界且不自动重试。转写中进入blocked不进入review。权限晚到发现会话废弃也立即stop tracks。已完成的review与在途请求分开：真实预览iframe点选造成的父窗口blur、点选pending、短暂SSE重连/任务锁只禁用确认并保留review，待当前对象ready后仍要求显式A/B确认；document真正hidden或卸载则明确放弃review。单测必须覆盖录音中切场景、转写中进影响模式、权限pending时隐藏，以及跨源iframe点选与重连时review保留。
 
 浏览器API不支持、非安全上下文、权限拒绝、无麦克风时给出可读提示并继续文字输入。录音器MIME从服务支持集合与`MediaRecorder.isTypeSupported`交集选取，不能把不支持的格式改名冒充WebM。录音期间累计chunk体积，越界立即取消，不发送大包；transcribing期间不能开始第二段，不自动创建任务。上传/取消都用有界AbortController；HTTP499按`error.code === 'SPEECH_CANCELLED'`处理，不以状态码推断业务成功。用户每次新录音/显式重试均生成新UUID，失败/取消后绝不复用旧ID（D1会缓存旧终态5分钟），不自动重试或切换服务。
 

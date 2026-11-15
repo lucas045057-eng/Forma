@@ -50,6 +50,10 @@ it('browser recognition is explicit, shares review, and cancellation discards sa
  const f=fixture();expect(f.recognition.start).not.toHaveBeenCalled();await f.controller.start(context,'browser',config,true);expect(f.ports.getStream).not.toHaveBeenCalled();f.controller.finish();expect(f.controller.getSnapshot().review?.provider).toBe('browser');expect(f.controller.getSnapshot().review?.text).toBe('浏览器草稿');expect(f.transcribe).not.toHaveBeenCalled();
  f.controller.accept();await f.controller.start(context,'browser',config,true);f.controller.cancel('hidden');f.recognize('late');f.end();expect(f.recognition.abort).toHaveBeenCalled();expect(f.controller.getSnapshot().review).toBeUndefined();f.controller.dispose();
 });
+it('browser recognition with no final text reports no speech instead of an upstream outage',async()=>{
+ const f=fixture();f.recognition.stop=vi.fn(()=>f.end());await f.controller.start(context,'browser',config,true);f.controller.finish();
+ await vi.waitFor(()=>expect(f.controller.getSnapshot().phase).toBe('error'));expect(f.controller.getSnapshot().error).toBe('未识别到语音，请重新录音或使用文字输入。');expect(f.recognition.detach).toHaveBeenCalled();f.controller.dispose();
+});
 it('unavailable gates and invalid transcripts preserve typed path without automatic fallback',async()=>{
  const f=fixture();await f.controller.start(context,'aliyun',config,false);expect(f.ports.getStream).not.toHaveBeenCalled();
  f.transcribe.mockResolvedValue({requestId:'wrong',text:'x'.repeat(4001),provider:'aliyun',model:'qwen3-asr-flash'});await f.controller.start(context,'aliyun',config,true);f.controller.finish();await vi.waitFor(()=>expect(f.controller.getSnapshot().phase).toBe('error'));expect(f.recognition.start).not.toHaveBeenCalled();f.controller.dispose();
