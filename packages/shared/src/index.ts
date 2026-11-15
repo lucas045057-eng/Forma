@@ -42,6 +42,20 @@ export interface AssetEvent {
   asset: Asset;
 }
 export interface TaskEvent { type: string; ts: string; sequence: number; message: string }
+export type SpeechErrorCode = 'SPEECH_NOT_CONFIGURED' | 'SPEECH_INVALID_AUDIO' | 'SPEECH_TOO_LARGE' |
+  'SPEECH_UNSUPPORTED_MEDIA' | 'SPEECH_UPSTREAM' | 'SPEECH_TIMEOUT' | 'SPEECH_CANCELLED' |
+  'SPEECH_BUSY' | 'SPEECH_REQUEST_CONFLICT' | 'SPEECH_NOT_FOUND' | 'SPEECH_CLOSING';
+export interface SpeechConfig {
+  enabled: boolean;
+  provider: 'aliyun';
+  model: 'qwen3-asr-flash';
+  supportedMimeTypes: string[];
+  maxBytes: number;
+  maxDurationMs: number;
+  notice: string;
+}
+export interface SpeechResult { requestId: string; text: string; provider: 'aliyun'; model: 'qwen3-asr-flash' }
+export interface SpeechCancelResult { requestId: string; status: 'cancelled' | 'completed' }
 export interface FileDiff { path: string; patch: string }
 export interface Task {
   id: string;

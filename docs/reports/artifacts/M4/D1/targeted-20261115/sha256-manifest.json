@@ -1,0 +1,367 @@
+{
+  "algorithm": "sha256",
+  "manifestExcluded": "sha256-manifest.json",
+  "entryNote": "Each historical entry is byte-matched to its original manifest; 03 reconstructed and hash-verified, not executed again.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "source": "Preserve every archived byte through Git.",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "01-red-fixture-error/install.log",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-21-54.942Z/install.log",
+      "bytes": 539,
+      "sha256": "af00bb1bf4c0a10e242b193bc3428999996548a6844e3801ca25858b6039d199"
+    },
+    {
+      "path": "01-red-fixture-error/launcher/cmd",
+      "source": "orbital/jobs/job_2ffe7154/cmd",
+      "bytes": 36,
+      "sha256": "de6017d708210e2dd2de2c8d13dda3652da5938082c55228b83e1c452015dd37"
+    },
+    {
+      "path": "01-red-fixture-error/launcher/exit",
+      "source": "orbital/jobs/job_2ffe7154/exit",
+      "bytes": 5,
+      "sha256": "13dd7ea678df22565726506d4db2bb4dd1cefd02a9d9772620ce4d4d9315e47b"
+    },
+    {
+      "path": "01-red-fixture-error/launcher/job.json",
+      "source": "orbital/jobs/job_2ffe7154/job.json",
+      "bytes": 398,
+      "sha256": "3b0fec36778fab045ed05253859061dea9234ffccc0871b4a19ffdd9f988e4ec"
+    },
+    {
+      "path": "01-red-fixture-error/launcher/output.log",
+      "source": "orbital/jobs/job_2ffe7154/output.log",
+      "bytes": 6326,
+      "sha256": "50d2cd3fdabf87d7c8484d354c0228928315be9e124a9668517bdf509f3d0af9"
+    },
+    {
+      "path": "01-red-fixture-error/manifest.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-21-54.942Z/manifest.json",
+      "bytes": 41837,
+      "sha256": "5638613cec9145f9492f947d8704fc3139d9626f87982918c46f7da88eb7b080"
+    },
+    {
+      "path": "01-red-fixture-error/server-results.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-21-54.942Z/server-results.json",
+      "bytes": 4245,
+      "sha256": "0ac8417d88fd606ce21bb2e2e1b84d7e6b4e3a376de9c2b7fc252f1109ab462e"
+    },
+    {
+      "path": "01-red-fixture-error/sha256-manifest.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-21-54.942Z/sha256-manifest.json",
+      "bytes": 665,
+      "sha256": "39bd395b5198a1cc6b2e751dbf072216fde1aab15f38e2cab93ae8bbeb2b645b"
+    },
+    {
+      "path": "01-red-fixture-error/speech-red.log",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-21-54.942Z/speech-red.log",
+      "bytes": 5466,
+      "sha256": "821bb8d2cf7f055e9aab7d08761b90df0c28fc3a32b165776149ba9c7a3939a9"
+    },
+    {
+      "path": "02-clean-red/launcher/cmd",
+      "source": "orbital/jobs/job_0fd1468c/cmd",
+      "bytes": 36,
+      "sha256": "de6017d708210e2dd2de2c8d13dda3652da5938082c55228b83e1c452015dd37"
+    },
+    {
+      "path": "02-clean-red/launcher/exit",
+      "source": "orbital/jobs/job_0fd1468c/exit",
+      "bytes": 5,
+      "sha256": "13dd7ea678df22565726506d4db2bb4dd1cefd02a9d9772620ce4d4d9315e47b"
+    },
+    {
+      "path": "02-clean-red/launcher/job.json",
+      "source": "orbital/jobs/job_0fd1468c/job.json",
+      "bytes": 399,
+      "sha256": "bc3f3d68f7b40d75c8521af0b32ccdf469ac8bd72775465e9142f6494bfe8646"
+    },
+    {
+      "path": "02-clean-red/launcher/output.log",
+      "source": "orbital/jobs/job_0fd1468c/output.log",
+      "bytes": 4751,
+      "sha256": "a66e6136d6982a6ab16dea83c129707fd3dd7a1c9a18d969d9bbf4108a41bf38"
+    },
+    {
+      "path": "02-clean-red/manifest.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-25-21.663Z/manifest.json",
+      "bytes": 41692,
+      "sha256": "0a14b4994ec2cd8bd12de04395f99997abbdf8da6d594d7aeae7d337349f6214"
+    },
+    {
+      "path": "02-clean-red/server-results.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-25-21.663Z/server-results.json",
+      "bytes": 4243,
+      "sha256": "3381c0dfd27c1de2ace232f887d4c602bea8481bba757fdabeb39a89d439ea02"
+    },
+    {
+      "path": "02-clean-red/sha256-manifest.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-25-21.663Z/sha256-manifest.json",
+      "bytes": 679,
+      "sha256": "8c6df4d1d5072634833ab971109408e3edd261f18853091e2acdc9a44b81de59"
+    },
+    {
+      "path": "02-clean-red/speech-cleanup-33476.json",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-25-21.663Z/speech-cleanup-33476.json",
+      "bytes": 332,
+      "sha256": "e9d63f4b09870c52f8f3297bd8896a9ca2003e5025df7087374d500634e1a2f4"
+    },
+    {
+      "path": "02-clean-red/speech-red.log",
+      "source": ".worktrees/m4/.data/d1-red-2026-11-15T06-25-21.663Z/speech-red.log",
+      "bytes": 4430,
+      "sha256": "138f6add3d3bc20b4c7192164be99dd507fadd0039b0709e3c5cc4d8641ca73d"
+    },
+    {
+      "path": "03-type-error/launcher/cmd",
+      "source": "orbital/jobs/job_c8723f0d/cmd",
+      "bytes": 38,
+      "sha256": "38c7ef84167ed9ebbe3b66dc2e4d2ba7b5800946813bd5411623f32ba1dc4caf"
+    },
+    {
+      "path": "03-type-error/launcher/exit",
+      "source": "orbital/jobs/job_c8723f0d/exit",
+      "bytes": 5,
+      "sha256": "13dd7ea678df22565726506d4db2bb4dd1cefd02a9d9772620ce4d4d9315e47b"
+    },
+    {
+      "path": "03-type-error/launcher/job.json",
+      "source": "orbital/jobs/job_c8723f0d/job.json",
+      "bytes": 399,
+      "sha256": "45bd8d41fe1965234cd8e6dd1b67c62e92f4c423587720eb61640ce6d30b32d5"
+    },
+    {
+      "path": "03-type-error/launcher/output.log",
+      "source": "orbital/jobs/job_c8723f0d/output.log",
+      "bytes": 655,
+      "sha256": "348e4167800ee9392b7304bc82429aaa2a8f60ce94f571384f5c7f0753789826"
+    },
+    {
+      "path": "03-type-error/manifest.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-37-50.098Z/manifest.json",
+      "bytes": 131035,
+      "sha256": "398ce9bfd4136ce8eead3024ca785035bb1fe5ba310733a160bb5ecf6a0096c2"
+    },
+    {
+      "path": "03-type-error/server-typecheck.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-37-50.098Z/server-typecheck.log",
+      "bytes": 312,
+      "sha256": "1308294c7c408bca0f98f4090b55554d4f2b4719bf1bda1bdadf523c02d56c1a"
+    },
+    {
+      "path": "03-type-error/sha256-manifest.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-37-50.098Z/sha256-manifest.json",
+      "bytes": 524,
+      "sha256": "c7d56094ddd31836c60ff5fcc06593dd88e014063a57dd9991449282572f5306"
+    },
+    {
+      "path": "03-type-error/shared-typecheck.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-37-50.098Z/shared-typecheck.log",
+      "bytes": 6,
+      "sha256": "5ac71a99decf5b92dbfe798066cbe8ea317395f8f764f5a8879fd3511ca99454"
+    },
+    {
+      "path": "04-targeted-green/launcher/cmd",
+      "source": "orbital/jobs/job_55d2232d/cmd",
+      "bytes": 38,
+      "sha256": "38c7ef84167ed9ebbe3b66dc2e4d2ba7b5800946813bd5411623f32ba1dc4caf"
+    },
+    {
+      "path": "04-targeted-green/launcher/exit",
+      "source": "orbital/jobs/job_55d2232d/exit",
+      "bytes": 5,
+      "sha256": "043b5ae7334040ef63298adca08912d5287ad37e66f9425316adc50d2c1ab652"
+    },
+    {
+      "path": "04-targeted-green/launcher/job.json",
+      "source": "orbital/jobs/job_55d2232d/job.json",
+      "bytes": 399,
+      "sha256": "a0920f7381933ab60e2341fe146d4e5e162c56d0d28a59e55b2aa65b69563c21"
+    },
+    {
+      "path": "04-targeted-green/launcher/output.log",
+      "source": "orbital/jobs/job_55d2232d/output.log",
+      "bytes": 11838,
+      "sha256": "30ae6b37446283c0b5273562faf5a749d923f29d6a8917aa81a417767c1d6961"
+    },
+    {
+      "path": "04-targeted-green/manifest.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/manifest.json",
+      "bytes": 219938,
+      "sha256": "3a50bf0f706d0abdb3d8b6e1d7c3e1da031c4bbf9eca88fecf5f952a263af713"
+    },
+    {
+      "path": "04-targeted-green/proxy-test.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/proxy-test.log",
+      "bytes": 679,
+      "sha256": "85448861ac26f638ff37b85c0e35770284e8f5da25be385bcaaea6c1fbde205e"
+    },
+    {
+      "path": "04-targeted-green/server-results.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/server-results.json",
+      "bytes": 16463,
+      "sha256": "2f06e9434c51dbe902b3505e64951a0dd0d18029379b62aa0db567f4d61cc9a4"
+    },
+    {
+      "path": "04-targeted-green/server-typecheck.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/server-typecheck.log",
+      "bytes": 6,
+      "sha256": "5ac71a99decf5b92dbfe798066cbe8ea317395f8f764f5a8879fd3511ca99454"
+    },
+    {
+      "path": "04-targeted-green/sha256-manifest.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/sha256-manifest.json",
+      "bytes": 3909,
+      "sha256": "9ea8b14a6d8694f573d8040d037f27277f7b80efc4ed6a66c90d81cfc53f7967"
+    },
+    {
+      "path": "04-targeted-green/speech-cleanup-45196.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-cleanup-45196.json",
+      "bytes": 332,
+      "sha256": "e0822c6e22aff5c1c8a3bf5bcd107dcf9b2c0d06924565cc7ca92ed2268c9013"
+    },
+    {
+      "path": "04-targeted-green/speech-lifecycle-LiZmIk-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-lifecycle-LiZmIk-cleanup.json",
+      "bytes": 245,
+      "sha256": "831645497cbbc4ea088f339139f6d59c32271b043b9a1cdc1d22eaecb65bc239"
+    },
+    {
+      "path": "04-targeted-green/speech-lifecycle-PgUri5-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-lifecycle-PgUri5-cleanup.json",
+      "bytes": 245,
+      "sha256": "6ae559ed717672547f5fae2872602ceec43fb814c197b7af7a9dbab4e31b830c"
+    },
+    {
+      "path": "04-targeted-green/speech-lifecycle-pVlOYX-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-lifecycle-pVlOYX-cleanup.json",
+      "bytes": 245,
+      "sha256": "a1af6e399462ae9f567e3ec7d0a5cb7bb240494d807188cf2622a81be9e273b7"
+    },
+    {
+      "path": "04-targeted-green/speech-lifecycle-ZRKoiO-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-lifecycle-ZRKoiO-cleanup.json",
+      "bytes": 245,
+      "sha256": "55b90382988e8120b7bcdf3184af78ec48b4dbb0aaefdc7e05a2c079c7a657eb"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-06a45630-84a4-4880-836f-0628ba515606-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-06a45630-84a4-4880-836f-0628ba515606-cleanup.json",
+      "bytes": 91,
+      "sha256": "79010412afd6d1c0739bd6be8c92d24016c4ac13a8e023122a2d05d10509193c"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-0e11139f-5afb-4035-a294-b7cac1ec6bbd-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-0e11139f-5afb-4035-a294-b7cac1ec6bbd-cleanup.json",
+      "bytes": 91,
+      "sha256": "421ce9a40455e16c7ae25ff848ad4e29fb438de05c6337cbd3edc31496616003"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-1df9bc86-35d6-424f-bd05-b8fe2d6a0b7c-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-1df9bc86-35d6-424f-bd05-b8fe2d6a0b7c-cleanup.json",
+      "bytes": 91,
+      "sha256": "3b27e2a3290c71fd258bd5579ca1a967a427d82ec451c259ce58930be0a2ab86"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-338a3bce-3631-44ed-a368-da18d6d27481-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-338a3bce-3631-44ed-a368-da18d6d27481-cleanup.json",
+      "bytes": 91,
+      "sha256": "2bee3f0a8d1445cca3542e6d9abd58d2342924ed598b6e6f51f034f66b1b9f7f"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-5ca767b2-be9e-4028-93ed-9f995c89db0e-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-5ca767b2-be9e-4028-93ed-9f995c89db0e-cleanup.json",
+      "bytes": 91,
+      "sha256": "482fc2d144f3e3cc17c218f3a98b3b4f89012e197c97cdac2eef70856277d982"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-6373bca2-323f-41e4-81f5-c093a8842b7c-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-6373bca2-323f-41e4-81f5-c093a8842b7c-cleanup.json",
+      "bytes": 91,
+      "sha256": "c91c1a6c320dd4823b3f9c0e1e72d1a3862da8f29a46f00a55779780c312ed95"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-a352e203-56b9-4c26-a1d5-17f0c972d887-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-a352e203-56b9-4c26-a1d5-17f0c972d887-cleanup.json",
+      "bytes": 91,
+      "sha256": "5cf42923c7111f483d5e0309e8df6bc1f5f3cd25026e5e6da5cd36bedcfc37f2"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-c16d9a3c-f96d-48e9-9283-1a0bd5865f5a-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-c16d9a3c-f96d-48e9-9283-1a0bd5865f5a-cleanup.json",
+      "bytes": 91,
+      "sha256": "a315d0aead3998a60d467e8cabb06d4034fdd174f940aec64d20327e592071f0"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-c57121a5-65fb-4787-a7d5-3ac8728e61af-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-c57121a5-65fb-4787-a7d5-3ac8728e61af-cleanup.json",
+      "bytes": 91,
+      "sha256": "a1c6e0f50b2ec3dda89d533fb1f5ac078c0d28f11a228cbb97899e8f571e0de1"
+    },
+    {
+      "path": "04-targeted-green/speech-mock-d1e8a070-26fe-4f5e-905d-85dc023a75b4-cleanup.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-mock-d1e8a070-26fe-4f5e-905d-85dc023a75b4-cleanup.json",
+      "bytes": 91,
+      "sha256": "542c3f57c91530438f71e8c78ba24531d38603c4bfe42eb338f2e65c65140276"
+    },
+    {
+      "path": "04-targeted-green/speech-tests.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/speech-tests.log",
+      "bytes": 11017,
+      "sha256": "6859cfa3cb47ef480b81ad392a3ab571b06e7762bd2663a12a19fba9d4d4c03d"
+    },
+    {
+      "path": "04-targeted-green/studio-results.json",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/studio-results.json",
+      "bytes": 990,
+      "sha256": "9940079c649d3a3070736879c674ef98ec09c5e9f1c63de141046ffa1e494552"
+    },
+    {
+      "path": "04-targeted-green/studio-typecheck.log",
+      "source": ".worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/studio-typecheck.log",
+      "bytes": 6,
+      "sha256": "5ac71a99decf5b92dbfe798066cbe8ea317395f8f764f5a8879fd3511ca99454"
+    },
+    {
+      "path": "entries/01-red-fixture-error.mjs",
+      "source": ".worktrees/m4/.data/d1-first-red-preserved/initial-entry.mjs",
+      "bytes": 4660,
+      "sha256": "012037c44b0c997dfc2749ef344f4a8dca9f167f99437c5facf4c5243409d342"
+    },
+    {
+      "path": "entries/02-clean-red.mjs",
+      "source": ".worktrees/m4/.data/d1-red.mjs",
+      "bytes": 4718,
+      "sha256": "747b5eba6a2297bb28fdcbddebd104c8f5a81e64a73f9f69df1bb32e8be62732"
+    },
+    {
+      "path": "entries/03-type-error.mjs",
+      "source": "Reconstructed from later entry by reversing only recorded mode/shared-command edits; hash must equal original manifest.",
+      "bytes": 5850,
+      "sha256": "d69d3d931e0177959c5972c775045ce909341df1b4a823a1182a2b7c34be142f"
+    },
+    {
+      "path": "entries/04-targeted-green.mjs",
+      "source": ".worktrees/m4/.data/d1-green.mjs",
+      "bytes": 5917,
+      "sha256": "b3ec483c3133c9b60f787baf810c9f40ee39576c2aae9a40fcfec61d36b38431"
+    },
+    {
+      "path": "entries/d1-loopback.cjs",
+      "source": ".worktrees/m4/.data/d1-loopback.cjs",
+      "bytes": 1751,
+      "sha256": "cfaee3abbae61a06691220c669f129613279739227fc5bf1d58bc66b00fe05e4"
+    },
+    {
+      "path": "verification.json",
+      "source": "Original JSON assertions, identities, cleanup, guard and current OS snapshots; no tests rerun.",
+      "bytes": 9309,
+      "sha256": "101fc9882796ab13ea89b4ea4e31066f844f0807554a40c4622285409ebe76f7"
+    }
+  ]
+}

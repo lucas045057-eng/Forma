@@ -1,0 +1,15 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 17h ago)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +248
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 248, reused 248, downloaded 0, added 244
+Progress: resolved 248, reused 248, downloaded 0, added 248, done
+
+devDependencies:
++ @playwright/test 1.65.0
++ @types/node 24.19.2
++ typescript 5.9.3
+
+Done in 1.8s using pnpm v11.17.0

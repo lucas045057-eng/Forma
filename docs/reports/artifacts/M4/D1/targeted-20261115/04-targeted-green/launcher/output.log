@@ -1,0 +1,78 @@
+$ tsc
+$ tsc
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/.worktrees/m4/apps/server[39m
+
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://evil.oss-cn-hangzhou.aliyuncs.com/compatible-mode/v1[32m 2[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://dashscope.aliyuncs.com.evil.example/compatible-mode/v1[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: http://dashscope.aliyuncs.com/compatible-mode/v1[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://user@dashscope.aliyuncs.com/compatible-mode/v1[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://dashscope.aliyuncs.com/compatible-mode/v1?key=fake[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://dashscope.aliyuncs.com/compatible-mode/v1#fake[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://dashscope.aliyuncs.com:444/compatible-mode/v1[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: https://dashscope.aliyuncs.com/wrong[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mrefuses an untrusted production base before any request: http://127.0.0.1:29001/compatible-mode/v1[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22maccepts only precise documented host forms: dashscope.aliyuncs.com[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22maccepts only precise documented host forms: dashscope-intl.aliyuncs.com[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22maccepts only precise documented host forms: workspace-1.cn-beijing.maas.aliyuncs.com[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22maccepts only precise documented host forms: workspace-1.ap-southeast-1.maas.aliyuncs.com[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mspeech endpoint validation[2m > [22mdoes not accept a remote host even through the internal loopback option[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mredacts upstream status 401 without retry[32m 23[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mredacts upstream status 429 without retry[32m 4[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mredacts upstream status 500 without retry[32m 3[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mrejects malformed or unbounded text safely[32m 6[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mrejects malformed or unbounded text safely[32m 3[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mrejects malformed or unbounded text safely[32m 3[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mrejects malformed or unbounded text safely[32m 3[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mdoes not follow redirects or forward credentials to another listener[32m 4[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22maborts an actual unfinished response stream within the total budget[33m 520[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mupstream streaming and protocol boundaries[2m > [22mcancels an excessive stream while reading, before a second read[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mdetaches only the departing consumer; conflicts and busy requests cannot send upstream[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mlast disconnect cancels and late upstream success cannot overwrite the cached terminal[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mexplicit cancellation cancels both consumers and waits for real settlement[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mexpires cache after five minutes and caps it at 32 without keeping audio[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mtimes out even while the response body never finishes, and aborts the reader transport[32m 39[2mms[22m[39m
+ [32m✓[39m src/speech/boundary.test.ts[2m > [22mone upstream, terminal identity, cancellation and cache[2m > [22mpreClose synchronously aborts and seals admission; onClose only awaits settlement[32m 0[2mms[22m[39m
+(node:45196) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45196) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mreports missing speech configuration honestly without borrowing coding credentials[32m 25[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mreturns only safe public configuration[32m 10[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22msends one Data URI with the fixed model and fake Authorization; codecs MIME succeeds[32m 19[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mrejects oversized safely before upstream[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mrejects unsupported safely before upstream[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mrejects empty safely before upstream[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mrejects JSON masquerading as audio safely before upstream[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mrequires a UUID before issuing any upstream request[32m 1[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22munknown cancellation returns 404 and never creates a call[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mnormal completed response is cached and DELETE cannot rewrite it as cancelled[32m 2[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mkeeps Host and Origin rejection ahead of speech processing[32m 0[2mms[22m[39m
+ [32m✓[39m src/speech/routes.test.ts[2m > [22mD1 speech HTTP boundary[2m > [22mdoes not expand binary or body limits on existing JSON routes[32m 1[2mms[22m[39m
+(node:60308) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m src/speech/lifecycle.test.ts[2m > [22mreal duplicate HTTP consumers: one disconnect keeps the other alive and normal close stays completed[33m 479[2mms[22m[39m
+(node:60308) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ [32m✓[39m src/speech/lifecycle.test.ts[2m > [22mreal last HTTP disconnect aborts the shared upstream transport[33m 361[2mms[22m[39m
+(node:60308) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ [32m✓[39m src/speech/lifecycle.test.ts[2m > [22mreal DELETE cancels both HTTP consumers without changing the cancellation terminal[33m 375[2mms[22m[39m
+(node:60308) [FSTDEP023] FastifyDeprecation: disableRequestLogging option is deprecated. Use the logController option with disableRequestLogging or isLogDisabled override instead. The disableRequestLogging top-level option will be removed in `fastify@6`.
+ [32m✓[39m src/speech/lifecycle.test.ts[2m > [22mreal preClose interrupts response reading instead of waiting the production 35 second budget[33m 352[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m46 passed[39m[22m[90m (46)[39m
+[2m   Start at [22m 14:39:41
+[2m   Duration [22m 3.74s[2m (transform 182ms, setup 0ms, collect 1.16s, tests 2.99s, environment 0ms, prepare 172ms)[22m
+
+JSON report written to E:/空间化AI工作台/.worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/server-results.json
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/.worktrees/m4/apps/studio[39m
+
+ [32m✓[39m src/dev-proxy.test.ts[2m > [22mroutes Studio API requests and check evidence through the real Vite proxy instead of SPA fallback[32m 82[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m   Start at [22m 14:39:45
+[2m   Duration [22m 519ms[2m (transform 31ms, setup 0ms, collect 186ms, tests 83ms, environment 0ms, prepare 93ms)[22m
+
+JSON report written to E:/空间化AI工作台/.worktrees/m4/.data/d1-green-2026-11-15T06-39-35.911Z/studio-results.json
+{"output":"E:\\空间化AI工作台\\.worktrees\\m4\\.data\\d1-green-2026-11-15T06-39-35.911Z","exit":0,"identityUnchanged":true}
