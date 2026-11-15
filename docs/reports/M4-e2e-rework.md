@@ -8,10 +8,12 @@
 run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受测 `280e282`（产品 `f9e21f5`）：
 
 - typecheck / build **通过**；单测 **614/614 通过**；`demo-safety` **12/12 通过**（exit 0）；
-- **M4 独立套件 19 例：4 过 / 8 败 / 7 跳过**（`stats.expected=4, unexpected=8, skipped=7`）：
-  - 失败：`01-speech` 4 例 + F1 + F2（共 6）、`02-fallback` 的 preset 哈希核对 1 例、`04-demo` 的 SIGINT 1 例；
-  - 跳过：串行文件在首个失败后的后续用例；
-  - 通过：权限晚到取消、preset 列表/导入/空对象 POST/坏 sidecar、3 个布局视口、候选 HMR、5175 占用、硬杀回收；
+- **M4 独立套件 19 例：4 过 / 8 败 / 7 未执行（serial skipped）**（原始 JSON：`stats.expected=4, unexpected=8, skipped=7`）：
+  - **只有 4 条是 `expected`（真实通过）**；**7 条是 `skipped`（串行文件首个失败后未执行），不是 passed**；
+  - 8 条失败：`01-speech` 4 例 + F1 + F2（共 6）、`02-fallback` 的 preset 哈希核对 1 例、`04-demo` 的 SIGINT 1 例；
+  - 上一版报告把「preset 列表/导入/F4/F5、布局、HMR、5175、硬杀」等一并写成「通过」是**错的**——它们在原始 JSON 里是 `skipped`；
+    **更正**：除原始 JSON 标记 `expected` 的那 4 条以外，本套件本轮没有任何「通过」结论；
+  - **也不再把**「6 条失败都跑到 UUID 校验」当结论：日志只能证明这几例失败，具体停在哪一步以各例首条断言为准，未逐条复现。
 - **旧九套 174 例全部未执行**（`failure.notExecuted` 已记）。
 - 归档：launcher + 242 个载荷（含脚本持久证据 `.data/demo-script-evidence/<pid>-<time>/orphan/<branch>` **三分支** 与 `demo-runs` 真实 run 目录，共 154 个证据文件）；
   清单排除自身、静态复算 **0 mismatch**；原始证据未改写。
@@ -80,3 +82,27 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受�
   真人 A/B、完整彩排：**均未执行**。
 - 独立审查状态：Claude 正式复审已完成 —— **0 blocker / 1 仅文档 should-fix（S1，已由 `70e82ca` 修正）/ 6 条建议**；
   不再写"欠审查"。复审建议本轮**不要求**改单测/E2E。
+## 6. 关闭分支诊断结论（job_376fbf57，已结束 exit 0）
+
+归档：`docs/reports/artifacts/M4/regression/2026-11-15T17-09-31-768Z-sigint-diagnostic/`（`scenario-SIGINT.json`、`scenario-SIGTERM.json`、`diagnostic.json`、SHA 清单）。
+
+| 场景 | exit | close | manifest 最终 status | cleanup.problems | forced | 端口 | 后代（按本诊断口径） |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| SIGINT | code=null / signal=SIGINT（7ms） | 同（7ms） | **running** | null | 0 | 全部关闭 | 无存活 |
+| SIGTERM | code=null / signal=SIGTERM（6ms） | 同（6ms） | **running** | null | 0 | 全部关闭 | 无存活 |
+
+结论（有证据）：在本机 **`ChildProcess.kill('SIGINT')` 与 `kill('SIGTERM')` 走的是同一条"直接终止"路径**——
+6–7ms 内进程以 signal 结束，启动器自己的 `process.once('SIGINT'|'SIGTERM')` 处理器**没有写出任何东西**
+（manifest 停在 `running`、没有 `cleanup` 记录），端口与后代是靠进程整体消失才没的，**不是** graceful 关闭逻辑跑完的结果。
+
+因此：
+
+- **不能**用 `child.kill('SIGINT')` 在 Windows 上验证"正常 Ctrl+C → `stopped` / `forced=false`"；
+  `04-demo` 那条断言在当前实现方式下**不可达**，本轮**没有**为了变绿而放宽它，也没有拿 `signalCode` 当正常停止。
+- **边界**：这是 `ChildProcess.kill()` 的**信号模拟**，**不是**真实 Windows 控制台 Ctrl+C（CTRL_C_EVENT 是另一条投递路径，未测）；
+  启动器禁止 `NODE_OPTIONS`/`execArgv` 注入，无法在子进程内装 SIGINT 观察器，只能由 exit/close + manifest 间接判断。
+- **本诊断自身的口径缺陷（如实记录）**：它的 `processCreated` 把"查询失败"也当成 `gone`，
+  所以表中"后代无存活"只是"没查到还活着"，**不构成**归属/回收证明；真正的三态（present/absent/unknown/error）判定已写进
+  `04-demo.spec.ts` 的 `probeProcess/stillOwn`，待下一次运行验证。本诊断**不重跑、不改写**。
+
+需要真实控制台 Ctrl+C 语义的验证，只能在有真实控制台的会话里做（或由产品提供显式关闭命令），本轮不做、也不宣称。

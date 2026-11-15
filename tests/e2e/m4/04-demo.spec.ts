@@ -86,20 +86,34 @@ function descendantsOf(pid: number): Array<{ pid: number; created: string; depth
   return out.sort((a, b) => b.depth - a.depth);
 }
 
-function processCreated(pid: number): string | null {
-  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', `try { (Get-Process -Id ${pid} -ErrorAction Stop).StartTime.ToUniversalTime().ToString('o') } catch { '' }`], { encoding: 'utf8', timeout: 10000 });
+interface ProcessProbe { state: 'present' | 'absent' | 'unknown' | 'error'; created?: string; detail?: string }
+
+/**
+ * 三态以上：查询**超时**、启动失败、输出不可解析都只能是 unknown/error，不能当成 gone。
+ * 也不把缺失的创建时间当作 epoch 0 或 reused。
+ */
+function probeProcess(pid: number): ProcessProbe {
+  const result = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
+    `try { $p = Get-Process -Id ${pid} -ErrorAction Stop; 'present|' + $p.StartTime.ToUniversalTime().ToString('o') } catch { 'absent' }`],
+  { encoding: 'utf8', timeout: 15000 });
+  if (result.error) return { state: 'error', detail: String(result.error).slice(0, 160) };
+  if (result.status !== 0) return { state: 'unknown', detail: `exit ${result.status}: ${(result.stderr ?? '').slice(0, 120)}` };
   const text = (result.stdout ?? '').trim();
-  return result.status === 0 && text ? text : null;
+  if (text === 'absent') return { state: 'absent' };
+  const match = /^present\|(.+)$/.exec(text);
+  if (!match) return { state: 'unknown', detail: text.slice(0, 120) };
+  return { state: 'present', created: match[1] };
 }
 
 /**
- * 只按 PID 存活判断会被 PID 复用误红（更糟的是可能把别人的进程当自己的）。
- * 这里用"存活 + 创建时间一致"认定仍是本次受测的进程；创建时间不同一律记为 pid-reused，不当作自有残留。
+ * 判定"是否仍是本次受测的进程"：present + 创建时间一致 → alive；present 但创建时间不同 → reused；
+ * absent → gone；查询超时/失败/不可解析 → unknown（**绝不**算 gone，也不自动补杀）。
  */
-function stillOwn(pid: number, created: string): 'gone' | 'alive' | 'reused' {
-  const now = processCreated(pid);
-  if (now === null) return 'gone';
-  const same = Math.abs(Date.parse(now) - Date.parse(created)) <= 2000;
+function stillOwn(pid: number, created: string): 'gone' | 'alive' | 'reused' | 'unknown' {
+  const probeResult = probeProcess(pid);
+  if (probeResult.state === 'absent') return 'gone';
+  if (probeResult.state !== 'present') return 'unknown';
+  const same = Math.abs(Date.parse(probeResult.created ?? '') - Date.parse(created)) <= 2000;
   return same ? 'alive' : 'reused';
 }
 
@@ -244,20 +258,24 @@ test.describe('M4-D5 演示入口（mock）', () => {
     const deadline = Date.now() + 90_000;
     let remaining: Array<{ pid: number; created: string; depth: number }> = [];
     let reused: number[] = [];
+    let unknown: Array<{ pid: number; verdict: string }> = [];
     while (Date.now() < deadline) {
       const verdicts = tracked.map((item) => ({ item, verdict: stillOwn(item.pid, item.created) }));
       remaining = verdicts.filter((entry) => entry.verdict === 'alive').map((entry) => entry.item);
       reused = verdicts.filter((entry) => entry.verdict === 'reused').map((entry) => entry.item.pid);
-      if (remaining.length === 0) break;
+      unknown = verdicts.filter((entry) => entry.verdict === 'unknown').map((entry) => ({ pid: entry.item.pid, verdict: entry.verdict }));
+      if (remaining.length === 0 && unknown.length === 0) break;
       await wait(1000);
     }
     expect(remaining.map((item) => item.pid), `硬杀后仍有自有后代存活（PID）：${JSON.stringify(remaining)}`).toEqual([]);
+    // 查询未知同样不能当作"已退出"：单独失败，要求重跑或人工确认。
+    expect(unknown, `进程查询未知，不能据此判定回收：${JSON.stringify(unknown)}`).toEqual([]);
 
     const orphanFiles = readdirSync(handle.runDir).filter((name) => name.startsWith('orphan-cleanup-'));
     const stillOpen: number[] = [];
     for (const port of Object.values(ports) as number[]) if (await portOpen(port)) stillOpen.push(port);
     writeArtifact('demo-hard-kill-reclaim.json', {
-      launcherPid: handle.child.pid, tracked, remaining, orphanFiles, portsStillListening: stillOpen,
+      launcherPid: handle.child.pid, tracked, remaining, reused, unknown, orphanFiles, portsStillListening: stillOpen,
       note: '硬杀父启动器后，这里只断言"本次受测的 PID（以创建时间核对）全部消失"；它不能证明是 IPC 断开处理器或 watchdog 执行的回收——在 Windows 上无 detached 的子进程可能由系统直接终止（推断，未泛化证实）。watchdog 的因果证据只来自 fixture 角色主动断开 IPC + close 挂起那条分支。',
     });
     expect(stillOpen, `硬杀回收后端口仍可连接：${stillOpen.join(',')}`).toEqual([]);

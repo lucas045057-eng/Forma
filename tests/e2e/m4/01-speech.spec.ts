@@ -35,12 +35,13 @@ async function installSpeechStubs(page: import('@playwright/test').Page): Promis
     next: (_index, requestedId) => ({ status: 200, body: { requestId: requestedId, text: '把这个改成圆角', provider: 'aliyun', model: 'qwen3-asr-flash' } }),
   };
   await page.addInitScript(() => {
-    const probe = { stops: 0, recorderStarts: 0, recorderStops: 0, errors: 0, timeslice: 0 };
+    const probe = { stops: 0, recorderStarts: 0, recorderStops: 0, errors: 0, timeslice: 0, liveTracks: 0, streams: 0, events: [] as string[] };
     (window as any).__speechProbe = probe;
-    let liveTracks = 0;
     const makeStream = () => {
-      liveTracks += 1;
-      const track = { kind: 'audio', stop() { probe.stops += 1; liveTracks -= 1; } };
+      probe.streams += 1;
+      probe.liveTracks += 1;
+      probe.events.push('stream-live');
+      const track = { kind: 'audio', stop() { probe.stops += 1; probe.liveTracks -= 1; probe.events.push('track-ended'); } };
       return { getTracks: () => [track] };
     };
     Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => makeStream() } });
@@ -59,12 +60,14 @@ async function installSpeechStubs(page: import('@playwright/test').Page): Promis
       start(timeslice?: number) {
         probe.recorderStarts += 1;
         probe.timeslice = timeslice ?? 0;
+        probe.events.push('recorder-start');
         this.state = 'recording';
       }
       stop() {
         if (this.state === 'inactive') return;
         this.state = 'inactive';
         probe.recorderStops += 1;
+        probe.events.push('recorder-stop');
         // 真实 MediaRecorder 在 stop 前派发最后一包 dataavailable，然后派发 stop。
         this.emit('dataavailable', { data: new Blob(['audio-chunk'], { type: this.mimeType }) });
         this.emit('stop', {});
@@ -95,13 +98,27 @@ async function installSpeechStubs(page: import('@playwright/test').Page): Promis
 const probe = (page: import('@playwright/test').Page) =>
   page.evaluate(() => (window as any).__speechProbe as { stops: number; recorderStarts: number; recorderStops: number; errors: number; timeslice: number });
 
-/** 真实按住：hover → pointerdown → 等录音真正开始（轨道变 live）→ 返回"松开"函数。 */
-async function pressRecord(page: import('@playwright/test').Page): Promise<() => Promise<void>> {
+/**
+ * 真实按住：先等按钮可用（上一轮录音必须已结算），记录**本次之前**的计数，
+ * hover → pointerdown → 等到本次 `recorderStarts` **增量 ≥1**、`liveTracks ≥1`、状态含"录音"，
+ * 再返回"松开"函数。用累计值判断第二次录音会假通过，所以这里全部是增量。
+ */
+async function pressRecord(page: import('@playwright/test').Page): Promise<{ release: () => Promise<void>; delta: () => Promise<{ starts: number; liveTracks: number }> }> {
   const button = page.getByTestId('speech-record');
+  await expect(button).toBeEnabled({ timeout: 30_000 });
+  const before = await probe(page);
   await button.hover();
   await page.mouse.down();
-  await waitFor(async () => (await probe(page)).recorderStarts >= 1, 20_000, 50);
-  return async () => { await page.mouse.up(); };
+  await waitFor(async () => {
+    const now = await probe(page);
+    return now.recorderStarts > before.recorderStarts && now.liveTracks >= 1;
+  }, 20_000, 50);
+  await expect(page.getByTestId('speech-status')).toContainText('录音', { timeout: 20_000 });
+  const delta = async () => {
+    const now = await probe(page);
+    return { starts: now.recorderStarts - before.recorderStarts, liveTracks: now.liveTracks };
+  };
+  return { release: async () => { await page.mouse.up(); }, delta };
 }
 
 test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显）', () => {
@@ -116,13 +133,13 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
       if (request.method() === 'POST' && new URL(request.url()).pathname === '/tasks') taskPosts.push(request.url());
     });
 
-    const release = await pressRecord(page);
+    const pressed = await pressRecord(page);
     const during = await probe(page);
-    expect(during.recorderStarts, '按下后 recorder 没有真正启动').toBeGreaterThanOrEqual(1);
+    expect((await pressed.delta()).starts, '本次按下没有启动 recorder').toBe(1);
     expect(during.timeslice, '没有使用生产的时间片参数（250ms）').toBe(250);
     await expect(page.getByTestId('speech-status')).toContainText('录音', { timeout: 20_000 });
 
-    await release();
+    await pressed.release();
     const review = page.getByTestId('speech-review');
     await review.waitFor({ state: 'visible', timeout: 30_000 });
     const textarea = page.getByTestId('speech-review-text');
@@ -142,8 +159,8 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
   test('录音时指着 A、确认前改点 B：提示并要求明确确认，不得自动套用', async ({ page }) => {
     await openStudio(page);
     const first = await pickElement(page, 'buy-button');
-    const release = await pressRecord(page);
-    await release();
+    const pressed = await pressRecord(page);
+    await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
     const captured = await page.getByTestId('speech-capture-object').innerText();
     expect(captured.length, '没有显示录音时指着的对象').toBeGreaterThan(0);
@@ -161,18 +178,22 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
   test('录音中页面隐藏：立即取消、释放轨道并发送 DELETE，且不上传', async ({ page }) => {
     await openStudio(page);
     const stub = await installSpeechStubs(page);
-    const release = await pressRecord(page);
+    const pressed = await pressRecord(page);
     await page.evaluate(() => {
       Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
       document.dispatchEvent(new Event('visibilitychange'));
     });
     await waitFor(async () => (await probe(page)).stops >= 1, 30_000, 100);
-    await release();
+    await pressed.release();
     expect(await page.getByTestId('speech-review').count(), '隐藏后仍弹出了 review').toBe(0);
     expect(stub.posts.length, '隐藏取消后仍然上传了音频').toBe(0);
+    // 录音阶段取消 ⇒ 从未上传 ⇒ 不需要也不应发 DELETE（这里如实断言两者都不存在，不伪造 DELETE 通过）。
+    expect(stub.deletes, '没有上传却发了 DELETE').toEqual([]);
     const recorded = await probe(page);
     expect(recorded.stops, '隐藏后没有释放麦克风轨道').toBeGreaterThanOrEqual(1);
+    expect(recorded.liveTracks, '隐藏后仍有活跃轨道').toBe(0);
+    expect(recorded.events).toContain('track-ended');
     writeArtifact('speech-hidden-cancel.json', { probe: recorded, posts: stub.posts.length, deletes: stub.deletes });
   });
 
@@ -183,16 +204,17 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
       ? { status: 499, body: { error: { code: 'SPEECH_CANCELLED', message: '内部取消细节不应显示' } } }
       : { status: 200, body: { requestId: requestedId, text: '改成圆角', provider: 'aliyun', model: 'qwen3-asr-flash' } };
 
-    const firstRelease = await pressRecord(page);
-    await firstRelease();
+    const firstPressed = await pressRecord(page);
+    await firstPressed.release();
+    await waitFor(async () => stub.posts.length >= 1, 20_000, 100);
+    expect(stub.posts[0].id, '第一次转写没有带 UUID').toMatch(/^[0-9a-f-]{36}$/);
     await expect(page.getByTestId('speech-review')).toHaveCount(0);
     await waitFor(async () => (await page.getByTestId('speech-status').innerText()).length > 0, 20_000, 100);
     const statusText = await page.getByTestId('speech-status').innerText();
     expect(statusText).not.toContain('内部取消细节');
-    await expect(page.getByTestId('speech-record')).toBeEnabled({ timeout: 30_000 });
 
-    const secondRelease = await pressRecord(page);
-    await secondRelease();
+    const secondPressed = await pressRecord(page);
+    await secondPressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
     expect(stub.posts.length, '没有得到两次转写请求').toBeGreaterThanOrEqual(2);
     const ids = stub.posts.map((item) => item.id);
@@ -201,32 +223,44 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     writeArtifact('speech-cancel-new-uuid.json', { requestIds: ids, statusText });
   });
 
-  test('权限未返回时取消：不启动录音、不出现 review、不残留轨道', async ({ page }) => {
+  test('权限未返回时取消：Escape 确定性取消，迟到的权限不会启动录音也不残留轨道', async ({ page }) => {
     await openStudio(page);
+    // 确定性 barrier：getUserMedia 一直 pending，直到测试显式放行；不用"等 1500ms 猜"。
     await page.evaluate(() => {
-      const slow = () => new Promise((resolve) => {
-        setTimeout(() => resolve({ getTracks: () => [{ kind: 'audio', stop() { (window as any).__speechProbe.stops += 1; } }] }), 1500);
+      const gate = { resolve: null as null | (() => void) };
+      (window as any).__permissionGate = gate;
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: {
+          getUserMedia: () => new Promise((resolve) => {
+            gate.resolve = () => resolve({ getTracks: () => [{ kind: 'audio', stop() { (window as any).__speechProbe.stops += 1; (window as any).__speechProbe.liveTracks -= 1; (window as any).__speechProbe.events.push('track-ended'); } }] });
+          }),
+        },
       });
-      Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: slow } });
     });
     const button = page.getByTestId('speech-record');
     await button.hover();
     await page.mouse.down();
-    await expect(page.getByTestId('speech-cancel')).toBeVisible({ timeout: 15_000 });
-    await page.getByTestId('speech-cancel').click();
+    await expect(page.getByTestId('speech-status')).toContainText('权限', { timeout: 15_000 });
+    // 按住期间按钮持有 pointer capture，点取消按钮可能被拦；用真实键盘 Escape 路径取消。
+    await page.keyboard.press('Escape');
     await page.mouse.up();
-    await waitFor(async () => (await probe(page)).stops >= 1, 20_000, 100);
+    await waitFor(async () => (await page.getByTestId('speech-status').innerText()).includes('取消') || (await probe(page)).stops >= 1, 20_000, 100);
     expect(await page.getByTestId('speech-review').count(), '取消后仍然弹出了 review').toBe(0);
+    // 放行迟到的权限：轨道必须被立刻停掉，且 recorder 从未启动、没有上传。
+    await page.evaluate(() => { (window as any).__permissionGate.resolve?.(); });
+    await waitFor(async () => (await probe(page)).stops >= 1 || (await probe(page)).streams === 0, 20_000, 100);
     const after = await probe(page);
     expect(after.recorderStarts, '权限未返回就不该启动 recorder').toBe(0);
+    expect(after.liveTracks, '迟到权限的轨道没有被释放').toBe(0);
     writeArtifact('speech-late-permission.json', { probe: after });
   });
 
   test('F1 真实跨源 iframe 重新点选：review 保留、必须显式确认，确认后再改选仍拦', async ({ page }) => {
     await openStudio(page);
     await pickElement(page, 'buy-button');
-    const release = await pressRecord(page);
-    await release();
+    const pressed = await pressRecord(page);
+    await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
     const second = await pickElement(page, 'save-button');
     await expect(page.getByTestId('speech-review'), '重新点选后转写被丢弃了').toBeVisible();
@@ -253,8 +287,8 @@ test.describe('M4-D2 语音确认闭环（真实按住 + 真实 requestId 回显
     ]);
     await openStudio(page);
     await pickElement(page, 'buy-button');
-    const release = await pressRecord(page);
-    await release();
+    const pressed = await pressRecord(page);
+    await pressed.release();
     await page.getByTestId('speech-review').waitFor({ state: 'visible', timeout: 30_000 });
     await page.getByTestId('speech-use').click();
     await expect(page.getByTestId('instruction-input')).toHaveValue(/改成圆角/);
