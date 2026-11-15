@@ -27,6 +27,14 @@ interface DemoHandle {
   stderr: string;
 }
 
+/** 测试专用 driver：普通文件入口 import 产品 launch，用进程内 SIGINT 事件模拟 graceful 关闭。 */
+const DRIVER = path.join(REPO_ROOT, 'tests', 'e2e', 'm4', 'support', 'demo-launch-driver.mjs');
+
+/** 把阶段性证据追加进 record（主错/清理/证据分开保留）。 */
+function progress(record: Record<string, unknown>, patch: Record<string, unknown>) {
+  Object.assign(record, patch);
+}
+
 const recentRun = (): string | null => {
   if (!existsSync(DEMO_RUNS)) return null;
   const dirs = readdirSync(DEMO_RUNS).map((name) => path.join(DEMO_RUNS, name))
@@ -146,26 +154,81 @@ async function stopHandle(handle: DemoHandle): Promise<void> {
 test.describe('M4-D5 演示入口（mock）', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test('SIGINT 正常关闭：stopped、forced 全 false、端口释放', async () => {
-    test.setTimeout(300_000);
-    const handle = await startMockDemo();
-    const studio = `http://127.0.0.1:${handle.plan.ports.studio}/`;
-    expect((await fetch(studio)).status, 'mock Studio 不可访问').toBe(200);
-    expect(handle.manifest.credentials, 'mock 不应声明任何真实凭据').toEqual({ speech: false, coding: false, lux3d: false });
-    expect(handle.manifest.mockServices).toBe(true);
+  test('进程内 SIGINT 处理模拟：launch 自身的 graceful 收尾（非真实控制台 Ctrl+C）', async () => {
+    test.setTimeout(420_000);
+    const record: Record<string, unknown> = { boundary: 'in-process SIGINT emit simulation, NOT real Windows console Ctrl+C' };
+    let child: ReturnType<typeof spawn> | null = null;
+    let primary: unknown = undefined;
+    const cleanupErrors: string[] = [];
+    try {
+      const before = recentRun();
+      const env: Record<string, string> = { ...process.env } as Record<string, string>;
+      delete env.NODE_OPTIONS;
+      // 普通文件入口 + IPC：不注入 NODE_OPTIONS/execArgv，launch 用的仍是产品实现（无替身 options）。
+      child = spawn(process.execPath, [DRIVER], { cwd: REPO_ROOT, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
+      let stdout = '';
+      let stderr = '';
+      child.stdout!.on('data', (chunk) => { stdout += String(chunk); });
+      child.stderr!.on('data', (chunk) => { stderr += String(chunk); });
+      record.driverPid = child.pid;
+      const ready = await waitAsync(() => stdout.includes('Demo mode=mock') || child!.exitCode !== null, 180_000);
+      expect(ready && child.exitCode === null, `driver 未能就绪：${stderr.slice(-600)}`).toBe(true);
 
-    handle.child.kill('SIGINT');
-    const exited = await waitAsync(() => handle.child.exitCode !== null, 90_000);
-    expect(exited, '父进程没有在 90s 内退出').toBe(true);
-    const finalManifest = readJson(path.join(handle.runDir, 'manifest.json'));
-    expect(finalManifest.status, `退出状态：${finalManifest.status}`).toBe('stopped');
-    expect(finalManifest.cleanup?.problems ?? [], '正常关闭不应该有清理问题').toEqual([]);
-    const forced = (finalManifest.cleanup?.children ?? []).filter((item: any) => item.forced);
-    expect(forced, `正常 SIGINT 出现 forced 回收：${JSON.stringify(forced)}`).toEqual([]);
-    const stillOpen: number[] = [];
-    for (const port of Object.values(handle.plan.ports) as number[]) if (await portOpen(port)) stillOpen.push(port);
-    expect(stillOpen, `退出后端口仍可连接：${stillOpen.join(',')}`).toEqual([]);
-    writeArtifact('demo-sigint.json', { runDir: path.relative(REPO_ROOT, handle.runDir), plan: handle.plan, finalManifest });
+      const runDir = recentRun();
+      expect(runDir, '没有生成新的 demo run 目录').not.toBe(before);
+      expect(runDir).not.toBeNull();
+      await waitFor(() => existsSync(path.join(runDir!, 'manifest.json')) && readJson(path.join(runDir!, 'manifest.json')).status === 'running', 60_000, 200);
+      const plan = readJson(path.join(runDir!, 'plan.json'));
+      const manifestBefore = readJson(path.join(runDir!, 'manifest.json'));
+      expect(manifestBefore.credentials, 'mock 不应声明任何真实凭据').toEqual({ speech: false, coding: false, lux3d: false });
+      const tracked = descendantsOf(child.pid!);
+      const ports = Object.values(plan.ports) as number[];
+      const portsOpenBefore: number[] = [];
+      for (const port of ports) if (await portOpen(port)) portsOpenBefore.push(port);
+      progress(record, { runDir: path.relative(REPO_ROOT, runDir!), plan, manifestBefore, tracked: tracked.length, portsOpenBefore });
+
+      // 只发出进程内 SIGINT 事件；launch 自己的 once('SIGINT') 处理器负责 graceful shutdown。
+      const sentAt = Date.now();
+      const exited = new Promise<{ code: number | null; signal: NodeJS.Signals | null; ms: number }>((resolve) => {
+        child!.once('exit', (code, signal) => resolve({ code, signal, ms: Date.now() - sentAt }));
+      });
+      const closed = new Promise<number>((resolve) => {
+        child!.once('close', () => resolve(Date.now() - sentAt));
+      });
+      child.send({ type: 'sigint' });
+
+      const exitInfo = await Promise.race([exited, wait(120_000).then(() => 'timeout' as const)]);
+      const closeMs = await Promise.race([closed, wait(30_000).then(() => 'timeout' as const)]);
+      record.exit = exitInfo;
+      record.closeMs = closeMs;
+
+      // 关键判据：不是"进程没了"，而是 manifest 真的由 launch 写成 stopped 且没有 forced。
+      await waitFor(() => existsSync(path.join(runDir!, 'manifest.json')) && readJson(path.join(runDir!, 'manifest.json')).status !== 'running', 120_000, 300);
+      const finalManifest = readJson(path.join(runDir!, 'manifest.json'));
+      expect(finalManifest.status, `退出后状态不是 stopped：${finalManifest.status}`).toBe('stopped');
+      expect(finalManifest.cleanup?.problems ?? [], '正常 SIGINT 不应该有清理问题').toEqual([]);
+      const forced = (finalManifest.cleanup?.children ?? []).filter((item: any) => item.forced);
+      expect(forced, `正常 SIGINT 出现 forced 回收：${JSON.stringify(forced)}`).toEqual([]);
+
+      const stillOpen: number[] = [];
+      for (const port of ports) if (await portOpen(port)) stillOpen.push(port);
+      expect(stillOpen, `graceful 收尾后端口仍可连接：${stillOpen.join(',')}`).toEqual([]);
+
+      const verdicts = tracked.map((item) => ({ pid: item.pid, created: item.created, verdict: stillOwn(item.pid, item.created) }));
+      expect(verdicts.filter((item) => item.verdict === 'alive'), `仍有受测后代存活：${JSON.stringify(verdicts.filter((item) => item.verdict === 'alive'))}`).toEqual([]);
+      expect(verdicts.filter((item) => item.verdict === 'unknown'), `进程查询未知，不能判定已退出：${JSON.stringify(verdicts.filter((item) => item.verdict === 'unknown'))}`).toEqual([]);
+      progress(record, { finalManifest, stillOpen, verdicts });
+    } catch (error) {
+      primary = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : error;
+    } finally {
+      // 主错误、清理错误、证据写入分别保留，互不覆盖。
+      if (child && child.exitCode === null) {
+        try { spawnSync('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' }); } catch (error) { cleanupErrors.push(String(error)); }
+      }
+    }
+    writeArtifact('demo-sigint-in-process.json', { ...record, primary, cleanupErrors });
+    if (primary) throw new Error(`进程内 SIGINT 模拟失败：${JSON.stringify(primary).slice(0, 600)}`);
+    expect(cleanupErrors, `收尾清理错误：${JSON.stringify(cleanupErrors)}`).toEqual([]);
   });
 
   test('真实候选链路：候选 HMR 连 plan.preview，10s 内无循环导航', async () => {
