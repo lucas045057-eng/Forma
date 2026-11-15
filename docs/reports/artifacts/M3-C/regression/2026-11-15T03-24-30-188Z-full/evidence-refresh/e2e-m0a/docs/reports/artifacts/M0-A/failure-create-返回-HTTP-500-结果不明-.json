@@ -1,0 +1,40 @@
+{
+  "case": {
+    "name": "create 返回 HTTP 500（结果不明）",
+    "stub": "create-500",
+    "submitOnly": true,
+    "status": "submit_unknown",
+    "code": "UPSTREAM_HTTP"
+  },
+  "submitted": {
+    "id": "021cf6f8-1f67-4ec6-884e-f556880189ac",
+    "status": "submit_unknown",
+    "createdAt": "2026-11-15T03:29:49.911Z",
+    "updatedAt": "2026-11-15T03:29:49.921Z",
+    "error": {
+      "code": "UPSTREAM_HTTP",
+      "message": "Lux3D 返回 HTTP 500"
+    }
+  },
+  "finalAsset": {
+    "id": "021cf6f8-1f67-4ec6-884e-f556880189ac",
+    "status": "submit_unknown",
+    "createdAt": "2026-11-15T03:29:49.911Z",
+    "updatedAt": "2026-11-15T03:29:49.921Z",
+    "error": {
+      "code": "UPSTREAM_HTTP",
+      "message": "Lux3D 返回 HTTP 500"
+    }
+  },
+  "elapsedMs": 16,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 0
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 0
+    }
+  }
+}

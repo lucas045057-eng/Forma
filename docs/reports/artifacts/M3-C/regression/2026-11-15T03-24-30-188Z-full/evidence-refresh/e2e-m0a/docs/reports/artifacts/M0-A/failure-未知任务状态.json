@@ -1,0 +1,37 @@
+{
+  "case": {
+    "name": "未知任务状态",
+    "mock": "unknown",
+    "status": "failed",
+    "code": "UNKNOWN_STATUS"
+  },
+  "submitted": {
+    "id": "3c46e254-b1c1-4f26-9f0b-5b59d6dc10ba",
+    "status": "polling",
+    "createdAt": "2026-11-15T03:29:45.009Z",
+    "updatedAt": "2026-11-15T03:29:45.020Z",
+    "taskId": "9000001"
+  },
+  "finalAsset": {
+    "id": "3c46e254-b1c1-4f26-9f0b-5b59d6dc10ba",
+    "status": "failed",
+    "createdAt": "2026-11-15T03:29:45.009Z",
+    "updatedAt": "2026-11-15T03:29:45.024Z",
+    "taskId": "9000001",
+    "error": {
+      "code": "UNKNOWN_STATUS",
+      "message": "Lux3D 返回未知任务状态"
+    }
+  },
+  "elapsedMs": 19,
+  "stats": {
+    "before": {
+      "creates": 1,
+      "gets": 1
+    },
+    "afterIdle": {
+      "creates": 1,
+      "gets": 1
+    }
+  }
+}

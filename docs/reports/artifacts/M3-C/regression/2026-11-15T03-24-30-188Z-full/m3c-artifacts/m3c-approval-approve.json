@@ -1,0 +1,16 @@
+{
+  "requestBody": {
+    "option": 0
+  },
+  "mockCallsBefore": 2,
+  "mockCallsAfter": 2,
+  "candidateId": "601886d618cb4585b5955761ffc47067",
+  "latestCheckRunId": null,
+  "checkStatuses": [
+    "not_run",
+    "not_run",
+    "not_run",
+    "not_run"
+  ],
+  "checkPosts": 0
+}

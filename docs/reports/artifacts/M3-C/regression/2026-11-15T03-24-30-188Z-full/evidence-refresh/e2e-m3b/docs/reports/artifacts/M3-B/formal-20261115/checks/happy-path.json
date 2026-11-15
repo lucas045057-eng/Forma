@@ -1,0 +1,226 @@
+{
+  "candidateId": "af130fe21df44a3d85afba8c4e2239d4",
+  "versionBefore": "adb08ce0ef96badefe7f730c5122438722cb85be",
+  "versionAfter": "2f80d8668026431386a42b304b16e8e928b51363",
+  "run": {
+    "id": "9e4bcda22bfe4d24919a78a15f818b3b",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-15T03:39:20.472Z",
+    "finishedAt": "2026-11-15T03:39:27.109Z",
+    "durationMs": 6637,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 10
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3760
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "178b9ca0b7daf6cc9b898ff74a6c7870e8f1715ab583388c4482d3a62df26cae",
+        "durationMs": 891
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "83556bb25e16edaff37b8f5701b24ea02f2b85e86e4ac578a00960ce79ab05d9",
+        "durationMs": 115
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105365,
+        "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "178b9ca0b7daf6cc9b898ff74a6c7870e8f1715ab583388c4482d3a62df26cae"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105365,
+        "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "83556bb25e16edaff37b8f5701b24ea02f2b85e86e4ac578a00960ce79ab05d9"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "name": "schema.json",
+      "bytes": 99,
+      "mime": "application/json; charset=utf-8",
+      "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+    },
+    {
+      "name": "build.log",
+      "bytes": 386,
+      "mime": "text/plain; charset=utf-8",
+      "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+    },
+    {
+      "name": "smoke.png",
+      "bytes": 105365,
+      "mime": "image/png",
+      "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+    },
+    {
+      "name": "smoke.json",
+      "bytes": 324,
+      "mime": "application/json; charset=utf-8",
+      "hash": "178b9ca0b7daf6cc9b898ff74a6c7870e8f1715ab583388c4482d3a62df26cae"
+    },
+    {
+      "name": "occlusion.png",
+      "bytes": 105365,
+      "mime": "image/png",
+      "hash": "87b39d6300594d45789ad22562f910c582463a5bd23cac57d44375db60318039"
+    },
+    {
+      "name": "occlusion.json",
+      "bytes": 2718,
+      "mime": "application/json; charset=utf-8",
+      "hash": "83556bb25e16edaff37b8f5701b24ea02f2b85e86e4ac578a00960ce79ab05d9"
+    }
+  ],
+  "artifactRejections": {
+    "unknown": 404,
+    "traversal": 404,
+    "unknownRun": 404
+  },
+  "schema": {
+    "status": "passed",
+    "configHash": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+  },
+  "smoke": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "http://127.0.0.1:33244/",
+    "browserVersion": "158.0.8127.18",
+    "scene": {
+      "state": "ready",
+      "placeholderVisible": false
+    },
+    "purchases": {
+      "before": 0,
+      "after": 1
+    },
+    "feedback": "已加入购物袋（演示）",
+    "pageErrors": [],
+    "blockedRequests": []
+  },
+  "occlusion": {
+    "targetCount": 4,
+    "excluded": [
+      "offscreen"
+    ],
+    "buyButton": {
+      "tag": "button",
+      "id": "",
+      "testId": "buy-button",
+      "rect": {
+        "x": 86.390625,
+        "y": 594.28125,
+        "width": 104,
+        "height": 47
+      },
+      "centerHit": true,
+      "passed": true,
+      "samples": [
+        {
+          "x": 138.390625,
+          "y": 617.78125,
+          "hit": {
+            "tag": "button",
+            "id": "",
+            "testId": "buy-button"
+          },
+          "hitSelf": true
+        },
+        {
+          "x": 90.390625,
+          "y": 598.28125,
+          "hit": {
+            "tag": "button",
+            "id": "",
+            "testId": "buy-button"
+          },
+          "hitSelf": true
+        },
+        {
+          "x": 186.390625,
+          "y": 598.28125,
+          "hit": {
+            "tag": "button",
+            "id": "",
+            "testId": "buy-button"
+          },
+          "hitSelf": true
+        },
+        {
+          "x": 90.390625,
+          "y": 637.28125,
+          "hit": {
+            "tag": "button",
+            "id": "",
+            "testId": "buy-button"
+          },
+          "hitSelf": true
+        },
+        {
+          "x": 186.390625,
+          "y": 637.28125,
+          "hit": {
+            "tag": "button",
+            "id": "",
+            "testId": "buy-button"
+          },
+          "hitSelf": true
+        }
+      ]
+    }
+  },
+  "events": {
+    "finishedSeq": 20,
+    "adoptSeq": 21,
+    "types": [
+      "task.updated",
+      "candidate.ready",
+      "check.started",
+      "check.updated",
+      "check.finished"
+    ]
+  }
+}
