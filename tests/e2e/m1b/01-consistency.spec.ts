@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { ARTIFACT_DIR } from './env';
 import { getScene, putScene, sameJson, snapshotSceneFile, restoreSceneFile, readSceneFile } from './api';
 import { captureCanvases, enableCompare, openEditor, readPanelConfig, readScrollAt, scrollPreview, setSlider } from './editor';
-import { assertBaselineReady, observeResponse, summarizeAttempts, waitForPairChange } from './window-compare';
+import { captureReadyBaseline, runPairChange, summarizeAttempts } from './window-compare';
 import { compareAligned, compareNormalized } from '../m1a/visual';
 import { writeArtifactFrom } from './artifact';
 
@@ -61,25 +61,14 @@ test.describe('一致性与配置来源', () => {
     await setSlider(page, 'scene-key-intensity', 4.2);
     await setSlider(page, 'scene-temperature', 5200);
     // 先证明基线就绪（场景 data-loaded + 写回控件可用 + 无“状态待同步”），再截基线。
-    const readiness = await assertBaselineReady(page, frame);
-    const baseline = await captureCanvases(page, frame);
-    const startedAt = Date.now();
-    const write = observeResponse(page, 'PUT', '/scene');
-    await page.getByTestId('scene-save-hero').click();
-    // 作品页通过 HMR 更新（不是整页刷新）；预算从点击前的 startedAt 起算，30s/0.02 不变。
-    let changed: Awaited<ReturnType<typeof waitForPairChange>> | null = null;
-    let captureFailure: Error | null = null;
-    try { changed = await waitForPairChange(page, frame, baseline, { startedAt, threshold: 0.02, timeoutMs: 30_000, intervalMs: 250 }); }
-    catch (error) { captureFailure = error as Error; }
-    const writeResult = await write;
-    if (captureFailure) {
-      writeArtifactFrom('consistency-after-edit-failure.json', {
-        readiness: readiness.gate, baselineWindow: readiness.window, write: writeResult, startedAt,
-        failure: String(captureFailure).slice(0, 3_000),
-      });
-      throw captureFailure;
-    }
-    const ms = changed!.elapsedMs;
+    const readiness = await captureReadyBaseline(page, frame, 'consistency-write-baseline.json');
+    const baseline = readiness.pair;
+    const changed = await runPairChange(page, frame, baseline, {
+      method: 'PUT', pathname: '/scene', button: 'scene-save-hero', artifact: 'consistency-write-sampling.json',
+      threshold: 0.02, timeoutMs: 30_000, intervalMs: 250,
+    });
+    const writeResult = changed.response;
+    const ms = changed.elapsedMs;
 
     const afterHero = (await getScene()).body;
     expect(afterHero.hero.lights.ambient).toBeCloseTo(2.4, 1);
@@ -106,8 +95,8 @@ test.describe('一致性与配置来源', () => {
       write: writeResult,
       readiness: readiness.gate,
       baselineWindow: readiness.window,
-      captureChangedRatio: changed!.changedRatio,
-      captureAttempts: summarizeAttempts(changed!.attempts),
+      captureChangedRatio: changed.changedRatio,
+      captureAttempts: summarizeAttempts(changed.attempts),
       heroConfig: afterHero.hero,
       writtenCamera: variant.hero.camera,
       config: panel,

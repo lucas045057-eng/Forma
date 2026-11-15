@@ -79,8 +79,9 @@ export interface CaptureWindow {
   /** 两侧各自算出的可见行区间（诊断用）。 */
   previewRows: { start: number; end: number };
   studioRows: { start: number; end: number };
+  previewState: string | null;
   /** canvas backing 尺寸与 DPR：前后采样必须一致。 */
-  backing: { preview: number; studio: number; dpr: number };
+  backing: { preview: number; studio: number; previewHeight: number; studioHeight: number; previewDpr: number; studioDpr: number; dpr: number };
 }
 
 export interface CanvasPair {
@@ -97,7 +98,7 @@ export interface CanvasPair {
  * 作品页画布可能被滚出视口一部分，就取它剩下的可见行，再在 Studio 画布上截同样的行。
  */
 /** 把编辑面板与页面的滚动都归零，保证画布完整可见。 */
-export async function resetEditorScroll(page: Page): Promise<void> {
+export async function resetEditorScroll(page: Page, settleMs = 250): Promise<void> {
   await page.evaluate(() => {
     window.scrollTo(0, 0);
     let node: HTMLElement | null = document.querySelector('[data-testid="scene-canvas"]');
@@ -106,7 +107,7 @@ export async function resetEditorScroll(page: Page): Promise<void> {
       node = node.parentElement;
     }
   });
-  await page.waitForTimeout(250);
+  if (settleMs > 0) await page.waitForTimeout(settleMs);
 }
 
 export async function captureCanvases(page: Page, frame: Frame): Promise<CanvasPair> {
@@ -139,15 +140,17 @@ export async function captureCanvases(page: Page, frame: Frame): Promise<CanvasP
   });
   const backing = await frame.evaluate(() => {
     const previewCanvas = document.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
-    return { preview: previewCanvas?.width ?? -1, dpr: window.devicePixelRatio };
+    return { preview: previewCanvas?.width ?? -1, height: previewCanvas?.height ?? -1, dpr: window.devicePixelRatio };
   });
   const studioBacking = await page.evaluate(() => {
     const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement;
-    return { studio: studioCanvas.width, dpr: window.devicePixelRatio };
+    return { studio: studioCanvas.width, height: studioCanvas.height, dpr: window.devicePixelRatio };
   });
   const captureWindow: CaptureWindow = {
     size, start, end, visibleHeight, previewRect, studioRect, frameRect, viewport, previewRows, studioRows,
-    backing: { preview: backing.preview, studio: studioBacking.studio, dpr: Math.max(backing.dpr, studioBacking.dpr) },
+    previewState: await frame.locator('[data-testid="product-scene"]').getAttribute('data-state'),
+    backing: { preview: backing.preview, studio: studioBacking.studio, previewHeight: backing.height, studioHeight: studioBacking.height,
+      previewDpr: backing.dpr, studioDpr: studioBacking.dpr, dpr: Math.max(backing.dpr, studioBacking.dpr) },
   };
   return {
     window: captureWindow,

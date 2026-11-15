@@ -98,10 +98,11 @@ test.describe('采用模型', () => {
     // finally 里恢复原状：原本不存在就删掉；原本已存在则按原字节写回——不能删历史文件、也不能留残留。
     const adoptedSidecar = path.join(TEMPLATE_ASSETS, `${imported.id}.provenance.json`);
     const sidecarBefore = existsSync(adoptedSidecar) ? readFileSync(adoptedSidecar) : null;
-    let primary: unknown = undefined;
+    const glbBefore = existsSync(adoptedFile) ? readFileSync(adoptedFile) : null;
+    const partsBefore = existsSync(adoptedParts) ? readFileSync(adoptedParts) : null;
+    const failures: unknown[] = [];
     let cleanupScene: boolean | null = null;
     let sidecarBytesMatch = false;
-    const cleanupErrors: string[] = [];
     try {
       const { frame } = await openEditor(page);
       const beforeModel = originalConfig.model;
@@ -130,36 +131,41 @@ test.describe('采用模型', () => {
         diff: (response.body as any).diff,
       });
       expect(typeof loaded === 'number' && loaded > 0, '作品页没有加载新模型').toBe(true);
-    } catch (error) { primary = error; } finally {
-      // 每一步独立收尾，错误聚合；不在这里 expect，避免遮盖主错（主错在 finally 之后优先抛出）。
+    } catch (error) { failures.push(error); } finally {
+      // 每一步均执行，原异常与收尾/证据错误全部保留。
       const attempt = (label: string, work: () => void) => {
-        try { work(); } catch (error) { cleanupErrors.push(label + ': ' + String(error).slice(0, 200)); }
+        try { work(); } catch (error) { failures.push(new Error(label, { cause: error })); }
       };
       attempt('restore-scene', () => { cleanupScene = restoreSceneFile().matches; });
-      attempt('remove-glb', () => rmSync(adoptedFile, { force: true }));
-      attempt('remove-parts', () => rmSync(adoptedParts, { force: true }));
-      // sidecar 按原状恢复：原本不存在则删除，原本存在则按原字节写回（不删历史文件）。
-      attempt('restore-sidecar', () => { if (sidecarBefore) writeFileSync(adoptedSidecar, sidecarBefore); else rmSync(adoptedSidecar, { force: true }); });
-      await page.waitForTimeout(1_500).catch(() => {});
-      // 用**字节相等**验证，不是只看“文件在不在”。
-      sidecarBytesMatch = sidecarBefore
-        ? (existsSync(adoptedSidecar) && readFileSync(adoptedSidecar).equals(sidecarBefore))
-        : !existsSync(adoptedSidecar);
-      writeArtifactFrom('adopt-provenance-cleanup.json', {
+      for (const [file, before] of [[adoptedFile, glbBefore], [adoptedParts, partsBefore], [adoptedSidecar, sidecarBefore]] as const) {
+        attempt('restore ' + file, () => {
+          if (before !== null) writeFileSync(file, before);
+          else rmSync(file, { force: true });
+        });
+        attempt('verify original bytes ' + file, () => {
+          expect(existsSync(file), '采用文件的存在性未恢复：' + file).toBe(before !== null);
+          if (before !== null) expect(readFileSync(file).equals(before), '采用文件字节未恢复：' + file).toBe(true);
+        });
+      }
+      try { await page.waitForTimeout(1_500); } catch (error) { failures.push(error); }
+      attempt('verify scene snapshot', () => { expect(cleanupScene, '配置没有按快照还原').toBe(true); });
+      attempt('verify sidecar', () => {
+        sidecarBytesMatch = sidecarBefore !== null
+          ? existsSync(adoptedSidecar) && readFileSync(adoptedSidecar).equals(sidecarBefore)
+          : !existsSync(adoptedSidecar);
+        expect(sidecarBytesMatch, 'provenance sidecar 没有恢复原状').toBe(true);
+      });
+      attempt('write cleanup evidence', () => writeArtifactFrom('adopt-provenance-cleanup.json', {
         sidecar: adoptedSidecar,
-        existedBefore: Boolean(sidecarBefore),
+        existedBefore: sidecarBefore !== null,
         existsAfter: existsSync(adoptedSidecar),
         sidecarBytesMatch,
         sceneRestored: cleanupScene,
-        cleanupErrors,
-      });
+        glbExistedBefore: glbBefore !== null, partsExistedBefore: partsBefore !== null,
+        errors: failures.map(error => error instanceof Error ? { message: error.message, stack: error.stack, cause: String(error.cause ?? '') } : String(error)),
+      }));
     }
-    // 主错优先；收尾错误单独聚合，不能被静默吞掉。
-    if (primary) throw primary;
-    expect(cleanupScene, '配置没有按快照还原').toBe(true);
-    expect(existsSync(adoptedFile), '测试产物没有清理').toBe(false);
-    expect(existsSync(adoptedParts), 'parts.json 没有清理').toBe(false);
-    expect(sidecarBytesMatch, 'provenance sidecar 没有按原字节恢复原状').toBe(true);
-    if (cleanupErrors.length) throw new AggregateError(cleanupErrors, 'adopt 收尾有错误：' + cleanupErrors.join(' | '));
+    if (failures.length === 1) throw failures[0];
+    if (failures.length) throw new AggregateError(failures, '采用用例失败；主错和各项收尾错误分别保留');
   });
 });
