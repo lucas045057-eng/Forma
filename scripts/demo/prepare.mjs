@@ -4,10 +4,11 @@ import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {assertPlainPath,readPlainFile} from '../../apps/server/src/checks/paths.ts';
-import {repository,descendant,systemEnvironment,templateNameAllowed} from './safety.mjs';
+import {descendant,systemEnvironment,templateNameAllowed} from './safety.mjs';
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const denied=()=>new Error('Demo source/destination must be a plain workspace path');
-export async function prepareDemo(mode){
+export async function prepareDemo(mode,options={}){
+ const repository=options.repositoryRoot??path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
  if(!['mock','real'].includes(mode))throw new Error('Unknown demo mode');
  const base=path.join(repository,'.data/demo-runs');const run=path.join(base,`${new Date().toISOString().replaceAll(':','-')}-${randomUUID()}`);
  if(!descendant(base,run))throw denied();await assertPlainPath(run,denied,true);await mkdir(base,{recursive:true});await mkdir(run);await assertPlainPath(run,denied);

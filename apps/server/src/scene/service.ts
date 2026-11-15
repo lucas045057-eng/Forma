@@ -160,10 +160,11 @@ export class SceneService {
       const destination = await safeWorkPath(this.options.workRoot, `public/assets/${id}.glb`);
       const parts = await safeWorkPath(this.options.workRoot, `public/assets/${id}.parts.json`);
       const sidecar=await safeWorkPath(this.options.workRoot,`public/assets/${id}.provenance.json`);
-      let provenanceBytes=Buffer.from(JSON.stringify(provenance,null,2)+'\n');
+      let provenanceBytes:Buffer=Buffer.from(JSON.stringify(provenance,null,2)+'\n');
       try {
         const existingBytes=await readPlainFile(sidecar,16384,()=>new SceneError('PATH_DENIED','来源文件路径含链接',403),()=>new SceneError('ASSET_NAME_CONFLICT','已有来源记录无效',409));
-        const existing=parseProvenance(JSON.parse(existingBytes.toString('utf8')));
+        let parsed:unknown;try{parsed=JSON.parse(existingBytes.toString('utf8'));}catch{throw new SceneError('ASSET_NAME_CONFLICT','已有来源记录无效',409);}
+        const existing=parseProvenance(parsed);
         if(!existing||!(['kind','presetId','sourceTaskId','sourceHash','outputHash'] as const).every(key=>existing[key]===provenance[key]))throw new SceneError('ASSET_NAME_CONFLICT','作品已有同名但来源不同的模型',409);
         provenanceBytes=existingBytes;
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}

@@ -89,7 +89,7 @@ export class AssetService {
     const operation = this.writes.then(async () => {
       await writeAtomic(file, json);
     });
-    this.writes = operation.catch(() => {});
+    this.writes = operation.catch(error => { this.jobFailure ??= error; });
     return operation;
   }
   private exclusive<T>(work: () => Promise<T>): Promise<T> {
