@@ -1,0 +1,112 @@
+{
+  "test": "original task retry keeps its original selection and cannot run while a speech review is pending",
+  "url": "http://127.0.0.1:13663/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:13663/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.39870000000155414
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 63.489300000001094
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 124.21290000000045
+      },
+      {
+        "phase": "interaction",
+        "ms": 125.77330000000075
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [
+    {
+      "id": "dd6e12fc-f47a-419b-8421-55708dca6994",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "原任务指令",
+      "selection": {
+        "cid": "A",
+        "src": "src/A.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-2",
+      "status": "queued",
+      "events": []
+    },
+    {
+      "instruction": "原任务指令",
+      "selection": {
+        "cid": "A",
+        "src": "src/A.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "failed",
+      "events": [],
+      "error": {
+        "code": "TASK_FAILED",
+        "message": "fake failure"
+      }
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}
