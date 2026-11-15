@@ -1,0 +1,11 @@
+# collect-m1a: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m4-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m1a.config.ts --list --reporter=list
+# started=2026-11-15T12:31:01.231Z
+Listing tests:
+  [chromium] › 01-consistency.spec.ts:23:1 › 一致性：Studio 视口与作品页首屏渲染同一模型，像素差异低于阈值
+  [chromium] › 02-scroll-lid.spec.ts:14:1 › 滚动关键帧：at≈0.6 时 lid 上移量与配置一致，at=0 复位，中间单调插值
+  [chromium] › 03-fallback-config.spec.ts:34:1 › 模型请求失败：显示占位、无运行错误、按钮可用，回退态标记完整
+  [chromium] › 03-fallback-config.spec.ts:79:1 › 非法配置（坏 JSON / 不符合 Schema）：网页不白屏、不崩
+  [chromium] › 04-parts.spec.ts:29:1 › 部件命名：4969889 拆分模型的 cap / reed_1..4 / body / lid 与 webReady 门槛
+  [chromium] › 04-parts.spec.ts:68:1 › 部件命名：单 mesh 模型 recognized=false 且不崩，仍可正常处理与预览
+  [chromium] › 05-resource-release.spec.ts:20:1 › 资源释放：多次重载与多次 HMR 后没有 WebGL 上下文堆积警告
+Total: 7 tests in 5 files
