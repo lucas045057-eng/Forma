@@ -83,7 +83,7 @@ it('does not resubmit after taskId persistence fails, even after restart', async
   const { directory, client, mock, base, removeDirectory } = await setup();
   const env:NodeJS.ProcessEnv={};for(const name of ['SystemRoot','WINDIR','PATH','TEMP','TMP'])if(process.env[name])env[name]=process.env[name];
   const stages:Array<{phase:string;ms:number}>=[];const started=performance.now();const mark=(phase:string)=>stages.push({phase,ms:performance.now()-started});
-  const child=spawn(process.execPath,['--import',fileURLToPath(new URL('../test-support/asset-persistence-register.mjs',import.meta.url)),fileURLToPath(new URL('../test-support/asset-persistence-parent.ts',import.meta.url)),directory,base],{env,stdio:['ignore','pipe','pipe','ipc']});
+  const child=spawn(process.execPath,['--import',new URL('../test-support/asset-persistence-register.mjs',import.meta.url).href,fileURLToPath(new URL('../test-support/asset-persistence-parent.ts',import.meta.url)),directory,base],{env,stdio:['ignore','pipe','pipe','ipc']});
   let stdout='';let stderr='';let childError:Error|undefined;let spawned=false;let ipcDisconnected=false;let primary:unknown;let owner:FixtureProcess|undefined;let restarted:AssetService|undefined;const messages:Array<Record<string,unknown>>=[];
   child.once('spawn',()=>{spawned=true;mark('spawned');});child.stdout!.on('data',chunk=>{stdout+=String(chunk);});child.stderr!.on('data',chunk=>{stderr+=String(chunk);});child.once('error',error=>{childError=error;});
   child.on('message',(value:unknown)=>{if(value&&typeof value==='object'&&'pid'in value&&value.pid===child.pid)messages.push(value as Record<string,unknown>);});
