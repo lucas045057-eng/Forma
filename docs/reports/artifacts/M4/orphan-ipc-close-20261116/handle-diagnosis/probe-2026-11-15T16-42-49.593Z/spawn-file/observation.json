@@ -1,0 +1,163 @@
+{
+  "variant": "spawn-file",
+  "started": "2026-11-15T16:43:20.104Z",
+  "errors": [],
+  "fallbackKills": [
+    {
+      "pid": 33392,
+      "parent": 25344,
+      "created": "2026-11-15T16:43:20.1129000Z",
+      "role": "unrelated",
+      "reason": "final unrelated stop"
+    }
+  ],
+  "handles": [
+    {
+      "role": "orphan",
+      "pid": 36628
+    },
+    {
+      "role": "unrelated",
+      "pid": 33392
+    }
+  ],
+  "identities": [
+    {
+      "pid": 51420,
+      "parent": 36628,
+      "created": "2026-11-15T16:43:20.1774590Z",
+      "role": "asset",
+      "depth": 1
+    },
+    {
+      "pid": 42264,
+      "parent": 36628,
+      "created": "2026-11-15T16:43:20.1730940Z",
+      "role": "check",
+      "depth": 1
+    },
+    {
+      "pid": 9896,
+      "parent": 36628,
+      "created": "2026-11-15T16:43:20.1814470Z",
+      "role": "frontend-worker",
+      "depth": 1
+    },
+    {
+      "pid": 36628,
+      "parent": 25344,
+      "created": "2026-11-15T16:43:20.1074790Z",
+      "role": "orphan",
+      "depth": 0
+    },
+    {
+      "pid": 8728,
+      "parent": 36628,
+      "created": "2026-11-15T16:43:20.1677800Z",
+      "role": "preview",
+      "depth": 1
+    },
+    {
+      "pid": 33392,
+      "parent": 25344,
+      "created": "2026-11-15T16:43:20.1129000Z",
+      "role": "unrelated"
+    }
+  ],
+  "readyAt": "2026-11-15T16:43:21.761Z",
+  "actionAt": "2026-11-15T16:43:21.762Z",
+  "main": {
+    "exitSeen": true,
+    "closeSeen": false,
+    "state": {
+      "pid": 36628,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 2,
+      "closesGot": 1,
+      "stdout": null,
+      "stderr": null
+    }
+  },
+  "familyRemainingBeforeFallback": [],
+  "unrelatedAliveBeforeCleanup": true,
+  "runtimeCleanup": {
+    "at": "2026-11-15T16:43:22.075Z",
+    "parentPid": 36628,
+    "forced": true,
+    "children": [
+      {
+        "pid": 8728,
+        "parent": 36628,
+        "created": "2026-11-15T16:43:20.1677800Z",
+        "depth": 1
+      },
+      {
+        "pid": 42264,
+        "parent": 36628,
+        "created": "2026-11-15T16:43:20.1730940Z",
+        "depth": 1
+      },
+      {
+        "pid": 51420,
+        "parent": 36628,
+        "created": "2026-11-15T16:43:20.1774590Z",
+        "depth": 1
+      },
+      {
+        "pid": 9896,
+        "parent": 36628,
+        "created": "2026-11-15T16:43:20.1814470Z",
+        "depth": 1
+      }
+    ],
+    "errors": [],
+    "remaining": []
+  },
+  "remainingAfterCleanup": [],
+  "mainFinal": {
+    "exitSeen": true,
+    "closeSeen": false,
+    "state": {
+      "pid": 36628,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 2,
+      "closesGot": 1,
+      "stdout": null,
+      "stderr": null
+    }
+  },
+  "unrelatedFinal": {
+    "exitSeen": true,
+    "closeSeen": true,
+    "state": {
+      "pid": 33392,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 4,
+      "closesGot": 4,
+      "stdout": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      },
+      "stderr": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      }
+    }
+  },
+  "finished": "2026-11-15T16:43:35.170Z"
+}

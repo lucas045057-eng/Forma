@@ -26,6 +26,12 @@ if(role==='parent'){
   await Promise.all(closers.map(record=>record.closed));log('close-completed',{forced:stop.forced});
  },{hardTimeoutMs:300});
  for(const worker of ['preview','check','asset','frontend-worker']){const record=spawnRole(worker);if(closeMode==='complete')closers.push(record);}
+ process.on('message',message=>{
+  if(message?.type!=='fixture-orphan-disconnect'||closeMode!=='hung')return;
+  log('fixture-disconnect-message');
+  if(!process.connected)throw new Error('Fixture disconnect requires live IPC');
+  log('fixture-disconnect-called');process.disconnect();
+ });
  ready();
 }else{
  if(!['preview','check','asset','frontend-worker','unrelated'].includes(role))throw new Error('Unknown fixture role');

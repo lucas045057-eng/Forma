@@ -71,5 +71,5 @@ test('mock and real launch both bind the generated preview port and SIGINT ends 
 });
 
 test('hard-killed parent leaves no original worker identities and preserves an unrelated process',()=>runOrphanCase('hard-kill'));
-test('explicit IPC disconnect with hung close triggers the watchdog and reclaims only owned descendants',()=>runOrphanCase('disconnect-hung'));
+test('fixture-role-initiated IPC disconnect with hung close triggers the watchdog and reclaims only owned descendants',()=>runOrphanCase('disconnect-hung'));
 test('completed owned close exits normally without watchdog or forced cleanup',()=>runOrphanCase('normal-close'));
