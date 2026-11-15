@@ -1,0 +1,22 @@
+{
+  "reviewText": "把这个改成圆角",
+  "second": "src/App.tsx:41:15",
+  "hit": {
+    "tag": "h3",
+    "testId": null,
+    "src": "src/App.tsx:41:15",
+    "point": {
+      "x": 515,
+      "y": 315.109375
+    }
+  },
+  "message": {
+    "index": 1,
+    "src": "src/App.tsx:41:15",
+    "origin": "http://127.0.0.1:5175"
+  },
+  "before": {
+    "panelText": "{\n  \"src\": \"src/components/Button.tsx:5:5\",\n  \"cid\": \"Button\",\n  \"text\": \"立即购买\",\n  \"bbox\": [\n    61.796875,\n    520.375,\n    104,\n    47\n  ],\n  \"styles\": {\n    \"display\": \"block\",\n    \"position\": \"static\",\n    \"color\": \"rgb(255, 250, 240)\",\n    \"backgroundColor\": \"rgb(117, 96, 68)\",\n    \"fontSize\": \"13px\",\n    \"fontFamily\": \"\\\"Microsoft YaHei\\\", sans-serif\",\n    \"fontWeight\": \"400\",\n    \"lineHeight\": \"normal\",\n    \"padding\": \"14px 25px\",\n    \"margin\": \"0px\",\n    \"borderRadius\": \"3px\",\n    \"width\": \"104px\",\n    \"height\": \"47px\"\n  },\n  \"instances\": 3,\n  \"ancestors\": [\n    \"src/App.tsx:26:11\",\n    \"src/App.tsx:21:9\",\n    \"src/App.tsx:20:7\"\n  ],\n  \"baseVersion\": \"e533d151811d95f8ca26f08d576ade19124af729\"\n}",
+    "messages": 1
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-15T17:21:48.979Z",
+  "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T17-21-00-912Z-m4-special",
+  "head": "501ea9ee727c861f114ddedd45bdd727e6fba004",
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "identityStable": true,
+  "note": "只跑 playwright.m4.config.ts 的 19 例；不跑 614 单测/12 脚本/旧 174/collect/full。"
+}

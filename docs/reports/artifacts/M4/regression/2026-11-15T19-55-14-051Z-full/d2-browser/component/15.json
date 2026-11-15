@@ -1,0 +1,69 @@
+{
+  "test": "transcribing hidden cancellation sends DELETE despite its failure and never reopens review",
+  "url": "http://127.0.0.1:4508/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:4508/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.40310000000044965
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 59.545100000000275
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 118.46300000000065
+      },
+      {
+        "phase": "interaction",
+        "ms": 120.27410000000054
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [
+    {
+      "id": "894cc53c-9604-4b2c-b2c0-526bf1a97e6b",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [
+    "894cc53c-9604-4b2c-b2c0-526bf1a97e6b"
+  ],
+  "tasks": [],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

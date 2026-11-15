@@ -1,0 +1,108 @@
+{
+  "test": "successful speech submission releases binding so later text and version changes do not block a new task",
+  "url": "http://127.0.0.1:4508/__speech_component__/",
+  "apiSubstitutes": true,
+  "realChromium": true,
+  "primary": [],
+  "bootstrap": {
+    "phase": "interaction",
+    "url": "http://127.0.0.1:4508/__speech_component__/",
+    "ready": true,
+    "phases": [
+      {
+        "phase": "navigate-component",
+        "ms": 0.6075000000000728
+      },
+      {
+        "phase": "react-component-mounted",
+        "ms": 62.64499999999998
+      },
+      {
+        "phase": "speech-config-ready",
+        "ms": 121.93870000000015
+      },
+      {
+        "phase": "interaction",
+        "ms": 123.88370000000032
+      }
+    ],
+    "errors": [],
+    "resources": []
+  },
+  "beforeUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "afterUnmount": {
+    "streams": 1,
+    "liveTracks": 0,
+    "recorderStarts": 1,
+    "recorderStops": 1,
+    "vendorStarts": 0,
+    "vendorAborts": 0,
+    "parentBlurs": 0,
+    "holdPermission": false,
+    "mimeSupported": true
+  },
+  "pointerEvents": [],
+  "posts": [
+    {
+      "id": "a9dbcf28-5cd3-4ae2-a789-2601ea9a0f2b",
+      "mime": "audio/webm;codecs=opus",
+      "bytes": 5
+    }
+  ],
+  "deletes": [],
+  "tasks": [
+    {
+      "instruction": "提交后的全新文字指令",
+      "selection": {
+        "cid": "B",
+        "src": "src/B.tsx:1:1",
+        "baseVersion": "v2",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-2",
+      "status": "queued",
+      "events": []
+    },
+    {
+      "instruction": "把这个改成圆角",
+      "selection": {
+        "cid": "A",
+        "src": "src/A.tsx:1:1",
+        "baseVersion": "v1",
+        "bbox": [
+          0,
+          0,
+          10,
+          10
+        ],
+        "styles": {},
+        "instances": 1,
+        "ancestors": []
+      },
+      "id": "task-1",
+      "status": "queued",
+      "events": []
+    }
+  ],
+  "pageErrors": [],
+  "denied": [],
+  "cleanup": []
+}

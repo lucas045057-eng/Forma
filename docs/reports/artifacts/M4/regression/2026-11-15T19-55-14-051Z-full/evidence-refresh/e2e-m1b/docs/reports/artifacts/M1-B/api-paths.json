@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "id": "../escape",
+      "status": 400,
+      "code": "INVALID_ASSET"
+    },
+    {
+      "id": "..%2F..%2Fetc%2Fpasswd",
+      "status": 400,
+      "code": "INVALID_ASSET"
+    },
+    {
+      "id": "a/../../b",
+      "status": 400,
+      "code": "INVALID_ASSET"
+    },
+    {
+      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "status": 414
+    },
+    {
+      "id": "",
+      "status": 400,
+      "code": "INVALID_ASSET"
+    },
+    {
+      "id": ".",
+      "status": 404
+    }
+  ],
+  "outsideCreated": false
+}

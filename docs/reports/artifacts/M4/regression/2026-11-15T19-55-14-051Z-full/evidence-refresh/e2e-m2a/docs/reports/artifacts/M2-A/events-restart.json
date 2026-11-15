@@ -1,0 +1,11 @@
+{
+  "before": {
+    "current": 2,
+    "oldest": 1
+  },
+  "after": {
+    "current": 2,
+    "oldest": 1
+  },
+  "latestSeq": 3
+}

@@ -1,0 +1,4 @@
+{"event":"instrument-before-stdio","role":"parent","pid":56772,"ppid":45060,"at":"2026-11-15T16:04:02.607Z","uptime":0.0209673,"connected":false,"exitCode":null,"resources":[]}
+{"event":"instrument-after-stdio","role":"parent","pid":56772,"ppid":45060,"at":"2026-11-15T16:04:02.609Z","uptime":0.0219195,"connected":false,"exitCode":null,"resources":["PipeWrap","PipeWrap"]}
+{"event":"ready","role":"parent","pid":56772,"ppid":45060,"at":"2026-11-15T16:04:02.615Z","uptime":0.0280835,"connected":false,"exitCode":null,"resources":["PipeWrap","PipeWrap","PipeWrap","ProcessWrap","Timeout"]}
+{"event":"orphan-spawn","role":"parent","pid":56772,"ppid":45060,"at":"2026-11-15T16:04:02.615Z","uptime":0.0285702,"connected":false,"exitCode":null,"resources":["PipeWrap","PipeWrap","PipeWrap","ProcessWrap","Timeout"],"childPid":16440,"stdio":"inherit stdout/stderr; IPC parent-owned"}

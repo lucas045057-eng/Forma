@@ -1,0 +1,162 @@
+{
+  "kind": "hard-kill",
+  "pid": 3296,
+  "begun": "2026-11-15T16:34:56.857Z",
+  "root": "C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4",
+  "events": [
+    {
+      "event": "spawn",
+      "role": "parent",
+      "pid": 19308
+    },
+    {
+      "event": "spawn",
+      "role": "unrelated",
+      "pid": 15736
+    },
+    {
+      "event": "close",
+      "role": "parent",
+      "pid": 19308,
+      "code": null,
+      "signal": "SIGKILL",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "event": "close",
+      "role": "unrelated",
+      "pid": 15736,
+      "code": 1,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "identities": [
+    {
+      "pid": 48476,
+      "parent": 29680,
+      "created": "2026-11-15T16:34:57.0119360Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs asset C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "asset"
+    },
+    {
+      "pid": 39088,
+      "parent": 29680,
+      "created": "2026-11-15T16:34:56.9928880Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs check C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "check"
+    },
+    {
+      "pid": 44304,
+      "parent": 29680,
+      "created": "2026-11-15T16:34:57.0185840Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs frontend-worker C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "frontend-worker"
+    },
+    {
+      "pid": 29680,
+      "parent": 19308,
+      "created": "2026-11-15T16:34:56.9244780Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs orphan C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "orphan"
+    },
+    {
+      "pid": 19308,
+      "parent": 3296,
+      "created": "2026-11-15T16:34:56.8619570Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs parent C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "parent"
+    },
+    {
+      "pid": 40384,
+      "parent": 29680,
+      "created": "2026-11-15T16:34:56.9865620Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs preview C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "preview"
+    },
+    {
+      "pid": 15736,
+      "parent": 3296,
+      "created": "2026-11-15T16:34:56.8689570Z",
+      "command": "E:\\Node\\node.exe E:\\�ռ仯AI����̨\\.worktrees\\m4\\scripts\\demo\\test-support\\orphan-role.mjs unrelated C:\\Users\\Admin\\AppData\\Local\\Temp\\demo-orphan-case-c0f3x4 hung",
+      "role": "unrelated"
+    }
+  ],
+  "fallbackKills": [
+    {
+      "role": "unrelated",
+      "pid": 15736,
+      "created": "2026-11-15T16:34:56.8689570Z",
+      "reason": "final unrelated stop"
+    }
+  ],
+  "cleanupErrors": [],
+  "primary": null,
+  "readyAt": "2026-11-15T16:34:59.478Z",
+  "actionAt": "2026-11-15T16:34:59.478Z",
+  "actionResult": {
+    "code": null,
+    "signal": "SIGKILL",
+    "stdout": "",
+    "stderr": ""
+  },
+  "familyGoneBeforeFallback": true,
+  "unrelatedAliveBeforeCleanup": true,
+  "orphanEvents": [
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 29680,
+      "parent": 19308,
+      "at": "2026-11-15T16:34:56.989Z",
+      "connected": true,
+      "childPid": 40384,
+      "childRole": "preview"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 29680,
+      "parent": 19308,
+      "at": "2026-11-15T16:34:56.994Z",
+      "connected": true,
+      "childPid": 39088,
+      "childRole": "check"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 29680,
+      "parent": 19308,
+      "at": "2026-11-15T16:34:57.014Z",
+      "connected": true,
+      "childPid": 48476,
+      "childRole": "asset"
+    },
+    {
+      "event": "spawned-child",
+      "role": "orphan",
+      "pid": 29680,
+      "parent": 19308,
+      "at": "2026-11-15T16:34:57.020Z",
+      "connected": true,
+      "childPid": 44304,
+      "childRole": "frontend-worker"
+    },
+    {
+      "event": "ready",
+      "role": "orphan",
+      "pid": 29680,
+      "parent": 19308,
+      "at": "2026-11-15T16:34:57.020Z",
+      "connected": true
+    }
+  ],
+  "runtimeCleanup": null,
+  "orphanStderr": "",
+  "remaining": [],
+  "finished": "2026-11-15T16:35:02.906Z",
+  "retained": null
+}

@@ -1,0 +1,286 @@
+{
+  "a": {
+    "id": "7144a5abcb8b439aaf753124e8fff5ec",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-15T20:14:08.590Z",
+    "finishedAt": "2026-11-15T20:14:15.335Z",
+    "durationMs": 6745,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 9
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3651
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "d8658285c63c4dd399840251ee3aa4702e7263bc0104a9dd4e094299f2a81f52",
+        "durationMs": 872
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "8fa03325af287bce9cf4e85fa3935189783a315bc8d470235d5f83cfa54c7cf9",
+        "durationMs": 104
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "d8658285c63c4dd399840251ee3aa4702e7263bc0104a9dd4e094299f2a81f52"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 105666,
+        "hash": "b36e6403fc3fb944f23da8dbd1d51215eece73f84c21590c7336c508faccb546"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "8fa03325af287bce9cf4e85fa3935189783a315bc8d470235d5f83cfa54c7cf9"
+      }
+    ]
+  },
+  "b": {
+    "id": "ae69ec10f5ae4c7e897627814493991f",
+    "status": "completed",
+    "outcome": "passed",
+    "policyVersion": "m3b-v2",
+    "createdAt": "2026-11-15T20:14:09.002Z",
+    "finishedAt": "2026-11-15T20:14:22.085Z",
+    "durationMs": 13083,
+    "checks": [
+      {
+        "name": "schema",
+        "status": "passed",
+        "evidence": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0",
+        "durationMs": 8
+      },
+      {
+        "name": "build",
+        "status": "passed",
+        "evidence": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b",
+        "durationMs": 3596
+      },
+      {
+        "name": "smoke",
+        "status": "passed",
+        "evidence": "635b91a4ed676029c617729b955dfb8c3031e3630d0e1df5d579b978bbc69a52",
+        "durationMs": 868
+      },
+      {
+        "name": "occlusion",
+        "status": "passed",
+        "evidence": "aa84f38862a1fe7143f2ee004bb07ae2d903c965de214daaadb5d1c8f91c535f",
+        "durationMs": 110
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "schema.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 99,
+        "hash": "38f489e1bfe7415743a1c003a5742aab9ee6b4429563f34c732e20574836b7c0"
+      },
+      {
+        "name": "build.log",
+        "mime": "text/plain; charset=utf-8",
+        "bytes": 386,
+        "hash": "68b32835516c44cd496079fcfa0006d000638c68011b93defb2730ddbe33a78b"
+      },
+      {
+        "name": "smoke.png",
+        "mime": "image/png",
+        "bytes": 106167,
+        "hash": "ebee72bede49a128a4cc64d96574213c5d860a9f31c0bfc729843d9ae63152f4"
+      },
+      {
+        "name": "smoke.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 324,
+        "hash": "635b91a4ed676029c617729b955dfb8c3031e3630d0e1df5d579b978bbc69a52"
+      },
+      {
+        "name": "occlusion.png",
+        "mime": "image/png",
+        "bytes": 106167,
+        "hash": "ebee72bede49a128a4cc64d96574213c5d860a9f31c0bfc729843d9ae63152f4"
+      },
+      {
+        "name": "occlusion.json",
+        "mime": "application/json; charset=utf-8",
+        "bytes": 2718,
+        "hash": "aa84f38862a1fe7143f2ee004bb07ae2d903c965de214daaadb5d1c8f91c535f"
+      }
+    ]
+  },
+  "samples": [
+    {
+      "at": 2,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 263,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 527,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 791,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1054,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1320,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1584,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 1851,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2117,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2381,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2646,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 2911,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3173,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3438,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3701,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 3966,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4232,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4496,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 4760,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5023,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5282,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5547,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 5812,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6077,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6339,
+      "a": "running",
+      "b": "queued"
+    },
+    {
+      "at": 6602,
+      "a": "completed",
+      "b": "running"
+    }
+  ],
+  "sawSerial": true,
+  "sawOverlap": false,
+  "ordering": {
+    "aFinishedAt": "2026-11-15T20:14:15.335Z",
+    "bStartedAt": "2026-11-15T20:14:15.682Z"
+  }
+}

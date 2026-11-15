@@ -1,0 +1,11 @@
+{
+  "pid": 59776,
+  "origin": "http://127.0.0.1:2916",
+  "previewOrigin": "http://127.0.0.1:2915",
+  "chromiumPid": 39756,
+  "chromiumExit": 0,
+  "chromiumSignal": null,
+  "serverListening": false,
+  "previewListening": false,
+  "errors": []
+}

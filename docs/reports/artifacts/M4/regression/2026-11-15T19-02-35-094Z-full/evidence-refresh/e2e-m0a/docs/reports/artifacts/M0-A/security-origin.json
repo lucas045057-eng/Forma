@@ -1,0 +1,12 @@
+{
+  "denied": {
+    "status": 403,
+    "body": {
+      "error": {
+        "code": "ORIGIN_DENIED",
+        "message": "仅允许通过同源工作台访问"
+      }
+    }
+  },
+  "allowed": 200
+}

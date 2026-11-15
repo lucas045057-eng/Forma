@@ -18,7 +18,9 @@ const messages: Record<SpeechErrorCode, string> = {
   SPEECH_CLOSING: '语音服务正在关闭',
 };
 export class SpeechError extends Error {
-  constructor(public readonly code: SpeechErrorCode, public readonly status: number) { super(messages[code]); }
+  readonly code:SpeechErrorCode;
+  readonly status:number;
+  constructor(code:SpeechErrorCode,status:number) { super(messages[code]);this.code=code;this.status=status; }
 }
 export interface SpeechClientOptions {
   baseUrl?: string;

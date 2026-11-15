@@ -1,0 +1,22 @@
+# demo-safety: E:\Node\node.exe --test scripts/demo/safety.test.mjs
+# started=2026-11-15T16:56:40.672Z
+✔ prepare copies only tracked public/source names and leaves decoy env and existing runs untouched (327.9408ms)
+✔ prepare refuses a junction in the destination ancestry without following it (142.6579ms)
+✔ plan reader refuses escaped paths, duplicate/out-of-range ports and unexpected port names (235.6415ms)
+✔ network guard refuses domains, private/public/mapped TCP and fetch before native boundaries while loopback remains usable (1272.6939ms)
+✔ mock and real launch both bind the generated preview port and SIGINT ends owned roles without forced shutdown (765.0939ms)
+✔ hard-killed parent leaves no original worker identities and preserves an unrelated process (5338.0833ms)
+✔ fixture-role-initiated IPC disconnect with hung close triggers the watchdog and reclaims only owned descendants (6867.6104ms)
+✔ completed owned close exits normally without watchdog or forced cleanup (4901.5353ms)
+✔ mock child environment drops injected loaders, proxies and real provider keys (0.1651ms)
+✔ mock endpoints never accept domains, private/public addresses, embedded credentials or URL parameters (0.2218ms)
+✔ real mode requires Aliyun operator config and never copies arbitrary env to the frontend envelope (0.1275ms)
+✔ copy allowlist omits private/cache files and run paths must remain descendants (0.0852ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19926.8529

@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-15T17:36:15.657Z",
+  "head": "7dd269d447fa1ab390fd61ab7e4330aa33aaeb9d",
+  "tool": {
+    "precheck": {
+      "path": ".data/m4-gitlink-precheck.mjs",
+      "sha256": "e4497b03357f7c8f5d737bdaaebc75d13a1045c9e3feed42bda348465780187a"
+    },
+    "preservedFailedPrecheck": {
+      "path": ".data/m4-gitlink-precheck.failed-head.mjs",
+      "sha256": "58114a1b5c96035a6308b6fd2b5aa8b7db22232c7c1b904e1f350010f0094fb1"
+    },
+    "specialEntry": {
+      "path": ".data/m4-special-run.mjs",
+      "sha256": "5f5c5fc5c3e3cfcf214dcaca560e6df7a5e5f841437f91261fab0f3c649a0840"
+    },
+    "evidenceIndex": {
+      "path": "tests/e2e/m4/evidence-index.mjs",
+      "sha256": "199eeda4b7d2ea379f4cc7b8b9138de05390869cf37ce1c24daec3309cda31fe"
+    }
+  },
+  "note": "上一轮预检失败原因：HEAD 读的是 worktree 的 .git/HEAD（非 git rev-parse），且 857 清单里的路径相对 run 目录却按 ROOT join；两处均已修正。本轮补上普通证据容器物化。"
+}

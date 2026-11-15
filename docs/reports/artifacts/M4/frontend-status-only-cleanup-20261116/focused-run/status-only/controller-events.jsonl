@@ -1,0 +1,13 @@
+{"at":"2026-11-15T18:36:10.360Z","event":"spawn","pid":33644,"exitCode":null,"signalCode":null,"connected":true}
+{"at":"2026-11-15T18:36:10.525Z","event":"ipc-message","type":"prepared","pid":33644,"run":"E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-36-10.429Z-f98d5536-5420-4d68-81eb-cb2f6237f2a5"}
+{"at":"2026-11-15T18:36:13.659Z","event":"http-response","url":"http://127.0.0.1:43138/","status":200,"bodyUsedAtHeaders":false,"retained":true,"bodyUsedAfter":false}
+{"at":"2026-11-15T18:36:13.664Z","event":"http-response","url":"http://127.0.0.1:22549/health","status":200,"bodyUsedAtHeaders":false,"retained":true,"bodyUsedAfter":false}
+{"at":"2026-11-15T18:36:13.700Z","event":"http-response","url":"http://127.0.0.1:25032/preview/main/","status":200,"bodyUsedAtHeaders":false,"retained":true,"bodyUsedAfter":false}
+{"at":"2026-11-15T18:36:14.226Z","event":"http-response","url":"http://127.0.0.1:33493/preview/main/@fs/E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/packages/scene-renderer/src/index.tsx","status":200,"bodyUsedAtHeaders":false,"retained":true,"bodyUsedAfter":false}
+{"at":"2026-11-15T18:36:15.074Z","event":"disconnect","pid":33644,"exitCode":null,"signalCode":null,"connected":false}
+{"at":"2026-11-15T18:36:15.079Z","event":"stderr:close","destroyed":true,"readableEnded":true,"closed":true}
+{"at":"2026-11-15T18:36:15.079Z","event":"stdout:end","destroyed":false,"readableEnded":true,"closed":false}
+{"at":"2026-11-15T18:36:15.078Z","event":"stderr:end","destroyed":false,"readableEnded":true,"closed":false}
+{"at":"2026-11-15T18:36:15.079Z","event":"stdout:close","destroyed":true,"readableEnded":true,"closed":true}
+{"at":"2026-11-15T18:36:15.083Z","event":"exit","pid":33644,"code":0,"signal":null,"exitCode":0,"signalCode":null,"connected":false}
+{"at":"2026-11-15T18:36:15.083Z","event":"close","pid":33644,"code":0,"signal":null,"exitCode":0,"signalCode":null,"connected":false}

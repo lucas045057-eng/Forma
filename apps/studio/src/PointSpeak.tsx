@@ -1,4 +1,7 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
+import SpeechInput from './SpeechInput.tsx';
+import {nativeSpeechPorts,SpeechController,speechBusy,type SpeechReview} from './speech-input.ts';
+import {bindingMatches,identityLabel,reviewDecision,type ReviewMode,type SpeechContext} from './speech-review.ts';
 import type { Selection, Task } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
 import { operationError, refreshError } from './adoption-gate.ts';
@@ -18,11 +21,39 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
   const [activeId, setActiveId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [speech] = useState(() => new SpeechController(nativeSpeechPorts()));
+  const speechState = useSyncExternalStore(speech.subscribe, speech.getSnapshot, speech.getSnapshot);
+  const revision = useRef(0);
+  const identity = selection ? {src:selection.src,cid:selection.cid,baseVersion:selection.baseVersion} : null;
+  const pickKey = JSON.stringify({identity,kind:pick.kind,version:state.version});
+  const selectionHistory = useRef({key:pickKey,epoch:0});
+  if (selectionHistory.current.key !== pickKey) selectionHistory.current = {key:pickKey,epoch:selectionHistory.current.epoch+1};
+  const context: SpeechContext = {selection:identity,version:state.version,revision:revision.current,selectionEpoch:selectionHistory.current.epoch};
+  const latestContext = useRef(context); latestContext.current = context;
+  const [binding,setBinding] = useState<SpeechContext | null>(null);
+  const latestBinding = useRef(binding); latestBinding.current = binding;
+  const boundText = useRef('');
+  const voiceGate = !speechBusy(speechState) && (!binding || bindingMatches(binding,context));
+  function changeInstruction(text:string,clearBinding=false) {
+    ++revision.current; latestContext.current = {...latestContext.current,revision:revision.current};
+    setInstruction(text);
+    if (clearBinding || !text) {latestBinding.current=null;setBinding(null);}
+  }
+  function useReview(review:SpeechReview,mode:ReviewMode) {
+    if (speech.getSnapshot().review !== review) return;
+    const decision=reviewDecision(review.context,latestContext.current,submittable&&!busy,review.text);
+    if (!decision[mode]) return;
+    changeInstruction(review.text);
+    const confirmed={...latestContext.current}; boundText.current=review.text;latestBinding.current=confirmed;setBinding(confirmed);speech.accept();
+  }
   const active = state.tasks.find(task => task.id === activeId) ?? state.tasks[0];
 
   const retryPlan = retrySelection(active?.selection, pick, state.version);
   async function submit(text: string, picked: Selection | null, retry = false) {
     if (!text.trim() || busy || !(retry ? writable && retryPlan.allowed : submittable)) return;
+    if (speechBusy(speech.getSnapshot()) || (!retry && latestBinding.current && !bindingMatches(latestBinding.current,latestContext.current))) {
+      setError('请先确认语音文字与当前对象，或放弃本次语音指令'); return;
+    }
     if (picked && picked.baseVersion !== state.version) { setError('页面已变化，请重新点选'); return; }
     const token = acquire(['task:create']);
     if (!token) return;
@@ -31,6 +62,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     try {
       const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
       setActiveId(task.id);
+      latestBinding.current=null;setBinding(null);
       succeeded = true;
     } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined)); }
     awaiting(token);
@@ -61,11 +93,19 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
   return <section className="point-speak" aria-label="指着说">
     <p className="section-label">POINT &amp; SPEAK</p><h2>指着说</h2>
     <label className="instruction-label">修改指令
-      <textarea data-testid="instruction-input" value={instruction} onChange={event => setInstruction(event.target.value)} onKeyDown={keyboard}
+      <textarea data-testid="instruction-input" value={instruction} onChange={event => changeInstruction(event.target.value)} onKeyDown={keyboard}
         placeholder="例如：把这个按钮改成“马上购买”" rows={3}/>
     </label>
     <p className="hint"><span data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span> Ctrl/⌘ + Enter 提交。</p>
-    <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
+    <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
+    {binding&&!bindingMatches(binding,context)&&<div data-testid="speech-binding-conflict" role="alert">
+      <p>语音确认后选中对象已变化，生成前需再次确认。</p>
+      <p>上次确认：{identityLabel(binding.selection)}；当前：{identityLabel(context.selection)}</p>
+      {binding.version!==context.version?<p>页面版本已变化，请放弃此语音指令并重新点选。</p>:<button type="button" data-testid="speech-reconfirm" disabled={!submittable||busy} onClick={()=>{if(!submittable||busy||speechBusy(speech.getSnapshot())||latestBinding.current?.version!==latestContext.current.version)return;const next={...latestContext.current};latestBinding.current=next;setBinding(next);}}>确认用于当前对象{context.selection?.cid??'（整体修改）'}</button>}
+      <button type="button" data-testid="speech-clear-binding" onClick={()=>changeInstruction(instruction===boundText.current?'':instruction,true)}>放弃此语音指令，保留后续文字编辑</button>
+    </div>}
+    <p className="hint">指令、选中对象与必要源码发送到已配置编码服务。</p>
+    <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}
     {active && <div className="task-card" data-testid="task-card">
       <div className="task-heading"><strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong><code>{active.id.slice(0, 8)}</code></div>
@@ -78,7 +118,7 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
       {(active.status === 'failed' || active.status === 'cancelled') && <>
         {retryPlan.reason && <p role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
-        <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed} onClick={() => { setInstruction(active.instruction); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
+        <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed || speechBusy(speechState)} onClick={() => { changeInstruction(active.instruction,true); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
       </>}
     </div>}
   </section>;

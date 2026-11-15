@@ -1,0 +1,39 @@
+{
+  "pid": 39652,
+  "origin": "http://127.0.0.1:5244",
+  "chromeVersion": "158.0.8127.18",
+  "chrome": [
+    {
+      "pid": 15596,
+      "parent": 39652,
+      "created": "2026-11-15T15:29:17.6849970Z"
+    },
+    {
+      "pid": 27212,
+      "parent": 15596,
+      "created": "2026-11-15T15:29:17.7385530Z"
+    },
+    {
+      "pid": 63360,
+      "parent": 15596,
+      "created": "2026-11-15T15:29:17.7489500Z"
+    }
+  ],
+  "chromeExitCode": 0,
+  "chromeSignalCode": null,
+  "remaining": [],
+  "serverListening": false,
+  "cacheRetained": null,
+  "setupFailure": null,
+  "vite": {
+    "mode": "development",
+    "optimizeDeps": [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime"
+    ]
+  },
+  "errors": []
+}

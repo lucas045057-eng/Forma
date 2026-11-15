@@ -1,0 +1,187 @@
+{
+  "variant": "spawn-pipe",
+  "started": "2026-11-15T16:42:49.623Z",
+  "errors": [],
+  "fallbackKills": [
+    {
+      "pid": 29208,
+      "parent": 25344,
+      "created": "2026-11-15T16:42:49.6326190Z",
+      "role": "unrelated",
+      "reason": "final unrelated stop"
+    }
+  ],
+  "handles": [
+    {
+      "role": "orphan",
+      "pid": 52408
+    },
+    {
+      "role": "unrelated",
+      "pid": 29208
+    }
+  ],
+  "identities": [
+    {
+      "pid": 12540,
+      "parent": 52408,
+      "created": "2026-11-15T16:42:49.6995800Z",
+      "role": "asset",
+      "depth": 1
+    },
+    {
+      "pid": 21972,
+      "parent": 52408,
+      "created": "2026-11-15T16:42:49.6939110Z",
+      "role": "check",
+      "depth": 1
+    },
+    {
+      "pid": 60372,
+      "parent": 52408,
+      "created": "2026-11-15T16:42:49.7063800Z",
+      "role": "frontend-worker",
+      "depth": 1
+    },
+    {
+      "pid": 52408,
+      "parent": 25344,
+      "created": "2026-11-15T16:42:49.6266230Z",
+      "role": "orphan",
+      "depth": 0
+    },
+    {
+      "pid": 69032,
+      "parent": 52408,
+      "created": "2026-11-15T16:42:49.6881850Z",
+      "role": "preview",
+      "depth": 1
+    },
+    {
+      "pid": 29208,
+      "parent": 25344,
+      "created": "2026-11-15T16:42:49.6326190Z",
+      "role": "unrelated"
+    }
+  ],
+  "readyAt": "2026-11-15T16:42:51.604Z",
+  "actionAt": "2026-11-15T16:42:51.605Z",
+  "main": {
+    "exitSeen": true,
+    "closeSeen": false,
+    "state": {
+      "pid": 52408,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 4,
+      "closesGot": 3,
+      "stdout": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      },
+      "stderr": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      }
+    }
+  },
+  "familyRemainingBeforeFallback": [],
+  "unrelatedAliveBeforeCleanup": true,
+  "runtimeCleanup": {
+    "at": "2026-11-15T16:42:51.917Z",
+    "parentPid": 52408,
+    "forced": true,
+    "children": [
+      {
+        "pid": 69032,
+        "parent": 52408,
+        "created": "2026-11-15T16:42:49.6881850Z",
+        "depth": 1
+      },
+      {
+        "pid": 21972,
+        "parent": 52408,
+        "created": "2026-11-15T16:42:49.6939110Z",
+        "depth": 1
+      },
+      {
+        "pid": 12540,
+        "parent": 52408,
+        "created": "2026-11-15T16:42:49.6995800Z",
+        "depth": 1
+      },
+      {
+        "pid": 60372,
+        "parent": 52408,
+        "created": "2026-11-15T16:42:49.7063800Z",
+        "depth": 1
+      }
+    ],
+    "errors": [],
+    "remaining": []
+  },
+  "remainingAfterCleanup": [],
+  "mainFinal": {
+    "exitSeen": true,
+    "closeSeen": false,
+    "state": {
+      "pid": 52408,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 4,
+      "closesGot": 3,
+      "stdout": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      },
+      "stderr": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      }
+    }
+  },
+  "unrelatedFinal": {
+    "exitSeen": true,
+    "closeSeen": true,
+    "state": {
+      "pid": 29208,
+      "exitCode": 1,
+      "signalCode": null,
+      "connected": false,
+      "channelPresent": false,
+      "closesNeeded": 4,
+      "closesGot": 4,
+      "stdout": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      },
+      "stderr": {
+        "destroyed": true,
+        "readableEnded": true,
+        "readable": false,
+        "closed": true,
+        "pending": true
+      }
+    }
+  },
+  "finished": "2026-11-15T16:43:05.142Z"
+}

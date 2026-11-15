@@ -1,0 +1,36 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/空间化AI工作台/.worktrees/m4/apps/studio[39m
+
+ [31m×[39m src/speech-render.test.tsx[2m > [22mPointSpeak exposes a press-to-record entry and provider disclosure beside the original typed instruction[32m 9[2mms[22m[39m
+[31m   → expected '<section class="point-speak" aria-lab…' to contain 'data-testid="speech-record"'[39m
+ [90m·[39m src/speech-render.test.tsx[2m > [22ma hidden-by-mode PointSpeak keeps typed input while its speech entry is actually disabled
+ [90m·[39m src/speech-render.test.tsx[2m > [22mstatic serialization invokes no HTTP or browser recording; mounted lifecycle requires separate coverage
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/speech-render.test.tsx[2m > [22mPointSpeak exposes a press-to-record entry and provider disclosure beside the original typed instruction
+[31m[1mAssertionError[22m: expected '<section class="point-speak" aria-lab…' to contain 'data-testid="speech-record"'[39m
+
+Expected: [32m"data-testid="speech-record""[39m
+Received: [31m"<section class="point-speak" aria-label="指着说"><p class="section-label">POINT &amp; SPEAK</p><h2>指着说</h2><label class="instruction-label">修改指令<textarea data-testid="instruction-input" placeholder="例如：把这个按钮改成“马上购买”" rows="3"></textarea></label><p class="hint"><span data-testid="pick-state" data-kind="none">当前没有选中对象，也可以提交整体修改。</span> Ctrl/⌘ + Enter 提交。</p><button type="button" data-testid="generate-candidate" disabled="">生成候选版本</button></section>"[39m
+
+[36m [2m❯[22m src/speech-render.test.tsx:[2m17:16[22m[39m
+    [90m 15| [39mit('PointSpeak exposes a press-to-record entry and provider disclosure…
+    [90m 16| [39m  const html = renderToStaticMarkup(<PointSpeak pick={{ kind: 'none' }…
+    [90m 17| [39m  [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'data-testid="speech-record"'[39m)[33m;[39m
+    [90m   | [39m               [31m^[39m
+    [90m 18| [39m  [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'data-testid="speech-provider"'[39m)[33m;[39m
+    [90m 19| [39m  [34mexpect[39m(html)[33m.[39m[34mtoContain[39m([32m'阿里云百炼'[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (3)[39m
+[2m   Start at [22m 15:24:10
+[2m   Duration [22m 405ms[2m (transform 52ms, setup 0ms, collect 150ms, tests 10ms, environment 0ms, prepare 97ms)[22m
+
+JSON report written to E:/空间化AI工作台/.worktrees/m4/.data/d2-red-2026-11-15T07-24-09.396Z/results.json
+undefined
+E:\空间化AI工作台\.worktrees\m4\apps\studio:
+[ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL] Command failed with exit code 1: vitest run src/speech-render.test.tsx "--bail=1" "--reporter=verbose" "--reporter=json" "--outputFile=../../.data/d2-red-2026-11-15T07-24-09.396Z/results.json"

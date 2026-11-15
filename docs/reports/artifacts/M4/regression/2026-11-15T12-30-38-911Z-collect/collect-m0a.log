@@ -1,0 +1,31 @@
+# collect-m0a: E:\Node\node.exe E:\空间化AI工作台\.worktrees\m4-acceptance\node_modules\@playwright\test\cli.js test -c playwright.m0a.config.ts --list --reporter=list
+# started=2026-11-15T12:30:59.397Z
+Listing tests:
+  [chromium] › 01-pipeline.spec.ts:44:3 › M0-A 主链路（全程 mock Lux3D） › 1. 出站守卫自检：指向真实 Lux3D 域名的请求会被拦截并留痕
+  [chromium] › 01-pipeline.spec.ts:61:3 › M0-A 主链路（全程 mock Lux3D） › 2. 文生 3D：提交 → 轮询 0/1/3 → 下载 → 处理 → asset.ready
+  [chromium] › 01-pipeline.spec.ts:145:3 › M0-A 主链路（全程 mock Lux3D） › 3. 图生 3D 与参数校验：img 走同一条 mock 链路，非法请求被拒
+  [chromium] › 02-idempotency.spec.ts:17:3 › M0-A 幂等与「结果不明不重发」 › 1. 同一幂等键顺序提交两次：只创建一次，返回同一条资产
+  [chromium] › 02-idempotency.spec.ts:35:3 › M0-A 幂等与「结果不明不重发」 › 2. 同一幂等键并发提交两次：只创建一个远端任务
+  [chromium] › 02-idempotency.spec.ts:53:3 › M0-A 幂等与「结果不明不重发」 › 3. 同一幂等键不同参数：409，且不产生新任务
+  [chromium] › 02-idempotency.spec.ts:66:3 › M0-A 幂等与「结果不明不重发」 › 4. 提交结果不明：不自动重发，同键再提交也不重发，只能查询远端后导入
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务失败 status=4
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务取消 status=6
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 结果 URL 过期 403
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 结果 URL 过期 404
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 轮询超时
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 未知任务状态
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 并发超限（create 返回 c 错误码）
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › create 返回 HTTP 500（结果不明）
+  [chromium] › 03-failures.spec.ts:41:5 › M0-A 失败路径：错误清晰、不卡死 › 任务成功但没有 GLB 输出
+  [chromium] › 04-import.spec.ts:6:3 › M0-A 导入已有任务（零额度） › 导入一个已完成任务：只查询不创建，处理后可下载模型
+  [chromium] › 05-security.spec.ts:24:3 › M0-A 路径穿越与密钥泄露 › 1. /assets/:id 与 /assets/:id/model.glb 的穿越 id 全部被拒
+  [chromium] › 05-security.spec.ts:47:3 › M0-A 路径穿越与密钥泄露 › 2. 响应、模型下载与 WebSocket 事件里都不含上游 key
+  [chromium] › 05-security.spec.ts:88:3 › M0-A 路径穿越与密钥泄露 › 3. 跨源 Origin 被拒（后端只服务同源工作台）
+  [chromium] › 05-security.spec.ts:100:3 › M0-A 路径穿越与密钥泄露 › 4. 幂等键本身不落盘成明文（索引里只有哈希）
+  [chromium] › 06-viewport.spec.ts:12:1 › Studio 3D 视口：加载处理后模型、画布非空、可拖动旋转、无运行错误
+  [chromium] › 07-review-fixes.spec.ts:32:3 › M0-A 审查整改回归 › R1 资产目录预置残留 model.glb.tmp / raw.glb.tmp 后重试仍能成功
+  [chromium] › 07-review-fixes.spec.ts:74:3 › M0-A 审查整改回归 › R2a 滴流下载被总时限中止，错误清晰且不卡死
+  [chromium] › 07-review-fixes.spec.ts:108:3 › M0-A 审查整改回归 › R2b 下载中优雅停机 → 记录可恢复 → 重启后继续原 taskId 且不新建任务
+  [chromium] › 07-review-fixes.spec.ts:163:3 › M0-A 审查整改回归 › R3 ready 资产模型丢失：视口报错 → 重新导入 → 画布恢复（不新建任务）
+  [chromium] › 07-review-fixes.spec.ts:233:3 › M0-A 审查整改回归 › S3 非 loopback 的 http 上游在启动时被拒绝，且没有发出任何请求
+Total: 27 tests in 7 files

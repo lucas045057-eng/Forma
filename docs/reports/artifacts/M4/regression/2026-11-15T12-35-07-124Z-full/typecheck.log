@@ -1,0 +1,19 @@
+# typecheck: pnpm typecheck
+# started=2026-11-15T12:35:07.670Z
+$ pnpm -r typecheck
+Scope: 7 of 8 workspace projects
+packages/shared typecheck$ tsc
+packages/vite-plugin-source-tag typecheck$ tsc
+packages/shared typecheck: Done
+packages/vite-plugin-source-tag typecheck: Done
+apps/server typecheck$ tsc
+packages/scene-renderer typecheck$ tsc
+packages/bridge typecheck$ tsc
+packages/bridge typecheck: Done
+apps/server typecheck: src/assets/process-worker.ts(8,28): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
+apps/server typecheck: src/assets/process-worker.ts(9,18): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
+apps/server typecheck: Failed
+E:\空间化AI工作台\.worktrees\m4-acceptance\apps\server:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/server@ typecheck: `tsc`
+Exit status 2
+[ELIFECYCLE] Command failed with exit code 2.

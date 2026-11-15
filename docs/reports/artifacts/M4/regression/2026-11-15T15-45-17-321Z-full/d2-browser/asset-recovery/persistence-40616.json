@@ -1,0 +1,145 @@
+{
+  "owner": {
+    "pid": 23208,
+    "parent": 40616,
+    "created": "2026-11-15T15:48:37.8408920Z",
+    "command": "E:\\Node\\node.exe --import file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4-acceptance/apps/server/src/test-support/asset-persistence-register.mjs E:\\�ռ仯AI����̨\\.worktrees\\m4-acceptance\\apps\\server\\src\\test-support\\asset-persistence-parent.ts E:\\�ռ仯AI����̨\\.worktrees\\m4-acceptance\\.data\\recovery-test-JawjYy http://127.0.0.1:45981"
+  },
+  "stages": [
+    {
+      "phase": "spawn",
+      "ms": 4.856200000000172
+    },
+    {
+      "phase": "spawned",
+      "ms": 4.915700000000015
+    },
+    {
+      "phase": "preload",
+      "ms": 31.516299999999774
+    },
+    {
+      "phase": "entry-imported",
+      "ms": 31.533100000000104
+    },
+    {
+      "phase": "identity",
+      "ms": 105.10019999999986
+    },
+    {
+      "phase": "held",
+      "ms": 682.6455999999998
+    },
+    {
+      "phase": "kill",
+      "ms": 684.0859
+    },
+    {
+      "phase": "IPC-disconnected",
+      "ms": 686.1379999999999
+    },
+    {
+      "phase": "exit:null:SIGKILL",
+      "ms": 689.9919
+    },
+    {
+      "phase": "closed:null:SIGKILL",
+      "ms": 690.0158000000001
+    },
+    {
+      "phase": "restart",
+      "ms": 1202.1529999999998
+    },
+    {
+      "phase": "assertions-complete",
+      "ms": 1416.9029999999998
+    },
+    {
+      "phase": "cleanup",
+      "ms": 1416.9036
+    }
+  ],
+  "messages": [
+    {
+      "type": "persistence-preload-stage",
+      "pid": 23208,
+      "stage": "installed"
+    },
+    {
+      "type": "persistence-preload-stage",
+      "pid": 23208,
+      "stage": "atomic-target-resolved"
+    },
+    {
+      "type": "persistence-preload-stage",
+      "pid": 23208,
+      "stage": "atomic-target-resolved"
+    },
+    {
+      "type": "persistence-preload-stage",
+      "pid": 23208,
+      "stage": "atomic-target-resolved"
+    },
+    {
+      "type": "persistence-preload-stage",
+      "pid": 23208,
+      "stage": "atomic-wrapper-evaluated"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "entry"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "init-start"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "init-done"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "submit"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "submit-rejected"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "idle-rejected"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "close-rejected"
+    },
+    {
+      "type": "persistence-stage",
+      "pid": 23208,
+      "stage": "live-lock-refused"
+    },
+    {
+      "type": "persistence-failure-held",
+      "pid": 23208,
+      "assetId": "b6542694-50a3-4fca-8154-2fbc46834666",
+      "submitError": "disk full",
+      "idleError": "disk full",
+      "closeError": "disk full",
+      "lockPid": 23208,
+      "blockedCode": "INSTANCE_LOCKED"
+    }
+  ],
+  "stdout": "",
+  "stderr": "",
+  "exit": null,
+  "signal": "SIGKILL",
+  "primary": null,
+  "cleanup": []
+}

@@ -1,0 +1,22 @@
+{
+  "runId": "088ab65eef3a497d9dbee2546f569d3a",
+  "items": [
+    {
+      "name": "schema",
+      "status": "passed"
+    },
+    {
+      "name": "build",
+      "status": "passed"
+    },
+    {
+      "name": "smoke",
+      "status": "passed"
+    },
+    {
+      "name": "occlusion",
+      "status": "failed"
+    }
+  ],
+  "gateReason": "检查未全部通过"
+}

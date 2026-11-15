@@ -104,6 +104,30 @@ it('adopts only ready assets, requires force and copies metadata with undo', asy
   } finally { await app.close(); }
 });
 
+it('maps malformed, oversized and conflicting provenance to a safe 409 without advancing work bytes', async () => {
+  const f = await fixture(); const assets = path.join(f.root, 'assets');
+  await mkdir(path.join(assets, 'asset1'), { recursive: true });
+  await writeFile(path.join(assets, 'asset1/model.glb'), 'model-bytes');
+  await writeFile(path.join(assets, 'index.json'), JSON.stringify([{ id: 'asset1', status: 'ready', createdAt: '', updatedAt: '', metrics: { webReady: true, parts: { recognized: false, nodes: [] } } }]));
+  const { app } = await createApp({ ...f.options, dataDirectory: assets, base: 'http://127.0.0.1:4010', key: 'mock-only' });
+  try {
+    expect((await app.inject({ method: 'POST', url: '/assets/asset1/adopt', payload: {} })).statusCode).toBe(200);
+    const sidecar = path.join(f.options.workRoot, 'public/assets/asset1.provenance.json');
+    const model = path.join(f.options.workRoot, 'public/assets/asset1.glb');
+    const parts = path.join(f.options.workRoot, 'public/assets/asset1.parts.json');
+    const valid = JSON.parse(await readFile(sidecar, 'utf8')) as Record<string, unknown>;
+    const cases = [Buffer.from('{"schemaVersion":1,"kind":'), Buffer.alloc(16_385, 32), Buffer.from(JSON.stringify({ ...valid, kind: 'lux3d', sourceTaskId: '123' }))];
+    for (const damaged of cases) {
+      await writeFile(sidecar, damaged);
+      const before = await Promise.all([f.file, model, parts, sidecar].map(file => readFile(file)));
+      const response = await app.inject({ method: 'POST', url: '/assets/asset1/adopt', payload: {} });
+      expect(response.statusCode).toBe(409); expect(response.json().error.code).toBe('ASSET_NAME_CONFLICT');
+      expect(response.body).not.toContain('schemaVersion');
+      expect(await Promise.all([f.file, model, parts, sidecar].map(file => readFile(file)))).toEqual(before);
+    }
+  } finally { await app.close(); }
+});
+
 it('bounds the persisted journal and undo stack', async () => {
   const f = await fixture();
   for (let i = 1; i <= 55; i++) await f.service.put(changed(i / 10));

@@ -1,0 +1,20 @@
+{
+  "assetId": "fallback-239b77d757cd50b377c8d9bd",
+  "results": [
+    {
+      "name": "bad-json",
+      "status": 409,
+      "code": "ASSET_NAME_CONFLICT"
+    },
+    {
+      "name": "too-large",
+      "status": 409,
+      "code": "ASSET_NAME_CONFLICT"
+    },
+    {
+      "name": "different-provenance",
+      "status": 409,
+      "code": "ASSET_NAME_CONFLICT"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "ports": {
+    "api": 29309,
+    "studio": 25695,
+    "main": 59273,
+    "preview": 53402,
+    "coding": 62000,
+    "lux3d": 29003,
+    "speech": 21196
+  },
+  "candidateId": "9143e852c67a49729b031ca61a5df150",
+  "sockets": [
+    "ws://127.0.0.1:53402/preview/c/9143e852c67a49729b031ca61a5df150/hmr?token=rbXhKqaaJ5ky"
+  ],
+  "navigations": [
+    "http://127.0.0.1:53402/preview/c/9143e852c67a49729b031ca61a5df150/"
+  ],
+  "extraNavigations": 0,
+  "candidateUrl": "http://127.0.0.1:53402/preview/c/9143e852c67a49729b031ca61a5df150/"
+}

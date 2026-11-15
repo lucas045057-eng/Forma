@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-15T15:55:38.908Z",
+  "runDir": "docs/reports/artifacts/M4/regression/2026-11-15T15-45-17-321Z-full",
+  "head": "ba3e61bd0e32ac8b51a44b04c7a52a8af0b04690",
+  "job": {
+    "id": "job_6cce1181",
+    "pid": 38876,
+    "exitCode": 1
+  },
+  "portsListening": [],
+  "ownNodeChrome": [],
+  "stagingLeftovers": [],
+  "templateAndProductDirty": [],
+  "productDiffVsAccepted": [],
+  "lockSha256": "67af36b7a1b8a8ace1f03aa0ca9addf979f3842bdab3ff3dc4f56901b7d18960",
+  "retainedScenes": [
+    "fallback-parent-death-1Z4Qum|2026-11-15T13:07:08.1299293Z",
+    "fallback-parent-death-PxCzE3|2026-11-15T13:51:32.0319424Z"
+  ],
+  "demoRuns": false,
+  "note": "typecheck/build/unit 全部通过；demo-safety 10 项 9 过 1 败后，M4 与旧九套全部未执行。demo-safety 的失败用例自身没有保留诊断（.data/demo-runs 不存在、临时目录已自清），只能引用其日志中的断言原文；未做任何 kill。"
+}

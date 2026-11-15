@@ -1,0 +1,75 @@
+{
+  "files": [
+    "model.glb",
+    "model.glb.tmp",
+    "parts.json",
+    "raw.glb",
+    "raw.glb.tmp"
+  ],
+  "temps": [
+    "model.glb.tmp",
+    "raw.glb.tmp"
+  ],
+  "indexTemps": [],
+  "asset": {
+    "id": "08603f4c-6fc1-4b93-bf82-936b4dae8a6b",
+    "status": "ready",
+    "createdAt": "2026-11-15T20:02:43.092Z",
+    "updatedAt": "2026-11-15T20:02:43.421Z",
+    "taskId": "9000001",
+    "provenance": {
+      "kind": "lux3d",
+      "outputHash": "f49c9946f06d036e149681d7c9ab845008f939777584fac5c1a2493609acb15f",
+      "sourceTaskId": "9000001",
+      "sourceHash": "8422459943b4d6feff27062d517ef69da0d0b051e008b4a81238290022547b64",
+      "importedAt": "2026-11-15T20:02:43.092Z"
+    },
+    "metrics": {
+      "before": {
+        "bytes": 488,
+        "vertices": 3
+      },
+      "after": {
+        "bytes": 1300,
+        "vertices": 3
+      },
+      "webReady": true,
+      "parts": {
+        "recognized": false,
+        "nodes": [
+          {
+            "sourceIndex": 0,
+            "name": "",
+            "bounds": {
+              "min": [
+                -0.5,
+                0,
+                0
+              ],
+              "max": [
+                0.5,
+                1,
+                0
+              ]
+            }
+          }
+        ],
+        "reason": "Expected body, cap and at least one reed"
+      },
+      "durationMs": 12,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          0
+        ],
+        "max": [
+          0.5,
+          1,
+          0
+        ]
+      }
+    },
+    "modelUrl": "/assets/08603f4c-6fc1-4b93-bf82-936b4dae8a6b/model.glb?revision=76154c49-4c3d-41e9-a2df-5e4bba52e62f"
+  }
+}

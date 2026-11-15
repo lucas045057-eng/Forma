@@ -1,0 +1,22 @@
+{
+  "assetId": "fallback-239b77d757cd50b377c8d9bd",
+  "before": {
+    "glb": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46",
+    "parts": "d1f30eba88ec2befc240248f103b00a9c40de6c8766333ba0a808ead42f13d50",
+    "sidecar": "92072df399cb74703f8e86f450d552bc0bb01eeeb98a90985a1b7772c8fd0016",
+    "scene": "af8c3113adc42442b3240c4abbee8f1db496dea88bebf3ae1314a8ea2d942e62"
+  },
+  "after": {
+    "glb": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46",
+    "parts": "d1f30eba88ec2befc240248f103b00a9c40de6c8766333ba0a808ead42f13d50",
+    "sidecar": "92072df399cb74703f8e86f450d552bc0bb01eeeb98a90985a1b7772c8fd0016",
+    "scene": "af8c3113adc42442b3240c4abbee8f1db496dea88bebf3ae1314a8ea2d942e62"
+  },
+  "status": 409,
+  "body": {
+    "error": {
+      "code": "ASSET_NAME_CONFLICT",
+      "message": "已有来源记录无效"
+    }
+  }
+}

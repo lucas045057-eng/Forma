@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "folder": "docs",
+      "status": 200,
+      "body": "<!doctype html>\r\n<html lang=\"zh-CN\"><hea"
+    },
+    {
+      "folder": "orbital",
+      "status": 200,
+      "body": "<!doctype html>\r\n<html lang=\"zh-CN\"><hea"
+    },
+    {
+      "folder": ".data",
+      "status": 200,
+      "body": "<!doctype html>\r\n<html lang=\"zh-CN\"><hea"
+    },
+    {
+      "folder": "apps\\server",
+      "status": 200,
+      "body": "<!doctype html>\r\n<html lang=\"zh-CN\"><hea"
+    }
+  ],
+  "ownStatus": 200
+}

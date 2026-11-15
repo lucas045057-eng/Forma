@@ -5,20 +5,23 @@ import { createMockServer, type MockScenario } from './mock-server.ts';
 import { Lux3DClient } from './lux3d.ts';
 import { AssetService } from './service.ts';
 import { createApp } from '../app.ts';
-import * as atomic from './atomic-file.ts';
+import {spawn} from 'node:child_process';
+import {setTimeout as delay} from 'node:timers/promises';
+import {fixtureProcesses,fixtureFailure,writeFixtureEvidence,fixtureDirectoryIdentity,removeFixtureDirectory,failFixture,type FixtureProcess} from '../test-support/fixture-diagnostics.ts';
+import {fileURLToPath} from 'node:url';
 import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 const cleanups: (() => Promise<unknown>)[] = [];
-afterEach(async () => { vi.restoreAllMocks(); for (const close of cleanups.reverse()) await close(); cleanups.length = 0; });
+afterEach(async () => { vi.restoreAllMocks(); const errors:unknown[]=[];for (const close of cleanups.splice(0).reverse())try{await close();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Recovery fixture cleanup failed'); });
 async function setup(scenario: MockScenario = 'success') {
   const root = resolve(import.meta.dirname, '../../../../.data');
   await mkdir(root, { recursive: true });
   const directory = await mkdtemp(join(root, 'recovery-test-'));
-  cleanups.push(() => rm(directory, { recursive: true, force: true }));
+  const owner=await fixtureDirectoryIdentity(directory);const removeDirectory=()=>removeFixtureDirectory(directory,owner);cleanups.push(removeDirectory);
   const { mock, baseUrl: base } = await listenForFetch(() => createMockServer({ scenario }));
   cleanups.push(() => mock.close());
   const client = new Lux3DClient({ base, key: 'mock-only' });
-  return { root, directory, mock, base, client };
+  return { root, directory, mock, base, client, removeDirectory };
 }
 
 it('processes despite stale temporary files, repairs missing ready output without a paid create, and changes its URL', async () => {
@@ -77,28 +80,40 @@ it('never repeats a paid request after upstream accepts it but loses the respons
   expect((await mock.inject('/__stats')).json().creates).toBe(1);
 });
 it('does not resubmit after taskId persistence fails, even after restart', async () => {
-  const { directory, client, mock } = await setup();
-  const first = new AssetService({ directory, client });
-  await first.init();
-  const actual = atomic.writeAtomic;
-  const failedWrite = vi.spyOn(atomic, 'writeAtomic').mockImplementation(async (filename, contents, signal) => {
-    if (filename.endsWith('index.json') && JSON.parse(String(contents)).some((entry: { taskId?: string }) => entry.taskId)) throw new Error('disk full');
-    return actual(filename, contents, signal);
-  });
-  const input = { prompt: 'bottle', version: 'G1' as const };
-  await expect(first.submit(input, 'disk-failure')).rejects.toThrow('disk full');
-  await first.close();
-  expect(JSON.parse(await readFile(join(directory, 'index.json'), 'utf8'))[0].status).toBe('submitting');
-  failedWrite.mockRestore();
-  const restarted = new AssetService({ directory, client, pollMs: 1 });
-  cleanups.push(() => restarted.close());
-  await restarted.init();
-  expect((await restarted.submit(input, 'disk-failure')).status).toBe('submit_unknown');
-  expect((await mock.inject('/__stats')).json().creates).toBe(1);
-  await restarted.importTask('9000001'); await restarted.idle();
-  expect(restarted.get('lux3d-9000001')?.status).toBe('ready');
-  expect((await mock.inject('/__stats')).json().creates).toBe(1);
-});
+  const { directory, client, mock, base, removeDirectory } = await setup();
+  const env:NodeJS.ProcessEnv={};for(const name of ['SystemRoot','WINDIR','PATH','TEMP','TMP'])if(process.env[name])env[name]=process.env[name];
+  const stages:Array<{phase:string;ms:number}>=[];const started=performance.now();const mark=(phase:string)=>stages.push({phase,ms:performance.now()-started});
+  const child=spawn(process.execPath,['--import',new URL('../test-support/asset-persistence-register.mjs',import.meta.url).href,fileURLToPath(new URL('../test-support/asset-persistence-parent.ts',import.meta.url)),directory,base],{env,stdio:['ignore','pipe','pipe','ipc']});
+  let stdout='';let stderr='';let childError:Error|undefined;let spawned=false;let ipcDisconnected=false;let primary:unknown;let owner:FixtureProcess|undefined;let restarted:AssetService|undefined;const messages:Array<Record<string,unknown>>=[];
+  child.once('spawn',()=>{spawned=true;mark('spawned');});child.stdout!.on('data',chunk=>{stdout+=String(chunk);});child.stderr!.on('data',chunk=>{stderr+=String(chunk);});child.once('error',error=>{childError=error;});
+  child.on('message',(value:unknown)=>{if(value&&typeof value==='object'&&'pid'in value&&value.pid===child.pid)messages.push(value as Record<string,unknown>);});
+  child.once('exit',(code,signal)=>mark(`exit:${code}:${signal}`));child.once('disconnect',()=>{ipcDisconnected=true;mark('IPC-disconnected');});
+  const closed=new Promise<void>(resolveClose=>child.once('close',(code,signal)=>{mark(`closed:${code}:${signal}`);resolveClose();}));
+  const diagnostics=()=>JSON.stringify({stages,messages,stdout:stdout.slice(-8000),stderr:stderr.slice(-8000),spawnError:childError?.message,exit:child.exitCode,signal:child.signalCode,connected:child.connected,ipcDisconnected});
+  const assertAlive=()=>{if(childError||ipcDisconnected||child.exitCode!==null||child.signalCode!==null||messages.some(message=>message.type==='persistence-fixture-error'))throw new Error(`Persistence fixture early failure: ${diagnostics()}`,{cause:childError});};
+  const waitStage=async(name:string,ready:()=>boolean)=>{mark(name);const until=performance.now()+5000;while(performance.now()<until){assertAlive();if(ready())return;await delay(20);}throw new Error(`Persistence fixture stage ${name} timed out: ${diagnostics()}`);};
+  const awaitClosed=async()=>{let timer:ReturnType<typeof setTimeout>|undefined;try{await Promise.race([closed,new Promise<never>((_resolve,reject)=>{timer=setTimeout(()=>reject(new Error(`Owned persistence fixture did not close: ${diagnostics()}`)),5000);})]);}finally{clearTimeout(timer);}};
+  try{
+    await waitStage('spawn',()=>spawned);await waitStage('preload',()=>messages.some(message=>message.type==='persistence-preload-stage'&&message.stage==='installed'));
+    await waitStage('entry-imported',()=>messages.some(message=>message.type==='persistence-stage'&&message.stage==='entry'));
+    mark('identity');const table=await fixtureProcesses([child.pid!]);assertAlive();owner=table.find(item=>item.pid===child.pid);if(!owner)throw new Error(`Persistence fixture identity unavailable while live: ${diagnostics()}`);
+    expect(owner.pid).toBe(child.pid);await waitStage('held',()=>messages.some(message=>message.type==='persistence-failure-held'));
+    const held=messages.find(message=>message.type==='persistence-failure-held');expect(held).toMatchObject({pid:child.pid,submitError:'disk full',idleError:'disk full',closeError:'disk full',lockPid:child.pid,blockedCode:'INSTANCE_LOCKED'});
+    expect(messages.some(message=>message.type==='persistence-preload-stage'&&message.stage==='atomic-wrapper-evaluated')).toBe(true);
+    const liveProbe=new AssetService({directory,client});await expect(liveProbe.init()).rejects.toMatchObject({code:'INSTANCE_LOCKED'});
+    expect(JSON.parse(await readFile(join(directory,'index.json'),'utf8'))[0].status).toBe('submitting');expect((await mock.inject('/__stats')).json().creates).toBe(1);
+    mark('kill');child.kill('SIGKILL');await awaitClosed();expect((await fixtureProcesses([owner.pid])).some(item=>item.created===owner!.created)).toBe(false);
+    expect(JSON.parse(await readFile(join(directory,'.instance.lock'),'utf8')).pid).toBe(owner.pid);
+    mark('restart');const input={prompt:'bottle',version:'G1' as const};restarted=new AssetService({directory,client,pollMs:1});await restarted.init();
+    expect((await restarted.submit(input,'disk-failure')).status).toBe('submit_unknown');expect((await mock.inject('/__stats')).json().creates).toBe(1);
+    await restarted.importTask('9000001');await restarted.idle();expect(restarted.get('lux3d-9000001')?.status).toBe('ready');expect((await mock.inject('/__stats')).json().creates).toBe(1);mark('assertions-complete');
+  }catch(error){primary=error;}
+  const errors:unknown[]=[];mark('cleanup');try{await restarted?.close();}catch(error){errors.push(error);}
+  try{if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');await awaitClosed();if(owner)expect((await fixtureProcesses([owner.pid])).some(item=>item.created===owner!.created)).toBe(false);}catch(error){errors.push(error);}
+  try{await writeFixtureEvidence(process.env.D2_RUN_DIR??directory,'asset-recovery',`persistence-${process.pid}.json`,{owner,stages,messages,stdout,stderr,exit:child.exitCode,signal:child.signalCode,primary:primary===undefined?null:fixtureFailure(primary),cleanup:errors.map(fixtureFailure)});}catch(error){errors.push(error);}
+  if(primary!==undefined||errors.length){const index=cleanups.indexOf(removeDirectory);if(index!==-1)cleanups.splice(index,1);}
+  failFixture(primary,errors,`Persistence fixture failed; retained on failure: ${directory}; ${diagnostics()}`);
+},15_000);
 it.each(['drip', 'timeout'] as const)('app.close stops %s work and persists a restartable record', async scenario => {
   const { directory, mock, base } = await setup(scenario);
   const { app, service } = await createApp({ dataDirectory: directory, base, key: 'mock-only', pollMs: scenario === 'timeout' ? 60_000 : 1, downloadTimeoutMs: 60_000 });
