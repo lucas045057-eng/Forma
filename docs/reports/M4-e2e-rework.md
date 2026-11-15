@@ -62,7 +62,7 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受�
 - 已准备一次性有界诊断 `tests/e2e/m4/diagnose-demo-sigint.mjs`：真实 mock demo，A=SIGINT、B=SIGTERM，
   记录 spawn/ready/exit(code,signal)/close、PID+创建时间、manifest 前后（status/cleanup.problems/forced）、端口前后、后代三态。
   边界如实：这是 `ChildProcess.kill()` 的**信号模拟**，不是真实 Windows 控制台 Ctrl+C；
-  启动器禁止 `NODE_OPTIONS`/`execArgv` 注入，无法在子进程内装 SIGINT 观察器，只能由 exit/close + manifest 间接判断处理器是否执行。
+  启动器禁止的是 `NODE_OPTIONS`/`execArgv` **注入**；这**不等于**不能建测试 driver（见 §7 的普通文件入口方案）。上一版报告把“不能注入”写成“无法在子进程内观察 SIGINT”是**过度限定**，此处更正。
   诊断结果交 Codex 后再决定一次 M4 专项。
 
 ## 4. 未执行路径的静态审计（第 5 条）
@@ -106,3 +106,21 @@ run `docs/reports/artifacts/M4/regression/2026-11-15T16-52-32-677Z-full/`，受�
   `04-demo.spec.ts` 的 `probeProcess/stillOwn`，待下一次运行验证。本诊断**不重跑、不改写**。
 
 需要真实控制台 Ctrl+C 语义的验证，只能在有真实控制台的会话里做（或由产品提供显式关闭命令），本轮不做、也不宣称。
+## 7. 关闭分支的测试驱动（本轮已建，未运行）
+
+`tests/e2e/m4/support/demo-launch-driver.mjs` 是**测试专用普通文件入口**（不是产品入口、不是后门）：
+
+- `import { launch } from '../../../../scripts/demo/launch.mjs'`（file URL 直接引用产品实现），**不替换任何 options**；
+- 强制 `execArgv` 为空、`NODE_OPTIONS` 未设置（launch 自身也校验），所以是“不注入”，不是“改产品”；
+- 真实的 prepare/backend/frontends 全走产品代码（无替身）；
+- 只在父进程发来 IPC 消息 `{type:'sigint'}` 后执行 `process.emit('SIGINT')`，让 **launch 自己注册的** `once('SIGINT')` 处理器跑 graceful shutdown；
+- 只在实际 ready（stdout 出现 `Demo mode=mock`、manifest 为 `running`）之后才发消息。
+
+对应用例（`04-demo.spec.ts` 第一条）保留原断言并补强判据：
+
+- 不在“进程消失/只看 exitCode”上判通过——必须等到 **manifest 由 launch 写成 `stopped`**、`cleanup.problems=[]`、`forced` 全 false；
+- 端口必须全部关闭；受测后代逐 PID+创建时间判定 **gone**，`alive` 与**查询未知**都单独失败；
+- 记录 exit(code,signal)、**真实 close 事件**耗时、manifest 前后、driver 与后代归属；
+- 主错误、清理错误、证据写入分别保留，互不覆盖。
+
+**边界**：该用例只能命名为“**进程内 SIGINT 处理模拟**”；`process.emit('SIGINT')` **不是**真实 Windows 控制台 Ctrl+C（CTRL_C_EVENT 投递路径仍未执行），也不伪造 handler 结果或 native close。
