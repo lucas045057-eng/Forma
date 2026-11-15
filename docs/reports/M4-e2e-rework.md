@@ -416,49 +416,49 @@ demo run 内的 **2 个嵌套 candidates 仓库**物化为 `gitlink-container/01
 ### 15.5 边界
 
 真实 Windows 控制台 Ctrl+C、真实服务/真人 A/B/完整彩排仍未验证；本轮未改测试/helper/runner/产品，未启动任何新验证。
-## 16. M1-B 同窗口前后比较（测试侧最小修正，未运行）
+## 16. M1-B 同窗口前后比较（测试侧最小修正 · 返工二，仍未运行）
 
-针对 §15 的三条失败（同一个预览在写入前后两次截图的尺寸 378x378 vs 378x341），只改 **M1-B 测试与 helper**；
-`../m1a/visual.ts`（`compareAligned` 阈值/算法）、`runner`、产品、实现侧测试、依赖、模板**均未改**。
+针对 §15 三条失败（同一预览写入前/后两次截图尺寸 378x378 vs 378x341），只改 **M1-B 测试与 helper**；
+`../m1a/visual.ts`（`compareAligned` 阈值/算法）、runner、产品、实现侧测试、依赖、模板均未改。
+**本轮仍没有运行 tsc/build/test/collect/服务/预检/job，也未做 syntax check。**
 
-### 16.1 新增 `tests/e2e/m1b/window-compare.ts`
+### 16.1 根复核提出的 6 项，逐项落实
 
-- `readCaptureWindow(page, frame)`：**只读**几何（不重置滚动、不截图）。窗口仍按原逻辑算：
-  `size = min(预览 canvas 宽, Studio canvas 宽)`，高度取 `previewRows`（受预览 iframe `frameRect` 限制）与 `studioRows` 的交集。
-- `sameWindow(a, b)`：`size/start/end` 相等 + 两类 rect 与 iframe rect 的 x/y/height 容差 ≤1px。
-- `readGate(page)`：真实 UI 状态——`scene-undo` 是否可用（= 不在 busy / 未持作品锁 / `syncReady` 且已连接），
-  以及页面上是否仍存在含"状态待同步"的 `[role="status"]`。
-- `captureWithWindow(page, frame, win)`：用**基线窗口的坐标**截两边（不 resize、不缩小基线）。
-- `captureWhenStable(page, frame, baseline)`：先做与基线相同的滚动归零，再要求
-  **(a) 写回控件可用 + (b) 提示消失 + (c) 窗口几何与基线一致** 三者同时成立才截图；
-  否则返回 `ok:false` + 具体原因（**继续在预算内观察**，不静默对齐）。
-- `waitForPairChange(page, frame, baseline, {threshold, timeoutMs, intervalMs, mode})`：预算/阈值/间隔全部由调用方传入，
-  内部不额外 sleep、不放宽阈值、不吞异常；`compareAligned` 的真实异常（含尺寸不一致）原样抛出；
-  超时抛错时附带最近 4 次的几何/UI 诊断（尺寸、visibleHeight、start、undoEnabled、hints）。
+1. **`captureRegion` 返回 `Region`，不是 `Buffer`**：`captureWithWindow` 现在用 `preview.png` / `studio.png`，
+   `offsetY` 取 `preview.offset.y`；没有用 `any` 绕过类型，也没有复制一份"看起来一样"的实现。
+2. **计时统一从动作前起算**：`waitForPairChange` 现在要求调用方传 `startedAt`（点击**之前**取），
+   内部按 `deadline = startedAt + timeoutMs` 判定，最后一次轮询也不越过 deadline；
+   `latencyMs`/`changedMs`/`recoveredMs` 都是"从点击前到满足条件"的实际耗时，
+   02 的 `< 10s` 延迟判据用同一起点，未把前段等待映射到后续项上。
+3. **真实请求与基线就绪的观察**：
+   - 新增 `assertBaselineReady()`：基线必须在**场景 `data-loaded='true'` + `scene-save-hero`/`scene-undo` 可用 + 无"状态待同步"**时才截；
+   - 新增 `observeResponse()`：在点击前挂上，动作后读回**本次真实 `PUT /scene` / `POST /scene/undo` 的状态与响应体**，
+     写进证据并对写回断言 `status === 200`（写失败绝不会被当成"画面未变"而继续等）；
+   - `readGate()` **去掉了所有 `.catch(() => false/[])`**：DOM 定位/读取失败会直接抛（真实失败），
+     只有"控件被禁用/仍有提示/场景未加载"才是可观察的未就绪。
+4. **`sameWindow` 补齐字段**：现在比较 `size/start/end/visibleHeight`、`previewRect/studioRect/frameRect` 的
+   `x/y/width/height`（1px 容差）、`viewport`、以及 **canvas backing（preview/studio 宽度 + DPR）必须完全相等**；
+   同时记录两侧 `previewRows/studioRows`。`windowDiff()` 给出"到底哪一项不同"的清单。
+5. **证据完整**：每次尝试都记录 `at/ok/reason/changedRatio/window{rects,rows,backing}/gate`；
+   三个用例的 artifact 都写 `summarizeAttempts(attempts)`；**失败也会写 `*-failure.json`**
+   （含 readiness、baselineWindow、真实请求结果、失败原因），不再只在成功路径结尾写一行；
+   02 不再只在 artifact 里放计数，03 也不再只放 count。
+6. **06-adopt 收尾**：sidecar 先记录原状（存在性 + 原字节），`finally` 按原状恢复（原本不存在则删、原本存在则按原字节写回），
+   并用 **`Buffer.equals` 字节相等**验证；scene 用 `restoreSceneFile().matches` 断言；
+   收尾每步独立 `try/catch` 聚合错误，**主错优先抛出**，收尾错误再用 `AggregateError` 单独抛；
+   不删历史文件、不靠测试造 sidecar。
 
 ### 16.2 三处调用点（预算与阈值均未变）
 
-| 用例 | 原调用 | 现在 |
-| --- | --- | --- |
-| `01-consistency` 写入后一致性 | `waitFor(..., 30_000, 250)` 内 `captureCanvases` + `changedRatio > 0.02` | `waitForPairChange(..., {threshold: 0.02, timeoutMs: 30_000, intervalMs: 250})` |
-| `02-writeback` 设为首屏即时同步 | `waitFor(..., 30_000, 100)` + `> 0.01`，`latencyMs` 后续断言 `< 10_000` | 同上参数，`latencyMs = changed.elapsedMs`（**计时起点仍是点击时刻**） |
-| `03-undo` 写入 | `waitFor(..., 30_000, 100)` + `> 0.01` | 同上 |
-| `03-undo` 撤回恢复 | `waitFor(..., 30_000, 150)` + `< 0.002` | `mode:'decrease'`，阈值 0.002、预算 30s 不变 |
+| 用例 | 现在的调用 |
+| --- | --- |
+| `01-consistency` 写入后一致性 | `startedAt` → `observeResponse('PUT','/scene')` → click → `waitForPairChange({startedAt, 0.02, 30s, 250ms})` |
+| `02-writeback` 即时同步 | 同上，`0.01 / 30s / 100ms`；`latencyMs` 同一起点，`<10s` 断言保留，并断言 `PUT /scene` 200 |
+| `03-undo` 写入 / 撤回 | 写入：`PUT /scene` + `0.01/30s/100ms`；撤回：`observeResponse('POST','/scene/undo')` + `mode:'decrease' 0.002/30s/150ms` |
 
-- 候选中的"瞬态尺寸变化"只作为证据记录（`captureTail` 写入 `writeback-hero.json` / `consistency-after-edit.json` / `undo-ui.json`）；
-  **持久不一致、同步失败、提示一直不消失、写回失败仍会失败**（要么超时并带诊断，要么 `compareAligned` 直接抛）。
-- 未改：像素阈值、10 秒延迟断言、HMR/落盘/撤回断言、`expect(...)` 语义；未加固定 sleep、未 retry/skip、未主动刷新页面。
+未改：像素阈值、HMR/落盘/撤回断言、`expect` 语义；没有固定 sleep、没有 retry/skip、没有主动刷新页面或伪造状态。
 
-### 16.3 `06-adopt` 的 provenance sidecar 清理
+### 16.3 边界
 
-- 采用现在会写 `public/assets/<id>.provenance.json`；旧 `finally` 只删 `.glb` 与 `.parts.json`，所以出现过残留。
-- 现在在测试开始前记录 sidecar **原状**（是否存在 + 原字节）；`finally` 按原状恢复：原本不存在则删除、原本存在则按原字节写回，
-  并断言 `existsSync(sidecar) === Boolean(sidecarBefore)`、`.parts.json` 也已清理；证据写入 `adopt-provenance-cleanup.json`。
-- 不删历史文件、不用测试"造"出 sidecar 再当历史。
-
-### 16.4 状态
-
-- 本轮**只做静态修改与提交**：未运行 tsc/build/test/collect/服务/探针/预检/job，也未做 syntax check（按卡要求）。
-- 类型/控制流/计时的静态自查要点：`CaptureWindow` 只做只读几何；局部变量改名避免遮蔽浏览器 `window`（`evaluate` 里仍用全局）；
-  删除因改造而无用的 import（`01` 的 `waitFor`、`03` 的 `compareAligned`）。
-- 待根复核后才安排**一次** M1-B 原 23 例 focused；真实 Windows 控制台 Ctrl+C、真实服务、真人 A/B、完整彩排仍未验证。
+- 待根复核后才安排**一次** M1-B 原 23 例 focused；本轮不授权运行。
+- 真实 Windows 控制台 Ctrl+C、真实服务、真人 A/B、完整彩排仍未验证。

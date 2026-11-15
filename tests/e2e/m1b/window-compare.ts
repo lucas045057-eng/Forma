@@ -3,21 +3,49 @@ import { canvasRect, resetEditorScroll, type CanvasPair, type CaptureWindow } fr
 import { captureRegion, compareAligned } from '../m1a/visual';
 
 /**
- * 同窗口前后比较（M1-B 专项最小测试侧修正）。
+ * 同窗口前后比较（M1-B 专项最小测试侧修正，返工二）。
  *
  * 背景：三条 M1-B 失败都是 `compareAligned(baseline.preview.png, current.preview.png)` 抛
- * `尺寸不一致：378x378 vs 378x341` —— 是**同一作品预览在写入前后两个时刻**的截图，
- * 而 `captureCanvases()` 每次都会按**当下**的预览 iframe 可见区重新计算坐标窗口，
- * 所以"写回过渡期里提示行出现/消失 → iframe 可见高度变化"就会让两次 PNG 尺寸不同。
+ * `尺寸不一致：378x378 vs 378x341` —— 同一个作品预览在写入前后两个时刻的截图，
+ * 而 `captureCanvases()` 每次按**当下**的预览 iframe 可见区重算坐标窗口，
+ * 写回过渡期里提示行出现/消失就会让两次 PNG 尺寸不同。
  *
- * 这里只做一件事：**在调用方原有预算内**等到"本次保存真的完成 + 提示消失 + 几何窗口与基线一致"，
- * 再用**基线的坐标窗口**截图，然后调用**原来的** `compareAligned`（阈值、算法都不变）。
- *
- * 明确不做：不缩小 baseline、不改尺寸/不 resize、不延长预算、不主动刷新页面、不伪造状态、
- * 不吞 compareAligned/DOM 异常；瞬态尺寸变化只作为证据记录并继续观察。
+ * 本模块只做三件事，全部在**原先的预算与阈值**内：
+ *  1. 采样前证明基线真的就绪（场景 `data-loaded`、写回控件可用、无"状态待同步"）；
+ *  2. 采样时要求"写回控件可用 + 提示消失 + 窗口几何/backing 与基线完全一致"，再用**基线坐标**截图；
+ *  3. 把真实请求结果与每次尝试的几何/UI 诊断原样记录（成功与失败都写），不吞异常、不做固定 sleep。
  */
 
-/** 只读几何：不重置滚动、不截图；仅按当前布局算出"如果现在截图会用的窗口"。 */
+/* ------------------------------------------------------------------ 观察真实请求 */
+
+export interface ObservedResponse { status: number | null; body: string | null; error?: string }
+
+/**
+ * 观测一次真实请求（不修改、不重放）。必须在触发动作**之前**调用，动作后再 await。
+ * 观测失败只记录到返回值里（便于证据），调用方仍按 status 断言。
+ */
+export function observeResponse(page: Page, method: string, pathname: string, timeoutMs = 60_000): Promise<ObservedResponse> {
+  return page
+    .waitForResponse((response) => response.request().method() === method && new URL(response.url()).pathname === pathname, { timeout: timeoutMs })
+    .then(async (response) => ({ status: response.status(), body: (await response.text()).slice(0, 2_000) }))
+    .catch((error) => ({ status: null, body: null, error: String(error).slice(0, 200) }));
+}
+
+/* ------------------------------------------------------------------ 只读几何 / 状态 */
+
+export async function readBacking(page: Page, frame: Frame): Promise<CaptureWindow['backing']> {
+  const preview = await frame.evaluate(() => {
+    const canvas = document.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
+    return { width: canvas?.width ?? -1, dpr: window.devicePixelRatio };
+  });
+  const studio = await page.evaluate(() => {
+    const canvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement | null;
+    return { width: canvas?.width ?? -1, dpr: window.devicePixelRatio };
+  });
+  return { preview: preview.width, studio: studio.width, dpr: Math.max(preview.dpr, studio.dpr) };
+}
+
+/** 只读几何：不重置滚动、不截图；按当前布局算出"如果现在截图会用的窗口"，并带 backing 与行区间。 */
 export async function readCaptureWindow(page: Page, frame: Frame): Promise<CaptureWindow> {
   const previewRect = await canvasRect(frame.locator('[data-testid="product-scene"] canvas'));
   const studioRect = await canvasRect(page.locator('[data-testid="scene-canvas"]'));
@@ -32,28 +60,73 @@ export async function readCaptureWindow(page: Page, frame: Frame): Promise<Captu
   const studioRows = visibleRows(studioRect, 0, viewport.height);
   const start = Math.max(previewRows.start, studioRows.start);
   const end = Math.min(previewRows.end, studioRows.end, start + size);
-  return { size, start, end, visibleHeight: end - start, previewRect, studioRect, frameRect, viewport };
+  const backing = await readBacking(page, frame);
+  return { size, start, end, visibleHeight: end - start, previewRect, studioRect, frameRect, viewport, previewRows, studioRows, backing };
 }
 
-/** 几何是否与基线一致（容许 1px 抖动）。 */
+/** 几何 + backing 是否与基线一致（位置/尺寸容差 1px；backing 必须完全相等）。 */
 export function sameWindow(a: CaptureWindow, b: CaptureWindow): boolean {
   const near = (x: number, y: number) => Math.abs(x - y) <= 1;
-  return a.size === b.size && a.start === b.start && a.end === b.end
-    && near(a.previewRect.x, b.previewRect.x) && near(a.previewRect.y, b.previewRect.y)
-    && near(a.studioRect.x, b.studioRect.x) && near(a.studioRect.y, b.studioRect.y)
-    && near(a.frameRect.y, b.frameRect.y) && near(a.frameRect.height, b.frameRect.height);
+  const rectEqual = (p: { x: number; y: number; width: number; height: number }, q: typeof p) =>
+    near(p.x, q.x) && near(p.y, q.y) && near(p.width, q.width) && near(p.height, q.height);
+  return a.size === b.size && a.start === b.start && a.end === b.end && a.visibleHeight === b.visibleHeight
+    && rectEqual(a.previewRect, b.previewRect) && rectEqual(a.studioRect, b.studioRect) && rectEqual(a.frameRect, b.frameRect)
+    && a.viewport.width === b.viewport.width && a.viewport.height === b.viewport.height
+    && a.backing.preview === b.backing.preview && a.backing.studio === b.backing.studio && a.backing.dpr === b.backing.dpr;
 }
 
-/** 真实 UI 状态：`scene-undo` 可用（= 不在 busy / 未持作品锁 / syncReady 且已连接）+ 是否还显示"状态待同步"。 */
-export async function readGate(page: Page): Promise<{ undoEnabled: boolean; hints: string[] }> {
-  const undoEnabled = await page.getByTestId('scene-undo').isEnabled().catch(() => false);
-  const hints = (await page.locator('[role="status"]').allInnerTexts().catch(() => []))
+/** 两次窗口不同的具体原因（写进失败信息，不用"看起来不一样"糊过去）。 */
+export function windowDiff(a: CaptureWindow, b: CaptureWindow): string[] {
+  const diff: string[] = [];
+  const push = (label: string, x: number, y: number, tol: number) => { if (Math.abs(x - y) > tol) diff.push(`${label}: ${x} vs ${y}`); };
+  push('size', a.size, b.size, 0);
+  push('start', a.start, b.start, 0);
+  push('end', a.end, b.end, 0);
+  push('visibleHeight', a.visibleHeight, b.visibleHeight, 0);
+  for (const key of ['x', 'y', 'width', 'height'] as const) {
+    push(`previewRect.${key}`, a.previewRect[key], b.previewRect[key], 1);
+    push(`studioRect.${key}`, a.studioRect[key], b.studioRect[key], 1);
+    push(`frameRect.${key}`, a.frameRect[key], b.frameRect[key], 1);
+  }
+  push('viewport.width', a.viewport.width, b.viewport.width, 0);
+  push('viewport.height', a.viewport.height, b.viewport.height, 0);
+  push('backing.preview', a.backing.preview, b.backing.preview, 0);
+  push('backing.studio', a.backing.studio, b.backing.studio, 0);
+  push('backing.dpr', a.backing.dpr, b.backing.dpr, 0);
+  return diff;
+}
+
+export interface GateState { undoEnabled: boolean; saveEnabled: boolean; sceneLoaded: string | null; hints: string[] }
+
+/**
+ * 真实 UI 状态：`scene-undo`/`scene-save-hero` 是否可用（不在 busy / 未持作品锁 / 已同步）、
+ * 场景是否 `data-loaded`、页面是否还显示"状态待同步"。
+ * **不吞异常**：DOM 读取/定位失败会抛出（那属于真实失败，不能当作"暂时不可用"继续等）。
+ */
+export async function readGate(page: Page): Promise<GateState> {
+  const undoEnabled = await page.getByTestId('scene-undo').isEnabled();
+  const saveEnabled = await page.getByTestId('scene-save-hero').isEnabled();
+  const sceneLoaded = await page.locator('[data-testid="scene-viewport"]').getAttribute('data-loaded');
+  const hints = (await page.locator('[role="status"]').allInnerTexts())
     .map((text) => text.trim())
     .filter((text) => text.includes('状态待同步'));
-  return { undoEnabled, hints };
+  return { undoEnabled, saveEnabled, sceneLoaded, hints };
 }
 
-/** 用**指定窗口**截两边（坐标与基线完全一致）；不做任何尺寸调整。 */
+/** 基线必须真的就绪：场景已加载 + 写回控件可用 + 无提示。 */
+export async function assertBaselineReady(page: Page, frame: Frame): Promise<{ gate: GateState; window: CaptureWindow }> {
+  const gate = await readGate(page);
+  if (gate.sceneLoaded !== 'true') throw new Error(`基线场景未加载：data-loaded=${gate.sceneLoaded}`);
+  if (!gate.undoEnabled || !gate.saveEnabled) throw new Error(`基线写回控件不可用：${JSON.stringify(gate)}`);
+  if (gate.hints.length) throw new Error(`基线仍显示状态待同步：${JSON.stringify(gate.hints)}`);
+  const window = await readCaptureWindow(page, frame);
+  if (window.visibleHeight < 120) throw new Error(`基线公共可见高度不足：${window.visibleHeight}`);
+  return { gate, window };
+}
+
+/* ------------------------------------------------------------------ 截图 */
+
+/** 用**指定窗口**截两边（坐标与基线完全一致）；`captureRegion` 返回 `Region`，PNG 在 `.png`。 */
 export async function captureWithWindow(page: Page, frame: Frame, captureWindow: CaptureWindow): Promise<CanvasPair> {
   const size = captureWindow.size;
   const visibleHeight = captureWindow.visibleHeight;
@@ -63,89 +136,97 @@ export async function captureWithWindow(page: Page, frame: Frame, captureWindow:
   const studio = await captureRegion(page, {
     x: Math.round(captureWindow.studioRect.x), y: Math.round(captureWindow.studioRect.y) + captureWindow.start, width: size, height: visibleHeight,
   });
-  const backing = await frame.evaluate(() => {
-    const previewCanvas = document.querySelector('[data-testid="product-scene"] canvas') as HTMLCanvasElement | null;
-    return { preview: previewCanvas?.width ?? -1, dpr: window.devicePixelRatio };
-  });
-  const studioBacking = await page.evaluate(() => {
-    const studioCanvas = document.querySelector('[data-testid="scene-canvas"]') as HTMLCanvasElement;
-    return { studio: studioCanvas.width, dpr: window.devicePixelRatio };
-  });
+  const backing = await readBacking(page, frame);
   return {
-    window: captureWindow, size,
-    preview: { rect: captureWindow.previewRect, png: preview, offsetY: captureWindow.start, visibleHeight },
-    studio: { rect: captureWindow.studioRect, png: studio },
-    backing: { preview: backing.preview, studio: studioBacking.studio, dpr: backing.dpr },
+    window: captureWindow,
+    size,
+    preview: { rect: captureWindow.previewRect, png: preview.png, offsetY: preview.offset.y, visibleHeight },
+    studio: { rect: captureWindow.studioRect, png: studio.png },
+    backing,
   };
 }
 
 export interface CaptureAttempt {
-  ok: boolean;
   at: number;
+  ok: boolean;
   reason?: string;
-  window?: CaptureWindow;
-  gate?: { undoEnabled: boolean; hints: string[] };
   changedRatio?: number;
+  window?: CaptureWindow;
+  gate?: GateState;
 }
 
 /**
  * 取"同一窗口"的当前画面：先做与基线相同的滚动归零，再要求
- * (a) 写回控件已可用、(b) 页面不再显示"状态待同步"、(c) 几何窗口与基线一致，三者同时成立才截图；
- * 任一不满足返回 ok=false + 具体原因（调用方在预算内继续观察，不静默对齐）。
+ * (a) 写回控件可用、(b) 无"状态待同步"、(c) 场景 data-loaded、(d) 几何+backing 与基线一致；
+ * 任一不满足返回 ok=false + 原因（调用方在预算内继续观察，不静默对齐）。
  */
 export async function captureWhenStable(page: Page, frame: Frame, baseline: CanvasPair): Promise<{ attempt: CaptureAttempt; pair?: CanvasPair }> {
   await resetEditorScroll(page);
-  const captureWindow = await readCaptureWindow(page, frame);
   const gate = await readGate(page);
+  const window = await readCaptureWindow(page, frame);
   const at = Date.now();
-  if (!gate.undoEnabled) return { attempt: { ok: false, at, reason: '写回控件仍不可用（busy/作品锁/未同步）', window: captureWindow, gate } };
-  if (gate.hints.length) return { attempt: { ok: false, at, reason: '仍显示状态待同步提示', window: captureWindow, gate } };
-  if (captureWindow.visibleHeight < 120) return { attempt: { ok: false, at, reason: `公共可见高度不足：${captureWindow.visibleHeight}`, window: captureWindow, gate } };
-  if (!sameWindow(captureWindow, baseline.window)) {
-    return {
-      attempt: {
-        ok: false, at, window: captureWindow, gate,
-        reason: `几何窗口与基线不同：now ${captureWindow.size}x${captureWindow.visibleHeight} start=${captureWindow.start} vs baseline ${baseline.window.size}x${baseline.window.visibleHeight} start=${baseline.window.start}`,
-      },
-    };
-  }
+  if (!gate.undoEnabled || !gate.saveEnabled) return { attempt: { ok: false, at, reason: '写回控件仍不可用（busy/作品锁/未同步）', window, gate } };
+  if (gate.hints.length) return { attempt: { ok: false, at, reason: '仍显示状态待同步提示', window, gate } };
+  if (gate.sceneLoaded !== 'true') return { attempt: { ok: false, at, reason: `场景未加载：data-loaded=${gate.sceneLoaded}`, window, gate } };
+  if (window.visibleHeight < 120) return { attempt: { ok: false, at, reason: `公共可见高度不足：${window.visibleHeight}`, window, gate } };
+  const diff = windowDiff(window, baseline.window);
+  if (diff.length) return { attempt: { ok: false, at, reason: `几何/backing 与基线不同：${diff.join('; ')}`, window, gate } };
   const pair = await captureWithWindow(page, frame, baseline.window);
-  return { attempt: { ok: true, at, window: captureWindow, gate }, pair };
+  return { attempt: { ok: true, at, window, gate }, pair };
 }
 
-export interface PairChangeResult { elapsedMs: number; changedRatio: number; attempts: CaptureAttempt[] }
+/* ------------------------------------------------------------------ 等待变化 */
 
-/**
- * 在**调用方给定的预算**内等待"同一窗口下的画面确实变化"。
- * - 预算、阈值、轮询间隔都由调用方传入；内部不额外 sleep、不放宽阈值、不重试掩盖失败；
- * - "还没稳定 / 画面变化不足"视为继续观察；`compareAligned` 的真实异常（含尺寸不一致）**原样抛出**；
- * - 超时抛错时附带最近几次几何/UI 诊断，避免空白或 pending 式的失败。
- */
+export interface PairChangeResult {
+  /** 从 startedAt（动作前）到满足条件的实际耗时。 */
+  elapsedMs: number;
+  changedRatio: number;
+  attempts: CaptureAttempt[];
+}
+
+/** 同一窗口下等待画面变化；预算从 startedAt 算，绝不超过总预算。 */
 export async function waitForPairChange(
   page: Page, frame: Frame, baseline: CanvasPair,
-  options: { threshold: number; timeoutMs: number; intervalMs: number; mode?: 'increase' | 'decrease' },
+  options: { startedAt: number; threshold: number; timeoutMs: number; intervalMs: number; mode?: 'increase' | 'decrease' },
 ): Promise<PairChangeResult> {
-  const started = Date.now();
+  const deadline = options.startedAt + options.timeoutMs;
   const attempts: CaptureAttempt[] = [];
-  while (Date.now() - started <= options.timeoutMs) {
+  const record = (attempt: CaptureAttempt) => attempts.push({ ...attempt, at: attempt.at - options.startedAt });
+  while (Date.now() <= deadline) {
     const { attempt, pair } = await captureWhenStable(page, frame, baseline);
     if (attempt.ok && pair) {
       const aligned = await compareAligned(baseline.preview.png, pair.preview.png, 3);
       const satisfied = options.mode === 'decrease' ? aligned.changedRatio < options.threshold : aligned.changedRatio > options.threshold;
-      if (satisfied) {
-        attempts.push({ ...attempt, changedRatio: aligned.changedRatio });
-        return { elapsedMs: Date.now() - started, changedRatio: aligned.changedRatio, attempts };
-      }
-      attempts.push({ ...attempt, ok: false, reason: `画面差异未满足 ${options.mode === 'decrease' ? '<' : '>'} ${options.threshold}：${aligned.changedRatio}`, changedRatio: aligned.changedRatio });
+      record({ ...attempt, changedRatio: aligned.changedRatio, ok: satisfied, reason: satisfied ? undefined : `画面差异未满足 ${options.mode === 'decrease' ? '<' : '>'} ${options.threshold}：${aligned.changedRatio}` });
+      if (satisfied) return { elapsedMs: Date.now() - options.startedAt, changedRatio: aligned.changedRatio, attempts };
     } else {
-      attempts.push(attempt);
+      record(attempt);
     }
-    await page.waitForTimeout(options.intervalMs);
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+    await page.waitForTimeout(Math.min(options.intervalMs, remaining));
   }
   const tail = attempts.slice(-4).map((item) => ({
-    at: item.at - started, ok: item.ok, reason: item.reason,
-    size: item.window?.size, visibleHeight: item.window?.visibleHeight, start: item.window?.start,
-    undoEnabled: item.gate?.undoEnabled, hints: item.gate?.hints,
+    at: item.at, ok: item.ok, reason: item.reason, changedRatio: item.changedRatio,
+    window: item.window ? {
+      size: item.window.size, start: item.window.start, end: item.window.end, visibleHeight: item.window.visibleHeight,
+      previewRect: item.window.previewRect, studioRect: item.window.studioRect, frameRect: item.window.frameRect,
+      previewRows: item.window.previewRows, studioRows: item.window.studioRows, backing: item.window.backing,
+    } : null,
+    gate: item.gate,
   }));
-  throw new Error(`等待画面变化超时（${options.timeoutMs}ms，阈值 ${options.threshold}）：${JSON.stringify(tail)}`);
+  throw new Error(`等待画面变化超时（预算 ${options.timeoutMs}ms，阈值 ${options.threshold}）：${JSON.stringify(tail)}`);
+}
+
+/** 把尝试记录裁剪成可写入证据的形状（含几何/backing/UI 状态，不写 Buffer）。 */
+export function summarizeAttempts(attempts: CaptureAttempt[], limit = 12) {
+  return attempts.slice(-limit).map((item) => ({
+    at: item.at, ok: item.ok, reason: item.reason, changedRatio: item.changedRatio,
+    window: item.window ? {
+      size: item.window.size, start: item.window.start, end: item.window.end, visibleHeight: item.window.visibleHeight,
+      previewRect: item.window.previewRect, studioRect: item.window.studioRect, frameRect: item.window.frameRect,
+      previewRows: item.window.previewRows, studioRows: item.window.studioRows, backing: item.window.backing,
+    } : null,
+    gate: item.gate,
+  }));
 }
