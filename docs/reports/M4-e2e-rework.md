@@ -245,3 +245,32 @@ Codex 已直接修好并**保全旧入口**为 `.data/m4-gitlink-precheck.failed
 - 本轮只允许**一次无服务只读预检重试**：不跑 M4/19 例、不 full、不 collect、614/12/旧 174 均未执行；不启动 Playwright/browser/server。
 - 产品与 19 例字节保持 `6aecd30` 不动；失败原件（含失败预检 launcher、工具身份）已保全，历史 JSON 未改写。
 - 入口失败与运行失败在报告里分开记录；真实 Windows 控制台 Ctrl+C、真实阿里/厂商/编码/Lux3D、真人 A/B、完整彩排仍未执行。
+## 12. 第二次预检失败（外部 .git 指针被误拒）与 Codex 修正
+
+`job_73d69e30` exit 1 / 3s，**仍未进入任何测试**。失败点是**我的物化逻辑**，不是载荷真的坏了：
+
+- 当时扫描结果：**4839 个普通文件、missing 0**；旧 857 清单 **match 857 / mismatch 0 / absent 0**；其中 **15 条**落在历史 gitlink 容器内。
+- 我的 `materializeContainer()` 把容器里那个 **worktree 正常的外部 `.git` 指针**当成错误直接拒绝 → 入口失败。
+  "外部 gitdir" 对 worktree 是正常元数据，不能因此判定一般 payload 失败。
+
+Codex 已直接修 helper 并固定 `f803d94`（读 `docs/reports/M4-container-static-integration.md` + `git show`）：
+
+- `.git` **指针文件自身的字节与 SHA** 被读入并纳入容器摘要，作为**惰性 `payload-NNNNNN.bin`** 保存；**绝不解析/跟随**它指向的仓库目标；
+- `directoryDigest` 的 `path` 相对 **root**，物化时改为 `resolve(root, path)` 并校验 source 边界，修复"再拼一次 source"的双拼问题；复制前后 SHA 必须一致，已有不同目标拒绝覆盖；
+- 普通文件 + 指针全部写进映射；真正的 **`.git` 目录**（不是指针文件）仍明确拒绝（需单独完整枚举）。
+
+### 12.1 本轮我只做的两件事（不动 helper 语义）
+
+1. 保全失败原件：`job_73d69e30` 的 launcher 归档到 `launcher-precheck-73d69e30/`；
+   旧 `precheck.json` **不覆盖**，另存为 `precheck-failed-materialize.json`，并记 `precheck-73d69e30-notes.json`（含工具 SHA 与失败原因）。
+2. 把 `.data` 预检的 **OUT 改成唯一新 run 目录**（`<时间戳>-gitlink-precheck/`），开跑前先 `mkdir`，失败也一定留 result；容器与映射也放在该新 run 下。
+   857 清单审计仍**以其自身目录为根**（`dirname(MANIFEST)`），不改成 ROOT。
+
+### 12.2 预检通过后的核对项
+
+- 平面容器里每个 `payload-*.bin` 的 **raw bytes** 与原件逐字节一致；
+- 映射里 `originalPath / mode / sha256 / containerPath` 完整（含 `.git` 指针作为惰性 payload）；
+- 归档后**不再新增 `160000`**（容器是普通文件），Git 能看到这些普通文件实际入库；
+- **保留原 gitlink 的旧 SHA 清单不变**。
+
+边界：只跑预检（无服务、0 用例）；不 M4/full/collect/614/12/旧 174；产品与 19 例字节保持 `6aecd30`；入口失败与运行失败继续分开记录。
