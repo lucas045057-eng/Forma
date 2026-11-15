@@ -15,14 +15,19 @@ import {
  */
 
 /**
- * preset 声明以**产品源码**为准（apps/server/src/assets/fallbacks.ts），哈希由**真实 GLB 字节**算出后比对。
- * 这样既不会出现手写 literal 抄错（旧版把 ...e5d05253a... 抄成 ...e5d05352a...），
- * 也不拿产品 helper 当行为 oracle —— 比较的是"文件字节 vs 产品声明"。
+ * 固定三份 preset 的 id/file/SHA 合同（SHA 由**实际 fallback 目录里的原始 GLB 字节**重新算出后写定）。
+ * 另外单独断言"产品声明里的 file→hash 与这里一致"，这样：
+ * - 列表用例有**精确 ID 集合**断言，不会退化成"长度对/空集合也算过"；
+ * - importFallback 用的是真实存在的 preset.id（旧版只有 file/hash，preset.id 是 undefined）；
+ * - 文件字节、本契约、产品声明三者互相校验，且不拿产品 helper 当行为 oracle。
  */
+const PRESETS = [
+  { id: 'diffuser-split', file: 'lux3d-split-4969889.glb', hash: '239b77d757cd50b377c8d9bd1f9313b1017f11681606ecf234b4fbf0549032e0' },
+  { id: 'diffuser-original', file: 'lux3d-4969293.glb', hash: '7770579bb7deb2880c252b2369ecefd4a5e427af2611bb8de4622c413c7b55d7' },
+  { id: 'diffuser-alternate', file: 'lux3d-4969298.glb', hash: '09f9085858ace106b7dc5c7b9355320e5d05253a565eb01a73d670c1754ac9bf' },
+] as const;
+
 const PRESET_SOURCE = path.join(REPO_ROOT, 'apps', 'server', 'src', 'assets', 'fallbacks.ts');
-const PRESETS = [...readFileSync(PRESET_SOURCE, 'utf8').matchAll(/file:'([^']+)',hash:'([0-9a-f]{64})'/g)]
-  .map((match) => ({ file: match[1], hash: match[2] }))
-  .filter((preset) => preset.file.startsWith('lux3d-'));
 
 const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
 
@@ -37,7 +42,14 @@ test.describe('M4-D3 本地备用模型与来源', () => {
       const bytes = readFileSync(path.join(FALLBACK_DIR, preset.file));
       return { id: preset.id, file: preset.file, bytes: bytes.length, sha256: sha256(bytes), expected: preset.hash, match: sha256(bytes) === preset.hash };
     });
-    expect(actual.every((item) => item.match), JSON.stringify(actual)).toBe(true);
+    for (const item of actual) {
+      expect(item.match, `${item.file} 的实际字节 SHA256 与固定合同不一致：${JSON.stringify(item)}`).toBe(true);
+    }
+    // 产品声明里的 file→hash 也必须与固定合同一致（声明被改动同样要被发现）。
+    const declared = new Map([...readFileSync(PRESET_SOURCE, 'utf8').matchAll(/file:'([^']+)',hash:'([0-9a-f]{64})'/g)].map((match) => [match[1], match[2]]));
+    for (const preset of PRESETS) {
+      expect(declared.get(preset.file), `产品声明里缺少 ${preset.file}`).toBe(preset.hash);
+    }
     writeArtifact('fallback-factor-presets.json', { presets: actual });
   });
 
@@ -45,7 +57,7 @@ test.describe('M4-D3 本地备用模型与来源', () => {
     const listed = await listFallbacks();
     expect(listed.status, listed.text.slice(0, 200)).toBe(200);
     const ids = (Array.isArray(listed.body) ? listed.body : []).map((item: any) => item.id).sort();
-    expect(ids).toHaveLength(PRESETS.length);
+    expect(ids, `preset 列表不是固定三份：${JSON.stringify(ids)}`).toEqual(PRESETS.map((preset) => preset.id).sort());
     const unknown = await importFallback('not-a-preset');
     expect([400, 404]).toContain(unknown.status);
     const bodyRejected = await fetch(`${BACKEND_BASE}/assets/fallbacks/diffuser-split/import`, {

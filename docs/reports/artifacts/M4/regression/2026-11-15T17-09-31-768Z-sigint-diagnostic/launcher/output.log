@@ -1,0 +1,42 @@
+[
+ {
+  "signal": "SIGINT",
+  "ready": true,
+  "exit": {
+   "code": null,
+   "signal": "SIGINT",
+   "ms": 7
+  },
+  "close": {
+   "code": null,
+   "signal": "SIGINT",
+   "ms": 7
+  },
+  "manifestStatusAfter": "running",
+  "cleanupProblems": null,
+  "forcedChildren": 0,
+  "portsAfter": [],
+  "descendantsAlive": [],
+  "descendantsReused": []
+ },
+ {
+  "signal": "SIGTERM",
+  "ready": true,
+  "exit": {
+   "code": null,
+   "signal": "SIGTERM",
+   "ms": 6
+  },
+  "close": {
+   "code": null,
+   "signal": "SIGTERM",
+   "ms": 6
+  },
+  "manifestStatusAfter": "running",
+  "cleanupProblems": null,
+  "forcedChildren": 0,
+  "portsAfter": [],
+  "descendantsAlive": [],
+  "descendantsReused": []
+ }
+]

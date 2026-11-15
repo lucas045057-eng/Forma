@@ -1,0 +1,402 @@
+{
+  "signal": "SIGTERM",
+  "launcherPid": 10944,
+  "launcherCreated": "2026-11-15T17:09:38.6420470Z",
+  "stdoutTail": "Demo mode=mock; Studio=http://127.0.0.1:29435; retained run=E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T17-09-38.707Z-052255a6-7119-4b6e-9943-59671bb597ed\nSpeech and coding are fixed local substitutes. Not real recognition or generation.\n",
+  "stderrTail": "",
+  "events": [],
+  "ready": true,
+  "readyMs": 1844,
+  "runDir": ".data/demo-runs/2026-11-15T17-09-38.707Z-052255a6-7119-4b6e-9943-59671bb597ed",
+  "manifestBefore": {
+    "schemaVersion": 1,
+    "mode": "mock",
+    "status": "running",
+    "createdAt": "2026-11-15T17:09:38.710Z",
+    "head": "55398ebb9663f2b0603ed4385e8afb4ca3f10fa9",
+    "work": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T17-09-38.707Z-052255a6-7119-4b6e-9943-59671bb597ed\\work",
+    "files": [
+      {
+        "path": "index.html",
+        "bytes": 286,
+        "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+      },
+      {
+        "path": "package.json",
+        "bytes": 515,
+        "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+      },
+      {
+        "path": "vite.config.ts",
+        "bytes": 1666,
+        "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 410,
+        "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.glb",
+        "bytes": 988116,
+        "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.provenance.json",
+        "bytes": 319,
+        "sha256": "93969ffd576e69cf89baf5279d9fdf80ffdce808f67c2d1169b2c72b0e210afe"
+      },
+      {
+        "path": "public/assets/parts.json",
+        "bytes": 2098,
+        "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+      },
+      {
+        "path": "src/App.tsx",
+        "bytes": 2751,
+        "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+      },
+      {
+        "path": "src/components/Button.tsx",
+        "bytes": 288,
+        "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+      },
+      {
+        "path": "src/components/ProductHero.tsx",
+        "bytes": 2079,
+        "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+      },
+      {
+        "path": "src/main.tsx",
+        "bytes": 316,
+        "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+      },
+      {
+        "path": "src/scene-config-store.ts",
+        "bytes": 1259,
+        "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+      },
+      {
+        "path": "src/scene.config.json",
+        "bytes": 539,
+        "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+      },
+      {
+        "path": "src/style.css",
+        "bytes": 3505,
+        "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+      }
+    ],
+    "dependencies": [
+      {
+        "name": "@spatial/bridge",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\bridge"
+      },
+      {
+        "name": "@spatial/shared",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\shared"
+      },
+      {
+        "name": "@spatial/scene-renderer",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\scene-renderer"
+      },
+      {
+        "name": "react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+      },
+      {
+        "name": "react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+      },
+      {
+        "name": "@spatial/vite-plugin-source-tag",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\vite-plugin-source-tag"
+      },
+      {
+        "name": "vite",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+      },
+      {
+        "name": "@vitejs/plugin-react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+      },
+      {
+        "name": "@types/react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+      },
+      {
+        "name": "@types/react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+      }
+    ],
+    "credentials": {
+      "speech": false,
+      "coding": false,
+      "lux3d": false
+    },
+    "realParticipants": false,
+    "rehearsalExecuted": false,
+    "mockServices": true,
+    "children": [
+      {
+        "role": "backend",
+        "pid": 15388,
+        "startedAt": "2026-11-15T17:09:38.807Z"
+      },
+      {
+        "role": "frontends",
+        "pid": 23872,
+        "startedAt": "2026-11-15T17:09:40.324Z"
+      }
+    ],
+    "ports": {
+      "api": 51428,
+      "studio": 29435,
+      "main": 63134,
+      "preview": 31188,
+      "coding": 23375,
+      "lux3d": 36337,
+      "speech": 63475
+    },
+    "startedAt": "2026-11-15T17:09:40.742Z"
+  },
+  "ports": {
+    "api": 51428,
+    "studio": 29435,
+    "main": 63134,
+    "preview": 31188,
+    "coding": 23375,
+    "lux3d": 36337,
+    "speech": 63475
+  },
+  "descendantsBefore": [
+    {
+      "pid": 62436,
+      "created": "2026-11-15T17:09:40.7491040Z",
+      "depth": 2
+    },
+    {
+      "pid": 17884,
+      "created": "2026-11-15T17:09:38.6445720Z",
+      "depth": 1
+    },
+    {
+      "pid": 15388,
+      "created": "2026-11-15T17:09:38.8110840Z",
+      "depth": 1
+    },
+    {
+      "pid": 23872,
+      "created": "2026-11-15T17:09:40.3265740Z",
+      "depth": 1
+    }
+  ],
+  "portsBefore": {
+    "listening": [
+      51428,
+      29435,
+      63134,
+      31188,
+      23375,
+      36337,
+      63475
+    ]
+  },
+  "exit": {
+    "code": null,
+    "signal": "SIGTERM",
+    "ms": 6
+  },
+  "close": {
+    "code": null,
+    "signal": "SIGTERM",
+    "ms": 6
+  },
+  "manifestAfter": {
+    "schemaVersion": 1,
+    "mode": "mock",
+    "status": "running",
+    "createdAt": "2026-11-15T17:09:38.710Z",
+    "head": "55398ebb9663f2b0603ed4385e8afb4ca3f10fa9",
+    "work": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T17-09-38.707Z-052255a6-7119-4b6e-9943-59671bb597ed\\work",
+    "files": [
+      {
+        "path": "index.html",
+        "bytes": 286,
+        "sha256": "21b59885b985f9b676b1e760c709365fb4830163f5e3cfb56935012eb7fb3c8b"
+      },
+      {
+        "path": "package.json",
+        "bytes": 515,
+        "sha256": "10af94715a7c335d9cceea1476ff00653b51d0dbf91e90830c3c7f7c0725934c"
+      },
+      {
+        "path": "vite.config.ts",
+        "bytes": 1666,
+        "sha256": "ebf59ec9a4bc2cdbf579eec1f0f11ef0b9cd0cf0523a32fb92f8bf4bade3a273"
+      },
+      {
+        "path": "tsconfig.json",
+        "bytes": 410,
+        "sha256": "24bd0103f3ce5dc640d5cfa766f546e028ac2abd9c8a8fcba6e77d76e16141a0"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.glb",
+        "bytes": 988116,
+        "sha256": "ebb7141771059ea8a60e9af0c4dba071ae9a2d83510edf76e7c76098434c7e46"
+      },
+      {
+        "path": "public/assets/diffuser-4969889.provenance.json",
+        "bytes": 319,
+        "sha256": "93969ffd576e69cf89baf5279d9fdf80ffdce808f67c2d1169b2c72b0e210afe"
+      },
+      {
+        "path": "public/assets/parts.json",
+        "bytes": 2098,
+        "sha256": "c7f60ca05e5dbbf568afcfa14915eb4e7c19caa75f56d2524f9dc0aeb2691a49"
+      },
+      {
+        "path": "src/App.tsx",
+        "bytes": 2751,
+        "sha256": "6ae8610ae8f698aa1a310c64aff0e14c3bc67aa77eebc9e8c5e18cbe22e6f778"
+      },
+      {
+        "path": "src/components/Button.tsx",
+        "bytes": 288,
+        "sha256": "8868c982a9e2688b447b597f164791eb74fcbea2dfc522122a74c5bae70c6412"
+      },
+      {
+        "path": "src/components/ProductHero.tsx",
+        "bytes": 2079,
+        "sha256": "e62699f3f6fe34e83d2c60f497dc9491d9ba7783ef100be6b64e87454ed5b369"
+      },
+      {
+        "path": "src/main.tsx",
+        "bytes": 316,
+        "sha256": "47f57e57b80dd3275b51a3b24eb510d316de0330ec4edc7bb6b6e3159d50be57"
+      },
+      {
+        "path": "src/scene-config-store.ts",
+        "bytes": 1259,
+        "sha256": "0226c9f73030704d7355344f74f7f95e93a8c17b91927ac33019b9eee6b49ea4"
+      },
+      {
+        "path": "src/scene.config.json",
+        "bytes": 539,
+        "sha256": "611b1c8a2935a323519d17f69fdfa116330a6362b95ab6841a7ca1b0a329042a"
+      },
+      {
+        "path": "src/style.css",
+        "bytes": 3505,
+        "sha256": "8afdcf807e20e2b214b28f88c808d8b56c10e1ebaf1af5267e14b93670d4c2cc"
+      }
+    ],
+    "dependencies": [
+      {
+        "name": "@spatial/bridge",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\bridge"
+      },
+      {
+        "name": "@spatial/shared",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\shared"
+      },
+      {
+        "name": "@spatial/scene-renderer",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\scene-renderer"
+      },
+      {
+        "name": "react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\react@19.3.1\\node_modules\\react"
+      },
+      {
+        "name": "react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\react-dom@19.3.1_react@19.3.1\\node_modules\\react-dom"
+      },
+      {
+        "name": "@spatial/vite-plugin-source-tag",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\packages\\vite-plugin-source-tag"
+      },
+      {
+        "name": "vite",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\vite@7.3.7_@types+node@24.19.2\\node_modules\\vite"
+      },
+      {
+        "name": "@vitejs/plugin-react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@vitejs+plugin-react@5.2.0_vite@7.3.7_@types+node@24.19.2_\\node_modules\\@vitejs\\plugin-react"
+      },
+      {
+        "name": "@types/react",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@types+react@19.3.0\\node_modules\\@types\\react"
+      },
+      {
+        "name": "@types/react-dom",
+        "target": "E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\node_modules\\.pnpm\\@types+react-dom@19.3.0_@types+react@19.3.0\\node_modules\\@types\\react-dom"
+      }
+    ],
+    "credentials": {
+      "speech": false,
+      "coding": false,
+      "lux3d": false
+    },
+    "realParticipants": false,
+    "rehearsalExecuted": false,
+    "mockServices": true,
+    "children": [
+      {
+        "role": "backend",
+        "pid": 15388,
+        "startedAt": "2026-11-15T17:09:38.807Z"
+      },
+      {
+        "role": "frontends",
+        "pid": 23872,
+        "startedAt": "2026-11-15T17:09:40.324Z"
+      }
+    ],
+    "ports": {
+      "api": 51428,
+      "studio": 29435,
+      "main": 63134,
+      "preview": 31188,
+      "coding": 23375,
+      "lux3d": 36337,
+      "speech": 63475
+    },
+    "startedAt": "2026-11-15T17:09:40.742Z"
+  },
+  "manifestStatusAfter": "running",
+  "manifestCleanupAfter": null,
+  "descendantsAfter": [
+    {
+      "pid": 62436,
+      "created": "2026-11-15T17:09:40.7491040Z",
+      "depth": 2,
+      "verdict": "gone",
+      "now": null
+    },
+    {
+      "pid": 17884,
+      "created": "2026-11-15T17:09:38.6445720Z",
+      "depth": 1,
+      "verdict": "gone",
+      "now": null
+    },
+    {
+      "pid": 15388,
+      "created": "2026-11-15T17:09:38.8110840Z",
+      "depth": 1,
+      "verdict": "gone",
+      "now": null
+    },
+    {
+      "pid": 23872,
+      "created": "2026-11-15T17:09:40.3265740Z",
+      "depth": 1,
+      "verdict": "gone",
+      "now": null
+    }
+  ],
+  "portsAfter": {
+    "listening": []
+  }
+}
