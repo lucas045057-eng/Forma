@@ -1,0 +1,34 @@
+{
+    "job":  "job_3cb0021d",
+    "testedHead":  "4d34bcee1eb777dda42bd3e4cfbdacda2395ebe8",
+    "payloadFiles":  5,
+    "manifestExcluded":  "sha256-manifest.json",
+    "note":  "Independent launcher supplement. Existing parent 37-payload manifest unchanged. Four original launcher files plus local raw-byte Git attributes.",
+    "entries":  [
+                    {
+                        "path":  "cmd",
+                        "bytes":  65,
+                        "sha256":  "a625c4266b57a87fa607688687692a45a45393dd9b580eebccef56974f2839f3"
+                    },
+                    {
+                        "path":  "exit",
+                        "bytes":  5,
+                        "sha256":  "043b5ae7334040ef63298adca08912d5287ad37e66f9425316adc50d2c1ab652"
+                    },
+                    {
+                        "path":  "job.json",
+                        "bytes":  428,
+                        "sha256":  "d62b1ca9cdb59f5c1e3502b55c1ad1ff8647bfb2a4493faed5ccbeb2eb372bad"
+                    },
+                    {
+                        "path":  "output.log",
+                        "bytes":  4599,
+                        "sha256":  "7594c48e743e68b3a907797d8ce3f9e09d876b0dd46717e107969ebb47d2f6ea"
+                    },
+                    {
+                        "path":  ".gitattributes",
+                        "bytes":  8,
+                        "sha256":  "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+                    }
+                ]
+}
