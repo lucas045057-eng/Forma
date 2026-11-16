@@ -321,11 +321,15 @@ export async function verifyCandidateLedger(repo: LedgerRepo, candidateId: strin
   }
   const changedSources = changes.map(change => change.path).filter(file => isTsxFile(file) && !isManagedModulePath(file));
   const beforeRefs: ModuleReference[] = [], afterRefs: ModuleReference[] = [];
+  const literalModel = /["'`]\/assets\/[A-Za-z0-9_-]+\.glb["'`]/;
   for (const file of new Set(changedSources)) {
     const before = (await repo.fileBufferAt(base, file))?.toString('utf8');
     if (before) beforeRefs.push(...scanModuleReferences(before, file));
     const after = await candidateText(repo, candidateId, file);
     if (after) afterRefs.push(...scanModuleReferences(after, file));
+    if (after && literalModel.test(after) && !(before && literalModel.test(before))) {
+      throw new WorkError('MODEL_PATH_IN_SOURCE', '模型源码不能直接写入作品资产路径；请使用受信实例配置', 409);
+    }
   }
   assertNoUnapprovedReferenceChanges({ before: beforeRefs, after: afterRefs, ledger });
 }
