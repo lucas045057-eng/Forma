@@ -200,8 +200,20 @@ function moduleTarget(file: string, specifier: string): string | undefined {
 }
 
 function mentionsManagedSpecifier(specifier: string): boolean {
+  const segments = specifier.replaceAll('\\', '/').toLowerCase().split('/').filter(Boolean);
+  return segments.some(segment => {
+    const clean = segment.split(/[?#]/, 1)[0];
+    return clean === 'scene-modules' || clean === 'spatial-module' || clean.startsWith('spatial-module.');
+  });
+}
+
+function isUnsupportedAbsoluteSpecifier(specifier: string): boolean {
   const text = specifier.replaceAll('\\', '/').toLowerCase();
-  return text.includes('spatial-module') || text.includes('scene-modules');
+  if (text.startsWith('/@fs/') || text.startsWith('@fs/')) return true;
+  if (text.startsWith('file:')) return true;
+  if (/^[a-z]:/.test(text)) return true;
+  if (text.startsWith('//')) return true;
+  return text.split('/').some(segment => /^[^/]*~\d+(?:\.[^/]*)?$/.test(segment));
 }
 
 function isModuleNamespaceTarget(target: string): boolean {
@@ -223,8 +235,9 @@ function globPatternTarget(file: string, pattern: string): string | undefined {
 function globIsAllowed(file: string, pattern: string): boolean {
   const target = globPatternTarget(file, pattern);
   if (!target) return false;
-  if (/spatial-module|scene-modules/i.test(target)) return false;
+  if (mentionsManagedSpecifier(target)) return false;
   const segments = target.split('/');
+  if (segments.some(segment => segment === '..' || segment.includes('..'))) return false;
   const meta = ['*', '?', '[', ']', '{', '}', '(', ')', '!', '+', '@', '\\'];
   const first = segments.findIndex(segment => meta.some(char => segment.includes(char)));
   const directory = first < 0 ? path.posix.dirname(target) : segments.slice(0, first).join('/');
@@ -271,6 +284,7 @@ export function auditTrustedImports(source: string, file: string): void {
     if (ts.isImportDeclaration(node)) {
       const specifier = node.moduleSpecifier;
       if (ts.isStringLiteral(specifier)) {
+        if (isUnsupportedAbsoluteSpecifier(specifier.text)) return reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径导入');
         const target = moduleTarget(file, specifier.text);
         const managedTarget = !!target && isModuleNamespaceTarget(target);
         if (managedTarget) {
@@ -292,11 +306,13 @@ export function auditTrustedImports(source: string, file: string): void {
       }
     }
     if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference) && ts.isStringLiteral(node.moduleReference.expression)) {
+      if (isUnsupportedAbsoluteSpecifier(node.moduleReference.expression.text)) reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径导入');
       const target = moduleTarget(file, node.moduleReference.expression.text);
       if (target && isModuleNamespaceTarget(target)) reject('不能用 import = require 加载受信实例或运行器');
       if (mentionsManagedSpecifier(node.moduleReference.expression.text)) reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
     }
     if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (isUnsupportedAbsoluteSpecifier(node.moduleSpecifier.text)) reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径重导出');
       const target = moduleTarget(file, node.moduleSpecifier.text);
       if (target && isModuleNamespaceTarget(target)) reject('不能重导出受信实例或运行器');
       if (mentionsManagedSpecifier(node.moduleSpecifier.text)) reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
@@ -307,6 +323,7 @@ export function auditTrustedImports(source: string, file: string): void {
         if (!patterns) return reject('import.meta.glob 参数无法静态证明，请改为明确的字面路径');
         const positive = patterns.filter(pattern => !pattern.startsWith('!'));
         if (!positive.length) return reject('import.meta.glob 需要至少一个正向且可静态证明的普通目录 pattern');
+        if (patterns.some(pattern => isUnsupportedAbsoluteSpecifier(pattern.replace(/^!/, '')))) return reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径 glob');
         if (positive.some(pattern => !globIsAllowed(file, pattern))) {
           return reject('import.meta.glob 的静态目录前缀不在普通 src 子目录内，无法证明不会覆盖受管运行时或受信实例');
         }
@@ -314,6 +331,7 @@ export function auditTrustedImports(source: string, file: string): void {
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         const literal = literalString(node.arguments[0]);
         if (literal === undefined) return reject('动态 import 目标无法静态证明，请改为明确的字面路径');
+        if (isUnsupportedAbsoluteSpecifier(literal)) return reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径动态导入');
         const target = moduleTarget(file, literal);
         if (target && isModuleNamespaceTarget(target)) return reject('不能用动态 import 加载受信实例或运行器');
         if (mentionsManagedSpecifier(literal)) return reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
@@ -321,6 +339,7 @@ export function auditTrustedImports(source: string, file: string): void {
       if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
         const literal = literalString(node.arguments[0]);
         if (literal === undefined) return reject('require 目标无法静态证明，请改为明确的字面路径');
+        if (isUnsupportedAbsoluteSpecifier(literal)) return reject('不支持 /@fs/、file:、盘符、UNC 或 DOS 8.3 绝对路径 require');
         const target = moduleTarget(file, literal);
         if (target && isModuleNamespaceTarget(target)) return reject('不能用 require 加载受信实例或运行器');
         if (mentionsManagedSpecifier(literal)) return reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');

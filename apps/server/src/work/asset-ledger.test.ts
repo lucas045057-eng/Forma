@@ -119,6 +119,13 @@ export default () => <SpatialModel${instanceId}/>;
       `import { SpatialModule as M } from '/@fs/E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
       `import { SpatialModule as M } from 'E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
       `import { SpatialModule as M } from 'file:///E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `import X from '/@fs/E:/work/src/components/Button.tsx'; export default () => <X/>;`,
+      `import X from 'E:/work/src/components/Button.tsx'; export default () => <X/>;`,
+      `import X from 'file:///E:/work/src/components/Button.tsx'; export default () => <X/>;`,
+      `import X from '//server/share/src/components/Button.tsx'; export default () => <X/>;`,
+      `import X from './components/SPATIA~1.TSX'; export default () => <X/>;`,
+      `const files = import.meta.glob('./components/{a,..}/*.tsx');`,
+      `const files = import.meta.glob('./components/SPATIA~1.TSX');`,
       `const files = import.meta.glob('./*.tsx');`,
       `const files = import.meta.glob('./scene-modules/*.json', { eager: true });`,
       `const files = import.meta.glob(['./**/*', '!./components/skip']);`,
@@ -139,6 +146,9 @@ export default () => <SpatialModel${instanceId}/>;
       `const files = import.meta.glob('./components/*.tsx', { eager: true });`,
       `const files = import.meta.glob(['./components/**', '!./components/secret']);`,
       `const files = import.meta.glob('./components/{A,B}.tsx');`,
+      `import { Card } from './components/spatial-module-card.tsx'; export default () => <Card/>;`,
+      `import { Card } from '/src/components/Button.tsx'; export default () => <Card/>;`,
+      `import { Card } from './components/scene-modules-card.tsx'; export default () => <Card/>;`,
     ]) expect(() => auditTrustedImports(source, 'src/App.tsx')).not.toThrow();
   });
 

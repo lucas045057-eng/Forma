@@ -198,9 +198,7 @@ it('preserves a pending card and its staging across restart without approving it
     await f.work.idle();
     const card = f.work.listApprovals()[0];
     const before = await readFile(path.join(f.work.repo.candidatePath(task.id), 'src/components/Button.tsx'), 'utf8');
-    mark('close-start');
     await f.work.close();
-    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     restarted.previews.start = async id => `/preview/c/${id}/`;
     restarted.previews.stop = async () => {};
@@ -423,9 +421,7 @@ it('resumes failed-preview cleanup after terminal save failure without restartin
     expect(f.published.some(event => event.type === 'approval.resolved' || event.type === 'candidate.ready')).toBe(false);
     const saved = JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8'));
     expect(saved.approvalIntent.kind).toBe('preview_failed');
-    mark('close-start');
     await f.work.close();
-    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     const preview = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not start'));
     try {
@@ -455,9 +451,7 @@ it.each(['save', 'cleanup'])('retains stale cleanup intent across %s failure and
     if (failure === 'save') {
       await expect(f.work.answerApproval(card.id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL' });
     }
-    mark('close-start');
     await f.work.close();
-    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     try {
       await restarted.init();
