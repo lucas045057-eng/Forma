@@ -122,6 +122,21 @@ export async function createApp(options: AppOptions = {}) {
   const modules=new ModuleSceneService({workRoot,directory:workDataDirectory,repo:work.repo});
   await modules.init();
   await service.init();
+  // Awaited plugin registration binds route error-handler contexts. Install the shared
+  // envelope before registering either the upload scope or the workbench routes.
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof SceneModuleError) return reply.code(400).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
+    if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SnapshotBudgetError) return reply.code(409).send({ error: { code: error.code, message: error.message, details: error.detail } });
+    if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof AssetError) {
+      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
+    }
+    const validation = (error as { validation?: unknown }).validation;
+    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
+  });
   const luxWorkbench=await registerLuxWorkbench(app,{
     directory:path.join(workDataDirectory,'lux3d-workbench'),assets:service,
     client:new Lux3DClient({base:options.base??process.env.LUX3D_WORKBENCH_BASE??process.env.LUX3D_BASE??'https://api.aholo.cn',key:options.key??process.env.LUX3D_API_KEY}),
@@ -145,19 +160,6 @@ export async function createApp(options: AppOptions = {}) {
     if (origin && origin !== `http://${request.headers.host}` && origin !== `https://${request.headers.host}`) {
       return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许通过同源工作台访问' } });
     }
-  });
-  app.setErrorHandler((error, _request, reply) => {
-    if (error instanceof SceneModuleError) return reply.code(400).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
-    if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof SnapshotBudgetError) return reply.code(409).send({ error: { code: error.code, message: error.message, details: error.detail } });
-    if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof AssetError) {
-      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
-    }
-    const validation = (error as { validation?: unknown }).validation;
-    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
   });
   app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
   app.get('/events', { websocket: true }, socket => {
