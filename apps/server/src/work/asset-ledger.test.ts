@@ -108,7 +108,28 @@ export default () => <SpatialModel${instanceId}/>;
       `export { default } from './scene-modules/${instanceId}.tsx';`,
       `const load = () => import('./scene-modules/${instanceId}.tsx');`,
       `const load = () => require('./spatial-module');`,
+      `import { SpatialModule as M } from '/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `import SpatialModel${instanceId} from '/src/scene-modules/${instanceId}.tsx'; export default () => <SpatialModel${instanceId}/>;`,
+      `const files = import.meta.glob('./spatial-module*.tsx', { eager: true });`,
+      `const files = import.meta.glob('./scene-modules/*.json', { eager: true });`,
+      `const files = import.meta.glob(['./**/*', '!./components/skip']);`,
+      `const files = import.meta.glob('/src/spatial-module*');`,
+      `const files = import.meta.glob(pattern);`,
+      `const load = () => import(name);`,
+      `const load = () => require(name);`,
+      `const el = createElement('SpatialModule');`,
     ]) expect(() => auditTrustedImports(source, 'src/App.tsx')).toThrow();
+  });
+
+  it('allows ordinary DOM, ordinary file imports and ordinary globs', () => {
+    for (const source of [
+      `const el = document.createElement('div');`,
+      `const el = React.createElement(Button);`,
+      `const load = () => import('./Section');`,
+      `const load = () => require('./image.png');`,
+      `const files = import.meta.glob('./components/*.tsx', { eager: true });`,
+      `const files = import.meta.glob(['./components/**', '!./components/secret']);`,
+    ]) expect(() => auditTrustedImports(source, 'src/App.tsx')).not.toThrow();
   });
 
   it('rejects a shadow renderer or extra managed file in the baseline', async () => {

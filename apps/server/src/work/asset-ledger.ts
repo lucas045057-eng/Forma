@@ -194,12 +194,70 @@ export function scanModuleReferences(source: string, file: string): ModuleRefere
 }
 
 function moduleTarget(file: string, specifier: string): string | undefined {
+  if (specifier.startsWith('/')) return path.posix.normalize(specifier.replace(/^\/+/, '')).toLowerCase();
   if (!specifier.startsWith('.')) return undefined;
   return path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier)).toLowerCase();
 }
 
 function isModuleNamespaceTarget(target: string): boolean {
-  return target === 'src/spatial-module' || target.startsWith('src/spatial-module.') || target.startsWith('src/spatial-module/') || target.startsWith('src/scene-modules/');
+  return target === 'src/spatial-module' || target.startsWith('src/spatial-module.') || target.startsWith('src/spatial-module/') || target === 'src/scene-modules' || target.startsWith('src/scene-modules/');
+}
+
+function literalString(node: ts.Node | undefined): string | undefined {
+  return node && ts.isStringLiteral(node) ? node.text : undefined;
+}
+
+function globPatternTarget(file: string, pattern: string): string | undefined {
+  const positive = pattern.startsWith('!') ? pattern.slice(1) : pattern;
+  if (!positive) return undefined;
+  if (positive.startsWith('/')) return path.posix.normalize(positive.replace(/^\/+/, '')).toLowerCase();
+  if (positive.startsWith('.')) return path.posix.normalize(path.posix.join(path.posix.dirname(file), positive)).toLowerCase();
+  return path.posix.normalize(positive).toLowerCase();
+}
+
+function globCouldMatchManaged(file: string, pattern: string): boolean {
+  const target = globPatternTarget(file, pattern);
+  if (!target) return false;
+  if (/spatial-module|scene-modules/i.test(target)) return true;
+  if (/[{}\[\]]/.test(target)) return true;
+  let regex = '^';
+  for (let index = 0; index < target.length; index++) {
+    const char = target[index];
+    if (char === '*') {
+      if (target[index + 1] === '*') { regex += '.*'; index++; }
+      else regex += '[^/]*';
+      continue;
+    }
+    if (char === '?') { regex += '[^/]'; continue; }
+    regex += char.replace(/[.*+?^${}()|\\]/g, '\\$&');
+  }
+  regex += '$';
+  const matcher = new RegExp(regex);
+  const representatives = [
+    'src/spatial-module', 'src/spatial-module.ts', 'src/spatial-module.tsx', 'src/spatial-module.js', 'src/spatial-module/index.ts',
+    'src/scene-modules/index.ts', 'src/scene-modules/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json', 'src/scene-modules/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tsx',
+  ];
+  return representatives.some(item => matcher.test(item));
+}
+
+function isGlobCall(node: ts.CallExpression): boolean {
+  const expression = node.expression;
+  if (!ts.isPropertyAccessExpression(expression)) return false;
+  if (!ts.isMetaProperty(expression.expression) || expression.expression.keywordToken !== ts.SyntaxKind.ImportKeyword) return false;
+  return expression.name.text === 'glob' || expression.name.text === 'globEager';
+}
+
+function globArguments(args: ts.NodeArray<ts.Expression>): string[] | undefined {
+  if (args.length < 1) return undefined;
+  const first = args[0];
+  const values = ts.isArrayLiteralExpression(first) ? first.elements : [first];
+  const patterns: string[] = [];
+  for (const value of values) {
+    const text = literalString(value);
+    if (text === undefined) return undefined;
+    patterns.push(text);
+  }
+  return patterns;
 }
 
 /**
@@ -221,6 +279,7 @@ export function auditTrustedImports(source: string, file: string): void {
       if (ts.isStringLiteral(specifier)) {
         const target = moduleTarget(file, specifier.text);
         if (target && isModuleNamespaceTarget(target)) {
+          if (specifier.text.startsWith('/')) return reject('受信运行时/实例必须使用服务端生成的相对导入，不能使用项目根绝对路径');
           const output = /^src\/scene-modules\/([a-f0-9]{32})\.tsx$/.exec(target);
           if (!output) return reject('只允许通过受信实例组件引用 3D 模块，禁止直接导入运行器、扩展名旁路或目录导入');
           const id = output[1];
@@ -245,10 +304,30 @@ export function auditTrustedImports(source: string, file: string): void {
       if (target && isModuleNamespaceTarget(target)) reject('不能重导出受信实例或运行器');
     }
     if (ts.isCallExpression(node)) {
-      if (node.expression.kind === ts.SyntaxKind.ImportKeyword) reject('受信模块源码不允许动态 import');
-      if (ts.isIdentifier(node.expression) && node.expression.text === 'require') reject('受信模块源码不允许 require');
+      if (isGlobCall(node)) {
+        const patterns = globArguments(node.arguments);
+        if (!patterns) return reject('import.meta.glob 参数无法静态证明，请改为明确的字面路径');
+        if (patterns.some(pattern => !pattern.startsWith('!') && globCouldMatchManaged(file, pattern))) {
+          return reject('import.meta.glob 可能覆盖受管运行时或受信实例');
+        }
+      }
+      if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+        const literal = literalString(node.arguments[0]);
+        if (literal === undefined) return reject('动态 import 目标无法静态证明，请改为明确的字面路径');
+        const target = moduleTarget(file, literal);
+        if (target && isModuleNamespaceTarget(target)) return reject('不能用动态 import 加载受信实例或运行器');
+      }
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
+        const literal = literalString(node.arguments[0]);
+        if (literal === undefined) return reject('require 目标无法静态证明，请改为明确的字面路径');
+        const target = moduleTarget(file, literal);
+        if (target && isModuleNamespaceTarget(target)) return reject('不能用 require 加载受信实例或运行器');
+      }
       const callee = ts.isPropertyAccessExpression(node.expression) ? node.expression.name.text : ts.isIdentifier(node.expression) ? node.expression.text : '';
-      if (['createElement', 'jsx', 'jsxs', '_jsx', '_jsxs'].includes(callee)) reject('改动的作品源码不能使用 createElement/jsx 动态构造');
+      if (['createElement', 'jsx', 'jsxs', '_jsx', '_jsxs'].includes(callee)) {
+        const argument = node.arguments[0]?.getText(tree) ?? '';
+        if (/SpatialModule|SpatialModel|scene-modules|spatial-module/i.test(argument)) return reject('不能用 createElement/jsx 动态构造受信实例');
+      }
     }
     ts.forEachChild(node, visitImports);
   }
