@@ -286,7 +286,7 @@ export class LuxTaskService {
       if (detected) {
         const parameters = (task as StoredLuxTask).parameters;
         const requested = (task.operation === 'image-to-3d' || task.operation === 'text-to-3d') && parameters?.version === 'G1-Turbo'
-          ? (parameters.outputFormat as string[] | undefined) ?? ['zip']
+          ? (parameters?.outputFormat as string[] | undefined) ?? ['zip']
           : undefined;
         if (detected.format === 'zip' && ['usdz', 'obj_zip', 'fbx_zip', '3mf'].includes(output.format)) {
           format = output.format;
