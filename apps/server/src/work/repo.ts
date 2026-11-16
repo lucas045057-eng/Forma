@@ -140,10 +140,14 @@ export class WorkRepo {
       const info = await lstat(file);
       if (!info.isFile() || info.isSymbolicLink() || info.size > 64 * 1024) return false;
       const text = (await readFile(file, 'utf8')).toLowerCase();
-      if (/^\s*(?:include|includeif)\s*=/m.test(text)) return false;
-      if (/^\s*(?:refstorage|objectformat)\s*=/m.test(text)) return false;
-      const version = /^\s*repositoryformatversion\s*=\s*(\S+)\s*$/m.exec(text);
-      if (version && version[1] !== '0' && version[1] !== '1') return false;
+      // Any include/extension/ref-storage wording keeps the original aborts. This deliberately
+      // over-matches: `[include]`/`[includeIf "…"]` sections, an inline `[extensions] …` header,
+      // keys without `=`, and unrelated paths containing those words all fall back.
+      if (/(?:include|refstorage|objectformat|\[extensions)/.test(text)) return false;
+      // Exactly one plainly formatted `repositoryformatversion = 0` is required; a missing,
+      // duplicated, commented or non-zero value falls back as well.
+      const versions = [...text.matchAll(/^\s*repositoryformatversion\s*=\s*(\S+)\s*$/gm)];
+      if (versions.length !== 1 || versions[0][1] !== '0') return false;
       return true;
     } catch { return false; }
   }
