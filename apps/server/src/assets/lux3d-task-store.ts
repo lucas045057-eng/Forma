@@ -5,9 +5,10 @@ import { writeAtomic } from './atomic-file.ts';
 import {assertPlainPath,readPlainFile} from '../checks/paths.ts';
 
 interface TaskState {tasks:LuxTask[]}
+type PersistedLuxTask = LuxTask & {keyHash?: string};
 const operations:LuxOperation[]=['image-to-3d','text-to-3d','image','four-view','material-transfer','part-split','export','articulation-animation','humanoid-rig','animation-retarget'];
 export class LuxTaskStore {
-  private tasks:LuxTask[]=[];
+  private tasks:PersistedLuxTask[]=[];
   private writes=Promise.resolve();
   private failure:unknown;
   private readonly directory:string;
@@ -29,6 +30,6 @@ export class LuxTaskStore {
   async idle(){await this.writes;if(this.failure)throw this.failure;}
   list(){return this.tasks.map(task=>structuredClone(task));}
   get(id:string){const task=this.tasks.find(item=>item.localId===id);return task?structuredClone(task):undefined;}
-  findKey(keyHash:string){const task=this.tasks.find(item=>(task as LuxTask&{keyHash?:string}).keyHash===keyHash);return task?structuredClone(task):undefined;}
+  findKey(keyHash:string){const task=this.tasks.find(item=>item.keyHash===keyHash);return task?structuredClone(task):undefined;}
   async update(task:LuxTask){const index=this.tasks.findIndex(item=>item.localId===task.localId);if(index<0)this.tasks.push(structuredClone(task));else this.tasks[index]=structuredClone(task);await this.save();return structuredClone(task);}
 }
