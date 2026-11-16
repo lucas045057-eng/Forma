@@ -32,6 +32,7 @@ async function listenForBrowser(server) {
 
 const transpile = source => ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const shared = transpile(await readFile(new URL('../../shared/src/index.ts', import.meta.url), 'utf8')).replace(/^export /gm, '');
+const placement = transpile(await readFile(new URL('./asset-placement.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
 const bridge = transpile(await readFile(new URL('./index.ts', import.meta.url), 'utf8')).replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
 const activation = ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'auxclick', 'dblclick', 'contextmenu', 'submit', 'keydown', 'keypress', 'keyup'];
 
@@ -61,7 +62,7 @@ test('capture isolation, real click selection, restoration and idle overlay with
       window.addEventListener = (type, fn, options) => { window.bridgeListeners.push({type, fn, options}); add(type, fn, options); };
       window.removeEventListener = (type, fn, options) => { window.bridgeListeners = window.bridgeListeners.filter(item => !(item.type === type && item.fn === fn && item.options === options)); remove(type, fn, options); };
     }, activation);
-    await frame.addScriptTag({ content: `${shared}\n${bridge}\nconst beforeInstall = window.bridgeListeners.length; window.disposeBridge = installBridge(); window.bridgeOwned = window.bridgeListeners.slice(beforeInstall);` });
+    await frame.addScriptTag({ content: `${shared}\n${placement}\n${bridge}\nconst beforeInstall = window.bridgeListeners.length; window.disposeBridge = installBridge(); window.bridgeOwned = window.bridgeListeners.slice(beforeInstall);` });
     const selectMode = async type => {
       await page.evaluate(type => document.querySelector('iframe').contentWindow.postMessage({type}, location.origin), type);
       // Same-origin ping ensures the prior message has been processed in the iframe event loop.
@@ -109,6 +110,15 @@ test('capture isolation, real click selection, restoration and idle overlay with
       document.querySelector('button').dispatchEvent(event); return !event.defaultPrevented;
     }), activation);
     assert.ok(unblocked.every(Boolean));
+    await page.evaluate(()=>{window.placements=[];window.addEventListener('message',event=>{if(event.source===document.querySelector('iframe').contentWindow&&event.origin===location.origin&&event.data.type==='placement:target')window.placements.push(event.data.payload);});document.querySelector('iframe').contentWindow.postMessage({type:'placement:start',payload:{sessionId:'fixture-placement',assetId:'fixture-asset',baseVersion:'fixture-version'}},location.origin);});
+    await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(resolve)));
+    await frame.locator('button').focus();await frame.locator('button').press('Enter');
+    await page.waitForFunction(()=>window.placements.length===1);
+    assert.equal((await page.evaluate(()=>window.placements[0])).sessionId,'fixture-placement');
+    assert.equal((await page.evaluate(()=>window.placements[0].target)).src,'src/Button.tsx:1:1');
+    await page.evaluate(()=>document.querySelector('iframe').contentWindow.postMessage({type:'placement:stop',payload:{sessionId:'fixture-placement'}},location.origin));
+    await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(resolve)));
+    assert.equal(await frame.locator('button').getAttribute('tabindex'),null,'temporary placement keyboard targets must be restored');
     await frame.evaluate(() => window.disposeBridge());
     assert.equal(await frame.locator('[data-bridge-overlay]').count(), 0);
     assert.equal(await frame.evaluate(() => window.bridgeListeners.filter(item => window.bridgeOwned.includes(item)).length), 0);

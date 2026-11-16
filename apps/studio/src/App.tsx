@@ -9,6 +9,10 @@ import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
 import { api } from './api.ts';
 import { previewOrigin, previewUrl } from './preview-origin.ts';
 import ModelOriginBadge from './model-provenance.tsx';
+import AssetPlacement from './AssetPlacement.tsx';
+import type {Asset} from '@spatial/shared';
+import type {PlacementSession} from './placement-state.ts';
+import {luxApi} from './lux3d-api.ts';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
@@ -22,6 +26,10 @@ function Studio() {
   const [impact, setImpact] = useState<{ id: string; src: string; baseVersion: string; wasPicking: boolean } | null>(null);
   const impactRef = useRef<typeof impact>(null);
   const [showAssets, setShowAssets] = useState(false);
+  const [placingAsset,setPlacingAsset]=useState<Asset>();
+  const [initialPlacement,setInitialPlacement]=useState<PlacementSession>();
+  const [placementGeneration,setPlacementGeneration]=useState(0);
+  const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
   const [showScene, setShowScene] = useState(false);
   const preview = useRef<HTMLIFrameElement>(null);
   const candidatePreview = useRef<HTMLIFrameElement>(null);
@@ -163,6 +171,17 @@ function Studio() {
     return () => window.removeEventListener('message', receive);
   }, []);
 
+  async function preparePlacement(asset:Asset):Promise<PlacementSession>{
+    if(!ready||!syncReady||eventStatus!=='connected'||!state.version)throw new Error('请等待主预览和作品状态同步后放置');
+    const key=asset.id+':'+state.version;let pending=placementSessions.current.get(key);
+    if(!pending){
+      pending=luxApi.placementSession(asset.id,state.version).catch(error=>{placementSessions.current.delete(key);throw error;});
+      placementSessions.current.set(key,pending);
+    }
+    const session=await pending;
+    if(session.expiresAt<=Date.now()){placementSessions.current.delete(key);throw new Error('放置会话已过期，请重新准备');}
+    return session;
+  }
   const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
   function toggle() {
     if (impactRef.current) { exitImpact(); return; }
@@ -180,7 +199,8 @@ function Studio() {
 
   return (
     <main className="studio">
-      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel onClose={() => setShowAssets(false)}/></Suspense>}
+      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={(asset,session)=>{exitImpact(false);pickingRef.current=false;setPicking(false);setMode('current');setShowScene(false);setInitialPlacement(session);setPlacementGeneration(value=>value+1);setPlacingAsset(asset);send({type:'pick:stop'});}}/></Suspense>}
+      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} frame={ready?preview.current:null} onClose={()=>{for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="toolbar">
         <div><span className="wordmark">ORBIT / STUDIO</span><h1>空间化 AI 创作工作台</h1></div>
         <div className="tools">

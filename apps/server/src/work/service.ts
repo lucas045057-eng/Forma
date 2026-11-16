@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir } from 'node:fs/promises';
 import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
-import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task } from '@spatial/shared';
+import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task, AssetPlacementTarget, ModelProvenance } from '@spatial/shared';
+import type { SceneModuleConfig } from '@spatial/shared/scene-module';
+import { assertModuleRuntime, packageAssetModule, removeModulePackage } from './asset-module.ts';
+import { readLedger, verifyCandidateLedger, writeLedger, type AssetLedger } from './asset-ledger.ts';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { CodingAgent, CodingAgentError, type CodingAgentOptions } from '../agent/client.ts';
 import { Sandbox, ToolError } from '../agent/tools.ts';
@@ -17,6 +20,8 @@ import { getCheckToolsIdentity } from '../checks/tools.ts';
 import { readArtifact, validateArtifactName } from '../checks/artifacts.ts';
 
 interface StoredTask extends Task {
+  /** Candidate id whose server-side attachment ledger proves managed files. */
+  ledgerId?: string;
   createdAt: string;
   updatedAt: string;
   error?: { code: string; message: string };
@@ -85,12 +90,12 @@ export class WorkService {
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
     // These mutations can await work outside the repo queue. Register admission
     // synchronously so close cannot miss a submit that has not enqueued its task yet.
-    for (const name of ['submit', 'cancel', 'answerApproval', 'startChecks', 'cancelCheckRun', 'discard']) {
+    for (const name of ['submit', 'cancel', 'answerApproval', 'startChecks', 'cancelCheckRun', 'discard', 'createAssetCandidate', 'removeModuleCandidate']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => {
         if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
         const pending = operation(...args).then(async result => {
-          if (name === 'answerApproval' || name === 'cancel') await this.trimCandidates();
+          if (name === 'answerApproval' || name === 'cancel' || name === 'createAssetCandidate' || name === 'removeModuleCandidate') await this.trimCandidates();
           return result;
         });
         this.inFlight.add(pending);
@@ -216,7 +221,7 @@ export class WorkService {
     }
     if (intent.kind !== 'approve' || intent.id !== card.id || intent.taskId !== taskId) throw new WorkError('RECOVERY_CONFLICT', '请示恢复意图不一致', 409);
     const head = await this.repo.head();
-    const pending = await this.repo.pendingDiff(taskId, intent.before);
+    const pending = await this.repo.pendingDiff(taskId, intent.before, await this.taskLedger(task));
     if (head !== intent.before || pending.contentDigest !== intent.contentDigest || card.contentDigest !== intent.contentDigest || card.baseVersion !== intent.before) {
       await this.failApproval(card, 'stale');
       return { approval: this.publicApproval(card), task: clone(task) };
@@ -224,7 +229,7 @@ export class WorkService {
     const controller = new AbortController();
     this.controllers.set(taskId, controller);
     try {
-      await this.repo.commitCandidate(taskId, card.summary);
+      await this.repo.commitCandidate(taskId, card.summary, await this.taskLedger(task));
       let previewUrl: string;
       try {
         previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
@@ -275,6 +280,8 @@ export class WorkService {
       const mainVersion = await this.snapshot();
       if (mainVersion !== candidate.baseVersion) throw new WorkError('STALE_CANDIDATE', '主作品版本已变化，请重新生成候选', 409);
       const candidateCommit = await this.repo.candidateCommit(id, { clean: true, expectedCommit: candidate.candidateCommit });
+      const task = this.state.tasks.find(item => item.id === candidate.taskId);
+      await verifyCandidateLedger(this.repo, id, candidate.baseVersion, task ? await this.taskLedger(task) : undefined);
       const toolIdentity = await this.toolsIdentity();
       const snapshot = await computeSnapshot(this.repo.candidatePath(id), { toolIdentity, signal });
       return { candidateId: id, candidatePath: this.repo.candidatePath(id), candidateCommit, baseVersion: candidate.baseVersion,
@@ -391,6 +398,9 @@ export class WorkService {
     if (!task) throw new WorkError('NOT_FOUND', '任务不存在', 404);
     return task;
   }
+  private async taskLedger(task: StoredTask): Promise<AssetLedger | undefined> {
+    return task.ledgerId ? readLedger(this.options.directory, task.ledgerId) : undefined;
+  }
   private candidate(id: string) {
     const candidate = this.state.candidates.find(item => item.id === id);
     if (!candidate) throw new WorkError('NOT_FOUND', '候选版本不存在', 404);
@@ -428,6 +438,54 @@ export class WorkService {
     await this.append(task, '任务已排队');
     this.taskQueue = this.taskQueue.then(() => this.execute(task.id)).catch(() => {});
     return clone(task);
+  }
+
+  async createAssetCandidate(input:{baseVersion:string;assetId:string;binary:Buffer;provenance:ModelProvenance;parts?:unknown;target:AssetPlacementTarget;config:SceneModuleConfig;force?:boolean}):Promise<Task>{
+    const instanceId=randomUUID().replaceAll('-','');
+    return this.createModuleTask({
+      baseVersion:input.baseVersion,instruction:input.force?'放入独立3D模块（明确强制采用超网页门槛模型）':'放入独立3D模块',
+      prepare:async(root,candidateId,base)=>{
+        await assertModuleRuntime(root);
+        const result=await packageAssetModule({root,candidateId,baseVersion:base,instanceId,assetId:input.assetId,binary:input.binary,provenance:input.provenance,parts:input.parts,target:input.target,config:input.config});
+        return result.ledger;
+      },
+    });
+  }
+
+  async removeModuleCandidate(input:{baseVersion:string;instanceId:string}):Promise<Task>{
+    if(!/^[a-f0-9]{32}$/.test(input.instanceId))throw new WorkError('INVALID_MODULE','实例编号无效');
+    return this.createModuleTask({
+      baseVersion:input.baseVersion,instruction:'移除独立3D模块',
+      prepare:async(root,candidateId,base)=>(await removeModulePackage({root,candidateId,baseVersion:base,instanceId:input.instanceId})).ledger,
+    });
+  }
+
+  private async createModuleTask(input:{baseVersion:string;instruction:string;prepare:(root:string,candidateId:string,base:string)=>Promise<AssetLedger>}):Promise<Task>{
+    return this.repo.exclusive(async()=>{
+      const base=await this.snapshot();
+      if(base!==input.baseVersion)throw new WorkError('STALE_PLACEMENT','作品版本已变化，请重新放置',409);
+      const id=randomUUID().replaceAll('-',''),now=new Date().toISOString();
+      const task:StoredTask={id,instruction:input.instruction,status:'running',events:[],createdAt:now,updatedAt:now};
+      this.state.tasks.push(task);await this.save();
+      try{
+        await this.repo.createCandidate(id,base);
+        const root=this.repo.candidatePath(id);
+        const ledger=await input.prepare(root,id,base);
+        await writeLedger(this.options.directory,ledger);
+        task.ledgerId=id;await this.save();
+        const pending=await this.repo.pendingDiff(id,base,ledger);
+        if(!pending.changedFiles.length)throw new WorkError('NO_CHANGES','模块文件没有产生任何改动',409);
+        const evaluation=await evaluateApproval({root,baseVersion:base,changedFiles:pending.changedFiles});
+        if(evaluation.ruleCodes.includes('shared_component'))throw new WorkError('SHARED_PLACEMENT_TARGET','插入会复制到共享组件的多个实例，请选择唯一外层容器',409);
+        if(evaluation.required){
+          const card:StoredApproval={id:randomUUID().replaceAll('-',''),taskId:id,question:'是否发布这个独立3D模块候选？',reason:evaluation.evidence.join('\n'),options:[{label:'批准候选',impact:'仅发布草稿，检查后才可采用'},{label:'拒绝并丢弃',impact:'主作品和资产不变'}],affected:evaluation.affected,evidence:evaluation.evidence,status:'pending',ruleCodes:evaluation.ruleCodes,ruleVersion:'m3a-v1',baseVersion:base,contentDigest:pending.contentDigest,createdAt:now,updatedAt:now,summary:task.instruction};
+          this.state.approvals.push(card);task.status='awaiting_approval';await this.append(task,'独立3D模块草稿已准备，等待明确批准');this.options.emit({type:'approval.requested',approval:this.publicApproval(card)});return clone(task);
+        }
+        await this.repo.commitCandidate(id,task.instruction,ledger);
+        const candidate:StoredCandidate={id,taskId:id,candidateCommit:await this.repo.candidateCommit(id),baseVersion:base,branch:this.repo.branch(id),previewUrl:await this.previews.start(id,root),diff:pending.diff,outOfScope:pending.changedFiles,checks:checks(),decision:'pending',createdAt:now};
+        this.state.candidates.push(candidate);task.status='done';task.candidateId=id;await this.append(task,task.instruction);this.options.emit({type:'candidate.ready',candidate:clone(candidate)});return clone(task);
+      }catch(error){await this.previews.stop(id);await this.repo.removeCandidate(id);task.status='failed';task.error=this.failure(error);await this.append(task,task.error.message);throw error;}
+    });
   }
 
   private async validateSelection(selection?: Selection) {
@@ -561,7 +619,7 @@ export class WorkService {
       if (card.status !== 'pending' || task.status !== 'awaiting_approval') throw new WorkError('APPROVAL_NOT_PENDING', '请示已失效，不能继续回答', 409);
       if (option === 0) {
         const head = await this.snapshot();
-        const pending = await this.repo.pendingDiff(task.id, card.baseVersion);
+        const pending = await this.repo.pendingDiff(task.id, card.baseVersion, await this.taskLedger(task));
         if (head !== card.baseVersion || pending.contentDigest !== card.contentDigest) {
           await this.failApproval(card, 'stale');
           throw new WorkError('STALE_APPROVAL', '草稿摘要或主作品版本已变化，请重新生成任务', 409);
@@ -655,6 +713,8 @@ export class WorkService {
       if (!latest || candidate.latestCheckRunId !== latest.id) throw new Error('missing check run');
       await this.validatePassedRun(latest);
     } catch { throw new WorkError('CHECKS_NOT_PASSED', '当前候选没有完整有效的四项检查证明，请重新检查或生成候选', 409); }
+    const task = this.state.tasks.find(item => item.id === candidate.taskId);
+    await verifyCandidateLedger(this.repo, id, candidate.baseVersion, task ? await this.taskLedger(task) : undefined);
     this.state.intent = { kind: 'adopt', id, before: await this.repo.head() };
     await this.save();
     const mergeCommit = await this.repo.adopt(id);

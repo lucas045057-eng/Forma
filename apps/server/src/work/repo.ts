@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readdir, readFile, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
+import { assertManagedTree, verifyCandidateLedger, type AssetLedger, type LedgerChange } from './asset-ledger.ts';
 
 export class WorkError extends Error {
   code: string; status: number;
@@ -21,6 +22,20 @@ function git(args: string[], cwd: string, env: NodeJS.ProcessEnv = {}): Promise<
         if (error && typeof (error as { code?: unknown }).code !== 'number') return reject(error);
         resolve({ code: error ? (error as unknown as { code: number }).code : 0, stdout, stderr });
       });
+  });
+}
+
+/** Read raw bytes (binary assets) without git text decoding or line-ending filters. */
+function gitBytes(args: string[], cwd: string): Promise<{ code: number; stdout: Buffer; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const clean = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.toUpperCase().startsWith('GIT_')));
+    execFile('git', [...identity, ...args], {
+      cwd, env: { ...clean, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0' },
+      maxBuffer: 128 * 1024 * 1024, windowsHide: true, encoding: 'buffer',
+    }, (error, stdout, stderr) => {
+      if (error && typeof (error as { code?: unknown }).code !== 'number') return reject(error);
+      resolve({ code: error ? (error as unknown as { code: number }).code : 0, stdout: stdout as unknown as Buffer, stderr: String(stderr) });
+    });
   });
 }
 
@@ -120,6 +135,7 @@ export class WorkRepo {
       if (!mode || mode === '120000' || mode === '160000' || /[\u0000-\u001f\u007f]/.test(file) || !this.permitted(file)) bad.push(JSON.stringify(file));
     }
     if (bad.length) throw new WorkError('UNSAFE_TRACKED_FILE', `作品版本库跟踪了不允许的文件或链接（${bad.slice(0, 5).join('、')}${bad.length > 5 ? ' 等' : ''}），请人工迁移到干净的版本库`, 409);
+    await assertManagedTree(this, revision);
   }
   private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {
     const tracked = (await command(['ls-files', '-z'])).stdout.split('\0').filter(Boolean);
@@ -190,6 +206,33 @@ export class WorkRepo {
     const result = await this.main(['show', `${version}:${file}`], true);
     return result.code === 0 ? result.stdout : undefined;
   }
+  async fileBufferAt(version:string,file:string):Promise<Buffer|undefined>{
+    const result=await gitBytes(['--git-dir',this.gitDir,'--work-tree',this.workRoot,'show',`${version}:${file}`],this.workRoot);
+    return result.code===0?result.stdout:undefined;
+  }
+  async candidateBufferAt(id:string,file:string):Promise<Buffer|undefined>{
+    try{return await readFile(path.join(this.candidatePath(id),file));}
+    catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return undefined;throw error;}
+  }
+  async listTree(revision:string):Promise<string[]>{
+    return (await this.main(['ls-tree','-r','-z','--name-only',revision])).stdout.split('\0').filter(Boolean);
+  }
+  async diffNameStatus(id:string,base:string):Promise<LedgerChange[]>{
+    const output=(await this.inCandidate(id,['diff','--name-status','-z',base,'--'])).stdout;
+    const parts=output.split('\0');const changes:LedgerChange[]=[];
+    for(let index=0;index<parts.length;){
+      const status=parts[index++];if(!status)continue;
+      if(status.startsWith('R')||status.startsWith('C')){const from=parts[index++],to=parts[index++];if(from&&to)changes.push({status,from,path:to});}
+      else{const file=parts[index++];if(file)changes.push({status,path:file});}
+    }
+    return changes;
+  }
+  private baseFile(id:string){return path.join(this.candidatesDir,`.base-${id}`);}
+  async candidateBase(id:string):Promise<string>{
+    if(!idPattern.test(id))throw new WorkError('NOT_FOUND','候选编号无效',404);
+    try{return (await readFile(this.baseFile(id),'utf8')).trim();}
+    catch{throw new WorkError('NOT_FOUND','候选缺少基线版本',404);}
+  }
   async transitionMatches(before: string, kind: 'adopt' | 'revert', id: string, target?: string) {
     const text = (await this.main(['log', '-1', '--format=%P%n%B'])).stdout;
     const [parents, ...body] = text.split('\n');
@@ -211,6 +254,8 @@ export class WorkRepo {
     if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
     try {
       await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
+      await mkdir(this.candidatesDir,{recursive:true});
+      await writeFile(this.baseFile(id),base,'utf8');
       await this.linkDependencies(directory); return directory;
     } catch (error) { await this.removeCandidate(id); throw error; }
   }
@@ -247,15 +292,14 @@ export class WorkRepo {
    * Read the complete unpublished diff without committing it. Intent-to-add makes new files
    * visible to git diff; the digest covers every changed file's exact bytes, including deletion.
    */
-  async pendingDiff(id: string, base: string) {
+  async pendingDiff(id: string, base: string, ledger?: AssetLedger) {
     const directory = this.candidatePath(id);
     await this.assertNoLinks(directory);
     await this.auditTree(base);
     const untracked = (await this.inCandidate(id, ['ls-files', '--others', '--exclude-standard', '-z'])).stdout.split('\0').filter(Boolean);
-    if (untracked.some(file => !modelWritable.test(file))) throw new WorkError('UNSAFE_CANDIDATE_DIFF', '模型草稿包含不允许的新增文件，不能请示或发布', 409);
     if (untracked.length) await this.inCandidate(id, ['add', '-N', '--', ...untracked]);
     const changedFiles = (await this.inCandidate(id, ['diff', '--name-only', '-z', base, '--'])).stdout.split('\0').filter(Boolean);
-    if (changedFiles.some(file => !modelWritable.test(file))) throw new WorkError('UNSAFE_CANDIDATE_DIFF', '模型只能修改 src/ 下允许的源码文件；依赖、配置与发布操作仍硬拒绝', 409);
+    await verifyCandidateLedger(this, id, base, ledger);
     const diff: FileDiff[] = [];
     const hash = createHash('sha256').update(base);
     for (const file of changedFiles) {
@@ -297,11 +341,15 @@ export class WorkRepo {
     return commit;
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
-  async commitCandidate(id: string, message: string) {
+  async commitCandidate(id: string, message: string, ledger?: AssetLedger) {
     await this.assertNoLinks(this.candidatePath(id));
     await this.stage(this.candidatePath(id), args => this.inCandidate(id, args));
     const changed = (await this.inCandidate(id, ['diff', '--cached', '--name-only'])).stdout.split('\n').map(line => line.trim()).filter(Boolean);
-    if (changed.length) await this.inCandidate(id, ['commit', '-q', '-m', message]);
+    if (changed.length) {
+      const base = ledger?.baseVersion ?? await this.candidateBase(id);
+      await verifyCandidateLedger(this, id, base, ledger);
+      await this.inCandidate(id, ['commit', '-q', '-m', message]);
+    }
     return changed;
   }
   async diff(id: string, base: string): Promise<FileDiff[]> {
@@ -342,6 +390,7 @@ export class WorkRepo {
     await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }).catch(() => {});
     await this.main(['worktree', 'prune'], true);
     await this.main(['branch', '-D', this.branch(id)], true);
+    await rm(this.baseFile(id), { force: true }).catch(() => {});
   }
   async candidateExists(id: string) {
     try { return (await lstat(path.join(this.candidatePath(id), '.git'))).isFile(); } catch { return false; }
