@@ -4,7 +4,8 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readdir, readFile, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
-import { assertManagedTree, managedBaselineListing, reusableBaselineListing, verifyCandidateLedger, type AssetLedger, type LedgerChange, type ManagedBaselineListing } from './asset-ledger.ts';
+import { auditManagedBaseline, verifyCandidateLedger, type AssetLedger, type LedgerChange, type ManagedBaselineListing } from './asset-ledger.ts';
+import { permittedWorkPath } from './path-policy.ts';
 
 export class WorkError extends Error {
   code: string; status: number;
@@ -115,42 +116,26 @@ export class WorkRepo {
     await this.auditTree();
   }
   private permitted(file: string) {
-    if (file.split('/').some(part => /^(?:\.|.*(?:secret|credential|private.?key|backup))/i.test(part) || /\.(?:pem|key|crt|p12|pfx|bak|tmp|old|orig)$/i.test(part))) return false;
-    return /^(?:src|public)\/[a-z0-9_./-]+$/i.test(file) || ['index.html', 'package.json', 'vite.config.ts', 'tsconfig.json'].includes(file);
+    return permittedWorkPath(file);
   }
   /**
    * Audit a commit's whole tree (review F3): a pre-existing repository may already track files the
    * allow-list forbids (keys, backups, links, submodules). Run unconditionally — not only when there
    * is something new to stage — at startup, before a snapshot version is handed out and before a
    * candidate is checked out from it.
+   *
+   * `auditManagedBaseline` is the only issuer of a reusable listing: it reads the tree through
+   * `readTree`, validates every record and binds the frozen list to this repo. Reuse is limited to
+   * this repo and the same full commit; everything else (symbolic HEAD, abbreviation, foreign repo,
+   * fabricated/truncated object) is enumerated again. Callers outside `repo.exclusive` should pass
+   * a full commit id and use that same commit as the base.
    */
   async auditTree(revision = 'HEAD', reusable?: ManagedBaselineListing): Promise<ManagedBaselineListing> {
-    // Operation-scoped reuse: a listing issued by this repository for this exact full commit was
-    // already validated entry-by-entry, and the commit is immutable. Anything else (symbolic HEAD,
-    // abbreviation, foreign repo, fabricated or truncated object) is enumerated again.
-    const reused = reusableBaselineListing(this, revision, reusable);
-    if (reused) {
-      await assertManagedTree(this, revision, reused);
-      return reused;
-    }
-    const listing = (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
-    const bad: string[] = [];
-    const files: string[] = [];
-    for (const record of listing) {
-      // "<mode> <type> <object>\t<path>": the path is everything after the FIRST tab (review N2).
-      const tab = record.indexOf('\t');
-      const meta = tab < 0 ? '' : record.slice(0, tab), file = tab < 0 ? record : record.slice(tab + 1);
-      const mode = /^(\d{6}) (blob|tree|commit) [0-9a-f]{40,64}$/.exec(meta)?.[1];
-      if (!mode || mode === '120000' || mode === '160000' || /[\u0000-\u001f\u007f]/.test(file) || !this.permitted(file)) bad.push(JSON.stringify(file));
-      else files.push(file);
-    }
-    if (bad.length) throw new WorkError('UNSAFE_TRACKED_FILE', `作品版本库跟踪了不允许的文件或链接（${bad.slice(0, 5).join('、')}${bad.length > 5 ? ' 等' : ''}），请人工迁移到干净的版本库`, 409);
-    // The listing validated above is complete for this revision and is handed to the managed
-    // audit instead of being enumerated a second time; anything unregistered or for another
-    // revision is ignored there and enumerated again (see reusableListing).
-    const validated = managedBaselineListing(this, revision, files);
-    await assertManagedTree(this, revision, validated);
-    return validated;
+    return auditManagedBaseline(this, revision, reusable);
+  }
+  /** Raw `ls-tree -r -z --full-tree` records for one revision; read-only, one git process. */
+  async readTree(revision: string): Promise<readonly string[]> {
+    return (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
   }
   private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {
     const tracked = (await command(['ls-files', '-z'])).stdout.split('\0').filter(Boolean);

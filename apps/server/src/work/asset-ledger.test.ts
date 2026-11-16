@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { defaultSceneModuleConfig } from '@spatial/shared/scene-module';
-import { auditTrustedImports, managedBaselineListing, scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo } from './asset-ledger.ts';
+import { auditManagedBaseline, auditTrustedImports, scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo, type TreeSource } from './asset-ledger.ts';
 
 const instanceId = 'a'.repeat(32);
 const baseVersion = 'b'.repeat(40);
@@ -14,11 +14,12 @@ export default <main><SpatialModel${instanceId}/></main>;
 
 function hash(bytes: Buffer): string { return createHash('sha256').update(bytes).digest('hex'); }
 
-function fakeRepo(before: Record<string, Buffer>, after: Record<string, Buffer>): LedgerRepo {
+function fakeRepo(before: Record<string, Buffer>, after: Record<string, Buffer>): LedgerRepo & TreeSource {
   const paths = new Set([...Object.keys(before), ...Object.keys(after)]);
   return {
     candidatePath: () => 'C:/candidate',
     async candidateBufferAt(_id, file) { return after[file]; },
+    async readTree() { return Object.keys(before).map(file => `100644 blob ${'0'.repeat(40)}\t${file}`); },
     async listTree() { return Object.keys(before); },
     async fileBufferAt(_version, file) { return before[file]; },
     async diffNameStatus() {
@@ -32,9 +33,11 @@ function fakeRepo(before: Record<string, Buffer>, after: Record<string, Buffer>)
 
 function countingRepo(before: Record<string, Buffer>, after: Record<string, Buffer>) {
   const repo = fakeRepo(before, after);
-  const state = { listTree: 0 };
-  const original = repo.listTree.bind(repo);
-  repo.listTree = async (revision: string) => { state.listTree += 1; return original(revision); };
+  const state = { listTree: 0, readTree: 0 };
+  const originalListTree = repo.listTree.bind(repo);
+  const originalReadTree = repo.readTree.bind(repo);
+  repo.listTree = async (revision: string) => { state.listTree += 1; return originalListTree(revision); };
+  repo.readTree = async (revision: string) => { state.readTree += 1; return originalReadTree(revision); };
   return { repo, state };
 }
 
@@ -165,64 +168,69 @@ export default () => <SpatialModel${instanceId}/>;
     await expect(verifyCandidateLedger(fakeRepo(before, before), 'candidate1', baseVersion, undefined)).rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
   });
 
-  it('reuses only a complete listing from the same repo and full commit, and never skips managed or ledger checks', async () => {
+  it('issues a listing only from the repository tree and reuses it only for the same repo and full commit', async () => {
+    const validTree = () => ({ [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase });
     const shadow = { 'src/spatial-module.ts': Buffer.from('export function SpatialModule(){return null}'), 'src/App.tsx': appBase };
-    const same = countingRepo(shadow, shadow);
-    const sameCommit = managedBaselineListing(same.repo, baseVersion, Object.keys(shadow));
-    await expect(verifyCandidateLedger(same.repo, 'candidate1', baseVersion, undefined, sameCommit))
-      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
-    // The managed audit still read the shadow bytes through the reused listing: it did not
-    // re-enumerate the tree, yet it still rejected the invalid baseline.
-    expect(same.state.listTree).toBe(0);
 
-    // A listing issued by another repo is not trusted, even for the same revision.
-    const foreign = countingRepo(shadow, shadow);
-    await expect(verifyCandidateLedger(foreign.repo, 'candidate1', baseVersion, undefined, sameCommit))
+    // Issuance always reads the real tree; no exported call accepts a caller-supplied file list.
+    const issuedTree = validTree();
+    const issuedRepo = countingRepo(issuedTree, validTree());
+    const listing = await auditManagedBaseline(issuedRepo.repo, baseVersion);
+    expect(issuedRepo.state.readTree).toBe(1);
+    expect(issuedRepo.state.listTree).toBe(0);
+
+    // Same repo + full commit: the file list is reused, the managed bytes are still re-read.
+    await expect(verifyCandidateLedger(issuedRepo.repo, 'candidate1', baseVersion, undefined, listing)).resolves.toBeUndefined();
+    expect(issuedRepo.state.listTree).toBe(0);
+    issuedTree[`src/scene-modules/${instanceId}.json`] = Buffer.from('{"broken":true}');
+    await expect(verifyCandidateLedger(issuedRepo.repo, 'candidate1', baseVersion, undefined, listing))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    expect(issuedRepo.state.listTree).toBe(0);
+
+    // The listing is bound to the repo that issued it, even for an identical revision.
+    const foreign = countingRepo(validTree(), validTree());
+    await expect(verifyCandidateLedger(foreign.repo, 'candidate1', baseVersion, undefined, listing)).resolves.toBeUndefined();
     expect(foreign.state.listTree).toBe(1);
 
-    // Another commit, an abbreviated revision, a fabricated list and a truncated copy all fall back.
-    const otherCommitRepo = countingRepo(shadow, shadow);
-    const otherCommit = managedBaselineListing(otherCommitRepo.repo, 'c'.repeat(40), Object.keys(shadow));
-    await expect(verifyCandidateLedger(otherCommitRepo.repo, 'candidate1', baseVersion, undefined, otherCommit))
-      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    // Another commit and an abbreviated revision are not reused either.
+    const otherCommitRepo = countingRepo(validTree(), validTree());
+    const otherCommit = await auditManagedBaseline(otherCommitRepo.repo, 'c'.repeat(40));
+    await expect(verifyCandidateLedger(otherCommitRepo.repo, 'candidate1', baseVersion, undefined, otherCommit)).resolves.toBeUndefined();
     expect(otherCommitRepo.state.listTree).toBe(1);
 
-    const abbreviatedRepo = countingRepo(shadow, shadow);
-    const abbreviated = managedBaselineListing(abbreviatedRepo.repo, baseVersion, Object.keys(shadow));
-    await expect(verifyCandidateLedger(abbreviatedRepo.repo, 'candidate1', baseVersion.slice(0, 7), undefined, abbreviated))
-      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    const abbreviatedRepo = countingRepo(validTree(), validTree());
+    const abbreviated = await auditManagedBaseline(abbreviatedRepo.repo, baseVersion);
+    await expect(verifyCandidateLedger(abbreviatedRepo.repo, 'candidate1', baseVersion.slice(0, 7), undefined, abbreviated)).resolves.toBeUndefined();
     expect(abbreviatedRepo.state.listTree).toBe(1);
 
+    // A hand-written or truncated list is never trusted: the shadow tree is enumerated and rejected.
     const fabricatedRepo = countingRepo(shadow, shadow);
     await expect(verifyCandidateLedger(fabricatedRepo.repo, 'candidate1', baseVersion, undefined, { revision: baseVersion, files: [] }))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
     expect(fabricatedRepo.state.listTree).toBe(1);
 
     const truncatedRepo = countingRepo(shadow, shadow);
-    const truncated = managedBaselineListing(truncatedRepo.repo, baseVersion, Object.keys(shadow));
-    await expect(verifyCandidateLedger(truncatedRepo.repo, 'candidate1', baseVersion, undefined, { revision: baseVersion, files: truncated.files.slice(0, 1) }))
+    await expect(verifyCandidateLedger(truncatedRepo.repo, 'candidate1', baseVersion, undefined, { revision: baseVersion, files: listing.files.slice(0, 0) }))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
     expect(truncatedRepo.state.listTree).toBe(1);
 
     const next = Buffer.from(JSON.stringify({ ...config, scale: 2 }, null, 2) + '\n');
-    const before = { [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase };
+    const before = validTree();
     const after = { [`src/scene-modules/${instanceId}.json`]: next, 'src/App.tsx': appWithRef };
     const positive = countingRepo(before, after);
-    const listing = managedBaselineListing(positive.repo, baseVersion, Object.keys(before));
+    const positiveListing = await auditManagedBaseline(positive.repo, baseVersion);
     const correct = ledger([
       { path: `src/scene-modules/${instanceId}.json`, operation: 'modify', role: 'config', beforeHash: hash(configBytes), afterHash: hash(next), bytes: next.length },
       { path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appWithRef), bytes: appWithRef.length },
     ]);
-    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, correct, listing)).resolves.toBeUndefined();
+    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, correct, positiveListing)).resolves.toBeUndefined();
     expect(positive.state.listTree).toBe(0);
     const wrongBytes = ledger([{ ...correct.entries[0]!, afterHash: hash(Buffer.from('different')) }, correct.entries[1]!]);
-    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, wrongBytes, listing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
+    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, wrongBytes, positiveListing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
 
-    const wrongBaseRepo = countingRepo(before, after);
-    const wrongBase = managedBaselineListing(wrongBaseRepo.repo, 'd'.repeat(40), Object.keys(before));
-    await expect(verifyCandidateLedger(wrongBaseRepo.repo, 'candidate1', baseVersion, undefined, wrongBase)).rejects.toMatchObject({ code: 'MANAGED_MODULE_DENIED' });
-    expect(wrongBaseRepo.state.listTree).toBe(1);
+    const wrongBase = await auditManagedBaseline(positive.repo, 'd'.repeat(40));
+    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, undefined, wrongBase)).rejects.toMatchObject({ code: 'MANAGED_MODULE_DENIED' });
+    expect(positive.state.listTree).toBe(1);
   });
 
   it('re-reads candidate bytes on every verification and rejects a change made between them', async () => {
@@ -230,7 +238,7 @@ export default () => <SpatialModel${instanceId}/>;
     const before = { [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase };
     const after: Record<string, Buffer> = { [`src/scene-modules/${instanceId}.json`]: next, 'src/App.tsx': appWithRef };
     const { repo, state } = countingRepo(before, after);
-    const listing = managedBaselineListing(repo, baseVersion, Object.keys(before));
+    const listing = await auditManagedBaseline(repo, baseVersion);
     const correct = ledger([
       { path: `src/scene-modules/${instanceId}.json`, operation: 'modify', role: 'config', beforeHash: hash(configBytes), afterHash: hash(next), bytes: next.length },
       { path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appWithRef), bytes: appWithRef.length },
