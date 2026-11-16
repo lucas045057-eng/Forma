@@ -86,6 +86,14 @@ describe('managed namespace and trusted attachment policy', () => {
     await expect(verifyCandidateLedger(fakeRepo(base, dynamic), 'candidate1', baseVersion, withSource(base, dynamic))).rejects.toMatchObject({ code: 'MODULE_REFERENCE_DYNAMIC' });
   });
 
+  it('refuses a literal model path written by page source', async () => {
+    const base = { 'src/App.tsx': appBase };
+    const after = { 'src/App.tsx': Buffer.from('export default <main><ProductScene modelUrl="/assets/asset1.glb"/></main>;
+') };
+    const policy = ledger([{ path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(after['src/App.tsx']), bytes: after['src/App.tsx'].length }]);
+    await expect(verifyCandidateLedger(fakeRepo(base, after), 'candidate1', baseVersion, policy)).rejects.toMatchObject({ code: 'MODEL_PATH_IN_SOURCE' });
+  });
+
   it('scanner keeps anchor identity and rejects extra renderer props', () => {
     const source = `<main><SpatialModule instanceId="${instanceId}"/><SpatialModule instanceId="${instanceId}" model="/assets/x.glb"/></main>`;
     const refs = scanModuleReferences(source, 'src/App.tsx');
