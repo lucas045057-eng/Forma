@@ -90,6 +90,26 @@ export async function ensureModuleRuntime(root: string): Promise<AssetFileDraft 
   return { path: SCENE_MODULE_RENDERER, operation: 'create', role: 'runtime', beforeHash: null, afterHash: digest(bytes), bytes: bytes.length };
 }
 
+export async function ensureModuleTsConfig(root: string): Promise<AssetFileDraft | undefined> {
+  const target = await safeWorkPath(root, 'tsconfig.json');
+  const before = await existingBytes(target);
+  if (!before) throw new WorkError('MODULE_TS_CONFIG_INCOMPATIBLE', '作品缺少 tsconfig.json，不能安装显式 .tsx 导入的受信模块', 409);
+  let parsed: unknown;
+  try { parsed = JSON.parse(before.toString('utf8')); }
+  catch { throw new WorkError('MODULE_TS_CONFIG_INCOMPATIBLE', '作品 tsconfig.json 不是可安全合并的 JSON；请由维护者处理', 409); }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new WorkError('MODULE_TS_CONFIG_INCOMPATIBLE', '作品 tsconfig.json 结构无效', 409);
+  const input = parsed as Record<string, unknown>;
+  const compiler = input.compilerOptions;
+  if (!compiler || typeof compiler !== 'object' || Array.isArray(compiler)) throw new WorkError('MODULE_TS_CONFIG_INCOMPATIBLE', '作品 tsconfig.json 缺少 compilerOptions', 409);
+  const options = compiler as Record<string, unknown>;
+  if (options.allowImportingTsExtensions === true) return undefined;
+  if (options.noEmit !== true) throw new WorkError('MODULE_TS_CONFIG_INCOMPATIBLE', '显式 .tsx 导入需要 noEmit:true；不能改写作品的编译语义', 409);
+  const next = { ...input, compilerOptions: { ...options, allowImportingTsExtensions: true } };
+  const bytes = Buffer.from(JSON.stringify(next, null, 2) + '\n');
+  await writeAtomic(target, bytes);
+  return { path: 'tsconfig.json', operation: 'modify', role: 'tsconfig', beforeHash: digest(before), afterHash: digest(bytes), bytes: bytes.length };
+}
+
 export function insertModuleSource(source: string, filename: string, target: AssetPlacementTarget, instanceId: string): string {
   const match = /^(src\/[A-Za-z0-9_./-]+):([1-9]\d*):([1-9]\d*)$/.exec(target.src);
   if (!match || match[1].split('/').includes('..')) throw new WorkError('INVALID_PLACEMENT_TARGET', '放置源码身份无效');
@@ -228,6 +248,8 @@ export async function packageAssetModule(input: PackageModuleInput): Promise<{ l
   const drafts: AssetFileDraft[] = await installAssetFiles(input);
   const runtime = await ensureModuleRuntime(input.root);
   if (runtime) drafts.push(runtime);
+  const tsconfig = await ensureModuleTsConfig(input.root);
+  if (tsconfig) drafts.push(tsconfig);
   const configTarget = await safeWorkPath(input.root, configPath);
   await mkdir(path.dirname(configTarget), { recursive: true });
   await writeAtomic(configTarget, configBytes);

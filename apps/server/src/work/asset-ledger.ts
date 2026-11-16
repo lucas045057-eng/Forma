@@ -16,7 +16,7 @@ import { writeAtomic } from '../assets/atomic-file.ts';
 import { readPlainFile } from '../checks/paths.ts';
 import { WorkError } from './repo.ts';
 
-export type LedgerRole = 'model' | 'provenance' | 'parts' | 'config' | 'component' | 'source' | 'runtime';
+export type LedgerRole = 'model' | 'provenance' | 'parts' | 'config' | 'component' | 'source' | 'runtime' | 'tsconfig';
 export type LedgerOperation = 'create' | 'modify' | 'delete';
 
 export interface LedgerEntry {
@@ -59,7 +59,7 @@ export interface LedgerRepo {
 }
 
 const HASH = /^[a-f0-9]{64}$/;
-const SAFE_PATH = /^(?:src|public)\/[A-Za-z0-9_-][A-Za-z0-9._/-]*$/;
+const SAFE_PATH = /^(?:tsconfig\.json|(?:src|public)\/[A-Za-z0-9_-][A-Za-z0-9._/-]*)$/;
 
 export function sha256Bytes(bytes: Buffer): string { return createHash('sha256').update(bytes).digest('hex'); }
 
@@ -87,7 +87,7 @@ export function validateLedger(value: unknown): AssetLedger {
     if (!SAFE_PATH.test(file) || file.includes('..') || file.includes('\\') || paths.has(file)) throw new WorkError('INVALID_LEDGER', '受信资产路径无效或重复');
     paths.add(file);
     if (!['create', 'modify', 'delete'].includes(String(entry.operation)) ||
-      !['model', 'provenance', 'parts', 'config', 'component', 'source', 'runtime'].includes(String(entry.role)) ||
+      !['model', 'provenance', 'parts', 'config', 'component', 'source', 'runtime', 'tsconfig'].includes(String(entry.role)) ||
       typeof entry.bytes !== 'number' || !Number.isSafeInteger(entry.bytes) || entry.bytes < 0 ||
       (entry.beforeHash !== null && !HASH.test(String(entry.beforeHash))) ||
       (entry.afterHash !== null && !HASH.test(String(entry.afterHash)))) {
