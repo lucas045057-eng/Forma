@@ -20,9 +20,9 @@
 
 审计识别 `import.meta.glob` 和 `import.meta.globEager` 的字面字符串/数组参数：
 
-- 将 pattern 按文件目录或项目根解析后，转成 glob 正则；
-- 用受管运行时/实例代表路径（`src/spatial-module*`、`src/scene-modules/...`）检查是否可能命中；
-- 命中受管树、宽 pattern、数组中的正向受管 pattern、绝对受管 pattern 都拒绝；
+- 将 pattern 按文件目录或项目根解析后，取第一个 glob 元字符段之前的**静态目录前缀**；
+- 仅当静态前缀位于 `src/<普通子目录>/`，且该子目录不是 `scene-modules`、也不以 `spatial-module` 开头时放行；`src/` 根、项目根、`/@fs/`、盘符或无法解析的前缀拒绝；
+- 不再用有限代表路径证明 glob 安全；G1 首字符、G2 extglob、G3 转义、G4 `@fs`/盘符/`file:` 都按前缀规则拒绝；
 - 明确只覆盖普通目录的 glob 保留；
 - 参数不是全部字面量、或含无法安全证明的动态值时拒绝，并说明是静态分析边界，不执行作品代码。
 
@@ -39,8 +39,8 @@
 
 `asset-ledger.test.ts` 增加：
 
-- 负例：`/src/spatial-module.tsx`、`/src/scene-modules/<id>.tsx`、受管 glob（单个、数组、宽 pattern、绝对）、动态 glob 变量、非字面 dynamic import/require、`createElement('SpatialModule')`。
-- 正例：`document.createElement('div')`、`React.createElement(Button)`、`import('./Section')`、`require('./image.png')`、普通 `components/*.tsx` glob、含负向普通 pattern 的 glob。
+- 负例：`/src/spatial-module.tsx`、`/src/scene-modules/<id>.tsx`、G1 `scene-*/b*.json`、G2 extglob、G3 转义、G4 `@fs`/盘符/`file:`、`src` 根 `*.tsx`、宽 `**`、动态 glob 变量、非字面 dynamic import/require、`createElement('SpatialModule')`。
+- 正例：`document.createElement('div')`、`React.createElement(Button)`、`import('./Section')`、`require('./image.png')`、普通 `components/*.tsx`、`components/**`、`components/{A,B}.tsx` glob。
 - 原 canonical 正例、别名/default 重命名、额外 props、重导出等断言保留。
 
 ## 未改变

@@ -199,6 +199,11 @@ function moduleTarget(file: string, specifier: string): string | undefined {
   return path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier)).toLowerCase();
 }
 
+function mentionsManagedSpecifier(specifier: string): boolean {
+  const text = specifier.replaceAll('\', '/').toLowerCase();
+  return text.includes('spatial-module') || text.includes('scene-modules');
+}
+
 function isModuleNamespaceTarget(target: string): boolean {
   return target === 'src/spatial-module' || target.startsWith('src/spatial-module.') || target.startsWith('src/spatial-module/') || target === 'src/scene-modules' || target.startsWith('src/scene-modules/');
 }
@@ -215,29 +220,18 @@ function globPatternTarget(file: string, pattern: string): string | undefined {
   return path.posix.normalize(positive).toLowerCase();
 }
 
-function globCouldMatchManaged(file: string, pattern: string): boolean {
+function globIsAllowed(file: string, pattern: string): boolean {
   const target = globPatternTarget(file, pattern);
   if (!target) return false;
-  if (/spatial-module|scene-modules/i.test(target)) return true;
-  if (/[{}\[\]]/.test(target)) return true;
-  let regex = '^';
-  for (let index = 0; index < target.length; index++) {
-    const char = target[index];
-    if (char === '*') {
-      if (target[index + 1] === '*') { regex += '.*'; index++; }
-      else regex += '[^/]*';
-      continue;
-    }
-    if (char === '?') { regex += '[^/]'; continue; }
-    regex += char.replace(/[.*+?^${}()|\\]/g, '\\$&');
-  }
-  regex += '$';
-  const matcher = new RegExp(regex);
-  const representatives = [
-    'src/spatial-module', 'src/spatial-module.ts', 'src/spatial-module.tsx', 'src/spatial-module.js', 'src/spatial-module/index.ts',
-    'src/scene-modules/index.ts', 'src/scene-modules/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json', 'src/scene-modules/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tsx',
-  ];
-  return representatives.some(item => matcher.test(item));
+  if (/spatial-module|scene-modules/i.test(target)) return false;
+  const segments = target.split('/');
+  const meta = ['*', '?', '[', ']', '{', '}', '(', ')', '!', '+', '@', '\'];
+  const first = segments.findIndex(segment => meta.some(char => segment.includes(char)));
+  const directory = first < 0 ? path.posix.dirname(target) : segments.slice(0, first).join('/');
+  if (!directory.startsWith('src/')) return false;
+  const subdirectory = directory.slice(4).split('/')[0];
+  if (!subdirectory || subdirectory === 'scene-modules' || subdirectory.startsWith('spatial-module')) return false;
+  return true;
 }
 
 function isGlobCall(node: ts.CallExpression): boolean {
@@ -278,7 +272,8 @@ export function auditTrustedImports(source: string, file: string): void {
       const specifier = node.moduleSpecifier;
       if (ts.isStringLiteral(specifier)) {
         const target = moduleTarget(file, specifier.text);
-        if (target && isModuleNamespaceTarget(target)) {
+        const managedTarget = !!target && isModuleNamespaceTarget(target);
+        if (managedTarget) {
           if (specifier.text.startsWith('/')) return reject('受信运行时/实例必须使用服务端生成的相对导入，不能使用项目根绝对路径');
           const output = /^src\/scene-modules\/([a-f0-9]{32})\.tsx$/.exec(target);
           if (!output) return reject('只允许通过受信实例组件引用 3D 模块，禁止直接导入运行器、扩展名旁路或目录导入');
@@ -293,22 +288,27 @@ export function auditTrustedImports(source: string, file: string): void {
           allowed.add(binding);
           importedCounts.set(id, (importedCounts.get(id) ?? 0) + 1);
         }
+        if (!managedTarget && mentionsManagedSpecifier(specifier.text)) return reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
       }
     }
     if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference) && ts.isStringLiteral(node.moduleReference.expression)) {
       const target = moduleTarget(file, node.moduleReference.expression.text);
       if (target && isModuleNamespaceTarget(target)) reject('不能用 import = require 加载受信实例或运行器');
+      if (mentionsManagedSpecifier(node.moduleReference.expression.text)) reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
     }
     if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
       const target = moduleTarget(file, node.moduleSpecifier.text);
       if (target && isModuleNamespaceTarget(target)) reject('不能重导出受信实例或运行器');
+      if (mentionsManagedSpecifier(node.moduleSpecifier.text)) reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
     }
     if (ts.isCallExpression(node)) {
       if (isGlobCall(node)) {
         const patterns = globArguments(node.arguments);
         if (!patterns) return reject('import.meta.glob 参数无法静态证明，请改为明确的字面路径');
-        if (patterns.some(pattern => !pattern.startsWith('!') && globCouldMatchManaged(file, pattern))) {
-          return reject('import.meta.glob 可能覆盖受管运行时或受信实例');
+        const positive = patterns.filter(pattern => !pattern.startsWith('!'));
+        if (!positive.length) return reject('import.meta.glob 需要至少一个正向且可静态证明的普通目录 pattern');
+        if (positive.some(pattern => !globIsAllowed(file, pattern))) {
+          return reject('import.meta.glob 的静态目录前缀不在普通 src 子目录内，无法证明不会覆盖受管运行时或受信实例');
         }
       }
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
@@ -316,12 +316,14 @@ export function auditTrustedImports(source: string, file: string): void {
         if (literal === undefined) return reject('动态 import 目标无法静态证明，请改为明确的字面路径');
         const target = moduleTarget(file, literal);
         if (target && isModuleNamespaceTarget(target)) return reject('不能用动态 import 加载受信实例或运行器');
+        if (mentionsManagedSpecifier(literal)) return reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
       }
       if (ts.isIdentifier(node.expression) && node.expression.text === 'require') {
         const literal = literalString(node.arguments[0]);
         if (literal === undefined) return reject('require 目标无法静态证明，请改为明确的字面路径');
         const target = moduleTarget(file, literal);
         if (target && isModuleNamespaceTarget(target)) return reject('不能用 require 加载受信实例或运行器');
+        if (mentionsManagedSpecifier(literal)) return reject('受管运行时/实例路径只能使用 server 生成的 canonical 相对导入');
       }
       const callee = ts.isPropertyAccessExpression(node.expression) ? node.expression.name.text : ts.isIdentifier(node.expression) ? node.expression.text : '';
       if (['createElement', 'jsx', 'jsxs', '_jsx', '_jsxs'].includes(callee)) {

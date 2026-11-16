@@ -32,7 +32,7 @@ function validate(operation: string, body: Record<string, unknown>): boolean {
   if (rule.required.some(key => body[key] === undefined)) return false;
   if (operation === 'image-to-3d') {
     if (!['G1', 'G1-Turbo'].includes(String(body.version))) return false;
-    if (!Array.isArray(body.outputFormat) || !body.outputFormat.length || body.outputFormat.some(item => !['zip', 'glb', 'ply'].includes(String(item)))) return false;
+    if (!Array.isArray(body.outputFormat) || !body.outputFormat.length || new Set(body.outputFormat).size !== body.outputFormat.length || body.outputFormat.some(item => !['zip', 'glb', 'ply'].includes(String(item)))) return false;
     if (!nonEmpty(body.img) && !(Array.isArray(body.imgs) && body.imgs.length > 0 && body.imgs.every(nonEmpty))) return false;
     if (body.img !== undefined && body.imgs !== undefined) return false;
     if (body.imgs !== undefined && !['G1', 'G1-Turbo'].includes(String(body.version))) return false;
@@ -40,7 +40,7 @@ function validate(operation: string, body: Record<string, unknown>): boolean {
   if (operation === 'text-to-3d') {
     if (!nonEmpty(body.prompt)) return false;
     if (!['G1', 'G1-Turbo'].includes(String(body.version))) return false;
-    if (!Array.isArray(body.outputFormat) || !body.outputFormat.length || body.outputFormat.some(item => !['zip', 'glb', 'ply'].includes(String(item)))) return false;
+    if (!Array.isArray(body.outputFormat) || !body.outputFormat.length || new Set(body.outputFormat).size !== body.outputFormat.length || body.outputFormat.some(item => !['zip', 'glb', 'ply'].includes(String(item)))) return false;
     if (body.img !== undefined && !nonEmpty(body.img)) return false;
   }
   if (operation === 'image' || operation === 'four-view') {
@@ -50,14 +50,14 @@ function validate(operation: string, body: Record<string, unknown>): boolean {
   }
   if (operation === 'material-transfer') {
     if (!nonEmpty(body.img) || !validUrl(body.meshUrl) || body.version !== 'v3.0-standard') return false;
-    if (body.outputFormat !== undefined && (!Array.isArray(body.outputFormat) || body.outputFormat.some(item => !['zip', 'glb', 'usdz', 'obj_zip', 'fbx_zip'].includes(String(item))))) return false;
+    if (body.outputFormat !== undefined && (!Array.isArray(body.outputFormat) || new Set(body.outputFormat).size !== body.outputFormat.length || body.outputFormat.some(item => !['zip', 'glb', 'usdz', 'obj_zip', 'fbx_zip'].includes(String(item))))) return false;
   }
   if (operation === 'part-split' && !validUrl(body.glbUrl)) return false;
   if (operation === 'articulation-animation' && (!validUrl(body.glbUrl) || !nonEmpty(body.prompt))) return false;
   if (operation === 'humanoid-rig' && !validUrl(body.modelUrl)) return false;
   if (operation === 'export') {
     if (!validUrl(body.modelUrl)) return false;
-    if (body.outputFormat !== undefined && (!Array.isArray(body.outputFormat) || body.outputFormat.some(item => !['usdz', 'obj_zip', 'fbx_zip', 'stl', '3mf'].includes(String(item))))) return false;
+    if (body.outputFormat !== undefined && (!Array.isArray(body.outputFormat) || new Set(body.outputFormat).size !== body.outputFormat.length || body.outputFormat.some(item => !['usdz', 'obj_zip', 'fbx_zip', 'stl', '3mf'].includes(String(item))))) return false;
   }
   if (operation === 'animation-retarget') {
     if (!validUrl(body.rigModelUrl)) return false;
@@ -121,7 +121,7 @@ export async function createMockServer(options: { scenario?: MockScenario; fixtu
     const scenario = options.scenario ?? 'success';
     const status = scenario === 'failed' ? 4 : scenario === 'cancelled' ? 6 : scenario === 'timeout' ? 1 : scenario === 'unknown' ? 99 : count === 1 ? 0 : count === 2 ? 1 : 3;
     if (![0, 1, 3, 4, 6].includes(status)) return { c: '0', d: { taskId: id, status, outputs: [] } };
-    if (!task) return { c: '0', d: { taskId: id, status, outputs: [] } };
+    if (!task) return { c: '0', d: { taskId: id, status, ...(status === 3 ? { outputs: [{ content: `http://${request.headers.host ?? '127.0.0.1'}/output/model.glb` }] } : { outputs: [] }) } };
     task.status = status;
     return { c: '0', d: { taskId: id, status, ...(status === 3 ? { outputs: outputsFor(task.operation, task.body, request.headers.host ?? '127.0.0.1') } : {}) } };
   });

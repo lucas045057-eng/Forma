@@ -8,7 +8,9 @@ const baseVersion = 'b'.repeat(40);
 const config = defaultSceneModuleConfig({ instanceId, assetId: 'asset1' });
 const configBytes = Buffer.from(JSON.stringify(config, null, 2) + '\n');
 const appBase = Buffer.from('export default <main/>;\n');
-const appWithRef = Buffer.from(`export default <main><SpatialModule instanceId="${instanceId}"/></main>;\n`);
+const appWithRef = Buffer.from(`import SpatialModel${instanceId} from "./scene-modules/${instanceId}.tsx";
+export default <main><SpatialModel${instanceId}/></main>;
+`);
 
 function hash(bytes: Buffer): string { return createHash('sha256').update(bytes).digest('hex'); }
 
@@ -111,6 +113,13 @@ export default () => <SpatialModel${instanceId}/>;
       `import { SpatialModule as M } from '/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
       `import SpatialModel${instanceId} from '/src/scene-modules/${instanceId}.tsx'; export default () => <SpatialModel${instanceId}/>;`,
       `const files = import.meta.glob('./spatial-module*.tsx', { eager: true });`,
+      `const files = import.meta.glob('./scene-*/b*.json', { eager: true });`,
+      `const files = import.meta.glob('./@(spatial|x)-module.tsx', { eager: true });`,
+      `const files = import.meta.glob('./spatial\\-module.tsx', { eager: true });`,
+      `import { SpatialModule as M } from '/@fs/E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `import { SpatialModule as M } from 'E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `import { SpatialModule as M } from 'file:///E:/work/src/spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `const files = import.meta.glob('./*.tsx');`,
       `const files = import.meta.glob('./scene-modules/*.json', { eager: true });`,
       `const files = import.meta.glob(['./**/*', '!./components/skip']);`,
       `const files = import.meta.glob('/src/spatial-module*');`,
@@ -129,6 +138,7 @@ export default () => <SpatialModel${instanceId}/>;
       `const load = () => require('./image.png');`,
       `const files = import.meta.glob('./components/*.tsx', { eager: true });`,
       `const files = import.meta.glob(['./components/**', '!./components/secret']);`,
+      `const files = import.meta.glob('./components/{A,B}.tsx');`,
     ]) expect(() => auditTrustedImports(source, 'src/App.tsx')).not.toThrow();
   });
 
