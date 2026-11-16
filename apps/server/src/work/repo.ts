@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readdir, readFile, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
-import { assertManagedTree, managedBaselineListing, verifyCandidateLedger, type AssetLedger, type LedgerChange, type ManagedBaselineListing } from './asset-ledger.ts';
+import { assertManagedTree, managedBaselineListing, reusableBaselineListing, verifyCandidateLedger, type AssetLedger, type LedgerChange, type ManagedBaselineListing } from './asset-ledger.ts';
 
 export class WorkError extends Error {
   code: string; status: number;
@@ -63,7 +63,7 @@ export class WorkRepo {
     this.candidatesDir = path.join(path.resolve(options.dataDirectory), 'candidates');
     // Bind every repository operation to the same reentrant queue, including nested snapshot calls.
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
-    for (const name of ['init', 'head', 'snapshot', 'isCommit', 'fileAt', 'fileChangedSince', 'createCandidate', 'commitCandidate', 'pendingDiff', 'candidateCommit', 'diff', 'adopt', 'revert', 'removeCandidate', 'candidateExists']) {
+    for (const name of ['init', 'head', 'snapshot', 'snapshotWithListing', 'isCommit', 'fileAt', 'fileChangedSince', 'createCandidate', 'commitCandidate', 'pendingDiff', 'candidateCommit', 'diff', 'adopt', 'revert', 'removeCandidate', 'candidateExists']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => this.exclusive(() => operation(...args));
     }
@@ -124,7 +124,15 @@ export class WorkRepo {
    * is something new to stage — at startup, before a snapshot version is handed out and before a
    * candidate is checked out from it.
    */
-  async auditTree(revision = 'HEAD'): Promise<ManagedBaselineListing> {
+  async auditTree(revision = 'HEAD', reusable?: ManagedBaselineListing): Promise<ManagedBaselineListing> {
+    // Operation-scoped reuse: a listing issued by this repository for this exact full commit was
+    // already validated entry-by-entry, and the commit is immutable. Anything else (symbolic HEAD,
+    // abbreviation, foreign repo, fabricated or truncated object) is enumerated again.
+    const reused = reusableBaselineListing(this, revision, reusable);
+    if (reused) {
+      await assertManagedTree(this, revision, reused);
+      return reused;
+    }
     const listing = (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
     const bad: string[] = [];
     const files: string[] = [];
@@ -140,7 +148,7 @@ export class WorkRepo {
     // The listing validated above is complete for this revision and is handed to the managed
     // audit instead of being enumerated a second time; anything unregistered or for another
     // revision is ignored there and enumerated again (see reusableListing).
-    const validated = managedBaselineListing(revision, files);
+    const validated = managedBaselineListing(this, revision, files);
     await assertManagedTree(this, revision, validated);
     return validated;
   }
@@ -161,13 +169,19 @@ export class WorkRepo {
       }
     };
     await walk(root);
+    // `add -u` already staged every tracked modification and deletion. The batched `add --` path
+    // exists only for files that are new in this work tree; re-adding tracked paths is a second,
+    // redundant process per batch. The path set is unchanged (no `add .`/`-A`), and the final
+    // index/link/mode check below still runs over the whole index.
+    const trackedSet = new Set(tracked);
+    const additions = addable.filter(file => !trackedSet.has(file));
     let batch: string[] = [], size = 0;
     const flush = async () => {
       if (!batch.length) return;
       await command(['add', '--', ...batch]);
       batch = []; size = 0;
     };
-    for (const file of addable) {
+    for (const file of additions) {
       if (batch.length >= 64 || size + file.length + 1 > 4000) await flush();
       batch.push(file); size += file.length + 1;
     }
@@ -211,15 +225,28 @@ export class WorkRepo {
     }
   }
   async head() { return (await this.main(['rev-parse', 'HEAD'])).stdout.trim(); }
-  /** Commit whatever is on disk (3D write-back, manual edits) so HEAD always equals the files. */
-  async snapshot(message = '自动快照：作品目录的未提交改动') {
+  /**
+   * Commit whatever is on disk (3D write-back, manual edits) so HEAD always equals the files,
+   * then audit exactly the commit that is returned. Resolving HEAD first and auditing that SHA
+   * binds the returned version to the audited tree; auditing the symbolic `HEAD` and resolving it
+   * again could hand back a commit that was never audited.
+   */
+  private async snapshotInternal(message: string) {
     await this.assertNoLinks();
     if ((await this.main(['status', '--porcelain'])).stdout.trim()) {
       await this.stage(this.workRoot, args => this.main(args));
       if ((await this.main(['diff', '--cached', '--name-only'])).stdout.trim()) await this.main(['commit', '-q', '-m', message]);
     }
-    await this.auditTree();
-    return this.head();
+    const version = (await this.main(['rev-parse', 'HEAD'])).stdout.trim();
+    const listing = await this.auditTree(version);
+    return { version, listing };
+  }
+  async snapshot(message = '自动快照：作品目录的未提交改动') {
+    return (await this.snapshotInternal(message)).version;
+  }
+  /** Same snapshot plus the validated listing for the returned commit (operation-scoped reuse). */
+  async snapshotWithListing(message = '自动快照：作品目录的未提交改动') {
+    return this.snapshotInternal(message);
   }
   async isCommit(version: string) {
     return /^[0-9a-f]{7,64}$/.test(version) && (await this.main(['cat-file', '-e', `${version}^{commit}`], true)).code === 0;
@@ -269,16 +296,17 @@ export class WorkRepo {
     return (await this.main(['diff', '--quiet', version, 'HEAD', '--', file], true)).code !== 0;
   }
 
-  async createCandidate(id: string, base: string) {
+  async createCandidate(id: string, base: string, listing?: ManagedBaselineListing) {
     const directory = this.candidatePath(id);
     await this.assertNoLinks();
-    await this.auditTree(base);
+    const validated = await this.auditTree(base, listing);
     if ((await this.main(['show-ref', '--verify', '--quiet', `refs/heads/${this.branch(id)}`], true)).code === 0) throw new WorkError('CANDIDATE_EXISTS', '候选分支已经存在', 409);
     try {
       await this.main(['worktree', 'add', '-q', '-b', this.branch(id), directory, base]);
       await mkdir(this.candidatesDir,{recursive:true});
       await writeFile(this.baseFile(id),base,'utf8');
-      await this.linkDependencies(directory); return directory;
+      await this.linkDependencies(directory);
+      return { directory, listing: validated };
     } catch (error) { await this.removeCandidate(id); throw error; }
   }
   /** pnpm's package links are relative, so link every package to its real location instead of the folder. */
@@ -314,10 +342,10 @@ export class WorkRepo {
    * Read the complete unpublished diff without committing it. Intent-to-add makes new files
    * visible to git diff; the digest covers every changed file's exact bytes, including deletion.
    */
-  async pendingDiff(id: string, base: string, ledger?: AssetLedger) {
+  async pendingDiff(id: string, base: string, ledger?: AssetLedger, listing?: ManagedBaselineListing) {
     const directory = this.candidatePath(id);
     await this.assertNoLinks(directory);
-    const baseline = await this.auditTree(base);
+    const baseline = await this.auditTree(base, listing);
     const untracked = (await this.inCandidate(id, ['ls-files', '--others', '--exclude-standard', '-z'])).stdout.split('\0').filter(Boolean);
     if (untracked.length) await this.inCandidate(id, ['add', '-N', '--', ...untracked]);
     const changedFiles = (await this.inCandidate(id, ['diff', '--name-only', '-z', base, '--'])).stdout.split('\0').filter(Boolean);
@@ -338,7 +366,7 @@ export class WorkRepo {
     }
     // Legacy digest order: base, then every file/length/content above, then every full patch.
     for (const file of changedFiles) hash.update(patches.get(file) ?? '');
-    return { changedFiles, diff, contentDigest: hash.digest('hex') };
+    return { changedFiles, diff, contentDigest: hash.digest('hex'), baseline };
   }
   async candidateCommit(id: string, options: { clean?: boolean; expectedCommit?: string } = {}) {
     const result = await this.main(['rev-parse', '--verify', this.branch(id)], true);
@@ -366,7 +394,7 @@ export class WorkRepo {
     return commit;
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
-  async commitCandidate(id: string, message: string, ledger?: AssetLedger, base?: string) {
+  async commitCandidate(id: string, message: string, ledger?: AssetLedger, base?: string, listing?: ManagedBaselineListing) {
     await this.assertNoLinks(this.candidatePath(id));
     await this.stage(this.candidatePath(id), args => this.inCandidate(id, args));
     const changed = (await this.inCandidate(id, ['diff', '--cached', '--name-only'])).stdout.split('\n').map(line => line.trim()).filter(Boolean);
@@ -380,7 +408,7 @@ export class WorkRepo {
       if (!await this.isCommit(trusted)) throw new WorkError('CANDIDATE_BASE_UNKNOWN', '候选基线不是作品版本库中的提交', 409);
       const mergeBase = (await this.main(['merge-base', trusted, this.branch(id)], true)).stdout.trim();
       if (mergeBase !== trusted) throw new WorkError('CANDIDATE_BASE_CONFLICT', '候选分支不是从该基线创建的', 409);
-      await verifyCandidateLedger(this, id, trusted, ledger);
+      await verifyCandidateLedger(this, id, trusted, ledger, listing);
       await this.inCandidate(id, ['commit', '-q', '-m', message]);
     }
     return changed;

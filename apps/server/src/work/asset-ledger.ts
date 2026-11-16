@@ -467,22 +467,43 @@ export interface ManagedBaselineListing {
   readonly files: readonly string[];
 }
 
-const issuedListings = new WeakSet<object>();
+const issuedListings = new WeakMap<object, WeakSet<object>>();
 
-export function managedBaselineListing(revision: string, files: readonly string[]): ManagedBaselineListing {
+/**
+ * Issue a frozen listing bound to the repository instance that validated it. The WeakMap key is
+ * the repo object itself, so a listing can never be transplanted to another repository (even one
+ * holding a byte-identical commit), and a fabricated/truncated copy is simply not in the set.
+ */
+export function managedBaselineListing(repo: object, revision: string, files: readonly string[]): ManagedBaselineListing {
   const value = Object.freeze({ revision, files: Object.freeze([...files]) });
-  issuedListings.add(value);
+  let set = issuedListings.get(repo);
+  if (!set) { set = new WeakSet<object>(); issuedListings.set(repo, set); }
+  set.add(value);
   return value;
 }
 
+/** Full 40- or 64-character commit id; `HEAD`, abbreviations and tags never qualify. */
+const FULL_COMMIT = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i;
+
 /**
- * Only an issued listing for the exact same commit may stand in for `listTree`. Symbolic or
- * foreign values fall back to a real enumeration: reuse must never be able to hide a file.
+ * Only an issued listing from this repository for the exact same full commit may stand in for
+ * `listTree`. Symbolic, abbreviated, foreign, fabricated or truncated values fall back to a real
+ * enumeration: reuse must never be able to hide a file.
  */
-function reusableListing(revision: string, listing: ManagedBaselineListing | undefined): readonly string[] | undefined {
-  if (!listing || !issuedListings.has(listing)) return undefined;
-  if (!/^[0-9a-f]{7,64}$/i.test(revision)) return undefined;
+function reusableListing(repo: object, revision: string, listing: ManagedBaselineListing | undefined): readonly string[] | undefined {
+  if (!listing) return undefined;
+  const set = issuedListings.get(repo);
+  if (!set || !set.has(listing)) return undefined;
+  if (!FULL_COMMIT.test(revision)) return undefined;
   return listing.revision === revision ? listing.files : undefined;
+}
+
+/**
+ * Read-only predicate with no minting power: returns the same listing only when this repository
+ * issued it for this exact full commit. Callers must re-enumerate in every other case.
+ */
+export function reusableBaselineListing(repo: object, revision: string, listing: ManagedBaselineListing | undefined): ManagedBaselineListing | undefined {
+  return reusableListing(repo, revision, listing) ? listing : undefined;
 }
 
 /**
@@ -491,7 +512,7 @@ function reusableListing(revision: string, listing: ManagedBaselineListing | und
  * extra file is rejected as a possible shadow.
  */
 async function assertManagedBaseline(repo: LedgerRepo, base: string, listing?: ManagedBaselineListing): Promise<void> {
-  for (const file of reusableListing(base, listing) ?? await repo.listTree(base)) {
+  for (const file of reusableListing(repo, base, listing) ?? await repo.listTree(base)) {
     if (!isManagedModulePath(file)) continue;
     const bytes = await repo.fileBufferAt(base, file);
     if (!bytes) continue;
