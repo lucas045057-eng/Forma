@@ -262,7 +262,8 @@ async function assertManagedBaseline(repo: LedgerRepo, base: string): Promise<vo
     if (!bytes) continue;
     let parsed: unknown;
     try { parsed = JSON.parse(bytes.toString('utf8')); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置损坏：${file}`, 409); }
-    const config = parseSceneModuleConfig(parsed);
+    let config: ReturnType<typeof parseSceneModuleConfig>;
+    try { config = parseSceneModuleConfig(parsed); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置不合法：${file}`, 409); }
     if (moduleConfigPath(config.instanceId) !== file) throw new WorkError('INVALID_MANAGED_BASELINE', '基线模块配置与实例编号不一致', 409);
   }
 }

@@ -9,6 +9,7 @@ import path from 'node:path';
 import type { Selection } from '@spatial/shared';
 import { SceneService, SceneError } from './scene/service.ts';
 import { ModuleSceneService } from './scene/modules.ts';
+import { SceneModuleError } from '@spatial/shared/scene-module';
 import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
@@ -146,6 +147,7 @@ export async function createApp(options: AppOptions = {}) {
     }
   });
   app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof SceneModuleError) return reply.code(400).send({ error: { code: error.code, message: error.message } });
     if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
     if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
     if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
