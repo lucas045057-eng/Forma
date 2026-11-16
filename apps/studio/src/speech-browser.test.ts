@@ -7,7 +7,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {installSpeechFakes} from './test-support/speech-fakes.ts';
 import {speechBrowserVite,observeSpeechBootstrap,browserFailure,writeSpeechEvidence,speechPortClosed as portClosed,type SpeechBootstrap} from './test-support/speech-browser-fixture.ts';
-import {listenOnEphemeralLoopback,openLoopback} from './test-support/safe-loopback.ts';
+import {failSetup,listenOnEphemeralLoopback,openLoopback} from './test-support/safe-loopback.ts';
 import type {ServerResponse} from 'node:http';
 
 const studio=path.resolve(import.meta.dirname,'..');
@@ -47,9 +47,11 @@ beforeAll(async()=>{
    }
    next();
   });}}],server:{host:'127.0.0.1',cors:false,hmr:false,watch:null}});
+ try{
  const http=created.httpServer;if(!http)throw new Error('Component HTTP listener missing');
  const port=await listenOnEphemeralLoopback(http);
  return{value:created,port,close:async()=>{const server=created.httpServer as unknown as {closeAllConnections?:()=>void}|undefined;server?.closeAllConnections?.();await created.close();}};
+ }catch(error){return failSetup(error,()=>created.close());}
  });
  vite=started.value;origin=started.origin;
  native=await chromium.launchServer({headless:true,args:['--disable-background-networking','--disable-component-update','--disable-features=MediaRouter,OptimizationHints,Translate']});
