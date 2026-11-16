@@ -7,7 +7,7 @@ import path from 'node:path';
 import { createServer, type ProxyOptions, type ViteDevServer } from 'vite';
 import { expect, it } from 'vitest';
 import config from '../vite.config.ts';
-import { listenOnEphemeralLoopback, openLoopback } from './test-support/safe-loopback.ts';
+import { failSetup, listenOnEphemeralLoopback, openLoopback } from './test-support/safe-loopback.ts';
 
 it('routes Studio API requests and check evidence through the real Vite proxy instead of SPA fallback', async () => {
   const seen: string[] = [];
@@ -43,18 +43,22 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
     const started = await openLoopback(async () => {
       const created = await createServer({ configFile: false, envFile: false, root: fileURLToPath(new URL('..', import.meta.url)),
         cacheDir, plugins: [], server: { ...config.server, port: 0, proxy, hmr: false, watch: null }, optimizeDeps: { noDiscovery: true, include: [] }, logLevel: 'silent' });
-      const httpServer = created.httpServer;
-      if (!httpServer) throw new Error('Studio fixture listener missing');
-      const port = await listenOnEphemeralLoopback(httpServer);
-      return {
-        value: created,
-        port,
-        close: async () => {
-          const http = created.httpServer as unknown as { closeAllConnections?: () => void } | null | undefined;
-          http?.closeAllConnections?.();
-          await created.close();
-        },
-      };
+      try {
+        const httpServer = created.httpServer;
+        if (!httpServer) throw new Error('Studio fixture listener missing');
+        const port = await listenOnEphemeralLoopback(httpServer);
+        return {
+          value: created,
+          port,
+          close: async () => {
+            const http = created.httpServer as unknown as { closeAllConnections?: () => void } | null | undefined;
+            http?.closeAllConnections?.();
+            await created.close();
+          },
+        };
+      } catch (error) {
+        return failSetup(error, () => created.close());
+      }
     });
     studio = started.value;
     const origin = started.origin;

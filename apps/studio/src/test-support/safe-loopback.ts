@@ -29,18 +29,37 @@ export function listenOnEphemeralLoopback(server: Server): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     const onError = (error: Error) => { server.off('error', onError); reject(error); };
     server.once('error', onError);
-    server.listen(0, '127.0.0.1', () => {
+    try {
+      server.listen(0, '127.0.0.1', () => {
+        server.off('error', onError);
+        const address = server.address();
+        if (!address || typeof address === 'string') { reject(new Error('loopback listener has no TCP address')); return; }
+        resolve(address.port);
+      });
+    } catch (error) {
       server.off('error', onError);
-      const address = server.address();
-      if (!address || typeof address === 'string') { reject(new Error('loopback listener has no TCP address')); return; }
-      resolve(address.port);
-    });
+      reject(error);
+    }
   });
 }
 
 export async function closeLoopbackServer(server: Server): Promise<void> {
   if (!server.listening) return;
   await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+}
+
+/**
+ * A fixture that fails while preparing/binding must close the listener it created: the value never
+ * reaches openLoopback, and the caller has not stored it yet. Keep the setup failure primary; a
+ * cleanup failure is appended rather than replacing it, and a failed setup never returns.
+ */
+export async function failSetup(error: unknown, close: () => Promise<void>): Promise<never> {
+  try {
+    await close();
+  } catch (closeError) {
+    throw new AggregateError([error, closeError], 'loopback fixture setup failed and its listener could not be closed', { cause: error });
+  }
+  throw error;
 }
 
 export interface LoopbackAttempt<T> {
