@@ -200,7 +200,7 @@ function moduleTarget(file: string, specifier: string): string | undefined {
 }
 
 function mentionsManagedSpecifier(specifier: string): boolean {
-  const text = specifier.replaceAll('\', '/').toLowerCase();
+  const text = specifier.replaceAll('\\', '/').toLowerCase();
   return text.includes('spatial-module') || text.includes('scene-modules');
 }
 
@@ -225,7 +225,7 @@ function globIsAllowed(file: string, pattern: string): boolean {
   if (!target) return false;
   if (/spatial-module|scene-modules/i.test(target)) return false;
   const segments = target.split('/');
-  const meta = ['*', '?', '[', ']', '{', '}', '(', ')', '!', '+', '@', '\'];
+  const meta = ['*', '?', '[', ']', '{', '}', '(', ')', '!', '+', '@', '\\'];
   const first = segments.findIndex(segment => meta.some(char => segment.includes(char)));
   const directory = first < 0 ? path.posix.dirname(target) : segments.slice(0, first).join('/');
   if (!directory.startsWith('src/')) return false;
