@@ -58,3 +58,10 @@ const link = async (from, to) => {
 ## 5. 未执行 / 边界
 
 未跑 typecheck/测试/E2E/服务/probe；未安装；未读 `.env`/ASKS/凭据；未碰 Pi 产品字节、live、主线、旧 probe run 原件；未派子代理；未改 5s/断言/并发/retry/skip/`isCommit`/`merge-base`/ledger mutable 复核/第二次 `pendingDiff`。
+
+## 6. 措辞更正（复审 S2/S3/S4）
+
+- **用例 1（junction 拓扑）**是 **Windows 修复证据**：在 POSIX 上相对链接本来就按物理路径解析，旧逻辑同样通过，所以其他平台只是回归保护。测试注释已写明。
+- **用例 2（普通 node_modules + broken link）**只是回归保护：修复前后都会通过，不构成修复证据。
+- 构造相对目录链接失败（缺 `SeCreateSymbolicLinkPrivilege`/开发者模式）时，用例以明确消息失败，**不 skip**。
+- broken link 仍以原始 `ENOENT` 冒泡（不新增错误码/API 扩展，S1 未采用）。
