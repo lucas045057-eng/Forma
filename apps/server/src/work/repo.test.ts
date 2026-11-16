@@ -283,6 +283,51 @@ it('keeps a spaced path out of the staged set, as the existing allow-list requir
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
+it('stages a pendingDiff intent-to-add file into the candidate commit', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    await writeFile(path.join(root, 'src', 'New.ts'), 'export const value = 42;\n');
+    // Same order as the service: pendingDiff records the new file with `add -N`, then commitCandidate
+    // stages it. The batch add never sees it because it is already in the index.
+    const pending = await repo.pendingDiff('candidate1', base);
+    expect(pending.changedFiles).toEqual(['src/New.ts']);
+    expect(await repo.commitCandidate('candidate1', '新增文件')).toEqual(['src/New.ts']);
+    const commit = await repo.candidateCommit('candidate1');
+    expect(commit).not.toBe(base);
+    expect(await repo.fileAt(commit, 'src/New.ts')).toContain('value = 42');
+    expect(await repo.listTree(commit)).toContain('src/New.ts');
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('stages pendingDiff then commitCandidate for a mixed new, modified and deleted change set', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    await writeFile(path.join(workRoot, 'src', 'Old.ts'), 'export const old = 1;\n');
+    const base = await repo.snapshot();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    await writeFile(path.join(root, 'src', 'New.ts'), 'export const fresh = 7;\n');
+    await writeFile(path.join(root, 'src', 'App.tsx'), 'export default () => <button>再次</button>;\n');
+    await rm(path.join(root, 'src', 'Old.ts'));
+    const pending = await repo.pendingDiff('candidate1', base);
+    expect([...pending.changedFiles].sort()).toEqual(['src/App.tsx', 'src/New.ts', 'src/Old.ts']);
+    const changed = await repo.commitCandidate('candidate1', '混合改动');
+    expect([...changed].sort()).toEqual(['src/App.tsx', 'src/New.ts', 'src/Old.ts']);
+    const commit = await repo.candidateCommit('candidate1');
+    expect(await repo.fileAt(commit, 'src/New.ts')).toContain('fresh = 7');
+    expect(await repo.fileAt(commit, 'src/Old.ts')).toBeUndefined();
+    expect(await repo.fileAt(commit, 'src/App.tsx')).toContain('再次');
+    const tree = await repo.listTree(commit);
+    expect(tree).toContain('src/New.ts');
+    expect(tree).not.toContain('src/Old.ts');
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
 it('reuses the validated snapshot listing across candidate creation, pending diff and commit', async () => {
   const { directory, workRoot, repo } = await fixture();
   try {
