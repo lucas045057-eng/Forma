@@ -42,7 +42,7 @@ await this.main(['worktree', 'prune'], true);     // 无变
 | c | 单次 revert 冲突 | `aborts a real interrupted single revert …` | `REVERT_HEAD` 消失、内容为 C、`status` 干净 |
 | d | 多提交 revert 序列 | `aborts an interrupted multi-commit revert …` | `sequencer/` 消失、内容为 C、`status` 干净 |
 | e | cherry-pick 冲突 | `aborts an interrupted cherry-pick …` | `CHERRY_PICK_HEAD` 消失、内容为 HEAD 侧、`status` 干净 |
-| f | merge 与 revert 标记共存 | `runs both aborts when merge and revert markers …` | 两个 abort 均被调用；`MERGE_HEAD` 消失 |
+| f | merge 与 revert 标记共存 | `rereads the revert markers after the merge abort …` | merge abort 被调用；`merge --abort` 的 `reset --merge` 清掉 `REVERT_HEAD` 后重新读 → **revert abort 未调用**；`MERGE_HEAD`/`REVERT_HEAD` 均消失、status 干净、文件回到 HEAD 侧 |
 | g | 标记读取非 ENOENT | `keeps the aborts when a marker cannot be read …`（`vi.spyOn(markerState)` 注入 `unknown`） | 两个 abort 均被调用 |
 | h | 非 files 后端 | `keeps the aborts when the ref backend is not proven …`（`work.git/reftable` 目录存在） | 两个 abort 均被调用，`prune` 仍在 |
 | i | 作品含链接 | `refuses before touching a conflicted work tree …` | 抛 `UNSAFE_WORK_TREE`；`MERGE_HEAD` 与冲突标记**原样保留** |
@@ -67,3 +67,15 @@ await this.main(['worktree', 'prune'], true);     // 无变
 ## 6. 边界
 
 未运行 typecheck/测试/E2E/服务/probe；未安装；未读 `.env`/ASKS/凭据；未碰 Pi 产品字节、live、主线、旧 probe；未派子代理；P-b/P-c/P-d、`removeCandidate` 的 prune 优化均未授权、未实施。
+
+## 7. 复审后更正（保留上文原文）
+
+**B1：用例 f 的期望修正。** `git merge --abort` 内部执行 `reset --merge`，会连带删除 `MERGE_HEAD`、`REVERT_HEAD`、`CHERRY_PICK_HEAD`。产品在 merge abort **之后**重新读 revert 标记，因此 `REVERT_HEAD` 已不存在 → **不会**再调用 `revert --abort`。原用例期望"两个 abort 都被调用"是错的（会在断言处必红，产品本身没有错）。现已改为真实 merge 冲突 + 预先写入 `REVERT_HEAD`，断言：merge abort 被调用、revert abort **未**被调用、两个标记都消失、status 干净、文件回到 HEAD 侧——正好证明"merge 后重新读"而不是用 pre-snapshot。
+
+**SF1：config 检测收紧。** 不再按"键=值"匹配，而是小写文本里出现 `include`、`refstorage`、`objectformat`、`[extensions` 任一子串即回退（覆盖 `[include]`、`[includeIf "…"]`、inline 段落头、无等号、路径里出现这些词等，宁可误拒）；`repositoryformatversion` 必须恰好出现一次且值为 `0`，缺失/重复/1/带注释等一律回退。lstat 失败、非普通文件、软链接、>64 KiB、`reftable` 存在仍为 false；`assertNoLinks` 先行与 `core.worktree` 归属检查不变。
+
+**SF2：新增 config 信号负例。** 新用例直接在本例私有 `gitDir/config` 上逐项写入并调用私有谓词（测试窄类型访问，不把 helper 公开），覆盖：`[include] path`、`includeIf`、`[extensions] refStorage`、inline `[extensions] …`、无等号 `refStorage`、`objectFormat`、缺版本、重复版本、版本 1、`0 # note`、config 缺失、config 是目录、>64 KiB、config 是文件软链接；最后恢复原字节并断言普通单版本 0 仍返回 true（避免"全 false 假绿"）。每个分支 finally 恢复原 config，软链接只指向本例私有副本。
+
+**S1：** 干净重启的用例新增断言：包装到的 `main` 调用里没有 `rev-parse`（既有的一次存在性探测走自由函数 `git()`，不在该计数内，保持原样）。
+**S2：** 本批 10 个 init 用例的清理统一走 `cleanup(root)`：先 `realpath` 并校验父目录等于 `tmpdir()`，再删除；未改动既有测试的清理。
+**S3：** "约 −100ms"仍是估算，不据此宣称 Abort 用例能回到 5s 以内。

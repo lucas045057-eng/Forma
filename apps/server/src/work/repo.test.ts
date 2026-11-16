@@ -499,6 +499,13 @@ function commitApp(repo: WorkRepo) {
   gitIn(repo, ['commit', '-q', '-m', 'change']);
 }
 
+/** Remove only the private temp root this test created, after proving its parent is tmpdir. */
+async function cleanup(root: string) {
+  const actual = await realpath(root);
+  if (path.dirname(actual) !== await realpath(tmpdir())) throw new Error('refusing cleanup outside the owned temp root');
+  await rm(actual, { recursive: true, force: true });
+}
+
 const aborted = (calls: string[][], name: 'merge' | 'revert') => calls.some(args => args[0] === name && args[1] === '--abort');
 
 it('skips the two no-op aborts on a clean restart but keeps prune and the tree audit', async () => {
@@ -510,7 +517,10 @@ it('skips the two no-op aborts on a clean restart but keeps prune and the tree a
     expect(aborted(calls, 'revert')).toBe(false);
     expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
     expect(calls.some(args => args[0] === 'ls-tree')).toBe(true);
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+    // The pre-existing existence probe is the free `git()` helper (one rev-parse) and is outside
+    // this counter; the restart path itself must not add another one.
+    expect(calls.some(args => args[0] === 'rev-parse')).toBe(false);
+  } finally { await cleanup(f.root); }
 });
 
 it('aborts a real interrupted merge during init', async () => {
@@ -526,7 +536,7 @@ it('aborts a real interrupted merge during init', async () => {
     expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(false);
     expect(await readFile(f.app, 'utf8')).toBe('main\n');
     expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('aborts a real interrupted single revert during init', async () => {
@@ -541,7 +551,7 @@ it('aborts a real interrupted single revert during init', async () => {
     expect(existsSync(path.join(f.repo.gitDir, 'REVERT_HEAD'))).toBe(false);
     expect(await readFile(f.app, 'utf8')).toBe('C\n');
     expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('aborts an interrupted multi-commit revert sequence during init', async () => {
@@ -557,7 +567,7 @@ it('aborts an interrupted multi-commit revert sequence during init', async () =>
     expect(existsSync(path.join(f.repo.gitDir, 'sequencer'))).toBe(false);
     expect(await readFile(f.app, 'utf8')).toBe('C\n');
     expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('aborts an interrupted cherry-pick through the revert abort during init', async () => {
@@ -573,10 +583,10 @@ it('aborts an interrupted cherry-pick through the revert abort during init', asy
     expect(existsSync(path.join(f.repo.gitDir, 'CHERRY_PICK_HEAD'))).toBe(false);
     expect(await readFile(f.app, 'utf8')).toBe('main\n');
     expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
-it('runs both aborts when merge and revert markers exist together', async () => {
+it('rereads the revert markers after the merge abort and skips the second abort', async () => {
   const f = await initFixture();
   try {
     gitIn(f.repo, ['checkout', '-q', '-b', 'side']);
@@ -585,12 +595,19 @@ it('runs both aborts when merge and revert markers exist together', async () => 
     await writeFile(f.app, 'main\n'); commitApp(f.repo);
     gitIn(f.repo, ['merge', 'side'], true);
     await writeFile(path.join(f.repo.gitDir, 'REVERT_HEAD'), `${gitIn(f.repo, ['rev-parse', 'HEAD']).trim()}\n`);
+    expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(true);
+    expect(existsSync(path.join(f.repo.gitDir, 'REVERT_HEAD'))).toBe(true);
     const calls = countMain(f.repo);
     await f.repo.init();
+    // merge --abort runs reset --merge, which removes MERGE_HEAD, REVERT_HEAD and CHERRY_PICK_HEAD.
+    // The implementation reads the revert markers only after that call, so the second abort is skipped.
     expect(aborted(calls, 'merge')).toBe(true);
-    expect(aborted(calls, 'revert')).toBe(true);
+    expect(aborted(calls, 'revert')).toBe(false);
     expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(false);
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+    expect(existsSync(path.join(f.repo.gitDir, 'REVERT_HEAD'))).toBe(false);
+    expect(await readFile(f.app, 'utf8')).toBe('main\n');
+    expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
+  } finally { await cleanup(f.root); }
 });
 
 it('keeps the aborts when a marker cannot be read (unknown state)', async () => {
@@ -602,7 +619,7 @@ it('keeps the aborts when a marker cannot be read (unknown state)', async () => 
     await f.repo.init();
     expect(aborted(calls, 'merge')).toBe(true);
     expect(aborted(calls, 'revert')).toBe(true);
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('keeps the aborts when the ref backend is not proven files-based', async () => {
@@ -614,7 +631,7 @@ it('keeps the aborts when the ref backend is not proven files-based', async () =
     expect(aborted(calls, 'merge')).toBe(true);
     expect(aborted(calls, 'revert')).toBe(true);
     expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('refuses before touching a conflicted work tree that contains a link', async () => {
@@ -631,7 +648,7 @@ it('refuses before touching a conflicted work tree that contains a link', async 
     await expect(f.repo.init()).rejects.toMatchObject({ code: 'UNSAFE_WORK_TREE' });
     expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(true);
     expect(await readFile(f.app, 'utf8')).toContain('<<<<<<<');
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
 });
 
 it('leaves a stale index.lock alone when there is nothing to abort', async () => {
@@ -645,5 +662,66 @@ it('leaves a stale index.lock alone when there is nothing to abort', async () =>
     expect(aborted(calls, 'revert')).toBe(false);
     expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
     expect(existsSync(lock)).toBe(true);
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await cleanup(f.root); }
+});
+
+it('falls back unless the config is a single plain version-0 files repository', async () => {
+  const f = await initFixture();
+  const config = path.join(f.repo.gitDir, 'config');
+  const original = await readFile(config);
+  const base = original.toString('utf8');
+  const predicate = () => (f.repo as unknown as { filesBackedRefLayout: () => Promise<boolean> }).filesBackedRefLayout();
+  const reset = async () => { await rm(config, { recursive: true, force: true }); await writeFile(config, original); };
+  try {
+    expect(await predicate()).toBe(true);
+
+    const signals = [
+      '[include]\n\tpath = ../shared\n',
+      '[includeIf "gitdir:C:/x/"]\n\tpath = ../shared\n',
+      '[extensions]\n\trefStorage = reftable\n',
+      '[extensions]\n\tobjectFormat = sha256\n',
+      '[extensions]\n\trefStorage\n',
+      '[extensions] refStorage = reftable\n',
+    ];
+    for (const signal of signals) {
+      await writeFile(config, `${base}\n${signal}`);
+      expect(await predicate(), signal).toBe(false);
+    }
+    await reset();
+
+    const variants = [
+      base.replace(/^[ \t]*repositoryformatversion.*$/m, ''),
+      `${base}\n[core]\n\trepositoryformatversion = 0\n`,
+      base.replace(/^[ \t]*repositoryformatversion.*$/m, 'repositoryformatversion = 1'),
+      base.replace(/^[ \t]*repositoryformatversion.*$/m, 'repositoryformatversion = 0 # note'),
+    ];
+    for (const variant of variants) {
+      await writeFile(config, variant);
+      expect(await predicate(), variant).toBe(false);
+    }
+    await reset();
+
+    await rm(config, { force: true });
+    expect(await predicate()).toBe(false);
+    await reset();
+    await rm(config, { force: true });
+    await mkdir(config);
+    expect(await predicate()).toBe(false);
+    await reset();
+    await writeFile(config, `${base}\n# ${'x'.repeat(70 * 1024)}\n`);
+    expect(await predicate()).toBe(false);
+    await reset();
+
+    const copy = path.join(f.root, 'config-copy');
+    await writeFile(copy, original);
+    await rm(config, { force: true });
+    try {
+      await symlink(copy, config, 'file');
+    } catch (error) {
+      throw new Error(`this regression needs file symlink support (Developer Mode or SeCreateSymbolicLinkPrivilege): ${(error as Error).message}`);
+    }
+    expect(await predicate()).toBe(false);
+    await reset();
+    expect(await predicate()).toBe(true);
+  } finally { await reset().catch(() => {}); await cleanup(f.root); }
 });
