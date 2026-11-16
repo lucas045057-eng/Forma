@@ -20,7 +20,7 @@
 
 ## Review Focus
 
-1. 断网发生在上游接受之后：仍能恢复原任务，无二次付费创建。
+1. 断网发生在上游接受之后：有providerTaskId只查原ID；无ID保持未知，历史匹配仅供用户明确认领，绝不自动认领或二次付费创建。
 2. 浏览器拖放跨iframe和页面滚动：实际目标被正确识别，不受坐标偏差或陈旧版本影响。
 3. 高级操作返回多个不同格式产物：不丢结果、不把图片/ZIP当GLB采用、不破坏动画。
 4. 资产被放入多个网页模块：每个实例独立可调整，采用/撤回包含正确资产及来源。
@@ -40,7 +40,7 @@ Interfaces: shared discriminated `LuxOperation`, `LuxTask`, `LuxArtifact`, opaqu
 
 Files: modify `apps/server/src/assets/service.ts`; create `lux3d-task-store.ts`, `lux3d-task-service.ts` and tests; extend existing asset event/public projection intentionally. Existing fallback/GLB pipeline remains usable.
 
-Interfaces: create operation with `{operation,inputRefs,parameters,idempotencyKey}`; returns local typed task. Resume only queries prior remote ID. Local artifacts distinguish original/optimized/version relationships and safe preview/download endpoints.
+Interfaces: create operation with `{operation,inputRefs,parameters,idempotencyKey}`; returns local typed task. Resume only queries prior remote ID; missing remote ID stays unknown until explicit user binding. Local artifacts distinguish original/optimized/version relationships and safe preview/download endpoints. Implement the spec revision's per-operation parser table and upload/public-resource disclosure, not a generic URL-only parser.
 
 - [ ] Write regression cases for concurrent duplicate clicks, changed parameters409, accepted-then-disconnected unknown, restart, expiry, multi-output/animation preservation, malformed business response and close.
 - [ ] Implement persistent reservation/state machine, bounded query retries, stage progress, task history and transformation dependencies.
@@ -60,7 +60,7 @@ Interfaces: canonical API accepts file/upload reference and typed operation; vie
 
 Files: extend `packages/shared/src/index.ts`, `packages/bridge/src/index.ts`, `apps/studio/src/App.tsx`; create focused `asset-placement` controller/protocol, server placement routes/service and tests; integrate `apps/server/src/scene/service.ts`, work task/candidate asset packaging, preview renderer/components as needed.
 
-Interfaces: a parent-held drag session binds assetId/workVersion/nonce/mainFrame/expiry. Frame emits a validated replace/insert target. Confirmation creates a placement intent; replace reuses scene adoption/history, insert creates a normal candidate with trusted asset attachment and independent instance configuration. No untrusted arbitrary file/URL paths in instructions.
+Interfaces: a parent-held drag session binds assetId/workVersion/nonce/mainFrame/expiry. Frame emits an untrusted replace/insert hint, revalidated by server at the bound version. Confirmation creates a placement intent; main-slot replace reuses scene history, module replace uses its instance configuration, insert creates a normal candidate with server-only attested attachments. Instance files live at src/scene-modules/<instanceId>.json; independent histories live outside model-writable work source, with version/content cursor checks. No untrusted arbitrary file/URL paths in instructions; modelWritable remains src-only, with server-managed exact attachment/config attestations rather than a public/** exception.
 
 - [ ] Write protocol tests for wrong origin/source, replay/expiry/stale version, nested target/scroll, external drag and pending assets.
 - [ ] Implement highlight/drop/confirmation and identical keyboard/button path; unchanged main work until confirmation.
@@ -77,3 +77,13 @@ Files: report `docs/reports/Lux3D-workbench-implementation.md`; independent Pi t
 - [ ] After focused acceptance/review, arrange one relevant full integration regression; only then create a fresh manual-acceptance instance. Current39743 remains preserved.
 
 Plan self-review: all10 operations, both placement kinds, transform/revert, upload/secret boundaries and five Review Focus inputs map to tasks and test cases above. SDK/new dependency/endpoint migration are explicit review decisions; no undocumented API or global SceneConfig multi-instance assumption is permitted.
+
+## 设计修订后的必要回归（与上述任务同批写齐）
+
+- [ ] Task2: accepted response loss without ID stays unknown even if list has exactly one item; explicit user recovery preserves manual confirmation provenance. Valid rejects keep failed key; no implicit new key, POST retry or cross-domain retry.
+- [ ] Task1/2: drop does not request upload token; click reveals cloud-resource disclosure then uploads; credential globalDomain/single/block/dedup/lackBlocks/status bounds and separate auth tested.
+- [ ] Task2/3: test every parser table row including NOT_REQUESTED slot preservation, unordered Turbo results, four-view order, rig error JSON, partial retarget success, 2h link refresh and original-not-optimized downstream input.
+- [ ] Task2/3/4: animated/skinned/morph models bypass destructive transforms, channels/joints survive, webpage instance playback is explicit and controls release resources.
+- [ ] Task4: instance-specific adjustment/model replace/undo; interleaved main-slot write, other-instance save, candidate adoption and version revert invalidate stale cursor safely; previous/current config hashes and journals are evidence.
+- [ ] Task4: forged iframe source/type or model-written managed config cannot bypass server target proof; attachment missing/hash mismatch/symlink/cancel/adopt/revert checks retain src-only model authority.
+- [ ] Independent design rereview is finite and static; root batches feedback to CodeBuddy. No tests or real services before the implementation batch is frozen.
