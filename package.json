@@ -17,7 +17,9 @@
     "test:e2e:m1a": "playwright test -c playwright.m1a.config.ts",
     "test:e2e:m1b": "playwright test -c playwright.m1b.config.ts",
     "test:e2e:m2a": "playwright test -c playwright.m2a.config.ts",
-    "test:e2e:m3b": "playwright test -c playwright.m3b.config.ts"
+    "test:e2e:m3b": "playwright test -c playwright.m3b.config.ts",
+    "test:e2e:m4": "playwright test -c playwright.m4.config.ts",
+    "test:e2e:m4:real-speech": "playwright test -c playwright.m4-real-speech.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
