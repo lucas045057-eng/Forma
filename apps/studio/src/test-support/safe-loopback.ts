@@ -1,4 +1,4 @@
-import type { Server } from 'node:http';
+import type { Server } from 'node:net';
 
 /**
  * Ports that Fetch and Chromium refuse even for loopback destinations.
