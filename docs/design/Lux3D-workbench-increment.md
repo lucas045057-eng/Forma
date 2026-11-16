@@ -55,7 +55,7 @@
 新增独立职责模块，优先保留已有AssetService稳定接口：
 
 1. 上传接收本地文件，存储opaque uploadId；浏览器不拿云凭据。图片仅PNG/JPEG/WebP，单张最大10MiB、最大4096万像素；实际解码校验，不相信扩展名/MIME；拒绝SVG/HTML和压缩炸弹。多图按官方上限1–32张有序处理；本地GLB限制100MiB并验结构。每请求/总体大小与超时显式受限，不全局放大Fastify限制。
-2. 官方Asset上传凭证及OUS上传由后端完成；API key与上传凭证不进入公开配置/日志/事件。只允许服务配置及可信凭证给出的上传目的域，不提供通用URL代理；拒绝localhost/私网/重定向绕过/任意路径；远端产物下载复用并加强既有安全边界。
+2. 官方Asset上传凭证及OUS上传由后端完成；API key与上传凭证不进入公开配置/日志/事件。上传目的域同时满足固定配置白名单、HTTPS与公网解析/连接边界；仅凭token返回域名不构成信任，不提供通用URL代理；拒绝localhost/私网/重定向绕过/任意路径；远端产物下载复用并加强既有安全边界。
 3. 规范化操作模型：`LuxOperation`覆盖上表10项；`LuxTask`包含localId、operation、providerTaskId字符串、阶段、输入引用、参数指纹、产物列表、错误和时间。云端int64 ID须无损解析，不先JSON number后转string。`LuxArtifact`明确kind=image/model/archive、格式、来源、哈希、可用本地assetId。
 4. 建议本地路由 `/assets/uploads`（上传）、`/assets/lux3d/capabilities`（无密钥）、`/assets/lux3d/operations`（创建）、`/assets/lux3d/tasks`（历史）、`/assets/lux3d/tasks/:id`（状态）、`/assets/lux3d/tasks/:id/resume`（只查询恢复）。保持旧 `/assets/lux3d` 与import路由兼容；新浏览器传opaque引用，不传任意云URL。路径可按现有约定合理收敛，报告准确记录。
 5. 客户端一次明确提交带本地幂等键；服务在云POST前持久化原子占位和参数指纹。同键同参数返回原任务，同键异参409；双击、刷新、重连及超时不二次付费创建。上游没有幂等键或可可靠匹配参数的任务历史：已获得providerTaskId才按原ID恢复；没有ID则保持submit_unknown，历史仅展示“可能对应”的任务，由用户明确确认或输入原编号后绑定，绝不按时间/唯一候选自动认领。该绑定记录人为确认来源，getTask和产物兼容校验不等于证明它就是响应丢失的原提交。未知不自动重发。
@@ -98,6 +98,7 @@ Pi至少证明：真实浏览器拖图与编码、拖图不提交、一次按钮
 
 - `modelWritable`不扩到public。创建候选前server持久化managed ledger，绑定candidateId、base/workVersion、来源asset及每个规范化路径、sha256、bytes、角色；配置、GLB、parts和provenance均有精确条目。
 - Ledger保存在工作数据区，模型不能提供或修改；server只从已经验证的本地资产复制，并在候选发布、完整diff摘要、检查快照、采用前重新校验。源码diff仍走原规则；managed附件以独立条目显示“受信资产/配置＋哈希”，不能从完整身份摘要排除。
+- 权限判断固定顺序为“规范化与路径安全→managed命名空间拒绝优先→普通modelWritable规则”。`src/scene-modules/**`不再落入普通src/json允许分支；模型对其新增、修改、删除、重命名（包括rename任一端）全部拒绝。仅服务端通过本次操作的ledger逐路径/操作/beforeHash/afterHash证明才能放行；基线已有模块同样受保护。pendingDiff、候选提交、所有audit/check/adopt/recovery入口必须调用同一权限判定，不可只在上传或新增public时检查。
 - 在所有审计入口（pendingDiff、candidateCommit/auditTree、检查、adopt、恢复）只对与ledger精确匹配的server附件放行；保留未授权非源码新增/修改、路径逃逸、链接、同名换字节和伪造清单的拒绝断言。已在基线存在的受信资产也必须防止模型改写。
 - 候选取消/作废只回收该候选拥有的副本与ledger；保留原资产与已采用实例引用。不通配删除共享文件，不改变历史证据。
 
@@ -135,3 +136,11 @@ Pi至少证明：真实浏览器拖图与编码、拖图不提交、一次按钮
 - 拖放处理在可信bridge包；iframe报告只是用户选择意图。server在绑定版本校验src定位、组件/实例注册和插入锚点，已有槽类型由服务端认定；源码被改动/目标不存在/陈旧版本拒绝。即使iframe可伪造DOM，也不能由此取得任意路径写入或绕过候选门禁。
 - 原生外部文件拖入preview时阻止浏览器默认导航并提示回到上传区；无内部会话不执行放置。键盘复用目标点选但保持相同server校验。
 - int64通过原始JSON token无损解析，优先Node24 reviver context.source；覆盖create/get/list/OUS中的ID，时间字段独立校验。动作ID以官方85项枚举固化并记录摘要，最多10个且不重复；UI真实显示并发/额度拒绝，不自动排队后收费提交。
+
+### 有限复核R1/N1–N4的补充
+
+- 上述managed拒绝优先规则落实R1；普通src-only允许规则不得覆盖它。测试覆盖新建、修改、删除、移入/移出命名空间、大小写/分隔符绕过、已有基线被改、ledger路径正确但字节错误；仍只写回归代码、不在开发中运行。
+- 固定上传域规则已在正文统一，不存在“token指向任意域也可上传”的分支；本补充的严格约束同样用于所有上传阶段和重试。
+- 受信模块渲染器的页面入口只接收instanceId，不接收调用者传入的model路径、URL或替代配置；根据服务端managed配置读取模型/变换，实例不存在或配置无效时安全拒绝。不得靠JSX另传模型地址绕过该入口。
+- 新增模块意图发布请示/候选及采用前，服务端在绑定版本与候选AST上验证：本次instanceId只有一个直接、静态的受信组件引用，且处于已校验目标容器/插入锚点；丢引用、重复引用或移到其他目标则拒绝。共享源码会产生多实例时应提示用户选择明确目标，不能默默多处插入。
+- 模块移除使用server受控remove intent并走候选：验证该instanceId引用被移除，ledger记录配置删除的原hash和afterAbsent；共享模型文件仅在无任何采用实例/候选引用时才可由服务端受控回收。普通模型源码编辑如果删掉受信模块引用、试图直接删managed文件，不得绕过remove intent。采用/回退涵盖组件、配置和ledger，其他实例与原始资产保留。
