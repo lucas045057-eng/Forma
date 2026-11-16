@@ -30,6 +30,14 @@ function fakeRepo(before: Record<string, Buffer>, after: Record<string, Buffer>)
   };
 }
 
+function countingRepo(before: Record<string, Buffer>, after: Record<string, Buffer>) {
+  const repo = fakeRepo(before, after);
+  const state = { listTree: 0 };
+  const original = repo.listTree.bind(repo);
+  repo.listTree = async (revision: string) => { state.listTree += 1; return original(revision); };
+  return { repo, state };
+}
+
 function ledger(entries: AssetLedger['entries']): AssetLedger {
   return {
     schemaVersion: 1, candidateId: 'candidate1', baseVersion, intent: 'insert', instanceId,
@@ -157,31 +165,80 @@ export default () => <SpatialModel${instanceId}/>;
     await expect(verifyCandidateLedger(fakeRepo(before, before), 'candidate1', baseVersion, undefined)).rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
   });
 
-  it('reuses only a complete listing for the same commit and never skips managed or ledger checks', async () => {
+  it('reuses only a complete listing from the same repo and full commit, and never skips managed or ledger checks', async () => {
     const shadow = { 'src/spatial-module.ts': Buffer.from('export function SpatialModule(){return null}'), 'src/App.tsx': appBase };
-    const sameCommit = managedBaselineListing(baseVersion, Object.keys(shadow));
-    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, sameCommit))
+    const same = countingRepo(shadow, shadow);
+    const sameCommit = managedBaselineListing(same.repo, baseVersion, Object.keys(shadow));
+    await expect(verifyCandidateLedger(same.repo, 'candidate1', baseVersion, undefined, sameCommit))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
-    // A listing issued for another commit, or a fabricated one, is ignored: the tree is re-listed.
-    const otherCommit = managedBaselineListing('c'.repeat(40), Object.keys(shadow));
-    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, otherCommit))
+    // The managed audit still read the shadow bytes through the reused listing: it did not
+    // re-enumerate the tree, yet it still rejected the invalid baseline.
+    expect(same.state.listTree).toBe(0);
+
+    // A listing issued by another repo is not trusted, even for the same revision.
+    const foreign = countingRepo(shadow, shadow);
+    await expect(verifyCandidateLedger(foreign.repo, 'candidate1', baseVersion, undefined, sameCommit))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
-    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, { revision: baseVersion, files: [] }))
+    expect(foreign.state.listTree).toBe(1);
+
+    // Another commit, an abbreviated revision, a fabricated list and a truncated copy all fall back.
+    const otherCommitRepo = countingRepo(shadow, shadow);
+    const otherCommit = managedBaselineListing(otherCommitRepo.repo, 'c'.repeat(40), Object.keys(shadow));
+    await expect(verifyCandidateLedger(otherCommitRepo.repo, 'candidate1', baseVersion, undefined, otherCommit))
       .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    expect(otherCommitRepo.state.listTree).toBe(1);
+
+    const abbreviatedRepo = countingRepo(shadow, shadow);
+    const abbreviated = managedBaselineListing(abbreviatedRepo.repo, baseVersion, Object.keys(shadow));
+    await expect(verifyCandidateLedger(abbreviatedRepo.repo, 'candidate1', baseVersion.slice(0, 7), undefined, abbreviated))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    expect(abbreviatedRepo.state.listTree).toBe(1);
+
+    const fabricatedRepo = countingRepo(shadow, shadow);
+    await expect(verifyCandidateLedger(fabricatedRepo.repo, 'candidate1', baseVersion, undefined, { revision: baseVersion, files: [] }))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    expect(fabricatedRepo.state.listTree).toBe(1);
+
+    const truncatedRepo = countingRepo(shadow, shadow);
+    const truncated = managedBaselineListing(truncatedRepo.repo, baseVersion, Object.keys(shadow));
+    await expect(verifyCandidateLedger(truncatedRepo.repo, 'candidate1', baseVersion, undefined, { revision: baseVersion, files: truncated.files.slice(0, 1) }))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    expect(truncatedRepo.state.listTree).toBe(1);
 
     const next = Buffer.from(JSON.stringify({ ...config, scale: 2 }, null, 2) + '\n');
     const before = { [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase };
     const after = { [`src/scene-modules/${instanceId}.json`]: next, 'src/App.tsx': appWithRef };
-    const listing = managedBaselineListing(baseVersion, Object.keys(before));
+    const positive = countingRepo(before, after);
+    const listing = managedBaselineListing(positive.repo, baseVersion, Object.keys(before));
     const correct = ledger([
       { path: `src/scene-modules/${instanceId}.json`, operation: 'modify', role: 'config', beforeHash: hash(configBytes), afterHash: hash(next), bytes: next.length },
       { path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appWithRef), bytes: appWithRef.length },
     ]);
-    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, correct, listing)).resolves.toBeUndefined();
+    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, correct, listing)).resolves.toBeUndefined();
+    expect(positive.state.listTree).toBe(0);
     const wrongBytes = ledger([{ ...correct.entries[0]!, afterHash: hash(Buffer.from('different')) }, correct.entries[1]!]);
-    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, wrongBytes, listing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
-    const wrongBase = managedBaselineListing('d'.repeat(40), Object.keys(before));
-    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, undefined, wrongBase)).rejects.toMatchObject({ code: 'MANAGED_MODULE_DENIED' });
+    await expect(verifyCandidateLedger(positive.repo, 'candidate1', baseVersion, wrongBytes, listing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
+
+    const wrongBaseRepo = countingRepo(before, after);
+    const wrongBase = managedBaselineListing(wrongBaseRepo.repo, 'd'.repeat(40), Object.keys(before));
+    await expect(verifyCandidateLedger(wrongBaseRepo.repo, 'candidate1', baseVersion, undefined, wrongBase)).rejects.toMatchObject({ code: 'MANAGED_MODULE_DENIED' });
+    expect(wrongBaseRepo.state.listTree).toBe(1);
+  });
+
+  it('re-reads candidate bytes on every verification and rejects a change made between them', async () => {
+    const next = Buffer.from(JSON.stringify({ ...config, scale: 2 }, null, 2) + '\n');
+    const before = { [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase };
+    const after: Record<string, Buffer> = { [`src/scene-modules/${instanceId}.json`]: next, 'src/App.tsx': appWithRef };
+    const { repo, state } = countingRepo(before, after);
+    const listing = managedBaselineListing(repo, baseVersion, Object.keys(before));
+    const correct = ledger([
+      { path: `src/scene-modules/${instanceId}.json`, operation: 'modify', role: 'config', beforeHash: hash(configBytes), afterHash: hash(next), bytes: next.length },
+      { path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appWithRef), bytes: appWithRef.length },
+    ]);
+    await expect(verifyCandidateLedger(repo, 'candidate1', baseVersion, correct, listing)).resolves.toBeUndefined();
+    after[`src/scene-modules/${instanceId}.json`] = Buffer.from(JSON.stringify({ ...config, scale: 3 }, null, 2) + '\n');
+    await expect(verifyCandidateLedger(repo, 'candidate1', baseVersion, correct, listing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
+    expect(state.listTree).toBe(0);
   });
 
   it('still refuses a renamed file carrying a ledger entry', async () => {

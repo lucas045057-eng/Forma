@@ -248,6 +248,62 @@ it('stages additions, deletions and an empty change set through bounded add batc
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
+it('stages new, modified, deleted and dotted paths in one commit without re-adding tracked files', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    await writeFile(path.join(workRoot, 'src', 'Old.ts'), 'export const old = 1;\n');
+    const base = await repo.snapshot();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    await writeFile(path.join(root, 'src', 'New-file.v2.ts'), 'export const dotted = 1;\n');
+    await writeFile(path.join(root, 'src', 'App.tsx'), 'export default () => <button>改过</button>;\n');
+    await rm(path.join(root, 'src', 'Old.ts'));
+    const changed = await repo.commitCandidate('candidate1', '混合改动');
+    expect([...changed].sort()).toEqual(['src/App.tsx', 'src/New-file.v2.ts', 'src/Old.ts']);
+    const commit = await repo.candidateCommit('candidate1');
+    expect(await repo.fileAt(commit, 'src/New-file.v2.ts')).toContain('dotted = 1');
+    expect(await repo.fileAt(commit, 'src/Old.ts')).toBeUndefined();
+    expect(await repo.fileAt(commit, 'src/App.tsx')).toContain('改过');
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('keeps a spaced path out of the staged set, as the existing allow-list requires', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    await writeFile(path.join(root, 'src', 'New file.ts'), 'export const spaced = 1;\n');
+    await writeFile(path.join(root, 'src', 'App.tsx'), 'export default () => <button>改动</button>;\n');
+    const changed = await repo.commitCandidate('candidate1', '忽略空格路径');
+    expect(changed).toEqual(['src/App.tsx']);
+    const commit = await repo.candidateCommit('candidate1');
+    expect(await repo.fileAt(commit, 'src/New file.ts')).toBeUndefined();
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('reuses the validated snapshot listing across candidate creation, pending diff and commit', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const { version: base, listing } = await repo.snapshotWithListing();
+    const originalMain = (repo as unknown as { main: (args: string[], allowFailure?: boolean) => Promise<{ code: number; stdout: string; stderr: string }> }).main.bind(repo);
+    let lsTree = 0;
+    (repo as unknown as { main: typeof originalMain }).main = async (args, allowFailure) => {
+      if (args[0] === 'ls-tree') { lsTree += 1; throw new Error('listing was enumerated again'); }
+      return originalMain(args, allowFailure);
+    };
+    const created = await repo.createCandidate('candidate1', base, listing);
+    expect(created.directory).toBe(repo.candidatePath('candidate1'));
+    await writeFile(path.join(created.directory, 'src', 'App.tsx'), 'export default () => <button>复用</button>;\n');
+    const pending = await repo.pendingDiff('candidate1', base, undefined, created.listing);
+    expect(pending.changedFiles).toEqual(['src/App.tsx']);
+    expect(await repo.commitCandidate('candidate1', '复用清单', undefined, base, pending.baseline)).toEqual(['src/App.tsx']);
+    expect(lsTree).toBe(0);
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
 it('keeps the untruncated patch in the digest and preserves the legacy hash order', async () => {
   const { directory, workRoot, repo } = await fixture();
   try {

@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task, AssetPlacementTarget, ModelProvenance } from '@spatial/shared';
 import type { SceneModuleConfig } from '@spatial/shared/scene-module';
 import { packageAssetModule, removeModulePackage } from './asset-module.ts';
-import { readLedger, verifyCandidateLedger, writeLedger, type AssetLedger } from './asset-ledger.ts';
+import { readLedger, verifyCandidateLedger, writeLedger, type AssetLedger, type ManagedBaselineListing } from './asset-ledger.ts';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { CodingAgent, CodingAgentError, type CodingAgentOptions } from '../agent/client.ts';
 import { Sandbox, ToolError } from '../agent/tools.ts';
@@ -191,11 +191,11 @@ export class WorkService {
     try { await this.save(); } catch (error) { this.state.intent = intent; throw error; }
   }
 
-  private async recoverApprovalIntent() {
+  private async recoverApprovalIntent(listing?: ManagedBaselineListing) {
     const intent = this.state.approvalIntent;
     if (!intent) return;
     const card = this.approval(intent.id), task = this.task(intent.taskId);
-    if (intent.kind === 'approve') { await this.finalizeApprovedTask(task.id); return; }
+    if (intent.kind === 'approve') { await this.finalizeApprovedTask(task.id, listing); return; }
     if (intent.kind === 'preview_failed' || intent.kind === 'stale') await this.save();
     await this.previews.stop(task.id);
     await this.repo.removeCandidate(task.id);
@@ -226,7 +226,7 @@ export class WorkService {
   }
 
   /** Publish only the already-generated draft named by a durable approval intent. */
-  async finalizeApprovedTask(taskId: string) {
+  async finalizeApprovedTask(taskId: string, listing?: ManagedBaselineListing) {
     const card = this.state.approvals.find(item => item.taskId === taskId);
     const task = this.task(taskId);
     if (!card) throw new WorkError('NOT_FOUND', '任务没有请示卡片', 404);
@@ -239,7 +239,7 @@ export class WorkService {
     }
     if (intent.kind !== 'approve' || intent.id !== card.id || intent.taskId !== taskId) throw new WorkError('RECOVERY_CONFLICT', '请示恢复意图不一致', 409);
     const head = await this.repo.head();
-    const pending = await this.repo.pendingDiff(taskId, intent.before, await this.taskLedger(task));
+    const pending = await this.repo.pendingDiff(taskId, intent.before, await this.taskLedger(task), listing);
     if (head !== intent.before || pending.contentDigest !== intent.contentDigest || card.contentDigest !== intent.contentDigest || card.baseVersion !== intent.before) {
       await this.failApproval(card, 'stale');
       return { approval: this.publicApproval(card), task: clone(task) };
@@ -247,7 +247,7 @@ export class WorkService {
     const controller = new AbortController();
     this.controllers.set(taskId, controller);
     try {
-      await this.repo.commitCandidate(taskId, card.summary, await this.taskLedger(task), intent.before);
+      await this.repo.commitCandidate(taskId, card.summary, await this.taskLedger(task), intent.before, pending.baseline);
       let previewUrl: string;
       try {
         previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
@@ -439,12 +439,13 @@ export class WorkService {
     await this.save();
     this.options.emit({ type: 'task.updated', task: clone(task) });
   }
-  private async snapshot() {
+  private async snapshotWithListing() {
     const previous = await this.repo.head();
-    const version = await this.repo.snapshot();
-    if (version !== previous) this.options.emit({ type: 'version.changed', version, previous, reason: 'snapshot' });
-    return version;
+    const result = await this.repo.snapshotWithListing();
+    if (result.version !== previous) this.options.emit({ type: 'version.changed', version: result.version, previous, reason: 'snapshot' });
+    return result;
   }
+  private async snapshot() { return (await this.snapshotWithListing()).version; }
 
   async version() { return { version: await this.snapshot() }; }
 
@@ -479,19 +480,19 @@ export class WorkService {
 
   private async createModuleTask(input:{baseVersion:string;instruction:string;prepare:(root:string,candidateId:string,base:string)=>Promise<AssetLedger>}):Promise<Task>{
     return this.repo.exclusive(async()=>{
-      const base=await this.snapshot();
+      const { version: base, listing: baselineListing } = await this.snapshotWithListing();
       if(base!==input.baseVersion)throw new WorkError('STALE_PLACEMENT','作品版本已变化，请重新放置',409);
       const id=randomUUID().replaceAll('-',''),now=new Date().toISOString();
       const task:StoredTask={id,instruction:input.instruction,status:'running',events:[],createdAt:now,updatedAt:now};
       this.state.tasks.push(task);await this.save();
       try{
-        await this.repo.createCandidate(id,base);
+        const prepared = await this.repo.createCandidate(id,base,baselineListing);
         const root=this.repo.candidatePath(id);
         const ledger=await input.prepare(root,id,base);
         if(ledger.intent==='insert') await assertSnapshotBudget(root);
         await writeLedger(this.options.directory,ledger);
         task.ledgerId=id;await this.save();
-        const pending=await this.repo.pendingDiff(id,base,ledger);
+        const pending=await this.repo.pendingDiff(id,base,ledger,prepared.listing);
         if(!pending.changedFiles.length)throw new WorkError('NO_CHANGES','模块文件没有产生任何改动',409);
         const evaluation=await evaluateApproval({root,baseVersion:base,changedFiles:pending.changedFiles});
         if(evaluation.ruleCodes.includes('shared_component'))throw new WorkError('SHARED_PLACEMENT_TARGET','插入会复制到共享组件的多个实例，请选择唯一外层容器',409);
@@ -499,7 +500,7 @@ export class WorkService {
           const card:StoredApproval={id:randomUUID().replaceAll('-',''),taskId:id,question:'是否发布这个独立3D模块候选？',reason:evaluation.evidence.join('\n'),options:[{label:'批准候选',impact:'仅发布草稿，检查后才可采用'},{label:'拒绝并丢弃',impact:'主作品和资产不变'}],affected:evaluation.affected,evidence:evaluation.evidence,status:'pending',ruleCodes:evaluation.ruleCodes,ruleVersion:'m3a-v1',baseVersion:base,contentDigest:pending.contentDigest,createdAt:now,updatedAt:now,summary:task.instruction};
           this.state.approvals.push(card);task.status='awaiting_approval';await this.append(task,'独立3D模块草稿已准备，等待明确批准');this.options.emit({type:'approval.requested',approval:this.publicApproval(card)});return clone(task);
         }
-        await this.repo.commitCandidate(id,task.instruction,ledger,base);
+        await this.repo.commitCandidate(id,task.instruction,ledger,base,pending.baseline);
         const candidate:StoredCandidate={id,taskId:id,candidateCommit:await this.repo.candidateCommit(id),baseVersion:base,branch:this.repo.branch(id),previewUrl:await this.previews.start(id,root),diff:pending.diff,outOfScope:pending.changedFiles,checks:checks(),decision:'pending',createdAt:now};
         this.state.candidates.push(candidate);task.status='done';task.candidateId=id;await this.append(task,task.instruction);this.options.emit({type:'candidate.ready',candidate:clone(candidate)});return clone(task);
       }catch(error){await this.previews.stop(id);await this.repo.removeCandidate(id);task.status='failed';task.error=error instanceof SnapshotBudgetError?{code:error.code,message:error.message}:this.failure(error);await this.append(task,task.error.message);throw error;}
@@ -537,8 +538,8 @@ export class WorkService {
       task.error = undefined;
       await this.append(task, '开始校验选中对象并创建候选版本');
       await this.validateSelection(task.selection);
-      const base = await this.snapshot();
-      await this.repo.createCandidate(id, base);
+      const { version: base, listing: baselineListing } = await this.snapshotWithListing();
+      const prepared = await this.repo.createCandidate(id, base, baselineListing);
       created = true;
       await this.append(task, '候选目录已创建，编码 Agent 开始工作');
       const agent = new CodingAgent({
@@ -547,7 +548,7 @@ export class WorkService {
       });
       const result = await agent.run({ taskId: id, instruction: task.instruction, selection: task.selection, root: this.repo.candidatePath(id), signal: controller.signal });
       controller.signal.throwIfAborted();
-      const pending = await this.repo.pendingDiff(id, base);
+      const pending = await this.repo.pendingDiff(id, base, undefined, prepared.listing);
       if (!pending.changedFiles.length) throw new WorkError('NO_CHANGES', '编码 Agent 没有产生任何文件改动', 409);
       const evaluation = await evaluateApproval({ root: this.repo.candidatePath(id), baseVersion: base, changedFiles: pending.changedFiles, selection: task.selection });
       if (evaluation.required) {
@@ -579,7 +580,7 @@ export class WorkService {
         });
         return;
       }
-      const changed = await this.repo.commitCandidate(id, result.summary, undefined, base);
+      const changed = await this.repo.commitCandidate(id, result.summary, undefined, base, pending.baseline);
       const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
       const candidate: StoredCandidate = {
         id, taskId: id, candidateCommit: await this.repo.candidateCommit(id), baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),
@@ -635,13 +636,15 @@ export class WorkService {
         throw new WorkError('APPROVAL_ALREADY_ANSWERED', '请示已经以另一选项回答，不能重放或覆盖', 409);
       }
       if (card.status !== 'pending' || task.status !== 'awaiting_approval') throw new WorkError('APPROVAL_NOT_PENDING', '请示已失效，不能继续回答', 409);
+      let approvalListing: ManagedBaselineListing | undefined;
       if (option === 0) {
-        const head = await this.snapshot();
-        const pending = await this.repo.pendingDiff(task.id, card.baseVersion, await this.taskLedger(task));
+        const { version: head, listing } = await this.snapshotWithListing();
+        const pending = await this.repo.pendingDiff(task.id, card.baseVersion, await this.taskLedger(task), listing);
         if (head !== card.baseVersion || pending.contentDigest !== card.contentDigest) {
           await this.failApproval(card, 'stale');
           throw new WorkError('STALE_APPROVAL', '草稿摘要或主作品版本已变化，请重新生成任务', 409);
         }
+        approvalListing = pending.baseline;
       }
       const index = this.state.approvals.findIndex(item => item.id === id);
       const previous = clone(card);
@@ -650,7 +653,7 @@ export class WorkService {
       this.state.approvalIntent = { kind: option === 0 ? 'approve' : 'reject', id, taskId: task.id, before: card.baseVersion, contentDigest: card.contentDigest };
       try { await this.save(); }
       catch (error) { this.state.approvals[index] = previous; this.state.approvalIntent = undefined; throw error; }
-      await this.recoverApprovalIntent();
+      await this.recoverApprovalIntent(approvalListing);
       return { approval: this.publicApproval(card), task: clone(this.task(task.id)) };
     });
   }
