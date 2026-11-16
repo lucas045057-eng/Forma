@@ -146,6 +146,7 @@ export class WorkRepo {
       if (/(?:include|refstorage|objectformat|\[extensions)/.test(text)) return false;
       // Exactly one plainly formatted `repositoryformatversion = 0` is required; a missing,
       // duplicated, commented or non-zero value falls back as well.
+      if ((text.match(/repositoryformatversion/g) ?? []).length !== 1) return false;
       const versions = [...text.matchAll(/^\s*repositoryformatversion\s*=\s*(\S+)\s*$/gm)];
       if (versions.length !== 1 || versions[0][1] !== '0') return false;
       return true;
