@@ -4,8 +4,8 @@ import type { LuxOperation, LuxTask } from '@spatial/shared';
 import { writeAtomic } from './atomic-file.ts';
 import {assertPlainPath,readPlainFile} from '../checks/paths.ts';
 
-interface TaskState {tasks:LuxTask[]}
 type PersistedLuxTask = LuxTask & {keyHash?: string};
+interface TaskState {tasks:PersistedLuxTask[]}
 const operations:LuxOperation[]=['image-to-3d','text-to-3d','image','four-view','material-transfer','part-split','export','articulation-animation','humanoid-rig','animation-retarget'];
 export class LuxTaskStore {
   private tasks:PersistedLuxTask[]=[];
