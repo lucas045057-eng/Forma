@@ -1,9 +1,10 @@
+import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { WorkRepo } from './repo.ts';
 
 async function fixture() {
@@ -359,7 +360,14 @@ it('resolves workspace links through a junctioned node_modules and leaves the so
     await writeFile(path.join(pkg, 'index.js'), 'export const bridge = 1;\n');
     await mkdir(scoped, { recursive: true });
     // Same shape as pnpm's workspace link: a relative link four levels up from the scope.
-    await symlink('../../../../packages/bridge', path.join(scoped, 'bridge'), 'dir');
+    // Windows fix evidence: on Windows the old code resolved this through the junction's logical
+    // path and failed; on POSIX relative links already resolve physically, so this case is only a
+    // regression guard there.
+    try {
+      await symlink('../../../../packages/bridge', path.join(scoped, 'bridge'), 'dir');
+    } catch (error) {
+      throw new Error(`this regression needs directory symlink support (Developer Mode or SeCreateSymbolicLinkPrivilege): ${(error as Error).message}`);
+    }
 
     const workRoot = path.join(root, 'work');
     await mkdir(path.join(workRoot, 'src'), { recursive: true });
@@ -454,4 +462,188 @@ it('keeps the untruncated patch in the digest and preserves the legacy hash orde
     expect((await repo.pendingDiff('candidate1', base)).contentDigest).not.toBe(pending.contentDigest);
     void workRoot;
   } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+const GIT_IDENTITY = ['-c', 'core.hooksPath=/dev/null', '-c', 'user.name=Studio', '-c', 'user.email=studio@localhost', '-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', '-c', 'commit.gpgsign=false'];
+
+function gitIn(repo: WorkRepo, args: string[], allowFailure = false): string {
+  const env = { ...Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.toUpperCase().startsWith('GIT_'))), GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0' };
+  try {
+    return execFileSync('git', [...GIT_IDENTITY, '--git-dir', repo.gitDir, '--work-tree', repo.workRoot, ...args], { cwd: repo.workRoot, encoding: 'utf8', env });
+  } catch (error) {
+    if (allowFailure) return '';
+    throw error;
+  }
+}
+
+function countMain(repo: WorkRepo) {
+  const calls: string[][] = [];
+  const target = repo as unknown as { main: (args: string[], allowFailure?: boolean) => Promise<unknown> };
+  const original = target.main.bind(repo);
+  target.main = async (args, allowFailure) => { calls.push([...args]); return original(args, allowFailure); };
+  return calls;
+}
+
+async function initFixture() {
+  const root = await mkdtemp(path.join(tmpdir(), 'spatial-init-'));
+  const workRoot = path.join(root, 'work');
+  await mkdir(path.join(workRoot, 'src'), { recursive: true });
+  await writeFile(path.join(workRoot, 'src', 'App.tsx'), 'base\n');
+  const repo = new WorkRepo({ workRoot, dataDirectory: path.join(root, 'data') });
+  await repo.init();
+  return { root, workRoot, repo, app: path.join(workRoot, 'src', 'App.tsx') };
+}
+
+function commitApp(repo: WorkRepo) {
+  gitIn(repo, ['add', '--', 'src/App.tsx']);
+  gitIn(repo, ['commit', '-q', '-m', 'change']);
+}
+
+const aborted = (calls: string[][], name: 'merge' | 'revert') => calls.some(args => args[0] === name && args[1] === '--abort');
+
+it('skips the two no-op aborts on a clean restart but keeps prune and the tree audit', async () => {
+  const f = await initFixture();
+  try {
+    const calls = countMain(f.repo);
+    await f.repo.init();
+    expect(aborted(calls, 'merge')).toBe(false);
+    expect(aborted(calls, 'revert')).toBe(false);
+    expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
+    expect(calls.some(args => args[0] === 'ls-tree')).toBe(true);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('aborts a real interrupted merge during init', async () => {
+  const f = await initFixture();
+  try {
+    gitIn(f.repo, ['checkout', '-q', '-b', 'side']);
+    await writeFile(f.app, 'side\n'); commitApp(f.repo);
+    gitIn(f.repo, ['checkout', '-q', 'main']);
+    await writeFile(f.app, 'main\n'); commitApp(f.repo);
+    gitIn(f.repo, ['merge', 'side'], true);
+    expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(true);
+    await f.repo.init();
+    expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(false);
+    expect(await readFile(f.app, 'utf8')).toBe('main\n');
+    expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('aborts a real interrupted single revert during init', async () => {
+  const f = await initFixture();
+  try {
+    await writeFile(f.app, 'B\n'); commitApp(f.repo);
+    await writeFile(f.app, 'C\n'); commitApp(f.repo);
+    const target = gitIn(f.repo, ['rev-parse', 'HEAD~1']).trim();
+    gitIn(f.repo, ['revert', '--no-edit', target], true);
+    expect(existsSync(path.join(f.repo.gitDir, 'REVERT_HEAD'))).toBe(true);
+    await f.repo.init();
+    expect(existsSync(path.join(f.repo.gitDir, 'REVERT_HEAD'))).toBe(false);
+    expect(await readFile(f.app, 'utf8')).toBe('C\n');
+    expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('aborts an interrupted multi-commit revert sequence during init', async () => {
+  const f = await initFixture();
+  try {
+    await writeFile(f.app, 'B\n'); commitApp(f.repo);
+    await writeFile(f.app, 'C\n'); commitApp(f.repo);
+    const second = gitIn(f.repo, ['rev-parse', 'HEAD~1']).trim();
+    const first = gitIn(f.repo, ['rev-parse', 'HEAD~2']).trim();
+    gitIn(f.repo, ['revert', '--no-edit', second, first], true);
+    expect(existsSync(path.join(f.repo.gitDir, 'sequencer'))).toBe(true);
+    await f.repo.init();
+    expect(existsSync(path.join(f.repo.gitDir, 'sequencer'))).toBe(false);
+    expect(await readFile(f.app, 'utf8')).toBe('C\n');
+    expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('aborts an interrupted cherry-pick through the revert abort during init', async () => {
+  const f = await initFixture();
+  try {
+    gitIn(f.repo, ['checkout', '-q', '-b', 'side']);
+    await writeFile(f.app, 'side\n'); commitApp(f.repo);
+    gitIn(f.repo, ['checkout', '-q', 'main']);
+    await writeFile(f.app, 'main\n'); commitApp(f.repo);
+    gitIn(f.repo, ['cherry-pick', 'side'], true);
+    expect(existsSync(path.join(f.repo.gitDir, 'CHERRY_PICK_HEAD'))).toBe(true);
+    await f.repo.init();
+    expect(existsSync(path.join(f.repo.gitDir, 'CHERRY_PICK_HEAD'))).toBe(false);
+    expect(await readFile(f.app, 'utf8')).toBe('main\n');
+    expect(gitIn(f.repo, ['status', '--porcelain']).trim()).toBe('');
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('runs both aborts when merge and revert markers exist together', async () => {
+  const f = await initFixture();
+  try {
+    gitIn(f.repo, ['checkout', '-q', '-b', 'side']);
+    await writeFile(f.app, 'side\n'); commitApp(f.repo);
+    gitIn(f.repo, ['checkout', '-q', 'main']);
+    await writeFile(f.app, 'main\n'); commitApp(f.repo);
+    gitIn(f.repo, ['merge', 'side'], true);
+    await writeFile(path.join(f.repo.gitDir, 'REVERT_HEAD'), `${gitIn(f.repo, ['rev-parse', 'HEAD']).trim()}\n`);
+    const calls = countMain(f.repo);
+    await f.repo.init();
+    expect(aborted(calls, 'merge')).toBe(true);
+    expect(aborted(calls, 'revert')).toBe(true);
+    expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(false);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('keeps the aborts when a marker cannot be read (unknown state)', async () => {
+  const f = await initFixture();
+  try {
+    const target = f.repo as unknown as { markerState: (file: string) => Promise<string> };
+    vi.spyOn(target, 'markerState').mockResolvedValue('unknown');
+    const calls = countMain(f.repo);
+    await f.repo.init();
+    expect(aborted(calls, 'merge')).toBe(true);
+    expect(aborted(calls, 'revert')).toBe(true);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('keeps the aborts when the ref backend is not proven files-based', async () => {
+  const f = await initFixture();
+  try {
+    await mkdir(path.join(f.repo.gitDir, 'reftable'), { recursive: true });
+    const calls = countMain(f.repo);
+    await f.repo.init();
+    expect(aborted(calls, 'merge')).toBe(true);
+    expect(aborted(calls, 'revert')).toBe(true);
+    expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('refuses before touching a conflicted work tree that contains a link', async () => {
+  const f = await initFixture();
+  try {
+    gitIn(f.repo, ['checkout', '-q', '-b', 'side']);
+    await writeFile(f.app, 'side\n'); commitApp(f.repo);
+    gitIn(f.repo, ['checkout', '-q', 'main']);
+    await writeFile(f.app, 'main\n'); commitApp(f.repo);
+    gitIn(f.repo, ['merge', 'side'], true);
+    const outside = path.join(f.root, 'outside');
+    await mkdir(outside, { recursive: true });
+    await symlink(outside, path.join(f.workRoot, 'src', 'link'), 'junction');
+    await expect(f.repo.init()).rejects.toMatchObject({ code: 'UNSAFE_WORK_TREE' });
+    expect(existsSync(path.join(f.repo.gitDir, 'MERGE_HEAD'))).toBe(true);
+    expect(await readFile(f.app, 'utf8')).toContain('<<<<<<<');
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+it('leaves a stale index.lock alone when there is nothing to abort', async () => {
+  const f = await initFixture();
+  try {
+    const lock = path.join(f.repo.gitDir, 'index.lock');
+    await writeFile(lock, '');
+    const calls = countMain(f.repo);
+    await f.repo.init();
+    expect(aborted(calls, 'merge')).toBe(false);
+    expect(aborted(calls, 'revert')).toBe(false);
+    expect(calls.some(args => args[0] === 'worktree' && args[1] === 'prune')).toBe(true);
+    expect(existsSync(lock)).toBe(true);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
 });

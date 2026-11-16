@@ -109,11 +109,58 @@ export class WorkRepo {
       // rewrites work files, so refuse first if the work tree holds links (review N1): the conflict
       // state is kept for a human to resolve instead of being written through a junction.
       await this.assertNoLinks();
-      await this.main(['merge', '--abort'], true);
-      await this.main(['revert', '--abort'], true);
+      // Skipping an abort is allowed only when a plain files-backed repository proves there is
+      // nothing to abort. Anything uncertain (a non-files ref backend, an unreadable/foreign
+      // config, an unknown marker error) keeps the unconditional abort, and git itself still does
+      // the rollback whenever one actually runs.
+      const filesBacked = await this.filesBackedRefLayout();
+      if (!filesBacked || await this.mergeInProgress()) await this.main(['merge', '--abort'], true);
+      // Read the revert markers only after the merge abort ran, so the order matches the original
+      // two calls instead of relying on a stale snapshot.
+      if (!filesBacked || await this.revertInProgress()) await this.main(['revert', '--abort'], true);
       await this.main(['worktree', 'prune'], true);
     }
     await this.auditTree();
+  }
+  /**
+   * Conservative "plain files backend" check for our own `work.git`. True only when
+   * `gitDir/reftable` is definitely absent and `gitDir/config` is a small regular file without
+   * include/refStorage/objectFormat or an unfamiliar repository-format version. Every uncertainty
+   * returns false so `init` keeps its unconditional aborts.
+   */
+  private async filesBackedRefLayout(): Promise<boolean> {
+    try {
+      await lstat(path.join(this.gitDir, 'reftable'));
+      return false;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return false;
+    }
+    try {
+      const file = path.join(this.gitDir, 'config');
+      const info = await lstat(file);
+      if (!info.isFile() || info.isSymbolicLink() || info.size > 64 * 1024) return false;
+      const text = (await readFile(file, 'utf8')).toLowerCase();
+      if (/^\s*(?:include|includeif)\s*=/m.test(text)) return false;
+      if (/^\s*(?:refstorage|objectformat)\s*=/m.test(text)) return false;
+      const version = /^\s*repositoryformatversion\s*=\s*(\S+)\s*$/m.exec(text);
+      if (version && version[1] !== '0' && version[1] !== '1') return false;
+      return true;
+    } catch { return false; }
+  }
+  /** 'absent' only on a definite ENOENT; any other error is 'unknown' and keeps the abort. */
+  private async markerState(file: string): Promise<'absent' | 'present' | 'unknown'> {
+    try { await lstat(file); return 'present'; }
+    catch (error) { return (error as NodeJS.ErrnoException).code === 'ENOENT' ? 'absent' : 'unknown'; }
+  }
+  private async mergeInProgress(): Promise<boolean> {
+    return (await this.markerState(path.join(this.gitDir, 'MERGE_HEAD'))) !== 'absent';
+  }
+  /** `revert --abort` also rolls back a cherry-pick and a multi-commit sequence (sequencer/). */
+  private async revertInProgress(): Promise<boolean> {
+    for (const name of ['REVERT_HEAD', 'CHERRY_PICK_HEAD', 'sequencer']) {
+      if ((await this.markerState(path.join(this.gitDir, name))) !== 'absent') return true;
+    }
+    return false;
   }
   private permitted(file: string) {
     return permittedWorkPath(file);
