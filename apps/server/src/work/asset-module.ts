@@ -125,7 +125,7 @@ export function insertModuleSource(source: string, filename: string, target: Ass
   if (!anchor) throw new WorkError('STALE_PLACEMENT_TARGET', '页面源码位置已变化或目标不支持插入', 409);
   const node = anchor;
   const tag = ts.isJsxElement(node) ? node.openingElement.tagName.getText(tree) : node.tagName.getText(tree);
-  if (tag.startsWith('SpatialModel') || tag === 'SpatialModule' || tag === 'ProductScene') {
+  if (tag.startsWith('SpatialModel') || tag === 'SpatialModule' || tag === 'ProductScene' || tag === 'ProductHero') {
     throw new WorkError('INVALID_PLACEMENT_TARGET', '该位置是已有 3D 展示区，请选择替换而不是新增', 409);
   }
   const component = `SpatialModel${instanceId}`;

@@ -198,7 +198,9 @@ it('preserves a pending card and its staging across restart without approving it
     await f.work.idle();
     const card = f.work.listApprovals()[0];
     const before = await readFile(path.join(f.work.repo.candidatePath(task.id), 'src/components/Button.tsx'), 'utf8');
+    mark('close-start');
     await f.work.close();
+    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     restarted.previews.start = async id => `/preview/c/${id}/`;
     restarted.previews.stop = async () => {};
@@ -326,31 +328,45 @@ it('drains an admitted direct answer before close and refuses later answers', as
 });
 
 it.each(['Error', 'AbortError'])('isolates preview %s to its approval and permits another card and restart', async name => {
+  const started = Date.now();
+  const mark = (stage: string) => console.info('[approval-preview-timing]', { name, stage, elapsedMs: Date.now() - started });
   const f = await fixture();
+  mark('fixture-ready');
   try {
     const first = await f.work.submit('shared A', selection(f.baseVersion));
     await f.work.idle();
+    mark('first-task-ready');
     const second = await f.work.submit('shared B', selection(f.baseVersion));
     await f.work.idle();
+    mark('second-task-ready');
     const [a, b] = f.work.listApprovals();
     const start = vi.spyOn(f.work.previews, 'start').mockRejectedValueOnce(Object.assign(new Error('private preview diagnostic'), { name }));
+    mark('answer-a-start');
     const response = await f.work.answerApproval(a.id, 0);
+    mark('answer-a-returned');
     expect(response.approval.status).toBe('failed');
     expect(response.task).toMatchObject({ status: 'failed', error: { code: 'PREVIEW_FAILED' } });
+    mark('answer-a-asserted');
     expect(JSON.stringify(response)).not.toContain('private preview diagnostic');
     expect(f.work.listCandidates()).toEqual([]);
     expect(await f.work.repo.candidateExists(first.id)).toBe(false);
     expect(f.published.filter(event => event.type === 'candidate.ready')).toEqual([]);
     expect(await f.work.answerApproval(a.id, 0)).toEqual(response);
     expect(start).toHaveBeenCalledTimes(1);
+    mark('answer-b-start');
     expect((await f.work.answerApproval(b.id, 1)).task.status).toBe('cancelled');
+    mark('answer-b-returned');
     expectStatus(f.work, second.id, 'cancelled');
     expect(modelCalls).toBe(2);
+    mark('close-start');
     await f.work.close();
+    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     const restartStart = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not replay failed preview'));
     try {
+      mark('restart-init-start');
       await restarted.init();
+      mark('restart-init-returned');
       expect(restarted.getApproval(a.id).status).toBe('failed');
       expectStatus(restarted, first.id, 'failed');
       expect(restarted.getApproval(b.id).status).toBe('rejected');
@@ -407,7 +423,9 @@ it('resumes failed-preview cleanup after terminal save failure without restartin
     expect(f.published.some(event => event.type === 'approval.resolved' || event.type === 'candidate.ready')).toBe(false);
     const saved = JSON.parse(await readFile(path.join(f.directory, 'data/tasks.json'), 'utf8'));
     expect(saved.approvalIntent.kind).toBe('preview_failed');
+    mark('close-start');
     await f.work.close();
+    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     const preview = vi.spyOn(restarted.previews, 'start').mockRejectedValue(new Error('must not start'));
     try {
@@ -437,7 +455,9 @@ it.each(['save', 'cleanup'])('retains stale cleanup intent across %s failure and
     if (failure === 'save') {
       await expect(f.work.answerApproval(card.id, 0)).rejects.toMatchObject({ code: 'STALE_APPROVAL' });
     }
+    mark('close-start');
     await f.work.close();
+    mark('close-returned');
     const restarted = new WorkService({ workRoot: f.workRoot, directory: path.join(f.directory, 'data'), agent: agentOptions, emit: f.work['options'].emit });
     try {
       await restarted.init();
