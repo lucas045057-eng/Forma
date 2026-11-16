@@ -28,8 +28,12 @@ export async function registerLuxWorkbench(app: FastifyInstance, options: {
   // JSON APIs keep Fastify's normal parser and 16 KiB limit.
   await app.register(async uploadScope => {
     uploadScope.addContentTypeParser('application/octet-stream', (_request, payload, done) => done(null, payload));
-    uploadScope.post<{ Querystring: { kind?: string; filename?: string } }>('/assets/uploads', { bodyLimit: 100 * 1024 * 1024 }, async (request, reply) => {
-      if (request.headers['content-type']?.split(';')[0] !== 'application/octet-stream') throw new AssetError('INVALID_UPLOAD_MEDIA', '文件上传必须使用二进制流');
+    uploadScope.post<{ Querystring: { kind?: string; filename?: string } }>('/assets/uploads', {
+      bodyLimit: 100 * 1024 * 1024,
+      onRequest: async request => {
+        if (request.headers['content-type']?.split(';')[0] !== 'application/octet-stream') throw new AssetError('INVALID_UPLOAD_MEDIA', '文件上传必须使用二进制流');
+      },
+    }, async (request, reply) => {
       if (activeUploads >= 2) throw new AssetError('UPLOAD_BUSY', '同时最多上传两个文件，请稍后重试', 429);
       activeUploads++;
       const length = request.headers['content-length'];

@@ -71,6 +71,41 @@ it('returns the shared INVALID_OPERATION_INPUT envelope from workbench routes', 
   expect(result.json()).toMatchObject({ error: { code: 'INVALID_OPERATION_INPUT', message: expect.any(String) } });
 });
 
+it('rejects non-binary upload media with the explicit 400 upload contract before parsing', async () => {
+  const result = await app().inject({
+    method: 'POST', url: '/assets/uploads?kind=image&filename=image.png',
+    headers: { 'content-type': 'image/png' }, payload: Buffer.from('not-an-image'),
+  });
+  expect(result.statusCode).toBe(400);
+  expect(result.json()).toMatchObject({ error: { code: 'INVALID_UPLOAD_MEDIA', message: expect.any(String) } });
+});
+
+it('preserves a 415 parser rejection as a shared error envelope', async () => {
+  const result = await app().inject({
+    method: 'POST', url: '/assets/lux3d/operations',
+    headers: { 'content-type': 'application/x-contract-test' }, payload: 'unsupported',
+  });
+  expect(result.statusCode).toBe(415);
+  expect(result.json()).toMatchObject({ error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: expect.any(String) } });
+});
+
+it('preserves a 413 parser rejection without raising the workbench body limit', async () => {
+  const result = await app().inject({
+    method: 'POST', url: '/assets/lux3d/operations', headers: { 'content-type': 'application/json' },
+    payload: JSON.stringify({ prompt: 'x'.repeat(17 * 1024) }),
+  });
+  expect(result.statusCode).toBe(413);
+  expect(result.json()).toMatchObject({ error: { code: 'REQUEST_TOO_LARGE', message: expect.any(String) } });
+});
+
+it('keeps malformed JSON a 400 client error rather than a 500', async () => {
+  const result = await app().inject({
+    method: 'POST', url: '/assets/lux3d/operations', headers: { 'content-type': 'application/json' }, payload: '{',
+  });
+  expect(result.statusCode).toBe(400);
+  expect(result.json()).toMatchObject({ error: { code: 'INVALID_INPUT', message: expect.any(String) } });
+});
+
 it('retains the 409 IDEMPOTENCY_CONFLICT envelope without a second provider creation', async () => {
   const payload = { operation: 'text-to-3d', parameters: { prompt: 'first', version: 'G1', outputFormat: ['glb'] }, idempotencyKey: 'http-contract-key' };
   expect((await app().inject({ method: 'POST', url: '/assets/lux3d/operations', payload })).statusCode).toBe(202);

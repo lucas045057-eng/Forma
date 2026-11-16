@@ -134,6 +134,12 @@ export async function createApp(options: AppOptions = {}) {
     if (error instanceof AssetError) {
       return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
     }
+    const parser = error as { code?: string; statusCode?: number };
+    if (parser.code?.startsWith('FST_ERR_CTP_') && [400, 413, 415].includes(parser.statusCode ?? 0)) {
+      if (parser.statusCode === 413) return reply.code(413).send({ error: { code: 'REQUEST_TOO_LARGE', message: '请求内容超出大小限制' } });
+      if (parser.statusCode === 415) return reply.code(415).send({ error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: '不支持此请求的内容类型' } });
+      return reply.code(400).send({ error: { code: 'INVALID_INPUT', message: '请求参数不符合接口约定' } });
+    }
     const validation = (error as { validation?: unknown }).validation;
     return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
   });
