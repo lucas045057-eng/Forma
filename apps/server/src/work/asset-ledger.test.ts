@@ -88,8 +88,7 @@ describe('managed namespace and trusted attachment policy', () => {
 
   it('refuses a literal model path written by page source', async () => {
     const base = { 'src/App.tsx': appBase };
-    const after = { 'src/App.tsx': Buffer.from('export default <main><ProductScene modelUrl="/assets/asset1.glb"/></main>;
-') };
+    const after = { 'src/App.tsx': Buffer.from('export default <main><ProductScene modelUrl="/assets/asset1.glb"/></main>;\n') };
     const policy = ledger([{ path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(after['src/App.tsx']), bytes: after['src/App.tsx'].length }]);
     await expect(verifyCandidateLedger(fakeRepo(base, after), 'candidate1', baseVersion, policy)).rejects.toMatchObject({ code: 'MODEL_PATH_IN_SOURCE' });
   });

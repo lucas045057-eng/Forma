@@ -185,7 +185,7 @@ function outputsFor(operation: string, body: Record<string, unknown>, host: stri
   if (operation === 'animation-retarget') {
     const ids = Array.isArray(body.animationIds) ? body.animationIds.map(String) : ['Idle_Loop'];
     if (body.animationOutputMode === 'combined') return [{ content: JSON.stringify({ actions: [{ animation_ids: ids, status: 'success', animationGlbUrl: `${base}/model.glb` }] }) }];
-    return [{ content: JSON.stringify({ actions: ids.map((id, index) => index === 0 && ids.length > 1 ? { animation_id: id, status: 'failed', error: { code: 'MOCK_FAILURE', message: 'mock action failure' } } : { animation_id: id, status: 'success', animationGlbUrl: `${base}/model.glb` })) }) }];
+    return [{ content: JSON.stringify({ actions: ids.map((id, index) => index === 0 && ids.length > 1 ? { animation_id: id, status: 'failed', error: { code: 'MOCK_FAILURE', message: 'mock action failure' } } : { animation_id: id, status: 'success', animationGlbUrl: `${base}/model.glb` }) }) }];
   }
   if (operation === 'material-transfer') {
     return ['zip', 'glb', 'usdz', 'obj_zip', 'fbx_zip'].map(format => ({ content: requested.includes(format) || format === 'zip' || format === 'glb' ? `${base}/model.${format === 'zip' ? 'zip' : format === 'glb' ? 'glb' : 'zip'}` : 'NOT_REQUESTED' }));
