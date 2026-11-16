@@ -103,8 +103,8 @@ it('drains an admitted real HTTP snapshot before unlock and preserves nested rep
   let preClosed!: () => void;
   const preClose = new Promise<void>(resolve => { preClosed = resolve; });
   instance.app.addHook('preClose', async () => { preClosed(); });
-  const snapshot = instance.work.repo.snapshot.bind(instance.work.repo);
-  vi.spyOn(instance.work.repo, 'snapshot').mockImplementation(async (...args) => {
+  const snapshot = instance.work.repo.snapshotWithListing.bind(instance.work.repo);
+  vi.spyOn(instance.work.repo, 'snapshotWithListing').mockImplementation(async (...args) => {
     entered(); await gate; return snapshot(...args);
   });
   let closing: Promise<void> | undefined;
