@@ -10,7 +10,6 @@ import {
   moduleConfigPath,
   parseSceneModuleConfig,
   isTrustedRuntimeSource,
-  scanModuleReferences,
   SCENE_MODULE_DIRECTORY,
   SCENE_MODULE_RENDERER,
   SCENE_MODULE_RENDERER_BASE,
@@ -20,7 +19,7 @@ import {
 import { safeWorkPath } from '../scene/service.ts';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { WorkError } from './repo.ts';
-import type { AssetLedger, LedgerEntry } from './asset-ledger.ts';
+import { scanModuleReferences, type AssetLedger, type LedgerEntry, type ModuleReference } from './asset-ledger.ts';
 
 async function existingBytes(file: string): Promise<Buffer | undefined> {
   try { return await readFile(file); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined; throw error; }
@@ -312,7 +311,7 @@ export async function findModuleReference(root: string, instanceId: string): Pro
 export async function removeModulePackage(input: { root: string; candidateId: string; baseVersion: string; instanceId: string }): Promise<{ ledger: AssetLedger; sourceFile: string }> {
   const config = await readModuleConfig(input.root, input.instanceId);
   const directory = await safeWorkPath(input.root, 'src');
-  const matches: Array<{ file: string; source: string; count: number }> = [];
+  const matches: Array<{ file: string; source: string; references: ModuleReference[] }> = [];
   async function walk(folder: string, relative: string) {
     for (const entry of await readdir(folder, { withFileTypes: true })) {
       const child = `${relative}/${entry.name}`;
@@ -324,15 +323,18 @@ export async function removeModulePackage(input: { root: string; candidateId: st
       const bytes = await existingBytes(path.join(folder, entry.name));
       if (!bytes) continue;
       const source = bytes.toString('utf8');
-      const count = scanModuleReferences(source, child).filter(reference => reference.instanceId === input.instanceId).length;
-      if (count) matches.push({ file: child, source, count });
+      const references = scanModuleReferences(source, child).filter(reference => reference.instanceId === input.instanceId);
+      if (references.length) matches.push({ file: child, source, references });
     }
   }
   await walk(directory, 'src');
-  if (matches.length !== 1 || matches[0].count !== 1) throw new WorkError('MODULE_REFERENCE_UNAPPROVED', '移除模块要求恰好一处静态引用', 409);
+  if (matches.length !== 1 || matches[0].references.length !== 1) throw new WorkError('MODULE_REFERENCE_UNAPPROVED', '移除模块要求恰好一处静态引用', 409);
   const target = matches[0];
+  const reference = target.references[0];
+  if (!reference) throw new WorkError('MODULE_REFERENCE_UNAPPROVED', '移除模块缺少实际引用位置', 409);
   const sourcePath = await safeWorkPath(input.root, target.file);
-  const beforeBytes = (await existingBytes(sourcePath))!;
+  const beforeBytes = await existingBytes(sourcePath);
+  if (!beforeBytes) throw new WorkError('MODULE_NOT_FOUND', '移除目标源码缺失', 404);
   const afterBytes = Buffer.from(removeModuleSource(target.source, target.file, input.instanceId));
   await writeAtomic(sourcePath, afterBytes);
   const configPath = moduleConfigPath(input.instanceId);
@@ -353,7 +355,7 @@ export async function removeModulePackage(input: { root: string; candidateId: st
     sourceFile: target.file,
     ledger: {
       schemaVersion: 1, candidateId: input.candidateId, baseVersion: input.baseVersion, instanceId: input.instanceId,
-      intent: 'remove', entries, reference: { action: 'remove', file: target.file, instanceId: input.instanceId, anchor: `${target.references[0].line}:${target.references[0].column}` },
+      intent: 'remove', entries, reference: { action: 'remove', file: target.file, instanceId: input.instanceId, anchor: `${reference.line}:${reference.column}` },
       createdAt: new Date().toISOString(),
     },
   };

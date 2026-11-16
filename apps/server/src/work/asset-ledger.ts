@@ -222,14 +222,16 @@ export function auditTrustedImports(source: string, file: string): void {
         const target = moduleTarget(file, specifier.text);
         if (target && isModuleNamespaceTarget(target)) {
           const output = /^src\/scene-modules\/([a-f0-9]{32})\.tsx$/.exec(target);
-          if (!output) reject('只允许通过受信实例组件引用 3D 模块，禁止直接导入运行器、扩展名旁路或目录导入');
+          if (!output) return reject('只允许通过受信实例组件引用 3D 模块，禁止直接导入运行器、扩展名旁路或目录导入');
           const id = output[1];
           const clause = node.importClause;
-          if (!clause || clause.isTypeOnly || clause.namedBindings || !clause.name) reject('实例组件必须使用固定名字的默认导入');
-          const local = clause.name.text;
+          if (!clause || clause.isTypeOnly || clause.namedBindings) return reject('实例组件必须使用固定名字的默认导入');
+          const binding = clause.name;
+          if (!binding) return reject('实例组件必须使用固定名字的默认导入');
+          const local = binding.text;
           if (local !== `SpatialModel${id}`) reject('实例组件导入名必须与服务端生成的名称一致');
           canonical.set(local, id);
-          allowed.add(clause.name);
+          allowed.add(binding);
           importedCounts.set(id, (importedCounts.get(id) ?? 0) + 1);
         }
       }

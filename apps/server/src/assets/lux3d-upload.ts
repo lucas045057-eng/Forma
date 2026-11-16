@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import sharp from 'sharp';
+import sharp, { type Metadata } from 'sharp';
 import type { Readable } from 'node:stream';
 import { AssetError } from './lux3d.ts';
 import { assertPlainPath, readPlainFile } from '../checks/paths.ts';
@@ -66,7 +66,7 @@ export class LuxUploadStore {
     const bytes=Buffer.concat(chunks,size);
     let dimensions:{width?:number;height?:number}={};
     if(kind==='image'){
-      let metadata:sharp.Metadata;
+      let metadata:Metadata;
       try{metadata=await sharp(bytes,{limitInputPixels:PIXEL_MAX}).metadata();}catch{throw new AssetError('INVALID_IMAGE','图片必须是实际PNG/JPEG/WebP，不能按扩展名或MIME放行');}
       if(!metadata.format||!['png','jpeg','webp'].includes(metadata.format)||!metadata.width||!metadata.height||metadata.width*metadata.height>PIXEL_MAX||(metadata.pages??1)>1)throw new AssetError('INVALID_IMAGE','仅支持PNG/JPEG/WebP，像素总量不得超过4096万');
       try{await sharp(bytes,{limitInputPixels:PIXEL_MAX}).rotate().toBuffer();}catch{throw new AssetError('INVALID_IMAGE','图片解码失败或内容异常');}
