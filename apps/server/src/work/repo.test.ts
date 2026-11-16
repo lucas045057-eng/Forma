@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -347,6 +347,79 @@ it('reuses the validated snapshot listing across candidate creation, pending dif
     expect(lsTree).toBe(0);
     void workRoot;
   } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('resolves workspace links through a junctioned node_modules and leaves the source untouched', async () => {
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'spatial-deps-')));
+  try {
+    const modules = path.join(root, 'templates', 'product-page', 'node_modules');
+    const scoped = path.join(modules, '@spatial');
+    const pkg = path.join(root, 'packages', 'bridge');
+    await mkdir(pkg, { recursive: true });
+    await writeFile(path.join(pkg, 'index.js'), 'export const bridge = 1;\n');
+    await mkdir(scoped, { recursive: true });
+    // Same shape as pnpm's workspace link: a relative link four levels up from the scope.
+    await symlink('../../../../packages/bridge', path.join(scoped, 'bridge'), 'dir');
+
+    const workRoot = path.join(root, 'work');
+    await mkdir(path.join(workRoot, 'src'), { recursive: true });
+    await writeFile(path.join(workRoot, 'src', 'App.tsx'), 'export default () => <main/>;\n');
+    await symlink(modules, path.join(workRoot, 'node_modules'), 'junction');
+
+    const repo = new WorkRepo({ workRoot, dataDirectory: path.join(root, 'data') });
+    await repo.init();
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+
+    const linked = path.join(repo.candidatePath('candidate1'), 'node_modules', '@spatial', 'bridge');
+    expect(await realpath(linked)).toBe(await realpath(pkg));
+    expect(await readFile(path.join(pkg, 'index.js'), 'utf8')).toContain('bridge = 1');
+
+    await repo.removeCandidate('candidate1');
+    // Removing the candidate only deletes the link it owns, never the real package.
+    expect(await readFile(path.join(pkg, 'index.js'), 'utf8')).toContain('bridge = 1');
+  } finally {
+    const actual = await realpath(root);
+    if (path.dirname(actual) !== await realpath(tmpdir())) throw new Error('refusing cleanup outside the owned temp root');
+    await rm(actual, { recursive: true, force: true });
+  }
+});
+
+it('keeps a plain node_modules working and still fails on an unknown broken dependency link', async () => {
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'spatial-deps-plain-')));
+  try {
+    const workRoot = path.join(root, 'work');
+    await mkdir(path.join(workRoot, 'src'), { recursive: true });
+    await writeFile(path.join(workRoot, 'src', 'App.tsx'), 'export default () => <main/>;\n');
+    await mkdir(path.join(workRoot, 'node_modules', 'plain'), { recursive: true });
+    await writeFile(path.join(workRoot, 'node_modules', 'plain', 'index.js'), 'export const plain = 1;\n');
+    const repo = new WorkRepo({ workRoot, dataDirectory: path.join(root, 'data') });
+    await repo.init();
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    expect(await realpath(path.join(repo.candidatePath('candidate1'), 'node_modules', 'plain')))
+      .toBe(await realpath(path.join(workRoot, 'node_modules', 'plain')));
+    await repo.removeCandidate('candidate1');
+
+    // A link whose target disappeared is a real failure, not a silently skipped package.
+    const brokenRoot = path.join(root, 'broken');
+    await mkdir(path.join(brokenRoot, 'src'), { recursive: true });
+    await writeFile(path.join(brokenRoot, 'src', 'App.tsx'), 'export default () => <main/>;\n');
+    const gone = path.join(root, 'gone');
+    await mkdir(gone, { recursive: true });
+    await mkdir(path.join(brokenRoot, 'node_modules'), { recursive: true });
+    await symlink(gone, path.join(brokenRoot, 'node_modules', 'broken'), 'junction');
+    await rm(gone, { recursive: true, force: true });
+    const brokenRepo = new WorkRepo({ workRoot: brokenRoot, dataDirectory: path.join(root, 'broken-data') });
+    await brokenRepo.init();
+    const brokenBase = await brokenRepo.head();
+    await expect(brokenRepo.createCandidate('candidate1', brokenBase)).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(await brokenRepo.candidateExists('candidate1')).toBe(false);
+  } finally {
+    const actual = await realpath(root);
+    if (path.dirname(actual) !== await realpath(tmpdir())) throw new Error('refusing cleanup outside the owned temp root');
+    await rm(actual, { recursive: true, force: true });
+  }
 });
 
 it('keeps the untruncated patch in the digest and preserves the legacy hash order', async () => {

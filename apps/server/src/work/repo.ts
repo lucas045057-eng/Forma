@@ -297,11 +297,16 @@ export class WorkRepo {
   /** pnpm's package links are relative, so link every package to its real location instead of the folder. */
   private async linkDependencies(directory: string) {
     const link = async (from: string, to: string) => {
+      // Resolve the source to its physical location before walking it. With a junctioned
+      // `node_modules`, the logical path keeps the junction's parent chain, so a relative
+      // workspace link such as `@spatial/bridge -> ../../../../packages/bridge` would be
+      // resolved against the wrong ancestors and point at a missing directory.
+      const physical = await realpath(from);
       await mkdir(to, { recursive: true });
-      for (const entry of await readdir(from)) {
+      for (const entry of await readdir(physical)) {
         if (entry.startsWith('.')) continue;
-        if (entry.startsWith('@')) await link(path.join(from, entry), path.join(to, entry));
-        else await symlink(await realpath(path.join(from, entry)), path.join(to, entry), 'junction');
+        if (entry.startsWith('@')) { await link(path.join(physical, entry), path.join(to, entry)); continue; }
+        await symlink(await realpath(path.join(physical, entry)), path.join(to, entry), 'junction');
       }
     };
     const modules = path.join(this.workRoot, 'node_modules');
