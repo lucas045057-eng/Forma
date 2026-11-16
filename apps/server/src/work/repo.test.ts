@@ -1,4 +1,6 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, it } from 'vitest';
@@ -206,6 +208,76 @@ it('uses an explicit trusted base when legacy candidates lack .base metadata (F4
     await expect(repo.commitCandidate('candidate1', 'legacy without base')).rejects.toMatchObject({ code: 'CANDIDATE_BASE_UNKNOWN' });
     expect(await repo.commitCandidate('candidate1', 'legacy with base', undefined, base)).toEqual(['src/App.tsx']);
     expect(await repo.candidateCommit('candidate1')).not.toBe(base);
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('rejects a shadowed managed baseline through the validated tree listing', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'spatial-work-'));
+  const workRoot = path.join(directory, 'work');
+  try {
+    const { mkdir } = await import('node:fs/promises');
+    await mkdir(path.join(workRoot, 'src'), { recursive: true });
+    await writeFile(path.join(workRoot, 'src', 'App.tsx'), 'export default () => <p/>;\n');
+    // A same-name non-canonical renderer must be seen by the managed audit even when the listing
+    // is the one auditTree already validated for this revision.
+    await writeFile(path.join(workRoot, 'src', 'spatial-module.ts'), 'export function SpatialModule() { return null; }\n');
+    const repo = new WorkRepo({ workRoot, dataDirectory: path.join(directory, 'data') });
+    await expect(repo.init()).rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('stages additions, deletions and an empty change set through bounded add batches', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    await writeFile(path.join(root, 'src', 'First.ts'), 'export const first = 1;\n');
+    await writeFile(path.join(root, 'src', 'Second.ts'), 'export const second = 2;\n');
+    expect((await repo.commitCandidate('candidate1', '新增两个文件')).sort()).toEqual(['src/First.ts', 'src/Second.ts']);
+    const added = await repo.candidateCommit('candidate1');
+    expect(await repo.fileAt(added, 'src/First.ts')).toContain('first = 1');
+    await rm(path.join(root, 'src', 'App.tsx'));
+    expect(await repo.commitCandidate('candidate1', '删除旧页面')).toEqual(['src/App.tsx']);
+    const deleted = await repo.candidateCommit('candidate1');
+    expect(deleted).not.toBe(added);
+    expect(await repo.fileAt(deleted, 'src/App.tsx')).toBeUndefined();
+    expect(await repo.commitCandidate('candidate1', '无变化')).toEqual([]);
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+it('keeps the untruncated patch in the digest and preserves the legacy hash order', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    const root = repo.candidatePath('candidate1');
+    const lines = Array.from({ length: 1200 }, (_, index) => `export const value${index} = "${'x'.repeat(40)}";\n`).join('');
+    await writeFile(path.join(root, 'src', 'Long.ts'), lines);
+    const pending = await repo.pendingDiff('candidate1', base);
+    expect(pending.changedFiles).toEqual(['src/Long.ts']);
+    const diffOf = (file: string) => execFileSync('git', ['-c', 'core.autocrlf=false', '-c', 'core.quotepath=false', 'diff', '--no-color', '--unified=3', base, '--', file], {
+      cwd: root, encoding: 'utf8', env: { ...Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.toUpperCase().startsWith('GIT_'))), GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null', GIT_TERMINAL_PROMPT: '0' },
+    });
+    const full = diffOf('src/Long.ts');
+    expect(full.length).toBeGreaterThan(60_000);
+    expect(pending.diff[0].patch).toBe(`${full.slice(0, 60_000)}\n…（差异过长，已截断）`);
+
+    // Independent restatement of the legacy order: base, then every file/length/content, then
+    // every complete patch in the same file order.
+    const expected = createHash('sha256').update(base);
+    for (const file of pending.changedFiles) {
+      const content = await readFile(path.join(root, file));
+      expected.update(file).update(Buffer.from(String(content.byteLength))).update(content);
+    }
+    for (const file of pending.changedFiles) expected.update(diffOf(file));
+    expect(pending.contentDigest).toBe(expected.digest('hex'));
+
+    // Only the tail beyond the 60 000-character display cap changes.
+    await writeFile(path.join(root, 'src', 'Long.ts'), lines.replace('value1199', 'value1199Changed'));
+    expect((await repo.pendingDiff('candidate1', base)).contentDigest).not.toBe(pending.contentDigest);
     void workRoot;
   } finally { await rm(directory, { recursive: true, force: true }); }
 });

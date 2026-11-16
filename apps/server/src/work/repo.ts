@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readdir, readFile, realpath, rm, rmdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileDiff } from '@spatial/shared';
-import { assertManagedTree, verifyCandidateLedger, type AssetLedger, type LedgerChange } from './asset-ledger.ts';
+import { assertManagedTree, managedBaselineListing, verifyCandidateLedger, type AssetLedger, type LedgerChange, type ManagedBaselineListing } from './asset-ledger.ts';
 
 export class WorkError extends Error {
   code: string; status: number;
@@ -124,32 +124,54 @@ export class WorkRepo {
    * is something new to stage — at startup, before a snapshot version is handed out and before a
    * candidate is checked out from it.
    */
-  async auditTree(revision = 'HEAD') {
+  async auditTree(revision = 'HEAD'): Promise<ManagedBaselineListing> {
     const listing = (await this.main(['ls-tree', '-r', '-z', '--full-tree', revision])).stdout.split('\0').filter(Boolean);
     const bad: string[] = [];
+    const files: string[] = [];
     for (const record of listing) {
       // "<mode> <type> <object>\t<path>": the path is everything after the FIRST tab (review N2).
       const tab = record.indexOf('\t');
       const meta = tab < 0 ? '' : record.slice(0, tab), file = tab < 0 ? record : record.slice(tab + 1);
       const mode = /^(\d{6}) (blob|tree|commit) [0-9a-f]{40,64}$/.exec(meta)?.[1];
       if (!mode || mode === '120000' || mode === '160000' || /[\u0000-\u001f\u007f]/.test(file) || !this.permitted(file)) bad.push(JSON.stringify(file));
+      else files.push(file);
     }
     if (bad.length) throw new WorkError('UNSAFE_TRACKED_FILE', `作品版本库跟踪了不允许的文件或链接（${bad.slice(0, 5).join('、')}${bad.length > 5 ? ' 等' : ''}），请人工迁移到干净的版本库`, 409);
-    await assertManagedTree(this, revision);
+    // The listing validated above is complete for this revision and is handed to the managed
+    // audit instead of being enumerated a second time; anything unregistered or for another
+    // revision is ignored there and enumerated again (see reusableListing).
+    const validated = managedBaselineListing(revision, files);
+    await assertManagedTree(this, revision, validated);
+    return validated;
   }
   private async stage(root: string, command: (args: string[]) => Promise<{ stdout: string }>) {
     const tracked = (await command(['ls-files', '-z'])).stdout.split('\0').filter(Boolean);
     if (tracked.some(file => !this.permitted(file))) throw new WorkError('UNSAFE_TRACKED_FILE', '作品版本库含不允许的文件，请人工迁移到干净版本库');
     await command(['add', '-u']);
+    // Collect only the paths the walk proved addable, then stage them in bounded batches. The
+    // allow-list, the symlink refusal and the final index check all stay; batching never widens
+    // the path set (no `add .`, every batch ends with `--`).
+    const addable: string[] = [];
     const walk = async (folder: string, prefix = '') => {
       for (const item of await readdir(folder, { withFileTypes: true })) {
         const file = prefix + item.name;
         if (item.isSymbolicLink()) { if (tracked.includes(file)) throw new WorkError('UNSAFE_TRACKED_FILE', '版本库不能跟踪符号链接'); continue; }
         if (item.isDirectory() && (file === 'src' || file === 'public' || /^(src|public)\//.test(file)) && !item.name.startsWith('.')) await walk(path.join(folder, item.name), `${file}/`);
-        else if (item.isFile() && this.permitted(file)) await command(['add', '--', file]);
+        else if (item.isFile() && this.permitted(file)) addable.push(file);
       }
     };
     await walk(root);
+    let batch: string[] = [], size = 0;
+    const flush = async () => {
+      if (!batch.length) return;
+      await command(['add', '--', ...batch]);
+      batch = []; size = 0;
+    };
+    for (const file of addable) {
+      if (batch.length >= 64 || size + file.length + 1 > 4000) await flush();
+      batch.push(file); size += file.length + 1;
+    }
+    await flush();
     const staged = (await command(['ls-files', '--stage', '-z'])).stdout.split('\0').filter(Boolean);
     if (staged.some(entry => entry.startsWith('120000 ') || !this.permitted(entry.slice(entry.indexOf('\t') + 1)))) throw new WorkError('UNSAFE_INDEX', '暂存区含不允许的路径或链接');
   }
@@ -295,15 +317,18 @@ export class WorkRepo {
   async pendingDiff(id: string, base: string, ledger?: AssetLedger) {
     const directory = this.candidatePath(id);
     await this.assertNoLinks(directory);
-    await this.auditTree(base);
+    const baseline = await this.auditTree(base);
     const untracked = (await this.inCandidate(id, ['ls-files', '--others', '--exclude-standard', '-z'])).stdout.split('\0').filter(Boolean);
     if (untracked.length) await this.inCandidate(id, ['add', '-N', '--', ...untracked]);
     const changedFiles = (await this.inCandidate(id, ['diff', '--name-only', '-z', base, '--'])).stdout.split('\0').filter(Boolean);
-    await verifyCandidateLedger(this, id, base, ledger);
+    await verifyCandidateLedger(this, id, base, ledger, baseline);
     const diff: FileDiff[] = [];
+    const patches = new Map<string, string>();
     const hash = createHash('sha256').update(base);
     for (const file of changedFiles) {
+      // One full patch per file: the display copy is capped, the digest copy is not.
       const patch = (await this.inCandidate(id, ['diff', '--no-color', '--unified=3', base, '--', file])).stdout;
+      patches.set(file, patch);
       diff.push({ path: file, patch: patch.length > 60_000 ? `${patch.slice(0, 60_000)}\n…（差异过长，已截断）` : patch });
       let content: Buffer | undefined;
       try { content = await readFile(path.join(directory, file)); }
@@ -311,8 +336,8 @@ export class WorkRepo {
       hash.update(file).update(Buffer.from(String(content?.byteLength ?? -1)));
       if (content) hash.update(content);
     }
-    // Full, untruncated patches participate in the identity even though the public diff is capped.
-    for (const file of changedFiles) hash.update(await this.inCandidate(id, ['diff', '--no-color', '--unified=3', base, '--', file]).then(result => result.stdout));
+    // Legacy digest order: base, then every file/length/content above, then every full patch.
+    for (const file of changedFiles) hash.update(patches.get(file) ?? '');
     return { changedFiles, diff, contentDigest: hash.digest('hex') };
   }
   async candidateCommit(id: string, options: { clean?: boolean; expectedCommit?: string } = {}) {
