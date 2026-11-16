@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { defaultSceneModuleConfig } from '@spatial/shared/scene-module';
-import { scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo } from './asset-ledger.ts';
+import { auditTrustedImports, scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo } from './asset-ledger.ts';
 
 const instanceId = 'a'.repeat(32);
 const baseVersion = 'b'.repeat(40);
@@ -81,9 +81,9 @@ describe('managed namespace and trusted attachment policy', () => {
     await expect(verifyCandidateLedger(fakeRepo(base, added), 'candidate1', baseVersion, { ...noReference, reference: null } as AssetLedger)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
     await expect(verifyCandidateLedger(fakeRepo(base, added), 'candidate1', baseVersion, without)).resolves.toBeUndefined();
     const duplicate = { 'src/App.tsx': Buffer.from(`export default <main><SpatialModule instanceId="${instanceId}"/><SpatialModule instanceId="${instanceId}"/></main>;\n`) };
-    await expect(verifyCandidateLedger(fakeRepo(base, duplicate), 'candidate1', baseVersion, withSource(base, duplicate))).rejects.toMatchObject({ code: 'MODULE_REFERENCE_UNAPPROVED' });
+    await expect(verifyCandidateLedger(fakeRepo(base, duplicate), 'candidate1', baseVersion, withSource(base, duplicate))).rejects.toMatchObject({ code: 'MODULE_IMPORT_UNAPPROVED' });
     const dynamic = { 'src/App.tsx': Buffer.from('export default <main><SpatialModule instanceId={id}/></main>;\n') };
-    await expect(verifyCandidateLedger(fakeRepo(base, dynamic), 'candidate1', baseVersion, withSource(base, dynamic))).rejects.toMatchObject({ code: 'MODULE_REFERENCE_DYNAMIC' });
+    await expect(verifyCandidateLedger(fakeRepo(base, dynamic), 'candidate1', baseVersion, withSource(base, dynamic))).rejects.toMatchObject({ code: 'MODULE_IMPORT_UNAPPROVED' });
   });
 
   it('refuses a literal model path written by page source', async () => {
@@ -92,6 +92,29 @@ describe('managed namespace and trusted attachment policy', () => {
 ') };
     const policy = ledger([{ path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(after['src/App.tsx']), bytes: after['src/App.tsx'].length }]);
     await expect(verifyCandidateLedger(fakeRepo(base, after), 'candidate1', baseVersion, policy)).rejects.toMatchObject({ code: 'MODEL_PATH_IN_SOURCE' });
+  });
+
+  it('rejects every noncanonical import/route to a module instance', () => {
+    const good = `import SpatialModel${instanceId} from "./scene-modules/${instanceId}.tsx";
+export default () => <SpatialModel${instanceId}/>;
+`;
+    expect(() => auditTrustedImports(good, 'src/App.tsx')).not.toThrow();
+    for (const source of [
+      `import { SpatialModule as M } from '../spatial-module.tsx'; export default () => <M instanceId="${instanceId}"/>;`,
+      `import * as M from './scene-modules/${instanceId}.tsx'; export default () => <M.default/>;`,
+      `import X from './scene-modules/${instanceId}.tsx'; export default () => <X/>;`,
+      `import SpatialModel${instanceId} from './scene-modules/${instanceId}'; export default () => <SpatialModel${instanceId}/>;`,
+      `import SpatialModel${instanceId} from './scene-modules/${instanceId}.tsx'; export default () => <SpatialModel${instanceId} extra="x"/>;`,
+      `import SpatialModel${instanceId} from './scene-modules/${instanceId}.tsx'; export default () => createElement(SpatialModel${instanceId});`,
+      `export { default } from './scene-modules/${instanceId}.tsx';`,
+      `const load = () => import('./scene-modules/${instanceId}.tsx');`,
+      `const load = () => require('./spatial-module');`,
+    ]) expect(() => auditTrustedImports(source, 'src/App.tsx')).toThrow();
+  });
+
+  it('rejects a shadow renderer or extra managed file in the baseline', async () => {
+    const before = { 'src/spatial-module.ts': Buffer.from('export function SpatialModule(){return null}'), 'src/App.tsx': appBase };
+    await expect(verifyCandidateLedger(fakeRepo(before, before), 'candidate1', baseVersion, undefined)).rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
   });
 
   it('scanner keeps anchor identity and rejects extra renderer props', () => {

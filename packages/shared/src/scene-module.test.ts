@@ -43,6 +43,11 @@ it('marks the module config namespace and renderer as managed for every normaliz
     `./src//scene-modules/${instanceId}.tsx`,
     'src/spatial-module.tsx',
     'SRC/SPATIAL-MODULE.TSX',
+    'src/spatial-module.ts',
+    'src/spatial-module.js',
+    'src/spatial-module.mjs',
+    'src/spatial-module/index.ts',
+    'src/spatial-module.d.ts',
   ]) expect(isManagedModulePath(file)).toBe(true);
   for (const file of ['src/App.tsx', 'src/scene-modules-other/x.json', 'public/assets/x.glb']) expect(isManagedModulePath(file)).toBe(false);
   expect(() => moduleConfigPath('../escape')).toThrow();

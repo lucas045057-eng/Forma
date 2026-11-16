@@ -90,10 +90,13 @@ export class Lux3DClient {
     if(!response.ok){
       if(response.status===400)throw new AssetError('UPSTREAM_REJECTED','Lux3D明确拒绝了本次请求，请核对参数、权限或额度',400,'rejected');
       if(response.status===401)throw new AssetError('UPSTREAM_AUTH','Lux3D鉴权失败，未接受本次请求',403,'rejected');
-      if(response.status===403)throw new AssetError('UPSTREAM_AUTH','Lux3D拒绝访问，请核对权限或额度',403,'rejected');
+      if(response.status===403)throw new AssetError('UPSTREAM_FORBIDDEN','Lux3D返回403；规范未保证未受理，本次结果只能按未知处理',502,'unknown');
       throw new AssetError('UPSTREAM_HTTP',`Lux3D返回HTTP ${response.status}，提交结果未知`,502,'unknown');
     }
-    if(input.route!=='/asset/v1/token'&&String(envelope.c)!=='0')throw new AssetError('UPSTREAM_REJECTED','Lux3D未接受请求，请核对参数、权限、额度及并发限制',400,'rejected');
+    if(input.route!=='/asset/v1/token'){
+      if(envelope.c===undefined||envelope.c===null)throw new AssetError('UPSTREAM_FORMAT','Lux3D成功响应缺少状态码，结果未知',502,'unknown');
+      if(String(envelope.c)!=='0')throw new AssetError('UPSTREAM_REJECTED','Lux3D未接受请求，请核对参数、权限、额度及并发限制',400,'rejected');
+    }
     return text;
   }
   async createProviderTask(route:string,body:unknown,signal?:AbortSignal):Promise<string>{

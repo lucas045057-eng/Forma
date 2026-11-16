@@ -6,7 +6,9 @@ import { defaultSceneConfig, type Vec3 } from './scene-config.ts';
  * `src/scene-modules/`; page code never carries the model URL or a replacement configuration.
  */
 export const SCENE_MODULE_DIRECTORY = 'src/scene-modules';
-export const SCENE_MODULE_RENDERER = 'src/spatial-module.tsx';
+export const SCENE_MODULE_RENDERER_BASE = 'src/spatial-module';
+export const SCENE_MODULE_RENDERER = `${SCENE_MODULE_RENDERER_BASE}.tsx`;
+export const SCENE_MODULE_RUNTIME_MARKERS = ['export function SpatialModule', "import.meta.glob<string>('./scene-modules/*.json'"] as const;
 export const MODULE_INSTANCE_PATTERN = /^[a-f0-9]{32}$/;
 export const MODULE_ASSET_PATTERN = /^[A-Za-z0-9_-]{1,80}$/;
 
@@ -164,8 +166,24 @@ export function normalizeRepoPath(value: string): string {
   return value.replaceAll('\\', '/').replace(/^\.\//, '').replace(/\/+/g, '/').toLowerCase();
 }
 
-/** Managed paths are server-only: models may reference them but never create, edit, delete or rename them. */
+export function isTrustedRuntimeSource(text: string): boolean {
+  return SCENE_MODULE_RUNTIME_MARKERS.every(marker => text.includes(marker));
+}
+
+/** Canonical trusted renderer path installed by the server. */
+export function isCanonicalModuleRenderer(value: string): boolean {
+  return normalizeRepoPath(value) === normalizeRepoPath(SCENE_MODULE_RENDERER);
+}
+
+/**
+ * Managed paths are server-only: models may reference them but never create, edit, delete or rename
+ * them. The renderer namespace covers every extension and a same-name directory so a sibling
+ * `.ts`/`.js`/index file cannot shadow the trusted `.tsx` during Vite resolution.
+ */
 export function isManagedModulePath(value: string): boolean {
   const path = normalizeRepoPath(value);
-  return path === normalizeRepoPath(SCENE_MODULE_RENDERER) || path.startsWith(`${normalizeRepoPath(SCENE_MODULE_DIRECTORY)}/`);
+  const renderer = normalizeRepoPath(SCENE_MODULE_RENDERER_BASE);
+  const directory = normalizeRepoPath(SCENE_MODULE_DIRECTORY);
+  return path === renderer || path.startsWith(`${renderer}.`) || path.startsWith(`${renderer}/`) ||
+    path === directory || path.startsWith(`${directory}/`);
 }

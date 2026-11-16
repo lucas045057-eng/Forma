@@ -275,79 +275,106 @@ export class LuxTaskService {
     await mkdir(directory, { recursive: true });
     const artifacts: LuxArtifact[] = [...task.artifacts];
     let warning = task.note;
-    for (const [outputIndex, output] of outputs.entries()) {
-      const downloaded = await downloadArtifactBytes(output.url, this.options.client.base, {
-        format: 'other', signal: this.abort.signal, timeoutMs: this.options.downloadTimeoutMs,
-        allowedHosts: this.options.artifactHosts, maxBytes: 100 * 1024 * 1024,
-      });
-      const detected = sniff(downloaded);
-      let format = output.format;
-      let kind = output.kind;
-      if (detected) {
-        const parameters = (task as StoredLuxTask).parameters;
-        const requested = (task.operation === 'image-to-3d' || task.operation === 'text-to-3d') && parameters?.version === 'G1-Turbo'
-          ? (parameters?.outputFormat as string[] | undefined) ?? ['zip']
-          : undefined;
-        if (detected.format === 'zip' && ['usdz', 'obj_zip', 'fbx_zip', '3mf'].includes(output.format)) {
-          format = output.format;
-          kind = 'archive';
-        } else if (format === 'bin' || format === 'glb' || format === 'zip') {
-          format = detected.format;
-          kind = detected.kind;
-        }
-        if (requested && !requested.includes(format) && !(format === 'zip' && requested.includes('zip'))) {
-          throw new AssetError('OUTPUT_FORMAT_MISMATCH', 'G1-Turbo 返回了未请求的产物格式', 502, 'unknown');
-        }
-      }
-      if (format === 'jpeg') format = 'jpg';
-      if (kind === 'image') { const { default: sharp } = await import('sharp'); try { await sharp(downloaded, { limitInputPixels: 40_960_000 }).toBuffer(); } catch { throw new AssetError('INVALID_IMAGE', '下载结果不是有效图片', 502, 'unknown'); } }
-      if (output.format === 'glb' && format !== 'glb') throw new AssetError('OUTPUT_FORMAT_MISMATCH', '声明为GLB的槽位返回了其他格式', 502, 'unknown');
-      if (kind === 'image' && !['png', 'jpg', 'webp'].includes(format)) throw new AssetError('UNSUPPORTED_OUTPUT', '返回的图片格式不受支持', 502, 'unknown');
-      const id = createHash('sha256').update(task.localId).update(String(outputIndex)).update(sha256(downloaded)).digest('hex');
-      const target = path.join(directory, `${id}.${format}`);
-      await writeAtomic(target, downloaded, this.abort.signal);
-      let assetId: string | undefined;
-      if (format === 'glb') {
-        const provenance: AssetProvenance = {
-          kind: ['api.aholo.cn', 'api.aholo3d.cn'].includes(new URL(this.options.client.base).hostname) ? 'lux3d' : 'unknown',
-          sourceTaskId: task.providerTaskId, sourceHash: sha256(downloaded), importedAt: new Date().toISOString(),
-        };
-        const asset = await this.options.assets.importOriginal(target, id, provenance);
-        assetId = asset.id;
-        const json = glbJson(downloaded);
-        const hasAnimation = !!json?.animations?.length || !!json?.skins?.length || !!json?.meshes?.some(mesh => mesh.primitives?.some(primitive => primitive.targets?.length));
-        if (!hasAnimation && downloaded.length <= 32 * 1024 * 1024 && this.options.optimize !== false) {
-          try {
-            const optimizedId = `opt-${id.slice(0, 60)}`;
-            const optimized = await this.options.assets.importLocal(target, optimizedId, provenance);
-            const model = this.options.assets.modelPath(optimizedId);
-            if (optimized.status === 'ready' && model) {
-              const optimizedBytes = await readFile(model);
-              await writeAtomic(path.join(directory, `${optimizedId}.glb`), optimizedBytes);
-              if (!artifacts.some(item => item.id === optimizedId)) {
-                artifacts.push({
-                  id: optimizedId, kind: 'model', format: 'glb', variant: 'optimized', bytes: optimizedBytes.length, sha256: sha256(optimizedBytes),
-                  downloadUrl: `/assets/lux3d/tasks/${task.localId}/artifacts/${optimizedId}/download`, previewUrl: optimized.modelUrl,
-                  assetId: optimized.id, sourceTaskId: task.providerTaskId, sourceUrlHash: urlHash(output.url), label: '网页优化件（原件保留）',
-                });
-              }
-            }
-          } catch { warning = `${warning ? warning + '；' : ''}网页优化未成功，原始产物仍保留；没有重复创建云任务`; }
-        }
-      }
-      if (!artifacts.some(item => item.id === id)) {
-        artifacts.push({
-          id, kind, format, variant: 'original', label: output.label, animationId: output.animationId,
-          ...(output.animationIds ? { animationIds: output.animationIds } : {}), ...(output.animationMode ? { animationMode: output.animationMode } : {}),
-          bytes: downloaded.length, sha256: sha256(downloaded),
-          downloadUrl: `/assets/lux3d/tasks/${task.localId}/artifacts/${id}/download`,
-          previewUrl: kind === 'image' ? `/assets/lux3d/tasks/${task.localId}/artifacts/${id}/preview` : assetId ? `/assets/${assetId}/model.glb` : undefined,
-          assetId, sourceTaskId: task.providerTaskId, sourceUrlHash: urlHash(output.url),
+    const note = (message: string) => { warning = `${warning ? warning + '；' : ''}${message}`; };
+    const existingSuccess = async (output: LuxOutputSpec): Promise<LuxArtifact | undefined> => {
+      const found = artifacts.find(item => item.variant === 'original' && item.format === output.format &&
+        item.label === output.label && item.animationId === output.animationId &&
+        (item.animationIds ?? []).join(',') === (output.animationIds ?? []).join(','));
+      if (!found) return undefined;
+      try {
+        const bytes = await readFile(path.join(directory, `${found.id}.${found.format}`));
+        return sha256(bytes) === found.sha256 ? found : undefined;
+      } catch { return undefined; }
+    };
+    const ordered = outputs.map((output, index) => ({ output, index }))
+      .sort((left, right) => Number(right.output.format === 'glb') - Number(left.output.format === 'glb'));
+    for (const { output, index: outputIndex } of ordered) {
+      if (await existingSuccess(output)) continue;
+      try {
+        const downloaded = await downloadArtifactBytes(output.url, this.options.client.base, {
+          format: 'other', signal: this.abort.signal, timeoutMs: this.options.downloadTimeoutMs,
+          allowedHosts: this.options.artifactHosts, maxBytes: 100 * 1024 * 1024,
         });
+        const detected = sniff(downloaded);
+        let format = output.format;
+        let kind = output.kind;
+        if (detected) {
+          const parameters = (task as StoredLuxTask).parameters;
+          const requested = (task.operation === 'image-to-3d' || task.operation === 'text-to-3d') && parameters?.version === 'G1-Turbo'
+            ? (parameters?.outputFormat as string[] | undefined) ?? ['zip']
+            : undefined;
+          if (detected.format === 'zip' && ['usdz', 'obj_zip', 'fbx_zip', '3mf'].includes(output.format)) {
+            format = output.format;
+            kind = 'archive';
+          } else if (format === 'bin' || format === 'glb' || format === 'zip') {
+            format = detected.format;
+            kind = detected.kind;
+          }
+          if (requested && !requested.includes(format) && !(format === 'zip' && requested.includes('zip'))) {
+            throw new AssetError('OUTPUT_FORMAT_MISMATCH', 'G1-Turbo 返回了未请求的产物格式', 502, 'unknown');
+          }
+        }
+        if (format === 'jpeg') format = 'jpg';
+        if (kind === 'image') {
+          const { default: sharp } = await import('sharp');
+          try { await sharp(downloaded, { limitInputPixels: 40_960_000 }).toBuffer(); }
+          catch { throw new AssetError('INVALID_IMAGE', '下载结果不是有效图片', 502, 'unknown'); }
+        }
+        if (output.format === 'glb' && format !== 'glb') throw new AssetError('OUTPUT_FORMAT_MISMATCH', '声明为GLB的槽位返回了其他格式', 502, 'unknown');
+        if (kind === 'image' && !['png', 'jpg', 'webp'].includes(format)) throw new AssetError('UNSUPPORTED_OUTPUT', '返回的图片格式不受支持', 502, 'unknown');
+        const id = createHash('sha256').update(task.localId).update(String(outputIndex)).update(sha256(downloaded)).digest('hex');
+        const target = path.join(directory, `${id}.${format}`);
+        await writeAtomic(target, downloaded, this.abort.signal);
+        let assetId: string | undefined;
+        if (format === 'glb') {
+          const provenance: AssetProvenance = {
+            kind: ['api.aholo.cn', 'api.aholo3d.cn'].includes(new URL(this.options.client.base).hostname) ? 'lux3d' : 'unknown',
+            sourceTaskId: task.providerTaskId, sourceHash: sha256(downloaded), importedAt: new Date().toISOString(),
+          };
+          const asset = await this.options.assets.importOriginal(target, id, provenance);
+          assetId = asset.id;
+          const json = glbJson(downloaded);
+          const hasAnimation = !!json?.animations?.length || !!json?.skins?.length || !!json?.meshes?.some(mesh => mesh.primitives?.some(primitive => primitive.targets?.length));
+          if (!hasAnimation && downloaded.length <= 32 * 1024 * 1024 && this.options.optimize !== false) {
+            try {
+              const optimizedId = `opt-${id.slice(0, 60)}`;
+              const optimized = await this.options.assets.importLocal(target, optimizedId, provenance);
+              const model = this.options.assets.modelPath(optimizedId);
+              if (optimized.status === 'ready' && model) {
+                const optimizedBytes = await readFile(model);
+                await writeAtomic(path.join(directory, `${optimizedId}.glb`), optimizedBytes);
+                if (!artifacts.some(item => item.id === optimizedId)) {
+                  artifacts.push({
+                    id: optimizedId, kind: 'model', format: 'glb', variant: 'optimized', bytes: optimizedBytes.length, sha256: sha256(optimizedBytes),
+                    downloadUrl: `/assets/lux3d/tasks/${task.localId}/artifacts/${optimizedId}/download`, previewUrl: optimized.modelUrl,
+                    assetId: optimized.id, sourceTaskId: task.providerTaskId, sourceUrlHash: urlHash(output.url), label: '网页优化件（原件保留）',
+                  });
+                }
+              }
+            } catch { note('网页优化未成功，原始产物仍保留；没有重复创建云任务'); }
+          }
+        }
+        if (!artifacts.some(item => item.id === id)) {
+          artifacts.push({
+            id, kind, format, variant: 'original', label: output.label, animationId: output.animationId,
+            ...(output.animationIds ? { animationIds: output.animationIds } : {}), ...(output.animationMode ? { animationMode: output.animationMode } : {}),
+            bytes: downloaded.length, sha256: sha256(downloaded),
+            downloadUrl: `/assets/lux3d/tasks/${task.localId}/artifacts/${id}/download`,
+            previewUrl: kind === 'image' ? `/assets/lux3d/tasks/${task.localId}/artifacts/${id}/preview` : assetId ? `/assets/${assetId}/model.glb` : undefined,
+            assetId, sourceTaskId: task.providerTaskId, sourceUrlHash: urlHash(output.url),
+          });
+        }
+        await this.persist({ ...this.get(task.localId)!, stage: 'running', artifacts, note: warning });
+      } catch (error) {
+        if (this.abort.signal.aborted) throw error;
+        note(`产物 ${output.label ?? output.format} 未完成：${error instanceof AssetError ? error.message : '下载或校验失败'}`);
       }
-      await this.persist({ ...this.get(task.localId)!, stage: 'running', artifacts, note: warning });
     }
-    await this.persist({ ...this.get(task.localId)!, stage: artifacts.length ? 'ready' : 'failed', artifacts, note: warning, error: artifacts.length ? undefined : { code: 'NO_OUTPUT', message: '没有可用产物' } });
+    if (!artifacts.length) {
+      await this.persist({ ...this.get(task.localId)!, stage: 'running', note: warning });
+      throw new AssetError('NO_OUTPUT', '所有产物均未成功，未生成可预览结果', 502, 'rejected');
+    }
+    await this.persist({ ...this.get(task.localId)!, stage: 'ready', artifacts, note: warning, error: undefined });
   }
 
   async remoteHistory(page = 1, filters: { status?: number; starttime?: string | number; endtime?: string | number } = {}) {
@@ -406,7 +433,11 @@ export class LuxTaskService {
     return this.exclusive(async () => {
       const task = this.get(id) as StoredLuxTask | undefined;
       if (!task) throw new AssetError('TASK_NOT_FOUND', '任务不存在', 404);
-      if (task.providerTaskId && task.providerTaskId !== providerTaskId) throw new AssetError('TASK_LINK_CONFLICT', '本地任务已关联不同云端任务', 409, 'blocked');
+      if (task.providerTaskId) {
+        if (task.providerTaskId === providerTaskId) return task;
+        throw new AssetError('TASK_LINK_CONFLICT', '本地任务已关联不同云端任务', 409, 'blocked');
+      }
+      if (task.stage !== 'submit_unknown') throw new AssetError('TASK_LINK_NOT_ALLOWED', '只有真实结果未知的提交可以手工关联；已拒绝、已取消或尚未提交的任务不能认领云端任务', 409, 'blocked');
       const remote = await this.options.client.getProviderTask(providerTaskId, this.abort.signal);
       const manualLink = {
         at: new Date().toISOString(), providerTaskId,
@@ -414,6 +445,7 @@ export class LuxTaskService {
         candidateCount: task.resumeCandidates?.length ?? 0,
         parametersHash: task.parametersHash,
       };
+      this.paused.delete(id);
       const updated = await this.persist({ ...task, providerTaskId, stage: remote.status === 3 ? 'running' : 'queued', error: undefined, manualLink, note: '已由用户明确关联云端任务；查询和产物校验不等于证明它就是响应丢失的原提交' });
       this.start(updated);
       return updated;

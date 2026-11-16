@@ -128,7 +128,7 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
       <ambientLight intensity={config.hero.lights.ambient}/>
       <directionalLight position={config.hero.lights.key.direction} intensity={config.hero.lights.key.intensity}
         color={config.hero.lights.key.color} castShadow shadow-mapSize={[sceneRenderSettings.shadowMapSize, sceneRenderSettings.shadowMapSize]}/>
-      {scene && <><ModelAnimation scene={scene} clips={animations} playing={animation?.playing??false} clip={animation?.clip} loop={animation?.loop??true}/><Model scene={scene} config={config} scrollAt={scrollAt} onRotationChange={onRotationChange}/><Ready scene={scene} notify={() => callbacks.current.onReady?.(scene)}/></>}
+      {scene && <>{animation && <ModelAnimation scene={scene} clips={animations} playing={animation.playing} clip={animation.clip} loop={animation.loop??true}/>}<Model scene={scene} config={config} scrollAt={scrollAt} onRotationChange={onRotationChange}/><Ready scene={scene} notify={() => callbacks.current.onReady?.(scene)}/></>}
       {controls && <OrbitControls makeDefault target={config.hero.camera.target} minDistance={0.6} maxDistance={5} onEnd={event => {
         const orbit = event?.target as { object: PerspectiveCamera; target: Vector3 } | undefined;
         if (orbit && onCameraChange) onCameraChange({ position: orbit.object.position.toArray() as Vec3, target: orbit.target.toArray() as Vec3, fov: (orbit.object as PerspectiveCamera).fov });

@@ -6,8 +6,12 @@ import { describeError, luxApi, type ModuleRecord } from './lux3d-api.ts';
 type Draft = {
   widthPercent: number;
   align: 'start' | 'center' | 'end';
+  offsetX: number;
   offsetY: number;
   rotationY: number;
+  cameraPosition: [number, number, number];
+  cameraTarget: [number, number, number];
+  fov: number;
   scale: number;
   clip: string;
   playing: boolean;
@@ -16,8 +20,11 @@ type Draft = {
 
 function draftOf(config: SceneModuleConfig): Draft {
   return {
-    widthPercent: config.layout.widthPercent, align: config.layout.align, offsetY: config.layout.offsetY,
+    widthPercent: config.layout.widthPercent, align: config.layout.align, offsetX: config.layout.offsetX, offsetY: config.layout.offsetY,
     rotationY: config.rotation[1], scale: config.scale,
+    cameraPosition: [...config.camera.position] as [number, number, number],
+    cameraTarget: [...config.camera.target] as [number, number, number],
+    fov: config.camera.fov,
     clip: config.animation.clip, playing: config.animation.playing, loop: config.animation.loop,
   };
 }
@@ -51,9 +58,10 @@ export default function AssetModuleControls() {
     setBusy(true); setError(''); setNotice('');
     try {
       await luxApi.adjustModule(selected, state.version, {
-        layout: { widthPercent: draft.widthPercent, align: draft.align, offsetY: draft.offsetY },
+        layout: { widthPercent: draft.widthPercent, align: draft.align, offsetX: draft.offsetX, offsetY: draft.offsetY },
         rotation: [current?.config.rotation[0] ?? 0, draft.rotationY, current?.config.rotation[2] ?? 0],
         scale: draft.scale,
+        camera: { position: draft.cameraPosition, target: draft.cameraTarget, fov: draft.fov },
         animation: { clip: draft.clip, playing: draft.playing, loop: draft.loop },
       });
       setNotice('已保存本实例调整，并创建新的作品版本；主作品其他实例不会一起变化。');
@@ -99,7 +107,13 @@ export default function AssetModuleControls() {
       <label>对齐<select value={draft.align} onChange={event => setDraft({ ...draft, align: event.target.value as Draft['align'] })}>
         <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
       </select></label>
+      <label>水平偏移（px）<input type="number" min={-500} max={500} value={draft.offsetX} onChange={event => setDraft({ ...draft, offsetX: Number(event.target.value) })} /></label>
       <label>上下偏移（px）<input type="number" min={-500} max={500} value={draft.offsetY} onChange={event => setDraft({ ...draft, offsetY: Number(event.target.value) })} /></label>
+      <label>相机位置 X<input type="number" step={0.1} value={draft.cameraPosition[0]} onChange={event => setDraft({ ...draft, cameraPosition: [Number(event.target.value), draft.cameraPosition[1], draft.cameraPosition[2]] as [number, number, number] })} /></label>
+      <label>相机位置 Z<input type="number" step={0.1} value={draft.cameraPosition[2]} onChange={event => setDraft({ ...draft, cameraPosition: [draft.cameraPosition[0], draft.cameraPosition[1], Number(event.target.value)] as [number, number, number] })} /></label>
+      <label>相机目标 X<input type="number" step={0.1} value={draft.cameraTarget[0]} onChange={event => setDraft({ ...draft, cameraTarget: [Number(event.target.value), draft.cameraTarget[1], draft.cameraTarget[2]] as [number, number, number] })} /></label>
+      <label>相机目标 Z<input type="number" step={0.1} value={draft.cameraTarget[2]} onChange={event => setDraft({ ...draft, cameraTarget: [draft.cameraTarget[0], draft.cameraTarget[1], Number(event.target.value)] as [number, number, number] })} /></label>
+      <label>视角 FOV<input type="number" min={1} max={120} value={draft.fov} onChange={event => setDraft({ ...draft, fov: Number(event.target.value) })} /></label>
       <label>默认动画片段<input value={draft.clip} onChange={event => setDraft({ ...draft, clip: event.target.value })} placeholder="留空保持静态" /></label>
       <label><input type="checkbox" checked={draft.playing} onChange={event => setDraft({ ...draft, playing: event.target.checked })} />加载后播放</label>
       <label><input type="checkbox" checked={draft.loop} onChange={event => setDraft({ ...draft, loop: event.target.checked })} />循环</label>

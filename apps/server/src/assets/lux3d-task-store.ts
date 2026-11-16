@@ -18,7 +18,10 @@ export class LuxTaskStore {
       const bytes=await readPlainFile(path.join(this.directory,'tasks.json'),16*1024*1024,()=>new Error('任务索引路径含链接'),()=>new Error('任务索引超过大小限制'));const value=JSON.parse(bytes.toString('utf8')) as TaskState;
       if(!Array.isArray(value.tasks)||value.tasks.some(task=>!task||typeof task.localId!=='string'||!/^[-a-f0-9]{36}$/.test(task.localId)||!operations.includes(task.operation)||!Array.isArray(task.artifacts)||task.artifacts.some(artifact=>!artifact||!/^(?:[a-f0-9]{64}|opt-[a-f0-9]{60})$/.test(artifact.id)||!['png','jpg','jpeg','webp','glb','zip','usdz','obj_zip','fbx_zip','fbx','ply','stl','3mf','bin'].includes(artifact.format)||!['image','model','archive'].includes(artifact.kind)||!/^[a-f0-9]{64}$/.test(artifact.sha256))||typeof task.parametersHash!=='string'))throw new Error();
       this.tasks=value.tasks;
-      for(const task of this.tasks)if(['submitting','uploading'].includes(task.stage)){task.stage='submit_unknown';task.error={code:'SUBMIT_UNCONFIRMED',message:'上次上传或提交结果未确认；不会自动重新创建付费任务'};task.updatedAt=new Date().toISOString();}
+      for(const task of this.tasks){
+        if(task.stage==='uploading'){task.stage='cancelled';task.note='上次在提交生成前中断；没有发出创建请求，请用新的明确操作重新开始';task.updatedAt=new Date().toISOString();}
+        else if(task.stage==='submitting'){task.stage='submit_unknown';task.error={code:'SUBMIT_UNCONFIRMED',message:'提交请求结果未确认；不会自动重新创建付费任务'};task.updatedAt=new Date().toISOString();}
+      }
       await this.save();
     }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw new Error('Lux3D任务索引损坏或不可读取');}
   }

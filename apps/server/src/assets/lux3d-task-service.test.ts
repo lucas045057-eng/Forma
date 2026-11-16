@@ -1,10 +1,11 @@
 import {it,expect,vi} from 'vitest';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {LuxTaskService} from './lux3d-task-service.ts';
 import {Lux3DClient,AssetError} from './lux3d.ts';
 import {LuxUploadStore} from './lux3d-upload.ts';
+import {LuxTaskStore} from './lux3d-task-store.ts';
 import {ProviderUploader} from './lux3d-provider-upload.ts';
 import {AssetService} from './service.ts';
 
@@ -12,3 +13,32 @@ async function fixture(){const directory=await mkdtemp(path.join(tmpdir(),'lux-t
 it('reserves once across concurrent duplicate clicks and refuses same key different parameters',async()=>{const f=await fixture();const create=vi.spyOn(f.client,'createProviderTask').mockRejectedValue(new AssetError('UPSTREAM_UNAVAILABLE','accepted then disconnected',502));try{await f.service.init();const input={operation:'image' as const,parameters:{prompt:'chair'},idempotencyKey:'same-key'};const [first,second]=await Promise.all([f.service.create(input),f.service.create(input)]);expect(first.localId).toBe(second.localId);await f.service.idle();expect(create).toHaveBeenCalledTimes(1);expect(f.service.get(first.localId)?.stage).toBe('submit_unknown');await expect(f.service.create({...input,parameters:{prompt:'different'}})).rejects.toMatchObject({code:'IDEMPOTENCY_CONFLICT'});await f.service.create(input);expect(create).toHaveBeenCalledTimes(1);}finally{await f.service.close();create.mockRestore();await rm(f.directory,{recursive:true,force:true});}});
 it('unknown task survives restart and resume only lists existing IDs without another POST',async()=>{const f=await fixture();const create=vi.spyOn(f.client,'createProviderTask').mockRejectedValue(new AssetError('UPSTREAM_FORMAT','response missing task ID',502));const list=vi.spyOn(f.client,'listProviderTasks').mockResolvedValue([{providerTaskId:'9223372036854775807',status:1}]);let restarted:LuxTaskService|undefined;try{await f.service.init();const task=await f.service.create({operation:'image',parameters:{prompt:'chair'},idempotencyKey:'stable'});await f.service.idle();await f.service.close();restarted=new LuxTaskService(path.join(f.directory,'tasks'),{client:f.client,uploads:f.uploads,uploader:new ProviderUploader(f.client),assets:f.assets,artifactsDirectory:path.join(f.directory,'artifacts')});await restarted.init();const resumed=await restarted.resume(task.localId);expect(resumed.stage).toBe('submit_unknown');expect(resumed.resumeCandidates?.[0].providerTaskId).toBe('9223372036854775807');expect(create).toHaveBeenCalledTimes(1);expect(list).toHaveBeenCalledTimes(1);}finally{await restarted?.close();create.mockRestore();list.mockRestore();await rm(f.directory,{recursive:true,force:true});}});
 it('explicit rejection is failed rather than success and closed service cannot create',async()=>{const f=await fixture();const create=vi.spyOn(f.client,'createProviderTask').mockRejectedValue(new AssetError('UPSTREAM_REJECTED','quota denied'));try{await f.service.init();const task=await f.service.create({operation:'image',parameters:{prompt:'chair'},idempotencyKey:'denied'});await f.service.idle();expect(f.service.get(task.localId)?.stage).toBe('failed');await f.service.close();await expect(f.service.create({operation:'image',parameters:{prompt:'chair'},idempotencyKey:'after-close'})).rejects.toThrow();}finally{create.mockRestore();await rm(f.directory,{recursive:true,force:true});}});
+
+it('refuses to link a definitely rejected or unpublished task (F5)', async () => {
+  const f = await fixture();
+  const create = vi.spyOn(f.client, 'createProviderTask').mockRejectedValue(new AssetError('UPSTREAM_REJECTED', 'quota denied'));
+  const query = vi.spyOn(f.client, 'getProviderTask');
+  try {
+    await f.service.init();
+    const task = await f.service.create({ operation: 'image', parameters: { prompt: 'chair' }, idempotencyKey: 'rejected-link' });
+    await f.service.idle();
+    expect(f.service.get(task.localId)?.stage).toBe('failed');
+    await expect(f.service.link(task.localId, '123')).rejects.toMatchObject({ code: 'TASK_LINK_NOT_ALLOWED' });
+    expect(query).not.toHaveBeenCalled();
+  } finally { await f.service.close(); create.mockRestore(); query.mockRestore(); await rm(f.directory, { recursive: true, force: true }); }
+});
+
+it('restart distinguishes an interrupted upload from a possibly submitted create (N7)', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'lux-store-'));
+  try {
+    const base = { operation: 'image' as const, stage: 'uploading', inputRefs: [], parametersHash: 'h', artifacts: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    await writeFile(path.join(directory, 'tasks.json'), JSON.stringify({ tasks: [
+      { ...base, localId: '00000000-0000-4000-8000-000000000001' },
+      { ...base, localId: '00000000-0000-4000-8000-000000000002', stage: 'submitting' },
+    ] }), 'utf8');
+    const store = new LuxTaskStore(directory);
+    await store.init();
+    expect(store.get('00000000-0000-4000-8000-000000000001')?.stage).toBe('cancelled');
+    expect(store.get('00000000-0000-4000-8000-000000000002')?.stage).toBe('submit_unknown');
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});

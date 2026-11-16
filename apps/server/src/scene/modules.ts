@@ -6,6 +6,7 @@ import { writeAtomic } from '../assets/atomic-file.ts';
 import { WorkError, type WorkRepo } from '../work/repo.ts';
 import { adjustedConfig, assertAnimationClip, listModuleConfigs, readModuleConfig } from '../work/asset-module.ts';
 import { safeWorkPath } from './service.ts';
+import { assertSnapshotBudget } from '../checks/snapshot.ts';
 
 export interface ModuleHistoryEntry {
   id: string;
@@ -33,6 +34,7 @@ interface Journal {
   instanceId: string;
   segmentBase?: string;
   cursorVersion?: string;
+  cursorContext?: string;
   entries: ModuleHistoryEntry[];
   archive: ModuleHistoryEntry[];
   pending?: Pending;
@@ -121,10 +123,18 @@ export class ModuleSceneService {
       }
     }
     journal.cursorVersion = version;
+    journal.cursorContext = await this.contextHash();
     journal.pending = undefined;
     journal.conflict = undefined;
     await this.save(journal);
     return journal;
+  }
+
+  private async contextHash(): Promise<string> {
+    try {
+      const bytes = await safeWorkPath(this.workRoot, 'src/scene.config.json').then(file => readFile(file));
+      return createHash('sha256').update(bytes).digest('hex');
+    } catch { return ''; }
   }
 
   private async journalFor(instanceId: string): Promise<Journal> {
@@ -152,13 +162,14 @@ export class ModuleSceneService {
   async list(): Promise<Array<{ config: SceneModuleConfig; canUndo: boolean; stale: boolean; entries: number }>> {
     return this.repo.exclusive(async () => {
       const head = await this.repo.head();
+      const context = await this.contextHash();
       const configs = await listModuleConfigs(this.workRoot);
       const result = [];
       for (const config of configs) {
         const journal = await this.load(config.instanceId);
         result.push({
-          config, canUndo: journal.cursorVersion === head && journal.entries.length > 0,
-          stale: !!journal.cursorVersion && journal.cursorVersion !== head,
+          config, canUndo: journal.cursorVersion === head && journal.cursorContext === context && journal.entries.length > 0,
+          stale: !!journal.cursorVersion && (journal.cursorVersion !== head || journal.cursorContext !== context),
           entries: journal.entries.length,
         });
       }
@@ -169,12 +180,13 @@ export class ModuleSceneService {
   async get(instanceId: string): Promise<{ config: SceneModuleConfig; canUndo: boolean; stale: boolean; history: ModuleHistoryEntry[]; conflict?: string }> {
     return this.repo.exclusive(async () => {
       const head = await this.repo.head();
+      const context = await this.contextHash();
       const config = await readModuleConfig(this.workRoot, instanceId);
       const journal = await this.load(instanceId);
       return {
         config, history: [...journal.archive.slice(-10), ...journal.entries].map(entry => structuredClone(entry)),
-        canUndo: journal.cursorVersion === head && journal.entries.length > 0,
-        stale: !!journal.cursorVersion && journal.cursorVersion !== head,
+        canUndo: journal.cursorVersion === head && journal.cursorContext === context && journal.entries.length > 0,
+        stale: !!journal.cursorVersion && (journal.cursorVersion !== head || journal.cursorContext !== context),
         ...(journal.conflict ? { conflict: journal.conflict } : {}),
       };
     });
@@ -190,7 +202,8 @@ export class ModuleSceneService {
       await assertAnimationClip(this.workRoot, after.assetId, after.animation.clip);
       if (hashConfig(before) === hashConfig(after)) throw new WorkError('NO_CHANGES', '实例配置没有变化', 409);
       const journal = await this.journalFor(instanceId);
-      if (journal.cursorVersion && journal.cursorVersion !== head) {
+      const context = await this.contextHash();
+      if (journal.cursorVersion && (journal.cursorVersion !== head || journal.cursorContext !== context)) {
         journal.archive.push(...journal.entries);
         journal.entries = [];
         journal.segmentBase = head;
@@ -200,6 +213,7 @@ export class ModuleSceneService {
         id: createHash('sha256').update(`${instanceId}:${head}:${Date.now()}:${Math.random()}`).digest('hex').slice(0, 32),
         kind: 'adjust', at: new Date().toISOString(), before: cloneConfig(before), after: cloneConfig(after), workVersionBefore: head,
       };
+      await assertSnapshotBudget(this.workRoot, new Map<string, Buffer>([[moduleConfigPath(instanceId), Buffer.from(JSON.stringify(after, null, 2) + '\n')]]));
       journal.pending = pending;
       await this.save(journal);
       await writeAtomic(await this.path(instanceId), JSON.stringify(after, null, 2) + '\n');
@@ -210,6 +224,7 @@ export class ModuleSceneService {
         workVersionBefore: head, workVersionAfter: version,
       });
       journal.cursorVersion = version;
+      journal.cursorContext = await this.contextHash();
       journal.pending = undefined;
       journal.conflict = undefined;
       await this.save(journal);
@@ -228,7 +243,8 @@ export class ModuleSceneService {
       await assertAnimationClip(this.workRoot, assetId, after.animation.clip);
       if (hashConfig(before) === hashConfig(after)) throw new WorkError('NO_CHANGES', '实例已经使用该模型', 409);
       const journal = await this.journalFor(instanceId);
-      if (journal.cursorVersion && journal.cursorVersion !== head) {
+      const context = await this.contextHash();
+      if (journal.cursorVersion && (journal.cursorVersion !== head || journal.cursorContext !== context)) {
         journal.archive.push(...journal.entries);
         journal.entries = [];
         journal.segmentBase = head;
@@ -238,6 +254,7 @@ export class ModuleSceneService {
         id: createHash('sha256').update(`${instanceId}:${head}:${Date.now()}:${Math.random()}`).digest('hex').slice(0, 32),
         kind: 'replace-model', at: new Date().toISOString(), before: cloneConfig(before), after: cloneConfig(after), workVersionBefore: head,
       };
+      await assertSnapshotBudget(this.workRoot, new Map<string, Buffer>([[moduleConfigPath(instanceId), Buffer.from(JSON.stringify(after, null, 2) + '\n')]]));
       journal.pending = pending;
       await this.save(journal);
       await writeAtomic(await this.path(instanceId), JSON.stringify(after, null, 2) + '\n');
@@ -248,6 +265,7 @@ export class ModuleSceneService {
         workVersionBefore: head, workVersionAfter: version,
       });
       journal.cursorVersion = version;
+      journal.cursorContext = await this.contextHash();
       journal.pending = undefined;
       journal.conflict = undefined;
       await this.save(journal);
@@ -261,7 +279,7 @@ export class ModuleSceneService {
       const head = await this.repo.head();
       if (expectedWorkVersion !== head) throw new WorkError('MODULE_HISTORY_STALE', '作品版本已变化，请重新载入实例后再撤回', 409);
       const journal = await this.journalFor(instanceId);
-      if (journal.cursorVersion !== head) throw new WorkError('MODULE_HISTORY_STALE', '实例历史游标已失效，请重新载入后再撤回', 409);
+      if (journal.cursorVersion !== head || journal.cursorContext !== await this.contextHash()) throw new WorkError('MODULE_HISTORY_STALE', '实例历史游标已失效，请重新载入后再撤回', 409);
       const last = journal.entries.at(-1);
       if (!last) throw new WorkError('NO_MODULE_HISTORY', '该实例没有可撤回的调整', 409);
       const before = await readModuleConfig(this.workRoot, instanceId);
@@ -277,6 +295,7 @@ export class ModuleSceneService {
       const version = await this.repo.snapshot();
       journal.entries.pop();
       journal.cursorVersion = version;
+      journal.cursorContext = await this.contextHash();
       journal.pending = undefined;
       journal.conflict = undefined;
       await this.save(journal);

@@ -23,20 +23,24 @@ export async function registerLuxWorkbench(app: FastifyInstance, options: {
   });
   options.close(() => tasks.close());
   await tasks.init();
-  app.addContentTypeParser('application/octet-stream', (_request, payload, done) => done(null, payload));
   let activeUploads = 0;
-  app.post<{ Querystring: { kind?: string; filename?: string } }>('/assets/uploads', { bodyLimit: 100 * 1024 * 1024 }, async (request, reply) => {
-    if (request.headers['content-type']?.split(';')[0] !== 'application/octet-stream') throw new AssetError('INVALID_UPLOAD_MEDIA', '文件上传必须使用二进制流');
-    if (activeUploads >= 2) throw new AssetError('UPLOAD_BUSY', '同时最多上传两个文件，请稍后重试', 429);
-    activeUploads++;
-    const length = request.headers['content-length'];
-    const abort = new AbortController();
-    const timer = setTimeout(() => { abort.abort(); (request.body as import('node:stream').Readable)?.destroy(); }, 30_000);
-    try {
-      const upload = await uploads.receive({ kind: request.query.kind, filename: request.query.filename, stream: request.body as import('node:stream').Readable, contentLength: length === undefined ? undefined : Number(length), signal: abort.signal });
-      const { providerUrl: _url, providerUrlExpiresAt: _expires, ...safe } = upload;
-      return reply.code(201).send(safe);
-    } finally { clearTimeout(timer); activeUploads--; }
+  // Encapsulated scope: only the upload route receives raw octet-stream bodies; all other
+  // JSON APIs keep Fastify's normal parser and 16 KiB limit.
+  await app.register(async uploadScope => {
+    uploadScope.addContentTypeParser('application/octet-stream', (_request, payload, done) => done(null, payload));
+    uploadScope.post<{ Querystring: { kind?: string; filename?: string } }>('/assets/uploads', { bodyLimit: 100 * 1024 * 1024 }, async (request, reply) => {
+      if (request.headers['content-type']?.split(';')[0] !== 'application/octet-stream') throw new AssetError('INVALID_UPLOAD_MEDIA', '文件上传必须使用二进制流');
+      if (activeUploads >= 2) throw new AssetError('UPLOAD_BUSY', '同时最多上传两个文件，请稍后重试', 429);
+      activeUploads++;
+      const length = request.headers['content-length'];
+      const abort = new AbortController();
+      const timer = setTimeout(() => { abort.abort(); (request.body as import('node:stream').Readable)?.destroy(); }, 30_000);
+      try {
+        const upload = await uploads.receive({ kind: request.query.kind, filename: request.query.filename, stream: request.body as import('node:stream').Readable, contentLength: length === undefined ? undefined : Number(length), signal: abort.signal });
+        const { providerUrl: _url, providerUrlExpiresAt: _expires, ...safe } = upload;
+        return reply.code(201).send(safe);
+      } finally { clearTimeout(timer); activeUploads--; }
+    });
   });
   app.get('/assets/uploads', async () => uploads.list().map(({ providerUrl: _url, providerUrlExpiresAt: _expires, ...record }) => record));
   app.get<{ Params: { id: string } }>('/assets/uploads/:id/preview', async (request, reply) => {

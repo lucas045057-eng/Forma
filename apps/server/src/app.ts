@@ -17,7 +17,7 @@ import { WorkService, type WorkServiceOptions } from './work/service.ts';
 import { WorkError } from './work/repo.ts';
 import { registerCheckRoutes } from './checks/routes.ts';
 import { ArtifactError } from './checks/artifacts.ts';
-import { SnapshotError } from './checks/snapshot.ts';
+import { SnapshotBudgetError, SnapshotError } from './checks/snapshot.ts';
 import { SpeechClient, type SpeechClientOptions } from './speech/client.ts';
 import { SpeechService } from './speech/service.ts';
 import { registerSpeechRoutes } from './speech/routes.ts';
@@ -151,6 +151,7 @@ export async function createApp(options: AppOptions = {}) {
     if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
     if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
     if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SnapshotBudgetError) return reply.code(409).send({ error: { code: error.code, message: error.message, details: error.detail } });
     if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
     if (error instanceof AssetError) {
       return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
