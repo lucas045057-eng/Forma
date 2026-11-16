@@ -692,6 +692,7 @@ it('falls back unless the config is a single plain version-0 files repository', 
     const variants = [
       base.replace(/^[ \t]*repositoryformatversion.*$/m, ''),
       `${base}\n[core]\n\trepositoryformatversion = 0\n`,
+      `${base}\n[core]\n\trepositoryformatversion = 1 # duplicate with a comment\n`,
       base.replace(/^[ \t]*repositoryformatversion.*$/m, 'repositoryformatversion = 1'),
       base.replace(/^[ \t]*repositoryformatversion.*$/m, 'repositoryformatversion = 0 # note'),
     ];
