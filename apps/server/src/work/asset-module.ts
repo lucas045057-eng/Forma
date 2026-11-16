@@ -88,7 +88,7 @@ export async function readModuleConfig(root: string, instanceId: string): Promis
   if (bytes.length > 16 * 1024) throw new WorkError('INVALID_MODULE', '独立3D实例配置过大', 409);
   let parsed: unknown;
   try { parsed = JSON.parse(bytes.toString('utf8')); } catch { throw new WorkError('INVALID_MODULE', '独立3D实例配置损坏', 409); }
-  return parseSceneModuleConfig(parsed);
+  try { return parseSceneModuleConfig(parsed); } catch { throw new WorkError('INVALID_MODULE', '独立3D实例配置不符合约束', 409); }
 }
 
 export async function listModuleConfigs(root: string): Promise<SceneModuleConfig[]> {
