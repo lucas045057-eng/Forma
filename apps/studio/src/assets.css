@@ -17,4 +17,20 @@
 .asset-controls form button { width: 100%; }
 .asset-controls dt { font-size: 11px; color: #8ea5b5; margin-top: 18px; }
 .asset-controls dd { margin: 6px 0; font-size: 13px; }
-@media (max-width: 700px) { .asset-layout { grid-template-columns: 1fr; overflow: auto; } .model-area { flex: none; } .asset-dialog { padding: 12px; } }
+.asset-dialog { inset: 90px 12px 12px auto; width: min(560px, 48vw); border: 1px solid #4d7986; border-radius: 10px; padding: 16px; z-index: 50; }
+.asset-layout { display: flex; flex-direction: column; flex: none; overflow: visible; }
+.asset-controls { overflow: visible; padding: 12px; }
+.model-area { max-height: 240px; flex: none; }
+.lux-dropzone { padding: 18px; border: 2px dashed #67d6cf; border-radius: 6px; }
+.lux-workbench textarea { min-height: 70px; }
+.lux-input-order > div { display: flex; gap: 5px; align-items: center; font-size: 11px; margin: 6px 0; }
+.lux-input-order button, .lux-result button { padding: 6px; font-size: 11px; margin: 3px; }
+.lux-result { border-top: 1px solid #4d7986; padding: 14px 0; }
+.lux-artifact img { max-width: 100%; max-height: 260px; object-fit: contain; }
+.lux-artifact a { display: inline-block; color: #9ff1df; margin: 8px; }
+.lux-model-preview { position: relative; width: 100%; aspect-ratio: 1; background: #efe8dc; }
+.asset-placement { position: fixed; left: 14px; top: 110px; bottom: 14px; overflow: auto; width: min(340px, 36vw); padding: 16px; background: #17232d; border: 1px solid #67d6cf; border-radius: 10px; z-index: 60; font-size: 12px; }
+.asset-placement label { display: block; margin: 8px 0; }
+.asset-placement input, .asset-placement select { width: 100%; }
+.placement-card { padding: 18px; background: #24464c; border: 2px dashed #8df2dd; cursor: grab; overflow-wrap: anywhere; }
+@media (max-width: 700px) { .asset-layout { grid-template-columns: 1fr; overflow: auto; } .model-area { flex: none; } .asset-dialog { top: 80px; bottom: 0; right: 0; width: 90vw; padding: 12px; } .asset-placement { width: 70vw; max-height: 50vh; top: auto; } }

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import type { Selection } from '@spatial/shared';
 import { SceneService, SceneError } from './scene/service.ts';
+import { ModuleSceneService } from './scene/modules.ts';
 import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
@@ -19,6 +20,8 @@ import { SnapshotError } from './checks/snapshot.ts';
 import { SpeechClient, type SpeechClientOptions } from './speech/client.ts';
 import { SpeechService } from './speech/service.ts';
 import { registerSpeechRoutes } from './speech/routes.ts';
+import { registerLuxWorkbench } from './assets/lux3d-routes.ts';
+import { registerPlacementRoutes } from './assets/placement.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
@@ -115,8 +118,17 @@ export async function createApp(options: AppOptions = {}) {
   }), { timeoutMs: options.speech?.timeoutMs });
   closers.push(() => speech.close());
   await work.init();
+  const modules=new ModuleSceneService({workRoot,directory:workDataDirectory,repo:work.repo});
+  await modules.init();
   await service.init();
-  app.addHook('preClose', async () => { closing = true; speech.beginClose(); });
+  const luxWorkbench=await registerLuxWorkbench(app,{
+    directory:path.join(workDataDirectory,'lux3d-workbench'),assets:service,
+    client:new Lux3DClient({base:options.base??process.env.LUX3D_WORKBENCH_BASE??process.env.LUX3D_BASE??'https://api.aholo.cn',key:options.key??process.env.LUX3D_API_KEY}),
+    uploadHosts:(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean).length?(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean):undefined,
+    close:operation=>closers.push(operation),
+  });
+  registerPlacementRoutes(app,service,scene,work,modules,emit);
+  app.addHook('preClose', async () => { closing = true; speech.beginClose(); luxWorkbench.tasks.beginClose(); });
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -139,7 +151,7 @@ export async function createApp(options: AppOptions = {}) {
     if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
     if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
     if (error instanceof AssetError) {
-      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : 400).send({ error: { code: error.code, message: error.message } });
+      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
     }
     const validation = (error as { validation?: unknown }).validation;
     return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
