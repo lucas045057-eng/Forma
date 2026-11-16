@@ -8,6 +8,7 @@ import { writeAtomic } from '../assets/atomic-file.ts';
 import type { AssetService } from '../assets/service.ts';
 import type {ModelProvenance,ModelProvenanceView} from '@spatial/shared';
 import {readPlainFile} from '../checks/paths.ts';
+import {assertSnapshotBudget} from '../checks/snapshot.ts';
 import {parseProvenance,cleanAssetProvenance} from '../assets/provenance.ts';
 import {sha256} from '../assets/fallbacks.ts';
 
@@ -168,6 +169,12 @@ export class SceneService {
         if(!existing||!(['kind','presetId','sourceTaskId','sourceHash','outputHash'] as const).every(key=>existing[key]===provenance[key]))throw new SceneError('ASSET_NAME_CONFLICT','作品已有同名但来源不同的模型',409);
         provenanceBytes=existingBytes;
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+      await assertSnapshotBudget(this.options.workRoot, new Map<string, Buffer>([
+        [`public/assets/${id}.glb`, binary],
+        [`public/assets/${id}.parts.json`, Buffer.from(JSON.stringify(metadata, null, 2))],
+        [`public/assets/${id}.provenance.json`, provenanceBytes],
+        ['src/scene.config.json', Buffer.from(JSON.stringify(next, null, 2) + '\n')],
+      ]));
       await mkdir(path.dirname(destination), { recursive: true });
       // Stable URLs are immutable: undo must not silently reference overwritten model bytes.
       try {

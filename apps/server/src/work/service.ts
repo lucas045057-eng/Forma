@@ -4,7 +4,7 @@ import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
 import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task, AssetPlacementTarget, ModelProvenance } from '@spatial/shared';
 import type { SceneModuleConfig } from '@spatial/shared/scene-module';
-import { assertModuleRuntime, packageAssetModule, removeModulePackage } from './asset-module.ts';
+import { packageAssetModule, removeModulePackage } from './asset-module.ts';
 import { readLedger, verifyCandidateLedger, writeLedger, type AssetLedger } from './asset-ledger.ts';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { CodingAgent, CodingAgentError, type CodingAgentOptions } from '../agent/client.ts';
@@ -14,7 +14,7 @@ import { PreviewManager, previewBase } from './preview.ts';
 import { WorkRepo, WorkError } from './repo.ts';
 import { evaluateApproval } from '../approvals/policy.ts';
 import { CheckRunner, CheckCompletionInvalidated, CHECK_ORDER, POLICY_VERSION, type CheckCandidateInput, type CheckExecutor } from '../checks/runner.ts';
-import { computeSnapshot } from '../checks/snapshot.ts';
+import { assertSnapshotBudget, computeSnapshot, SnapshotBudgetError } from '../checks/snapshot.ts';
 import { createRealExecutor } from '../checks/worker.ts';
 import { getCheckToolsIdentity } from '../checks/tools.ts';
 import { readArtifact, validateArtifactName } from '../checks/artifacts.ts';
@@ -22,6 +22,8 @@ import { readArtifact, validateArtifactName } from '../checks/artifacts.ts';
 interface StoredTask extends Task {
   /** Candidate id whose server-side attachment ledger proves managed files. */
   ledgerId?: string;
+  /** Startup could not prove the candidate baseline; keep the draft for an operator. */
+  recoveryHold?: boolean;
   createdAt: string;
   updatedAt: string;
   error?: { code: string; message: string };
@@ -124,12 +126,28 @@ export class WorkService {
       if (task.status === 'awaiting_approval' && !this.state.approvals.some(card => card.taskId === task.id)) throw new Error('等待请示的任务缺少对应卡片，拒绝自动清理或发布');
     }
     await this.recoverIntent();
-    await this.recoverApprovalIntent();
+    try { await this.recoverApprovalIntent(); }
+    catch (error) {
+      if (!(error instanceof WorkError) || !['CANDIDATE_BASE_UNKNOWN', 'CANDIDATE_BASE_CONFLICT', 'NOT_FOUND'].includes(error.code)) throw error;
+      const intent = this.state.approvalIntent;
+      const card = intent ? this.state.approvals.find(item => item.id === intent.id) : undefined;
+      const task = intent ? this.state.tasks.find(item => item.id === intent.taskId) : undefined;
+      if (card) { card.status = 'failed'; card.updatedAt = new Date().toISOString(); }
+      if (task) {
+        task.status = 'failed';
+        task.recoveryHold = true;
+        task.updatedAt = new Date().toISOString();
+        task.error = { code: 'RECOVERY_FAILED', message: '恢复时无法证明候选基线；草稿已保留，请由操作者核对后处理' };
+        task.events.push({ type: 'task.updated', ts: task.updatedAt, sequence: task.events.length + 1, message: task.error.message });
+      }
+      this.state.approvalIntent = undefined;
+      await this.save();
+    }
     for (const entry of await readdir(this.repo.candidatesDir, { withFileTypes: true })) {
       if (!/^[a-z0-9]{6,32}$/.test(entry.name)) continue;
       const publicPending = this.state.candidates.some(c => c.id === entry.name && c.decision === 'pending');
-      const privateStaging = this.state.tasks.some(task => task.id === entry.name && task.status === 'awaiting_approval' &&
-        this.state.approvals.some(card => card.taskId === task.id));
+      const privateStaging = this.state.tasks.some(task => task.id === entry.name &&
+        (task.recoveryHold || (task.status === 'awaiting_approval' && this.state.approvals.some(card => card.taskId === task.id))));
       if (!publicPending && !privateStaging) await this.repo.removeCandidate(entry.name);
     }
     let recovered = false;
@@ -229,7 +247,7 @@ export class WorkService {
     const controller = new AbortController();
     this.controllers.set(taskId, controller);
     try {
-      await this.repo.commitCandidate(taskId, card.summary, await this.taskLedger(task));
+      await this.repo.commitCandidate(taskId, card.summary, await this.taskLedger(task), intent.before);
       let previewUrl: string;
       try {
         previewUrl = await this.previews.start(taskId, this.repo.candidatePath(taskId), controller.signal);
@@ -445,7 +463,6 @@ export class WorkService {
     return this.createModuleTask({
       baseVersion:input.baseVersion,instruction:input.force?'放入独立3D模块（明确强制采用超网页门槛模型）':'放入独立3D模块',
       prepare:async(root,candidateId,base)=>{
-        await assertModuleRuntime(root);
         const result=await packageAssetModule({root,candidateId,baseVersion:base,instanceId,assetId:input.assetId,binary:input.binary,provenance:input.provenance,parts:input.parts,target:input.target,config:input.config});
         return result.ledger;
       },
@@ -471,6 +488,7 @@ export class WorkService {
         await this.repo.createCandidate(id,base);
         const root=this.repo.candidatePath(id);
         const ledger=await input.prepare(root,id,base);
+        if(ledger.intent==='insert') await assertSnapshotBudget(root);
         await writeLedger(this.options.directory,ledger);
         task.ledgerId=id;await this.save();
         const pending=await this.repo.pendingDiff(id,base,ledger);
@@ -481,10 +499,10 @@ export class WorkService {
           const card:StoredApproval={id:randomUUID().replaceAll('-',''),taskId:id,question:'是否发布这个独立3D模块候选？',reason:evaluation.evidence.join('\n'),options:[{label:'批准候选',impact:'仅发布草稿，检查后才可采用'},{label:'拒绝并丢弃',impact:'主作品和资产不变'}],affected:evaluation.affected,evidence:evaluation.evidence,status:'pending',ruleCodes:evaluation.ruleCodes,ruleVersion:'m3a-v1',baseVersion:base,contentDigest:pending.contentDigest,createdAt:now,updatedAt:now,summary:task.instruction};
           this.state.approvals.push(card);task.status='awaiting_approval';await this.append(task,'独立3D模块草稿已准备，等待明确批准');this.options.emit({type:'approval.requested',approval:this.publicApproval(card)});return clone(task);
         }
-        await this.repo.commitCandidate(id,task.instruction,ledger);
+        await this.repo.commitCandidate(id,task.instruction,ledger,base);
         const candidate:StoredCandidate={id,taskId:id,candidateCommit:await this.repo.candidateCommit(id),baseVersion:base,branch:this.repo.branch(id),previewUrl:await this.previews.start(id,root),diff:pending.diff,outOfScope:pending.changedFiles,checks:checks(),decision:'pending',createdAt:now};
         this.state.candidates.push(candidate);task.status='done';task.candidateId=id;await this.append(task,task.instruction);this.options.emit({type:'candidate.ready',candidate:clone(candidate)});return clone(task);
-      }catch(error){await this.previews.stop(id);await this.repo.removeCandidate(id);task.status='failed';task.error=this.failure(error);await this.append(task,task.error.message);throw error;}
+      }catch(error){await this.previews.stop(id);await this.repo.removeCandidate(id);task.status='failed';task.error=error instanceof SnapshotBudgetError?{code:error.code,message:error.message}:this.failure(error);await this.append(task,task.error.message);throw error;}
     });
   }
 
@@ -561,7 +579,7 @@ export class WorkService {
         });
         return;
       }
-      const changed = await this.repo.commitCandidate(id, result.summary);
+      const changed = await this.repo.commitCandidate(id, result.summary, undefined, base);
       const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
       const candidate: StoredCandidate = {
         id, taskId: id, candidateCommit: await this.repo.candidateCommit(id), baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),

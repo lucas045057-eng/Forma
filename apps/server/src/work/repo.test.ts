@@ -195,3 +195,17 @@ it('audits paths containing tabs, newlines and spaces as whole names (review N2)
     void workRoot;
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+it('uses an explicit trusted base when legacy candidates lack .base metadata (F4)', async () => {
+  const { directory, workRoot, repo } = await fixture();
+  try {
+    const base = await repo.head();
+    await repo.createCandidate('candidate1', base);
+    await rm(path.join(repo.candidatesDir, '.base-candidate1'));
+    await writeFile(path.join(repo.candidatePath('candidate1'), 'src', 'App.tsx'), 'export default () => <button>旧草稿</button>;\n');
+    await expect(repo.commitCandidate('candidate1', 'legacy without base')).rejects.toMatchObject({ code: 'CANDIDATE_BASE_UNKNOWN' });
+    expect(await repo.commitCandidate('candidate1', 'legacy with base', undefined, base)).toEqual(['src/App.tsx']);
+    expect(await repo.candidateCommit('candidate1')).not.toBe(base);
+    void workRoot;
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});

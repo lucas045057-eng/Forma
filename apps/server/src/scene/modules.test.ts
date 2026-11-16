@@ -71,3 +71,13 @@ it('rejects an adjustment prepared for a different work version without touching
     expect(await readFile(file, 'utf8')).toBe(before);
   } finally { await rm(f.directory, { recursive: true, force: true }); }
 });
+
+it('invalidates the module cursor when the main scene changes without a new module snapshot (N4)', async () => {
+  const f = await fixture();
+  try {
+    await f.service.adjust(instanceId, { scale: 1.2 }, 'v1');
+    await writeFile(path.join(f.workRoot, 'src', 'scene.config.json'), JSON.stringify({ changed: true }), 'utf8');
+    expect((await f.service.get(instanceId)).stale).toBe(true);
+    await expect(f.service.undo(instanceId, f.repo.version)).rejects.toMatchObject({ code: 'MODULE_HISTORY_STALE' });
+  } finally { await rm(f.directory, { recursive: true, force: true }); }
+});

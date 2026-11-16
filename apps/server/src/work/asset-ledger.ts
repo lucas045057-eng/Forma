@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { mkdir } from 'node:fs/promises';
+import ts from 'typescript';
 import path from 'node:path';
 import {
   MODULE_INSTANCE_PATTERN,
@@ -7,13 +8,15 @@ import {
   moduleComponentPath,
   moduleConfigPath,
   parseSceneModuleConfig,
-  SCENE_MODULE_RENDERER,
+  normalizeRepoPath,
+  isCanonicalModuleRenderer,
+  isTrustedRuntimeSource,
 } from '@spatial/shared/scene-module';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import { readPlainFile } from '../checks/paths.ts';
 import { WorkError } from './repo.ts';
 
-export type LedgerRole = 'model' | 'provenance' | 'parts' | 'config' | 'component' | 'source';
+export type LedgerRole = 'model' | 'provenance' | 'parts' | 'config' | 'component' | 'source' | 'runtime';
 export type LedgerOperation = 'create' | 'modify' | 'delete';
 
 export interface LedgerEntry {
@@ -84,7 +87,7 @@ export function validateLedger(value: unknown): AssetLedger {
     if (!SAFE_PATH.test(file) || file.includes('..') || file.includes('\\') || paths.has(file)) throw new WorkError('INVALID_LEDGER', '受信资产路径无效或重复');
     paths.add(file);
     if (!['create', 'modify', 'delete'].includes(String(entry.operation)) ||
-      !['model', 'provenance', 'parts', 'config', 'component', 'source'].includes(String(entry.role)) ||
+      !['model', 'provenance', 'parts', 'config', 'component', 'source', 'runtime'].includes(String(entry.role)) ||
       typeof entry.bytes !== 'number' || !Number.isSafeInteger(entry.bytes) || entry.bytes < 0 ||
       (entry.beforeHash !== null && !HASH.test(String(entry.beforeHash))) ||
       (entry.afterHash !== null && !HASH.test(String(entry.afterHash)))) {
@@ -190,6 +193,100 @@ export function scanModuleReferences(source: string, file: string): ModuleRefere
   return references;
 }
 
+function moduleTarget(file: string, specifier: string): string | undefined {
+  if (!specifier.startsWith('.')) return undefined;
+  return path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier)).toLowerCase();
+}
+
+function isModuleNamespaceTarget(target: string): boolean {
+  return target === 'src/spatial-module' || target.startsWith('src/spatial-module.') || target.startsWith('src/spatial-module/') || target.startsWith('src/scene-modules/');
+}
+
+/**
+ * F3: only the exact server-generated default import may reference a module instance. Aliases,
+ * namespace imports, re-exports, dynamic imports, require, createElement/jsx-runtime and extra
+ * props on the canonical component are rejected. This runs on every changed non-managed source.
+ */
+export function auditTrustedImports(source: string, file: string): void {
+  const tree = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const canonical = new Map<string, string>();
+  const allowed = new Set<ts.Node>();
+  const importedCounts = new Map<string, number>();
+  const jsxCounts = new Map<string, number>();
+  const reject = (message: string): never => { throw new WorkError('MODULE_IMPORT_UNAPPROVED', message, 409); };
+
+  function visitImports(node: ts.Node) {
+    if (ts.isImportDeclaration(node)) {
+      const specifier = node.moduleSpecifier;
+      if (ts.isStringLiteral(specifier)) {
+        const target = moduleTarget(file, specifier.text);
+        if (target && isModuleNamespaceTarget(target)) {
+          const output = /^src\/scene-modules\/([a-f0-9]{32})\.tsx$/.exec(target);
+          if (!output) reject('只允许通过受信实例组件引用 3D 模块，禁止直接导入运行器、扩展名旁路或目录导入');
+          const id = output[1];
+          const clause = node.importClause;
+          if (!clause || clause.isTypeOnly || clause.namedBindings || !clause.name) reject('实例组件必须使用固定名字的默认导入');
+          const local = clause.name.text;
+          if (local !== `SpatialModel${id}`) reject('实例组件导入名必须与服务端生成的名称一致');
+          canonical.set(local, id);
+          allowed.add(clause.name);
+          importedCounts.set(id, (importedCounts.get(id) ?? 0) + 1);
+        }
+      }
+    }
+    if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference) && ts.isStringLiteral(node.moduleReference.expression)) {
+      const target = moduleTarget(file, node.moduleReference.expression.text);
+      if (target && isModuleNamespaceTarget(target)) reject('不能用 import = require 加载受信实例或运行器');
+    }
+    if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+      const target = moduleTarget(file, node.moduleSpecifier.text);
+      if (target && isModuleNamespaceTarget(target)) reject('不能重导出受信实例或运行器');
+    }
+    if (ts.isCallExpression(node)) {
+      if (node.expression.kind === ts.SyntaxKind.ImportKeyword) reject('受信模块源码不允许动态 import');
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'require') reject('受信模块源码不允许 require');
+      const callee = ts.isPropertyAccessExpression(node.expression) ? node.expression.name.text : ts.isIdentifier(node.expression) ? node.expression.text : '';
+      if (['createElement', 'jsx', 'jsxs', '_jsx', '_jsxs'].includes(callee)) reject('改动的作品源码不能使用 createElement/jsx 动态构造');
+    }
+    ts.forEachChild(node, visitImports);
+  }
+  visitImports(tree);
+
+  function visitJsx(node: ts.Node) {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tag = ts.isJsxElement(node) ? node.openingElement.tagName : node.tagName;
+      if (ts.isIdentifier(tag)) {
+        const name = tag.text;
+        if (name === 'SpatialModule') reject('普通源码不能直接渲染受信运行器');
+        const id = canonical.get(name) ?? (name.startsWith('SpatialModel') ? name.slice('SpatialModel'.length) : undefined);
+        if (id !== undefined) {
+          if (!/^[a-f0-9]{32}$/.test(id) || !canonical.has(name)) reject('实例必须使用服务端生成且已导入的静态组件名');
+          const attributes = ts.isJsxElement(node) ? node.openingElement.attributes : node.attributes;
+          if (!ts.isJsxSelfClosingElement(node) || attributes.properties.length) reject('实例组件必须是无属性的自闭合静态标签');
+          allowed.add(tag);
+          jsxCounts.set(id, (jsxCounts.get(id) ?? 0) + 1);
+        }
+      }
+    }
+    ts.forEachChild(node, visitJsx);
+  }
+  visitJsx(tree);
+
+  for (const [local, id] of canonical) {
+    if ((importedCounts.get(id) ?? 0) !== 1 || (jsxCounts.get(id) ?? 0) !== 1) {
+      reject(`实例 ${local} 必须恰好有一个受信导入和一个静态引用`);
+    }
+  }
+
+  function visitIdentifiers(node: ts.Node) {
+    if (ts.isIdentifier(node) && canonical.has(node.text) && !allowed.has(node)) {
+      reject('受信实例标识符只能用于唯一静态 JSX 引用，不能传递、别名或动态调用');
+    }
+    ts.forEachChild(node, visitIdentifiers);
+  }
+  visitIdentifiers(tree);
+}
+
 function referenceKey(reference: ModuleReference): string {
   return reference.dynamic ? `${reference.file}:${reference.line}:${reference.column}:dynamic` : reference.signature;
 }
@@ -255,16 +352,40 @@ function modelWritable(file: string): boolean {
   return /^src\/(?:[A-Za-z0-9_-][A-Za-z0-9._-]*\/)*[A-Za-z0-9_-][A-Za-z0-9._-]*\.(?:tsx|ts|css|json|svg)$/.test(file);
 }
 
+const COMPONENT_SOURCE = /^\/\/ Generated by Spatial AI Workbench\. Do not edit\.\nimport \{ SpatialModule \} from '\.\.\/spatial-module\.tsx';\nexport default function SpatialModel([a-f0-9]{32})\(\) \{ return <SpatialModule instanceId="([a-f0-9]{32})" \/>; \}\n$/;
+
+/**
+ * Validate every managed file in a revision. Only the canonical `.tsx` renderer and the exact
+ * generated `<id>.json` / `<id>.tsx` module pair are allowed; any same-name `.ts`/directory or
+ * extra file is rejected as a possible shadow.
+ */
 async function assertManagedBaseline(repo: LedgerRepo, base: string): Promise<void> {
   for (const file of await repo.listTree(base)) {
-    if (!isManagedModulePath(file) || file === SCENE_MODULE_RENDERER || !file.endsWith('.json')) continue;
+    if (!isManagedModulePath(file)) continue;
     const bytes = await repo.fileBufferAt(base, file);
     if (!bytes) continue;
-    let parsed: unknown;
-    try { parsed = JSON.parse(bytes.toString('utf8')); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置损坏：${file}`, 409); }
-    let config: ReturnType<typeof parseSceneModuleConfig>;
-    try { config = parseSceneModuleConfig(parsed); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置不合法：${file}`, 409); }
-    if (moduleConfigPath(config.instanceId) !== file) throw new WorkError('INVALID_MANAGED_BASELINE', '基线模块配置与实例编号不一致', 409);
+    if (isCanonicalModuleRenderer(file)) {
+      if (!isTrustedRuntimeSource(bytes.toString('utf8'))) throw new WorkError('INVALID_MANAGED_BASELINE', '受信运行时内容不符合约定', 409);
+      continue;
+    }
+    if (normalizeRepoPath(file).startsWith('src/spatial-module')) {
+      throw new WorkError('INVALID_MANAGED_BASELINE', `受管运行时命名空间只能包含 canonical .tsx：${file}`, 409);
+    }
+    const output = /^src\/scene-modules\/([a-f0-9]{32})\.(json|tsx)$/.exec(file);
+    if (!output) throw new WorkError('INVALID_MANAGED_BASELINE', `受管目录只能包含 server 生成的实例文件：${file}`, 409);
+    const instanceId = output[1], kind = output[2];
+    if (kind === 'json') {
+      let parsed: unknown;
+      try { parsed = JSON.parse(bytes.toString('utf8')); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置损坏：${file}`, 409); }
+      let config: ReturnType<typeof parseSceneModuleConfig>;
+      try { config = parseSceneModuleConfig(parsed); } catch { throw new WorkError('INVALID_MANAGED_BASELINE', `基线模块配置不合法：${file}`, 409); }
+      if (moduleConfigPath(config.instanceId) !== file) throw new WorkError('INVALID_MANAGED_BASELINE', '基线模块配置与实例编号不一致', 409);
+      continue;
+    }
+    const match = COMPONENT_SOURCE.exec(bytes.toString('utf8'));
+    if (!match || match[1] !== match[2] || match[1] !== instanceId || moduleComponentPath(instanceId) !== file) {
+      throw new WorkError('INVALID_MANAGED_BASELINE', `受管组件必须由服务端生成：${file}`, 409);
+    }
   }
 }
 
@@ -284,6 +405,7 @@ export async function verifyCandidateLedger(repo: LedgerRepo, candidateId: strin
   await assertManagedBaseline(repo, base);
   const changes = await repo.diffNameStatus(candidateId, base);
   const seen = new Set<string>();
+  const renamedSources: Array<{ from: string; to: string }> = [];
   for (const change of changes) {
     if (change.status.startsWith('R') || change.status.startsWith('C')) {
       const from = change.from ?? '', to = change.path;
@@ -292,6 +414,7 @@ export async function verifyCandidateLedger(repo: LedgerRepo, candidateId: strin
         if (managedReason(file)) throw new WorkError('MANAGED_MODULE_DENIED', '模型不能重命名受管模块文件', 409);
       }
       if (!modelWritable(from) || !modelWritable(to)) throw new WorkError('UNSAFE_CANDIDATE_DIFF', '模型只能修改 src/ 下允许的源码文件', 409);
+      if ((isTsxFile(from) || isTsxFile(to)) && !isManagedModulePath(from) && !isManagedModulePath(to)) renamedSources.push({ from, to });
       const entry = entryFor(ledger, from) ?? entryFor(ledger, to);
       if (entry) throw new WorkError('INVALID_LEDGER', '受信清单不支持改名', 409);
       continue;
@@ -319,14 +442,20 @@ export async function verifyCandidateLedger(repo: LedgerRepo, candidateId: strin
   for (const entry of ledger?.entries ?? []) {
     if (!seen.has(entry.path)) throw new WorkError('INVALID_LEDGER', `受信清单包含未变化的文件：${entry.path}`, 409);
   }
-  const changedSources = changes.map(change => change.path).filter(file => isTsxFile(file) && !isManagedModulePath(file));
+  const changedSources = changes.filter(change => !change.status.startsWith('R') && !change.status.startsWith('C')).map(change => change.path).filter(file => isTsxFile(file) && !isManagedModulePath(file));
   const beforeRefs: ModuleReference[] = [], afterRefs: ModuleReference[] = [];
   const literalModel = /["'`]\/assets\/[A-Za-z0-9_-]+\.glb["'`]/;
+  for (const { from, to } of renamedSources) {
+    const before = (await repo.fileBufferAt(base, from))?.toString('utf8');
+    if (before) beforeRefs.push(...scanModuleReferences(before, from));
+    const after = await candidateText(repo, candidateId, to);
+    if (after) { auditTrustedImports(after, to); afterRefs.push(...scanModuleReferences(after, to)); }
+  }
   for (const file of new Set(changedSources)) {
     const before = (await repo.fileBufferAt(base, file))?.toString('utf8');
     if (before) beforeRefs.push(...scanModuleReferences(before, file));
     const after = await candidateText(repo, candidateId, file);
-    if (after) afterRefs.push(...scanModuleReferences(after, file));
+    if (after) { auditTrustedImports(after, file); afterRefs.push(...scanModuleReferences(after, file)); }
     if (after && literalModel.test(after) && !(before && literalModel.test(before))) {
       throw new WorkError('MODEL_PATH_IN_SOURCE', '模型源码不能直接写入作品资产路径；请使用受信实例配置', 409);
     }
@@ -337,14 +466,4 @@ export async function verifyCandidateLedger(repo: LedgerRepo, candidateId: strin
 /** Validate the managed part of a committed tree without re-authorizing unchanged baseline. */
 export async function assertManagedTree(repo: LedgerRepo, revision: string): Promise<void> {
   await assertManagedBaseline(repo, revision);
-  for (const file of await repo.listTree(revision)) {
-    if (!isManagedModulePath(file) || file === SCENE_MODULE_RENDERER || !file.endsWith('.tsx')) continue;
-    const bytes = await repo.fileBufferAt(revision, file);
-    if (!bytes) continue;
-    const expected = /^\/\/ Generated by Spatial AI Workbench\. Do not edit\.\nimport \{ SpatialModule \} from '\.\.\/spatial-module';\nexport default function SpatialModel([a-f0-9]{32})\(\) \{ return <SpatialModule instanceId="([a-f0-9]{32})" \/>; \}\n$/;
-    const match = expected.exec(bytes.toString('utf8'));
-    if (!match || match[1] !== match[2] || moduleComponentPath(match[1]) !== file) {
-      throw new WorkError('INVALID_MANAGED_BASELINE', `受管组件必须由服务端生成：${file}`, 409);
-    }
-  }
 }

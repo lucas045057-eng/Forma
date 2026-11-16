@@ -138,7 +138,9 @@ export function parseLuxOutputs(task: LuxTask, raw: Array<{ content: string }>):
       if (slot) notes.push(`未请求或未返回格式：${slot}`);
       continue;
     }
-    let format = formatFromUrl(value, slot ?? requested[index] ?? 'bin');
+    let format: string;
+    try { format = formatFromUrl(value, slot ?? requested[index] ?? 'bin'); }
+    catch { notes.push(`产物槽位 ${slot ?? index + 1} 的格式不受支持，已跳过`); continue; }
     if (format === 'zip' && slot && ['obj_zip', 'fbx_zip'].includes(slot)) format = slot;
     result.push(output(value, format, slot ?? (turbo ? format : undefined)));
   }

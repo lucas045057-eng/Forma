@@ -34,6 +34,7 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
   const [align, setAlign] = useState<'start' | 'center' | 'end'>('center');
+  const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
   const [force, setForce] = useState(false);
   const confirmed = useRef(false);
@@ -91,7 +92,7 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
     confirmed.current = true; setBusy(true); setError('');
     try {
       const adjustment = target.kind === 'insert' ? {
-        layout: { widthPercent, align, offsetY },
+        layout: { widthPercent, align, offsetX, offsetY },
         rotation: [0, rotation, 0],
         scale,
       } : undefined;
@@ -130,6 +131,7 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
         <label>容器内对齐<select value={align} onChange={event => setAlign(event.target.value as typeof align)}>
           <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
         </select></label>
+        <label>水平偏移<input type="number" min={-500} max={500} value={offsetX} onChange={event => setOffsetX(Number(event.target.value))} /></label>
         <label>上下偏移<input type="number" min={-500} max={500} value={offsetY} onChange={event => setOffsetY(Number(event.target.value))} /></label>
       </fieldset>}
       {asset.metrics?.webReady !== true && <label>

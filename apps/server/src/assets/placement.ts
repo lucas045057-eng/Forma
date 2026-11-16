@@ -1,4 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { readdir, readFile, rm } from 'node:fs/promises';
+import path from 'node:path';
 import ts from 'typescript';
 import type { FastifyInstance } from 'fastify';
 import type { AssetPlacementTarget, ModelProvenance } from '@spatial/shared';
@@ -6,6 +8,8 @@ import { isPlacementTarget } from '@spatial/shared';
 import {
   adjustSceneModuleConfig,
   defaultSceneModuleConfig,
+  moduleConfigPath,
+  parseSceneModuleConfig,
   type SceneModuleAdjustment,
 } from '@spatial/shared/scene-module';
 import type { AssetService } from './service.ts';
@@ -14,9 +18,10 @@ import type { WorkService } from '../work/service.ts';
 import type { ModuleSceneService } from '../scene/modules.ts';
 import { WorkError } from '../work/repo.ts';
 import { readPlainFile } from '../checks/paths.ts';
+import { assertSnapshotBudget } from '../checks/snapshot.ts';
 import { sha256 } from './fallbacks.ts';
 import { cleanAssetProvenance } from './provenance.ts';
-import { findModuleReference, installAssetFiles } from '../work/asset-module.ts';
+import { findModuleReference, installAssetFiles, readModuleConfig, type AssetFileDraft } from '../work/asset-module.ts';
 
 interface Session { id: string; assetId: string; baseVersion: string; expiresAt: number; result?: unknown; pending?: Promise<unknown>; fingerprint?: string }
 type Classified = { kind: 'replace' } | { kind: 'replace-module'; instanceId: string } | { kind: 'insert' };
@@ -120,6 +125,33 @@ async function readAsset(assets: AssetService, assetId: string) {
   return { asset, binary, provenance };
 }
 
+async function assetReferenced(root: string, assetId: string): Promise<boolean> {
+  const needle = `/assets/${assetId}.glb`;
+  const files: string[] = [path.join(root, 'src', 'scene.config.json')];
+  try {
+    for (const name of await readdir(path.join(root, 'src', 'scene-modules'))) if (name.endsWith('.json')) files.push(path.join(root, 'src', 'scene-modules', name));
+  } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return true; }
+  for (const file of files) {
+    try { if ((await readFile(file, 'utf8')).includes(needle)) return true; }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return true; }
+  }
+  return false;
+}
+
+/** N5: only remove files created by this failed replacement, and only if nothing references them. */
+async function rollbackCreatedAssets(root: string, created: AssetFileDraft[], assetId: string, baseVersion: string, work: WorkService): Promise<void> {
+  try { if (await work.repo.head() !== baseVersion) return; } catch { return; }
+  if (await assetReferenced(root, assetId)) return;
+  for (const draft of created) {
+    if (!draft.path.startsWith('public/assets/')) continue;
+    const file = path.join(root, draft.path);
+    try {
+      const bytes = await readFile(file);
+      if (createHash('sha256').update(bytes).digest('hex') === draft.afterHash) await rm(file, { force: true });
+    } catch { /* already absent or changed */ }
+  }
+}
+
 export function registerPlacementRoutes(
   app: FastifyInstance,
   assets: AssetService,
@@ -170,10 +202,26 @@ export function registerPlacementRoutes(
       }
       if (classified.kind === 'replace-module') {
         if (!asset.metrics?.webReady && body.force !== true) throw new WorkError('MODEL_NOT_WEB_READY', '模型超过网页门槛，先优化或明确强制替换该实例', 409);
-        await installAssetFiles({ root: work.repo.workRoot, assetId: asset.id, binary, provenance, parts: asset.metrics?.parts });
-        const result = await modules.replaceModel(classified.instanceId, asset.id, session.baseVersion);
-        emit({ type: 'version.changed', version: result.version, previous: session.baseVersion, reason: 'module-replace' });
-        return { kind: 'replace-module', config: result.config, version: result.version };
+        const root = work.repo.workRoot;
+        const current = await readModuleConfig(root, classified.instanceId);
+        const next = parseSceneModuleConfig({ ...current, assetId: asset.id, model: `/assets/${asset.id}.glb` });
+        const provenanceBytes = Buffer.from(JSON.stringify(provenance, null, 2) + '\n');
+        const overrides = new Map<string, Buffer>([
+          [`public/assets/${asset.id}.glb`, binary],
+          [`public/assets/${asset.id}.provenance.json`, provenanceBytes],
+          [moduleConfigPath(classified.instanceId), Buffer.from(JSON.stringify(next, null, 2) + '\n')],
+        ]);
+        if (asset.metrics?.parts !== undefined) overrides.set(`public/assets/${asset.id}.parts.json`, Buffer.from(JSON.stringify(asset.metrics.parts, null, 2) + '\n'));
+        await assertSnapshotBudget(root, overrides);
+        const created = await installAssetFiles({ root, assetId: asset.id, binary, provenance, parts: asset.metrics?.parts });
+        try {
+          const result = await modules.replaceModel(classified.instanceId, asset.id, session.baseVersion);
+          emit({ type: 'version.changed', version: result.version, previous: session.baseVersion, reason: 'module-replace' });
+          return { kind: 'replace-module', config: result.config, version: result.version };
+        } catch (error) {
+          await rollbackCreatedAssets(root, created, asset.id, session.baseVersion, work);
+          throw error;
+        }
       }
       if (!asset.metrics?.webReady && body.force !== true) throw new WorkError('MODEL_NOT_WEB_READY', '模型超过网页门槛，先优化或明确强制新增实例', 409);
       const baseConfig = defaultSceneModuleConfig({ instanceId: '0'.repeat(32), assetId: asset.id });

@@ -341,13 +341,21 @@ export class WorkRepo {
     return commit;
   }
   /** Stage and commit the agent's edits. Returns the changed paths (empty when nothing changed). */
-  async commitCandidate(id: string, message: string, ledger?: AssetLedger) {
+  async commitCandidate(id: string, message: string, ledger?: AssetLedger, base?: string) {
     await this.assertNoLinks(this.candidatePath(id));
     await this.stage(this.candidatePath(id), args => this.inCandidate(id, args));
     const changed = (await this.inCandidate(id, ['diff', '--cached', '--name-only'])).stdout.split('\n').map(line => line.trim()).filter(Boolean);
     if (changed.length) {
-      const base = ledger?.baseVersion ?? await this.candidateBase(id);
-      await verifyCandidateLedger(this, id, base, ledger);
+      let stored: string | undefined;
+      try { stored = await this.candidateBase(id); } catch { stored = undefined; }
+      const trusted = base ?? ledger?.baseVersion ?? stored;
+      if (!trusted) throw new WorkError('CANDIDATE_BASE_UNKNOWN', '候选缺少可信基线，拒绝提交；请保留草稿并由操作者核对', 409);
+      if (base && ledger && base !== ledger.baseVersion) throw new WorkError('CANDIDATE_BASE_CONFLICT', '调用方基线与受信资产清单不一致', 409);
+      if (stored && stored !== trusted) throw new WorkError('CANDIDATE_BASE_CONFLICT', '候选基线与现存元数据不一致', 409);
+      if (!await this.isCommit(trusted)) throw new WorkError('CANDIDATE_BASE_UNKNOWN', '候选基线不是作品版本库中的提交', 409);
+      const mergeBase = (await this.main(['merge-base', trusted, this.branch(id)], true)).stdout.trim();
+      if (mergeBase !== trusted) throw new WorkError('CANDIDATE_BASE_CONFLICT', '候选分支不是从该基线创建的', 409);
+      await verifyCandidateLedger(this, id, trusted, ledger);
       await this.inCandidate(id, ['commit', '-q', '-m', message]);
     }
     return changed;
