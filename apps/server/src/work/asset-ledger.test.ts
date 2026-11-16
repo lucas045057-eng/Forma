@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { defaultSceneModuleConfig } from '@spatial/shared/scene-module';
-import { auditTrustedImports, scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo } from './asset-ledger.ts';
+import { auditTrustedImports, managedBaselineListing, scanModuleReferences, verifyCandidateLedger, type AssetLedger, type LedgerRepo } from './asset-ledger.ts';
 
 const instanceId = 'a'.repeat(32);
 const baseVersion = 'b'.repeat(40);
@@ -155,6 +155,43 @@ export default () => <SpatialModel${instanceId}/>;
   it('rejects a shadow renderer or extra managed file in the baseline', async () => {
     const before = { 'src/spatial-module.ts': Buffer.from('export function SpatialModule(){return null}'), 'src/App.tsx': appBase };
     await expect(verifyCandidateLedger(fakeRepo(before, before), 'candidate1', baseVersion, undefined)).rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+  });
+
+  it('reuses only a complete listing for the same commit and never skips managed or ledger checks', async () => {
+    const shadow = { 'src/spatial-module.ts': Buffer.from('export function SpatialModule(){return null}'), 'src/App.tsx': appBase };
+    const sameCommit = managedBaselineListing(baseVersion, Object.keys(shadow));
+    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, sameCommit))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    // A listing issued for another commit, or a fabricated one, is ignored: the tree is re-listed.
+    const otherCommit = managedBaselineListing('c'.repeat(40), Object.keys(shadow));
+    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, otherCommit))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+    await expect(verifyCandidateLedger(fakeRepo(shadow, shadow), 'candidate1', baseVersion, undefined, { revision: baseVersion, files: [] }))
+      .rejects.toMatchObject({ code: 'INVALID_MANAGED_BASELINE' });
+
+    const next = Buffer.from(JSON.stringify({ ...config, scale: 2 }, null, 2) + '\n');
+    const before = { [`src/scene-modules/${instanceId}.json`]: configBytes, 'src/App.tsx': appBase };
+    const after = { [`src/scene-modules/${instanceId}.json`]: next, 'src/App.tsx': appWithRef };
+    const listing = managedBaselineListing(baseVersion, Object.keys(before));
+    const correct = ledger([
+      { path: `src/scene-modules/${instanceId}.json`, operation: 'modify', role: 'config', beforeHash: hash(configBytes), afterHash: hash(next), bytes: next.length },
+      { path: 'src/App.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appWithRef), bytes: appWithRef.length },
+    ]);
+    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, correct, listing)).resolves.toBeUndefined();
+    const wrongBytes = ledger([{ ...correct.entries[0]!, afterHash: hash(Buffer.from('different')) }, correct.entries[1]!]);
+    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, wrongBytes, listing)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
+    const wrongBase = managedBaselineListing('d'.repeat(40), Object.keys(before));
+    await expect(verifyCandidateLedger(fakeRepo(before, after), 'candidate1', baseVersion, undefined, wrongBase)).rejects.toMatchObject({ code: 'MANAGED_MODULE_DENIED' });
+  });
+
+  it('still refuses a renamed file carrying a ledger entry', async () => {
+    const renamed: LedgerRepo = {
+      ...fakeRepo({ 'src/A.tsx': appBase }, { 'src/B.tsx': appBase }),
+      async diffNameStatus() { return [{ status: 'R100', from: 'src/A.tsx', path: 'src/B.tsx' }]; },
+      async listTree() { return ['src/A.tsx']; },
+    };
+    const stale = ledger([{ path: 'src/A.tsx', operation: 'modify', role: 'source', beforeHash: hash(appBase), afterHash: hash(appBase), bytes: appBase.length }]);
+    await expect(verifyCandidateLedger(renamed, 'candidate1', baseVersion, stale)).rejects.toMatchObject({ code: 'INVALID_LEDGER' });
   });
 
   it('scanner keeps anchor identity and rejects extra renderer props', () => {
