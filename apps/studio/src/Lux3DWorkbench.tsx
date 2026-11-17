@@ -4,6 +4,7 @@ import { ProductScene } from '@spatial/scene-renderer';
 import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import { describeError, luxApi, type WorkbenchUpload } from './lux3d-api.ts';
 import type { PlacementSession } from './placement-state.ts';
+import { DragSessionCache, liveSession } from './drag-session.ts';
 
 const operationNames: Record<LuxOperation, string> = {
   'image-to-3d': '图生3D', 'text-to-3d': '文生3D', image: '多模态生图', 'four-view': '四视图',
@@ -36,6 +37,7 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
   onPreparePlace?: (asset: Asset) => Promise<PlacementSession>;
 }) {
   const [dragSessions, setDragSessions] = useState<Record<string, PlacementSession>>({});
+  const [sessionCache] = useState(() => new DragSessionCache());
   const [remote, setRemote] = useState<Array<{ providerTaskId: string; status: number; created?: string }>>([]);
   const [remotePage, setRemotePage] = useState(1);
   const [capabilities, setCapabilities] = useState<LuxCapabilities>();
@@ -158,8 +160,8 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
   async function prepare(asset: Asset) {
     if (!onPreparePlace) return;
     try {
-      const session = await onPreparePlace(asset);
-      setDragSessions(previous => ({ ...previous, [asset.id]: session }));
+      await sessionCache.ensure(asset.id, () => onPreparePlace(asset));
+      setDragSessions(sessionCache.snapshot());
     } catch (cause) { setError(describeError(cause)); }
   }
 
@@ -261,19 +263,20 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
       {task.artifacts.length > 0 && <button type="button" onClick={() => void luxApi.refresh(task.localId).then(updated => setTasks(previous => previous.map(item => item.localId === updated.localId ? updated : item))).catch(cause => setError(describeError(cause)))}>刷新产物链接并补齐本地文件</button>}
       {task.artifacts.map(artifact => {
         const asset = assets.find(item => item.id === artifact.assetId);
-        const session = asset ? dragSessions[asset.id] : undefined;
+        const session = asset ? liveSession(dragSessions, asset.id) : undefined;
         const canDrag = !!asset && !!session && session.expiresAt > Date.now() && asset.metrics?.webReady === true;
         const clipsLabel = artifact.animationIds?.length ? ` · 片段 ${artifact.animationIds.join('、')}` : artifact.animationId ? ` · 片段 ${artifact.animationId}` : '';
         return <div key={artifact.id} className="lux-artifact"
           draggable={canDrag}
-          onClick={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace && !session) void prepare(asset); }}
-          onPointerEnter={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace && !session) void prepare(asset); }}
-          onFocus={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace && !session) void prepare(asset); }}
+          onClick={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace) void prepare(asset); }}
+          onPointerEnter={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace) void prepare(asset); }}
+          onFocus={() => { if (asset && asset.metrics?.webReady === true && onPreparePlace) void prepare(asset); }}
           onDragStart={event => {
-            if (!asset || !session || session.expiresAt <= Date.now()) { event.preventDefault(); return; }
+            const current = asset ? sessionCache.live(asset.id) : undefined;
+            if (!asset || !current || current.expiresAt <= Date.now()) { event.preventDefault(); return; }
             event.dataTransfer.effectAllowed = 'copy';
-            event.dataTransfer.setData('application/x-spatial-asset', JSON.stringify({ sessionId: session.sessionId, assetId: asset.id }));
-            onPlace?.(asset, session, true);
+            event.dataTransfer.setData('application/x-spatial-asset', JSON.stringify({ sessionId: current.sessionId, assetId: asset.id }));
+            onPlace?.(asset, current, true);
           }}>
           <p>{artifact.label ?? artifact.format} · {(artifact.bytes / 1e6).toFixed(2)}MB · {artifact.variant === 'original' ? '原始产物' : '网页优化件（原始产物保留）'}{clipsLabel}{artifact.animationMode ? ` · ${artifact.animationMode === 'combined' ? '合并交付' : '分文件交付'}` : ''}</p>
           {artifact.kind === 'image' && artifact.previewUrl && <img src={artifact.previewUrl} alt={artifact.label ?? 'Lux3D创作图片'} loading="lazy" />}
