@@ -27,6 +27,18 @@ function probe(port: number, url: string): Promise<number> {
 interface Running { port: number; child: ChildProcess; exited: Promise<void> }
 export const previewBase = (id: string) => `/preview/c/${id}/`;
 
+/**
+ * Resolve the Vite entry executed by the preview worker. Resolve `node_modules` itself first:
+ * a legacy work root mounts `node_modules` as a junction over the template's modules, and pnpm's
+ * relative package links are then resolved against the junction's logical parent chain, which
+ * does not contain the store. Resolving the physical root first makes the same link resolve in
+ * place; a missing root or a broken package link still fails with ENOENT.
+ */
+export async function previewViteEntry(workRoot: string): Promise<string> {
+  const modules = await realpath(path.join(workRoot, 'node_modules'));
+  return realpath(path.join(modules, 'vite', 'bin', 'vite.js'));
+}
+
 /** One Vite dev server per candidate, reached only through the backend's same-origin proxy. */
 export class PreviewManager {
   private running = new Map<string, Running>();
@@ -36,7 +48,7 @@ export class PreviewManager {
 
   async start(id: string, directory: string, signal?: AbortSignal) {
     await this.stop(id);
-    const vite = await realpath(path.join(this.options.workRoot, 'node_modules', 'vite', 'bin', 'vite.js'));
+    const vite = await previewViteEntry(this.options.workRoot);
     const port = await freePort();
     // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
     const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
