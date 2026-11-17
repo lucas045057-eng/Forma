@@ -173,14 +173,28 @@ function Studio() {
 
   async function preparePlacement(asset:Asset):Promise<PlacementSession>{
     if(!ready||!syncReady||eventStatus!=='connected'||!state.version)throw new Error('请等待主预览和作品状态同步后放置');
-    const key=asset.id+':'+state.version;let pending=placementSessions.current.get(key);
-    if(!pending){
-      pending=luxApi.placementSession(asset.id,state.version).catch(error=>{placementSessions.current.delete(key);throw error;});
-      placementSessions.current.set(key,pending);
-    }
+    const key=asset.id+':'+state.version;
+    const request=()=>{
+      const guarded=luxApi.placementSession(asset.id,state.version).catch(error=>{
+        if(placementSessions.current.get(key)===guarded)placementSessions.current.delete(key);
+        throw error;
+      });
+      return guarded;
+    };
+    let pending=placementSessions.current.get(key);
+    if(!pending){pending=request();placementSessions.current.set(key,pending);}
     const session=await pending;
-    if(session.expiresAt<=Date.now()){placementSessions.current.delete(key);throw new Error('放置会话已过期，请重新准备');}
-    return session;
+    if(session.expiresAt>Date.now())return session;
+    // The cached promise resolved to an expired session: drop only this value and prepare once
+    // more inside the same interaction. A concurrent interaction may already have installed a
+    // fresh request for this asset+version, which is reused instead of creating a second one.
+    if(placementSessions.current.get(key)===pending)placementSessions.current.delete(key);
+    let refreshed=placementSessions.current.get(key);
+    if(!refreshed){refreshed=request();placementSessions.current.set(key,refreshed);}
+    const next=await refreshed;
+    if(next.expiresAt>Date.now())return next;
+    if(placementSessions.current.get(key)===refreshed)placementSessions.current.delete(key);
+    throw new Error('放置会话已过期，请重新准备');
   }
   const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
   function toggle() {
