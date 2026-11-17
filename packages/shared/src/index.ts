@@ -53,6 +53,83 @@ export interface AssetEvent {
   sequence: number;
   asset: Asset;
 }
+
+export type LuxOperation = 'image-to-3d' | 'text-to-3d' | 'image' | 'four-view' |
+  'material-transfer' | 'part-split' | 'export' | 'articulation-animation' |
+  'humanoid-rig' | 'animation-retarget';
+export type LuxTaskStage = 'reserved' | 'uploading' | 'submitting' | 'submit_unknown' |
+  'queued' | 'running' | 'ready' | 'failed' | 'cancelled';
+export type LuxSubmissionClass = 'blocked' | 'rejected' | 'unknown';
+export interface LuxArtifact {
+  id: string;
+  kind: 'image' | 'model' | 'archive';
+  format: string;
+  variant: 'original' | 'optimized';
+  label?: string;
+  /** Set for a single delivered action; omitted when one file contains several clips. */
+  animationId?: string;
+  /** All clip identities carried by this artifact (combined delivery keeps the list here). */
+  animationIds?: string[];
+  /** How separate/combined delivery relates files and clips. */
+  animationMode?: 'separate' | 'combined';
+  bytes: number;
+  sha256: string;
+  downloadUrl: string;
+  previewUrl?: string;
+  assetId?: string;
+  sourceTaskId?: string;
+  sourceUrlHash: string;
+}
+export interface LuxTask {
+  localId: string;
+  operation: LuxOperation;
+  providerTaskId?: string;
+  stage: LuxTaskStage;
+  inputRefs: string[];
+  parametersHash: string;
+  artifacts: LuxArtifact[];
+  error?: { code: string; message: string; classification?: LuxSubmissionClass };
+  createdAt: string;
+  updatedAt: string;
+  resumeCandidates?: Array<{ providerTaskId: string; status: number; created?: string }>;
+  /** Provenance for a user-confirmed binding when the original response had no task id. */
+  manualLink?: { at: string; providerTaskId: string; listedAt: string; candidateCount: number; parametersHash: string };
+  note?: string;
+}
+export interface LuxCapabilities {
+  gateway: 'api.aholo.cn';
+  activeGateway: string;
+  legacyGateway: boolean;
+  configured: boolean;
+  billingNotice: string;
+  operations: Array<{ operation: LuxOperation; label: string; description: string }>;
+  upload: { imageMaxBytes: number; modelMaxBytes: number; maxImages: number; maxImagePixels: number };
+  limits: { activeLocalTasks: number; maxImages: number; maxActions: number };
+}
+export interface AssetPlacementTarget {
+  kind: 'replace' | 'replace-module' | 'insert';
+  src: string;
+  cid: string;
+  ancestors: string[];
+  position: 'before' | 'after' | 'inside';
+  /** Present only for replace-module; the server still verifies the instance exists. */
+  instanceId?: string;
+}
+export interface AssetPlacementSession {
+  sessionId: string;
+  assetId: string;
+  baseVersion: string;
+  expiresAt: number;
+}
+export interface AssetPlacementIntent {
+  sessionId: string;
+  assetId: string;
+  baseVersion: string;
+  target: AssetPlacementTarget;
+}
+export type PlacementPreviewMessage =
+  | { type: 'placement:target'; payload: { sessionId: string; target: AssetPlacementTarget } }
+  | { type: 'placement:cancelled'; payload: { sessionId: string; reason: string } };
 export interface TaskEvent { type: string; ts: string; sequence: number; message: string }
 export type SpeechErrorCode = 'SPEECH_NOT_CONFIGURED' | 'SPEECH_INVALID_AUDIO' | 'SPEECH_TOO_LARGE' |
   'SPEECH_UNSUPPORTED_MEDIA' | 'SPEECH_UPSTREAM' | 'SPEECH_TIMEOUT' | 'SPEECH_CANCELLED' |
@@ -151,23 +228,44 @@ export type StudioMessage =
   | { type: 'pick:stop' }
   | { type: 'highlight'; payload: { src: string } }
   | { type: 'scroll:to'; payload: { at: number } }
-  | { type: 'viewport:request' };
+  | { type: 'viewport:request' }
+  | { type: 'placement:start'; payload: { sessionId: string; assetId: string; baseVersion: string } }
+  | { type: 'placement:stop'; payload: { sessionId: string } }
+  | { type: 'placement:hover'; payload: { sessionId: string; target: AssetPlacementTarget | null } };
 export type PreviewMessage =
   | { type: 'pick:result'; payload: PickSelection }
   | { type: 'viewport:size'; payload: { width: number } }
   | { type: 'scroll:progress'; payload: { at: number } }
   | { type: 'ready' }
   | { type: 'error'; payload: { message: string } };
-export type BridgeMessage = StudioMessage | PreviewMessage;
+export type BridgeMessage = StudioMessage | PreviewMessage | PlacementPreviewMessage;
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+export function isPlacementTarget(value: unknown): value is AssetPlacementTarget {
+  if (!record(value) || !['replace', 'replace-module', 'insert'].includes(String(value.kind)) ||
+    typeof value.src !== 'string' || typeof value.cid !== 'string' ||
+    !Array.isArray(value.ancestors) || value.ancestors.length > 3 || !value.ancestors.every(item => typeof item === 'string') ||
+    !['before', 'after', 'inside'].includes(String(value.position))) return false;
+  if (value.kind === 'replace-module') return typeof value.instanceId === 'string' && /^[a-f0-9]{32}$/.test(value.instanceId);
+  return value.instanceId === undefined;
+}
+
 export function isStudioMessage(value: unknown): value is StudioMessage {
   if (!record(value)) return false;
+  if (value.type === 'placement:start' || value.type === 'placement:stop') {
+    return record(value.payload) && typeof value.payload.sessionId === 'string' &&
+      (value.type === 'placement:stop' || (typeof value.payload.assetId === 'string' && typeof value.payload.baseVersion === 'string'));
+  }
+  if (value.type === 'placement:hover') return record(value.payload) && typeof value.payload.sessionId === 'string' && (value.payload.target === null || isPlacementTarget(value.payload.target));
   return value.type === 'pick:start' || value.type === 'pick:stop' || value.type === 'viewport:request' ||
     (value.type === 'scroll:to' && record(value.payload) && typeof value.payload.at === 'number' && Number.isFinite(value.payload.at) && value.payload.at >= 0 && value.payload.at <= 1) ||
     (value.type === 'highlight' && record(value.payload) && typeof value.payload.src === 'string');
+}
+export function isPlacementPreviewMessage(value:unknown):value is PlacementPreviewMessage {
+  if(!record(value)||!record(value.payload)||typeof value.payload.sessionId!=='string')return false;
+  return value.type==='placement:target'?isPlacementTarget(value.payload.target):value.type==='placement:cancelled'&&typeof value.payload.reason==='string';
 }
 export function isPreviewMessage(value: unknown): value is PreviewMessage {
   if (!record(value)) return false;

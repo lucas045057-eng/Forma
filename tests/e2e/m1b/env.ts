@@ -8,7 +8,9 @@ export const ASSETS = path.join(M1B_DATA, 'assets');
 export const HISTORY = path.join(M1B_DATA, 'history');
 export const SANDBOX = path.join(M1B_DATA, 'sandbox');
 export const GUARD_LOG = path.join(M1B_DATA, 'net-guard.log');
-export const ARTIFACT_DIR = path.join(REPO_ROOT, 'docs', 'reports', 'artifacts', 'M1-B');
+export const ARTIFACT_DIR = process.env.M1B_ARTIFACT_DIR
+  ? path.resolve(process.env.M1B_ARTIFACT_DIR)
+  : path.join(REPO_ROOT, 'docs', 'reports', 'artifacts', 'M1-B');
 
 export const MOCK_PORT = 4010;
 export const BACKEND_PORT = 3001;

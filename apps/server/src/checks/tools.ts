@@ -17,6 +17,7 @@ export async function browserAliases(): Promise<Record<string, string>> {
     '@spatial/shared': path.join(workspaceRoots[0], 'src/index.ts'),
     '@spatial/shared/scene-config': path.join(workspaceRoots[0], 'src/scene-config.ts'),
     '@spatial/shared/scene-edit': path.join(workspaceRoots[0], 'src/scene-edit.ts'),
+    '@spatial/shared/scene-module': path.join(workspaceRoots[0], 'src/scene-module.ts'),
     '@spatial/bridge': path.join(workspaceRoots[1], 'src/index.ts'),
     '@spatial/scene-renderer': path.join(workspaceRoots[2], 'src/index.tsx'),
   };

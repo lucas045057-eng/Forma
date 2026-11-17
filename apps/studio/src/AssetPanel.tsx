@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import Lux3DWorkbench from './Lux3DWorkbench.tsx';
+import AssetModuleControls from './AssetModuleControls.tsx';
+import type {PlacementSession} from './placement-state.ts';
 import { ProductScene, sceneRenderSettings } from '@spatial/scene-renderer';
 import type { Asset, FallbackPreset } from '@spatial/shared';
 import {assetOriginLabel} from './model-provenance.tsx';
@@ -13,7 +16,7 @@ const labels: Record<Asset['status'], string> = {
   downloading: '下载中', processing: '优化模型中', ready: '可查看', failed: '失败', cancelled: '已取消',
 };
 
-export default function AssetPanel({ onClose }: { onClose: () => void }) {
+export default function AssetPanel({ onClose,onPlace,onPreparePlace }: { onClose: () => void;onPlace?:(asset:Asset,session?:PlacementSession,drag?:boolean)=>void;onPreparePlace?:(asset:Asset)=>Promise<PlacementSession> }) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState('');
   const [taskId, setTaskId] = useState('4969293');
@@ -70,7 +73,7 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
     try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new ApiError(response.status,typeof result?.error?.code==='string'?result.error.code:'ASSET_IMPORT_FAILED','备用导入未成功');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
     catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
-  return <div className="asset-dialog" role="dialog" aria-modal="true" aria-label="3D 资产视口">
+  return <aside className="asset-dialog" role="complementary" aria-label="3D 创作与资产">
     <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
     <div className="asset-layout">
       <section className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>
@@ -82,6 +85,9 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
         <div className="orbit-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
       </section>
       <aside className="asset-controls">
+        <Lux3DWorkbench assets={assets} onPlace={onPlace} onPreparePlace={onPreparePlace}/>
+        <AssetModuleControls/>
+        {current?.status==='ready'&&<button type="button" data-testid="asset-place" disabled={!onPlace} onClick={()=>{if(current)onPlace?.(current)}}>放入网页（点击目标或拖模型卡片）</button>}
         <h3>已处理模型</h3>
         <select aria-label="选择模型" data-testid="asset-select" value={current?.status === 'ready' ? selected : ''} onChange={event => setSelected(event.target.value)}>
           <option value="" disabled>选择模型</option>
@@ -108,5 +114,5 @@ export default function AssetPanel({ onClose }: { onClose: () => void }) {
         </div>}
       </aside>
     </div>
-  </div>;
+  </aside>;
 }

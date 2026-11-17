@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import type { Selection } from '@spatial/shared';
 import { SceneService, SceneError } from './scene/service.ts';
+import { ModuleSceneService } from './scene/modules.ts';
+import { SceneModuleError } from '@spatial/shared/scene-module';
 import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
@@ -15,10 +17,12 @@ import { WorkService, type WorkServiceOptions } from './work/service.ts';
 import { WorkError } from './work/repo.ts';
 import { registerCheckRoutes } from './checks/routes.ts';
 import { ArtifactError } from './checks/artifacts.ts';
-import { SnapshotError } from './checks/snapshot.ts';
+import { SnapshotBudgetError, SnapshotError } from './checks/snapshot.ts';
 import { SpeechClient, type SpeechClientOptions } from './speech/client.ts';
 import { SpeechService } from './speech/service.ts';
 import { registerSpeechRoutes } from './speech/routes.ts';
+import { registerLuxWorkbench } from './assets/lux3d-routes.ts';
+import { registerPlacementRoutes } from './assets/placement.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
@@ -115,8 +119,38 @@ export async function createApp(options: AppOptions = {}) {
   }), { timeoutMs: options.speech?.timeoutMs });
   closers.push(() => speech.close());
   await work.init();
+  const modules=new ModuleSceneService({workRoot,directory:workDataDirectory,repo:work.repo});
+  await modules.init();
   await service.init();
-  app.addHook('preClose', async () => { closing = true; speech.beginClose(); });
+  // Awaited plugin registration binds route error-handler contexts. Install the shared
+  // envelope before registering either the upload scope or the workbench routes.
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof SceneModuleError) return reply.code(400).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
+    if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof SnapshotBudgetError) return reply.code(409).send({ error: { code: error.code, message: error.message, details: error.detail } });
+    if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
+    if (error instanceof AssetError) {
+      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : error.status).send({ error: { code: error.code, message: error.message } });
+    }
+    const parser = error as { code?: string; statusCode?: number };
+    if (parser.code?.startsWith('FST_ERR_CTP_') && [400, 413, 415].includes(parser.statusCode ?? 0)) {
+      if (parser.statusCode === 413) return reply.code(413).send({ error: { code: 'REQUEST_TOO_LARGE', message: '请求内容超出大小限制' } });
+      if (parser.statusCode === 415) return reply.code(415).send({ error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: '不支持此请求的内容类型' } });
+      return reply.code(400).send({ error: { code: 'INVALID_INPUT', message: '请求参数不符合接口约定' } });
+    }
+    const validation = (error as { validation?: unknown }).validation;
+    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
+  });
+  const luxWorkbench=await registerLuxWorkbench(app,{
+    directory:path.join(workDataDirectory,'lux3d-workbench'),assets:service,
+    client:new Lux3DClient({base:options.base??process.env.LUX3D_WORKBENCH_BASE??process.env.LUX3D_BASE??'https://api.aholo.cn',key:options.key??process.env.LUX3D_API_KEY}),
+    uploadHosts:(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean).length?(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean):undefined,
+    close:operation=>closers.push(operation),
+  });
+  registerPlacementRoutes(app,service,scene,work,modules,emit);
+  app.addHook('preClose', async () => { closing = true; speech.beginClose(); luxWorkbench.tasks.beginClose(); });
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -132,17 +166,6 @@ export async function createApp(options: AppOptions = {}) {
     if (origin && origin !== `http://${request.headers.host}` && origin !== `https://${request.headers.host}`) {
       return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许通过同源工作台访问' } });
     }
-  });
-  app.setErrorHandler((error, _request, reply) => {
-    if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
-    if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof ArtifactError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof SnapshotError) return reply.code(409).send({ error: { code: error.code, message: error.message } });
-    if (error instanceof AssetError) {
-      return reply.code(error.code === 'IDEMPOTENCY_CONFLICT' ? 409 : 400).send({ error: { code: error.code, message: error.message } });
-    }
-    const validation = (error as { validation?: unknown }).validation;
-    return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
   });
   app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
   app.get('/events', { websocket: true }, socket => {

@@ -51,7 +51,7 @@ async function fixture() {
   const base = await repo.head();
   const inputs = new Map<string, Input>();
   for (const id of ['candidate1', 'candidate2']) {
-    const candidatePath = await repo.createCandidate(id, base);
+    const { directory: candidatePath } = await repo.createCandidate(id, base);
     await writeFile(path.join(candidatePath, 'src/App.tsx'), `export default () => <main>${id}</main>;\n`);
     await repo.commitCandidate(id, 'fixture ' + id);
     const candidateCommit = await repo.candidateCommit(id);
