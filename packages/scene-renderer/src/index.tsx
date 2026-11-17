@@ -1,7 +1,7 @@
 import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, TransformControls } from '@react-three/drei';
-import { ACESFilmicToneMapping, LoadingManager, PCFSoftShadowMap, SRGBColorSpace, Mesh, Texture, type Vector3, type Material, type Object3D, type PerspectiveCamera } from 'three';
+import { ACESFilmicToneMapping, LoadingManager, PCFSoftShadowMap, SRGBColorSpace, Mesh, Texture, AnimationMixer, LoopOnce, LoopRepeat, type AnimationAction, type AnimationClip, type Vector3, type Material, type Object3D, type PerspectiveCamera } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import type { SceneConfig, Vec3 } from '@spatial/shared/scene-config';
@@ -79,10 +79,13 @@ export interface ProductSceneProps {
   onReady?: (scene: Object3D) => void;
   onError?: () => void;
   children?: ReactNode;
+  animation?: {playing:boolean;clip?:string;loop?:boolean};
+  onAnimations?: (names:string[])=>void;
 }
 
-function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId }: ProductSceneProps) {
+function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId,animation,onAnimations }: ProductSceneProps) {
   const [scene, setScene] = useState<Object3D>();
+  const [animations,setAnimations]=useState<AnimationClip[]>([]);
   const [failed, setFailed] = useState(false);
   const callbacks = useRef({ onReady, onError });
   callbacks.current = { onReady, onError };
@@ -106,7 +109,7 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
         owned = gltf.scene;
         if (abort.signal.aborted) { disposeModel(owned); owned = undefined; return; }
         owned.traverse(node => { if (node instanceof Mesh) { node.castShadow = true; node.receiveShadow = true; } });
-        setScene(owned);
+        setAnimations(gltf.animations);onAnimations?.(gltf.animations.map(clip=>clip.name));setScene(owned);
       } catch {
         if (!abort.signal.aborted) { setFailed(true); callbacks.current.onError?.(); }
       }
@@ -117,7 +120,7 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
   return <>
     {!scene && fallback}
     <Canvas style={{ position: 'absolute', inset: 0, visibility: scene ? 'visible' : 'hidden' }}
-      frameloop="demand" camera={{ position: config.hero.camera.position, fov: config.hero.camera.fov }}
+      frameloop={animation?.playing?'always':'demand'} camera={{ position: config.hero.camera.position, fov: config.hero.camera.fov }}
       dpr={[1, sceneRenderSettings.maxDpr]} shadows={{ enabled: true, type: sceneRenderSettings.shadowMapType }} gl={{ antialias: true }}
       onCreated={({ gl }) => { if (canvasTestId) gl.domElement.dataset.testid = canvasTestId; gl.outputColorSpace = sceneRenderSettings.outputColorSpace; gl.toneMapping = sceneRenderSettings.toneMapping; gl.toneMappingExposure = sceneRenderSettings.exposure; }}>
       <color attach="background" args={[sceneRenderSettings.background]}/>
@@ -125,7 +128,7 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
       <ambientLight intensity={config.hero.lights.ambient}/>
       <directionalLight position={config.hero.lights.key.direction} intensity={config.hero.lights.key.intensity}
         color={config.hero.lights.key.color} castShadow shadow-mapSize={[sceneRenderSettings.shadowMapSize, sceneRenderSettings.shadowMapSize]}/>
-      {scene && <><Model scene={scene} config={config} scrollAt={scrollAt} onRotationChange={onRotationChange}/><Ready scene={scene} notify={() => callbacks.current.onReady?.(scene)}/></>}
+      {scene && <>{animation && <ModelAnimation scene={scene} clips={animations} playing={animation.playing} clip={animation.clip} loop={animation.loop??true}/>}<Model scene={scene} config={config} scrollAt={scrollAt} onRotationChange={onRotationChange}/><Ready scene={scene} notify={() => callbacks.current.onReady?.(scene)}/></>}
       {controls && <OrbitControls makeDefault target={config.hero.camera.target} minDistance={0.6} maxDistance={5} onEnd={event => {
         const orbit = event?.target as { object: PerspectiveCamera; target: Vector3 } | undefined;
         if (orbit && onCameraChange) onCameraChange({ position: orbit.object.position.toArray() as Vec3, target: orbit.target.toArray() as Vec3, fov: (orbit.object as PerspectiveCamera).fov });
@@ -133,6 +136,13 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
       {children}
     </Canvas>
   </>;
+}
+function ModelAnimation({scene,clips,playing,clip,loop=true}:{scene:Object3D;clips:AnimationClip[];playing:boolean;clip?:string;loop?:boolean}){
+ const mixer=useMemo(()=>new AnimationMixer(scene),[scene]);
+ const action=useRef<AnimationAction | undefined>(undefined);
+ useEffect(()=>{const selected=clips.find(item=>item.name===clip)??clips[0];if(!selected)return;const next=mixer.clipAction(selected);next.reset();next.setLoop(loop?LoopRepeat:LoopOnce,loop?Infinity:1);next.clampWhenFinished=!loop;next.play();next.paused=!playing;action.current=next;mixer.update(0);return()=>{next.stop();mixer.stopAllAction();mixer.uncacheRoot(scene);action.current=undefined;};},[mixer,scene,clips,clip,loop]);
+ useEffect(()=>{if(action.current)action.current.paused=!playing;},[playing]);
+ useFrame((_state,delta)=>{if(playing)mixer.update(delta);});return null;
 }
 function Ready({ scene, notify }: { scene: Object3D; notify: () => void }) {
   const callback = useRef(notify);

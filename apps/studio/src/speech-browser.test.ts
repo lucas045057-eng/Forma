@@ -7,6 +7,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {installSpeechFakes} from './test-support/speech-fakes.ts';
 import {speechBrowserVite,observeSpeechBootstrap,browserFailure,writeSpeechEvidence,speechPortClosed as portClosed,type SpeechBootstrap} from './test-support/speech-browser-fixture.ts';
+import {failSetup,listenOnEphemeralLoopback,openLoopback} from './test-support/safe-loopback.ts';
 import type {ServerResponse} from 'node:http';
 
 const studio=path.resolve(import.meta.dirname,'..');
@@ -20,7 +21,8 @@ function answer(response:ServerResponse,id:string){response.setHeader('Content-T
 beforeAll(async()=>{
  try{
  cache=await mkdtemp(path.join(tmpdir(),'speech-component-'));
- vite=await createServer({...speechBrowserVite(),root:studio,cacheDir:cache,logLevel:'silent',
+ const started=await openLoopback(async()=>{
+ const created=await createServer({...speechBrowserVite(),root:studio,cacheDir:cache,logLevel:'silent',
   plugins:[{name:'speech-component-local-fixture',enforce:'pre',resolveId(source,importer){
    if(source==='./EventCenter.tsx'&&importer?.endsWith('/PointSpeak.tsx'))return path.join(studio,'src/test-support/speech-center.tsx').replaceAll('\\','/');
    if(source==='./speech-input.css')return '\0speech-component-css';
@@ -45,9 +47,13 @@ beforeAll(async()=>{
    }
    next();
   });}}],server:{host:'127.0.0.1',cors:false,hmr:false,watch:null}});
- const http=vite.httpServer;if(!http)throw new Error('Component HTTP listener missing');
- await new Promise<void>((resolve,reject)=>{const error=(cause:Error)=>reject(cause);http.once('error',error);http.listen(0,'127.0.0.1',()=>{http.off('error',error);resolve();});});
- const address=http.address();if(!address||typeof address==='string')throw new Error('Component listener has no TCP address');origin=`http://127.0.0.1:${address.port}`;
+ try{
+ const http=created.httpServer;if(!http)throw new Error('Component HTTP listener missing');
+ const port=await listenOnEphemeralLoopback(http);
+ return{value:created,port,close:async()=>{const server=created.httpServer as unknown as {closeAllConnections?:()=>void}|undefined;server?.closeAllConnections?.();await created.close();}};
+ }catch(error){return failSetup(error,()=>created.close());}
+ });
+ vite=started.value;origin=started.origin;
  native=await chromium.launchServer({headless:true,args:['--disable-background-networking','--disable-component-update','--disable-features=MediaRouter,OptimizationHints,Translate']});
  browser=await chromium.connect(native.wsEndpoint());
  }catch(error){suiteFailure=error;console.error('[speech component setup]',JSON.stringify({origin,cache,primary:browserFailure(error)}));throw error;}

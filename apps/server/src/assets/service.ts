@@ -12,6 +12,7 @@ import { downloadGlb } from './download.ts';
 import { processModelIsolated } from './process-isolated.ts';
 import { cleanupAssetTemporaries } from './cleanup.ts';
 import { acquireInstanceLock } from './instance-lock.ts';
+import { inspectOriginalModel } from './original-model.ts';
 
 type RecordEntry = Asset & { keyHash?: string; fingerprint?: string; deadline?: number };
 export interface ServiceOptions {
@@ -170,11 +171,11 @@ export class AssetService {
       return this.prepareLocal(binary,`fallback-${sourceHash.slice(0,24)}`,{kind:'fallback',presetId,sourceHash,importedAt:new Date().toISOString()});
     });
   }
-  async importLocal(input:string,id:string):Promise<Asset> {
+  async importLocal(input:string,id:string,provenance?:AssetProvenance):Promise<Asset> {
     if(!validAssetId(id))throw new AssetError('INVALID_ID','本地资产编号无效');
     const asset=await this.exclusive(async()=>{
       const bytes=await readPlainFile(input,32*1024*1024,()=>new AssetError('LOCAL_PATH_DENIED','本地模型路径不得包含链接'),()=>new AssetError('MODEL_TOO_LARGE','本地模型超过32MiB'),this.abort.signal);
-      return this.prepareLocal(bytes,id,{kind:'unknown',sourceHash:sha256(bytes),importedAt:new Date().toISOString()});
+      return this.prepareLocal(bytes,id,provenance??{kind:'unknown',sourceHash:sha256(bytes),importedAt:new Date().toISOString()});
     });
     await this.jobs.get(asset.id);
     return this.get(asset.id)!;
@@ -196,6 +197,24 @@ export class AssetService {
     this.jobs.set(id,job);void job.catch(error=>{this.jobFailure??=error;});
     return publicAsset(entry);
   }
+  /** Publish an unmodified, self-contained GLB for animation/rig-aware preview and placement. */
+  async importOriginal(input:string,id:string,provenance:AssetProvenance):Promise<Asset>{
+    if(!validAssetId(id))throw new AssetError('INVALID_ID','本地资产编号无效');
+    return this.exclusive(async()=>{
+      const bytes=await readPlainFile(input,100*1024*1024,()=>new AssetError('ASSET_PATH_DENIED','原始资产路径含链接'),()=>new AssetError('MODEL_TOO_LARGE','原始资产超过100MiB'),this.abort.signal);
+      const fingerprint=sha256(bytes),existing=this.entries.find(item=>item.id===id);
+      if(existing?.taskId||existing&&existing.fingerprint!==fingerprint)throw new AssetError('ASSET_EXISTS','资产编号已用于不同的内容');
+      if(existing?.status==='ready'&&await this.modelExists(existing))return publicAsset(existing);
+      const now=new Date().toISOString(),entry:RecordEntry=existing??{id,status:'processing',createdAt:now,updatedAt:now,fingerprint};
+      if(!existing)this.entries.push(entry);
+      const directory=path.join(this.options.directory,id);await assertPlainPath(directory,()=>new AssetError('ASSET_PATH_DENIED','资产写入目录含链接'),true);await mkdir(directory,{recursive:true});
+      const metrics=await inspectOriginalModel(bytes);
+      await writeAtomic(path.join(directory,'raw.glb'),bytes,this.abort.signal);await writeAtomic(path.join(directory,'model.glb'),bytes,this.abort.signal);
+      await this.update(entry,{status:'ready',modelUrl:`/assets/${id}/model.glb?revision=${randomUUID()}`,metrics,error:undefined,provenance:{...provenance,sourceHash:provenance.sourceHash??fingerprint,outputHash:fingerprint}});
+      return publicAsset(entry);
+    });
+  }
+
   private start(entry: RecordEntry) {
     const job = this.run(entry).catch(async error => {
       if (this.abort.signal.aborted) {

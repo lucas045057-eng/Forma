@@ -5,11 +5,17 @@ import {createConnection} from 'node:net';
 import path from 'node:path';
 
 // Real installed React entry points; esbuild follows their CJS dependencies (including scheduler).
-export function speechBrowserVite():InlineConfig{return {
- mode:'development',configFile:false,envFile:false,
- esbuild:{jsx:'automatic',jsxDev:true},
- optimizeDeps:{noDiscovery:true,include:['react','react-dom','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime']},
-};}
+// A fixture that serves the real App can point the dependency scan at the module it serves, so the
+// whole graph behind it (fiber, drei, zustand and their CJS interop) is prebuilt like `vite dev`.
+// Without an entry the harness page keeps the explicit React-only include and skips discovery.
+export function speechBrowserVite(options:{entry?:string}={}):InlineConfig{
+ const react=['react','react-dom','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime'];
+ return {
+  mode:'development',configFile:false,envFile:false,
+  esbuild:{jsx:'automatic',jsxDev:true},
+  optimizeDeps:options.entry?{entries:[options.entry],include:react}:{noDiscovery:true,include:react},
+ };
+}
 export function browserFailure(error:unknown):unknown{
  if(error instanceof AggregateError)return {name:error.name,message:error.message,stack:error.stack,errors:error.errors.map(browserFailure)};
  if(error instanceof Error)return {name:error.name,message:error.message,stack:error.stack,...('cause'in error&&error.cause!==error?{cause:browserFailure(error.cause)}:{})};

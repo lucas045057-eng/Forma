@@ -1,4 +1,5 @@
 import { isStudioMessage, type PickSelection, type PreviewMessage, type SelectionStyles } from '@spatial/shared';
+import { installAssetPlacement } from './asset-placement';
 
 export function installBridge(): () => void {
   const requested = new URLSearchParams(window.location.search).get('studioOrigin');
@@ -7,6 +8,7 @@ export function installBridge(): () => void {
     try { const parsed = new URL(requested); if (['http:', 'https:'].includes(parsed.protocol) && parsed.origin === requested) origin = parsed.origin; else return () => {}; }
     catch { return () => {}; }
   }
+  const disposePlacement=installAssetPlacement(origin);
   let picking = false;
   let selectedSrc = '';
   let hovered: Element | null = null;
@@ -144,6 +146,7 @@ export function installBridge(): () => void {
   observer.observe(document.getElementById('root') ?? document.body, { subtree: true, childList: true, attributes: true, characterData: true });
   send({ type: 'ready' });
   return () => {
+    disposePlacement();
     window.removeEventListener('message', receive);
     window.removeEventListener('click', click, true);
     window.removeEventListener('auxclick', click, true);
