@@ -1,19 +1,27 @@
-import { expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { PlacementSession } from './placement-state.ts';
 import { DragSessionCache, liveSession } from './drag-session.ts';
 
 const session = (sessionId: string, expiresAt: number, assetId = 'asset-a'): PlacementSession => ({ sessionId, assetId, baseVersion: 'v1', expiresAt });
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-it('treats a cached session as live only before its server-issued expiry', async () => {
+let now = 1_000_000;
+let restoreClock = () => {};
+beforeEach(() => {
+  now = 1_000_000;
+  const clock = vi.spyOn(Date, 'now').mockImplementation(() => now);
+  restoreClock = () => clock.mockRestore();
+});
+afterEach(() => restoreClock());
+
+it('treats a cached session as live only before its server-issued expiry', () => {
   const cached = { 'asset-a': session('s1', Date.now() + 50) };
   expect(liveSession(cached, 'asset-a')?.sessionId).toBe('s1');
   expect(liveSession(cached, 'asset-b')).toBeUndefined();
-  await wait(80);
+  now += 80;
   expect(liveSession(cached, 'asset-a')).toBeUndefined();
 });
 
-it('reuses a live cache for repeated interactions and prepares again only after natural expiry', async () => {
+it('reuses a live cache for repeated interactions and prepares again only after the cached session expires', async () => {
   const cache = new DragSessionCache();
   let serial = 0;
   const prepare = vi.fn(async (): Promise<PlacementSession> => {
@@ -35,8 +43,8 @@ it('reuses a live cache for repeated interactions and prepares again only after 
   expect(repeated.map(item => item.sessionId)).toEqual(['s1', 's1', 's1']);
   expect(cache.live('asset-a')?.sessionId).toBe('s1');
 
-  // The short expiry passes on its own; the cache must be treated as absent, not reused.
-  await wait(80);
+  // Advance the controlled clock past the short expiry; the cache must be treated as absent.
+  now += 80;
   expect(cache.live('asset-a')).toBeUndefined();
   const refreshed = await cache.ensure('asset-a', prepare);
   expect(prepare).toHaveBeenCalledTimes(2);
