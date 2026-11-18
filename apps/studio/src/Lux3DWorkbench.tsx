@@ -31,6 +31,88 @@ function clearKey(signature: string) {
   try { localStorage.removeItem(`lux3d-create:${signature}`); } catch { /* private mode: new in-memory key is still used */ }
 }
 
+export const MAX_ACTIVE_GLB_PREVIEWS = 4;
+
+export function promotePreviewId(manualIds: readonly string[], id: string, limit = MAX_ACTIVE_GLB_PREVIEWS): string[] {
+  const cap = Math.max(1, limit);
+  return [id, ...manualIds.filter(existing => existing !== id)].slice(0, cap);
+}
+
+export function resolveActivePreviewIds(
+  orderedIds: readonly string[],
+  manualIds: readonly string[],
+  limit = MAX_ACTIVE_GLB_PREVIEWS,
+): Set<string> {
+  const cap = Math.max(1, limit);
+  const available = new Set(orderedIds);
+  const active = new Set<string>();
+  for (const id of manualIds) {
+    if (active.size >= cap) break;
+    if (available.has(id)) active.add(id);
+  }
+  for (const id of orderedIds) {
+    if (active.size >= cap) break;
+    active.add(id);
+  }
+  return active;
+}
+
+export function ArtifactGlbPreview({
+  previewUrl,
+  active,
+  onActivate,
+  initialClips = [],
+}: {
+  previewUrl: string;
+  active: boolean;
+  onActivate: () => void;
+  initialClips?: string[];
+}) {
+  const [playing, setPlaying] = useState(false);
+  const [loop, setLoop] = useState(true);
+  const [clips, setClips] = useState<string[]>(initialClips);
+  const [clip, setClip] = useState(initialClips[0] ?? '');
+
+  useEffect(() => {
+    setPlaying(false);
+    setClips(initialClips);
+    setClip(initialClips[0] ?? '');
+  }, [previewUrl]);
+
+  useEffect(() => {
+    if (!active) setPlaying(false);
+  }, [active]);
+
+  if (!active) {
+    return (
+      <div className="lux-model-preview-deferred" data-testid="lux-preview-deferred">
+        <p className="hint">为保护浏览器显存，已暂停此历史卡片的实时 3D 视口（同时最多开启 {MAX_ACTIVE_GLB_PREVIEWS} 个）。</p>
+        <button type="button" onClick={onActivate}>加载 3D 预览</button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="lux-model-preview">
+        <ProductScene
+          config={defaultSceneConfig}
+          modelUrl={previewUrl}
+          controls
+          animation={{ playing, clip, loop }}
+          onAnimations={names => {
+            setClips(names);
+            setClip(previous => (previous && names.includes(previous) ? previous : names[0] ?? ''));
+          }}
+        />
+      </div>
+      <label>动画片段<select value={clip} onChange={event => { setClip(event.target.value); setPlaying(false); }}><option value="">默认（静态）</option>{clips.map(name => <option key={name} value={name}>{name}</option>)}</select></label>
+      <label><input type="checkbox" checked={loop} onChange={event => setLoop(event.target.checked)} />循环播放</label>
+      <button type="button" onClick={() => setPlaying(previous => !previous)}>{playing ? '暂停动画' : '播放动画'}</button>
+    </>
+  );
+}
+
 export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
   assets: Asset[];
   onPlace?: (asset: Asset, session?: PlacementSession, drag?: boolean) => void;
@@ -61,11 +143,12 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const [loop, setLoop] = useState(true);
-  const [clips, setClips] = useState<string[]>([]);
-  const [clip, setClip] = useState('');
+  const [manualPreviewIds, setManualPreviewIds] = useState<string[]>([]);
   const submitKey = useRef<{ signature: string; key: string } | undefined>(undefined);
+  const orderedGlbPreviewIds = tasks.flatMap(task =>
+    task.artifacts.filter(artifact => artifact.format === 'glb' && !!artifact.previewUrl).map(artifact => artifact.id),
+  );
+  const activeGlbPreviewIds = resolveActivePreviewIds(orderedGlbPreviewIds, manualPreviewIds);
 
   useEffect(() => {
     let active = true;
@@ -281,12 +364,11 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
           <p>{artifact.label ?? artifact.format} · {(artifact.bytes / 1e6).toFixed(2)}MB · {artifact.variant === 'original' ? '原始产物' : '网页优化件（原始产物保留）'}{clipsLabel}{artifact.animationMode ? ` · ${artifact.animationMode === 'combined' ? '合并交付' : '分文件交付'}` : ''}</p>
           {artifact.kind === 'image' && artifact.previewUrl && <img src={artifact.previewUrl} alt={artifact.label ?? 'Lux3D创作图片'} loading="lazy" />}
           {artifact.format === 'glb' && artifact.previewUrl && <>
-            <div className="lux-model-preview">
-              <ProductScene config={defaultSceneConfig} modelUrl={artifact.previewUrl} controls animation={{ playing, clip, loop }} onAnimations={names => { setClips(names); if (!clip && names.length) setClip(names[0]); }} />
-            </div>
-            <label>动画片段<select value={clip} onChange={event => { setClip(event.target.value); setPlaying(false); }}><option value="">默认（静态）</option>{clips.map(name => <option key={name}>{name}</option>)}</select></label>
-            <label><input type="checkbox" checked={loop} onChange={event => setLoop(event.target.checked)} />循环播放</label>
-            <button type="button" onClick={() => setPlaying(previous => !previous)}>{playing ? '暂停动画' : '播放动画'}</button>
+            <ArtifactGlbPreview
+              previewUrl={artifact.previewUrl}
+              active={activeGlbPreviewIds.has(artifact.id)}
+              onActivate={() => setManualPreviewIds(previous => promotePreviewId(previous, artifact.id))}
+            />
             {asset && <button type="button" disabled={!onPlace} onClick={() => onPlace?.(asset)}>放入网页</button>}
           </>}
           <a href={artifact.downloadUrl} download>下载 {artifact.format} 原件</a>

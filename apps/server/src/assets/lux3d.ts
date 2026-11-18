@@ -12,13 +12,15 @@ export class AssetError extends Error {
 export type GenerationInput = { prompt?: string; img?: string; version: 'G1' | 'G1-Turbo' };
 export interface RemoteTask { status: number; outputs?: { content: string }[] }
 
+const LOOPBACK_GATEWAYS = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
+
 export class Lux3DClient {
   readonly base: string;
   private readonly key: string;
   get configured(){return !!this.key;}
-  /** The official single-service gateway is api.aholo.cn; legacy hosts stay explicit, never auto-switched. */
+  /** The official single-service gateway is api.aholo.cn; legacy cloud hosts stay explicit, while loopback mocks are local test endpoints. */
   get activeGateway(){return new URL(this.base).hostname;}
-  get legacyGateway(){return this.activeGateway!=='api.aholo.cn';}
+  get legacyGateway(){const host=this.activeGateway.toLowerCase();return host!=='api.aholo.cn'&&!LOOPBACK_GATEWAYS.has(host);}
   constructor(options: { base?: string; key?: string }) {
     this.base = (options.base ?? 'https://api.aholo3d.cn').replace(/\/$/, '');
     const url = new URL(this.base);

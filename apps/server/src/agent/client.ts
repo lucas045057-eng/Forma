@@ -74,9 +74,20 @@ export class CodingAgent {
       if (Date.now() >= deadline) throw new CodingAgentError('AGENT_TIMEOUT', '编码任务超过总时限');
     };
     const selected = input.selection ? await this.selectedSource(sandbox, input.selection) : undefined;
+    const ancestorSources = input.selection ? await this.ancestorSources(sandbox, input.selection) : undefined;
     const messages: Message[] = [
       { role: 'system', content: '你是网页作品的编码 Agent。先用 list_files/read_file 理解代码，再用 replace_in_file 或 write_file 完成用户指令，最后调用 finish。只能修改候选作品 src/ 下的源码；不要修改依赖、构建配置或 src 之外的文件。没有 shell。尽量做满足指令的最小改动。' },
-      { role: 'user', content: JSON.stringify({ instruction: input.instruction, selection: input.selection, selectedFileWithLineNumbers: selected }) },
+      {
+        role: 'user',
+        content: JSON.stringify({
+          instruction: input.instruction,
+          selection: input.selection,
+          selectedFileWithLineNumbers: selected,
+          ...(ancestorSources && Object.keys(ancestorSources).length > 0
+            ? { relatedAncestorFilesWithLineNumbers: ancestorSources }
+            : {}),
+        }),
+      },
     ];
     const step = async (message: string) => { check(); await this.options.onStep?.(message); check(); };
 
@@ -121,10 +132,33 @@ export class CodingAgent {
     throw new CodingAgentError('AGENT_ROUNDS', `编码 Agent 超过 ${maxRounds} 轮仍未完成`);
   }
 
+  private formatNumbered(source: string) {
+    return source.split('\n').map((line, index) => `${index + 1}\t${line}`).join('\n');
+  }
+
   private async selectedSource(sandbox: Sandbox, selection: Selection) {
     const file = selection.src.replace(/:\d+:\d+$/, '');
     const source = await sandbox.read(file);
-    return source.split('\n').map((line, index) => `${index + 1}\t${line}`).join('\n');
+    return this.formatNumbered(source);
+  }
+
+  private async ancestorSources(sandbox: Sandbox, selection: Selection): Promise<Record<string, string>> {
+    const primary = selection.src.replace(/:\d+:\d+$/, '');
+    const seen = new Set<string>([primary]);
+    const result: Record<string, string> = {};
+    for (const raw of selection.ancestors ?? []) {
+      if (Object.keys(result).length >= 2) break;
+      const file = raw.replace(/:\d+:\d+$/, '');
+      if (!file || seen.has(file)) continue;
+      seen.add(file);
+      try {
+        const source = await sandbox.read(file);
+        result[file] = this.formatNumbered(source);
+      } catch {
+        // Optional ancestor hint may be absent or unreadable; never fail the primary selection.
+      }
+    }
+    return result;
   }
 
   private arguments(call: ToolCall): Record<string, unknown> {

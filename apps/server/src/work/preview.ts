@@ -1,19 +1,54 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomInt } from 'node:crypto';
 import { request as httpRequest, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createServer } from 'node:net';
 import { realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-function freePort(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const server = createServer();
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => {
-      const address = server.address();
-      server.close(() => (typeof address === 'object' && address ? resolve(address.port) : reject(new Error('No free port'))));
-    });
-  });
+const RESTRICTED_PREVIEW_PORTS = new Set<number>([
+  1, 7, 9, 11, 13, 15, 17, 19, 20, 21, 22, 23, 25, 37, 42, 43, 53, 69, 77, 79, 87, 95, 101, 102,
+  103, 104, 109, 110, 111, 113, 115, 117, 119, 123, 135, 137, 139, 143, 161, 179, 389, 427, 465,
+  512, 513, 514, 515, 526, 530, 531, 532, 540, 548, 554, 556, 563, 587, 601, 636, 989, 990, 993,
+  995, 1719, 1720, 1723, 2049, 3659, 4045, 4190, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668,
+  6669, 6679, 6697, 10080,
+]);
+
+export function isRestrictedPreviewPort(port: number): boolean {
+  return !Number.isInteger(port) || port < 1024 || port > 65_535 || RESTRICTED_PREVIEW_PORTS.has(port);
+}
+
+export async function allocatePreviewPort(
+  nextPort: () => number = () => randomInt(20_000, 65_536),
+  maxAttempts = 32,
+): Promise<number> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const requested = nextPort();
+    if (requested !== 0 && isRestrictedPreviewPort(requested)) continue;
+    try {
+      const bound = await new Promise<number>((resolve, reject) => {
+        const server = createServer();
+        const onError = (error: Error) => { server.off('error', onError); reject(error); };
+        server.once('error', onError);
+        server.listen(requested, '127.0.0.1', () => {
+          server.off('error', onError);
+          const address = server.address();
+          server.close(closeErr => {
+            if (closeErr) return reject(closeErr);
+            if (typeof address === 'object' && address) resolve(address.port);
+            else reject(new Error('No free port'));
+          });
+        });
+      });
+      if (!isRestrictedPreviewPort(bound)) return bound;
+    } catch (error) {
+      lastError = error;
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'EADDRINUSE' && !(process.platform === 'win32' && code === 'EACCES')) throw error;
+    }
+  }
+  throw new Error('No safe preview port available', { cause: lastError });
 }
 function probe(port: number, url: string): Promise<number> {
   return new Promise(resolve => {
@@ -49,7 +84,7 @@ export class PreviewManager {
   async start(id: string, directory: string, signal?: AbortSignal) {
     await this.stop(id);
     const vite = await previewViteEntry(this.options.workRoot);
-    const port = await freePort();
+    const port = await allocatePreviewPort();
     // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
     const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
     for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT', 'ComSpec']) {

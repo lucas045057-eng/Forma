@@ -4,7 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, it } from 'vitest';
-import { PreviewManager, previewViteEntry } from './preview.ts';
+import { allocatePreviewPort, isRestrictedPreviewPort, PreviewManager, previewViteEntry } from './preview.ts';
 import { listenServerForFetch } from '../test-support/fetch-listener.ts';
 
 it('proxies only GET and HEAD to the selected loopback preview port', async () => {
@@ -87,5 +87,26 @@ it('resolves the preview Vite entry through a junctioned work root and keeps bro
     const actual = await realpath(root);
     if (path.dirname(actual) !== await realpath(tmpdir())) throw new Error('refusing cleanup outside the owned temp root');
     await rm(actual, { recursive: true, force: true });
+  }
+});
+
+it('skips Fetch/Chromium restricted ports and occupied loopback ports during preview port allocation', async () => {
+  expect(isRestrictedPreviewPort(80)).toBe(true);
+  expect(isRestrictedPreviewPort(5061)).toBe(true);
+  expect(isRestrictedPreviewPort(6000)).toBe(true);
+  expect(isRestrictedPreviewPort(10080)).toBe(true);
+  expect(isRestrictedPreviewPort(24567)).toBe(false);
+
+  const occupied = createServer((_req, res) => res.end('busy'));
+  await new Promise<void>(resolve => occupied.listen(0, '127.0.0.1', resolve));
+  const occupiedPort = (occupied.address() as AddressInfo).port;
+  try {
+    const sequence = [5061, 6000, 10080, occupiedPort, 0];
+    let index = 0;
+    const selected = await allocatePreviewPort(() => sequence[Math.min(index++, sequence.length - 1)]);
+    expect(isRestrictedPreviewPort(selected)).toBe(false);
+    expect(selected).not.toBe(occupiedPort);
+  } finally {
+    await new Promise<void>(resolve => occupied.close(() => resolve()));
   }
 });
