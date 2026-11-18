@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createMockServer } from './mock-server.ts';
+import { Lux3DClient } from './lux3d.ts';
+import { ProviderUploader } from './lux3d-provider-upload.ts';
+import { listenForFetch } from '../test-support/fetch-listener.ts';
 
 const mocks: Awaited<ReturnType<typeof createMockServer>>[] = [];
 afterEach(async () => { for (const mock of mocks.splice(0)) await mock.close(); });
@@ -127,6 +130,22 @@ describe('isolated Lux3D mock contract', () => {
     const status = await mock.inject({ url: '/ous/api/v2/upload/status', headers: { 'ous-token-v2': 'mock-ous-token' } });
     expect(status.json().d.status).toBe(5);
     expect((await mock.inject({ url: '/ous/api/v2/upload/status', headers: { authorization: 'test-only-key' } })).statusCode).toBe(401);
+
+    const realisticMock = await setup({ key: 'demo-key', blockSize: 1024 * 1024 });
+    const realisticToken = await realisticMock.inject({ url: '/asset/v1/token', headers: { authorization: 'demo-key' } });
+    expect(realisticToken.json()).toMatchObject({ ousToken: 'mock-ous-token', blockSize: 1024 * 1024 });
+
+    const { mock: liveMock, baseUrl } = await listenForFetch(() => createMockServer({ key: 'demo-key', blockSize: 1024 * 1024 }));
+    try {
+      const client = new Lux3DClient({ base: baseUrl, key: 'demo-key' });
+      const uploader = new ProviderUploader(client);
+      // 1.5 MiB real-sized image buffer: exceeds Fastify's default 1 MiB bodyLimit with multipart framing and exercises multi-part upload.
+      const largePhoto = Buffer.alloc(Math.floor(1.5 * 1024 * 1024), 0xab);
+      const publishedUrl = await uploader.publish(largePhoto, 'img_24866.jpg', baseUrl);
+      expect(publishedUrl).toBe(`${baseUrl}/output/model.glb`);
+    } finally {
+      await liveMock.close();
+    }
   });
 
   it('serves a truncated GLB whose header still declares the full length', async () => {
