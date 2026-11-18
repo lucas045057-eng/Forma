@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { Candidate } from '@spatial/shared';
 import { parseDiff } from './diff.ts';
 import { api, ApiError, mutation } from './api.ts';
@@ -23,13 +24,17 @@ export function Diff({ candidate }: { candidate: Candidate }) {
     </section>)}
   </div>;
 }
-export default function CandidatePanel({ selectedId, onSelect, mode, onMode, headerMeta, headerStatus, children }: {
+export default function CandidatePanel({ selectedId, onSelect, mode, onMode, headerMeta, headerStatus, detailsTarget, children }: {
   selectedId: string;
   onSelect: (id: string) => void;
   mode: PreviewMode;
   onMode: (mode: PreviewMode) => void;
   headerMeta?: ReactNode;
   headerStatus?: ReactNode;
+  /** Where the candidate checks/diff section renders. Omitted → inline below the artboards;
+   *  null → the target is not mounted yet, so render nothing rather than mount inline and
+   *  remount on teleport (that would abort evidence loading once). */
+  detailsTarget?: HTMLElement | null;
   children: ReactNode;
 }) {
   const { state, status, reload, syncReady, syncEpoch, acquire, awaiting, locked } = useEventCenter();
@@ -106,6 +111,30 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
     }
   }
 
+  const details = selected ? <section className="candidate-details" data-testid="candidate-details">
+      <div className="candidate-header-bar">
+        <div className="candidate-title">
+          <span className="section-label">CANDIDATE</span>
+          <h2>候选 {selected.id.slice(0, 8)}</h2>
+          <span className="meta-tag">{pending.length}/3 待定</span>
+        </div>
+        <div className="candidate-actions-bar">
+          {!selected.latestCheckRunId
+            ? <button type="button" className="secondary-btn compact-btn" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button>
+            : <button type="button" className="secondary-btn compact-btn" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
+          <button type="button" className="ghost-btn compact-btn" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
+          <AdoptButton reason={reason} onAdopt={() => void action('adopt')}/>
+          <button type="button" className="ghost-btn compact-btn" data-testid="candidate-discard" disabled={busy || !ready} onClick={() => void action('discard')}>撤回候选</button>
+        </div>
+      </div>
+      {busy && <p className="muted-note" role="status">操作结果待确认；若连接中断，请刷新状态</p>}
+      {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
+      <div className="candidate-body-grid">
+        <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} checkIssue={checkIssue} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '四项检查与证据已就绪，点击右上角「采用此候选」即可合入主作品'}/>
+        <Diff candidate={selected}/>
+      </div>
+    </section> : null;
+
   return <>
     <div className="preview-controls">
       <div className="canvas-bar-left">
@@ -130,28 +159,6 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
     {error && <p className="candidate-error error" data-testid="candidate-action-error" role="alert">{error}</p>}
     {!canRevert && <p className="candidate-sync-hint" role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
     <div className={`preview-frames mode-${mode}`}>{children}</div>
-    {selected && <section className="candidate-details" data-testid="candidate-details">
-      <div className="candidate-header-bar">
-        <div className="candidate-title">
-          <span className="section-label">CANDIDATE</span>
-          <h2>候选 {selected.id.slice(0, 8)}</h2>
-          <span className="meta-tag">{pending.length}/3 待定</span>
-        </div>
-        <div className="candidate-actions-bar">
-          {!selected.latestCheckRunId
-            ? <button type="button" className="secondary-btn compact-btn" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button>
-            : <button type="button" className="secondary-btn compact-btn" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
-          <button type="button" className="ghost-btn compact-btn" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
-          <AdoptButton reason={reason} onAdopt={() => void action('adopt')}/>
-          <button type="button" className="ghost-btn compact-btn" data-testid="candidate-discard" disabled={busy || !ready} onClick={() => void action('discard')}>撤回候选</button>
-        </div>
-      </div>
-      {busy && <p className="muted-note" role="status">操作结果待确认；若连接中断，请刷新状态</p>}
-      {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
-      <div className="candidate-body-grid">
-        <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} checkIssue={checkIssue} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '四项检查与证据已就绪，点击右上角「采用此候选」即可合入主作品'}/>
-        <Diff candidate={selected}/>
-      </div>
-    </section>}
+    {details && (detailsTarget === undefined ? details : detailsTarget && createPortal(details, detailsTarget))}
   </>;
 }

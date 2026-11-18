@@ -41,6 +41,7 @@ function Studio() {
   const [draggingPlacement,setDraggingPlacement]=useState(false);
   const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
   const [showScene, setShowScene] = useState(false);
+  const [candidateSlot, setCandidateSlot] = useState<HTMLDivElement | null>(null);
   const preview = useRef<HTMLIFrameElement>(null);
   const candidatePreview = useRef<HTMLIFrameElement>(null);
   const pickingRef = useRef(false);
@@ -354,42 +355,35 @@ function Studio() {
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
       {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
-      <header className="toolbar">
-        <div className="brand-cluster">
-          <div className="brand-identity">
-            <span className="wordmark">FORMA</span>
-            <h1>Forma 空间工作台</h1>
-          </div>
-          <div className="status-cluster">
-            <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
-            <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus}>{eventStatus === 'connected' ? '事件已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'} · <output data-testid="events-seq">{lastSeq}</output></span>
-            {modelStatus && (
-              <span
-                className={`status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
-                data-testid="model-status"
-                data-mode={modelStatus.coding.mode}
-                title={modelStatusTooltip}
-              >
-                {modelStatus.coding.mode === 'real'
-                  ? `真实模型 · ${modelStatus.coding.model}`
-                  : modelStatus.coding.mode === 'mock'
-                    ? '模拟编码模型'
-                    : '未配置编码模型'}
-              </span>
-            )}
-            {!syncReady && <span className="status-pill is-wait" role="status">状态待同步</span>}
-            {syncError && <span className="status-pill is-error" role="alert">{syncError}</span>}
-            <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
-          </div>
+      <header className="studio-top">
+        <div className="island brand-island">
+          <span className="wordmark" aria-hidden="true">F</span>
+          <h1>Forma 空间工作台</h1>
         </div>
-        <div className="tools">
-          <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
-          <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
-          <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setShowScene(true); }}>3D 场景编辑</button>
+        {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示：语音为固定示例转写，编码与生成上游为模拟；不代表真实语音识别或现场模型生成。</p>}
+        {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式：已接入真实编码模型与云端服务，提交生成或语音识别可能产生对应平台计费。</p>}
+        <div className="island status-island status-cluster">
+          <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
+          <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus}>{eventStatus === 'connected' ? '事件已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'} · <output data-testid="events-seq">{lastSeq}</output></span>
+          {modelStatus && (
+            <span
+              className={`status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
+              data-testid="model-status"
+              data-mode={modelStatus.coding.mode}
+              title={modelStatusTooltip}
+            >
+              {modelStatus.coding.mode === 'real'
+                ? `真实模型 · ${modelStatus.coding.model}`
+                : modelStatus.coding.mode === 'mock'
+                  ? '模拟编码模型'
+                  : '未配置编码模型'}
+            </span>
+          )}
+          {!syncReady && <span className="status-pill is-wait" role="status">状态待同步</span>}
+          {syncError && <span className="status-pill is-error" role="alert">{syncError}</span>}
+          <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
         </div>
       </header>
-      {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示：语音为固定示例转写，编码与生成上游为模拟；不代表真实语音识别或现场模型生成。</p>}
-      {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式：已接入真实编码模型与云端服务，提交生成或语音识别可能产生对应平台计费。</p>}
       <div className={`workspace${showScene ? ' scene-editing' : ''}`}>
         <section className="preview-panel" aria-label="作品预览">
           <CandidatePanel
@@ -424,7 +418,7 @@ function Studio() {
               </div>
               <ModelOriginBadge/>
             </>}
-            headerStatus={<span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>}
+            detailsTarget={candidateSlot}
           >
             {mainFrame}
             {mode !== 'current' && candidateFrame}
@@ -432,6 +426,7 @@ function Studio() {
         </section>
         <aside className="inspector">
           {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
+          <div className="candidate-slot" ref={setCandidateSlot}/>
           <div className="inspector-main" hidden={showScene}>
             <div className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
               <div className="target-card-header">
@@ -456,6 +451,13 @@ function Studio() {
           <ApprovalPanel highlightId={impact?.id ?? null} onHighlight={highlight} onExit={() => exitImpact()}/>
         </aside>
       </div>
+      <nav className="island dock tools" role="toolbar" aria-label="工具">
+        <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
+        <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
+        <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setShowScene(true); }}>3D 场景编辑</button>
+        <span className="dock-sep" aria-hidden="true"/>
+        <span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>
+      </nav>
     </main>
   );
 }
