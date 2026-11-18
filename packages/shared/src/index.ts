@@ -148,6 +148,7 @@ export interface SpeechCancelResult { requestId: string; status: 'cancelled' | '
 export interface FileDiff { path: string; patch: string }
 export interface Task {
   id: string;
+  kind?: 'agent' | 'module';
   instruction: string;
   selection?: Selection;
   status: 'queued' | 'running' | 'awaiting_approval' | 'done' | 'failed' | 'cancelled';

@@ -171,7 +171,7 @@ export class SceneService {
       }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
       await assertSnapshotBudget(this.options.workRoot, new Map<string, Buffer>([
         [`public/assets/${id}.glb`, binary],
-        [`public/assets/${id}.parts.json`, Buffer.from(JSON.stringify(metadata, null, 2))],
+        [`public/assets/${id}.parts.json`, Buffer.from(JSON.stringify(metadata, null, 2) + '\n')],
         [`public/assets/${id}.provenance.json`, provenanceBytes],
         ['src/scene.config.json', Buffer.from(JSON.stringify(next, null, 2) + '\n')],
       ]));
@@ -183,7 +183,7 @@ export class SceneService {
       await safeWorkPath(this.options.workRoot, `public/assets/${id}.glb`);
       await writeAtomic(destination, binary);
       await safeWorkPath(this.options.workRoot,`public/assets/${id}.parts.json`);
-      await writeAtomic(parts, JSON.stringify(metadata, null, 2));
+      await writeAtomic(parts, JSON.stringify(metadata, null, 2) + '\n');
       await safeWorkPath(this.options.workRoot,`public/assets/${id}.provenance.json`);
       await writeAtomic(sidecar,provenanceBytes);
       return this.commit(previous, next, 'write', [...this.state!.stack, previous]);

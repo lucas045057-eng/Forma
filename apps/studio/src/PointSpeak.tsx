@@ -116,10 +116,12 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
       <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
       {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy || !syncReady || locked([`task:${active.id}`])} onClick={() => void cancel(active)}>取消任务</button>}
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
-      {(active.status === 'failed' || active.status === 'cancelled') && <>
-        {retryPlan.reason && <p role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
-        <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed || speechBusy(speechState)} onClick={() => { changeInstruction(active.instruction,true); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
-      </>}
+      {(active.status === 'failed' || active.status === 'cancelled') && (active.kind === 'module'
+        ? <p className="hint" role="status" data-testid="task-retry-reason">独立 3D 模块操作请从左侧资产面板重新发起，不能通过文字指令重试。</p>
+        : <>
+          {retryPlan.reason && <p role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
+          <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed || speechBusy(speechState)} onClick={() => { changeInstruction(active.instruction,true); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
+        </>)}
     </div>}
   </section>;
 }

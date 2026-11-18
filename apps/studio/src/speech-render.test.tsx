@@ -38,3 +38,33 @@ it('static serialization invokes no HTTP or browser recording; mounted lifecycle
   expect(transport).not.toHaveBeenCalled();
   expect(center.acquire).not.toHaveBeenCalled();
 });
+
+it('omits the CodingAgent retry button on failed module placement tasks while keeping it for ordinary agent tasks', () => {
+  center.state = {
+    ...center.state,
+    tasks: [{
+      id: '0ba219305def4605bde7b38f2b67bf5a',
+      kind: 'module',
+      instruction: '放入独立3D模块',
+      status: 'failed',
+      events: [],
+      error: { code: 'STALE_PLACEMENT', message: '作品版本已变化，请重新放置' },
+    }],
+  };
+  const moduleHtml = renderToStaticMarkup(<PointSpeak pick={{ kind: 'none' }}/>);
+  expect(moduleHtml).not.toContain('data-testid="task-retry"');
+  expect(moduleHtml).toContain('独立 3D 模块操作请从左侧资产面板重新发起');
+
+  center.state = {
+    ...center.state,
+    tasks: [{
+      id: 'a1b2c3d4e5f60718293a4b5c6d7e8f90',
+      instruction: '把标题改成新文案',
+      status: 'failed',
+      events: [],
+      error: { code: 'TASK_FAILED', message: '任务失败' },
+    }],
+  };
+  const agentHtml = renderToStaticMarkup(<PointSpeak pick={{ kind: 'none' }}/>);
+  expect(agentHtml).toContain('data-testid="task-retry"');
+});
