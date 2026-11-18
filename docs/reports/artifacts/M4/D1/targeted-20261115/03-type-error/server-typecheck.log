@@ -1,5 +1,0 @@
-$ tsc
-src/speech/routes.test.ts(135,89): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${string}-${string}-${string}-${string}-${string}`'.
-E:\空间化AI工作台\.worktrees\m4\apps\server:
-[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/server@ typecheck: `tsc`
-Exit status 2

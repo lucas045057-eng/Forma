@@ -1,4 +1,0 @@
-{
-  "test": "force-stops only its owned real worker when the IPC stop message is ignored",
-  "runId": "334bfa16b35b4347bac85cae2102e80d"
-}

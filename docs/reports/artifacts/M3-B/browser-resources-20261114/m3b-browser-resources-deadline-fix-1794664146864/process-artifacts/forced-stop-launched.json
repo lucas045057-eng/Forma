@@ -1,9 +1,0 @@
-{
-  "state": "launched",
-  "worker": {
-    "pid": 46168,
-    "parent": 14132,
-    "created": "2026-11-14T13:49:26.8232940Z",
-    "name": "node.exe"
-  }
-}

@@ -1,4 +1,0 @@
-apps/server/src/checks/network-guard.ts(13,3): error TS2741: Property '__promisify__' is missing in type '() => never' but required in type 'typeof lookup'.
-apps/server/src/checks/network-guard.ts(13,24): error TS2741: Property '__promisify__' is missing in type '() => never' but required in type 'typeof resolve'.
-apps/server/src/checks/network-guard.ts(13,46): error TS2741: Property '__promisify__' is missing in type '() => never' but required in type 'typeof resolve4'.
-apps/server/src/checks/network-guard.ts(13,69): error TS2741: Property '__promisify__' is missing in type '() => never' but required in type 'typeof resolve6'.

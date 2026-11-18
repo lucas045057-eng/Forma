@@ -1,8 +1,0 @@
-{
-  "approvalId": "22424936bc5d449f9860fc5c2dc5dcea",
-  "taskId": "50e093a2ae034db1911c941b24005af4",
-  "selectionSrc": "src/components/Button.tsx:5:5",
-  "instances": 3,
-  "pendingCardsAfterReload": 1,
-  "publicCandidates": 0
-}

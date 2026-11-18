@@ -1,7 +1,0 @@
-{
-  "status": "cancelled",
-  "error": {
-    "code": "TASK_CANCELLED",
-    "message": "用户取消任务"
-  }
-}

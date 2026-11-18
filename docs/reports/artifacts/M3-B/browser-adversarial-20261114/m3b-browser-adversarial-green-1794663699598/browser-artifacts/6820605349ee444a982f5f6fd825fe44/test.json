@@ -1,4 +1,0 @@
-{
-  "test": "blocks fetch access to a different loopback origin before it reaches the server",
-  "runId": "6820605349ee444a982f5f6fd825fe44"
-}

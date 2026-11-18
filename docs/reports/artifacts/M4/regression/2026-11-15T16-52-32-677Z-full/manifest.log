@@ -1,5 +1,0 @@
-typecheck ok=true code=0 report=- archived=0
-build ok=true code=0 report=- archived=0
-unit ok=true code=0 report=- archived=0
-demo-safety ok=true code=0 report=- archived=0
-e2e-m4 ok=false code=1 report=false archived=0

@@ -1,1 +1,0 @@
-apps/server/src/checks/runner.ts(91,84): error TS18048: 'maximum' is possibly 'undefined'.

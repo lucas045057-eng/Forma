@@ -1,7 +1,0 @@
-{
-  "artifactDir": "E:\\空间化AI工作台\\.worktrees\\m3b-acceptance\\docs\\reports\\artifacts\\M0-B",
-  "baselineSrc": "src/components/Button.tsx:5:5",
-  "acceptedSrc": "src/App.tsx:1:1",
-  "wrongSourceIgnored": true,
-  "consoleErrors": []
-}

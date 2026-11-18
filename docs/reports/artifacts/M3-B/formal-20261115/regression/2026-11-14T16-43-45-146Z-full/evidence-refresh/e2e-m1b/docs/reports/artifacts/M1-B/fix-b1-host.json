@@ -1,9 +1,0 @@
-{
-  "evil": {
-    "status": 403,
-    "body": "{\"error\":{\"code\":\"HOST_DENIED\",\"message\":\"仅允许通过本机地址访问；其他主机名需写入 ALLOWED_HOSTS\"}}"
-  },
-  "evilOriginOnly": 403,
-  "loopback": 200,
-  "viaProxy": 200
-}

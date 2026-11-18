@@ -1,4 +1,0 @@
-{
-  "test": "blocks WebSocket connections made inside a dedicated worker",
-  "runId": "b143ded928874b73b8c41b6d9e8b1ee9"
-}

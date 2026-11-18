@@ -1,2 +1,0 @@
-# Preserve raw evidence bytes so manifest SHA256 values survive checkout.
-* -text

@@ -1,7 +1,0 @@
-{
-  "status": "failed",
-  "error": {
-    "code": "AGENT_PROTOCOL",
-    "message": "编码模型没有调用工具，也未结束任务"
-  }
-}

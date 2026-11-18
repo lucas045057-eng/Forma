@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "historical-test-artifacts-index",
+  "baselineBranch": "master",
+  "baselineCommit": "38b69ff8fb5baf6f90101ba468fb7289c915da78",
+  "rootTreeHash": "75081fa0e21923d3b215c3a634b125254167f36c",
+  "totalEntries": 8166,
+  "totalFiles": 8165,
+  "totalGitlinks": 1,
+  "totalBlobBytes": 946207283,
+  "maxRelativePathLength": 265,
+  "entriesDigestSha256": "2d69202ffb7e07079e3065ba4b2838281847932125eb9a7addb3eced2ea77d01",
+  "restoreExamples": {
+    "singleMilestone": "git -c core.longpaths=true checkout 38b69ff8fb5baf6f90101ba468fb7289c915da78 -- docs/reports/artifacts/M4",
+    "readSingleFileWithoutCheckout": "git show 38b69ff8fb5baf6f90101ba468fb7289c915da78:docs/reports/artifacts/M0-B/playwright-results.json"
+  },
+  "milestones": [
+    {
+      "milestone": "M4",
+      "treeHash": "075462c5c493f33121c123b1ea44ac17291efcf2",
+      "entryCount": 5163,
+      "fileCount": 5162,
+      "gitlinkCount": 1,
+      "totalBytes": 924406535
+    },
+    {
+      "milestone": "M3-B",
+      "treeHash": "e1da92f168167bab9ea27b6138f458e6d2260c73",
+      "entryCount": 1430,
+      "fileCount": 1430,
+      "gitlinkCount": 0,
+      "totalBytes": 7728281
+    },
+    {
+      "milestone": "M3-C",
+      "treeHash": "95bbed06e8e64fe4112051e25e0bed494b99c686",
+      "entryCount": 590,
+      "fileCount": 590,
+      "gitlinkCount": 0,
+      "totalBytes": 4135342
+    },
+    {
+      "milestone": "M3-A",
+      "treeHash": "ab86695c68fe5e6e63fbb1872665f3416b320509",
+      "entryCount": 374,
+      "fileCount": 374,
+      "gitlinkCount": 0,
+      "totalBytes": 2528200
+    },
+    {
+      "milestone": "M2-final",
+      "treeHash": "d6bcef1a1d953cd58372a0142f0fa10c45f834fd",
+      "entryCount": 238,
+      "fileCount": 238,
+      "gitlinkCount": 0,
+      "totalBytes": 1079547
+    },
+    {
+      "milestone": "M2-real-model",
+      "treeHash": "d8b218eb9f3ebc58c56c1aa68512949b2097d437",
+      "entryCount": 110,
+      "fileCount": 110,
+      "gitlinkCount": 0,
+      "totalBytes": 4746598
+    },
+    {
+      "milestone": "M1-B",
+      "treeHash": "2513b8a22462df886b3c31e1aabc90dde7f93612",
+      "entryCount": 73,
+      "fileCount": 73,
+      "gitlinkCount": 0,
+      "totalBytes": 435815
+    },
+    {
+      "milestone": "M2-A",
+      "treeHash": "7679512ece7f56cd2feaee04def2e857324b23f8",
+      "entryCount": 58,
+      "fileCount": 58,
+      "gitlinkCount": 0,
+      "totalBytes": 310114
+    },
+    {
+      "milestone": "M2-N4",
+      "treeHash": "aade8e20ae2c3f9ee5c7d2e25b1b04e86127f14f",
+      "entryCount": 46,
+      "fileCount": 46,
+      "gitlinkCount": 0,
+      "totalBytes": 167872
+    },
+    {
+      "milestone": "M0-A",
+      "treeHash": "0b62f49a1980e9c41963a5965a954c1b7cd5e089",
+      "entryCount": 30,
+      "fileCount": 30,
+      "gitlinkCount": 0,
+      "totalBytes": 352762
+    },
+    {
+      "milestone": "M2-B",
+      "treeHash": "1b9083f3cb3a300b79066df20691ac4bd47875e2",
+      "entryCount": 23,
+      "fileCount": 23,
+      "gitlinkCount": 0,
+      "totalBytes": 248638
+    },
+    {
+      "milestone": "M0-B",
+      "treeHash": "cb8b747b3a72ec4786054f30d66e160f3d17bbe5",
+      "entryCount": 22,
+      "fileCount": 22,
+      "gitlinkCount": 0,
+      "totalBytes": 33320
+    },
+    {
+      "milestone": "M1-A",
+      "treeHash": "abaa4c7c11fe15159079cb4effb7d125bc2d8539",
+      "entryCount": 9,
+      "fileCount": 9,
+      "gitlinkCount": 0,
+      "totalBytes": 34259
+    }
+  ]
+}

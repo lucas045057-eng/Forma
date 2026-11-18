@@ -1,8 +1,0 @@
-[core]
-	repositoryformatversion = 0
-	filemode = false
-	bare = false
-	logallrefupdates = true
-	worktree = E:\\空间化AI工作台\\.worktrees\\m4-acceptance\\.data\\demo-runs\\2026-11-15T20-00-23.833Z-0303c0ee-320b-4107-b133-e4a17bf654bc\\work
-	symlinks = false
-	ignorecase = true
