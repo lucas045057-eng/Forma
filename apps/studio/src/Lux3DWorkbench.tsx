@@ -99,6 +99,7 @@ export function ArtifactGlbPreview({
           config={defaultSceneConfig}
           modelUrl={previewUrl}
           controls
+          enableZoom
           animation={{ playing, clip, loop }}
           onAnimations={names => {
             setClips(names);

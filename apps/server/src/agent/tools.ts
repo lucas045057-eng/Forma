@@ -3,6 +3,7 @@ import { writeAtomic } from '../assets/atomic-file.ts';
 import path from 'node:path';
 import ts from 'typescript';
 import { isSceneConfig } from '@spatial/shared/scene-config';
+import { isManagedModulePath } from '@spatial/shared/scene-module';
 
 const ALLOWED_BARE_PACKAGES = new Set([
   'react',
@@ -90,6 +91,9 @@ export class Sandbox {
     return content.toString('utf8');
   }
   private async store(target: { absolute: string; relative: string }, content: string) {
+    if (isManagedModulePath(target.relative)) {
+      throw new ToolError(`不能直接修改受保护的 3D 运行时文件 ${target.relative}。请去引用该模块的页面源码（如 src/App.tsx 与 src/style.css），保持 <SpatialModel.../> 无属性自闭合标签原封不动，通过在其外层包裹 <div> 容器（如 style={{ pointerEvents: 'none' }} 定格禁用鼠标交互、或添加滚动变换/卡片框）来完成修改。`);
+    }
     let nextContent = content;
     if (Buffer.byteLength(nextContent) > MAX_WRITE) throw new ToolError('内容过大');
     this.check(Buffer.byteLength(nextContent));
