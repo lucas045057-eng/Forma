@@ -9,20 +9,28 @@ import { adoptionReason, operationError, refreshError, type EvidenceReceipt } fr
 
 export type PreviewMode = 'current' | 'candidate' | 'compare';
 export function AdoptButton({ reason, onAdopt }: { reason: string; onAdopt: () => void }) {
-  return <button type="button" data-testid="candidate-adopt" disabled={!!reason} onClick={() => { if (!reason) onAdopt(); }}>采用此候选</button>;
+  return <button type="button" className="primary-btn compact-btn" data-testid="candidate-adopt" disabled={!!reason} onClick={() => { if (!reason) onAdopt(); }}>采用此候选</button>;
 }
 export function Diff({ candidate }: { candidate: Candidate }) {
   return <div className="candidate-diff" data-testid="candidate-diff">
-    <h3>改动文件</h3>
-    <ul data-testid="candidate-files">{candidate.diff.map(file => <li key={file.path}><code>{file.path}</code></li>)}</ul>
-    {candidate.diff.map(file => <section key={file.path} aria-label={`差异 ${file.path}`}>
-      <code>{file.path}</code>
+    <div className="diff-header">
+      <span className="section-label">DIFF</span>
+      <ul className="diff-file-pills" data-testid="candidate-files">{candidate.diff.map(file => <li key={file.path}><code>{file.path}</code></li>)}</ul>
+    </div>
+    {candidate.diff.map(file => <section key={file.path} className="diff-file-block" aria-label={`差异 ${file.path}`}>
+      <code className="diff-file-label">{file.path}</code>
       <pre className="diff-view">{parseDiff(file.patch).map((line, index) => <span key={index} className={`diff-${line.kind}`}>{line.text}{'\n'}</span>)}</pre>
     </section>)}
   </div>;
 }
-export default function CandidatePanel({ selectedId, onSelect, mode, onMode, children }: {
-  selectedId: string; onSelect: (id: string) => void; mode: PreviewMode; onMode: (mode: PreviewMode) => void; children: ReactNode;
+export default function CandidatePanel({ selectedId, onSelect, mode, onMode, headerMeta, headerStatus, children }: {
+  selectedId: string;
+  onSelect: (id: string) => void;
+  mode: PreviewMode;
+  onMode: (mode: PreviewMode) => void;
+  headerMeta?: ReactNode;
+  headerStatus?: ReactNode;
+  children: ReactNode;
 }) {
   const { state, status, reload, syncReady, syncEpoch, acquire, awaiting, locked } = useEventCenter();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -100,34 +108,49 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, chi
 
   return <>
     <div className="preview-controls">
-      <span>作品版本 <code data-testid="work-version">{state.version ? state.version.slice(0, 10) : '读取中'}</code></span>
-      <button type="button" data-testid="version-revert" disabled={!canRevert} onClick={() => void action('revert')}>回退上一次采用</button>
-      {pending.length > 0 && <>
-        <select aria-label="待定候选版本" data-testid="candidate-select" value={selected?.id ?? ''} onChange={event => { clearEvidence(); onSelect(event.target.value); onMode('candidate'); }}>
-          {pending.map(candidate => <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}</option>)}</select>
-        <div className="preview-modes" aria-label="预览模式">
-          <button type="button" data-testid="preview-current" aria-pressed={mode === 'current'} onClick={() => onMode('current')}>当前版本</button>
-          <button type="button" data-testid="preview-candidate" aria-pressed={mode === 'candidate'} onClick={() => onMode('candidate')}>候选版本</button>
-          <button type="button" data-testid="preview-compare" aria-pressed={mode === 'compare'} onClick={() => onMode('compare')}>并排对比</button>
-        </div>
-      </>}
+      <div className="canvas-bar-left">
+        {headerMeta}
+        <span className="version-badge">版本 <code data-testid="work-version">{state.version ? state.version.slice(0, 8) : '读取中'}</code></span>
+        <button type="button" className="ghost-btn compact-btn" data-testid="version-revert" disabled={!canRevert} onClick={() => void action('revert')}>回退上一次采用</button>
+      </div>
+      <div className="canvas-bar-right">
+        {pending.length > 0 && <>
+          <select aria-label="待定候选版本" data-testid="candidate-select" value={selected?.id ?? ''} onChange={event => { clearEvidence(); onSelect(event.target.value); onMode('candidate'); }}>
+            {pending.map(candidate => <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}</option>)}
+          </select>
+          <div className="segmented-control" aria-label="预览模式">
+            <button type="button" data-testid="preview-current" aria-pressed={mode === 'current'} onClick={() => onMode('current')}>当前版本</button>
+            <button type="button" data-testid="preview-candidate" aria-pressed={mode === 'candidate'} onClick={() => onMode('candidate')}>候选版本</button>
+            <button type="button" data-testid="preview-compare" aria-pressed={mode === 'compare'} onClick={() => onMode('compare')}>并排对比</button>
+          </div>
+        </>}
+        {headerStatus}
+      </div>
     </div>
     {error && <p className="candidate-error error" data-testid="candidate-action-error" role="alert">{error}</p>}
-    {!canRevert && <p role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
+    {!canRevert && <p className="candidate-sync-hint" role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
     <div className={`preview-frames mode-${mode}`}>{children}</div>
     {selected && <section className="candidate-details" data-testid="candidate-details">
-      <div className="candidate-title"><h2>候选 {selected.id.slice(0, 8)}</h2><span>待定候选 {pending.length}/3</span></div>
-      {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
-      <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} checkIssue={checkIssue} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '前端检查与证据已就绪，采用时仍由服务器最终核对'}/>
-      <div className="check-actions">
-        {!selected.latestCheckRunId ? <button type="button" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button> : <button type="button" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
-        <button type="button" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
-        {busy && <span role="status">操作结果待确认；若连接中断，请刷新状态</span>}
+      <div className="candidate-header-bar">
+        <div className="candidate-title">
+          <span className="section-label">CANDIDATE</span>
+          <h2>候选 {selected.id.slice(0, 8)}</h2>
+          <span className="meta-tag">{pending.length}/3 待定</span>
+        </div>
+        <div className="candidate-actions-bar">
+          {!selected.latestCheckRunId
+            ? <button type="button" className="secondary-btn compact-btn" data-testid="check-run" disabled={!canRun} onClick={() => void action('run')}>运行检查</button>
+            : <button type="button" className="secondary-btn compact-btn" data-testid="check-rerun" disabled={!canRun} onClick={() => void action('rerun')}>重新检查</button>}
+          <button type="button" className="ghost-btn compact-btn" data-testid="check-cancel" disabled={!canCancel} onClick={() => void action('cancel')}>取消检查</button>
+          <AdoptButton reason={reason} onAdopt={() => void action('adopt')}/>
+          <button type="button" className="ghost-btn compact-btn" data-testid="candidate-discard" disabled={busy || !ready} onClick={() => void action('discard')}>撤回候选</button>
+        </div>
       </div>
-      <Diff candidate={selected}/>
-      <div className="candidate-actions">
-        <AdoptButton reason={reason} onAdopt={() => void action('adopt')}/>
-        <button type="button" data-testid="candidate-discard" disabled={busy || !ready} onClick={() => void action('discard')}>撤回候选</button>
+      {busy && <p className="muted-note" role="status">操作结果待确认；若连接中断，请刷新状态</p>}
+      {selected.outOfScope.length > 0 && <p className="scope-warning" data-testid="candidate-out-of-scope" role="alert">改动超出选中范围：{selected.outOfScope.join('、')}</p>}
+      <div className="candidate-body-grid">
+        <CheckPanel candidate={selected} run={run} syncReady={ready && !busy} syncEpoch={syncEpoch} version={state.version} onEvidence={onEvidence} checkIssue={checkIssue} proofRejected={!!invalid[selected.id] || (!!run && rejected[selected.id] === run.id)} gateReason={reason || '四项检查与证据已就绪，点击右上角「采用此候选」即可合入主作品'}/>
+        <Diff candidate={selected}/>
       </div>
     </section>}
   </>;

@@ -248,33 +248,41 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
     } catch (cause) { setError(describeError(cause)); }
   }
 
-  return <section className="lux-workbench" data-testid="lux-workbench">
-    <h3>从图片创作 3D</h3>
+  return <section className="lux-workbench drawer-section" data-testid="lux-workbench">
+    <div className="drawer-section-head">
+      <h3>AI 生成 3D 模型</h3>
+      <div className="segmented-control">
+        <button type="button" aria-pressed={operation === 'image-to-3d'} onClick={() => { setOperation('image-to-3d'); submitKey.current = undefined; setFormats(['glb']); }}>图生 3D</button>
+        <button type="button" aria-pressed={operation === 'text-to-3d'} onClick={() => { setOperation('text-to-3d'); submitKey.current = undefined; setFormats(['glb']); }}>文生 3D</button>
+      </div>
+    </div>
     <div className="lux-dropzone" tabIndex={0}
       onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; }}
       onDrop={event => { event.preventDefault(); if (event.dataTransfer.files.length) void upload(event.dataTransfer.files); }}>
-      <p>把图片或 GLB 拖到这里，也可以选择文件。拖入只会本地暂存，不会上传云端或计费。</p>
+      <p>拖入参考图或 GLB（仅本地暂存，点击生成前不上传不计费）</p>
       <input type="file" data-testid="lux-files" accept="image/png,image/jpeg,image/webp,.glb" multiple disabled={busy}
         onChange={event => { if (event.target.files) void upload(event.target.files); event.target.value = ''; }} />
     </div>
-    <details>
+    {uploads.some(item => item.kind === 'image') && <details className="compact-details">
       <summary>选择已上传的图片（保持顺序）</summary>
       {uploads.filter(item => item.kind === 'image').map(item => <label key={item.id}>
         <input type="checkbox" checked={images.includes(item.id)} onChange={event => setImages(previous => event.target.checked ? [...previous, item.id].slice(0, 32) : previous.filter(id => id !== item.id))} />
         {item.filename}
       </label>)}
-    </details>
+    </details>}
     {images.length > 0 && <div className="lux-input-order">{images.map((id, index) => <div key={id}>
-      <img src={`/assets/uploads/${id}/preview`} alt={`参考图${index + 1}`} width={48} height={48} />
+      <img src={`/assets/uploads/${id}/preview`} alt={`参考图${index + 1}`} width={40} height={40} />
       <span>{index + 1} · {uploads.find(item => item.id === id)?.filename ?? id.slice(0, 8)}</span>
-      <button type="button" disabled={index === 0} onClick={() => setImages(previous => { const next = [...previous];[next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })}>向前</button>
-      <button type="button" onClick={() => setImages(previous => previous.filter(value => value !== id))}>移除</button>
+      <button type="button" className="ghost-btn compact-btn" disabled={index === 0} onClick={() => setImages(previous => { const next = [...previous];[next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })}>向前</button>
+      <button type="button" className="ghost-btn compact-btn" onClick={() => setImages(previous => previous.filter(value => value !== id))}>移除</button>
     </div>)}</div>}
-    <label>可选描述<textarea aria-label="Lux3D描述" value={prompt} onChange={event => setPrompt(event.target.value)} maxLength={4000} /></label>
-    {operation === 'image-to-3d' && <p className="hint">官方图生3D接口不接受描述；需要描述时请点击下面的“改用文生3D”。</p>}
-    {operation === 'image-to-3d' && prompt.trim() && <button type="button" onClick={() => { setOperation('text-to-3d'); setNotice('已切换为文生3D，并保留第一张参考图；不会自动提交。'); }}>改用文生3D（保留参考图）</button>}
-    <details>
-      <summary>高级工具与参数</summary>
+    <label className="lux-prompt-label">
+      <span>{operation === 'text-to-3d' || operation === 'image' || operation === 'four-view' ? '模型描述' : '可选描述（图生 3D 如需描述可一键切到文生 3D）'}</span>
+      <textarea aria-label="Lux3D描述" placeholder="例如：极简琥珀玻璃香薰瓶，原木瓶盖，柔和工作室布光" value={prompt} onChange={event => setPrompt(event.target.value)} maxLength={4000} />
+    </label>
+    {operation === 'image-to-3d' && prompt.trim() && <button type="button" className="secondary-btn compact-btn" onClick={() => { setOperation('text-to-3d'); setNotice('已切换为文生3D，并保留第一张参考图；不会自动提交。'); }}>改用文生3D（保留参考图）</button>}
+    <details className="compact-details">
+      <summary>更多工具与生成参数（材质 / 拆件 / 绑骨 / 导出）</summary>
       <label>工具<select data-testid="lux-operation" value={operation} onChange={event => { setOperation(event.target.value as LuxOperation); submitKey.current = undefined; setFormats(event.target.value === 'export' ? [] : ['glb']); }}>{Object.entries(operationNames).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
       {needsModel && <label>输入模型<select aria-label="输入GLB" value={model} onChange={event => setModel(event.target.value)}>
         <option value="">选择本站上传的 GLB</option>
@@ -304,30 +312,33 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
         <label><input type="checkbox" checked={inPlace} onChange={event => setInPlace(event.target.checked)} />原地动画</label>
       </>}
     </details>
-    <p className="hint">{capabilities?.billingNotice ?? '点击创建会把输入上传到云端并提交一次可能计费的任务；拖入、选参数和刷新都不会创建任务。'}</p>
-    {capabilities?.legacyGateway && <p role="status">当前配置指向旧网关 {capabilities.activeGateway}。新能力按官方 api.aholo.cn 规范实现，不会自动改域或重试付费请求。</p>}
-    {capabilities && <p className="hint">本地同时最多处理 {capabilities.limits.activeLocalTasks} 个任务；满额时新请求会被明确拒绝，不会静默排队或提交。</p>}
-    {missing && <p role="status">{missing}</p>}
-    {notice && <p role="status">{notice}</p>}
-    <button type="button" data-testid="lux-create" disabled={busy || !!missing || capabilities?.configured !== true} onClick={() => void create()}>
-      {busy ? '处理中…' : operation === 'image-to-3d' ? '生成模型' : `创建${operationNames[operation]}任务`}
-    </button>
-    <button type="button" disabled={busy} onClick={replacement}>明确开始同参数的新创作</button>
-    {capabilities && !capabilities.configured && <p role="status">后端未配置 Lux3D 密钥，请由操作者私密配置。</p>}
-    {error && <p role="alert">{error}</p>}
+    <p className="lux-disclosure">{capabilities?.billingNotice ?? '点击创建会把输入上传到云端（产生公开可访问链接）并提交一次可能计费的任务；拖入与调参不计费。'}{capabilities ? ` 本地并发上限 ${capabilities.limits.activeLocalTasks}。` : ''}</p>
+    {capabilities?.legacyGateway && <p className="muted-note" role="status">当前配置指向旧网关 {capabilities.activeGateway}。新能力按官方 api.aholo.cn 规范实现，不会自动改域或重试付费请求。</p>}
+    {missing && <p className="muted-note" role="status">{missing}</p>}
+    {notice && <p className="muted-note" role="status">{notice}</p>}
+    <div className="lux-action-row">
+      <button type="button" className="primary-btn" data-testid="lux-create" disabled={busy || !!missing || capabilities?.configured !== true} onClick={() => void create()}>
+        {busy ? '处理中…' : operation === 'image-to-3d' ? '生成模型' : `创建${operationNames[operation]}任务`}
+      </button>
+      <button type="button" className="ghost-btn compact-btn" disabled={busy} onClick={replacement}>明确开始同参数的新创作</button>
+    </div>
+    {capabilities && !capabilities.configured && <p className="muted-note" role="status">后端未配置 Lux3D 密钥，请由操作者私密配置。</p>}
+    {error && <p className="error" role="alert">{error}</p>}
 
-    <details>
+    <details className="compact-details">
       <summary>云端已有任务历史（只查询）</summary>
-      <p>先在高级工具选中原任务的操作类型，再导入结果；不会重新生成。</p>
-      <label>页码<input type="number" min={1} max={100} value={remotePage} onChange={event => setRemotePage(Number(event.target.value))} /></label>
-      <button type="button" onClick={() => void luxApi.remoteHistory(remotePage).then(setRemote).catch(cause => setError(describeError(cause)))}>查询云端历史</button>
-      {remote.map(item => <div key={item.providerTaskId}>
+      <p className="muted-note">先在上方选择对应工具类型，再导入云端已有任务结果；不重新生成。</p>
+      <div className="inline-form">
+        <input type="number" aria-label="页码" min={1} max={100} value={remotePage} onChange={event => setRemotePage(Number(event.target.value))} />
+        <button type="button" className="secondary-btn compact-btn" onClick={() => void luxApi.remoteHistory(remotePage).then(setRemote).catch(cause => setError(describeError(cause)))}>查询云端历史</button>
+      </div>
+      {remote.map(item => <div key={item.providerTaskId} className="remote-history-row">
         <span>{item.providerTaskId} · 状态{item.status}</span>
-        <button type="button" onClick={() => void luxApi.importExisting(operation, item.providerTaskId).then(task => setTasks(previous => [task, ...previous.filter(value => value.localId !== task.localId)])).catch(cause => setError(describeError(cause)))}>按{operationNames[operation]}导入</button>
+        <button type="button" className="ghost-btn compact-btn" onClick={() => void luxApi.importExisting(operation, item.providerTaskId).then(task => setTasks(previous => [task, ...previous.filter(value => value.localId !== task.localId)])).catch(cause => setError(describeError(cause)))}>按{operationNames[operation]}导入</button>
       </div>)}
     </details>
 
-    <h3>创作历史</h3>
+    {tasks.length > 0 && <h4>创作历史</h4>}
     {tasks.map(task => <article key={task.localId} className="lux-result" data-testid="lux-task" data-stage={task.stage}>
       <strong>{operationNames[task.operation]} · {stages[task.stage]}</strong>
       <p>{new Date(task.createdAt).toLocaleString()}</p>

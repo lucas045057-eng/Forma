@@ -95,36 +95,42 @@ export default function AssetModuleControls() {
   }
   function syncRequired() { return syncReady && status === 'connected'; }
 
-  return <details className="asset-module-controls">
-    <summary>调整网页独立 3D 实例</summary>
-    <p>每个实例独立读写。保存调整会立即写入作品并生成一个可撤回的实例历史步骤；移除会走普通候选门禁。</p>
+  return <details className="asset-module-controls drawer-section compact-details">
+    <summary>调整网页独立 3D 实例{modules.length > 0 ? `（${modules.length}）` : ''}</summary>
+    <p className="muted-note">每个实例独立读写并支持单步撤回；移除实例走候选门禁。</p>
     <select aria-label="独立模块" value={selected} onChange={event => setSelected(event.target.value)}>
-      <option value="">选择已有模块</option>
+      <option value="">选择页面已有独立 3D 模块…</option>
       {modules.map(item => <option value={item.id} key={item.id}>{item.id.slice(0, 8)} · {item.stale ? '历史游标已失效' : item.canUndo ? `可撤回 ${item.entries} 步` : '无调整历史'}</option>)}
     </select>
-    {current?.stale && <p role="status">该实例历史游标已失效：可以重新载入后保存新的调整，但旧撤回不会覆盖当前作品。</p>}
+    {current?.stale && <p className="muted-note" role="status">该实例历史游标已失效：可重新保存新调整，旧撤回不会覆盖当前作品。</p>}
     {current && draft && <>
-      <label>宽度（%）<input type="number" min={10} max={100} value={draft.widthPercent} onChange={event => setDraft({ ...draft, widthPercent: Number(event.target.value) })} /></label>
-      <label>Y 角度<input type="number" step={0.1} value={draft.rotationY} onChange={event => setDraft({ ...draft, rotationY: Number(event.target.value) })} /></label>
-      <label>比例<input type="number" min={0.01} max={100} step={0.1} value={draft.scale} onChange={event => setDraft({ ...draft, scale: Number(event.target.value) })} /></label>
-      <label>对齐<select value={draft.align} onChange={event => setDraft({ ...draft, align: event.target.value as Draft['align'] })}>
-        <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
-      </select></label>
-      <label>水平偏移（px）<input type="number" min={-500} max={500} value={draft.offsetX} onChange={event => setDraft({ ...draft, offsetX: Number(event.target.value) })} /></label>
-      <label>上下偏移（px）<input type="number" min={-500} max={500} value={draft.offsetY} onChange={event => setDraft({ ...draft, offsetY: Number(event.target.value) })} /></label>
-      <label>相机位置 X<input type="number" step={0.1} value={draft.cameraPosition[0]} onChange={event => setDraft({ ...draft, cameraPosition: [Number(event.target.value), draft.cameraPosition[1], draft.cameraPosition[2]] as [number, number, number] })} /></label>
-      <label>相机位置 Z<input type="number" step={0.1} value={draft.cameraPosition[2]} onChange={event => setDraft({ ...draft, cameraPosition: [draft.cameraPosition[0], draft.cameraPosition[1], Number(event.target.value)] as [number, number, number] })} /></label>
-      <label>相机目标 X<input type="number" step={0.1} value={draft.cameraTarget[0]} onChange={event => setDraft({ ...draft, cameraTarget: [Number(event.target.value), draft.cameraTarget[1], draft.cameraTarget[2]] as [number, number, number] })} /></label>
-      <label>相机目标 Z<input type="number" step={0.1} value={draft.cameraTarget[2]} onChange={event => setDraft({ ...draft, cameraTarget: [draft.cameraTarget[0], draft.cameraTarget[1], Number(event.target.value)] as [number, number, number] })} /></label>
-      <label>视角 FOV<input type="number" min={1} max={120} value={draft.fov} onChange={event => setDraft({ ...draft, fov: Number(event.target.value) })} /></label>
-      <label>默认动画片段<input value={draft.clip} onChange={event => setDraft({ ...draft, clip: event.target.value })} placeholder="留空保持静态" /></label>
-      <label><input type="checkbox" checked={draft.playing} onChange={event => setDraft({ ...draft, playing: event.target.checked })} />加载后播放</label>
-      <label><input type="checkbox" checked={draft.loop} onChange={event => setDraft({ ...draft, loop: event.target.checked })} />循环</label>
-      <button type="button" disabled={busy || !syncRequired()} onClick={() => void apply()}>保存模块调整</button>
-      <button type="button" disabled={busy || !syncRequired() || !current.canUndo} onClick={() => void undo()}>撤回该实例上一次调整</button>
-      <button type="button" disabled={busy || !syncRequired()} onClick={() => void remove()}>创建移除候选</button>
+      <div className="param-grid-2">
+        <label>宽度（%）<input type="number" min={10} max={100} value={draft.widthPercent} onChange={event => setDraft({ ...draft, widthPercent: Number(event.target.value) })} /></label>
+        <label>比例<input type="number" min={0.01} max={100} step={0.1} value={draft.scale} onChange={event => setDraft({ ...draft, scale: Number(event.target.value) })} /></label>
+        <label>Y 角度<input type="number" step={0.1} value={draft.rotationY} onChange={event => setDraft({ ...draft, rotationY: Number(event.target.value) })} /></label>
+        <label>对齐<select value={draft.align} onChange={event => setDraft({ ...draft, align: event.target.value as Draft['align'] })}>
+          <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
+        </select></label>
+        <label>水平偏移（px）<input type="number" min={-500} max={500} value={draft.offsetX} onChange={event => setDraft({ ...draft, offsetX: Number(event.target.value) })} /></label>
+        <label>上下偏移（px）<input type="number" min={-500} max={500} value={draft.offsetY} onChange={event => setDraft({ ...draft, offsetY: Number(event.target.value) })} /></label>
+        <label>相机位置 X<input type="number" step={0.1} value={draft.cameraPosition[0]} onChange={event => setDraft({ ...draft, cameraPosition: [Number(event.target.value), draft.cameraPosition[1], draft.cameraPosition[2]] as [number, number, number] })} /></label>
+        <label>相机位置 Z<input type="number" step={0.1} value={draft.cameraPosition[2]} onChange={event => setDraft({ ...draft, cameraPosition: [draft.cameraPosition[0], draft.cameraPosition[1], Number(event.target.value)] as [number, number, number] })} /></label>
+        <label>相机目标 X<input type="number" step={0.1} value={draft.cameraTarget[0]} onChange={event => setDraft({ ...draft, cameraTarget: [Number(event.target.value), draft.cameraTarget[1], draft.cameraTarget[2]] as [number, number, number] })} /></label>
+        <label>相机目标 Z<input type="number" step={0.1} value={draft.cameraTarget[2]} onChange={event => setDraft({ ...draft, cameraTarget: [draft.cameraTarget[0], draft.cameraTarget[1], Number(event.target.value)] as [number, number, number] })} /></label>
+        <label>视角 FOV<input type="number" min={1} max={120} value={draft.fov} onChange={event => setDraft({ ...draft, fov: Number(event.target.value) })} /></label>
+        <label>默认动画片段<input value={draft.clip} onChange={event => setDraft({ ...draft, clip: event.target.value })} placeholder="留空保持静态" /></label>
+      </div>
+      <div className="checkbox-inline-row">
+        <label><input type="checkbox" checked={draft.playing} onChange={event => setDraft({ ...draft, playing: event.target.checked })} />加载后播放</label>
+        <label><input type="checkbox" checked={draft.loop} onChange={event => setDraft({ ...draft, loop: event.target.checked })} />循环</label>
+      </div>
+      <div className="module-action-row">
+        <button type="button" className="primary-btn compact-btn" disabled={busy || !syncRequired()} onClick={() => void apply()}>保存模块调整</button>
+        <button type="button" className="secondary-btn compact-btn" disabled={busy || !syncRequired() || !current.canUndo} onClick={() => void undo()}>撤回该实例上一次调整</button>
+        <button type="button" className="ghost-btn compact-btn" disabled={busy || !syncRequired()} onClick={() => void remove()}>创建移除候选</button>
+      </div>
     </>}
-    {notice && <p role="status">{notice}</p>}
-    {error && <p role="alert">{error}</p>}
+    {notice && <p className="muted-note" role="status">{notice}</p>}
+    {error && <p className="error" role="alert">{error}</p>}
   </details>;
 }

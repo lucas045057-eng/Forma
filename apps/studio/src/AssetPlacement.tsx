@@ -129,30 +129,38 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession, 
   }
 
   return <section ref={panelRef} className={`asset-placement${dragging ? ' is-dragging' : ''}`} role="region" aria-label="放置模型确认" data-testid="asset-placement">
-    <h3>将模型放入网页</h3>
+    <div className="placement-head">
+      <div>
+        <span className="section-label">PLACEMENT</span>
+        <h3>将模型放入网页</h3>
+      </div>
+      <button type="button" className="ghost-btn compact-btn" onClick={onClose} disabled={busy}>取消</button>
+    </div>
     {target && <div className="placement-target-banner">
-      <p data-testid="placement-target">
-        {target.kind === 'replace' ? '替换主 3D 槽位' : target.kind === 'replace-module' ? `替换实例 ${target.instanceId?.slice(0, 8)} 的模型` : '在此添加独立 3D 模块'} · {target.src}
+      <p className="placement-target-title" data-testid="placement-target">
+        {target.kind === 'replace' ? '替换主 3D 槽位' : target.kind === 'replace-module' ? `替换实例 ${target.instanceId?.slice(0, 8)} 的模型` : '在此添加独立 3D 模块'} · <code>{target.src}</code>
       </p>
-      <p>采用前主作品不会改变。{target.kind === 'insert' ? '将创建候选，仍需批准、检查和采用。' : target.kind === 'replace' ? '确认后通过场景历史替换，可撤回。' : '确认后写入该实例的独立历史，可单独撤回。'}</p>
-      {target.kind === 'insert' && <fieldset>
-        <legend>独立实例布局</legend>
-        <label>宽度（%）<input type="number" min={10} max={100} value={widthPercent} onChange={event => setWidthPercent(Number(event.target.value))} /></label>
-        <label>Y 角度<input type="number" step={0.1} value={rotation} onChange={event => setRotation(Number(event.target.value))} /></label>
-        <label>比例<input type="number" min={0.01} max={100} step={0.1} value={scale} onChange={event => setScale(Number(event.target.value))} /></label>
-        <label>容器内对齐<select value={align} onChange={event => setAlign(event.target.value as typeof align)}>
-          <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
-        </select></label>
-        <label>水平偏移<input type="number" min={-500} max={500} value={offsetX} onChange={event => setOffsetX(Number(event.target.value))} /></label>
-        <label>上下偏移<input type="number" min={-500} max={500} value={offsetY} onChange={event => setOffsetY(Number(event.target.value))} /></label>
+      <p className="muted-note">{target.kind === 'insert' ? '将创建独立模块候选（经批准与检查后生效）' : target.kind === 'replace' ? '确认后写入主场景历史，随时可撤回' : '确认后写入该实例独立历史，可单独撤回'}</p>
+      {target.kind === 'insert' && <fieldset className="placement-fieldset">
+        <legend>初始布局参数</legend>
+        <div className="param-grid-2">
+          <label>宽度（%）<input type="number" min={10} max={100} value={widthPercent} onChange={event => setWidthPercent(Number(event.target.value))} /></label>
+          <label>比例<input type="number" min={0.01} max={100} step={0.1} value={scale} onChange={event => setScale(Number(event.target.value))} /></label>
+          <label>Y 角度<input type="number" step={0.1} value={rotation} onChange={event => setRotation(Number(event.target.value))} /></label>
+          <label>对齐<select value={align} onChange={event => setAlign(event.target.value as typeof align)}>
+            <option value="start">左</option><option value="center">居中</option><option value="end">右</option>
+          </select></label>
+          <label>水平偏移<input type="number" min={-500} max={500} value={offsetX} onChange={event => setOffsetX(Number(event.target.value))} /></label>
+          <label>上下偏移<input type="number" min={-500} max={500} value={offsetY} onChange={event => setOffsetY(Number(event.target.value))} /></label>
+        </div>
       </fieldset>}
-      {asset.metrics?.webReady !== true && <label>
+      {asset.metrics?.webReady !== true && <label className="checkbox-row">
         <input type="checkbox" checked={force} onChange={event => setForce(event.target.checked)} />该模型超过网页门槛；我明确要求强制采用
       </label>}
-      <button type="button" data-testid="placement-confirm" disabled={busy || !syncReady} onClick={() => void confirm()}>{busy ? '确认中…' : '确认放置'}</button>
+      <button type="button" className="primary-btn" data-testid="placement-confirm" disabled={busy || !syncReady} onClick={() => void confirm()}>{busy ? '确认中…' : '确认放置'}</button>
     </div>}
-    {error && <p role="alert">{error}</p>}
-    <p>{target ? '如需改选位置，可继续拖动下方卡片或直接点击网页其他区块。' : '拖动下方卡片到右侧作品，或直接点击网页中的香薰瓶/区块选择目标；松开选定目标后点击上方“确认放置”即可生效。'}</p>
+    {error && <p className="error" role="alert">{error}</p>}
+    <p className="muted-note">{target ? '如需改选位置，可继续拖入或直接点击右侧网页其他区块。' : '按住下方拖动手柄拖向右侧网页，或直接点击网页中的香薰瓶 / 普通区块。'}</p>
     <div tabIndex={0} role="button" aria-label="拖动模型卡片到网页" draggable={!!session && !busy}
       onDragStart={event => {
         if (!session) return;
@@ -164,6 +172,5 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession, 
       onDragEnd={() => onDragStateChange?.(false)}
       className="placement-card">⠿ 按住拖入网页（或直接点击网页目标） · {asset.id.slice(0, 10)}…</div>
     {asset.modelUrl && <div className="lux-model-preview"><ProductScene config={defaultSceneConfig} modelUrl={asset.modelUrl} controls /></div>}
-    <button type="button" onClick={onClose} disabled={busy}>取消放置</button>
   </section>;
 }

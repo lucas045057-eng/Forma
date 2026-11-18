@@ -74,45 +74,80 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
     catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
   return <aside className={`asset-dialog${dragging ? ' is-dragging' : ''}`} role="complementary" aria-label="3D 创作与资产">
-    <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
+    <header className="asset-header">
+      <div>
+        <span className="wordmark">3D ATELIER</span>
+        <h2>3D 创作与资产</h2>
+      </div>
+      <button type="button" className="ghost-btn compact-btn" onClick={onClose} data-testid="asset-close">返回网页</button>
+    </header>
     <div className="asset-layout">
-      <section className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>
-        {current?.status === 'ready' && current.modelUrl ? <ProductScene config={defaultSceneConfig} modelUrl={current.modelUrl} controls
-          onReady={() => { setLoadedUrl(current.modelUrl!); setFailedUrl(''); }}
-          onError={() => { setLoadedUrl(''); setFailedUrl(current.modelUrl!); }}
-          fallback={failedUrl === current.modelUrl ? <p role="alert">3D 模型加载失败。请检查资产状态或重新导入。</p> : <p className="model-loading">加载模型中…</p>}/>
-          : <p className="model-empty">{current ? labels[current.status] : '导入已有任务，或选择已处理模型'}</p>}
-        <div className="orbit-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
+      <section className="active-asset-card">
+        <div className="active-asset-bar">
+          <select aria-label="选择模型" data-testid="asset-select" value={current?.status === 'ready' ? selected : ''} onChange={event => setSelected(event.target.value)}>
+            <option value="" disabled>选择已就绪模型…</option>
+            {ready.map(asset => <option key={asset.id} value={asset.id}>{asset.taskId ? `Lux3D ${asset.taskId}` : asset.id.slice(0, 18)} · {assetOriginLabel(asset.provenance)}</option>)}
+          </select>
+          {current?.status==='ready'&&<button type="button" className="primary-btn compact-btn" data-testid="asset-place" disabled={!onPlace} onClick={()=>{if(current)onPlace?.(current)}}>放入网页</button>}
+        </div>
+        <div className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>
+          {current?.status === 'ready' && current.modelUrl ? <ProductScene config={defaultSceneConfig} modelUrl={current.modelUrl} controls
+            onReady={() => { setLoadedUrl(current.modelUrl!); setFailedUrl(''); }}
+            onError={() => { setLoadedUrl(''); setFailedUrl(current.modelUrl!); }}
+            fallback={failedUrl === current.modelUrl ? <p role="alert">3D 模型加载失败。请检查资产状态或重新导入。</p> : <p className="model-loading">加载模型中…</p>}/>
+            : <p className="model-empty">{current ? labels[current.status] : '从下方生成或导入备用模型后可预览并放入网页'}</p>}
+          <div className="orbit-hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
+        </div>
+        {current && <div className="asset-meta-strip" data-testid="asset-status">
+          <div className="asset-meta-head">
+            <span className="meta-tag">{labels[current.status]}</span>
+            <code>{current.id.slice(0, 16)}</code>
+            <span className="muted-note" data-testid="asset-provenance">{assetOriginLabel(current.provenance)}{current.provenance?.importedAt&&` · ${new Date(current.provenance.importedAt).toLocaleTimeString()}`}</span>
+          </div>
+          {current.error && <p role="alert" className="error">{current.error.message}</p>}
+          {current.metrics?.webReady === false && <p role="alert" className="error">模型超过 3 MB 或 10 万顶点，不适合网页，请先优化。</p>}
+          {current.metrics?.parts?.recognized === false && <p className="muted-note" role="status">未识别部件，开盖关键帧不可用。</p>}
+          {current.metrics && <div className="metrics-chips">
+            <span>体积 {(current.metrics.before.bytes / 1e6).toFixed(2)} → {(current.metrics.after.bytes / 1e6).toFixed(2)} MB</span>
+            <span>顶点 {current.metrics.before.vertices.toLocaleString()} → {current.metrics.after.vertices.toLocaleString()}</span>
+            <span>耗时 {current.metrics.durationMs} ms</span>
+          </div>}
+        </div>}
       </section>
-      <aside className="asset-controls">
+
+      <div className="asset-controls">
+        {error && <p className="error" role="alert">{error}</p>}
         <Lux3DWorkbench assets={assets} onPlace={onPlace} onPreparePlace={onPreparePlace}/>
         <AssetModuleControls/>
-        {current?.status==='ready'&&<button type="button" data-testid="asset-place" disabled={!onPlace} onClick={()=>{if(current)onPlace?.(current)}}>放入网页（点击目标或拖模型卡片）</button>}
-        <h3>已处理模型</h3>
-        <select aria-label="选择模型" data-testid="asset-select" value={current?.status === 'ready' ? selected : ''} onChange={event => setSelected(event.target.value)}>
-          <option value="" disabled>选择模型</option>
-          {ready.map(asset => <option key={asset.id} value={asset.id}>{asset.taskId ? `Lux3D ${asset.taskId}` : asset.id} · {assetOriginLabel(asset.provenance)}</option>)}
-        </select>
-        <section data-testid="fallback-list"><h3>本地备用资产</h3><p className="hint">预先生成的备用模型，时间未记录。仅在本机处理，不请求Lux3D；导入后可在场景编辑中明确采用。</p>
-          {fallbackError&&<p role="alert">{fallbackError}</p>}
-          {!fallbacks.length&&!fallbackError&&<p role="status">正在读取本地备用目录…</p>}
-          {fallbacks.map(preset=><div className="fallback-preset" key={preset.id} data-preset-id={preset.id}><strong>{preset.title}</strong><p>{preset.description}</p>{!preset.available&&<p role="status">{preset.reason??'本地文件不可用'}</p>}<button type="button" data-testid="fallback-import" disabled={busy||!canImport||!preset.available} onClick={()=>void importFallback(preset.id)}>导入备用</button></div>)}
+
+        <section className="drawer-section" data-testid="fallback-list">
+          <div className="drawer-section-head">
+            <h3>本地备用资产</h3>
+            <span className="muted-note">本机离线处理 · 不计费</span>
+          </div>
+          {fallbackError&&<p className="error" role="alert">{fallbackError}</p>}
+          {!fallbacks.length&&!fallbackError&&<p className="muted-note" role="status">正在读取本地备用目录…</p>}
+          <div className="fallback-list-rows">
+            {fallbacks.map(preset=><div className="fallback-preset" key={preset.id} data-preset-id={preset.id}>
+              <div className="fallback-preset-info">
+                <strong>{preset.title}</strong>
+                <p>{preset.description}</p>
+                {!preset.available&&<p className="muted-note" role="status">{preset.reason??'本地文件不可用'}</p>}
+              </div>
+              <button type="button" className="secondary-btn compact-btn" data-testid="fallback-import" disabled={busy||!canImport||!preset.available} onClick={()=>void importFallback(preset.id)}>导入备用</button>
+            </div>)}
+          </div>
         </section>
-        <h3>导入已有 Lux3D 任务</h3>
-        <p className="hint">读取已有结果，不创建新的付费任务。</p>
-        <form onSubmit={event => { event.preventDefault(); void importTask(); }}>
-          <input aria-label="任务编号" data-testid="asset-task-id" value={taskId} onChange={event => setTaskId(event.target.value)} pattern="[1-9][0-9]{0,18}" required/>
-          <button type="submit" disabled={busy||!canImport} data-testid="asset-import">{busy ? '请求中…' : '导入任务'}</button>
-        </form>
-        {error && <p className="error" role="alert">{error}</p>}
-        {current && <div data-testid="asset-status"><h3>{labels[current.status]}</h3><code>{current.id}</code>
-          <p data-testid="asset-provenance">{assetOriginLabel(current.provenance)}{current.provenance?.importedAt&&` · 本地导入：${new Date(current.provenance.importedAt).toLocaleString()}`}</p>
-          {current.error && <p role="alert" className="error">{current.error.message}</p>}
-          {current.metrics?.webReady === false && <p role="alert">模型超过 3 MB 或 10 万顶点，不适合网页，请先优化。</p>}
-          {current.metrics?.parts?.recognized === false && <p role="status">未识别部件，开盖关键帧不可用。</p>}
-          {current.metrics && <dl><dt>文件体积</dt><dd>{(current.metrics.before.bytes / 1e6).toFixed(2)} → {(current.metrics.after.bytes / 1e6).toFixed(2)} MB</dd><dt>顶点数</dt><dd>{current.metrics.before.vertices.toLocaleString()} → {current.metrics.after.vertices.toLocaleString()}</dd><dt>处理耗时</dt><dd>{current.metrics.durationMs} ms</dd><dt>尺寸约定</dt><dd>最大边 1，底面中心为原点</dd></dl>}
-        </div>}
-      </aside>
+
+        <details className="drawer-section compact-details">
+          <summary>导入已有 Lux3D 任务编号</summary>
+          <p className="muted-note">按任务 ID 拉取已有云端结果，不创建新的付费任务。</p>
+          <form className="inline-form" onSubmit={event => { event.preventDefault(); void importTask(); }}>
+            <input aria-label="任务编号" data-testid="asset-task-id" value={taskId} onChange={event => setTaskId(event.target.value)} pattern="[1-9][0-9]{0,18}" required/>
+            <button type="submit" className="secondary-btn compact-btn" disabled={busy||!canImport} data-testid="asset-import">{busy ? '请求中…' : '导入任务'}</button>
+          </form>
+        </details>
+      </div>
     </div>
   </aside>;
 }
