@@ -129,6 +129,7 @@ export interface AssetPlacementIntent {
 }
 export type PlacementPreviewMessage =
   | { type: 'placement:target'; payload: { sessionId: string; target: AssetPlacementTarget } }
+  | { type: 'placement:slot'; payload: { sessionId: string; rect: [number, number, number, number] | null; isVoidTag?: boolean } }
   | { type: 'placement:cancelled'; payload: { sessionId: string; reason: string } };
 export interface TaskEvent { type: string; ts: string; sequence: number; message: string }
 export type SpeechErrorCode = 'SPEECH_NOT_CONFIGURED' | 'SPEECH_INVALID_AUDIO' | 'SPEECH_TOO_LARGE' |
@@ -268,7 +269,15 @@ export type StudioMessage =
   | { type: 'viewport:request' }
   | { type: 'placement:start'; payload: { sessionId: string; assetId: string; baseVersion: string } }
   | { type: 'placement:stop'; payload: { sessionId: string } }
-  | { type: 'placement:hover'; payload: { sessionId: string; target: AssetPlacementTarget | null } };
+  | { type: 'placement:hover'; payload: { sessionId: string; target: AssetPlacementTarget | null } }
+  | {
+      type: 'placement:preview-layout';
+      payload: {
+        sessionId: string;
+        target: AssetPlacementTarget | null;
+        layout: { widthPercent: number; align: 'start' | 'center' | 'end' };
+      };
+    };
 export type PreviewMessage =
   | { type: 'pick:result'; payload: PickSelection }
   | { type: 'viewport:size'; payload: { width: number } }
@@ -296,12 +305,24 @@ export function isStudioMessage(value: unknown): value is StudioMessage {
       (value.type === 'placement:stop' || (typeof value.payload.assetId === 'string' && typeof value.payload.baseVersion === 'string'));
   }
   if (value.type === 'placement:hover') return record(value.payload) && typeof value.payload.sessionId === 'string' && (value.payload.target === null || isPlacementTarget(value.payload.target));
+  if (value.type === 'placement:preview-layout') {
+    if (!record(value.payload) || typeof value.payload.sessionId !== 'string') return false;
+    if (value.payload.target !== null && !isPlacementTarget(value.payload.target)) return false;
+    const layout = value.payload.layout;
+    return record(layout) && typeof layout.widthPercent === 'number' && Number.isFinite(layout.widthPercent) &&
+      layout.widthPercent >= 10 && layout.widthPercent <= 100 && ['start', 'center', 'end'].includes(String(layout.align));
+  }
   return value.type === 'pick:start' || value.type === 'pick:stop' || value.type === 'viewport:request' ||
     (value.type === 'scroll:to' && record(value.payload) && typeof value.payload.at === 'number' && Number.isFinite(value.payload.at) && value.payload.at >= 0 && value.payload.at <= 1) ||
     (value.type === 'highlight' && record(value.payload) && typeof value.payload.src === 'string');
 }
 export function isPlacementPreviewMessage(value:unknown):value is PlacementPreviewMessage {
   if(!record(value)||!record(value.payload)||typeof value.payload.sessionId!=='string')return false;
+  if(value.type==='placement:slot'){
+    const rect=value.payload.rect;
+    return (rect===null||(Array.isArray(rect)&&rect.length===4&&rect.every(n=>typeof n==='number'&&Number.isFinite(n)))) &&
+      (value.payload.isVoidTag===undefined||typeof value.payload.isVoidTag==='boolean');
+  }
   return value.type==='placement:target'?isPlacementTarget(value.payload.target):value.type==='placement:cancelled'&&typeof value.payload.reason==='string';
 }
 export function isPreviewMessage(value: unknown): value is PreviewMessage {

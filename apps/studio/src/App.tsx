@@ -353,7 +353,7 @@ function Studio() {
     <main className="studio">
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
-      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
+      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="toolbar">
         <div className="brand-cluster">
           <div className="brand-identity">
