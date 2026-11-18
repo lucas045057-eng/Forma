@@ -81,9 +81,10 @@ export interface ProductSceneProps {
   children?: ReactNode;
   animation?: {playing:boolean;clip?:string;loop?:boolean};
   onAnimations?: (names:string[])=>void;
+  transparent?: boolean;
 }
 
-function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId,animation,onAnimations }: ProductSceneProps) {
+function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId,animation,onAnimations, transparent = false }: ProductSceneProps) {
   const [scene, setScene] = useState<Object3D>();
   const [animations,setAnimations]=useState<AnimationClip[]>([]);
   const [failed, setFailed] = useState(false);
@@ -119,11 +120,11 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
   if (failed) return fallback;
   return <>
     {!scene && fallback}
-    <Canvas style={{ position: 'absolute', inset: 0, visibility: scene ? 'visible' : 'hidden' }}
+    <Canvas style={{ position: 'absolute', inset: 0, background: transparent ? 'transparent' : undefined, visibility: scene ? 'visible' : 'hidden' }}
       frameloop={animation?.playing?'always':'demand'} camera={{ position: config.hero.camera.position, fov: config.hero.camera.fov }}
-      dpr={[1, sceneRenderSettings.maxDpr]} shadows={{ enabled: true, type: sceneRenderSettings.shadowMapType }} gl={{ antialias: true }}
+      dpr={[1, sceneRenderSettings.maxDpr]} shadows={{ enabled: true, type: sceneRenderSettings.shadowMapType }} gl={{ antialias: true, alpha: transparent }}
       onCreated={({ gl }) => { if (canvasTestId) gl.domElement.dataset.testid = canvasTestId; gl.outputColorSpace = sceneRenderSettings.outputColorSpace; gl.toneMapping = sceneRenderSettings.toneMapping; gl.toneMappingExposure = sceneRenderSettings.exposure; }}>
-      <color attach="background" args={[sceneRenderSettings.background]}/>
+      {!transparent && <color attach="background" args={[sceneRenderSettings.background]}/>}
       <Camera config={config}/>
       <ambientLight intensity={config.hero.lights.ambient}/>
       <directionalLight position={config.hero.lights.key.direction} intensity={config.hero.lights.key.intensity}
