@@ -5,9 +5,14 @@ dist/
 .env.*
 !.env.example
 *.tsbuildinfo
+fallback/
+deliverables/
 orbital/sessions/
 orbital/ledger/
 orbital/tool-results/
+orbital/history/
+orbital/*.json
+orbital/**/.latest
 orbital/sub_agents/*/*.jsonl
 .worktrees/
 
