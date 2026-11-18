@@ -72,7 +72,10 @@ export class ProviderUploader {
     catch { throw new AssetError('UPLOAD_FORMAT', '上传响应格式错误', 502, 'unknown'); }
     if (!body || typeof body !== 'object' || Array.isArray(body)) throw new AssetError('UPLOAD_FORMAT', '上传响应必须是JSON对象', 502, 'unknown');
     if (!response.ok) throw new AssetError('UPLOAD_UPSTREAM', `上传返回HTTP ${response.status}`, 502, 'unknown');
-    if (String(body.c) !== '0') throw new AssetError('UPLOAD_REJECTED', '云端未接受文件上传', 400, 'rejected');
+    if (String(body.c) !== '0') {
+      const detail = typeof body.m === 'string' ? body.m.replace(/[\r\n\u0000-\u001f]/g, ' ').trim().slice(0, 60) : '';
+      throw new AssetError('UPLOAD_REJECTED', detail ? `云端未接受文件上传（${detail}）` : '云端未接受文件上传', 400, 'rejected');
+    }
     if (body.d === null) return {};
     if (!body.d || typeof body.d !== 'object') throw new AssetError('UPLOAD_FORMAT', '上传响应缺少状态数据', 502, 'unknown');
     return body.d as Record<string, unknown>;
@@ -98,15 +101,17 @@ export class ProviderUploader {
     if (bytes.length <= credentials.blockSize) {
       const form = new FormData();
       form.append('md5', md5);
-      form.append('file', new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' }));
+      form.append('file', new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' }), safeFilename(filename));
       const data = await this.call(domain, '/ous/api/v2/single/upload', credentials.token, { form, signal }, mockBase);
-      taskId = typeof data.taskId === 'number' ? String(data.taskId) : String(data.taskId ?? '');
+      const rawTaskId = data.taskId ?? data.obsTaskId;
+      taskId = typeof rawTaskId === 'number' ? String(rawTaskId) : String(rawTaskId ?? '');
     } else {
       const blocks = Math.ceil(bytes.length / credentials.blockSize);
       if (blocks > 100) throw new AssetError('UPLOAD_TOO_MANY_PARTS', '分片数量超过本地限制', 413, 'blocked');
       const query = new URLSearchParams({ md5, blocks: String(blocks), size: String(bytes.length), name: safeFilename(filename) });
       const init = await this.call(domain, '/ous/api/v2/block/upload/init', credentials.token, { query, signal }, mockBase);
-      taskId = typeof init.taskId === 'number' ? String(init.taskId) : String(init.taskId ?? '');
+      const rawInitId = init.taskId ?? init.obsTaskId;
+      taskId = typeof rawInitId === 'number' ? String(rawInitId) : String(rawInitId ?? '');
       const deduplicated = init.deduplicated === true;
       const missing = deduplicated ? [] : parseBlockList(init.lackBlocks, blocks);
       const pending = deduplicated ? [] : missing.length ? missing : Array.from({ length: blocks }, (_item, index) => index + 1);
@@ -118,7 +123,8 @@ export class ProviderUploader {
       }
     }
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(taskId)) throw new AssetError('UPLOAD_FORMAT', '上传任务编号无效', 502, 'unknown');
-    const deadline = Date.now() + 5_000;
+    const pollBudgetMs = mockBase ? 5_000 : 30_000;
+    const deadline = Date.now() + pollBudgetMs;
     for (;;) {
       const data = await this.call(domain, '/ous/api/v2/upload/status', credentials.token, { method: 'GET', signal }, mockBase);
       const status = Number(data.status);
@@ -129,7 +135,7 @@ export class ProviderUploader {
       if (status === 6 || status === 8) throw new AssetError('UPLOAD_REJECTED', '云端上传失败或已中止', 400, 'rejected');
       if (![0, 1, 2, 3, 4, 7].includes(status)) throw new AssetError('UPLOAD_FORMAT', '云端上传状态无效', 502, 'unknown');
       const remaining = deadline - Date.now();
-      if (remaining <= 0) throw new AssetError('UPLOAD_TIMEOUT', '上传状态在5秒预算内未完成；保留上传引用供明确恢复，不会重复创建模型', 504, 'unknown');
+      if (remaining <= 0) throw new AssetError('UPLOAD_TIMEOUT', `上传状态在${Math.round(pollBudgetMs / 1000)}秒预算内未完成；保留上传引用供明确恢复，不会重复创建模型`, 504, 'unknown');
       await delay(Math.min(200, remaining), undefined, { signal });
     }
   }

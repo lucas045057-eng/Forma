@@ -36,7 +36,12 @@ export async function securePublicFetch(url:URL,init:RequestInit={},mockBase?:st
     const boundary=`spatial-${crypto.randomUUID()}`;const parts:Buffer[]=[];
     for(const [name,value]of init.body.entries()){
       if(typeof value==='string')parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`));
-      else parts.push(Buffer.concat([Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"; filename="upload.bin"\r\nContent-Type: ${value.type||'application/octet-stream'}\r\n\r\n`),Buffer.from(await value.arrayBuffer()),Buffer.from('\r\n')]));
+      else {
+        const safePartName = typeof value.name === 'string' && value.name && value.name !== 'blob'
+          ? value.name.replace(/[\r\n"\\/\u0000-\u001f\u007f]/g, '_').slice(0, 160) || 'upload.bin'
+          : 'upload.bin';
+        parts.push(Buffer.concat([Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"; filename="${safePartName}"\r\nContent-Type: ${value.type||'application/octet-stream'}\r\n\r\n`),Buffer.from(await value.arrayBuffer()),Buffer.from('\r\n')]));
+      }
     }
     parts.push(Buffer.from(`--${boundary}--\r\n`));body=Buffer.concat(parts);headers.set('Content-Type',`multipart/form-data; boundary=${boundary}`);headers.set('Content-Length',String((body as Buffer).length));
   }
