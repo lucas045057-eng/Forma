@@ -12,6 +12,14 @@ it.each(['http://example.com', 'http://10.0.0.1', 'ftp://example.com', 'https://
 it.each(['http://127.0.0.1:4010', 'http://localhost:4010', 'http://[::1]:4010', 'https://example.com'])('accepts secure or loopback configuration %s', base => {
   expect(new Lux3DClient({ base, key: 'mock-only' }).base).toBe(base);
 });
+it('distinguishes official gateway, legacy cloud gateways and local loopback mocks', () => {
+  expect(new Lux3DClient({ base: 'https://api.aholo.cn', key: 'k' }).legacyGateway).toBe(false);
+  expect(new Lux3DClient({ base: 'https://api.aholo3d.cn', key: 'k' }).legacyGateway).toBe(true);
+  expect(new Lux3DClient({ base: 'https://api.aholo.ai', key: 'k' }).legacyGateway).toBe(true);
+  expect(new Lux3DClient({ base: 'http://127.0.0.1:4010', key: 'k' }).legacyGateway).toBe(false);
+  expect(new Lux3DClient({ base: 'http://localhost:4010', key: 'k' }).legacyGateway).toBe(false);
+  expect(new Lux3DClient({ base: 'http://[::1]:4010', key: 'k' }).legacyGateway).toBe(false);
+});
 it('aborts an in-flight task query without waiting for the upstream timeout', async () => {
   let started!: () => void;
   const received = new Promise<void>(resolve => { started = resolve; });

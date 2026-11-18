@@ -64,3 +64,64 @@ it('fails closed on upstream errors, missing tool calls and insecure remote conf
   expect(() => codingAgentEndpoint('http://example.com/v1')).toThrow('HTTPS');
   expect(codingAgentEndpoint('https://example.com/v1')).toBe('https://example.com/v1/chat/completions');
 });
+
+it('attaches distinct ancestor component sources alongside a picked child component in the initial prompt', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'spatial-agent-ancestors-'));
+  await mkdir(path.join(root, 'src', 'components'), { recursive: true });
+  await writeFile(path.join(root, 'src', 'components', 'Button.tsx'), 'export const Button = () => <button>立即购买</button>;\n');
+  await writeFile(path.join(root, 'src', 'App.tsx'), 'import { Button } from "./components/Button";\nexport default () => <div className="actions"><Button/></div>;\n');
+
+  const capturedPayloads: Array<Record<string, unknown>> = [];
+  const customFetch: typeof fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? '{}')) as { messages?: Array<{ role: string; content: string }> };
+    const userMsg = body.messages?.find(item => item.role === 'user');
+    if (userMsg?.content) capturedPayloads.push(JSON.parse(userMsg.content) as Record<string, unknown>);
+    return new Response(
+      JSON.stringify({
+        id: 'chatcmpl-1',
+        object: 'chat.completion',
+        choices: [{
+          index: 0,
+          message: {
+            role: 'assistant',
+            content: null,
+            tool_calls: [{ id: 'done-1', type: 'function', function: { name: 'finish', arguments: JSON.stringify({ summary: '已读取上下文' }) } }],
+          },
+          finish_reason: 'tool_calls',
+        }],
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+
+  try {
+    const agent = new CodingAgent({ baseUrl: 'http://127.0.0.1:49999', apiKey: 'mock-only', model: 'mock-coder', fetch: customFetch });
+    await agent.run({
+      taskId: 'ancestor-task',
+      instruction: '把购买区往下挪一点',
+      root,
+      selection: {
+        src: 'src/components/Button.tsx:1:29',
+        baseVersion: 'v1',
+        cid: 'Button',
+        text: '立即购买',
+        bbox: [0, 0, 100, 40],
+        styles: {
+          display: 'inline-block', position: 'static', color: '#000', backgroundColor: '#fff',
+          fontSize: '16px', fontFamily: 'sans-serif', fontWeight: '400', lineHeight: '20px',
+          padding: '8px', margin: '0px', borderRadius: '4px', width: '100px', height: '40px',
+        },
+        instances: 3,
+        ancestors: ['src/components/Button.tsx:1:29', 'src/App.tsx:2:22', 'src/Missing.tsx:1:1'],
+      },
+    });
+
+    expect(capturedPayloads).toHaveLength(1);
+    expect(capturedPayloads[0].selectedFileWithLineNumbers).toContain('1\texport const Button');
+    const related = capturedPayloads[0].relatedAncestorFilesWithLineNumbers as Record<string, string>;
+    expect(Object.keys(related)).toEqual(['src/App.tsx']);
+    expect(related['src/App.tsx']).toContain('2\texport default () => <div className="actions"><Button/></div>;');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

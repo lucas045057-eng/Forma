@@ -1,6 +1,6 @@
 import { mkdir } from 'node:fs/promises';
 import { acquireInstanceLock } from './assets/instance-lock.ts';
-import Fastify from 'fastify';
+import Fastify, { type FastifyServerOptions } from 'fastify';
 import websocket from '@fastify/websocket';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
@@ -25,6 +25,41 @@ import { registerLuxWorkbench } from './assets/lux3d-routes.ts';
 import { registerPlacementRoutes } from './assets/placement.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
+
+const SECRET_PATTERNS = [
+  /(\bBearer\s+)[^\s,;'"`]+/gi,
+  /(\bAuthorization\s*[:=]\s*)[^\s,;'"`]+/gi,
+  /(https?:\/\/)([^/\s:@]+:[^/\s@]+@)/gi,
+  /(\?)[^\s#)'"`]+/g,
+  /\bsk-[A-Za-z0-9_-]{8,}\b/g,
+];
+
+export function redactErrorText(text: string): string {
+  let out = text;
+  out = out.replace(SECRET_PATTERNS[0], '$1[REDACTED]');
+  out = out.replace(SECRET_PATTERNS[1], '$1[REDACTED]');
+  out = out.replace(SECRET_PATTERNS[2], '$1[REDACTED]@');
+  out = out.replace(SECRET_PATTERNS[3], '?[REDACTED]');
+  out = out.replace(SECRET_PATTERNS[4], '[REDACTED]');
+  return out.slice(0, 2000);
+}
+
+export function sanitizeServerError(error: unknown): { name: string; code?: string; message: string; stack?: string } {
+  if (error instanceof Error) {
+    const rawCode = (error as { code?: unknown }).code;
+    const code = typeof rawCode === 'string' && /^[A-Za-z0-9_.-]{1,64}$/.test(rawCode) ? rawCode : undefined;
+    const stack = typeof error.stack === 'string'
+      ? redactErrorText(error.stack.split('\n').slice(0, 8).join('\n'))
+      : undefined;
+    return {
+      name: error.name || 'Error',
+      ...(code ? { code } : {}),
+      message: redactErrorText(error.message || 'Unhandled error'),
+      ...(stack ? { stack } : {}),
+    };
+  }
+  return { name: 'NonErrorThrow', message: 'Unhandled non-Error value' };
+}
 
 export interface AppOptions {
   allowedHosts?: string[];
@@ -52,7 +87,7 @@ export interface AppOptions {
   checks?: WorkServiceOptions['checks'];
   /** Internal speech configuration; the loopback exception is never read from env. */
   speech?: SpeechClientOptions & { timeoutMs?: number };
-  logger?: boolean;
+  logger?: FastifyServerOptions['logger'];
 }
 
 export async function createApp(options: AppOptions = {}) {
@@ -124,7 +159,7 @@ export async function createApp(options: AppOptions = {}) {
   await service.init();
   // Awaited plugin registration binds route error-handler contexts. Install the shared
   // envelope before registering either the upload scope or the workbench routes.
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error, request, reply) => {
     if (error instanceof SceneModuleError) return reply.code(400).send({ error: { code: error.code, message: error.message } });
     if (error instanceof SceneError) return reply.code(error.status).send({ error: { code: error.code, message: error.message, fields: error.fields } });
     if (error instanceof WorkError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
@@ -141,6 +176,12 @@ export async function createApp(options: AppOptions = {}) {
       return reply.code(400).send({ error: { code: 'INVALID_INPUT', message: '请求参数不符合接口约定' } });
     }
     const validation = (error as { validation?: unknown }).validation;
+    if (!validation) {
+      request.log.error(
+        { err: sanitizeServerError(error), method: request.method, url: request.url.split('?')[0] },
+        'unhandled server error',
+      );
+    }
     return reply.code(validation ? 400 : 500).send({ error: { code: validation ? 'INVALID_INPUT' : 'SERVER_ERROR', message: validation ? '请求参数不符合接口约定' : '本地服务错误，请检查配置和文件' } });
   });
   const luxWorkbench=await registerLuxWorkbench(app,{
