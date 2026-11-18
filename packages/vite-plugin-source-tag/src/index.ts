@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { transformSync, type NodePath, type types as t } from '@babel/core';
 import MagicString from 'magic-string';
@@ -74,15 +75,32 @@ export function tagSource(code: string, filename: string, root: string) {
   });
   return { code: output.toString(), map: output.generateMap({ hires: true, source: filename, includeContent: true }) };
 }
+export async function recoverNonEmptySource(code: string, filename: string, delaysMs = [15, 25, 40, 60, 80, 100]): Promise<string> {
+  if (code.trim().length > 0) return code;
+  for (const delayMs of delaysMs) {
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+    try {
+      const disk = await readFile(filename, 'utf8');
+      if (disk.trim().length > 0) return disk;
+    } catch {
+      // Transient ENOENT/EBUSY while git checkout/merge/revert updates the work tree on Windows.
+    }
+  }
+  throw new Error(`Refusing to cache empty JSX/TSX module during concurrent file update: ${filename}`);
+}
+
 export default function sourceTag(): Plugin {
   let root: string;
   return {
     name: 'spatial-source-tag', apply: 'serve', enforce: 'pre',
     configResolved(config) { root = config.root; },
-    transform(code, id) {
+    async transform(code, id) {
       const filename = id.split('?')[0];
       if (!/\.[jt]sx$/.test(filename) || filename.replaceAll('\\', '/').includes('/node_modules/')) return null;
-      return tagSource(code, filename, root);
+      const relative = path.relative(root, filename).split(path.sep).join('/');
+      if (relative.startsWith('../') || path.isAbsolute(relative)) return null;
+      const resolved = await recoverNonEmptySource(code, filename);
+      return tagSource(resolved, filename, root);
     },
   };
 }

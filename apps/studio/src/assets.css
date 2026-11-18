@@ -13,7 +13,8 @@
 .orbit-hint { position: absolute; bottom: 18px; left: 18px; font-size: 12px; background: #fff9; padding: 8px 12px; border-radius: 4px; pointer-events: none; }
 .asset-controls { background: #17232d; padding: 22px; border-radius: 10px; overflow: auto; }
 .asset-controls h3 { font-size: 15px; margin: 24px 0 14px; }
-.asset-controls input, .asset-controls select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #4d7986; border-radius: 4px; background: #0e1922; color: #d7e4ee; }
+.asset-controls input:not([type="checkbox"]), .asset-controls select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #4d7986; border-radius: 4px; background: #0e1922; color: #d7e4ee; }
+.asset-controls input[type="checkbox"], .asset-placement input[type="checkbox"] { width: auto; margin: 0 6px 0 0; vertical-align: middle; }
 .asset-controls form button { width: 100%; }
 .asset-controls dt { font-size: 11px; color: #8ea5b5; margin-top: 18px; }
 .asset-controls dd { margin: 6px 0; font-size: 13px; }
@@ -31,7 +32,9 @@
 .lux-model-preview { position: relative; width: 100%; aspect-ratio: 1; background: #efe8dc; }
 .asset-placement { position: fixed; left: 14px; top: 110px; bottom: 14px; overflow: auto; width: min(340px, 36vw); padding: 16px; background: #17232d; border: 1px solid #67d6cf; border-radius: 10px; z-index: 60; font-size: 12px; }
 .asset-placement label { display: block; margin: 8px 0; }
-.asset-placement input, .asset-placement select { width: 100%; }
+.asset-placement input:not([type="checkbox"]), .asset-placement select { width: 100%; }
+.asset-module-controls label { display: block; margin: 8px 0; }
+.asset-module-controls button { margin: 6px 6px 6px 0; }
 .placement-card { padding: 14px; margin: 10px 0; background: #24464c; border: 2px dashed #8df2dd; border-radius: 6px; cursor: grab; overflow-wrap: anywhere; font-weight: 600; color: #c7fff3; user-select: none; }
 .lux-drag-handle { padding: 10px 12px; margin-bottom: 8px; background: #20454c; border: 1.5px dashed #8df2dd; border-radius: 6px; color: #c7fff3; font-size: 12px; font-weight: 600; cursor: grab; user-select: none; }
 .asset-dialog.is-dragging, .asset-placement.is-dragging { opacity: 0.16; pointer-events: none; transition: opacity 0.12s ease; }
