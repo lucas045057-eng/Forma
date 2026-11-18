@@ -483,7 +483,7 @@ export class WorkService {
       const { version: base, listing: baselineListing } = await this.snapshotWithListing();
       if(base!==input.baseVersion)throw new WorkError('STALE_PLACEMENT','作品版本已变化，请重新放置',409);
       const id=randomUUID().replaceAll('-',''),now=new Date().toISOString();
-      const task:StoredTask={id,instruction:input.instruction,status:'running',events:[],createdAt:now,updatedAt:now};
+      const task:StoredTask={id,kind:'module',instruction:input.instruction,status:'running',events:[],createdAt:now,updatedAt:now};
       this.state.tasks.push(task);await this.save();
       try{
         const prepared = await this.repo.createCandidate(id,base,baselineListing);

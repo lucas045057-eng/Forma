@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, readFile, writeFile, rm, symlink, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
@@ -157,4 +158,54 @@ it('refuses requests addressed to a non-loopback host name unless explicitly all
   const { app: allowed } = await createApp({ ...base, allowedHosts: ['studio.lan'] });
   try { expect((await allowed.inject({ url: '/scene', headers: { host: 'studio.lan:3001' } })).statusCode).toBe(200); }
   finally { await allowed.close(); }
+});
+
+it('allows inserting an independent 3D module using the same asset after adopting it into the main slot', async () => {
+  const f = await fixture();
+  const assets = path.join(f.root, 'assets');
+  await mkdir(path.join(assets, 'opt-same'), { recursive: true });
+  const appSource = 'export default function App() { return <main><section id="ritual"><h2>自然</h2></section></main>; }\n';
+  await writeFile(path.join(f.options.workRoot, 'src/App.tsx'), appSource);
+  await writeFile(path.join(f.options.workRoot, 'tsconfig.json'), JSON.stringify({ compilerOptions: { noEmit: true, allowImportingTsExtensions: true } }, null, 2) + '\n');
+  const model = Buffer.from('glTF-same-asset-bytes');
+  const outputHash = createHash('sha256').update(model).digest('hex');
+  await writeFile(path.join(assets, 'opt-same/model.glb'), model);
+  await writeFile(path.join(assets, 'index.json'), JSON.stringify([{
+    id: 'opt-same',
+    status: 'ready',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    provenance: { kind: 'lux3d', sourceTaskId: '1001', outputHash },
+    metrics: { webReady: true, parts: { recognized: false, nodes: [], reason: 'No part metadata' } },
+  }]));
+  const { app } = await createApp({ ...f.options, dataDirectory: assets, workDataDirectory: path.join(f.root, 'work-data'), base: 'http://127.0.0.1:4010', key: 'mock-only' });
+  try {
+    const adopted = await app.inject({ method: 'POST', url: '/assets/opt-same/adopt', payload: {} });
+    expect(adopted.statusCode).toBe(200);
+    expect((await readFile(path.join(f.options.workRoot, 'public/assets/opt-same.parts.json'), 'utf8')).endsWith('\n')).toBe(true);
+
+    const versionResponse = await app.inject({ method: 'GET', url: '/version' });
+    const baseVersion = versionResponse.json().version as string;
+    const sessionResponse = await app.inject({
+      method: 'POST',
+      url: '/assets/placements/sessions',
+      payload: { assetId: 'opt-same', baseVersion },
+    });
+    expect(sessionResponse.statusCode).toBe(200);
+    const { sessionId } = sessionResponse.json() as { sessionId: string };
+
+    const sectionColumn = appSource.indexOf('<section') + 1;
+    const confirmResponse = await app.inject({
+      method: 'POST',
+      url: `/assets/placements/${sessionId}/confirm`,
+      payload: {
+        target: { kind: 'insert', src: `src/App.tsx:1:${sectionColumn}`, cid: 'section', ancestors: [], position: 'after' },
+      },
+    });
+    expect(confirmResponse.statusCode).toBe(200);
+    expect(confirmResponse.json()).toMatchObject({
+      kind: 'insert',
+      task: { kind: 'module', instruction: '放入独立3D模块', status: 'awaiting_approval' },
+    });
+  } finally { await app.close(); }
 });

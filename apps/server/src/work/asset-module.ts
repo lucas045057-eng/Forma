@@ -187,7 +187,9 @@ export async function installAssetFiles(input: { root: string; assetId: string; 
       const target = await safeWorkPath(input.root, item.relative);
       const before = await existingBytes(target);
       if (before) {
-        if (!before.equals(item.bytes)) throw new WorkError('ASSET_NAME_CONFLICT', '作品中已有同名但内容或来源不同的模型文件', 409);
+        const same = before.equals(item.bytes)
+          || (item.role === 'parts' && Buffer.concat([before, Buffer.from('\n')]).equals(item.bytes));
+        if (!same) throw new WorkError('ASSET_NAME_CONFLICT', '作品中已有同名但内容或来源不同的模型文件', 409);
         continue;
       }
       await mkdir(path.dirname(target), { recursive: true });
