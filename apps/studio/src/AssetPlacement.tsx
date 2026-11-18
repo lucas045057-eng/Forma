@@ -19,14 +19,18 @@ async function post<T>(url: string, body: unknown): Promise<T> {
   return result as T;
 }
 
-export default function AssetPlacement({ asset, frame, onClose, initialSession }: {
+export default function AssetPlacement({ asset, frame, onClose, initialSession, dragging = false, onDragStateChange, onTargetSelected }: {
   asset: Asset;
   frame: HTMLIFrameElement | null;
   onClose: () => void;
   initialSession?: PlacementSession;
+  dragging?: boolean;
+  onDragStateChange?: (dragging: boolean) => void;
+  onTargetSelected?: () => void;
 }) {
   const { state, syncReady, status, reload, acquire, awaiting } = useEventCenter();
-  const [session, setSession] = useState<AssetPlacementSession>();
+  const panelRef = useRef<HTMLElement>(null);
+  const [session, setSession] = useState<AssetPlacementSession | undefined>(() => initialSession);
   const [target, setTarget] = useState<AssetPlacementTarget>();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -40,13 +44,27 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
   const confirmed = useRef(false);
   const currentVersion = useRef(state.version);
   currentVersion.current = state.version;
+  const onTargetSelectedRef = useRef(onTargetSelected);
+  onTargetSelectedRef.current = onTargetSelected;
   const send = (message: StudioMessage) => frame?.contentWindow?.postMessage(message, previewOrigin);
 
   useEffect(() => {
+    if (!initialSession || initialSession.expiresAt <= Date.now()) return;
+    if (session?.sessionId === initialSession.sessionId) return;
+    setSession(initialSession);
+    setError('');
+  }, [initialSession, session?.sessionId]);
+
+  useEffect(() => {
     let active = true;
-    if (session || confirmed.current || !syncReady || status !== 'connected' || !frame || !state.version) return;
+    if (confirmed.current || !syncReady || status !== 'connected' || !frame || !state.version) return;
+    if (session) {
+      frame.contentWindow?.postMessage({ type: 'pick:stop' }, previewOrigin);
+      frame.contentWindow?.postMessage({ type: 'placement:start', payload: session }, previewOrigin);
+      return;
+    }
     const version = state.version;
-    void (initialSession ? Promise.resolve(initialSession) : post<AssetPlacementSession>('/assets/placements/sessions', { assetId: asset.id, baseVersion: version }))
+    void post<AssetPlacementSession>('/assets/placements/sessions', { assetId: asset.id, baseVersion: version })
       .then(result => {
         if (!active) return;
         setSession(result);
@@ -64,6 +82,8 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
       if (!result) return;
       if ('cancelled' in result) { onClose(); return; }
       setTarget(result.target);
+      onTargetSelectedRef.current?.();
+      panelRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' });
     };
     window.addEventListener('message', receive);
     const timer = setTimeout(() => {
@@ -108,17 +128,9 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
     } finally { setBusy(false); }
   }
 
-  return <section className="asset-placement" role="region" aria-label="放置模型确认" data-testid="asset-placement">
+  return <section ref={panelRef} className={`asset-placement${dragging ? ' is-dragging' : ''}`} role="region" aria-label="放置模型确认" data-testid="asset-placement">
     <h3>将模型放入网页</h3>
-    {asset.modelUrl && <div className="lux-model-preview"><ProductScene config={defaultSceneConfig} modelUrl={asset.modelUrl} controls /></div>}
-    <p>拖动下方卡片到左侧作品，或直接点击/键盘选择网页目标。落下后仍需确认；主作品在确认前不会改变。</p>
-    <div tabIndex={0} role="button" aria-label="拖动模型卡片到网页" draggable={!!session && !busy}
-      onDragStart={event => {
-        if (!session) return;
-        event.dataTransfer.effectAllowed = 'copy';
-        event.dataTransfer.setData('application/x-spatial-asset', JSON.stringify({ sessionId: session.sessionId, assetId: asset.id }));
-      }} className="placement-card">{asset.id} · 可拖模型</div>
-    {target && <>
+    {target && <div className="placement-target-banner">
       <p data-testid="placement-target">
         {target.kind === 'replace' ? '替换主 3D 槽位' : target.kind === 'replace-module' ? `替换实例 ${target.instanceId?.slice(0, 8)} 的模型` : '在此添加独立 3D 模块'} · {target.src}
       </p>
@@ -138,8 +150,20 @@ export default function AssetPlacement({ asset, frame, onClose, initialSession }
         <input type="checkbox" checked={force} onChange={event => setForce(event.target.checked)} />该模型超过网页门槛；我明确要求强制采用
       </label>}
       <button type="button" data-testid="placement-confirm" disabled={busy || !syncReady} onClick={() => void confirm()}>{busy ? '确认中…' : '确认放置'}</button>
-    </>}
+    </div>}
     {error && <p role="alert">{error}</p>}
+    <p>{target ? '如需改选位置，可继续拖动下方卡片或直接点击网页其他区块。' : '拖动下方卡片到右侧作品，或直接点击网页中的香薰瓶/区块选择目标；松开选定目标后点击上方“确认放置”即可生效。'}</p>
+    <div tabIndex={0} role="button" aria-label="拖动模型卡片到网页" draggable={!!session && !busy}
+      onDragStart={event => {
+        if (!session) return;
+        frame?.contentWindow?.postMessage({ type: 'placement:start', payload: session }, previewOrigin);
+        event.dataTransfer.effectAllowed = 'copy';
+        event.dataTransfer.setData('application/x-spatial-asset', JSON.stringify({ sessionId: session.sessionId, assetId: asset.id }));
+        requestAnimationFrame(() => onDragStateChange?.(true));
+      }}
+      onDragEnd={() => onDragStateChange?.(false)}
+      className="placement-card">⠿ 按住拖入网页（或直接点击网页目标） · {asset.id.slice(0, 10)}…</div>
+    {asset.modelUrl && <div className="lux-model-preview"><ProductScene config={defaultSceneConfig} modelUrl={asset.modelUrl} controls /></div>}
     <button type="button" onClick={onClose} disabled={busy}>取消放置</button>
   </section>;
 }
