@@ -119,23 +119,38 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
     Object.assign(data,{url:s.origin.url,browserVersion:s.browser.version()});
     await navigate(s);
     if(name==='smoke'){
-      const buy=s.page.getByTestId('buy-button');
-      if(await buy.count()!==1 || !await buy.isVisible() || !await buy.isEnabled())throw new Error('BUY_BUTTON_UNAVAILABLE');
+      const isCustomSpatialPage = await s.page.locator('#root main[data-spatial-page]').count() > 0;
       const scene=s.page.getByTestId('product-scene');
       const state=await scene.getAttribute('data-state');
       const placeholderVisible=await s.page.getByTestId('product-placeholder').isVisible();
       data.scene={state,placeholderVisible};
       if(state!=='ready' && !(state==='fallback'&&placeholderVisible))throw new Error('SCENE_NOT_READY_OR_VISIBLE_FALLBACK');
-      const output=s.page.getByTestId('action-status');
-      const before=Number(await output.getAttribute('data-purchases'));
-      if(!Number.isSafeInteger(before)||before<0)throw new Error('PURCHASE_COUNT_INVALID');
-      await buy.click();
-      await frames(s.page);
-      const after=Number(await output.getAttribute('data-purchases'));
-      const feedback=(await output.textContent()??'').trim();
-      Object.assign(data,{purchases:{before,after},feedback});
-      if(after!==before+1)throw new Error('PURCHASE_COUNT_DID_NOT_INCREMENT');
-      if(!feedback)throw new Error('PURCHASE_FEEDBACK_EMPTY');
+      if (isCustomSpatialPage) {
+        const heading = s.page.locator('#root main h1').first();
+        if (await heading.count() < 1 || !await heading.isVisible() || !(await heading.textContent() ?? '').trim()) {
+          throw new Error('HEADING_UNAVAILABLE');
+        }
+        const cta = s.page.locator('#root main button:not([disabled])').first();
+        if (await cta.count() < 1 || !await cta.isVisible()) {
+          throw new Error('PRIMARY_CTA_UNAVAILABLE');
+        }
+        await cta.click();
+        await frames(s.page);
+        data.spatialPage = { heading: (await heading.textContent() ?? '').trim().slice(0, 120), interactiveVerified: true };
+      } else {
+        const buy=s.page.getByTestId('buy-button');
+        if(await buy.count()!==1 || !await buy.isVisible() || !await buy.isEnabled())throw new Error('BUY_BUTTON_UNAVAILABLE');
+        const output=s.page.getByTestId('action-status');
+        const before=Number(await output.getAttribute('data-purchases'));
+        if(!Number.isSafeInteger(before)||before<0)throw new Error('PURCHASE_COUNT_INVALID');
+        await buy.click();
+        await frames(s.page);
+        const after=Number(await output.getAttribute('data-purchases'));
+        const feedback=(await output.textContent()??'').trim();
+        Object.assign(data,{purchases:{before,after},feedback});
+        if(after!==before+1)throw new Error('PURCHASE_COUNT_DID_NOT_INCREMENT');
+        if(!feedback)throw new Error('PURCHASE_FEEDBACK_EMPTY');
+      }
     }else{
       const result=await s.page.evaluate(()=>{
         const targets:Record<string,unknown>[]=[],excluded:Record<string,unknown>[]=[];

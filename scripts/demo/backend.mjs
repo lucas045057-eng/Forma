@@ -21,8 +21,9 @@ try{
   const speech=speechMock();await listenOwned(speech,ports.speech);
   Object.assign(options,{base:endpoints.lux3d,key:'mock-only',pollMs:80,timeoutMs:60000,mockAssets:true,codingAgentBaseUrl:endpoints.coding,codingAgentApiKey:'mock-only',codingAgentModel:'mock-coder',speech:{baseUrl:endpoints.speech,apiKey:'mock-only',model:'qwen3-asr-flash',testLoopback:true}});
  }
- stage='app-init';const {app,work}=await createApp(options);await own(()=>app.close());
- const preview=createPreviewOrigin(work.previews,{mainPort:ports.main,studioOrigin:`http://127.0.0.1:${ports.studio}`});
+ stage='app-init';const {app,workspace}=await createApp(options);await own(()=>app.close());
+ workspace.enableDynamicMainPreview(ports.main);
+ const preview=createPreviewOrigin(()=>workspace.current().work.previews,{mainPort:()=>workspace.activeMainPort()??ports.main,studioOrigin:`http://127.0.0.1:${ports.studio}`});
  const sockets=new Set();preview.on('connection',socket=>{sockets.add(socket);socket.once('close',()=>sockets.delete(socket));});
  const closePreview=async()=>{for(const socket of sockets)socket.destroy();preview.closeAllConnections();if(preview.listening)await new Promise((resolve,reject)=>preview.close(error=>error?reject(error):resolve()));};await own(closePreview);
  stage='listen';await new Promise((resolve,reject)=>{preview.once('error',reject);preview.listen(ports.preview,'127.0.0.1',resolve);});await app.listen({host:'127.0.0.1',port:ports.api});

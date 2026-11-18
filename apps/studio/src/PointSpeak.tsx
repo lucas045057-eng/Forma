@@ -12,7 +12,7 @@ const statusLabels: Record<Task['status'], string> = {
   queued: '排队中', running: '执行中', awaiting_approval: '等待请示', done: '候选已就绪', failed: '失败', cancelled: '已取消',
 };
 
-export default function PointSpeak({ pick, blocked = false }: { pick: PickState; blocked?: boolean }) {
+export default function PointSpeak({ pick, blocked = false, blankBootstrap = false }: { pick: PickState; blocked?: boolean; blankBootstrap?: boolean }) {
   const selection = submittedSelection(pick);
   const { state, reload, syncReady, status, acquire, awaiting, locked } = useEventCenter();
   const writable = !blocked && syncReady && status === 'connected' && !locked(['task:create']);
@@ -60,7 +60,8 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
     setBusy(true); setError('');
     let succeeded = false;
     try {
-      const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}) }));
+      const useBootstrap = blankBootstrap && !picked;
+      const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}), ...(useBootstrap ? { bootstrap: true } : {}) }));
       setActiveId(task.id);
       latestBinding.current=null;setBinding(null);
       succeeded = true;
@@ -93,13 +94,17 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
   return <section className="point-speak" aria-label="指着说">
     <div className="composer-shell">
       <div className="composer-header">
-        <span className="section-label">PROMPT &amp; VOICE</span>
+        <span className="section-label">{blankBootstrap && !selection ? 'FIRST-EDITION 3D PAGE' : 'PROMPT & VOICE'}</span>
         <span className="composer-pick-hint" data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span>
       </div>
+      {blankBootstrap && !selection && <div className="composer-quick-chips">
+        <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个黑钛旗舰无线降噪耳机的深空科技感 3D 新品发布页')}>✦ 黑钛耳机发布页</button>
+        <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个北欧极简月球氛围灯的温润家居 3D 互动展厅')}>✦ 月球灯互动展厅</button>
+      </div>}
       <label className="instruction-label">
         <span className="sr-only">修改指令</span>
         <textarea data-testid="instruction-input" value={instruction} onChange={event => changeInstruction(event.target.value)} onKeyDown={keyboard}
-          placeholder="描述想调整的文案、排版或交互，例如：把标题改成“山野清风，落入日常。”（Ctrl/⌘ + Enter 提交）" rows={3}/>
+          placeholder={blankBootstrap && !selection ? '输入一句话直接从零生成首版完整 3D 网页（Ctrl/⌘ + Enter 提交）…' : '描述想调整的文案、排版或交互，例如：把标题改成“山野清风，落入日常。”（Ctrl/⌘ + Enter 提交）'} rows={3}/>
       </label>
       <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
       {binding&&!bindingMatches(binding,context)&&<div className="conflict-banner" data-testid="speech-binding-conflict" role="alert">
@@ -111,8 +116,8 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
         </div>
       </div>}
       <div className="composer-footer">
-        <span className="composer-caption">发送选中源码上下文生成候选草稿</span>
-        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
+        <span className="composer-caption">{blankBootstrap && !selection ? '直接生成完整首版页面候选' : '发送选中源码上下文生成候选草稿'}</span>
+        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>{blankBootstrap && !selection ? '生成首版 3D 网页' : '生成候选版本'}</button>
       </div>
     </div>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}

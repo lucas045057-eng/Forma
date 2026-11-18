@@ -20,6 +20,7 @@ export default defineConfig({
       '/tasks': { target: backend },
       '/candidates': { target: backend },
       '/version': { target: backend },
+      '/works': { target: backend },
     },
   },
 });

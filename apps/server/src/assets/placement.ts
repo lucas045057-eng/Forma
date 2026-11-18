@@ -23,7 +23,7 @@ import { sha256 } from './fallbacks.ts';
 import { cleanAssetProvenance } from './provenance.ts';
 import { findModuleReference, installAssetFiles, readModuleConfig, type AssetFileDraft } from '../work/asset-module.ts';
 
-interface Session { id: string; assetId: string; baseVersion: string; expiresAt: number; result?: unknown; pending?: Promise<unknown>; fingerprint?: string }
+interface Session { id: string; workId: string; assetId: string; baseVersion: string; expiresAt: number; result?: unknown; pending?: Promise<unknown>; fingerprint?: string }
 type Classified = { kind: 'replace' } | { kind: 'replace-module'; instanceId: string } | { kind: 'insert' };
 
 function record(value: unknown): Record<string, unknown> {
@@ -152,16 +152,28 @@ async function rollbackCreatedAssets(root: string, created: AssetFileDraft[], as
   }
 }
 
+export interface PlacementContext {
+  id?: string;
+  scene: SceneService;
+  work: WorkService;
+  modules: ModuleSceneService;
+}
+
 export function registerPlacementRoutes(
   app: FastifyInstance,
   assets: AssetService,
-  scene: SceneService,
-  work: WorkService,
-  modules: ModuleSceneService,
-  emit: (event: { type: string } & Record<string, unknown>) => unknown,
+  contextOrScene: SceneService | (() => PlacementContext),
+  workArg?: WorkService,
+  modulesArg?: ModuleSceneService,
+  emitArg?: (event: { type: string } & Record<string, unknown>) => unknown,
 ) {
+  const resolveContext: () => PlacementContext = typeof contextOrScene === 'function'
+    ? contextOrScene
+    : () => ({ id: 'default', scene: contextOrScene, work: workArg!, modules: modulesArg! });
+  const emit = emitArg ?? (() => undefined);
   const sessions = new Map<string, Session>();
   app.post<{ Body: { assetId: string; baseVersion: string } }>('/assets/placements/sessions', async request => {
+    const { id: workId = 'default', work } = resolveContext();
     const body = request.body;
     if (!body || typeof body.assetId !== 'string' || typeof body.baseVersion !== 'string' || Object.keys(body).some(key => !['assetId', 'baseVersion'].includes(key))) {
       throw new WorkError('INVALID_PLACEMENT', '放置会话字段无效');
@@ -171,15 +183,17 @@ export function registerPlacementRoutes(
     if (version !== body.baseVersion) throw new WorkError('STALE_PLACEMENT', '作品版本已变化', 409);
     for (const [key, value] of sessions) if (value.expiresAt < Date.now()) sessions.delete(key);
     if (sessions.size >= 50) throw new WorkError('PLACEMENT_LIMIT', '放置会话过多，请稍后重试', 429);
-    const session: Session = { id: randomUUID(), assetId: body.assetId, baseVersion: version, expiresAt: Date.now() + 120_000 };
+    const session: Session = { id: randomUUID(), workId, assetId: body.assetId, baseVersion: version, expiresAt: Date.now() + 120_000 };
     sessions.set(session.id, session);
     return { sessionId: session.id, assetId: session.assetId, baseVersion: version, expiresAt: session.expiresAt };
   });
 
   app.post<{ Params: { id: string }; Body: { target: AssetPlacementTarget; adjustment?: unknown; force?: boolean } }>('/assets/placements/:id/confirm', async request => {
+    const { id: activeWorkId = 'default', scene, work, modules } = resolveContext();
     const session = sessions.get(request.params.id);
     if (!session) throw new WorkError('PLACEMENT_NOT_FOUND', '放置会话不存在', 404);
     if (session.expiresAt < Date.now()) throw new WorkError('PLACEMENT_EXPIRED', '放置会话已过期', 409);
+    if (session.workId !== activeWorkId) throw new WorkError('STALE_PLACEMENT', '当前激活作品已切换，请重新发起放置', 409);
     const body = record(request.body);
     only(body, ['target', 'adjustment', 'force']);
     if (!isPlacementTarget(body.target)) throw new WorkError('INVALID_PLACEMENT', '目标不符合放置协议');
@@ -238,13 +252,20 @@ export function registerPlacementRoutes(
     finally { session.pending = undefined; }
   });
 
-  app.get('/assets/modules', async () => work.repo.exclusive(async () => {
-    const list = await modules.list();
-    return list.map(item => ({ id: item.config.instanceId, config: item.config, canUndo: item.canUndo, stale: item.stale, entries: item.entries }));
-  }));
-  app.get<{ Params: { id: string } }>('/assets/modules/:id', async request => work.repo.exclusive(() => modules.get(request.params.id)));
+  app.get('/assets/modules', async () => {
+    const { work, modules } = resolveContext();
+    return work.repo.exclusive(async () => {
+      const list = await modules.list();
+      return list.map(item => ({ id: item.config.instanceId, config: item.config, canUndo: item.canUndo, stale: item.stale, entries: item.entries }));
+    });
+  });
+  app.get<{ Params: { id: string } }>('/assets/modules/:id', async request => {
+    const { work, modules } = resolveContext();
+    return work.repo.exclusive(() => modules.get(request.params.id));
+  });
 
   app.post<{ Params: { id: string }; Body: { baseVersion: string; adjustment: unknown } }>('/assets/modules/:id/adjust', async request => {
+    const { modules } = resolveContext();
     const body = record(request.body);
     only(body, ['baseVersion', 'adjustment']);
     if (typeof body.baseVersion !== 'string') throw new WorkError('INVALID_MODULE', '缺少作品版本');
@@ -254,6 +275,7 @@ export function registerPlacementRoutes(
   });
 
   app.post<{ Params: { id: string }; Body: { baseVersion: string } }>('/assets/modules/:id/undo', async request => {
+    const { modules } = resolveContext();
     const body = record(request.body);
     only(body, ['baseVersion']);
     if (typeof body.baseVersion !== 'string') throw new WorkError('INVALID_MODULE', '缺少作品版本');
@@ -263,6 +285,7 @@ export function registerPlacementRoutes(
   });
 
   app.post<{ Params: { id: string }; Body: { baseVersion: string } }>('/assets/modules/:id/remove', async request => {
+    const { work } = resolveContext();
     const body = record(request.body);
     only(body, ['baseVersion']);
     if (typeof body.baseVersion !== 'string') throw new WorkError('INVALID_MODULE', '缺少作品版本');

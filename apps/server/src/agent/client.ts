@@ -52,7 +52,7 @@ export class CodingAgent {
     if (!options.model) throw new CodingAgentError('AGENT_CONFIG', '未配置 CODING_AGENT_MODEL');
   }
 
-  async run(input: { taskId: string; instruction: string; selection?: Selection; root: string; signal?: AbortSignal }) {
+  async run(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; root: string; signal?: AbortSignal }) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 180_000);
     const signal = input.signal ? AbortSignal.any([input.signal, controller.signal]) : controller.signal;
@@ -64,7 +64,7 @@ export class CodingAgent {
     } finally { clearTimeout(timer); }
   }
 
-  private async execute(input: { taskId: string; instruction: string; selection?: Selection; root: string; signal: AbortSignal }) {
+  private async execute(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; root: string; signal: AbortSignal }) {
     const maxRounds = Math.min(this.options.maxRounds ?? 16, 16);
     const timeoutMs = this.options.timeoutMs ?? 180_000;
     const deadline = Date.now() + timeoutMs;
@@ -75,12 +75,16 @@ export class CodingAgent {
     };
     const selected = input.selection ? await this.selectedSource(sandbox, input.selection) : undefined;
     const ancestorSources = input.selection ? await this.ancestorSources(sandbox, input.selection) : undefined;
+    const systemPrompt = input.bootstrap
+      ? '你是空间化 3D 网页的首席前端设计师与编码 Agent。用户正在一句话从零创建首版 3D 网页。请先用 list_files/read_file 查看现有结构，再用 write_file 完整设计并重写 src/App.tsx 与 src/style.css（必要时可在 src/components/ 下新建辅助组件），最后调用 finish。必须遵守：1）App 根元素保持 <main data-spatial-page ...>；2）保留导入并渲染 <ProductHero /> 作为页面主 3D 互动舞台，不要修改 src/spatial-module.tsx 或在源码中硬编码 /assets/*.glb；3）包含清晰的 <h1> 主标题、多段有审美的空间叙事/卖点区块，以及至少一个可点击且有状态反馈的交互按钮，所有按钮/链接不得被遮挡；4）严禁引用任何外网图片、字体或外部请求，全部视觉效果用高水准现代 CSS 完成。'
+      : '你是网页作品的编码 Agent。先用 list_files/read_file 理解代码，再用 replace_in_file 或 write_file 完成用户指令，最后调用 finish。只能修改候选作品 src/ 下的源码；不要修改依赖、构建配置或 src 之外的文件。没有 shell。尽量做满足指令的最小改动。';
     const messages: Message[] = [
-      { role: 'system', content: '你是网页作品的编码 Agent。先用 list_files/read_file 理解代码，再用 replace_in_file 或 write_file 完成用户指令，最后调用 finish。只能修改候选作品 src/ 下的源码；不要修改依赖、构建配置或 src 之外的文件。没有 shell。尽量做满足指令的最小改动。' },
+      { role: 'system', content: systemPrompt },
       {
         role: 'user',
         content: JSON.stringify({
           instruction: input.instruction,
+          ...(input.bootstrap ? { mode: 'bootstrap-first-edition-3d-webpage' } : {}),
           selection: input.selection,
           selectedFileWithLineNumbers: selected,
           ...(ancestorSources && Object.keys(ancestorSources).length > 0

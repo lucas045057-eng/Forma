@@ -6,14 +6,14 @@ import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import type { Selection } from '@spatial/shared';
-import { SceneService, SceneError } from './scene/service.ts';
-import { ModuleSceneService } from './scene/modules.ts';
+import type { Selection, WorkStarter } from '@spatial/shared';
+import { SceneError } from './scene/service.ts';
 import { SceneModuleError } from '@spatial/shared/scene-module';
 import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
 import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts';
 import { EventLog } from './events.ts';
-import { WorkService, type WorkServiceOptions } from './work/service.ts';
+import { type WorkServiceOptions } from './work/service.ts';
+import { WorkspaceManager } from './work/workspace.ts';
 import { WorkError } from './work/repo.ts';
 import { registerCheckRoutes } from './checks/routes.ts';
 import { ArtifactError } from './checks/artifacts.ts';
@@ -124,12 +124,7 @@ export async function createApp(options: AppOptions = {}) {
   await events.init();
   const emit = (event: { type: string }) => events.publish(event as { type: string } & Record<string, unknown>);
   const workRoot = options.workRoot ?? process.env.WORK_ROOT ?? fileURLToPath(new URL('../../../templates/product-page/', import.meta.url));
-  const scene = new SceneService({
-    workRoot,
-    historyDirectory: options.historyDirectory ?? process.env.SCENE_HISTORY_DIR ?? fileURLToPath(new URL('../../../.data/scene-history/', import.meta.url)),
-    emit,
-  });
-  closers.push(() => scene.idle());
+  const historyDirectory = options.historyDirectory ?? process.env.SCENE_HISTORY_DIR ?? fileURLToPath(new URL('../../../.data/scene-history/', import.meta.url));
   const service = new AssetService({
     directory: options.dataDirectory ?? process.env.ASSETS_DIR ?? fileURLToPath(new URL('../../../.data/assets/', import.meta.url)),
     client: new Lux3DClient({ base: options.base ?? process.env.LUX3D_BASE, key: options.key ?? process.env.LUX3D_API_KEY }),
@@ -137,8 +132,10 @@ export async function createApp(options: AppOptions = {}) {
     emit,
   });
   closers.push(() => service.close());
-  const work = new WorkService({
-    workRoot, directory: workDataDirectory, emit, lockHeld: true,
+  const workspace = new WorkspaceManager({
+    defaultWorkRoot: workRoot,
+    workDataDirectory,
+    defaultHistoryDirectory: historyDirectory,
     previewStartTimeoutMs: options.previewStartTimeoutMs,
     checks: options.checks,
     agent: {
@@ -147,16 +144,17 @@ export async function createApp(options: AppOptions = {}) {
       model: options.codingAgentModel ?? process.env.CODING_AGENT_MODEL,
       timeoutMs: options.agentTimeoutMs, maxRounds: options.agentMaxRounds,
     },
+    emit,
   });
-  closers.push(() => work.close());
+  closers.push(() => workspace.close());
   const speech = new SpeechService(new SpeechClient(options.speech ?? {
     baseUrl: process.env.SPEECH_BASE_URL, apiKey: process.env.DASHSCOPE_API_KEY, model: process.env.SPEECH_MODEL,
   }), { timeoutMs: options.speech?.timeoutMs });
   closers.push(() => speech.close());
-  await work.init();
-  const modules=new ModuleSceneService({workRoot,directory:workDataDirectory,repo:work.repo});
-  await modules.init();
+  await workspace.init();
   await service.init();
+  const activeWork = () => workspace.current().work;
+  const activeScene = () => workspace.current().scene;
   // Awaited plugin registration binds route error-handler contexts. Install the shared
   // envelope before registering either the upload scope or the workbench routes.
   app.setErrorHandler((error, request, reply) => {
@@ -190,7 +188,7 @@ export async function createApp(options: AppOptions = {}) {
     uploadHosts:(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean).length?(process.env.LUX3D_UPLOAD_HOSTS??'').split(',').map(host=>host.trim()).filter(Boolean):undefined,
     close:operation=>closers.push(operation),
   });
-  registerPlacementRoutes(app,service,scene,work,modules,emit);
+  registerPlacementRoutes(app, service, () => workspace.current(), undefined, undefined, emit);
   app.addHook('preClose', async () => { closing = true; speech.beginClose(); luxWorkbench.tasks.beginClose(); });
   await app.register(websocket);
   const allowedHosts = new Set([...loopbackHosts, ...(options.allowedHosts ?? (process.env.ALLOWED_HOSTS ?? '').split(','))]
@@ -221,19 +219,47 @@ export async function createApp(options: AppOptions = {}) {
     return { events: events.since(since), current: events.last, oldest: events.oldest, truncated: since < events.oldest - 1 };
   });
 
-  app.get('/version', async () => work.version());
-  app.post('/version/revert', async () => work.revert());
-  app.post<{ Body: { instruction: string; selection?: Selection } }>('/tasks', {
+  app.get('/works', async () => workspace.list());
+  app.post<{ Body: { name?: string; starter?: WorkStarter; prompt?: string; assetId?: string } }>('/works', {
+    schema: {
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          name: { type: 'string', maxLength: 60 },
+          starter: { type: 'string', enum: ['blank', 'product-page'] },
+          prompt: { type: 'string', maxLength: 4000 },
+          assetId: { type: 'string', maxLength: 80 },
+        },
+      },
+    },
+  }, async (request, reply) => reply.code(201).send(await workspace.create({ ...request.body, assets: service })));
+  app.post<{ Params: { id: string } }>('/works/:id/select', async request => workspace.select(request.params.id));
+  app.patch<{ Params: { id: string }; Body: { name: string } }>('/works/:id', {
+    schema: {
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['name'],
+        properties: { name: { type: 'string', minLength: 1, maxLength: 60 } },
+      },
+    },
+  }, async request => workspace.rename(request.params.id, request.body.name));
+
+  app.get('/version', async () => activeWork().version());
+  app.post('/version/revert', async () => activeWork().revert());
+  app.post<{ Body: { instruction: string; selection?: Selection; bootstrap?: boolean } }>('/tasks', {
     schema: { body: { type: 'object', additionalProperties: false, required: ['instruction'], properties: {
       instruction: { type: 'string', minLength: 1, maxLength: 4000 },
+      bootstrap: { type: 'boolean' },
       selection: { type: 'object', required: ['src', 'baseVersion'], properties: { src: { type: 'string' }, baseVersion: { type: 'string' } } },
     } } },
-  }, async (request, reply) => reply.code(202).send(await work.submit(request.body.instruction, request.body.selection)));
-  app.get('/tasks', async () => work.listTasks());
-  app.get<{ Params: { id: string } }>('/tasks/:id', async request => work.getTask(request.params.id));
-  app.post<{ Params: { id: string } }>('/tasks/:id/cancel', async request => work.cancel(request.params.id));
-  app.get('/approvals', async () => work.listApprovals());
-  app.get<{ Params: { id: string } }>('/approvals/:id', async request => work.getApproval(request.params.id));
+  }, async (request, reply) => reply.code(202).send(await activeWork().submit(request.body.instruction, request.body.selection, { bootstrap: request.body.bootstrap })));
+  app.get('/tasks', async () => activeWork().listTasks());
+  app.get<{ Params: { id: string } }>('/tasks/:id', async request => activeWork().getTask(request.params.id));
+  app.post<{ Params: { id: string } }>('/tasks/:id/cancel', async request => activeWork().cancel(request.params.id));
+  app.get('/approvals', async () => activeWork().listApprovals());
+  app.get<{ Params: { id: string } }>('/approvals/:id', async request => activeWork().getApproval(request.params.id));
   app.post<{ Params: { id: string }; Body: unknown }>('/approvals/:id', {
     preValidation: async request => {
       const body = request.body;
@@ -248,13 +274,13 @@ export async function createApp(options: AppOptions = {}) {
   }, async request => {
     const option = (request.body as { option: unknown }).option;
     if (typeof option !== 'number' || !Number.isInteger(option) || (option !== 0 && option !== 1)) throw new WorkError('INVALID_OPTION', 'option 必须是原始 JSON 数字 0 或 1', 400);
-    return work.answerApproval(request.params.id, option);
+    return activeWork().answerApproval(request.params.id, option);
   });
-  app.get('/candidates', async () => work.listCandidates());
-  app.get<{ Params: { id: string } }>('/candidates/:id', async request => work.getCandidate(request.params.id));
-  app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => work.adopt(request.params.id));
-  app.post<{ Params: { id: string } }>('/candidates/:id/discard', async request => work.discard(request.params.id));
-  registerCheckRoutes(app, work);
+  app.get('/candidates', async () => activeWork().listCandidates());
+  app.get<{ Params: { id: string } }>('/candidates/:id', async request => activeWork().getCandidate(request.params.id));
+  app.post<{ Params: { id: string } }>('/candidates/:id/adopt', async request => activeWork().adopt(request.params.id));
+  app.post<{ Params: { id: string } }>('/candidates/:id/discard', async request => activeWork().discard(request.params.id));
+  registerCheckRoutes(app, activeWork);
 
   // Preview content is served exclusively by the separate preview-origin listener.
 
@@ -305,21 +331,22 @@ export async function createApp(options: AppOptions = {}) {
     try { await stat(filename); } catch { return reply.code(404).send({ error: { code: 'MODEL_MISSING', message: '模型文件已丢失，请重新导入资产' } }); }
     return reply.type('model/gltf-binary').header('Cache-Control', 'no-cache').send(createReadStream(filename));
   });
-  app.get('/scene/model-provenance',async(request,reply)=>{if(Object.keys(request.query as object).length)throw new SceneError('INVALID_INPUT','来源查询不接受路径或URL参数');reply.header('Cache-Control','no-store');return work.repo.exclusive(()=>scene.modelProvenance());});
-  app.get('/scene', async () => work.repo.exclusive(() => scene.get()));
-  app.put('/scene', async request => work.repo.exclusive(() => scene.put(request.body)));
-  app.post('/scene/undo', async () => work.repo.exclusive(() => scene.undo()));
+  app.get('/scene/model-provenance',async(request,reply)=>{if(Object.keys(request.query as object).length)throw new SceneError('INVALID_INPUT','来源查询不接受路径或URL参数');reply.header('Cache-Control','no-store');return activeWork().repo.exclusive(()=>activeScene().modelProvenance());});
+  app.get('/scene', async () => activeWork().repo.exclusive(() => activeScene().get()));
+  app.put('/scene', async request => activeWork().repo.exclusive(() => activeScene().put(request.body)));
+  app.post('/scene/undo', async () => activeWork().repo.exclusive(() => activeScene().undo()));
   app.post<{ Params: { id: string }; Body: unknown }>('/assets/:id/adopt', async request => {
     const body = request.body ?? {};
     if (typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => key !== 'force')
       || ('force' in body && typeof body.force !== 'boolean')) throw new SceneError('INVALID_INPUT', 'force 必须为布尔值');
-    return work.repo.exclusive(() => scene.adopt(service, request.params.id, 'force' in body && body.force === true));
+    return activeWork().repo.exclusive(() => activeScene().adopt(service, request.params.id, 'force' in body && body.force === true));
   });
   // preClose must not wait for handlers: Fastify drains HTTP after this hook.
   // Keep admitted handlers and their nested repo operations usable until onClose.
   await registerSpeechRoutes(app, speech);
   app.addHook('onClose', closeAll);
-  return { app, service, scene, work, events, speech };
+  const currentDefault = workspace.current();
+  return { app, service, scene: currentDefault.scene, work: currentDefault.work, workspace, events, speech };
   } catch (error) {
     await closeAll().catch(() => {});
     throw error;

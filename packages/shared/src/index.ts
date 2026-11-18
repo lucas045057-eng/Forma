@@ -146,9 +146,25 @@ export interface SpeechConfig {
 export interface SpeechResult { requestId: string; text: string; provider: 'aliyun'; model: 'qwen3-asr-flash' }
 export interface SpeechCancelResult { requestId: string; status: 'cancelled' | 'completed' }
 export interface FileDiff { path: string; patch: string }
+export type WorkStarter = 'blank' | 'product-page';
+export interface WorkSummary {
+  id: string;
+  name: string;
+  starter: WorkStarter;
+  createdAt: string;
+  updatedAt: string;
+  active: boolean;
+  initialPrompt?: string;
+}
+export interface WorksState {
+  activeId: string;
+  works: WorkSummary[];
+}
+
 export interface Task {
   id: string;
   kind?: 'agent' | 'module';
+  bootstrap?: boolean;
   instruction: string;
   selection?: Selection;
   status: 'queued' | 'running' | 'awaiting_approval' | 'done' | 'failed' | 'cancelled';
