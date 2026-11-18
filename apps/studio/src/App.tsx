@@ -1,15 +1,16 @@
 import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { isPreviewMessage, type ApprovalCard, type StudioMessage } from '@spatial/shared';
+import { isPreviewMessage, type ApprovalCard, type StudioMessage, type WorkSummary, type WorksState } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
 import { impactHighlightMessages, isImpactPickError, restorePicking, waiting } from './approval-state.ts';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
 import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
-import { api } from './api.ts';
+import { api, mutation } from './api.ts';
 import { previewOrigin, previewUrl } from './preview-origin.ts';
 import ModelOriginBadge from './model-provenance.tsx';
 import AssetPlacement from './AssetPlacement.tsx';
+import NewWorkModal, { type CreatedWorkResult } from './NewWorkModal.tsx';
 import type {Asset} from '@spatial/shared';
 import type {PlacementSession} from './placement-state.ts';
 import {luxApi} from './lux3d-api.ts';
@@ -22,7 +23,14 @@ function syncScroll(frame: HTMLIFrameElement | null, at: number) {
 }
 
 function Studio() {
-  const { state, status: eventStatus, lastSeq, syncReady, syncError, reload } = useEventCenter();
+  const { state, status: eventStatus, lastSeq, syncReady, syncError, reload, subscribe } = useEventCenter();
+  const [worksState, setWorksState] = useState<WorksState>({
+    activeId: 'default',
+    works: [{ id: 'default', name: '木间香薰', starter: 'product-page', createdAt: '', updatedAt: '', active: true }],
+  });
+  const [showNewWork, setShowNewWork] = useState(false);
+  const [switchingWork, setSwitchingWork] = useState(false);
+  const [previewRevision, setPreviewRevision] = useState(0);
   const [impact, setImpact] = useState<{ id: string; src: string; baseVersion: string; wasPicking: boolean } | null>(null);
   const impactRef = useRef<typeof impact>(null);
   const [showAssets, setShowAssets] = useState(false);
@@ -239,7 +247,83 @@ function Studio() {
     send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
     if (pickingRef.current && selection) send({ type: 'highlight', payload: { src: selection.src } });
   }
-  const mainFrame = <iframe ref={preview} src={previewUrl('/preview/main/')} title="香薰商品页预览" data-testid="preview-frame" onLoad={() => {
+  useEffect(() => {
+    let active = true;
+    const loadWorks = () => {
+      void fetch('/works', { cache: 'no-store' })
+        .then(res => (res.ok ? (res.json() as Promise<WorksState>) : null))
+        .then(value => {
+          if (!active || !value || !Array.isArray(value.works) || typeof value.activeId !== 'string') return;
+          setWorksState(previous => {
+            if (previous.activeId !== value.activeId) {
+              setReady(false);
+              setPreviewRevision(rev => rev + 1);
+            }
+            return value;
+          });
+        })
+        .catch(() => {});
+    };
+    loadWorks();
+    const unsubscribe = subscribe(event => {
+      if (event.type === 'work.changed' || event.type === 'work.updated') loadWorks();
+      if (event.type === 'candidate.ready') {
+        const readyCandidate = event.candidate as { id?: string; taskId?: string } | undefined;
+        const relatedTask = state.tasks.find(t => t.id === readyCandidate?.taskId || t.id === readyCandidate?.id);
+        if (readyCandidate?.id && relatedTask?.bootstrap) {
+          setCandidateId(readyCandidate.id);
+          setMode('candidate');
+        }
+      }
+    });
+    return () => { active = false; unsubscribe(); };
+  }, [subscribe, state.tasks]);
+
+  async function selectWork(nextId: string) {
+    if (!nextId || nextId === worksState.activeId || switchingWork) return;
+    setSwitchingWork(true);
+    setError('');
+    try {
+      exitImpact(false);
+      pickingRef.current = false;
+      setPicking(false);
+      setPick({ kind: 'none' });
+      setPlacingAsset(undefined);
+      setShowScene(false);
+      setMode('current');
+      setReady(false);
+      await api(`/works/${encodeURIComponent(nextId)}/select`, mutation('POST', {}));
+      setPreviewRevision(rev => rev + 1);
+      await reload(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '切换作品失败');
+    } finally {
+      setSwitchingWork(false);
+    }
+  }
+
+  async function handleWorkCreated(created: CreatedWorkResult) {
+    setShowNewWork(false);
+    exitImpact(false);
+    pickingRef.current = false;
+    setPicking(false);
+    setPick({ kind: 'none' });
+    setPlacingAsset(undefined);
+    setShowScene(false);
+    setMode('current');
+    setReady(false);
+    setWorksState(previous => {
+      const others = previous.works.filter(item => item.id !== created.work.id).map(item => ({ ...item, active: false }));
+      return { activeId: created.activeId, works: [...others, { ...created.work, active: true }] };
+    });
+    setPreviewRevision(rev => rev + 1);
+    await reload(true).catch(() => {});
+  }
+
+  const activeWorkSummary: WorkSummary | undefined = worksState.works.find(item => item.id === worksState.activeId) ?? worksState.works[0];
+  const blankBootstrap = activeWorkSummary?.starter === 'blank' && !state.candidates.some(item => item.decision === 'adopted');
+
+  const mainFrame = <iframe key={`${worksState.activeId}:${previewRevision}`} ref={preview} src={previewUrl('/preview/main/')} title={`${activeWorkSummary?.name ?? '空间作品'}预览`} data-testid="preview-frame" onLoad={() => {
     exitImpact(false);
     send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
   }}/>;
@@ -247,6 +331,7 @@ function Studio() {
 
   return (
     <main className="studio">
+      {showNewWork && <NewWorkModal onClose={() => setShowNewWork(false)} onCreated={result => void handleWorkCreated(result)}/>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
       {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="toolbar">
@@ -279,7 +364,20 @@ function Studio() {
             mode={mode}
             onMode={setMode}
             headerMeta={<>
-              <span className="work-title">木间香薰</span>
+              <div className="work-switcher-group">
+                <select
+                  aria-label="切换当前作品"
+                  data-testid="work-switcher"
+                  disabled={switchingWork || !syncReady}
+                  value={worksState.activeId}
+                  onChange={event => void selectWork(event.target.value)}
+                >
+                  {worksState.works.map(item => (
+                    <option key={item.id} value={item.id}>{item.name}{item.starter === 'blank' ? ' · 3D 画布' : ''}</option>
+                  ))}
+                </select>
+                <button type="button" className="secondary-btn compact-btn" data-testid="work-new-open" disabled={switchingWork || !syncReady} onClick={() => setShowNewWork(true)}>+ 新建作品</button>
+              </div>
               <ModelOriginBadge/>
             </>}
             headerStatus={<span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>}
@@ -309,7 +407,7 @@ function Studio() {
                 <pre className="selection-raw" data-testid="selection-json">{JSON.stringify(selection, null, 2)}</pre>
               </> : <p className="target-empty">{picking ? '请在左侧网页中点击要修改的标题、按钮或区块…' : '当前作用于整页 · 开启选取可精准锁定局部元素'}</p>}
             </div>
-            <PointSpeak pick={pick} blocked={!!impact || showScene}/>
+            <PointSpeak pick={pick} blocked={!!impact || showScene} blankBootstrap={blankBootstrap}/>
           </div>
           <ApprovalPanel highlightId={impact?.id ?? null} onHighlight={highlight} onExit={() => exitImpact()}/>
         </aside>

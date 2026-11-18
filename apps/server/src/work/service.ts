@@ -449,12 +449,22 @@ export class WorkService {
 
   async version() { return { version: await this.snapshot() }; }
 
-  async submit(instruction: string, selection?: Selection) {
+  async submit(instruction: string, selection?: Selection, options?: { bootstrap?: boolean }) {
+    if (options?.bootstrap && selection) throw new WorkError('INVALID_INPUT', '首版整页生成不能同时绑定局部选中元素', 400);
     await this.validateSelection(selection);
     const now = new Date().toISOString();
-    const task: StoredTask = { id: randomUUID().replaceAll('-', ''), instruction, selection, status: 'queued', events: [], createdAt: now, updatedAt: now };
+    const task: StoredTask = {
+      id: randomUUID().replaceAll('-', ''),
+      instruction,
+      selection,
+      ...(options?.bootstrap ? { bootstrap: true } : {}),
+      status: 'queued',
+      events: [],
+      createdAt: now,
+      updatedAt: now,
+    };
     this.state.tasks.push(task);
-    await this.append(task, '任务已排队');
+    await this.append(task, options?.bootstrap ? '首版 3D 网页生成任务已排队' : '任务已排队');
     this.taskQueue = this.taskQueue.then(() => this.execute(task.id)).catch(() => {});
     return clone(task);
   }
@@ -546,12 +556,13 @@ export class WorkService {
         ...this.options.agent,
         onStep: async message => { await this.append(task, message); },
       });
-      const result = await agent.run({ taskId: id, instruction: task.instruction, selection: task.selection, root: this.repo.candidatePath(id), signal: controller.signal });
+      const result = await agent.run({ taskId: id, instruction: task.instruction, selection: task.selection, bootstrap: task.bootstrap, root: this.repo.candidatePath(id), signal: controller.signal });
       controller.signal.throwIfAborted();
       const pending = await this.repo.pendingDiff(id, base, undefined, prepared.listing);
       if (!pending.changedFiles.length) throw new WorkError('NO_CHANGES', '编码 Agent 没有产生任何文件改动', 409);
       const evaluation = await evaluateApproval({ root: this.repo.candidatePath(id), baseVersion: base, changedFiles: pending.changedFiles, selection: task.selection });
-      if (evaluation.required) {
+      const skipBootstrapApproval = task.bootstrap === true && !task.selection && this.state.adoptions.length === 0;
+      if (evaluation.required && !skipBootstrapApproval) {
         await this.repo.exclusive(async () => {
           controller.signal.throwIfAborted();
           if (task.status !== 'running') throw new WorkError('TASK_CANCELLED', '任务已取消', 409);
@@ -584,7 +595,7 @@ export class WorkService {
       const allowed = new Set(task.selection ? [task.selection.src, ...(Array.isArray(task.selection.ancestors) ? task.selection.ancestors : [])].map(src => src.replace(/:\d+:\d+$/, '')) : []);
       const candidate: StoredCandidate = {
         id, taskId: id, candidateCommit: await this.repo.candidateCommit(id), baseVersion: base, branch: this.repo.branch(id), previewUrl: '', createdAt: new Date().toISOString(),
-        diff: pending.diff, outOfScope: changed.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending',
+        diff: pending.diff, outOfScope: skipBootstrapApproval ? [] : changed.filter(file => !allowed.has(file)), checks: checks(), decision: 'pending',
       };
       await this.append(task, `候选已提交，改动 ${changed.length} 个文件；正在启动预览`);
       candidate.previewUrl = await this.previews.start(id, this.repo.candidatePath(id), controller.signal);

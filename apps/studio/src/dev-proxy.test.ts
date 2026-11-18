@@ -62,7 +62,7 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
     });
     studio = started.value;
     const origin = started.origin;
-    for (const path of ['/health', '/approvals', '/approvals/card001', '/checks/run001', '/checks/run001/artifacts/schema.json', '/tasks', '/candidates', '/version', '/scene', '/assets', '/events/history?since=0', '/speech/config']) {
+    for (const path of ['/health', '/works', '/approvals', '/approvals/card001', '/checks/run001', '/checks/run001/artifacts/schema.json', '/tasks', '/candidates', '/version', '/scene', '/assets', '/events/history?since=0', '/speech/config']) {
       const response = await fetch(origin + path);
       expect(response.headers.get('content-type')).toContain('application/json');
       expect(await response.json()).toEqual({ path, method: 'GET' });
@@ -80,7 +80,7 @@ it('routes Studio API requests and check evidence through the real Vite proxy in
     expect(await speech.json()).toEqual({ path: '/speech/transcribe', method: 'POST', contentType: 'audio/webm;codecs=opus', requestId, audio: [0x1a, 0x45, 0xdf, 0xa3] });
     const cancelled = await fetch(origin + `/speech/transcribe/${requestId}`, { method: 'DELETE' });
     expect(await cancelled.json()).toEqual({ path: `/speech/transcribe/${requestId}`, method: 'DELETE' });
-    expect(seen).toHaveLength(18);
+    expect(seen).toHaveLength(19);
   } finally {
     try {
       const httpServer = studio?.httpServer as unknown as { closeAllConnections?: () => void } | null | undefined;

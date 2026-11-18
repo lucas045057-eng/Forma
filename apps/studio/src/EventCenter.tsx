@@ -15,7 +15,7 @@ interface EventCenterValue {
   syncEpoch: number;
   lastSeq: number;
   subscribe: (listener: (event: CenterEvent) => void) => () => void;
-  reload: () => Promise<void>;
+  reload: (freshAnchor?: boolean) => Promise<void>;
   acquire: (keys: string[]) => symbol | undefined;
   awaiting: (token: symbol) => void;
   locked: (keys: string[]) => boolean;
@@ -51,8 +51,8 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     setLockRevision(value => value + 1);
   }, []);
   const listeners = useRef(new Set<(event: CenterEvent) => void>());
-  const reloadRef = useRef<() => Promise<void>>(async () => { throw new Error('事件尚未连接'); });
-  const reload = useCallback(() => reloadRef.current(), []);
+  const reloadRef = useRef<(freshAnchor?: boolean) => Promise<void>>(async () => { throw new Error('事件尚未连接'); });
+  const reload = useCallback((freshAnchor?: boolean) => reloadRef.current(freshAnchor), []);
   const subscribe = useCallback((listener: (event: CenterEvent) => void) => {
     listeners.current.add(listener);
     return () => { listeners.current.delete(listener); };
@@ -75,7 +75,7 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
     const valid = (generation: number, operation: number) => currentSync(generation, operation, connection, request, socket?.readyState === WebSocket.OPEN, disposed);
     const history = (since: number) => json<History>(`/events/history?since=${since}`);
 
-    async function synchronize(anchor = seq) {
+    async function synchronize(anchor = seq, freshAnchor = false) {
       const generation = connection;
       const operation = ++request;
       setSyncEpoch(++epochRef.current);
@@ -85,14 +85,15 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
       setSyncError('');
       try {
         if (!readyReceived || socket?.readyState !== WebSocket.OPEN) throw new Error('事件连接不可用');
-        // A bounded restart obtains a new server anchor after truncation or overflow.
+        // A bounded restart obtains a new server anchor after truncation, overflow or work switch.
         for (let attempt = 0; attempt < 3; attempt++) {
-          if (attempt > 0) {
+          if (attempt > 0 || freshAnchor) {
             const head = await history(0);
             if (!valid(generation, operation)) return;
             anchor = head.current;
             buffer = [];
             overflow = false;
+            freshAnchor = false;
           }
           const [tasks, candidates, version, approvals] = await Promise.all([
             json<Task[]>('/tasks'), json<Candidate[]>('/candidates'), json<{ version: string }>('/version'), json<unknown[]>('/approvals'),
@@ -139,8 +140,8 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
         throw cause;
       }
     }
-    reloadRef.current = () => synchronize();
-    const startSync = (anchor?: number) => { void synchronize(anchor).catch(() => {}); };
+    reloadRef.current = (freshAnchor?: boolean) => synchronize(seq, freshAnchor === true);
+    const startSync = (anchor?: number, freshAnchor = false) => { void synchronize(anchor, freshAnchor).catch(() => {}); };
     function connect() {
       if (disposed) return;
       const generation = ++connection;
@@ -170,6 +171,21 @@ export function EventCenterProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (event.seq <= seq) return;
+        if (event.type === 'work.changed') {
+          buffer = [];
+          overflow = false;
+          seq = event.seq;
+          setLastSeq(seq);
+          notify(event);
+          startSync(event.seq);
+          return;
+        }
+        if (event.type === 'work.updated') {
+          seq = event.seq;
+          setLastSeq(seq);
+          notify(event);
+          return;
+        }
         if (event.seq !== seq + 1 || event.type === 'version.changed' || event.type === 'check.started' || event.type === 'check.finished') {
           buffer.push(event);
           // Disable gates immediately; the triggering event is retained for replay.

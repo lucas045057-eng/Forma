@@ -5,8 +5,12 @@ import type { PreviewManager } from './preview.ts';
 /** This listener serves previews only. No API route or credentials cross this boundary. */
 const loopback = ['127.0.0.1', 'localhost', '[::1]'];
 
-export function createPreviewOrigin(previews: PreviewManager, options: { mainPort?: number; studioOrigin?: string; allowedHosts?: string[] } = {}) {
-  const mainPort = options.mainPort ?? 5174;
+export function createPreviewOrigin(
+  previews: PreviewManager | (() => PreviewManager),
+  options: { mainPort?: number | (() => number | undefined); studioOrigin?: string; allowedHosts?: string[] } = {},
+) {
+  const resolvePreviews = () => (typeof previews === 'function' ? previews() : previews);
+  const resolveMainPort = () => (typeof options.mainPort === 'function' ? (options.mainPort() ?? 5174) : (options.mainPort ?? 5174));
   const studioOrigin = options.studioOrigin ?? 'http://127.0.0.1:5173';
   const hostnames = new Set([...loopback, ...(options.allowedHosts ?? (process.env.PREVIEW_ALLOWED_HOSTS ?? '').split(','))]
     .map(host => host.trim().toLowerCase()).filter(Boolean));
@@ -30,8 +34,9 @@ export function createPreviewOrigin(previews: PreviewManager, options: { mainPor
     outgoing.setHeader('Access-Control-Allow-Origin', studioOrigin);
     outgoing.setHeader('Vary', 'Origin');
     if (url.startsWith('/preview/c/')) {
-      previews.proxy(url.split('/')[3], incoming, outgoing); return;
+      resolvePreviews().proxy(url.split('/')[3], incoming, outgoing); return;
     }
+    const mainPort = resolveMainPort();
     const upstream = request({ hostname: '127.0.0.1', port: mainPort, method: incoming.method, path: url,
       headers: { host: `127.0.0.1:${mainPort}`, accept: incoming.headers.accept ?? '*/*' } }, response => {
       outgoing.statusCode = response.statusCode ?? 502;
@@ -47,7 +52,7 @@ export function createPreviewOrigin(previews: PreviewManager, options: { mainPor
     const url = incoming.url ?? '';
     // Only the Vite HMR socket of the main work or of a running candidate; nothing else upgrades.
     const candidate = /^\/preview\/c\/([a-z0-9]{6,32})\/hmr(?:\?|$)/.exec(url);
-    const port = /^\/preview\/main\/hmr(?:\?|$)/.test(url) ? mainPort : candidate ? previews.port(candidate[1]) : undefined;
+    const port = /^\/preview\/main\/hmr(?:\?|$)/.test(url) ? resolveMainPort() : candidate ? resolvePreviews().port(candidate[1]) : undefined;
     if (!port || !trustedHost(incoming.headers.host) || !trustedOrigin(incoming.headers.origin)) { socket.destroy(); return; }
     const upstream = connect(port, '127.0.0.1', () => {
       const headers = { ...incoming.headers, host: `127.0.0.1:${port}` };

@@ -2,9 +2,12 @@ import { createApp } from './app.ts';
 import { createPreviewOrigin } from './work/preview-origin.ts';
 import type { Socket } from 'node:net';
 
-const { app, work } = await createApp({ logger: true });
-const preview = createPreviewOrigin(work.previews, {
-  mainPort: Number(process.env.MAIN_PREVIEW_PORT ?? 5174),
+const mainPort = Number(process.env.MAIN_PREVIEW_PORT ?? 5174);
+const { app, workspace } = await createApp({ logger: true });
+workspace.enableDynamicMainPreview(mainPort);
+await workspace.ensureActiveMainPreview();
+const preview = createPreviewOrigin(() => workspace.current().work.previews, {
+  mainPort: () => workspace.activeMainPort() ?? mainPort,
   studioOrigin: process.env.STUDIO_ORIGIN ?? 'http://127.0.0.1:5173',
 });
 const sockets = new Set<Socket>();
