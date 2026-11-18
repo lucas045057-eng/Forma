@@ -218,6 +218,7 @@ export default function AssetPlacement({
         if (result.isVoidTag !== undefined) setIsVoidTag(result.isVoidTag);
         return;
       }
+      setError('');
       setTarget(result.target);
       onTargetSelectedRef.current?.();
     };
@@ -421,6 +422,7 @@ export default function AssetPlacement({
                 className="ghost-btn compact-btn"
                 disabled={busy}
                 onClick={() => {
+                  setError('');
                   setTarget(undefined);
                   setSlotRect(null);
                 }}

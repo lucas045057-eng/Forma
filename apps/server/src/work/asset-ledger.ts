@@ -390,8 +390,20 @@ export function auditTrustedImports(source: string, file: string): void {
   visitIdentifiers(tree);
 }
 
-function referenceKey(reference: ModuleReference): string {
-  return reference.dynamic ? `${reference.file}:${reference.line}:${reference.column}:dynamic` : reference.signature;
+function indexedReferences(references: ModuleReference[]): Map<string, ModuleReference> {
+  const counts = new Map<string, number>();
+  const map = new Map<string, ModuleReference>();
+  for (const reference of references) {
+    if (reference.dynamic || !reference.instanceId) {
+      map.set(`${reference.file}:${reference.line}:${reference.column}:dynamic`, reference);
+      continue;
+    }
+    const base = `${reference.file}::${reference.instanceId}`;
+    const occurrence = (counts.get(base) ?? 0) + 1;
+    counts.set(base, occurrence);
+    map.set(`${base}#${occurrence}`, reference);
+  }
+  return map;
 }
 
 function isTsxFile(file: string): boolean { return /\.(?:tsx|ts)$/.test(file) && file.startsWith('src/'); }
@@ -415,10 +427,10 @@ export function assertNoUnapprovedReferenceChanges(input: {
   if ([...before, ...after].some(reference => reference.dynamic)) {
     throw new WorkError('MODULE_REFERENCE_DYNAMIC', '受信 3D 渲染器只接受静态 instanceId，不能使用变量、展开或额外参数', 409);
   }
-  const beforeKeys = new Map(before.map(reference => [referenceKey(reference), reference]));
-  const afterKeys = new Map(after.map(reference => [referenceKey(reference), reference]));
-  const added = [...afterKeys.values()].filter(reference => !beforeKeys.has(referenceKey(reference)));
-  const removed = [...beforeKeys.values()].filter(reference => !afterKeys.has(referenceKey(reference)));
+  const beforeKeys = indexedReferences(before);
+  const afterKeys = indexedReferences(after);
+  const added = [...afterKeys.entries()].filter(([key]) => !beforeKeys.has(key)).map(([, ref]) => ref);
+  const removed = [...beforeKeys.entries()].filter(([key]) => !afterKeys.has(key)).map(([, ref]) => ref);
   const reference = ledger?.reference;
   if (!added.length && !removed.length) {
     if (reference) throw new WorkError('MODULE_REFERENCE_UNAPPROVED', '受信清单声明的实例引用变化没有实际发生', 409);
