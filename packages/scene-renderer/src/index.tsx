@@ -82,9 +82,10 @@ export interface ProductSceneProps {
   animation?: {playing:boolean;clip?:string;loop?:boolean};
   onAnimations?: (names:string[])=>void;
   transparent?: boolean;
+  enableZoom?: boolean;
 }
 
-function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId,animation,onAnimations, transparent = false }: ProductSceneProps) {
+function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallback = null, onReady, onError, children, onCameraChange, onRotationChange, canvasTestId,animation,onAnimations, transparent = false, enableZoom }: ProductSceneProps) {
   const [scene, setScene] = useState<Object3D>();
   const [animations,setAnimations]=useState<AnimationClip[]>([]);
   const [failed, setFailed] = useState(false);
@@ -130,7 +131,7 @@ function LoadedScene({ config, modelUrl, scrollAt = 0, controls = false, fallbac
       <directionalLight position={config.hero.lights.key.direction} intensity={config.hero.lights.key.intensity}
         color={config.hero.lights.key.color} castShadow shadow-mapSize={[sceneRenderSettings.shadowMapSize, sceneRenderSettings.shadowMapSize]}/>
       {scene && <>{animation && <ModelAnimation scene={scene} clips={animations} playing={animation.playing} clip={animation.clip} loop={animation.loop??true}/>}<Model scene={scene} config={config} scrollAt={scrollAt} onRotationChange={onRotationChange}/><Ready scene={scene} notify={() => callbacks.current.onReady?.(scene)}/></>}
-      {controls && <OrbitControls makeDefault target={config.hero.camera.target} minDistance={0.6} maxDistance={5} onEnd={event => {
+      {controls && <OrbitControls makeDefault enableZoom={enableZoom ?? Boolean(onCameraChange)} target={config.hero.camera.target} minDistance={0.6} maxDistance={5} onEnd={event => {
         const orbit = event?.target as { object: PerspectiveCamera; target: Vector3 } | undefined;
         if (orbit && onCameraChange) onCameraChange({ position: orbit.object.position.toArray() as Vec3, target: orbit.target.toArray() as Vec3, fov: (orbit.object as PerspectiveCamera).fov });
       }}/>}

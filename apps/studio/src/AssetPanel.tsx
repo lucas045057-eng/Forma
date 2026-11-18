@@ -91,7 +91,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
           {current?.status==='ready'&&<button type="button" className="primary-btn compact-btn" data-testid="asset-place" disabled={!onPlace} onClick={()=>{if(current)onPlace?.(current)}}>放入网页</button>}
         </div>
         <div className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>
-          {current?.status === 'ready' && current.modelUrl ? <ProductScene config={defaultSceneConfig} modelUrl={current.modelUrl} controls
+          {current?.status === 'ready' && current.modelUrl ? <ProductScene config={defaultSceneConfig} modelUrl={current.modelUrl} controls enableZoom
             onReady={() => { setLoadedUrl(current.modelUrl!); setFailedUrl(''); }}
             onError={() => { setLoadedUrl(''); setFailedUrl(current.modelUrl!); }}
             fallback={failedUrl === current.modelUrl ? <p role="alert">3D 模型加载失败。请检查资产状态或重新导入。</p> : <p className="model-loading">加载模型中…</p>}/>

@@ -59,5 +59,7 @@ it('strips empty CSS @import placeholders and rejects external network imports o
     await expect(sandbox.write('src/App.tsx', 'import { Sparkles } from "lucide-react";\nexport default () => <main />;\n')).rejects.toThrow('lucide-react');
     await expect(sandbox.write('src/App.tsx', 'export default () => <main><img src="https://example.com/a.jpg" /></main>;\n')).rejects.toThrow('外网媒体');
     await expect(sandbox.write('src/App.tsx', 'export default () => <main><h1>unclosed</main>;\n')).rejects.toThrow('语法错误');
+    await expect(sandbox.write('src/spatial-module.tsx', 'export const x = 1;\n')).rejects.toThrow('pointerEvents');
+    await expect(sandbox.write('src/scene-modules/abc.json', '{}\n')).rejects.toThrow('pointerEvents');
   } finally { await rm(root, { recursive: true, force: true }); }
 });

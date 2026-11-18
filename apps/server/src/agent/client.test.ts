@@ -125,3 +125,62 @@ it('attaches distinct ancestor component sources alongside a picked child compon
     await rm(root, { recursive: true, force: true });
   }
 });
+
+it('automatically attaches src/App.tsx and wrapper guidance when user picks a managed SpatialModule', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'spatial-agent-managed-pick-'));
+  await mkdir(path.join(root, 'src'), { recursive: true });
+  await writeFile(path.join(root, 'src', 'spatial-module.tsx'), 'export function SpatialModule() { return <div/>; }\n');
+  await writeFile(path.join(root, 'src', 'App.tsx'), 'import SpatialModelaaaa from "./scene-modules/aaaa.tsx";\nexport default () => <main><SpatialModelaaaa/></main>;\n');
+
+  let systemContent = '';
+  let userPayload: Record<string, unknown> = {};
+  const customFetch: typeof fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? '{}')) as { messages?: Array<{ role: string; content: string }> };
+    systemContent = body.messages?.find(item => item.role === 'system')?.content ?? '';
+    userPayload = JSON.parse(body.messages?.find(item => item.role === 'user')?.content ?? '{}') as Record<string, unknown>;
+    return new Response(
+      JSON.stringify({
+        id: 'chatcmpl-2',
+        object: 'chat.completion',
+        choices: [{
+          index: 0,
+          message: {
+            role: 'assistant',
+            content: null,
+            tool_calls: [{ id: 'done-2', type: 'function', function: { name: 'finish', arguments: JSON.stringify({ summary: '完成' }) } }],
+          },
+          finish_reason: 'tool_calls',
+        }],
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+
+  try {
+    const agent = new CodingAgent({ baseUrl: 'http://127.0.0.1:49999', apiKey: 'mock-only', model: 'mock-coder', fetch: customFetch });
+    await agent.run({
+      taskId: 'managed-pick',
+      instruction: '定格这个3D动画，别让它随滚轮滑动',
+      root,
+      selection: {
+        src: 'src/spatial-module.tsx:1:35',
+        baseVersion: 'v1',
+        cid: 'SpatialModule',
+        text: '',
+        bbox: [0, 0, 400, 400],
+        styles: {
+          display: 'block', position: 'relative', color: '#000', backgroundColor: '#fff',
+          fontSize: '16px', fontFamily: 'sans-serif', fontWeight: '400', lineHeight: '20px',
+          padding: '0px', margin: '0px', borderRadius: '0px', width: '400px', height: '400px',
+        },
+        instances: 1,
+        ancestors: ['src/spatial-module.tsx:1:1'],
+      },
+    });
+    expect(systemContent).toContain('pointerEvents');
+    const related = userPayload.relatedAncestorFilesWithLineNumbers as Record<string, string>;
+    expect(related['src/App.tsx']).toContain('<SpatialModelaaaa/>');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
