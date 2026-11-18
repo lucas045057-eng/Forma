@@ -1,5 +1,0 @@
-{"event":"spawned-child","role":"orphan","pid":3896,"parent":35220,"at":"2026-11-15T16:56:44.224Z","connected":true,"childPid":36124,"childRole":"preview"}
-{"event":"spawned-child","role":"orphan","pid":3896,"parent":35220,"at":"2026-11-15T16:56:44.229Z","connected":true,"childPid":10800,"childRole":"check"}
-{"event":"spawned-child","role":"orphan","pid":3896,"parent":35220,"at":"2026-11-15T16:56:44.235Z","connected":true,"childPid":50084,"childRole":"asset"}
-{"event":"spawned-child","role":"orphan","pid":3896,"parent":35220,"at":"2026-11-15T16:56:44.239Z","connected":true,"childPid":38108,"childRole":"frontend-worker"}
-{"event":"ready","role":"orphan","pid":3896,"parent":35220,"at":"2026-11-15T16:56:44.240Z","connected":true}

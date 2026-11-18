@@ -1,4 +1,0 @@
-{
-  "test": "reclaims actual Chromium and its static listener after a renderer loop cancel",
-  "runId": "c8d6dabaf3024689804197b8a49d94c6"
-}

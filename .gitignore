@@ -9,8 +9,9 @@ orbital/sessions/
 orbital/ledger/
 orbital/tool-results/
 orbital/sub_agents/*/*.jsonl
-
-docs/reports/artifacts/M0-B/output/
 .worktrees/
 
-docs/reports/artifacts/M0-A/output/
+# 忽略本地 E2E 运行输出与已收敛的历史测试产物，仅跟踪归档索引
+docs/reports/artifacts/*
+!docs/reports/artifacts/README.md
+!docs/reports/artifacts/ARCHIVE-INDEX.json

@@ -1,4 +1,0 @@
-{
-  "test": "unexpected worker exit rejects a pending request instead of leaving a green result",
-  "runId": "8d51eba072be4e279a65ed5c5604fe18"
-}

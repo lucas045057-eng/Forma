@@ -1,4 +1,0 @@
-{
-  "test": "blocks webkitRTCPeerConnection before a real loopback STUN packet can leave Chromium",
-  "runId": "c4e37affaa834a4fa3ca2cfd031cfad5"
-}

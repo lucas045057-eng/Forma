@@ -1,4 +1,0 @@
-{
-  "test": "runs real Chromium smoke and occlusion against one built static page with evidence",
-  "runId": "8a16126c59f24454b0159130456fd448"
-}

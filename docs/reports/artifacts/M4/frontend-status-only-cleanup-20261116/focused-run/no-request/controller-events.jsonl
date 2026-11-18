@@ -1,9 +1,0 @@
-{"at":"2026-11-15T18:35:43.594Z","event":"spawn","pid":15768,"exitCode":null,"signalCode":null,"connected":true}
-{"at":"2026-11-15T18:35:43.748Z","event":"ipc-message","type":"prepared","pid":15768,"run":"E:\\空间化AI工作台\\.worktrees\\m4\\.data\\demo-runs\\2026-11-15T18-35-43.648Z-d2a0960b-7333-4a23-8ca7-ae7ac0085f47"}
-{"at":"2026-11-15T18:35:48.175Z","event":"disconnect","pid":15768,"exitCode":null,"signalCode":null,"connected":false}
-{"at":"2026-11-15T18:35:48.180Z","event":"stdout:end","destroyed":false,"readableEnded":true,"closed":false}
-{"at":"2026-11-15T18:35:48.180Z","event":"stderr:end","destroyed":false,"readableEnded":true,"closed":false}
-{"at":"2026-11-15T18:35:48.180Z","event":"stderr:close","destroyed":true,"readableEnded":true,"closed":true}
-{"at":"2026-11-15T18:35:48.180Z","event":"stdout:close","destroyed":true,"readableEnded":true,"closed":true}
-{"at":"2026-11-15T18:35:48.183Z","event":"exit","pid":15768,"code":0,"signal":null,"exitCode":0,"signalCode":null,"connected":false}
-{"at":"2026-11-15T18:35:48.184Z","event":"close","pid":15768,"code":0,"signal":null,"exitCode":0,"signalCode":null,"connected":false}

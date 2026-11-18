@@ -1,4 +1,0 @@
-{
-  "test": "stop settles the active request and confirms exit even without aborting its signal",
-  "runId": "9755c4343da942209e1297f3b0c885c4"
-}

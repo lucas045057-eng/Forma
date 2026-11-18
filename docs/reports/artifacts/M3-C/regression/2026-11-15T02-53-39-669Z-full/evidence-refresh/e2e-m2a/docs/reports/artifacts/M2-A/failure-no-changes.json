@@ -1,7 +1,0 @@
-{
-  "status": "failed",
-  "error": {
-    "code": "NO_CHANGES",
-    "message": "编码 Agent 没有产生任何文件改动"
-  }
-}

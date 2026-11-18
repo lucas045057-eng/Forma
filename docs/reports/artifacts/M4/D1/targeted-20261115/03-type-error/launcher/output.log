@@ -1,9 +1,0 @@
-$ tsc
-$ tsc
-src/speech/routes.test.ts(135,89): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${string}-${string}-${string}-${string}-${string}`'.
-E:\空间化AI工作台\.worktrees\m4\apps\server:
-[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @spatial/server@ typecheck: `tsc`
-Exit status 2
-Error: server-typecheck failed; remaining stages not executed
-    at file:///E:/%E7%A9%BA%E9%97%B4%E5%8C%96AI%E5%B7%A5%E4%BD%9C%E5%8F%B0/.worktrees/m4/.data/d1-green.mjs:45:79
-{"output":"E:\\空间化AI工作台\\.worktrees\\m4\\.data\\d1-green-2026-11-15T06-37-50.098Z","exit":1,"stoppedAt":"server-typecheck","identityUnchanged":true}

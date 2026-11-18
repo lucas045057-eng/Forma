@@ -1,8 +1,0 @@
-{"event":"spawned-child","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:05.202Z","connected":true,"childPid":25816,"childRole":"preview"}
-{"event":"spawned-child","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:05.207Z","connected":true,"childPid":29252,"childRole":"check"}
-{"event":"spawned-child","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:05.211Z","connected":true,"childPid":66488,"childRole":"asset"}
-{"event":"spawned-child","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:05.216Z","connected":true,"childPid":27384,"childRole":"frontend-worker"}
-{"event":"ready","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:05.217Z","connected":true}
-{"event":"disconnect","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:06.876Z","connected":false}
-{"event":"close-called","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:06.876Z","connected":false,"closeMode":"hung"}
-{"event":"exit","role":"orphan","pid":46960,"parent":25344,"at":"2026-11-15T16:43:08.901Z","connected":false,"code":1}

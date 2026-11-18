@@ -1,4 +1,0 @@
-{"event":"instrument-before-stdio","role":"frontend-worker","pid":60992,"ppid":16440,"at":"2026-11-15T16:04:02.732Z","uptime":0.0239357,"connected":true,"exitCode":null,"resources":[]}
-{"event":"instrument-after-stdio","role":"frontend-worker","pid":60992,"ppid":16440,"at":"2026-11-15T16:04:02.733Z","uptime":0.024632,"connected":true,"exitCode":null,"resources":[]}
-{"event":"worker-interval-installed","role":"frontend-worker","pid":60992,"ppid":16440,"at":"2026-11-15T16:04:02.733Z","uptime":0.0249362,"connected":true,"exitCode":null,"resources":["PipeWrap","Timeout"]}
-{"event":"ready","role":"frontend-worker","pid":60992,"ppid":16440,"at":"2026-11-15T16:04:02.733Z","uptime":0.0252103,"connected":true,"exitCode":null,"resources":["PipeWrap","Timeout"]}

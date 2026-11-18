@@ -1,1 +1,0 @@
-cd /d .worktrees\m4-acceptance&& node tests/e2e/m4/full-regression.mjs

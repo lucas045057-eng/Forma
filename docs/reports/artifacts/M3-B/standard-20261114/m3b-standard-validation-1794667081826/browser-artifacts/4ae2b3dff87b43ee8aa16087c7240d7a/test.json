@@ -1,4 +1,0 @@
-{
-  "test": "rejects a static directory replaced by a junction after the browser starts",
-  "runId": "4ae2b3dff87b43ee8aa16087c7240d7a"
-}

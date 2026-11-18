@@ -1,7 +1,0 @@
-{
-  "status": "failed",
-  "error": {
-    "code": "AGENT_UPSTREAM",
-    "message": "编码模型服务返回 HTTP 500"
-  }
-}
