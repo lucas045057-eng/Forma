@@ -2,7 +2,7 @@ import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'reac
 import SpeechInput from './SpeechInput.tsx';
 import {nativeSpeechPorts,SpeechController,speechBusy,type SpeechReview} from './speech-input.ts';
 import {bindingMatches,identityLabel,reviewDecision,type ReviewMode,type SpeechContext} from './speech-review.ts';
-import type { Selection, Task } from '@spatial/shared';
+import type { Selection, Task, WorkStarter } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
 import { operationError, refreshError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
@@ -12,7 +12,7 @@ const statusLabels: Record<Task['status'], string> = {
   queued: '排队中', running: '执行中', awaiting_approval: '等待请示', done: '候选已就绪', failed: '失败', cancelled: '已取消',
 };
 
-export default function PointSpeak({ pick, blocked = false, blankBootstrap = false }: { pick: PickState; blocked?: boolean; blankBootstrap?: boolean }) {
+export default function PointSpeak({ pick, blocked = false, blankBootstrap = false, starterKind }: { pick: PickState; blocked?: boolean; blankBootstrap?: boolean; starterKind?: WorkStarter }) {
   const selection = submittedSelection(pick);
   const { state, reload, syncReady, status, acquire, awaiting, locked } = useEventCenter();
   const writable = !blocked && syncReady && status === 'connected' && !locked(['task:create']);
@@ -91,20 +91,35 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
     finally { setBusy(false); }
   }
 
+  const isFreeWebBootstrap = blankBootstrap && starterKind === 'free-web' && !selection;
+  const isSpatialBootstrap = blankBootstrap && starterKind !== 'free-web' && !selection;
+
   return <section className="point-speak" aria-label="指着说">
     <div className="composer-shell">
       <div className="composer-header">
-        <span className="section-label">{blankBootstrap && !selection ? 'FIRST-EDITION 3D PAGE' : 'PROMPT & VOICE'}</span>
+        <span className="section-label">{isFreeWebBootstrap ? 'CREATE WEBPAGE' : isSpatialBootstrap ? 'FIRST-EDITION 3D PAGE' : 'PROMPT & VOICE'}</span>
         <span className="composer-pick-hint" data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span>
       </div>
-      {blankBootstrap && !selection && <div className="composer-quick-chips">
+      {isFreeWebBootstrap && <div className="composer-quick-chips">
+        <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个北欧极简建筑与空间设计事务所官网，带代表项目筛选与预约咨询')}>✦ 极简建筑事务所官网</button>
+        <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个精品手冲咖啡馆品牌网页，带当季风味豆单切换与预订试饮按钮')}>✦ 精品咖啡馆主页</button>
+      </div>}
+      {isSpatialBootstrap && <div className="composer-quick-chips">
         <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个黑钛旗舰无线降噪耳机的深空科技感 3D 新品发布页')}>✦ 黑钛耳机发布页</button>
         <button type="button" className="chip-btn" onClick={() => changeInstruction('做一个北欧极简月球氛围灯的温润家居 3D 互动展厅')}>✦ 月球灯互动展厅</button>
       </div>}
       <label className="instruction-label">
         <span className="sr-only">修改指令</span>
         <textarea data-testid="instruction-input" value={instruction} onChange={event => changeInstruction(event.target.value)} onKeyDown={keyboard}
-          placeholder={blankBootstrap && !selection ? '输入一句话直接从零生成首版完整 3D 网页（Ctrl/⌘ + Enter 提交）…' : '描述想调整的文案、排版或交互，例如：把标题改成“山野清风，落入日常。”（Ctrl/⌘ + Enter 提交）'} rows={3}/>
+          placeholder={
+            isFreeWebBootstrap
+              ? '自由输入一句话从零生成完整现代网页（Ctrl/⌘ + Enter 提交）…'
+              : isSpatialBootstrap
+                ? '输入一句话直接从零生成首版完整 3D 网页（Ctrl/⌘ + Enter 提交）…'
+                : starterKind === 'imported' && !selection
+                  ? '描述对这份已导入网页的修改要求，或先点击顶部「开启选取」锁定局部标题/区块修改（Ctrl/⌘ + Enter）'
+                  : '描述想调整的文案、排版或交互，例如：把标题改成“山野清风，落入日常。”（Ctrl/⌘ + Enter 提交）'
+          } rows={3}/>
       </label>
       <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
       {binding&&!bindingMatches(binding,context)&&<div className="conflict-banner" data-testid="speech-binding-conflict" role="alert">
@@ -116,8 +131,8 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
         </div>
       </div>}
       <div className="composer-footer">
-        <span className="composer-caption">{blankBootstrap && !selection ? '直接生成完整首版页面候选' : '发送选中源码上下文生成候选草稿'}</span>
-        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>{blankBootstrap && !selection ? '生成首版 3D 网页' : '生成候选版本'}</button>
+        <span className="composer-caption">{blankBootstrap && !selection ? '由编码模型直接生成首版完整页面候选' : '发送选中源码上下文生成候选草稿'}</span>
+        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>{isFreeWebBootstrap ? '生成首版网页' : isSpatialBootstrap ? '生成首版 3D 网页' : '生成候选版本'}</button>
       </div>
     </div>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}

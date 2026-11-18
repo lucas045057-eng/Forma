@@ -1,13 +1,14 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { request as httpRequest } from 'node:http';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Task, WorkStarter, WorkSummary, WorksState } from '@spatial/shared';
 import type { CodingAgentOptions } from '../agent/client.ts';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import type { AssetService } from '../assets/service.ts';
+import { assertSnapshotBudget } from '../checks/snapshot.ts';
 import type { StudioEvent } from '../events.ts';
 import { ModuleSceneService } from '../scene/modules.ts';
 import { SceneService } from '../scene/service.ts';
@@ -15,6 +16,11 @@ import { allocatePreviewPort, previewViteEntry } from './preview.ts';
 import { WorkError } from './repo.ts';
 import { WorkService, type WorkServiceOptions } from './service.ts';
 import { scaffoldWorkDirectory } from './starter-templates.ts';
+import {
+  prepareImportedWorkDirectory,
+  type ImporterInternalOptions,
+  type ImportWorkRequest,
+} from './webpage-importer.ts';
 
 interface StoredWorkRecord {
   id: string;
@@ -23,6 +29,7 @@ interface StoredWorkRecord {
   createdAt: string;
   updatedAt: string;
   initialPrompt?: string;
+  sourceLabel?: string;
 }
 
 interface StoredWorksIndex {
@@ -312,10 +319,17 @@ export class WorkspaceManager {
     return this.serial(async () => {
       if (this.closing) throw new WorkError('SERVICE_CLOSING', '服务正在关闭', 503);
       if (this.index.works.length >= 24) throw new WorkError('WORK_LIMIT', '本地最多保留 24 个作品，请先整理现有作品', 409);
-      const starter: WorkStarter = input.starter === 'product-page' ? 'product-page' : 'blank';
-      const prompt = typeof input.prompt === 'string' ? input.prompt.trim() : '';
+      const starter: WorkStarter =
+        input.starter === 'product-page' ? 'product-page'
+        : input.starter === 'free-web' ? 'free-web'
+        : 'blank';
+      const prompt = starter === 'product-page' ? '' : (typeof input.prompt === 'string' ? input.prompt.trim() : '');
       if (prompt.length > 4000) throw new WorkError('INVALID_INPUT', '生成描述不能超过 4000 字', 400);
-      const inferredName = prompt ? prompt.slice(0, 18).replace(/[，。！？,.!?\s]+$/g, '') : starter === 'blank' ? '未命名空间作品' : '木间香薰副本';
+      const inferredName = prompt
+        ? prompt.slice(0, 18).replace(/[，。！？,.!?\s]+$/g, '')
+        : starter === 'free-web' ? '未命名网页作品'
+        : starter === 'blank' ? '未命名空间作品'
+        : '木间香薰副本';
       const rawName = (typeof input.name === 'string' ? input.name.trim() : '') || inferredName;
       if (rawName.length < 1 || rawName.length > 60) throw new WorkError('INVALID_INPUT', '作品名称长度需在 1 到 60 字之间', 400);
 
@@ -346,7 +360,7 @@ export class WorkspaceManager {
       let instance: WorkInstance;
       try {
         instance = await this.instantiate(id);
-        if (input.assetId && input.assets) {
+        if (input.assetId && input.assets && starter === 'blank') {
           await instance.work.repo.exclusive(() => instance.scene.adopt(input.assets!, input.assetId!, true));
         }
         await this.ensureActiveMainPreview();
@@ -366,6 +380,71 @@ export class WorkspaceManager {
         task = await instance.work.submit(prompt, undefined, { bootstrap: true });
       }
       return { activeId: id, work: summary, version, ...(task ? { task } : {}) };
+    });
+  }
+
+  async importWork(
+    request: ImportWorkRequest,
+    internal?: ImporterInternalOptions,
+  ): Promise<{ activeId: string; work: WorkSummary; version: string }> {
+    return this.serial(async () => {
+      if (this.closing) throw new WorkError('SERVICE_CLOSING', '服务正在关闭', 503);
+      if (this.index.works.length >= 24) throw new WorkError('WORK_LIMIT', '本地最多保留 24 个作品，请先整理现有作品', 409);
+
+      const id = `work-${randomUUID().replaceAll('-', '').slice(0, 8)}`;
+      const now = new Date().toISOString();
+      const paths = this.pathsFor(id);
+
+      let prepared;
+      try {
+        prepared = await prepareImportedWorkDirectory({
+          request,
+          targetWorkRoot: paths.workRoot,
+          dependencySourceRoots: [this.options.defaultWorkRoot],
+          internal: {
+            ...internal,
+            protectedRoots: [
+              this.options.workDataDirectory,
+              this.options.defaultHistoryDirectory,
+              ...(internal?.protectedRoots ?? []),
+            ],
+          },
+        });
+        await assertSnapshotBudget(paths.workRoot);
+      } catch (error) {
+        await rm(path.dirname(paths.workRoot), { recursive: true, force: true }).catch(() => {});
+        throw error;
+      }
+
+      const record: StoredWorkRecord = {
+        id,
+        name: prepared.name,
+        starter: 'imported',
+        createdAt: now,
+        updatedAt: now,
+        sourceLabel: prepared.sourceLabel,
+      };
+      this.index.works.push(record);
+      const previousId = this.index.activeId;
+      this.index.activeId = id;
+      await this.saveIndex();
+
+      let instance: WorkInstance;
+      try {
+        instance = await this.instantiate(id);
+        await this.ensureActiveMainPreview();
+      } catch (error) {
+        this.index.activeId = previousId;
+        this.index.works = this.index.works.filter(item => item.id !== id);
+        await this.saveIndex().catch(() => {});
+        await rm(path.dirname(paths.workRoot), { recursive: true, force: true }).catch(() => {});
+        throw error;
+      }
+
+      const { version } = await instance.work.version();
+      const summary = this.getSummary(id);
+      this.options.emit({ type: 'work.changed', activeId: id, previousId, work: summary, version });
+      return { activeId: id, work: summary, version };
     });
   }
 

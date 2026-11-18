@@ -118,25 +118,37 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
     ctx.signal.throwIfAborted();s=await session(ctx);
     Object.assign(data,{url:s.origin.url,browserVersion:s.browser.version()});
     await navigate(s);
+    const isCustomSpatialPage = await s.page.locator('#root main[data-spatial-page]').count() > 0;
     if(name==='smoke'){
-      const isCustomSpatialPage = await s.page.locator('#root main[data-spatial-page]').count() > 0;
       const scene=s.page.getByTestId('product-scene');
-      const state=await scene.getAttribute('data-state');
-      const placeholderVisible=await s.page.getByTestId('product-placeholder').isVisible();
-      data.scene={state,placeholderVisible};
-      if(state!=='ready' && !(state==='fallback'&&placeholderVisible))throw new Error('SCENE_NOT_READY_OR_VISIBLE_FALLBACK');
+      const sceneCount = await scene.count();
+      if (!isCustomSpatialPage || sceneCount > 0) {
+        const state=await scene.getAttribute('data-state');
+        const placeholderVisible=await s.page.getByTestId('product-placeholder').isVisible().catch(()=>false);
+        data.scene={present:true,state,placeholderVisible};
+        if(state!=='ready' && !(state==='fallback'&&placeholderVisible))throw new Error('SCENE_NOT_READY_OR_VISIBLE_FALLBACK');
+      } else {
+        data.scene={present:false};
+      }
       if (isCustomSpatialPage) {
-        const heading = s.page.locator('#root main h1').first();
-        if (await heading.count() < 1 || !await heading.isVisible() || !(await heading.textContent() ?? '').trim()) {
-          throw new Error('HEADING_UNAVAILABLE');
+        const mainEl = s.page.locator('#root main[data-spatial-page]').first();
+        const visibleText = ((await mainEl.innerText().catch(() => '')) ?? '').trim();
+        const mediaCount = await mainEl.locator('img,svg,canvas,video').count();
+        if (!visibleText && mediaCount < 1) {
+          throw new Error('PAGE_CONTENT_EMPTY');
         }
-        const cta = s.page.locator('#root main button:not([disabled])').first();
-        if (await cta.count() < 1 || !await cta.isVisible()) {
-          throw new Error('PRIMARY_CTA_UNAVAILABLE');
+        const heading = s.page.locator('#root main h1, #root main h2, #root main [role="heading"]').first();
+        const headingText = await heading.count() > 0
+          ? ((await heading.textContent().catch(() => '')) ?? '').trim().slice(0, 120)
+          : visibleText.slice(0, 120);
+        const cta = s.page.locator('#root main button:not([disabled]):not([type="submit"])').first();
+        let interactiveVerified = false;
+        if (await cta.count() > 0 && await cta.isVisible()) {
+          await cta.click();
+          await frames(s.page);
+          interactiveVerified = true;
         }
-        await cta.click();
-        await frames(s.page);
-        data.spatialPage = { heading: (await heading.textContent() ?? '').trim().slice(0, 120), interactiveVerified: true };
+        data.spatialPage = { heading: headingText, interactiveVerified, has3DStage: sceneCount > 0 };
       } else {
         const buy=s.page.getByTestId('buy-button');
         if(await buy.count()!==1 || !await buy.isVisible() || !await buy.isEnabled())throw new Error('BUY_BUTTON_UNAVAILABLE');
@@ -179,7 +191,7 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
         return {targets,excluded};
       });
       Object.assign(data,result);
-      if(!result.targets.length)throw new Error('NO_INTERACTIVE_TARGETS');
+      if(!result.targets.length && !isCustomSpatialPage)throw new Error('NO_INTERACTIVE_TARGETS');
       if(result.targets.some(target=>!target.passed))throw new Error('INTERACTIVE_TARGET_OCCLUDED');
     }
     await frames(s.page);

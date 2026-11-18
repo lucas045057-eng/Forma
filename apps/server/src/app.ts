@@ -6,7 +6,7 @@ import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import type { Selection, WorkStarter } from '@spatial/shared';
+import type { ModelStatusView, Selection, WorkStarter } from '@spatial/shared';
 import { SceneError } from './scene/service.ts';
 import { SceneModuleError } from '@spatial/shared/scene-module';
 import { AssetService, type ServiceOptions as AssetServiceOptions } from './assets/service.ts';
@@ -14,6 +14,7 @@ import { AssetError, Lux3DClient, type GenerationInput } from './assets/lux3d.ts
 import { EventLog } from './events.ts';
 import { type WorkServiceOptions } from './work/service.ts';
 import { WorkspaceManager } from './work/workspace.ts';
+import type { ImporterInternalOptions, ImportWorkRequest } from './work/webpage-importer.ts';
 import { WorkError } from './work/repo.ts';
 import { registerCheckRoutes } from './checks/routes.ts';
 import { ArtifactError } from './checks/artifacts.ts';
@@ -87,6 +88,8 @@ export interface AppOptions {
   checks?: WorkServiceOptions['checks'];
   /** Internal speech configuration; the loopback exception is never read from env. */
   speech?: SpeechClientOptions & { timeoutMs?: number };
+  /** Internal test seam for webpage importer URL loopback fixtures; never read from HTTP. */
+  importer?: ImporterInternalOptions;
   logger?: FastifyServerOptions['logger'];
 }
 
@@ -206,7 +209,60 @@ export async function createApp(options: AppOptions = {}) {
       return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许通过同源工作台访问' } });
     }
   });
+  const resolvedCodingBase = options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL ?? '';
+  const resolvedCodingKey = options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY ?? '';
+  const resolvedCodingModel = options.codingAgentModel ?? process.env.CODING_AGENT_MODEL ?? '';
+  const resolvedSpeechBase = options.speech?.baseUrl ?? process.env.SPEECH_BASE_URL ?? '';
+  const luxStatusClient = new Lux3DClient({
+    base: options.base ?? process.env.LUX3D_WORKBENCH_BASE ?? process.env.LUX3D_BASE ?? 'https://api.aholo.cn',
+    key: options.key ?? process.env.LUX3D_API_KEY,
+  });
+
   app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
+  app.get('/models/status', async (_request, reply): Promise<ModelStatusView> => {
+    reply.header('Cache-Control', 'no-store');
+    const parseHost = (raw: string) => {
+      if (!raw) return null;
+      try { return new URL(raw).hostname.toLowerCase(); } catch { return null; }
+    };
+    const isLoopbackHost = (h: string | null) => !!h && ['127.0.0.1', 'localhost', '[::1]', '::1'].includes(h);
+    const codingHost = parseHost(resolvedCodingBase);
+    const codingConfigured = Boolean(codingHost && resolvedCodingKey.trim() && resolvedCodingModel.trim());
+    const codingMode = !codingConfigured
+      ? 'unconfigured'
+      : (isLoopbackHost(codingHost) || resolvedCodingKey === 'mock-only' ? 'mock' : 'real');
+
+    const speechHost = parseHost(resolvedSpeechBase);
+    const speechConfigured = speech.config.enabled;
+    const speechMode = !speechConfigured
+      ? 'unconfigured'
+      : (isLoopbackHost(speechHost) || options.speech?.testLoopback === true ? 'mock' : 'real');
+
+    const luxHost = luxStatusClient.activeGateway.toLowerCase();
+    const luxMode = !luxStatusClient.configured
+      ? 'unconfigured'
+      : (options.mockAssets || isLoopbackHost(luxHost) || (options.key ?? process.env.LUX3D_API_KEY) === 'mock-only' ? 'mock' : 'real');
+
+    return {
+      coding: {
+        configured: codingConfigured,
+        mode: codingMode,
+        model: codingConfigured ? resolvedCodingModel.trim() : null,
+        providerHost: codingHost,
+      },
+      speech: {
+        configured: speechConfigured,
+        mode: speechMode,
+        model: speech.config.model,
+      },
+      lux3d: {
+        configured: luxStatusClient.configured,
+        mode: luxMode,
+        gateway: luxStatusClient.activeGateway,
+        legacyGateway: luxStatusClient.legacyGateway,
+      },
+    };
+  });
   app.get('/events', { websocket: true }, socket => {
     const unsubscribe = events.subscribe(event => { if (socket.readyState === 1) socket.send(JSON.stringify(event)); });
     socket.send(JSON.stringify({ type: 'ready', seq: events.last, oldest: events.oldest }));
@@ -227,13 +283,45 @@ export async function createApp(options: AppOptions = {}) {
         additionalProperties: false,
         properties: {
           name: { type: 'string', maxLength: 60 },
-          starter: { type: 'string', enum: ['blank', 'product-page'] },
+          starter: { type: 'string', enum: ['blank', 'free-web', 'product-page'] },
           prompt: { type: 'string', maxLength: 4000 },
           assetId: { type: 'string', maxLength: 80 },
         },
       },
     },
   }, async (request, reply) => reply.code(201).send(await workspace.create({ ...request.body, assets: service })));
+  app.post<{ Body: ImportWorkRequest }>('/works/import', {
+    bodyLimit: 24 * 1024 * 1024,
+    schema: {
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['mode'],
+        properties: {
+          mode: { type: 'string', enum: ['html', 'files', 'directory', 'url'] },
+          name: { type: 'string', maxLength: 60 },
+          html: { type: 'string', maxLength: 8_500_000 },
+          css: { type: 'string', maxLength: 8_500_000 },
+          directoryPath: { type: 'string', minLength: 1, maxLength: 1024 },
+          url: { type: 'string', minLength: 1, maxLength: 2048 },
+          files: {
+            type: 'array',
+            minItems: 1,
+            maxItems: 250,
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['path', 'contentBase64'],
+              properties: {
+                path: { type: 'string', minLength: 1, maxLength: 512 },
+                contentBase64: { type: 'string', maxLength: 12_000_000 },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, async (request, reply) => reply.code(201).send(await workspace.importWork(request.body, options.importer)));
   app.post<{ Params: { id: string } }>('/works/:id/select', async request => workspace.select(request.params.id));
   app.patch<{ Params: { id: string }; Body: { name: string } }>('/works/:id', {
     schema: {

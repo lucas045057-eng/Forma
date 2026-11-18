@@ -464,7 +464,7 @@ export class WorkService {
       updatedAt: now,
     };
     this.state.tasks.push(task);
-    await this.append(task, options?.bootstrap ? '首版 3D 网页生成任务已排队' : '任务已排队');
+    await this.append(task, options?.bootstrap ? '首版网页生成任务已排队' : '任务已排队');
     this.taskQueue = this.taskQueue.then(() => this.execute(task.id)).catch(() => {});
     return clone(task);
   }

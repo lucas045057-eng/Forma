@@ -1,7 +1,16 @@
 import { lstat, mkdir, readdir, readFile, realpath } from 'node:fs/promises';
 import { writeAtomic } from '../assets/atomic-file.ts';
 import path from 'node:path';
+import ts from 'typescript';
 import { isSceneConfig } from '@spatial/shared/scene-config';
+
+const ALLOWED_BARE_PACKAGES = new Set([
+  'react',
+  'react-dom',
+  '@spatial/shared',
+  '@spatial/bridge',
+  '@spatial/scene-renderer',
+]);
 
 /** Raised for anything the model asked for that the sandbox refuses; the text goes back to the model. */
 export class ToolError extends Error {}
@@ -81,19 +90,60 @@ export class Sandbox {
     return content.toString('utf8');
   }
   private async store(target: { absolute: string; relative: string }, content: string) {
-    if (Buffer.byteLength(content) > MAX_WRITE) throw new ToolError('内容过大');
-    this.check(Buffer.byteLength(content));
+    let nextContent = content;
+    if (Buffer.byteLength(nextContent) > MAX_WRITE) throw new ToolError('内容过大');
+    this.check(Buffer.byteLength(nextContent));
     if (target.relative.toLowerCase() === 'src/scene.config.json') {
       let parsed: unknown;
-      try { parsed = JSON.parse(content); } catch { throw new ToolError('scene.config.json 必须是合法 JSON'); }
+      try { parsed = JSON.parse(nextContent); } catch { throw new ToolError('scene.config.json 必须是合法 JSON'); }
       if (!isSceneConfig(parsed)) throw new ToolError('scene.config.json 不符合场景配置的约定（字段、取值范围或关键帧顺序）');
     } else if (target.relative.endsWith('.json')) {
-      try { JSON.parse(content); } catch { throw new ToolError('JSON 文件内容不是合法 JSON'); }
+      try { JSON.parse(nextContent); } catch { throw new ToolError('JSON 文件内容不是合法 JSON'); }
+    } else if (target.relative.endsWith('.css')) {
+      // Strip harmless empty @import placeholders emitted by some LLMs
+      nextContent = nextContent.replace(/@import\s+(?:url\(\s*(?:""|''|)\s*\)|""|'')\s*;?\s*/gi, '');
+      const uncommented = nextContent.replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const match of uncommented.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]*))\s*\)|@import\s+["']([^"']*)["']/gi)) {
+        const ref = (match[1] ?? match[2] ?? match[3] ?? match[4] ?? '').trim();
+        if (!ref || /^(?:https?:)?\/\//i.test(ref)) {
+          throw new ToolError('CSS 文件不得包含外网 @import 或外网/空 url(...) 引用（检查门禁禁止外部网络请求），请改用本地系统字体栈、CSS 渐变或 data:image/svg+xml。');
+        }
+      }
+    } else if (target.relative.endsWith('.tsx') || target.relative.endsWith('.ts')) {
+      const sf = ts.createSourceFile(
+        target.relative,
+        nextContent,
+        ts.ScriptTarget.Latest,
+        true,
+        target.relative.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+      );
+      const diags = (sf as ts.SourceFile & { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics ?? [];
+      if (diags.length > 0) {
+        const first = diags[0];
+        const line = sf.getLineAndCharacterOfPosition(first.start ?? 0).line + 1;
+        const msg = ts.flattenDiagnosticMessageText(first.messageText, ' ');
+        throw new ToolError(`${target.relative} 存在 TypeScript/JSX 语法错误（第 ${line} 行：${msg}），请修正后重新写入。`);
+      }
+      for (const stmt of sf.statements) {
+        if ((ts.isImportDeclaration(stmt) || ts.isExportDeclaration(stmt)) && stmt.moduleSpecifier && ts.isStringLiteral(stmt.moduleSpecifier)) {
+          const spec = stmt.moduleSpecifier.text.trim();
+          if (!spec.startsWith('.')) {
+            const parts = spec.split('/');
+            const pkg = spec.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+            if (!ALLOWED_BARE_PACKAGES.has(pkg)) {
+              throw new ToolError(`不允许 import 未安装的包 "${spec}"；仅允许 import "react"、"react-dom"、"@spatial/scene-renderer" 或 ./ 本地模块（图标请手写内联 <svg>）。`);
+            }
+          }
+        }
+      }
+      if (/<(?:img|script|link|iframe|video|audio|source)\b[^>]*\b(?:src|href)\s*=\s*["'](?:https?:)?\/\//i.test(nextContent)) {
+        throw new ToolError('源码不得引用 http:// 或 https:// 外网媒体/脚本资源（检查门禁禁止外部网络请求），请改用现代 CSS 或内联 <svg>。');
+      }
     }
     await mkdir(path.dirname(target.absolute), { recursive: true });
     await this.resolve(target.relative, WRITABLE, '写入');
     this.check();
-    await writeAtomic(target.absolute, content, this.options.signal);
+    await writeAtomic(target.absolute, nextContent, this.options.signal);
     this.check();
     this.written.add(target.relative);
   }

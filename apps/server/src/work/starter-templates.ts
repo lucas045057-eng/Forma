@@ -200,7 +200,68 @@ export default function App() {
         ))}
       </section>
 
-      <footer className="page-footer">${safeTitle} · Powered by Orbit Spatial Studio</footer>
+      <footer className="page-footer">${safeTitle} · Powered by Forma Spatial Studio</footer>
+    </main>
+  );
+}
+`;
+}
+
+function freeWebAppSource(workName: string): string {
+  const safeTitle = escapeJsxText(workName.trim() || '未命名网页作品');
+  return `import { useState } from 'react';
+import { Button } from './components/Button';
+
+const sections = [
+  { code: '01', title: '自由网页创作', detail: '用自然语言从零生成品牌官网、个人作品集、产品着陆页、互动小工具或活动专题。' },
+  { code: '02', title: '点选局部精修', detail: '开启选取即可直接锁定任意标题、段落、卡片或按钮，让真实大模型按需改写。' },
+  { code: '03', title: '随时融入 3D', detail: '即便从纯 2D 网页起步，也可随时从左侧 3D 资产库将模型拖入任意区块生成三维模块。' },
+];
+
+export default function App() {
+  const [feedback, setFeedback] = useState('');
+  const [interactions, setInteractions] = useState(0);
+
+  return (
+    <main data-spatial-page className="spatial-page">
+      <header className="top-nav">
+        <a className="brand-mark" href="#hero">${safeTitle}<span>FORMA WEB CANVAS</span></a>
+        <a className="nav-link" href="#highlights">创作能力</a>
+      </header>
+
+      <section id="hero" className="hero-editorial">
+        <p className="eyebrow">FREE WEB WORKSPACE</p>
+        <h1>${safeTitle}</h1>
+        <p className="lead">
+          这是一张自由现代网页画布，不设固定模板限制。在右侧输入你的想法即可直接生成完整网页，或随时点选任意元素继续迭代。
+        </p>
+        <div className="cta-row">
+          <Button
+            data-testid="explore-button"
+            onClick={() => {
+              setInteractions(count => count + 1);
+              setFeedback('画布交互就绪 · 在右侧输入描述即可由真实模型生成完整网页');
+            }}
+          >
+            验证页面交互
+          </Button>
+        </div>
+        <output className="status-pill" data-testid="action-status" data-interactions={interactions} aria-live="polite">
+          {feedback}
+        </output>
+      </section>
+
+      <section id="highlights" className="feature-strip">
+        {sections.map(item => (
+          <article key={item.code} className="feature-card">
+            <span className="feature-index">{item.code}</span>
+            <h2>{item.title}</h2>
+            <p>{item.detail}</p>
+          </article>
+        ))}
+      </section>
+
+      <footer className="page-footer">${safeTitle} · Powered by Forma Spatial Studio</footer>
     </main>
   );
 }
@@ -388,11 +449,49 @@ body {
   font-size: 12px;
   color: #6d7886;
 }
+.hero-editorial {
+  padding: 56px 0 44px;
+  max-width: 760px;
+}
+.hero-editorial h1 {
+  margin: 0 0 18px;
+  font-size: clamp(34px, 4.6vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
 @media (max-width: 820px) {
   .hero-grid, .feature-strip { grid-template-columns: 1fr; }
   .spatial-page { padding: 20px 18px 44px; }
 }
 `;
+}
+
+export async function scaffoldRuntimeBase(input: {
+  targetWorkRoot: string;
+  name: string;
+  dependencySourceRoots?: string[];
+  linkDeps?: boolean;
+}): Promise<void> {
+  const { targetWorkRoot, name, dependencySourceRoots = [], linkDeps = true } = input;
+  await mkdir(targetWorkRoot, { recursive: true });
+  for (const configFile of ['package.json', 'vite.config.ts', 'tsconfig.json']) {
+    await writeFile(path.join(targetWorkRoot, configFile), await readFile(path.join(TEMPLATE_ROOT, configFile)));
+  }
+  const safeTitle = escapeHtml(name.trim() || '未命名空间作品');
+  const html = `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>${safeTitle}</title>\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>\n`;
+  await writeFile(path.join(targetWorkRoot, 'index.html'), html);
+  await mkdir(path.join(targetWorkRoot, 'src', 'components'), { recursive: true });
+  await mkdir(path.join(targetWorkRoot, 'public', 'assets'), { recursive: true });
+
+  for (const sharedSrc of ['src/main.tsx', 'src/scene-config-store.ts', 'src/spatial-module.tsx', 'src/components/Button.tsx']) {
+    await writeFile(path.join(targetWorkRoot, sharedSrc), await readFile(path.join(TEMPLATE_ROOT, sharedSrc)));
+  }
+  const blankScene = { ...structuredClone(defaultSceneConfig), model: '', scroll: [] };
+  await writeFile(path.join(targetWorkRoot, 'src', 'scene.config.json'), JSON.stringify(blankScene, null, 2) + '\n');
+  await writeFile(path.join(targetWorkRoot, 'src', 'components', 'ProductHero.tsx'), blankProductHeroSource());
+  if (linkDeps) {
+    await linkWorkDependencies(targetWorkRoot, dependencySourceRoots);
+  }
 }
 
 export async function scaffoldWorkDirectory(input: {
@@ -404,30 +503,22 @@ export async function scaffoldWorkDirectory(input: {
   const { targetWorkRoot, starter, name, dependencySourceRoots = [] } = input;
   await mkdir(targetWorkRoot, { recursive: true });
 
-  for (const configFile of ['package.json', 'vite.config.ts', 'tsconfig.json']) {
-    await writeFile(path.join(targetWorkRoot, configFile), await readFile(path.join(TEMPLATE_ROOT, configFile)));
-  }
-
   if (starter === 'product-page') {
+    for (const configFile of ['package.json', 'vite.config.ts', 'tsconfig.json']) {
+      await writeFile(path.join(targetWorkRoot, configFile), await readFile(path.join(TEMPLATE_ROOT, configFile)));
+    }
     await writeFile(path.join(targetWorkRoot, 'index.html'), await readFile(path.join(TEMPLATE_ROOT, 'index.html')));
     await copyTreePlain(path.join(TEMPLATE_ROOT, 'src'), path.join(targetWorkRoot, 'src'));
     await copyTreePlain(path.join(TEMPLATE_ROOT, 'public'), path.join(targetWorkRoot, 'public'));
-  } else {
-    const safeTitle = escapeHtml(name.trim() || '未命名空间作品');
-    const html = `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>${safeTitle}</title>\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>\n`;
-    await writeFile(path.join(targetWorkRoot, 'index.html'), html);
-    await mkdir(path.join(targetWorkRoot, 'src', 'components'), { recursive: true });
-    await mkdir(path.join(targetWorkRoot, 'public', 'assets'), { recursive: true });
-
-    for (const sharedSrc of ['src/main.tsx', 'src/scene-config-store.ts', 'src/spatial-module.tsx', 'src/components/Button.tsx']) {
-      await writeFile(path.join(targetWorkRoot, sharedSrc), await readFile(path.join(TEMPLATE_ROOT, sharedSrc)));
-    }
-    const blankScene = { ...structuredClone(defaultSceneConfig), model: '', scroll: [] };
-    await writeFile(path.join(targetWorkRoot, 'src', 'scene.config.json'), JSON.stringify(blankScene, null, 2) + '\n');
-    await writeFile(path.join(targetWorkRoot, 'src', 'components', 'ProductHero.tsx'), blankProductHeroSource());
-    await writeFile(path.join(targetWorkRoot, 'src', 'App.tsx'), blankAppSource(name));
-    await writeFile(path.join(targetWorkRoot, 'src', 'style.css'), blankStyleSource());
+    await linkWorkDependencies(targetWorkRoot, dependencySourceRoots);
+    return;
   }
 
+  await scaffoldRuntimeBase({ targetWorkRoot, name, dependencySourceRoots, linkDeps: false });
+  await writeFile(
+    path.join(targetWorkRoot, 'src', 'App.tsx'),
+    starter === 'free-web' ? freeWebAppSource(name) : blankAppSource(name),
+  );
+  await writeFile(path.join(targetWorkRoot, 'src', 'style.css'), blankStyleSource());
   await linkWorkDependencies(targetWorkRoot, dependencySourceRoots);
 }
