@@ -49,7 +49,8 @@ export default function AssetModuleControls() {
   }, [state.version]);
 
   const current = modules.find(item => item.id === selected);
-  useEffect(() => { setDraft(current ? draftOf(current.config) : undefined); }, [current?.id, state.version]);
+  const currentConfigKey = current ? JSON.stringify(current.config) : '';
+  useEffect(() => { setDraft(current ? draftOf(current.config) : undefined); }, [current?.id, currentConfigKey]);
 
   async function apply() {
     if (!selected || !draft || busy || !syncReady || status !== 'connected') return;
@@ -57,13 +58,14 @@ export default function AssetModuleControls() {
     if (!token) return;
     setBusy(true); setError(''); setNotice('');
     try {
-      await luxApi.adjustModule(selected, state.version, {
+      const result = await luxApi.adjustModule(selected, state.version, {
         layout: { widthPercent: draft.widthPercent, align: draft.align, offsetX: draft.offsetX, offsetY: draft.offsetY },
         rotation: [current?.config.rotation[0] ?? 0, draft.rotationY, current?.config.rotation[2] ?? 0],
         scale: draft.scale,
         camera: { position: draft.cameraPosition, target: draft.cameraTarget, fov: draft.fov },
         animation: { clip: draft.clip, playing: draft.playing, loop: draft.loop },
       });
+      setDraft(draftOf(result.config));
       setNotice('已保存本实例调整，并创建新的作品版本；主作品其他实例不会一起变化。');
     } catch (cause) { setError(describeError(cause)); }
     finally { awaiting(token); try { await reload(); } catch (cause) { setError(describeError(cause)); } setBusy(false); }
@@ -75,7 +77,8 @@ export default function AssetModuleControls() {
     if (!token) return;
     setBusy(true); setError(''); setNotice('');
     try {
-      await luxApi.undoModule(selected, state.version);
+      const result = await luxApi.undoModule(selected, state.version);
+      setDraft(draftOf(result.config));
       setNotice('已撤回该实例上一次调整。');
     } catch (cause) { setError(describeError(cause)); }
     finally { awaiting(token); try { await reload(); } catch (cause) { setError(describeError(cause)); } setBusy(false); }

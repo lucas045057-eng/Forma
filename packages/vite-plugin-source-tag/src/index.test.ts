@@ -1,6 +1,8 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import sourceTag, { tagSource } from './index';
+import sourceTag, { recoverNonEmptySource, tagSource } from './index';
 
 const root = path.resolve('fixture');
 const transform = (code: string) => tagSource(code, path.join(root, 'src', 'Page.tsx'), root)!.code;
@@ -54,5 +56,25 @@ describe('source tags', () => {
   it('only enables serve and excludes sources outside the root', () => {
     expect(sourceTag().apply).toBe('serve');
     expect(tagSource('const A = () => <div/>', path.resolve('elsewhere.tsx'), root)).toBeNull();
+  });
+  it('recovers from a transient 0-byte read during concurrent Windows git updates and refuses to cache empty TSX', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'source-tag-race-'));
+    try {
+      const file = path.join(dir, 'App.tsx');
+      await writeFile(file, '');
+      setTimeout(() => { void writeFile(file, 'export default function App() { return <main/>; }\n'); }, 20);
+      const plugin = sourceTag();
+      (plugin.configResolved as (config: { root: string }) => void)({ root: dir });
+      const transformFn = plugin.transform as (code: string, id: string) => Promise<{ code: string } | null>;
+      const recovered = await transformFn('', `${file}?t=123`);
+      expect(recovered?.code).toContain('export default function App()');
+      expect(recovered?.code).toContain('data-src={"App.tsx:1:40"}');
+
+      const emptyFile = path.join(dir, 'Empty.tsx');
+      await writeFile(emptyFile, '');
+      await expect(recoverNonEmptySource('', emptyFile, [5, 5])).rejects.toThrow(/Refusing to cache empty JSX\/TSX module/);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });
