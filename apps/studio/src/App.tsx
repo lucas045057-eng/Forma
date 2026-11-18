@@ -10,6 +10,7 @@ import { api, mutation } from './api.ts';
 import { previewOrigin, previewUrl } from './preview-origin.ts';
 import ModelOriginBadge from './model-provenance.tsx';
 import AssetPlacement from './AssetPlacement.tsx';
+import SelectionLink from './SelectionLink.tsx';
 import NewWorkModal, { type CreatedWorkResult, type ModalTab } from './NewWorkModal.tsx';
 import type {Asset} from '@spatial/shared';
 import type {PlacementSession} from './placement-state.ts';
@@ -47,6 +48,9 @@ function Studio() {
   const pickingRef = useRef(false);
   const pickRequest = useRef(0);
   const progressRef = useRef(0);
+  const targetCard = useRef<HTMLDivElement>(null);
+  // Scroll progress at the moment the current selection was confirmed; the connector hides once it changes.
+  const [pickedAt, setPickedAt] = useState<number | null>(null);
   const canvasWidth = useRef(400);
   const [picking, setPicking] = useState(false);
   const [ready, setReady] = useState(false);
@@ -161,6 +165,7 @@ function Studio() {
           void api<{ version: string }>('/version').then(result => {
             if (requestId !== pickRequest.current) return;
             setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
+            setPickedAt(progressRef.current);
             setError('');
           }).catch(() => {
             if (requestId !== pickRequest.current) return;
@@ -348,6 +353,7 @@ function Studio() {
     exitImpact(false);
     send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
   }}/>;
+  const workName = activeWorkSummary?.name ?? '空间作品';
   const candidateFrame = candidate ? <iframe key={candidate.id} ref={candidatePreview} src={previewUrl(candidate.previewUrl)} title={`候选版本 ${candidate.id.slice(0, 8)}`} data-testid="candidate-frame" data-ready={candidateReady}/> : null;
 
   return (
@@ -420,15 +426,21 @@ function Studio() {
             </>}
             detailsTarget={candidateSlot}
           >
-            {mainFrame}
-            {mode !== 'current' && candidateFrame}
+            <figure className="artboard artboard-main">
+              <figcaption className="artboard-name"><b>{workName}</b><span>当前版本</span></figcaption>
+              {mainFrame}
+            </figure>
+            {mode !== 'current' && candidate && <figure className="artboard artboard-candidate">
+              <figcaption className="artboard-name"><b>候选 {candidate.id.slice(0, 8)}</b><span>{mode === 'compare' ? '并排对比' : '候选预览'}</span></figcaption>
+              {candidateFrame}
+            </figure>}
           </CandidatePanel>
         </section>
         <aside className="inspector">
           {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
           <div className="candidate-slot" ref={setCandidateSlot}/>
           <div className="inspector-main" hidden={showScene}>
-            <div className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
+            <div ref={targetCard} className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
               <div className="target-card-header">
                 <span className="section-label">TARGET</span>
                 <button type="button" className="inline-link-btn" onClick={toggle}>{picking ? '完成选取' : selection ? '重选元素' : '点选页面元素'}</button>
@@ -451,6 +463,12 @@ function Studio() {
           <ApprovalPanel highlightId={impact?.id ?? null} onHighlight={highlight} onExit={() => exitImpact()}/>
         </aside>
       </div>
+      <SelectionLink
+        frame={preview}
+        target={targetCard}
+        bbox={selection?.bbox ?? null}
+        visible={!!selection && ready && !picking && mode === 'current' && !showScene && !impact && !showAssets && !placingAsset && pickedAt === progress}
+      />
       <nav className="island dock tools" role="toolbar" aria-label="工具">
         <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
         <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>

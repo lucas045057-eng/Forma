@@ -350,8 +350,10 @@ h1 {
   min-height: 0;
 }
 
-/* Bottom tool dock */
+/* Bottom tool dock (above the selection connector) */
 .dock {
+  position: relative;
+  z-index: 35;
   justify-self: center;
   display: flex;
   align-items: center;
@@ -519,18 +521,93 @@ h1 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.preview-frames > iframe {
+.artboard > iframe {
+  flex: 1 1 0;
   border-radius: 4px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 24px 60px -24px rgba(40, 30, 20, 0.4);
 }
 
-.preview-frames.mode-compare > [data-testid="candidate-frame"] {
+.preview-frames.mode-compare .artboard-candidate > iframe {
   outline: 3px solid var(--bg-surface-1);
 }
 
-.preview-frames.mode-candidate > [data-testid="preview-frame"] {
+.preview-frames.mode-compare .artboard-candidate .artboard-name b {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--bg-surface-1);
+  color: var(--accent);
+}
+
+/* Connector from the picked element to the inspector target card (pointer-transparent). */
+.selection-link {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 30;
+  overflow: visible;
+  pointer-events: none;
+  animation: selection-link-in 0.18s var(--ease-out);
+}
+
+.selection-link path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.selection-link-casing {
+  stroke: rgba(22, 22, 22, 0.35);
+  stroke-width: 4;
+}
+
+.selection-link-line {
+  stroke: var(--accent);
+  stroke-width: 1.75;
+}
+
+.selection-link-dot {
+  fill: var(--accent);
+  stroke: #161616;
+  stroke-width: 1.5;
+}
+
+@keyframes selection-link-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.preview-frames.mode-candidate > .artboard-main {
   display: none;
 }
+
+.artboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.artboard-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 2px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--floor-ink-muted);
+  white-space: nowrap;
+}
+
+.artboard-name b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: var(--floor-ink);
+}
+
 
 iframe {
   width: 100%;
