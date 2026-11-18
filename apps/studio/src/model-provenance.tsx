@@ -24,9 +24,7 @@ export default function ModelOriginBadge(){
   return()=>{disposed=true;++sequence.current;abort?.abort();if(timer)clearTimeout(timer);unsubscribe();};
  },[subscribe,syncReady,status]);
  const current=syncReady&&status==='connected'?view:undefined;
- return <span className="model-origin" data-testid="model-provenance" data-model={current?.model??''} data-kind={current?.verified?current.provenance.kind:'unknown'} role="status">
-  当前作品模型：{!syncReady||status!=='connected'?'来源状态待同步':!current?'核验来源中…':current.verified?assetOriginLabel(current.provenance):'来源未核实'}
-  {current?.verified&&current.provenance.kind==='fallback'&&'（备用，非现场生成）'}
-  {current&&!current.verified&&current.reason&&<span className="model-origin-reason"> · {current.reason}</span>}
+ return <span className="model-origin" data-testid="model-provenance" data-model={current?.model??''} data-kind={current?.verified?current.provenance.kind:'unknown'} title={current&&!current.verified&&current.reason?current.reason:undefined} role="status">
+  {!syncReady||status!=='connected'?'模型状态待同步':!current?'核验模型中…':current.verified?assetOriginLabel(current.provenance):'模型来源未核实'}
  </span>;
 }

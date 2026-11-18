@@ -91,37 +91,52 @@ export default function PointSpeak({ pick, blocked = false }: { pick: PickState;
   }
 
   return <section className="point-speak" aria-label="指着说">
-    <p className="section-label">POINT &amp; SPEAK</p><h2>指着说</h2>
-    <label className="instruction-label">修改指令
-      <textarea data-testid="instruction-input" value={instruction} onChange={event => changeInstruction(event.target.value)} onKeyDown={keyboard}
-        placeholder="例如：把这个按钮改成“马上购买”" rows={3}/>
-    </label>
-    <p className="hint"><span data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span> Ctrl/⌘ + Enter 提交。</p>
-    <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
-    {binding&&!bindingMatches(binding,context)&&<div data-testid="speech-binding-conflict" role="alert">
-      <p>语音确认后选中对象已变化，生成前需再次确认。</p>
-      <p>上次确认：{identityLabel(binding.selection)}；当前：{identityLabel(context.selection)}</p>
-      {binding.version!==context.version?<p>页面版本已变化，请放弃此语音指令并重新点选。</p>:<button type="button" data-testid="speech-reconfirm" disabled={!submittable||busy} onClick={()=>{if(!submittable||busy||speechBusy(speech.getSnapshot())||latestBinding.current?.version!==latestContext.current.version)return;const next={...latestContext.current};latestBinding.current=next;setBinding(next);}}>确认用于当前对象{context.selection?.cid??'（整体修改）'}</button>}
-      <button type="button" data-testid="speech-clear-binding" onClick={()=>changeInstruction(instruction===boundText.current?'':instruction,true)}>放弃此语音指令，保留后续文字编辑</button>
-    </div>}
-    <p className="hint">指令、选中对象与必要源码发送到已配置编码服务。</p>
-    <button type="button" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
+    <div className="composer-shell">
+      <div className="composer-header">
+        <span className="section-label">PROMPT &amp; VOICE</span>
+        <span className="composer-pick-hint" data-testid="pick-state" data-kind={pick.kind}>{pickHint(pick)}</span>
+      </div>
+      <label className="instruction-label">
+        <span className="sr-only">修改指令</span>
+        <textarea data-testid="instruction-input" value={instruction} onChange={event => changeInstruction(event.target.value)} onKeyDown={keyboard}
+          placeholder="描述想调整的文案、排版或交互，例如：把标题改成“山野清风，落入日常。”（Ctrl/⌘ + Enter 提交）" rows={3}/>
+      </label>
+      <SpeechInput controller={speech} snapshot={speechState} context={context} allowed={submittable&&!busy} connected={status==='connected'} onUse={useReview}/>
+      {binding&&!bindingMatches(binding,context)&&<div className="conflict-banner" data-testid="speech-binding-conflict" role="alert">
+        <p>语音确认后选中对象已变化，生成前需再次确认。</p>
+        <p className="muted-note">上次：{identityLabel(binding.selection)} · 当前：{identityLabel(context.selection)}</p>
+        <div className="conflict-actions">
+          {binding.version!==context.version?<p>页面版本已变化，请放弃此语音指令并重新点选。</p>:<button type="button" className="secondary-btn compact-btn" data-testid="speech-reconfirm" disabled={!submittable||busy} onClick={()=>{if(!submittable||busy||speechBusy(speech.getSnapshot())||latestBinding.current?.version!==latestContext.current.version)return;const next={...latestContext.current};latestBinding.current=next;setBinding(next);}}>确认用于当前对象{context.selection?.cid??'（整体修改）'}</button>}
+          <button type="button" className="ghost-btn compact-btn" data-testid="speech-clear-binding" onClick={()=>changeInstruction(instruction===boundText.current?'':instruction,true)}>放弃语音绑定</button>
+        </div>
+      </div>}
+      <div className="composer-footer">
+        <span className="composer-caption">发送选中源码上下文生成候选草稿</span>
+        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>生成候选版本</button>
+      </div>
+    </div>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}
     {active && <div className="task-card" data-testid="task-card">
-      <div className="task-heading"><strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong><code>{active.id.slice(0, 8)}</code></div>
+      <div className="task-heading">
+        <div className="task-status-group">
+          <span className={`task-status-dot status-${active.status}`}/>
+          <strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong>
+        </div>
+        <code>{active.id.slice(0, 8)}</code>
+      </div>
       {state.tasks.length > 1 && <select aria-label="查看任务" data-testid="task-select" value={active.id} onChange={event => setActiveId(event.target.value)}>
         {state.tasks.map(task => <option key={task.id} value={task.id}>{task.id.slice(0, 8)} · {statusLabels[task.status]}</option>)}
       </select>}
       <p className="task-instruction">{active.instruction}</p>
-      <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>
-      {(active.status === 'queued' || active.status === 'running') && <button type="button" data-testid="task-cancel" disabled={busy || !syncReady || locked([`task:${active.id}`])} onClick={() => void cancel(active)}>取消任务</button>}
+      {active.events.length > 0 && <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>}
+      {(active.status === 'queued' || active.status === 'running') && <button type="button" className="ghost-btn compact-btn" data-testid="task-cancel" disabled={busy || !syncReady || locked([`task:${active.id}`])} onClick={() => void cancel(active)}>取消任务</button>}
       {active.error && <p className="error" data-testid="task-error" role="alert">{active.error.code === 'STALE_SELECTION' ? '页面已变化，请重新点选' : active.error.message}</p>}
       {(active.status === 'failed' || active.status === 'cancelled') && (active.kind === 'module'
         ? <p className="hint" role="status" data-testid="task-retry-reason">独立 3D 模块操作请从左侧资产面板重新发起，不能通过文字指令重试。</p>
-        : <>
-          {retryPlan.reason && <p role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
-          <button type="button" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed || speechBusy(speechState)} onClick={() => { changeInstruction(active.instruction,true); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
-        </>)}
+        : <div className="task-retry-row">
+          {retryPlan.reason && <p className="muted-note" role="status" data-testid="task-retry-reason">{retryPlan.reason}</p>}
+          <button type="button" className="secondary-btn compact-btn" data-testid="task-retry" disabled={busy || !writable || !retryPlan.allowed || speechBusy(speechState)} onClick={() => { changeInstruction(active.instruction,true); void submit(active.instruction, retryPlan.selection, true); }}>重试</button>
+        </div>)}
     </div>}
   </section>;
 }

@@ -140,9 +140,17 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
   }
   const modelUrl = saved?.model ? `${previewOrigin}/preview/main${saved.model}` : '';
   return <section className="scene-editor" data-testid="scene-panel">
-    <header><h2>3D 场景编辑</h2><button data-testid="scene-close" onClick={onClose}>关闭</button></header>
-    {writeBlocked && <p role="status">状态待同步或作品操作待确认，请刷新状态后继续。</p>}
-    <p>预览滚动位置 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></p>
+    <header className="scene-header">
+      <div>
+        <span className="section-label">SCENE DIRECTOR</span>
+        <h2>3D 场景编辑</h2>
+      </div>
+      <div className="scene-header-meta">
+        <span className="meta-tag">滚动 <output data-testid="scene-scroll-at">{at.toFixed(3)}</output></span>
+        <button type="button" className="ghost-btn compact-btn" data-testid="scene-close" onClick={onClose}>关闭</button>
+      </div>
+    </header>
+    {writeBlocked && <p className="muted-note" role="status">状态待同步或作品操作待确认，请刷新状态后继续。</p>}
     <div className="scene-canvas-scroll" ref={canvasScroll} tabIndex={0} role="region" aria-label="场景画布，可横向滚动">
     <div className="scene-viewport" style={{ width: compare ? size : '100%', aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="scene-viewport" data-loaded={loaded}>
       {saved && <ProductScene config={config} modelUrl={modelUrl} scrollAt={compare ? at : 0} controls={!compare && !busy && !writeBlocked}
@@ -155,32 +163,40 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     </div></div>
     {canvasOverflow&&<p className="notice" data-testid="scene-size-hint" role="status">画布超出可用宽度，请在画布区域横向滚动；尺寸未缩放。</p>}
     <fieldset disabled={!saved || busy || compare || writeBlocked}>
-      <legend>调整场景</legend>
-      <label>工具 <select data-testid="scene-tool" value={tool} onChange={e => setTool(e.target.value as typeof tool)}><option value="camera">相机轨道</option><option value="rotate">旋转模型</option><option value="light">主光方向手柄</option></select></label>
-      <p className="hint">拖动视口调相机；选择旋转显示旋转环；主光工具可拖动黄色球面手柄。</p>
-      <label>模型 Y 旋转 <input data-testid="scene-rotation-y" type="range" min={-Math.PI} max={Math.PI} step="0.01" value={rotation[1]} onChange={e => editRotation([rotation[0], Number(e.target.value), rotation[2]])}/></label>
-      <label>主光强度 {draft.lights.key.intensity.toFixed(2)}<input data-testid="scene-key-intensity" type="range" min="0" max="20" step="0.1" value={draft.lights.key.intensity} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, intensity: Number(e.target.value) } } }))}/></label>
-      <label>色温 {temperature} K <input data-testid="scene-temperature" type="range" min="2700" max="6500" step="50" value={temperature} onChange={e => { const value = Number(e.target.value); setTemperature(value); editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, color: temperatureToHex(value) } } })); }}/><span>{draft.lights.key.color}</span></label>
-      <label>环境光 {draft.lights.ambient.toFixed(2)}<input data-testid="scene-ambient" type="range" min="0" max="20" step="0.1" value={draft.lights.ambient} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, ambient: Number(e.target.value) } }))}/></label>
-      <label>开盖 {lid.toFixed(3)}<input data-testid="scene-lid" type="range" min="0" max="0.15" step="0.001" value={lid} disabled={!recognized} onChange={e => { draftGuard.current.edit(); setLid(Number(e.target.value)); }}/></label>
-      {!recognized && <p data-testid="scene-parts-warning">未识别部件，开盖关键帧不可用。</p>}
-      <button data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
-      <button data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
+      <legend>相机 · 布光 · 关键帧</legend>
+      <label className="slider-row"><span>交互工具</span><select data-testid="scene-tool" value={tool} onChange={e => setTool(e.target.value as typeof tool)}><option value="camera">相机轨道</option><option value="rotate">旋转模型</option><option value="light">主光方向手柄</option></select></label>
+      <label className="slider-block"><span className="slider-head"><span>模型 Y 旋转</span><code>{rotation[1].toFixed(2)} rad</code></span><input data-testid="scene-rotation-y" type="range" min={-Math.PI} max={Math.PI} step="0.01" value={rotation[1]} onChange={e => editRotation([rotation[0], Number(e.target.value), rotation[2]])}/></label>
+      <label className="slider-block"><span className="slider-head"><span>主光强度</span><code>{draft.lights.key.intensity.toFixed(2)}</code></span><input data-testid="scene-key-intensity" type="range" min="0" max="20" step="0.1" value={draft.lights.key.intensity} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, intensity: Number(e.target.value) } } }))}/></label>
+      <label className="slider-block"><span className="slider-head"><span>主光色温</span><code>{temperature} K · {draft.lights.key.color}</code></span><input data-testid="scene-temperature" type="range" min="2700" max="6500" step="50" value={temperature} onChange={e => { const value = Number(e.target.value); setTemperature(value); editHero(h => ({ ...h, lights: { ...h.lights, key: { ...h.lights.key, color: temperatureToHex(value) } } })); }}/></label>
+      <label className="slider-block"><span className="slider-head"><span>环境光</span><code>{draft.lights.ambient.toFixed(2)}</code></span><input data-testid="scene-ambient" type="range" min="0" max="20" step="0.1" value={draft.lights.ambient} onChange={e => editHero(h => ({ ...h, lights: { ...h.lights, ambient: Number(e.target.value) } }))}/></label>
+      <label className="slider-block"><span className="slider-head"><span>开盖行程</span><code>{lid.toFixed(3)}</code></span><input data-testid="scene-lid" type="range" min="0" max="0.15" step="0.001" value={lid} disabled={!recognized} onChange={e => { draftGuard.current.edit(); setLid(Number(e.target.value)); }}/></label>
+      {!recognized && <p className="muted-note" data-testid="scene-parts-warning">未识别部件，开盖关键帧不可用。</p>}
+      <div className="scene-action-bar">
+        <button type="button" className="primary-btn compact-btn" data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
+        <button type="button" className="secondary-btn compact-btn" data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
+        <button type="button" className="ghost-btn compact-btn" data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
+      </div>
     </fieldset>
-    <button data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
-    <fieldset disabled={busy || !saved || writeBlocked}><legend>采用模型</legend>
-      <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id} · {assetOriginLabel(a.provenance)}{a.metrics?.webReady === false ? '（超过网页门槛）' : ''}</option>)}</select>
-      <label><input type="checkbox" data-testid="scene-force-adopt" checked={force} onChange={e => setForce(e.target.checked)}/>允许采用超过网页门槛的模型</label>
-      <button data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>
+    <fieldset disabled={busy || !saved || writeBlocked}><legend>快速采用主槽位模型</legend>
+      <div className="inline-form">
+        <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型…</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id.slice(0, 18)} · {assetOriginLabel(a.provenance)}{a.metrics?.webReady === false ? '（超门槛）' : ''}</option>)}</select>
+        <button type="button" className="secondary-btn compact-btn" data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>
+      </div>
+      <label className="checkbox-row"><input type="checkbox" data-testid="scene-force-adopt" checked={force} onChange={e => setForce(e.target.checked)}/>允许采用超过网页门槛的模型</label>
     </fieldset>
-    <fieldset disabled={busy}><legend>与作品画面对照</legend>
-      <button data-testid="scene-load" onClick={() => { setCompare(false); void load(true); }}>读取作品配置</button>
-      <label>画布边长 <input data-testid="scene-size" type="number" min="100" max="1600" value={size} onChange={e => setSize(Math.max(100, Math.min(1600, Number(e.target.value) || 400)))}/></label>
-      <button data-testid="scene-match-size" onClick={() => setSize(previewSize())}>匹配作品画布尺寸</button>
-      <label><input data-testid="scene-compare" type="checkbox" checked={compare} onChange={e => { setCompare(e.target.checked); if (e.target.checked) void load(); }}/>对照模式（已保存配置、当前滚动位置、隐藏手柄）</label>
+    <fieldset disabled={busy}><legend>画布对照与诊断</legend>
+      <div className="scene-compare-row">
+        <button type="button" className="ghost-btn compact-btn" data-testid="scene-load" onClick={() => { setCompare(false); void load(true); }}>读取作品配置</button>
+        <button type="button" className="ghost-btn compact-btn" data-testid="scene-match-size" onClick={() => setSize(previewSize())}>匹配作品画布尺寸</button>
+        <label className="inline-number-label">边长 <input data-testid="scene-size" type="number" min="100" max="1600" value={size} onChange={e => setSize(Math.max(100, Math.min(1600, Number(e.target.value) || 400)))}/></label>
+      </div>
+      <label className="checkbox-row"><input data-testid="scene-compare" type="checkbox" checked={compare} onChange={e => { setCompare(e.target.checked); if (e.target.checked) void load(); }}/>对照模式（已保存配置、同步滚动位置、隐藏手柄）</label>
     </fieldset>
     {error && <p data-testid="scene-error" className="error" role="alert">{error}</p>}
-    <h3>最近写入的参数变化</h3><pre data-testid="scene-diff">{latest ? JSON.stringify(latest.diff, null, 2) : '尚无写入'}</pre>
-    <details><summary>当前视口配置</summary><pre data-testid="scene-config">{JSON.stringify(config, null, 2)}</pre></details>
+    <div className="scene-diagnostics">
+      <span className="section-label">LAST WRITE DIFF</span>
+      <pre className="compact-pre" data-testid="scene-diff">{latest ? JSON.stringify(latest.diff, null, 2) : '尚无写入'}</pre>
+      <details className="compact-details"><summary>当前视口完整配置 JSON</summary><pre data-testid="scene-config">{JSON.stringify(config, null, 2)}</pre></details>
+    </div>
   </section>;
 }

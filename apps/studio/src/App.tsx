@@ -247,47 +247,69 @@ function Studio() {
 
   return (
     <main className="studio">
-      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
+      {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
       {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="toolbar">
-        <div><span className="wordmark">ORBIT / STUDIO</span><h1>空间化 AI 创作工作台</h1></div>
+        <div className="brand-cluster">
+          <div className="brand-identity">
+            <span className="wordmark">ORBIT</span>
+            <h1>空间化 AI 创作工作台</h1>
+          </div>
+          <div className="status-cluster">
+            <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
+            <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus}>{eventStatus === 'connected' ? '事件已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'} · <output data-testid="events-seq">{lastSeq}</output></span>
+            {!syncReady && <span className="status-pill is-wait" role="status">状态待同步</span>}
+            {syncError && <span className="status-pill is-error" role="alert">{syncError}</span>}
+            <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
+          </div>
+        </div>
         <div className="tools">
-          <button type="button" data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setShowScene(true); }}>3D 场景编辑</button>
-          <button type="button" data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
-          <span className="connection" data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
-          <span className="connection" data-testid="events-status" data-status={eventStatus}>{eventStatus === 'connected' ? '事件已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'} · <output data-testid="events-seq">{lastSeq}</output></span>
-          <button type="button" aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
+          <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
+          <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
+          <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setShowScene(true); }}>3D 场景编辑</button>
         </div>
       </header>
       {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示：语音为固定示例转写，编码与生成上游为模拟；不代表真实语音识别或现场模型生成。</p>}
-      {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner" data-testid="demo-mode" role="status">真实服务模式：录音使用阿里云百炼，用户提交的服务请求可能计费。</p>}
-      <div className="state-sync">
-        {!syncReady && <span role="status">状态待同步</span>}
-        {syncError && <span role="alert">{syncError}</span>}
-        <button type="button" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
-      </div>
+      {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式：录音使用阿里云百炼，用户提交的服务请求可能计费。</p>}
       <div className={`workspace${showScene ? ' scene-editing' : ''}`}>
         <section className="preview-panel" aria-label="作品预览">
-          <div className="panel-title"><span>作品 / 木间香薰</span><span>{impact ? '查看影响位置' : picking ? '选取模式 · 点击查看源码' : '浏览模式'} · {Math.round(progress * 100)}%</span></div>
-          <div className="preview-source"><ModelOriginBadge/></div>
-          <CandidatePanel selectedId={candidate?.id ?? ''} onSelect={setCandidateId} mode={mode} onMode={setMode}>
+          <CandidatePanel
+            selectedId={candidate?.id ?? ''}
+            onSelect={setCandidateId}
+            mode={mode}
+            onMode={setMode}
+            headerMeta={<>
+              <span className="work-title">木间香薰</span>
+              <ModelOriginBadge/>
+            </>}
+            headerStatus={<span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>}
+          >
             {mainFrame}
             {mode !== 'current' && candidateFrame}
           </CandidatePanel>
         </section>
         <aside className="inspector">
-          {showScene && <Suspense fallback={<p>加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
-          <div hidden={showScene}>
-          <p className="section-label">SOURCE INSPECTOR</p><h2>选中对象</h2>
-          <p className="hint">开启选取后，点击左侧页面。青色边框标出共享同一处源码的所有实例。</p>
-          {error && <p className="error" role="alert">{error}</p>}
-          {selection ? <>
-            <div className="selection-summary"><strong>{selection.cid}</strong><code>{selection.src}</code></div>
-            {selection.note && <p className="notice">已选中外层容器</p>}
-            <p className="notice" data-testid="instances">同源码实例：{selection.instances} 处{selection.instances > 1 ? '；修改将影响全部实例（共享组件或列表项）。' : ''}</p>
-            <pre data-testid="selection-json">{JSON.stringify(selection, null, 2)}</pre>
-          </> : <div className="empty">等待选取页面元素</div>}
-          <PointSpeak pick={pick} blocked={!!impact || showScene}/>
+          {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
+          <div className="inspector-main" hidden={showScene}>
+            <div className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
+              <div className="target-card-header">
+                <span className="section-label">TARGET</span>
+                <button type="button" className="inline-link-btn" onClick={toggle}>{picking ? '完成选取' : selection ? '重选元素' : '点选页面元素'}</button>
+              </div>
+              {error && <p className="error" role="alert">{error}</p>}
+              {selection ? <>
+                <div className="selection-summary">
+                  <strong>{selection.cid}</strong>
+                  <code>{selection.src}</code>
+                </div>
+                <div className="selection-badges">
+                  {selection.note && <span className="meta-tag">外层容器</span>}
+                  <span className="meta-tag" data-testid="instances">同源码实例：{selection.instances} 处{selection.instances > 1 ? '（共享组件/列表，修改将同步生效）' : ''}</span>
+                </div>
+                <pre className="selection-raw" data-testid="selection-json">{JSON.stringify(selection, null, 2)}</pre>
+              </> : <p className="target-empty">{picking ? '请在左侧网页中点击要修改的标题、按钮或区块…' : '当前作用于整页 · 开启选取可精准锁定局部元素'}</p>}
+            </div>
+            <PointSpeak pick={pick} blocked={!!impact || showScene}/>
           </div>
           <ApprovalPanel highlightId={impact?.id ?? null} onHighlight={highlight} onExit={() => exitImpact()}/>
         </aside>
