@@ -68,8 +68,8 @@ function validate(operation: string, body: Record<string, unknown>): boolean {
   return true;
 }
 
-export async function createMockServer(options: { scenario?: MockScenario; fixture?: string; key?: string } = {}) {
-  const app = Fastify({ logger: false, ajv: { customOptions: { coerceTypes: false, removeAdditional: false } } });
+export async function createMockServer(options: { scenario?: MockScenario; fixture?: string; key?: string; blockSize?: number } = {}) {
+  const app = Fastify({ logger: false, bodyLimit: 16 * 1024 * 1024, ajv: { customOptions: { coerceTypes: false, removeAdditional: false } } });
   app.addContentTypeParser(/^multipart\/form-data/, { parseAs: 'buffer' }, (_request, body, done) => done(null, body));
   app.addHook('onRequest', async (request, reply) => {
     if ((request.url.startsWith('/lux3d/') || request.url.startsWith('/asset/')) && request.headers.authorization !== (options.key ?? 'mock-only')) {
@@ -126,10 +126,11 @@ export async function createMockServer(options: { scenario?: MockScenario; fixtu
     return { c: '0', d: { taskId: id, status, ...(status === 3 ? { outputs: outputsFor(task.operation, task.body, request.headers.host ?? '127.0.0.1') } : {}) } };
   });
 
+  const configuredBlockSize = options.blockSize ?? 4;
   app.get('/asset/v1/token', async request => ({
     ousToken: 'mock-ous-token',
     globalDomain: `http://${request.headers.host}`,
-    blockSize: 4,
+    blockSize: configuredBlockSize,
   }));
   app.post('/ous/api/v2/single/upload', async () => ({ c: '0', d: { taskId: `up${++ousTasks}` } }));
   app.post('/ous/api/v2/block/upload/init', async request => {

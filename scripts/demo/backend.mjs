@@ -14,10 +14,10 @@ try{
  const options={workRoot:plan.work,dataDirectory:path.join(plan.run,'assets'),workDataDirectory:path.join(plan.run,'work-data'),historyDirectory:path.join(plan.run,'scene-history'),fallbackDirectory:path.join(repository,'fallback'),logger:false};
  if(plan.mode==='mock'){
   stage='mock-start';
-  const endpoints={coding:`http://127.0.0.1:${ports.coding}`,lux3d:`http://127.0.0.1:${ports.lux3d}/lux3d/v1`,speech:`http://127.0.0.1:${ports.speech}/compatible-mode/v1`};
+  const endpoints={coding:`http://127.0.0.1:${ports.coding}`,lux3d:`http://127.0.0.1:${ports.lux3d}`,speech:`http://127.0.0.1:${ports.speech}/compatible-mode/v1`};
   for(const value of Object.values(endpoints))assertMockEndpoint(value);
   const coding=codingMock();await listenOwned(coding,ports.coding);
-  const lux3d=await createMockServer({key:'mock-only'});await listenOwned(lux3d,ports.lux3d);
+  const lux3d=await createMockServer({key:'mock-only',blockSize:1024*1024});await listenOwned(lux3d,ports.lux3d);
   const speech=speechMock();await listenOwned(speech,ports.speech);
   Object.assign(options,{base:endpoints.lux3d,key:'mock-only',pollMs:80,timeoutMs:60000,mockAssets:true,codingAgentBaseUrl:endpoints.coding,codingAgentApiKey:'mock-only',codingAgentModel:'mock-coder',speech:{baseUrl:endpoints.speech,apiKey:'mock-only',model:'qwen3-asr-flash',testLoopback:true}});
  }
