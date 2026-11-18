@@ -146,7 +146,7 @@ export interface SpeechConfig {
 export interface SpeechResult { requestId: string; text: string; provider: 'aliyun'; model: 'qwen3-asr-flash' }
 export interface SpeechCancelResult { requestId: string; status: 'cancelled' | 'completed' }
 export interface FileDiff { path: string; patch: string }
-export type WorkStarter = 'blank' | 'product-page';
+export type WorkStarter = 'blank' | 'free-web' | 'product-page' | 'imported';
 export interface WorkSummary {
   id: string;
   name: string;
@@ -155,10 +155,30 @@ export interface WorkSummary {
   updatedAt: string;
   active: boolean;
   initialPrompt?: string;
+  sourceLabel?: string;
 }
 export interface WorksState {
   activeId: string;
   works: WorkSummary[];
+}
+export interface ModelStatusView {
+  coding: {
+    configured: boolean;
+    mode: 'real' | 'mock' | 'unconfigured';
+    model: string | null;
+    providerHost: string | null;
+  };
+  speech: {
+    configured: boolean;
+    mode: 'real' | 'mock' | 'unconfigured';
+    model: string;
+  };
+  lux3d: {
+    configured: boolean;
+    mode: 'real' | 'mock' | 'unconfigured';
+    gateway: string;
+    legacyGateway: boolean;
+  };
 }
 
 export interface Task {

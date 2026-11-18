@@ -45,3 +45,19 @@ it('validates JSON and scene configuration before writing', async () => {
     await expect(sandbox.write('src/scene.config.json', '{}')).rejects.toThrow('场景配置');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+it('strips empty CSS @import placeholders and rejects external network imports or uninstalled npm packages', async () => {
+  const root = await fixture();
+  try {
+    const sandbox = new Sandbox(root);
+    await sandbox.write('src/style.css', "@import url('');\nbody { margin: 0; background: #f8f8f5; }\n");
+    const savedCss = await readFile(path.join(root, 'src/style.css'), 'utf8');
+    expect(savedCss).not.toContain('@import');
+    expect(savedCss).toContain('background: #f8f8f5');
+
+    await expect(sandbox.write('src/style.css', '@import url("https://fonts.googleapis.com/css");\n')).rejects.toThrow('外网');
+    await expect(sandbox.write('src/App.tsx', 'import { Sparkles } from "lucide-react";\nexport default () => <main />;\n')).rejects.toThrow('lucide-react');
+    await expect(sandbox.write('src/App.tsx', 'export default () => <main><img src="https://example.com/a.jpg" /></main>;\n')).rejects.toThrow('外网媒体');
+    await expect(sandbox.write('src/App.tsx', 'export default () => <main><h1>unclosed</main>;\n')).rejects.toThrow('语法错误');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
