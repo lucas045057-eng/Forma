@@ -29,6 +29,7 @@ function Studio() {
   const [placingAsset,setPlacingAsset]=useState<Asset>();
   const [initialPlacement,setInitialPlacement]=useState<PlacementSession>();
   const [placementGeneration,setPlacementGeneration]=useState(0);
+  const [draggingPlacement,setDraggingPlacement]=useState(false);
   const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
   const [showScene, setShowScene] = useState(false);
   const preview = useRef<HTMLIFrameElement>(null);
@@ -196,6 +197,39 @@ function Studio() {
     if(placementSessions.current.get(key)===refreshed)placementSessions.current.delete(key);
     throw new Error('放置会话已过期，请重新准备');
   }
+  useEffect(() => {
+    if (!draggingPlacement) return;
+    const stopDrag = () => setDraggingPlacement(false);
+    window.addEventListener('dragend', stopDrag, true);
+    window.addEventListener('drop', stopDrag, true);
+    return () => {
+      window.removeEventListener('dragend', stopDrag, true);
+      window.removeEventListener('drop', stopDrag, true);
+    };
+  }, [draggingPlacement]);
+
+  function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
+    exitImpact(false);
+    pickingRef.current = false;
+    setPicking(false);
+    setMode('current');
+    setShowScene(false);
+    send({ type: 'pick:stop' });
+    if (session) {
+      send({ type: 'placement:start', payload: session });
+    }
+    setInitialPlacement(session);
+    if (!placingAsset || placingAsset.id !== asset.id || !session) {
+      setPlacementGeneration(value => value + 1);
+    }
+    setPlacingAsset(asset);
+    if (fromDrag) {
+      requestAnimationFrame(() => setDraggingPlacement(true));
+    } else {
+      setDraggingPlacement(false);
+      setShowAssets(false);
+    }
+  }
   const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
   function toggle() {
     if (impactRef.current) { exitImpact(); return; }
@@ -213,8 +247,8 @@ function Studio() {
 
   return (
     <main className="studio">
-      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={(asset,session)=>{exitImpact(false);pickingRef.current=false;setPicking(false);setMode('current');setShowScene(false);setInitialPlacement(session);setPlacementGeneration(value=>value+1);setPlacingAsset(asset);send({type:'pick:stop'});}}/></Suspense>}
-      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} frame={ready?preview.current:null} onClose={()=>{for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
+      {showAssets && <Suspense fallback={<p role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
+      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="toolbar">
         <div><span className="wordmark">ORBIT / STUDIO</span><h1>空间化 AI 创作工作台</h1></div>
         <div className="tools">

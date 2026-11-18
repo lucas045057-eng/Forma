@@ -32,5 +32,9 @@
 .asset-placement { position: fixed; left: 14px; top: 110px; bottom: 14px; overflow: auto; width: min(340px, 36vw); padding: 16px; background: #17232d; border: 1px solid #67d6cf; border-radius: 10px; z-index: 60; font-size: 12px; }
 .asset-placement label { display: block; margin: 8px 0; }
 .asset-placement input, .asset-placement select { width: 100%; }
-.placement-card { padding: 18px; background: #24464c; border: 2px dashed #8df2dd; cursor: grab; overflow-wrap: anywhere; }
+.placement-card { padding: 14px; margin: 10px 0; background: #24464c; border: 2px dashed #8df2dd; border-radius: 6px; cursor: grab; overflow-wrap: anywhere; font-weight: 600; color: #c7fff3; user-select: none; }
+.lux-drag-handle { padding: 10px 12px; margin-bottom: 8px; background: #20454c; border: 1.5px dashed #8df2dd; border-radius: 6px; color: #c7fff3; font-size: 12px; font-weight: 600; cursor: grab; user-select: none; }
+.asset-dialog.is-dragging, .asset-placement.is-dragging { opacity: 0.16; pointer-events: none; transition: opacity 0.12s ease; }
+.placement-target-banner { padding: 12px; margin-bottom: 12px; background: #193d44; border: 1.5px solid #67e5d5; border-radius: 8px; }
+.placement-target-banner [data-testid="placement-confirm"] { width: 100%; margin-top: 8px; background: #67e5d5; color: #0b2429; font-weight: 700; }
 @media (max-width: 700px) { .asset-layout { grid-template-columns: 1fr; overflow: auto; } .model-area { flex: none; } .asset-dialog { top: 80px; bottom: 0; right: 0; width: 90vw; padding: 12px; } .asset-placement { width: 70vw; max-height: 50vh; top: auto; } }

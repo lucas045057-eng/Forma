@@ -16,7 +16,7 @@ const labels: Record<Asset['status'], string> = {
   downloading: '下载中', processing: '优化模型中', ready: '可查看', failed: '失败', cancelled: '已取消',
 };
 
-export default function AssetPanel({ onClose,onPlace,onPreparePlace }: { onClose: () => void;onPlace?:(asset:Asset,session?:PlacementSession,drag?:boolean)=>void;onPreparePlace?:(asset:Asset)=>Promise<PlacementSession> }) {
+export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=false }: { onClose: () => void;onPlace?:(asset:Asset,session?:PlacementSession,drag?:boolean)=>void;onPreparePlace?:(asset:Asset)=>Promise<PlacementSession>;dragging?:boolean }) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState('');
   const [taskId, setTaskId] = useState('4969293');
@@ -73,7 +73,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace }: { onClose
     try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new ApiError(response.status,typeof result?.error?.code==='string'?result.error.code:'ASSET_IMPORT_FAILED','备用导入未成功');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
     catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
-  return <aside className="asset-dialog" role="complementary" aria-label="3D 创作与资产">
+  return <aside className={`asset-dialog${dragging ? ' is-dragging' : ''}`} role="complementary" aria-label="3D 创作与资产">
     <header className="asset-header"><div><span className="wordmark">3D ASSETS</span><h2>木间 · 模型预览</h2></div><button onClick={onClose} data-testid="asset-close">返回网页</button></header>
     <div className="asset-layout">
       <section className="model-area" style={{ aspectRatio: sceneRenderSettings.aspectRatio }} data-testid="model-viewport" data-loaded={loaded}>

@@ -361,6 +361,11 @@ export default function Lux3DWorkbench({ assets, onPlace, onPreparePlace }: {
             event.dataTransfer.setData('application/x-spatial-asset', JSON.stringify({ sessionId: current.sessionId, assetId: asset.id }));
             onPlace?.(asset, current, true);
           }}>
+          {asset && asset.metrics?.webReady === true && (
+            <div className="lux-drag-handle">
+              {canDrag ? '⠿ 按住此条拖向左侧网页（松开后点确认放置生效）' : '移入此处准备网页拖放会话…'}
+            </div>
+          )}
           <p>{artifact.label ?? artifact.format} · {(artifact.bytes / 1e6).toFixed(2)}MB · {artifact.variant === 'original' ? '原始产物' : '网页优化件（原始产物保留）'}{clipsLabel}{artifact.animationMode ? ` · ${artifact.animationMode === 'combined' ? '合并交付' : '分文件交付'}` : ''}</p>
           {artifact.kind === 'image' && artifact.previewUrl && <img src={artifact.previewUrl} alt={artifact.label ?? 'Lux3D创作图片'} loading="lazy" />}
           {artifact.format === 'glb' && artifact.previewUrl && <>
