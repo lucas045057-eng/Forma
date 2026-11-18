@@ -474,9 +474,15 @@ export async function scaffoldRuntimeBase(input: {
 }): Promise<void> {
   const { targetWorkRoot, name, dependencySourceRoots = [], linkDeps = true } = input;
   await mkdir(targetWorkRoot, { recursive: true });
-  for (const configFile of ['package.json', 'vite.config.ts', 'tsconfig.json']) {
+  for (const configFile of ['package.json', 'tsconfig.json']) {
     await writeFile(path.join(targetWorkRoot, configFile), await readFile(path.join(TEMPLATE_ROOT, configFile)));
   }
+  const templateViteConfig = await readFile(path.join(TEMPLATE_ROOT, 'vite.config.ts'), 'utf8');
+  const prewarmedViteConfig = templateViteConfig.replace(
+    'plugins: [sourceTag(), react()],',
+    "plugins: [sourceTag(), react()],\n  resolve: { dedupe: ['react', 'react-dom', 'three'] },\n  optimizeDeps: { entries: ['src/main.tsx', 'src/spatial-module.tsx'] },",
+  );
+  await writeFile(path.join(targetWorkRoot, 'vite.config.ts'), prewarmedViteConfig);
   const safeTitle = escapeHtml(name.trim() || '未命名空间作品');
   const html = `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>${safeTitle}</title>\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>\n`;
   await writeFile(path.join(targetWorkRoot, 'index.html'), html);
