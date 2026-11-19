@@ -88,7 +88,13 @@ test.describe('M2-B 界面', () => {
     await expect(candidateFrame.locator('[data-testid="buy-button"]')).toHaveText('马上购买', { timeout: 60_000 });
 
     // 并排对比：两个 iframe 同尺寸
+    await page.getByTestId('preview-current').click();
+    await page.locator('.target-card-header').scrollIntoViewIfNeeded();
+    await pickElement(page, 'buy-button');
+    const link = page.getByTestId('selection-link');
+    await expect(link).toBeVisible();
     await page.getByTestId('preview-compare').click();
+    await expect(link).toHaveCount(0);
     const mainFrameElement = page.locator('[data-testid="preview-frame"]');
     const candidateElement = page.locator('[data-testid="candidate-frame"]');
     await expect(mainFrameElement).toBeVisible();
