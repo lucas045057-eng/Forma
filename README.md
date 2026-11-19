@@ -2,6 +2,8 @@
 
 React + TypeScript strict + Vite 的同源预览与源码点选验证。环境：Node 24、pnpm 11（packageManager 固定 11.17.0）。
 
+本机使用 Forma 工作台可运行 `pnpm forma`。启动、重开作品和第一轮试用步骤见[空间画布试用指南](docs/demo/studio-pilot.md)。
+
 ## 运行
 
 在仓库根目录执行：
