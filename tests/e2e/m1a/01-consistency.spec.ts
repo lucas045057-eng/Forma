@@ -28,7 +28,9 @@ test('一致性：Studio 视口与作品页首屏渲染同一模型，像素差�
   const frame = await openProductPage(page);
   await page.waitForTimeout(1_500);
   const productBox = await productCanvasRect(frame);
-  const size = Math.floor(productBox.width);
+  // Both canvases are forced to the same square size below. The Studio asset panel is at most
+  // 500px wide, so cap the common size to one that fits there; same model, camera and pixel size.
+  const size = Math.min(Math.floor(productBox.width), 400);
   expect(size).toBeGreaterThan(300);
   // 画布的 CSS 尺寸是小数（588.2），会让帧缓冲被拉伸而引入亚像素重采样。
   // 把作品页画布也固定到整数尺寸，两边才能按像素 1:1 比较。
@@ -61,7 +63,12 @@ test('一致性：Studio 视口与作品页首屏渲染同一模型，像素差�
     if (!area) throw new Error('没有找到资产视口');
     area.style.width = `${target}px`;
     area.style.height = `${target}px`;
+    // The panel caps the viewport (max-height) to stay compact; lift it so both canvases match 1:1.
+    area.style.maxHeight = 'none';
     area.style.flex = 'none';
+    // The orbit hint pill overlays the canvas; it is UI chrome, not part of the rendered model.
+    const hint = area.querySelector('.orbit-hint') as HTMLElement | null;
+    if (hint) hint.style.visibility = 'hidden';
   }, size);
   await page.waitForFunction((target) => {
     const canvas = document.querySelector('[data-testid="model-viewport"] canvas') as HTMLCanvasElement | null;
