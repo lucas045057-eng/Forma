@@ -106,6 +106,26 @@ it('runs real Chromium smoke and occlusion against one built static page with ev
     if(name==='smoke')expect(smoke.evidence).toBe(json.ref.hash);
   }
 },30000);
+it('measures the initial coffee page even when the smoke click opens a booking dialog',async()=>{
+  const coffee=await fixture(`import {useState} from 'react';
+export default function App(){
+  const [booking,setBooking]=useState(()=>localStorage.getItem('booking')==='open');
+  return <main data-spatial-page="free-web"><h1>Coffee</h1><a id="menu" href="#beans">Beans</a>
+    <button id="book" onClick={()=>{localStorage.setItem('booking','open');setBooking(true);}}>Book a tasting</button>
+    {booking&&<div role="dialog" style={{position:'fixed',inset:0,background:'white'}}>
+      <button id="dismiss" onClick={()=>{localStorage.removeItem('booking');setBooking(false);}}>Close</button>
+    </div>}</main>;
+}`);
+  const smoke=await coffee.executor.smoke(coffee.ctx);
+  expect(smoke.status,smoke.message).toBe('passed');
+  const smokeReport=await report(coffee,'smoke');
+  expect(smokeReport.spatialPage.interactiveVerified).toBe(true);
+  const occlusion=await coffee.executor.occlusion(coffee.ctx);
+  expect(occlusion.status,occlusion.message).toBe('passed');
+  const baseline=await report(coffee,'occlusion');
+  expect(baseline.url).toBe(smokeReport.url);
+  expect(baseline.targets.map((target:{id:string})=>target.id)).toEqual(['menu','book']);
+},30000);
 it('checks the real product template with its explicit missing-asset fallback',async()=>{
   const f=await fixture('',true);
   const result=await f.executor.smoke(f.ctx);
@@ -131,10 +151,11 @@ it('fails a covered purchase center using real hit testing',async()=>{
   const buy=(await report(f,'occlusion')).targets.find((target:any)=>target.testId==='buy-button');
   expect(buy.centerHit).toBe(false);expect(buy.samples.some((sample:any)=>sample.hit?.id==='cover')).toBe(true);
 },30000);
-it('fails a covered secondary control even when the purchase button is usable',async()=>{
-  const f=await fixture(app({extra:'<div style={{position:"relative",width:120,height:50}}><button id="other">Other</button><div style={{position:"absolute",inset:0,zIndex:2}}>Cover</div></div>'}));
-  const result=await f.executor.occlusion(f.ctx);expect(result.status).toBe('failed');
-  expect((await report(f,'occlusion')).targets.find((target:any)=>target.id==='other').passed).toBe(false);
+it('fails a covered secondary control even when the smoke click removes its cover',async()=>{
+  const sample=await fixture(app({extra:'<div style={{position:"relative",width:120,height:50}}><button id="other">Other</button>{count===0&&<div style={{position:"absolute",inset:0,zIndex:2}}>Cover</div>}</div>'}));
+  const smoke=await sample.executor.smoke(sample.ctx);expect(smoke.status,smoke.message).toBe('passed');
+  const result=await sample.executor.occlusion(sample.ctx);expect(result.status).toBe('failed');
+  expect((await report(sample,'occlusion')).targets).toContainEqual(expect.objectContaining({id:'other',passed:false}));
 },30000);
 it('rejects an empty interactive target set',async()=>{
   const f=await fixture('export default ()=> <main>No interactive targets</main>');

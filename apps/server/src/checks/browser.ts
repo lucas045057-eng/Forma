@@ -7,10 +7,11 @@ import { startStaticOrigin, type StaticOrigin } from './static-origin.ts';
 const viewport={width:1440,height:900};
 const safe=(value:string)=>value.replace(/Bearer\s+\S+/gi,'Bearer [redacted]').slice(0,700);
 const urlForEvidence=(value:string)=>{try{const url=new URL(value);return url.origin+url.pathname;}catch{return '<invalid-url>';}};
-interface Session { origin:StaticOrigin; browser:Browser; context:BrowserContext; page:Page; pageErrors:string[]; blockedRequests:{kind:string;url:string}[] }
-const sessions=new Map<string,Promise<Session>>();
+interface BrowserRun { origin:StaticOrigin; browser:Browser }
+interface Session extends BrowserRun { context:BrowserContext; page:Page; pageErrors:string[]; blockedRequests:{kind:string;url:string}[] }
+const runs=new Map<string,Promise<BrowserRun>>();
 const stops=new Map<string,Promise<void>>();
-async function initialize(ctx:CheckContext):Promise<Session>{
+async function initialize(ctx:CheckContext):Promise<BrowserRun>{
   ctx.signal.throwIfAborted();
   const origin=await startStaticOrigin(ctx.buildRoot);
   let browser:Browser|undefined;
@@ -18,7 +19,20 @@ async function initialize(ctx:CheckContext):Promise<Session>{
     browser=await chromium.launch({headless:true,timeout:Math.min(15000,ctx.browserTimeoutMs),
       downloadsPath:path.join(ctx.buildRoot,'.tmp/downloads'),
       args:['--no-proxy-server','--force-webrtc-ip-handling-policy=disable_non_proxied_udp','--disable-background-networking','--disable-component-update','--disable-sync','--disable-domain-reliability']});
-    const context=await browser.newContext({viewport,deviceScaleFactor:1,serviceWorkers:'block',acceptDownloads:false});
+    ctx.signal.throwIfAborted();
+    return {origin,browser};
+  }catch(error){
+    await browser?.close().catch(()=>{});await origin.close();throw error;
+  }
+}
+async function session(ctx:CheckContext):Promise<Session>{
+  if(stops.has(ctx.runId))throw new Error('BROWSER_STOPPED');
+  let run=runs.get(ctx.runId);
+  if(!run){run=initialize(ctx);runs.set(ctx.runId,run);}
+  const {origin,browser}=await run;
+  ctx.signal.throwIfAborted();
+  const context=await browser.newContext({viewport,deviceScaleFactor:1,serviceWorkers:'block',acceptDownloads:false});
+  try{
     const pageErrors:string[]=[],blockedRequests:{kind:string;url:string}[]=[];
     const blocked=(kind:string,url:string)=>{if(blockedRequests.length<100)blockedRequests.push({kind,url:urlForEvidence(url)});};
     // This template has no worker dependency. Deny worker creation itself because
@@ -73,25 +87,20 @@ async function initialize(ctx:CheckContext):Promise<Session>{
     ctx.signal.throwIfAborted();
     return {origin,browser,context,page,pageErrors,blockedRequests};
   }catch(error){
-    await browser?.close().catch(()=>{});await origin.close();throw error;
+    await context.close();throw error;
   }
-}
-async function session(ctx:CheckContext){
-  if(stops.has(ctx.runId))throw new Error('BROWSER_STOPPED');
-  let promise=sessions.get(ctx.runId);
-  if(!promise){promise=initialize(ctx);sessions.set(ctx.runId,promise);}
-  return promise;
 }
 export async function stopBrowser(runId:string){
   let stopped=stops.get(runId);
   if(!stopped){
-    const promise=sessions.get(runId);
+    const promise=runs.get(runId);
+    runs.delete(runId);
     stopped=(async()=>{
       if(!promise)return;
-      let s:Session;
-      try{s=await promise;}catch{return;}
-      try{await s.context.close();}finally{try{await s.browser.close();}finally{await s.origin.close();}}
-      sessions.delete(runId);
+      let run:BrowserRun;
+      try{run=await promise;}catch{return;}
+      try{await Promise.all(run.browser.contexts().map(context=>context.close()));}
+      finally{try{await run.browser.close();}finally{await run.origin.close();}}
     })();
     stops.set(runId,stopped);
   }
@@ -99,10 +108,8 @@ export async function stopBrowser(runId:string){
 }
 async function frames(page:Page){await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));}
 async function navigate(s:Session){
-  if(s.page.url()!==s.origin.url){
-    await s.page.goto(s.origin.url,{waitUntil:'load'});
-    await s.page.locator('#root main').waitFor({state:'visible'});
-  }
+  await s.page.goto(s.origin.url,{waitUntil:'load'});
+  await s.page.locator('#root main').waitFor({state:'visible'});
   await frames(s.page);
   // Observe actual in-flight startup resources, including dedicated worker requests.
   await s.page.waitForLoadState('networkidle',{timeout:5000});
@@ -199,21 +206,23 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
     if(s.blockedRequests.length)throw new Error('BROWSER_NETWORK_DENIED');
     status='passed';
   }catch(error){
-    ctx.signal.throwIfAborted();
     message=safe(error instanceof Error?error.message:'BROWSER_CHECK_FAILED');
     data.error=message;
+  }
+  try{
+    ctx.signal.throwIfAborted();
+    if(s){
+      Object.assign(data,{pageErrors:[...s.pageErrors],blockedRequests:[...s.blockedRequests]});
+      if(s.pageErrors.length||s.blockedRequests.length)status='failed';
+      const png=await s.page.screenshot({type:'png',fullPage:false,timeout:5000});
+      await ctx.writeArtifact(name+'.png',png);
+    }
+    Object.assign(data,{status,durationMs:Date.now()-startedAt});
+    const ref=await ctx.writeArtifact(name+'.json',JSON.stringify(data));
+    return {name,status,message,evidence:ref.hash,durationMs:Date.now()-startedAt};
   }finally{
     ctx.signal.removeEventListener('abort',aborted);
+    await s?.context.close();
   }
-  ctx.signal.throwIfAborted();
-  if(s){
-    Object.assign(data,{pageErrors:[...s.pageErrors],blockedRequests:[...s.blockedRequests]});
-    if(s.pageErrors.length||s.blockedRequests.length)status='failed';
-    const png=await s.page.screenshot({type:'png',fullPage:false,timeout:5000});
-    await ctx.writeArtifact(name+'.png',png);
-  }
-  Object.assign(data,{status,durationMs:Date.now()-startedAt});
-  const ref=await ctx.writeArtifact(name+'.json',JSON.stringify(data));
-  return {name,status,message,evidence:ref.hash,durationMs:Date.now()-startedAt};
 }
 

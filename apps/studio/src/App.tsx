@@ -49,7 +49,6 @@ function Studio() {
   const pickRequest = useRef(0);
   const progressRef = useRef(0);
   const targetCard = useRef<HTMLDivElement>(null);
-  // Scroll progress at the moment the current selection was confirmed; the connector hides once it changes.
   const [pickedAt, setPickedAt] = useState<number | null>(null);
   const canvasWidth = useRef(400);
   const [picking, setPicking] = useState(false);
@@ -162,10 +161,10 @@ function Studio() {
           send({ type: 'highlight', payload: { src: payload.src } });
           // The previous object stops being submittable the moment a new one is picked.
           setPick({ kind: 'pending', src: payload.src });
+          setPickedAt(progressRef.current);
           void api<{ version: string }>('/version').then(result => {
             if (requestId !== pickRequest.current) return;
             setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
-            setPickedAt(progressRef.current);
             setError('');
           }).catch(() => {
             if (requestId !== pickRequest.current) return;
