@@ -167,6 +167,26 @@ it('recovers interrupted saved checks as failed without rerunning them',async()=
   expect(f.calls).toHaveLength(calls);
   await expect(f.work.adopt(c.id)).rejects.toMatchObject({code:'CHECKS_NOT_PASSED',status:409});
 },15000);
+it('requires fresh checks for a saved pass from before placed modules were inspected', async () => {
+  const f = await fixture();
+  const draft = await candidate(f);
+  const oldRun = await complete(f, draft.id);
+  await f.work.close();
+  const file = path.join(f.dataDirectory, 'tasks.json');
+  const state = JSON.parse(await readFile(file, 'utf8'));
+  state.checkRuns.find((run: CheckRun) => run.id === oldRun.id).policyVersion = 'm3b-v2';
+  await writeFile(file, JSON.stringify(state));
+
+  f.work = new WorkService(f.options) as IntegratedWork;
+  await f.work.init();
+  stubPreview(f.work);
+  expect(f.work.getCandidate(draft.id).checks.every(check => check.status === 'not_run')).toBe(true);
+  await expect(f.work.adopt(draft.id)).rejects.toMatchObject({ code: 'CHECKS_NOT_PASSED' });
+  const fresh = await complete(f, draft.id);
+  expect(fresh.id).not.toBe(oldRun.id);
+  expect(fresh.outcome).toBe('passed');
+  await f.work.adopt(draft.id);
+}, 15000);
 it('migrates missing run storage without trusting legacy candidate green labels',async()=>{
   const f=await fixture(),c=await candidate(f);await f.work.close();
   const file=path.join(f.dataDirectory,'tasks.json'),state=JSON.parse(await readFile(file,'utf8'));delete state.checkRuns;

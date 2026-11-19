@@ -120,12 +120,62 @@ export default function App(){
   expect(smoke.status,smoke.message).toBe('passed');
   const smokeReport=await report(coffee,'smoke');
   expect(smokeReport.spatialPage.interactiveVerified).toBe(true);
+  expect(smokeReport.placedModules).toMatchObject({ count: 0, failed: 0 });
   const occlusion=await coffee.executor.occlusion(coffee.ctx);
   expect(occlusion.status,occlusion.message).toBe('passed');
   const baseline=await report(coffee,'occlusion');
   expect(baseline.url).toBe(smokeReport.url);
   expect(baseline.targets.map((target:{id:string})=>target.id)).toEqual(['menu','book']);
 },30000);
+it('rejects invisible placed modules even when the coffee illustration and another canvas are visible', async () => {
+  const coffee = await fixture(`export default function App() {
+    return <main data-spatial-page="free-web"><h1>Coffee</h1>
+      <section data-spatial-module="visible"><canvas /></section>
+      <svg viewBox="0 0 240 160" width="240" height="160">
+        <path d="M20 20h60v40H20z" />
+        <section data-spatial-module="cup"><canvas /></section>
+      </svg>
+      <section data-spatial-module="collapsed"><canvas style={{ width: 0 }} /></section>
+      <section style={{opacity: 0}}><div data-spatial-module="transparent"><canvas /></div></section>
+      <section data-spatial-module="missing"><p>Model</p></section>
+      <section data-spatial-module="empty-buffer"><canvas width={0} style={{width: 120, height: 80}} /></section>
+    </main>;
+  }`);
+  const smoke = await coffee.executor.smoke(coffee.ctx);
+  expect(smoke.status).toBe('failed');
+  expect(smoke.message).toContain('插图外层');
+  const { placedModules } = await report(coffee, 'smoke');
+  expect(placedModules).toMatchObject({ count: 6, failed: 5 });
+  expect(placedModules.samples).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: 'visible', reason: null }),
+    expect.objectContaining({ id: 'cup', reason: 'non-html-module', box: { width: 0, height: 0 } }),
+    expect.objectContaining({ id: 'collapsed', reason: 'zero-size' }),
+    expect.objectContaining({ id: 'transparent', reason: 'hidden' }),
+    expect.objectContaining({ id: 'missing', reason: 'missing-canvas' }),
+    expect.objectContaining({ id: 'empty-buffer', reason: 'empty-buffer' }),
+  ]));
+}, 30000);
+it('accepts a placed module below the fold when its canvas finishes loading before interaction', async () => {
+  const coffee = await fixture(`import {useEffect, useState} from 'react';
+  export default function App() {
+    const [ready, setReady] = useState(false);
+    const [open, setOpen] = useState(true);
+    useEffect(() => { const timer = setTimeout(() => setReady(true), 1500); return () => clearTimeout(timer); }, []);
+    return <main data-spatial-page="free-web"><h1>Coffee</h1>
+      <button onClick={() => setOpen(false)}>Book a tasting</button>
+      {open && <section style={{ marginTop: 1300 }} data-spatial-module="below-fold">
+        {ready && <canvas width={160} height={100} />}
+      </section>}
+    </main>;
+  }`);
+  const smoke = await coffee.executor.smoke(coffee.ctx);
+  expect(smoke.status, smoke.message).toBe('passed');
+  const evidence = await report(coffee, 'smoke');
+  expect(evidence.placedModules).toMatchObject({
+    count: 1, failed: 0, samples: [{ id: 'below-fold', reason: null, canvasBox: { width: 160, height: 100 } }],
+  });
+  expect(evidence.spatialPage.interactiveVerified).toBe(true);
+}, 30000);
 it('checks the real product template with its explicit missing-asset fallback',async()=>{
   const f=await fixture('',true);
   const result=await f.executor.smoke(f.ctx);
