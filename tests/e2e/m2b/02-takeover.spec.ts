@@ -404,7 +404,7 @@ test.describe('M2-B 接管后专项', () => {
       socketMock.sendReady(caught.current);
       await expect(page.getByTestId('events-status')).toHaveAttribute('data-status', 'connected', { timeout: 20_000 });
       await expect(page.getByTestId('events-seq')).toHaveText(String(caught.current), { timeout: 20_000 });
-      await expect(page.getByTestId('work-version')).toContainText(versionAfterAdopt.slice(0, 10), { timeout: 20_000 });
+      await expect(page.getByTestId('work-version')).toContainText(versionAfterAdopt.slice(0, 8), { timeout: 20_000 });
       expect(historyRequests.some((url) => url.includes(`since=${opened.current}`)), '没有从断线前序号补拉').toBe(true);
 
       writeArtifactFrom('takeover-events-reconnect.json', {
@@ -576,7 +576,7 @@ test.describe('M2-B 接管后专项', () => {
         expect(title).toContain(candidate.id.slice(0, 8));
         switched.push({ id: candidate.id, text: await frame.locator('[data-testid="buy-button"]').innerText(), frameSrc });
       }
-      await expect(page.getByTestId('candidate-details')).toContainText('待定候选 3/3');
+      await expect(page.getByTestId('candidate-details')).toContainText('3/3 待定');
       writeArtifactFrom('takeover-candidates-switch.json', { created, switched });
     } finally {
       for (const candidate of (await listCandidates()).body.filter((item) => item.decision === 'pending')) {

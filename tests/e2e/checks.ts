@@ -23,8 +23,13 @@ import { astSrcSet, nativeJsxNodes, nodeByText, type JsxNodeModel } from './sour
 
 export type RenderState = 'ready' | 'fallback';
 
-/** 只在特定渲染状态下出现的组件（M1-A：ProductHero.tsx 里的 Placeholder）。 */
-const STATE_ONLY_COMPONENTS: Record<string, RenderState> = { Placeholder: 'fallback' };
+/**
+ * 只在特定渲染状态下出现的组件：
+ * - Placeholder（M1-A，ProductHero.tsx）只在回退态出现；
+ * - SpatialModule（spatial-module.tsx）只在作品里放置了页内 3D 模块时才渲染，
+ *   基线模板没有任何放置实例，ready / fallback 两种状态都不应期望它出现。
+ */
+const STATE_ONLY_COMPONENTS: Record<string, RenderState | 'placed-module'> = { Placeholder: 'fallback', SpatialModule: 'placed-module' };
 
 function isExpected(node: JsxNodeModel, state: RenderState): boolean {
   const required = STATE_ONLY_COMPONENTS[node.component];
