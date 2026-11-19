@@ -262,7 +262,7 @@ test.describe('M0-B 点选 → 源码定位', () => {
     expect(mode, '探针应能被真实鼠标点中').toBe('mouse');
     expect(selection.src).toBe(hostSrc);
     expect(selection.note).toBe('outer-container');
-    expect(await page.locator('.inspector .notice').first().innerText()).toContain('已选中外层容器');
+    expect(await page.locator('.inspector .selection-badges').innerText()).toContain('外层容器');
     writeArtifact('case5-outer-container.json', { hostSrc, clickMode: mode, selection });
   });
 

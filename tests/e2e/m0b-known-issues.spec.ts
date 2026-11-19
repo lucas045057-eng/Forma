@@ -162,9 +162,9 @@ test.describe('R1 选取模式不得触发先于/绕过 click 的业务行为', 
     await expect.poll(() => hoverBoxCount(frame), { timeout: 5_000 }).toBeGreaterThan(0);
     const hoverBoxes = await hoverBoxCount(frame);
 
-    // 滚动：先回到顶部拿到基线，再往下滚，确认 Studio 收到 scroll:progress（右上角百分比）
+    // 滚动：先回到顶部拿到基线，再往下滚，确认 Studio 收到 scroll:progress（视口模式标签里的百分比）
     const percent = async () => {
-      const text = await page.locator('.panel-title span').last().innerText();
+      const text = await page.locator('.viewport-mode-pill').innerText();
       const match = /(\d+)%/.exec(text);
       return match ? Number(match[1]) : -1;
     };

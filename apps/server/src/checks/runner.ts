@@ -15,7 +15,7 @@ export type { CheckResult } from '@spatial/shared';
 export const DEFAULT_BUILD_TIMEOUT_MS = 120_000;
 export const DEFAULT_BROWSER_TIMEOUT_MS = 30_000;
 export const DEFAULT_RUN_TIMEOUT_MS = 180_000;
-export const POLICY_VERSION = 'm3b-v2';
+export const POLICY_VERSION = 'm3b-v3';
 export const CHECK_ORDER: CheckName[] = ['schema', 'build', 'smoke', 'occlusion'];
 
 /** The owning store can reject a terminal green result under its publication lock. */
