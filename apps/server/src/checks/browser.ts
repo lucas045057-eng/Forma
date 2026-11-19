@@ -3,6 +3,7 @@ import path from 'node:path';
 import type { CheckResult } from '@spatial/shared';
 import type { CheckContext } from './runner.ts';
 import { startStaticOrigin, type StaticOrigin } from './static-origin.ts';
+import { inspectPlacedModules } from './placed-modules.ts';
 
 const viewport={width:1440,height:900};
 const safe=(value:string)=>value.replace(/Bearer\s+\S+/gi,'Bearer [redacted]').slice(0,700);
@@ -115,49 +116,6 @@ async function navigate(s:Session){
   await s.page.waitForLoadState('networkidle',{timeout:5000});
 }
 
-// Runs in Chromium on the initially rendered page, before the smoke click can change it.
-async function inspectPlacedModules(settleMs: number) {
-  const selector = '#root [data-spatial-module]';
-  const initial = Array.from(document.querySelectorAll(selector));
-  const visibility = { checkOpacity: true, checkVisibilityCSS: true };
-  const size = (element: Element) => {
-    const { width, height } = element.getBoundingClientRect();
-    return { width, height };
-  };
-  const measure = (original: Element) => {
-    const id = original.getAttribute('data-spatial-module')!;
-    const module = original.isConnected ? original :
-      document.querySelector(`#root [data-spatial-module="${CSS.escape(id)}"]`) ?? original;
-    const box = size(module);
-    const canvas = Array.from(module.querySelectorAll('canvas')).find(child => child.closest('[data-spatial-module]') === module);
-    const canvasBox = canvas ? size(canvas) : null;
-    let reason: string | null = null;
-    if (!module.isConnected) reason = 'unmounted';
-    else if (!(module instanceof HTMLElement)) reason = 'non-html-module';
-    else if (!canvas || !canvasBox) reason = 'missing-canvas';
-    else if (!(canvas instanceof HTMLCanvasElement)) reason = 'non-html-canvas';
-    else if (!canvas.width || !canvas.height) reason = 'empty-buffer';
-    else if (!box.width || !box.height || !canvasBox.width || !canvasBox.height) reason = 'zero-size';
-    else if (!module.checkVisibility(visibility) || !canvas.checkVisibility(visibility)) reason = 'hidden';
-    return { id: id.slice(0, 80), reason, box, canvasBox, namespace: module.namespaceURI };
-  };
-
-  const deadline = performance.now() + settleMs;
-  let samples = initial.map(measure);
-  let failures = samples.filter(sample => sample.reason !== null);
-  const wrongNamespace = () => failures.some(sample => sample.reason === 'non-html-module' || sample.reason === 'non-html-canvas');
-  while (failures.length && !wrongNamespace() && performance.now() < deadline) {
-    // The trusted renderer hides the canvas while decoding the model and sizing the drawing surface.
-    await new Promise(resolve => setTimeout(resolve, 100));
-    samples = initial.map(measure);
-    failures = samples.filter(sample => sample.reason !== null);
-  }
-  return {
-    count: samples.length, failed: failures.length, wrongNamespace: wrongNamespace(),
-    samples: [...failures, ...samples.filter(sample => sample.reason === null)].slice(0, 32),
-  };
-}
-
 export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Promise<CheckResult>{
   const startedAt=Date.now();
   let s:Session|undefined;
@@ -171,13 +129,6 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
     await navigate(s);
     const isCustomSpatialPage = await s.page.locator('#root main[data-spatial-page]').count() > 0;
     if(name==='smoke'){
-      const placed = await s.page.evaluate(inspectPlacedModules, Math.min(5000, ctx.browserTimeoutMs));
-      data.placedModules = placed;
-      if (placed.failed) {
-        throw new Error(placed.wrongNamespace
-          ? '3D 模块无法在插图内部显示。请选择插图外层的网页区块，重新放置后再检查。'
-          : '3D 模块未显示。请在候选预览中检查放置区域的尺寸和模型加载情况。');
-      }
       const scene=s.page.getByTestId('product-scene');
       const sceneCount = await scene.count();
       if (!isCustomSpatialPage || sceneCount > 0) {
@@ -187,6 +138,16 @@ export async function checkBrowser(name:'smoke'|'occlusion',ctx:CheckContext):Pr
         if(state!=='ready' && !(state==='fallback'&&placeholderVisible))throw new Error('SCENE_NOT_READY_OR_VISIBLE_FALLBACK');
       } else {
         data.scene={present:false};
+      }
+      // Leave budget for the CTA, the screenshot and publishing the evidence.
+      const reserveMs = Math.min(10000, ctx.browserTimeoutMs / 3);
+      const settleMs = Math.max(0, ctx.browserTimeoutMs - (Date.now() - startedAt) - reserveMs);
+      const placed = await s.page.evaluate(inspectPlacedModules, settleMs);
+      data.placedModules = placed;
+      if (placed.failed) {
+        throw new Error(placed.wrongNamespace
+          ? '3D 模块无法在插图内部显示。请选择插图外层的网页区块，重新放置后再检查。'
+          : '3D 模块未显示。请在候选预览中检查放置区域是否有可见空间，以及模型是否已加载。');
       }
       if (isCustomSpatialPage) {
         const mainEl = s.page.locator('#root main[data-spatial-page]').first();
