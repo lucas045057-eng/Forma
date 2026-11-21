@@ -18,12 +18,12 @@ export const MODEL_PROVIDER_PRESETS: ProviderPreset[] = [
   {
     id: 'dashscope',
     name: '阿里云百炼 (DashScope 通用)',
-    badge: '推荐 · 编码+语音同Key',
+    badge: '推荐 · 通义千问',
     baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     defaultModel: 'qwen3-coder-plus',
     models: ['qwen3-coder-plus', 'qwen-max', 'qwen-plus', 'deepseek-v3'],
     keyPlaceholder: 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    docHint: '使用百炼控制台 API-KEY（北京节点）；同一个 Key 可同时用于下方阿里云语音识别 (qwen3-asr-flash)。',
+    docHint: '使用阿里云百炼控制台申请的 API-KEY（国内北京节点），Base URL 以 /compatible-mode/v1 结尾。',
     requiresKey: true,
   },
   {

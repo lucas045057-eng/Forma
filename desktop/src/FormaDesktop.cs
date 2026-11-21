@@ -383,8 +383,8 @@ namespace FormaDesktop
             _envPath = envPath;
             ShouldRestartService = false;
 
-            Text = "Forma 模型与 API 密钥配置 (apps/server/.env)";
-            Size = new Size(700, 610);
+            Text = "Forma 编码大模型配置 (apps/server/.env)";
+            Size = new Size(700, 385);
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -407,7 +407,7 @@ namespace FormaDesktop
         private void BuildUi()
         {
             Label header = new Label();
-            header.Text = "配置真实 AI 模型连接（UTF-8 无 BOM 安全写入 apps/server/.env）";
+            header.Text = "配置编码大模型连接（UTF-8 无 BOM 安全写入 apps/server/.env）";
             header.Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold);
             header.ForeColor = Theme.AccentLime;
             header.Location = new Point(22, 16);
@@ -465,14 +465,9 @@ namespace FormaDesktop
 
             string[][] fields = new string[][]
             {
-                new string[] { "CODING_AGENT_BASE_URL", "代码生成 Base URL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "0" },
-                new string[] { "CODING_AGENT_MODEL", "代码生成模型名称", "qwen3-coder-plus", "0" },
-                new string[] { "CODING_AGENT_API_KEY", "代码生成 API Key", "sk-...", "1" },
-                new string[] { "SPEECH_BASE_URL", "语音识别 Base URL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "0" },
-                new string[] { "SPEECH_MODEL", "语音识别模型名称", "qwen3-asr-flash", "0" },
-                new string[] { "DASHSCOPE_API_KEY", "语音识别 API Key", "sk-...", "1" },
-                new string[] { "LUX3D_BASE", "Lux3D 3D 服务地址", "https://api.aholo.cn", "0" },
-                new string[] { "LUX3D_API_KEY", "Lux3D API Key", "lux-...", "1" }
+                new string[] { "CODING_AGENT_BASE_URL", "编码模型 Base URL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "0" },
+                new string[] { "CODING_AGENT_MODEL", "编码模型名称", "qwen3-coder-plus", "0" },
+                new string[] { "CODING_AGENT_API_KEY", "编码模型 API Key", "sk-...", "1" }
             };
 
             int y = 118;
@@ -526,7 +521,7 @@ namespace FormaDesktop
             Controls.Add(_showSecretsCheck);
 
             Button btnSaveRestart = CreateButton("保存并重启服务", Theme.AccentLime, Theme.BgCanvas, true);
-            btnSaveRestart.Location = new Point(298, 514);
+            btnSaveRestart.Location = new Point(298, 292);
             btnSaveRestart.Size = new Size(146, 36);
             btnSaveRestart.Click += delegate
             {
@@ -538,7 +533,7 @@ namespace FormaDesktop
             Controls.Add(btnSaveRestart);
 
             Button btnSaveOnly = CreateButton("仅保存", Theme.BgCard, Theme.TextPrimary, false);
-            btnSaveOnly.Location = new Point(454, 514);
+            btnSaveOnly.Location = new Point(454, 292);
             btnSaveOnly.Size = new Size(96, 36);
             btnSaveOnly.Click += delegate
             {
@@ -550,7 +545,7 @@ namespace FormaDesktop
             Controls.Add(btnSaveOnly);
 
             Button btnCancel = CreateButton("取消", Theme.BgCard, Theme.TextMuted, false);
-            btnCancel.Location = new Point(560, 514);
+            btnCancel.Location = new Point(560, 292);
             btnCancel.Size = new Size(96, 36);
             btnCancel.Click += delegate
             {
@@ -565,9 +560,6 @@ namespace FormaDesktop
             Dictionary<string, string> current = DotEnvManager.ReadEnv(_envPath);
             if (!current.ContainsKey("CODING_AGENT_BASE_URL")) current["CODING_AGENT_BASE_URL"] = "https://dashscope.aliyuncs.com/compatible-mode/v1";
             if (!current.ContainsKey("CODING_AGENT_MODEL")) current["CODING_AGENT_MODEL"] = "qwen3-coder-plus";
-            if (!current.ContainsKey("SPEECH_BASE_URL")) current["SPEECH_BASE_URL"] = "https://dashscope.aliyuncs.com/compatible-mode/v1";
-            if (!current.ContainsKey("SPEECH_MODEL")) current["SPEECH_MODEL"] = "qwen3-asr-flash";
-            if (!current.ContainsKey("LUX3D_BASE")) current["LUX3D_BASE"] = "https://api.aholo.cn";
 
             foreach (KeyValuePair<string, TextBox> kv in _inputs)
             {
