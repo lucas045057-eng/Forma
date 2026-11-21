@@ -11,6 +11,7 @@ type ToolCall = { id: string; type?: 'function'; function: { name: string; argum
 type Message = {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string | null;
+  reasoning_content?: string | null;
   tool_calls?: ToolCall[];
   tool_call_id?: string;
   name?: string;
@@ -31,13 +32,56 @@ function isLoopback(hostname: string) {
   return host === 'localhost' || host === '127.0.0.1' || host === '::1';
 }
 
+const KNOWN_PROVIDER_DEFAULT_PATHS: Record<string, string> = {
+  'dashscope.aliyuncs.com': '/compatible-mode/v1',
+  'dashscope-intl.aliyuncs.com': '/compatible-mode/v1',
+  'coding.dashscope.aliyuncs.com': '/v1',
+  'api.deepseek.com': '/v1',
+  'api.siliconflow.cn': '/v1',
+  'api.siliconflow.com': '/v1',
+  'ark.cn-beijing.volces.com': '/api/v3',
+  'open.bigmodel.cn': '/api/paas/v4',
+  'api.moonshot.cn': '/v1',
+  'api.moonshot.ai': '/v1',
+  'api.openai.com': '/v1',
+  'openrouter.ai': '/api/v1',
+};
+
+export function normalizeCodingAgentBaseUrl(rawBase: string): string {
+  let cleaned = rawBase.trim().replace(/^["']+|["']+$/g, '').trim();
+  if (!cleaned) return '';
+  cleaned = cleaned.replace(/\/+$/, '');
+  if (/\/chat\/completions$/i.test(cleaned)) {
+    cleaned = cleaned.replace(/\/chat\/completions$/i, '');
+  }
+  try {
+    const parsed = new URL(cleaned);
+    const host = parsed.hostname.toLowerCase();
+    if (!parsed.pathname || parsed.pathname === '/') {
+      const defaultPath = KNOWN_PROVIDER_DEFAULT_PATHS[host];
+      if (defaultPath) {
+        parsed.pathname = defaultPath;
+        return parsed.toString().replace(/\/+$/, '');
+      }
+      if (isLoopback(host) && parsed.port === '11434') {
+        parsed.pathname = '/v1';
+        return parsed.toString().replace(/\/+$/, '');
+      }
+    }
+  } catch {
+    // Let codingAgentEndpoint report invalid URL
+  }
+  return cleaned;
+}
+
 export function codingAgentEndpoint(base: string) {
+  const normalized = normalizeCodingAgentBaseUrl(base);
   let url: URL;
-  try { url = new URL(base); } catch { throw new CodingAgentError('AGENT_CONFIG', 'CODING_AGENT_BASE_URL 不是合法 URL'); }
+  try { url = new URL(normalized); } catch { throw new CodingAgentError('AGENT_CONFIG', 'CODING_AGENT_BASE_URL 不是合法 URL'); }
   if (url.username || url.password || (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLoopback(url.hostname)))) {
     throw new CodingAgentError('AGENT_CONFIG', '编码 Agent 上游除本机 mock 外必须使用 HTTPS，且 URL 不得含凭据');
   }
-  return `${base.replace(/\/+$/, '')}/chat/completions`;
+  return `${normalized.replace(/\/+$/, '')}/chat/completions`;
 }
 
 /** Runs the model/tool protocol. The model never receives process or shell access. */
@@ -121,6 +165,7 @@ export class CodingAgent {
       messages.push({
         role: 'assistant',
         content: typeof message.content === 'string' ? message.content : null,
+        ...(typeof message.reasoning_content === 'string' ? { reasoning_content: message.reasoning_content } : {}),
         ...(message.tool_calls?.length
           ? {
               tool_calls: message.tool_calls.map(tc => ({
@@ -208,7 +253,11 @@ export class CodingAgent {
 
   private arguments(call: ToolCall): Record<string, unknown> {
     try {
-      const parsed: unknown = JSON.parse(call.function.arguments || '{}');
+      let rawArgs = (call.function.arguments || '{}').trim();
+      if (rawArgs.startsWith('```')) {
+        rawArgs = rawArgs.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      }
+      const parsed: unknown = JSON.parse(rawArgs || '{}');
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('not object');
       return parsed as Record<string, unknown>;
     } catch { throw new CodingAgentError('AGENT_TOOL_ARGUMENTS', '工具参数必须是 JSON 对象'); }
@@ -265,9 +314,13 @@ export class CodingAgent {
     if (!message || message.role !== 'assistant' || !Array.isArray(message.tool_calls) && message.content === undefined) {
       throw new CodingAgentError('AGENT_PROTOCOL', '编码模型响应缺少 assistant message');
     }
-    for (const call of message.tool_calls ?? []) {
+    for (let i = 0; i < (message.tool_calls ?? []).length; i += 1) {
+      const call = message.tool_calls![i];
       if (!call || typeof call.id !== 'string' || typeof call.function?.name !== 'string' || typeof call.function.arguments !== 'string') {
         throw new CodingAgentError('AGENT_PROTOCOL', '编码模型返回了不完整的工具调用');
+      }
+      if (!call.id.trim()) {
+        call.id = `call_${i + 1}`;
       }
     }
     return message;

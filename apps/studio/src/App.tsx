@@ -12,6 +12,7 @@ import ModelOriginBadge from './model-provenance.tsx';
 import AssetPlacement from './AssetPlacement.tsx';
 import SelectionLink from './SelectionLink.tsx';
 import NewWorkModal, { type CreatedWorkResult, type ModalTab } from './NewWorkModal.tsx';
+import ModelConfigModal from './ModelConfigModal.tsx';
 import type {Asset} from '@spatial/shared';
 import type {PlacementSession} from './placement-state.ts';
 import {luxApi} from './lux3d-api.ts';
@@ -30,6 +31,7 @@ function Studio() {
     works: [{ id: 'default', name: '木间香薰', starter: 'product-page', createdAt: '', updatedAt: '', active: true }],
   });
   const [modalTab, setModalTab] = useState<ModalTab | null>(null);
+  const [showModelConfig, setShowModelConfig] = useState(false);
   const [modelStatus, setModelStatus] = useState<ModelStatusView | null>(null);
   const [switchingWork, setSwitchingWork] = useState(false);
   const [previewRevision, setPreviewRevision] = useState(0);
@@ -284,6 +286,7 @@ function Studio() {
     loadModelStatus();
     const unsubscribe = subscribe(event => {
       if (event.type === 'work.changed' || event.type === 'work.updated') loadWorks();
+      if (event.type === 'models.updated') loadModelStatus();
       if (event.type === 'candidate.ready') {
         const readyCandidate = event.candidate as { id?: string; taskId?: string } | undefined;
         const relatedTask = state.tasks.find(t => t.id === readyCandidate?.taskId || t.id === readyCandidate?.id);
@@ -358,6 +361,7 @@ function Studio() {
   return (
     <main className="studio">
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
+      {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => setModelStatus(nextStatus)}/>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
       {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="studio-top">
@@ -375,7 +379,9 @@ function Studio() {
               className={`status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
               data-testid="model-status"
               data-mode={modelStatus.coding.mode}
-              title={modelStatusTooltip}
+              title={`${modelStatusTooltip}（点击配置或切换大模型）`}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setShowModelConfig(true)}
             >
               {modelStatus.coding.mode === 'real'
                 ? `真实模型 · ${modelStatus.coding.model}`
@@ -386,6 +392,7 @@ function Studio() {
           )}
           {!syncReady && <span className="status-pill is-wait" role="status">状态待同步</span>}
           {syncError && <span className="status-pill is-error" role="alert">{syncError}</span>}
+          <button type="button" className="ghost-btn compact-btn" data-testid="model-config-open" onClick={() => setShowModelConfig(true)}>接入模型</button>
           <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
         </div>
       </header>

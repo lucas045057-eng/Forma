@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, it } from 'vitest';
-import { CodingAgent, codingAgentEndpoint } from './client.ts';
+import { CodingAgent, codingAgentEndpoint, normalizeCodingAgentBaseUrl } from './client.ts';
 import { createCodingAgentMock, type MockScenario } from './mock-server.ts';
 import { listenForFetch } from '../test-support/fetch-listener.ts';
 
@@ -180,6 +180,66 @@ it('automatically attaches src/App.tsx and wrapper guidance when user picks a ma
     expect(systemContent).toContain('pointerEvents');
     const related = userPayload.relatedAncestorFilesWithLineNumbers as Record<string, string>;
     expect(related['src/App.tsx']).toContain('<SpatialModelaaaa/>');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+it('normalizes common LLM provider Base URL pitfalls and preserves reasoning_content across tool calls', async () => {
+  expect(normalizeCodingAgentBaseUrl('https://api.deepseek.com/v1/chat/completions')).toBe('https://api.deepseek.com/v1');
+  expect(normalizeCodingAgentBaseUrl('https://dashscope.aliyuncs.com')).toBe('https://dashscope.aliyuncs.com/compatible-mode/v1');
+  expect(normalizeCodingAgentBaseUrl('https://open.bigmodel.cn/')).toBe('https://open.bigmodel.cn/api/paas/v4');
+  expect(normalizeCodingAgentBaseUrl('https://ark.cn-beijing.volces.com')).toBe('https://ark.cn-beijing.volces.com/api/v3');
+  expect(normalizeCodingAgentBaseUrl('http://127.0.0.1:11434')).toBe('http://127.0.0.1:11434/v1');
+  expect(codingAgentEndpoint('https://api.deepseek.com/v1/chat/completions')).toBe('https://api.deepseek.com/v1/chat/completions');
+
+  const root = await mkdtemp(path.join(tmpdir(), 'spatial-agent-reasoning-'));
+  await mkdir(path.join(root, 'src'), { recursive: true });
+  await writeFile(path.join(root, 'src', 'App.tsx'), '<button>旧文案</button>\n');
+
+  let callCount = 0;
+  let round2Messages: Array<Record<string, unknown>> = [];
+  const customFetch: typeof fetch = async (_input, init) => {
+    callCount += 1;
+    const body = JSON.parse(String(init?.body ?? '{}')) as { messages: Array<Record<string, unknown>> };
+    if (callCount === 1) {
+      return new Response(
+        JSON.stringify({
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: null,
+              reasoning_content: 'First inspect src/App.tsx before editing.',
+              tool_calls: [{ id: '', type: 'function', function: { name: 'read_file', arguments: '```json\n{"path":"src/App.tsx"}\n```' } }],
+            },
+          }],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      );
+    }
+    round2Messages = body.messages;
+    return new Response(
+      JSON.stringify({
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: null,
+            tool_calls: [{ id: 'finish-1', type: 'function', function: { name: 'finish', arguments: '{"summary":"已完成思考与读取"}' } }],
+          },
+        }],
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+
+  try {
+    const agent = new CodingAgent({ baseUrl: 'http://127.0.0.1:49999', apiKey: 'mock-only', model: 'deepseek-reasoner', fetch: customFetch });
+    const res = await agent.run({ taskId: 'reasoning-task', instruction: '测试思考模型', root });
+    expect(res.summary).toBe('已完成思考与读取');
+    const assistantMsg = round2Messages.find(m => m.role === 'assistant');
+    expect(assistantMsg?.reasoning_content).toBe('First inspect src/App.tsx before editing.');
+    const toolMsg = round2Messages.find(m => m.role === 'tool');
+    expect(toolMsg?.tool_call_id).toBe('call_1');
   } finally {
     await rm(root, { recursive: true, force: true });
   }

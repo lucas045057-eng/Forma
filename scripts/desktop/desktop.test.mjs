@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { buildDesktopClient, verifyDesktopClient } from './cli.mjs';
 import { buildIcoBuffer, ensureFormaIcons } from './generate-icon.mjs';
+import { MODEL_PROVIDER_PRESETS, probeCodingModelConnection } from '../../apps/server/src/agent/model-config.ts';
 
 test('buildIcoBuffer generates valid 4-frame Windows ICO container (16/32/48/256 PNG)', () => {
   const buf = buildIcoBuffer([16, 32, 48, 256]);
@@ -72,4 +73,42 @@ test('Forma.exe --self-test supervises backend+frontend startup, probes /health 
     stillAlive = false;
   }
   assert.equal(stillAlive, false, `Node child PID ${verified.report.nodePid} must be terminated after shutdown`);
+});
+
+test('probeCodingModelConnection normalizes Base URLs, verifies tool-calling support, and returns actionable diagnostics on 401/404', async () => {
+  assert.ok(MODEL_PROVIDER_PRESETS.length >= 8, 'Should expose mainstream provider presets');
+
+  const okRes = await probeCodingModelConnection({
+    baseUrl: 'https://api.deepseek.com/v1/chat/completions',
+    apiKey: 'sk-test-placeholder',
+    model: 'deepseek-chat',
+    fetchImpl: async (url) => {
+      assert.equal(String(url), 'https://api.deepseek.com/v1/chat/completions');
+      return new Response(
+        JSON.stringify({
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: null,
+              tool_calls: [{ id: '1', type: 'function', function: { name: 'finish', arguments: '{"summary":"ok"}' } }],
+            },
+          }],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      );
+    },
+  });
+  assert.equal(okRes.ok, true);
+  assert.equal(okRes.normalizedBaseUrl, 'https://api.deepseek.com/v1');
+  assert.equal(okRes.toolCallSupported, true);
+
+  const authFail = await probeCodingModelConnection({
+    baseUrl: 'https://dashscope.aliyuncs.com',
+    apiKey: 'sk-bad',
+    model: 'qwen3-coder-plus',
+    fetchImpl: async () => new Response(JSON.stringify({ error: { message: 'Invalid API-key' } }), { status: 401 }),
+  });
+  assert.equal(authFail.ok, false);
+  assert.equal(authFail.status, 401);
+  assert.ok(authFail.hint && authFail.hint.includes('API Key'));
 });

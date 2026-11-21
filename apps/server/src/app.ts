@@ -24,6 +24,8 @@ import { SpeechService } from './speech/service.ts';
 import { registerSpeechRoutes } from './speech/routes.ts';
 import { registerLuxWorkbench } from './assets/lux3d-routes.ts';
 import { registerPlacementRoutes } from './assets/placement.ts';
+import { codingAgentEndpoint, CodingAgentError, normalizeCodingAgentBaseUrl, type CodingAgentOptions } from './agent/client.ts';
+import { maskSecret, MODEL_PROVIDER_PRESETS, probeCodingModelConnection, updateEnvFileSafe } from './agent/model-config.ts';
 
 const loopbackHosts = ['localhost', '127.0.0.1', '[::1]'];
 
@@ -90,6 +92,8 @@ export interface AppOptions {
   speech?: SpeechClientOptions & { timeoutMs?: number };
   /** Internal test seam for webpage importer URL loopback fixtures; never read from HTTP. */
   importer?: ImporterInternalOptions;
+  /** Optional override for .env persistence target used by PUT /models/config. */
+  envFilePath?: string;
   logger?: FastifyServerOptions['logger'];
 }
 
@@ -135,18 +139,20 @@ export async function createApp(options: AppOptions = {}) {
     emit,
   });
   closers.push(() => service.close());
+  const runtimeAgentConfig: CodingAgentOptions = {
+    baseUrl: options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL,
+    apiKey: options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY,
+    model: options.codingAgentModel ?? process.env.CODING_AGENT_MODEL,
+    timeoutMs: options.agentTimeoutMs,
+    maxRounds: options.agentMaxRounds,
+  };
   const workspace = new WorkspaceManager({
     defaultWorkRoot: workRoot,
     workDataDirectory,
     defaultHistoryDirectory: historyDirectory,
     previewStartTimeoutMs: options.previewStartTimeoutMs,
     checks: options.checks,
-    agent: {
-      baseUrl: options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL,
-      apiKey: options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY,
-      model: options.codingAgentModel ?? process.env.CODING_AGENT_MODEL,
-      timeoutMs: options.agentTimeoutMs, maxRounds: options.agentMaxRounds,
-    },
+    agent: runtimeAgentConfig,
     emit,
   });
   closers.push(() => workspace.close());
@@ -209,28 +215,30 @@ export async function createApp(options: AppOptions = {}) {
       return reply.code(403).send({ error: { code: 'ORIGIN_DENIED', message: '仅允许通过同源工作台访问' } });
     }
   });
-  const resolvedCodingBase = options.codingAgentBaseUrl ?? process.env.CODING_AGENT_BASE_URL ?? '';
-  const resolvedCodingKey = options.codingAgentApiKey ?? process.env.CODING_AGENT_API_KEY ?? '';
-  const resolvedCodingModel = options.codingAgentModel ?? process.env.CODING_AGENT_MODEL ?? '';
-  const resolvedSpeechBase = options.speech?.baseUrl ?? process.env.SPEECH_BASE_URL ?? '';
-  const luxStatusClient = new Lux3DClient({
-    base: options.base ?? process.env.LUX3D_WORKBENCH_BASE ?? process.env.LUX3D_BASE ?? 'https://api.aholo.cn',
-    key: options.key ?? process.env.LUX3D_API_KEY,
+  let resolvedSpeechBase = options.speech?.baseUrl ?? process.env.SPEECH_BASE_URL ?? '';
+  let resolvedSpeechKey = options.speech?.apiKey ?? process.env.DASHSCOPE_API_KEY ?? '';
+  let resolvedLuxBase = options.base ?? process.env.LUX3D_WORKBENCH_BASE ?? process.env.LUX3D_BASE ?? 'https://api.aholo.cn';
+  let resolvedLuxKey = options.key ?? process.env.LUX3D_API_KEY ?? '';
+  let luxStatusClient = new Lux3DClient({
+    base: resolvedLuxBase,
+    key: resolvedLuxKey || undefined,
   });
+  const envFilePath = options.envFilePath ?? fileURLToPath(new URL('../.env', import.meta.url));
 
-  app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
-  app.get('/models/status', async (_request, reply): Promise<ModelStatusView> => {
-    reply.header('Cache-Control', 'no-store');
+  const buildModelStatusView = (): ModelStatusView => {
     const parseHost = (raw: string) => {
       if (!raw) return null;
       try { return new URL(raw).hostname.toLowerCase(); } catch { return null; }
     };
     const isLoopbackHost = (h: string | null) => !!h && ['127.0.0.1', 'localhost', '[::1]', '::1'].includes(h);
-    const codingHost = parseHost(resolvedCodingBase);
-    const codingConfigured = Boolean(codingHost && resolvedCodingKey.trim() && resolvedCodingModel.trim());
+    const codingBase = runtimeAgentConfig.baseUrl ?? '';
+    const codingKey = runtimeAgentConfig.apiKey ?? '';
+    const codingModel = runtimeAgentConfig.model ?? '';
+    const codingHost = parseHost(codingBase);
+    const codingConfigured = Boolean(codingHost && codingKey.trim() && codingModel.trim());
     const codingMode = !codingConfigured
       ? 'unconfigured'
-      : (isLoopbackHost(codingHost) || resolvedCodingKey === 'mock-only' ? 'mock' : 'real');
+      : (isLoopbackHost(codingHost) || codingKey === 'mock-only' ? 'mock' : 'real');
 
     const speechHost = parseHost(resolvedSpeechBase);
     const speechConfigured = speech.config.enabled;
@@ -241,13 +249,13 @@ export async function createApp(options: AppOptions = {}) {
     const luxHost = luxStatusClient.activeGateway.toLowerCase();
     const luxMode = !luxStatusClient.configured
       ? 'unconfigured'
-      : (options.mockAssets || isLoopbackHost(luxHost) || (options.key ?? process.env.LUX3D_API_KEY) === 'mock-only' ? 'mock' : 'real');
+      : (options.mockAssets || isLoopbackHost(luxHost) || resolvedLuxKey === 'mock-only' ? 'mock' : 'real');
 
     return {
       coding: {
         configured: codingConfigured,
         mode: codingMode,
-        model: codingConfigured ? resolvedCodingModel.trim() : null,
+        model: codingConfigured ? codingModel.trim() : null,
         providerHost: codingHost,
       },
       speech: {
@@ -260,6 +268,225 @@ export async function createApp(options: AppOptions = {}) {
         mode: luxMode,
         gateway: luxStatusClient.activeGateway,
         legacyGateway: luxStatusClient.legacyGateway,
+      },
+    };
+  };
+
+  app.get('/health', async () => ({ status: 'ok', milestone: 'M2-A' }));
+  app.get('/models/status', async (_request, reply): Promise<ModelStatusView> => {
+    reply.header('Cache-Control', 'no-store');
+    return buildModelStatusView();
+  });
+
+  app.get('/models/config', async (_request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    return {
+      coding: {
+        baseUrl: runtimeAgentConfig.baseUrl ?? '',
+        model: runtimeAgentConfig.model ?? '',
+        hasApiKey: Boolean((runtimeAgentConfig.apiKey ?? '').trim()),
+        apiKeyMasked: maskSecret(runtimeAgentConfig.apiKey),
+      },
+      speech: {
+        baseUrl: resolvedSpeechBase || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        model: speech.config.model,
+        hasApiKey: Boolean(resolvedSpeechKey.trim()),
+        apiKeyMasked: maskSecret(resolvedSpeechKey),
+      },
+      lux3d: {
+        baseUrl: resolvedLuxBase || 'https://api.aholo.cn',
+        hasApiKey: Boolean(resolvedLuxKey.trim()),
+        apiKeyMasked: maskSecret(resolvedLuxKey),
+      },
+      presets: MODEL_PROVIDER_PRESETS,
+      status: buildModelStatusView(),
+    };
+  });
+
+  app.post<{ Body: { baseUrl?: string; apiKey?: string; model?: string } }>('/models/test', {
+    schema: {
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          baseUrl: { type: 'string', maxLength: 512 },
+          apiKey: { type: 'string', maxLength: 512 },
+          model: { type: 'string', maxLength: 160 },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    const baseUrl = (request.body.baseUrl ?? runtimeAgentConfig.baseUrl ?? '').trim();
+    const model = (request.body.model ?? runtimeAgentConfig.model ?? '').trim();
+    const apiKey = (request.body.apiKey ?? '').trim() || (runtimeAgentConfig.apiKey ?? '').trim();
+    return probeCodingModelConnection({ baseUrl, apiKey, model });
+  });
+
+  app.put<{
+    Body: {
+      coding?: { baseUrl?: string; model?: string; apiKey?: string; clearApiKey?: boolean };
+      speech?: { baseUrl?: string; apiKey?: string; clearApiKey?: boolean };
+      lux3d?: { baseUrl?: string; apiKey?: string; clearApiKey?: boolean };
+      persist?: boolean;
+    };
+  }>('/models/config', {
+    schema: {
+      body: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          coding: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              baseUrl: { type: 'string', maxLength: 512 },
+              model: { type: 'string', maxLength: 160 },
+              apiKey: { type: 'string', maxLength: 512 },
+              clearApiKey: { type: 'boolean' },
+            },
+          },
+          speech: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              baseUrl: { type: 'string', maxLength: 512 },
+              apiKey: { type: 'string', maxLength: 512 },
+              clearApiKey: { type: 'boolean' },
+            },
+          },
+          lux3d: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              baseUrl: { type: 'string', maxLength: 512 },
+              apiKey: { type: 'string', maxLength: 512 },
+              clearApiKey: { type: 'boolean' },
+            },
+          },
+          persist: { type: 'boolean' },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    const body = request.body;
+
+    // 1. Validate & update Coding Agent config
+    if (body.coding) {
+      const nextRawBase = body.coding.baseUrl !== undefined ? body.coding.baseUrl.trim() : (runtimeAgentConfig.baseUrl ?? '');
+      const normalizedBase = normalizeCodingAgentBaseUrl(nextRawBase);
+      if (normalizedBase) {
+        try {
+          codingAgentEndpoint(normalizedBase);
+        } catch (err) {
+          throw new WorkError('INVALID_MODEL_CONFIG', err instanceof CodingAgentError ? err.message : '编码模型 Base URL 不合法', 400);
+        }
+      }
+      const nextModel = body.coding.model !== undefined ? body.coding.model.trim() : (runtimeAgentConfig.model ?? '');
+      let nextKey = runtimeAgentConfig.apiKey ?? '';
+      if (body.coding.clearApiKey) {
+        nextKey = '';
+      } else if (typeof body.coding.apiKey === 'string' && body.coding.apiKey.trim()) {
+        nextKey = body.coding.apiKey.trim();
+      } else if (!nextKey && normalizedBase) {
+        try {
+          const u = new URL(normalizedBase);
+          const h = u.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+          if (h === '127.0.0.1' || h === 'localhost' || h === '::1') {
+            nextKey = 'ollama';
+          }
+        } catch {}
+      }
+
+      runtimeAgentConfig.baseUrl = normalizedBase || undefined;
+      runtimeAgentConfig.model = nextModel || undefined;
+      runtimeAgentConfig.apiKey = nextKey || undefined;
+    }
+
+    // 2. Validate & update Speech ASR config
+    if (body.speech) {
+      const nextSpeechBase = body.speech.baseUrl !== undefined
+        ? body.speech.baseUrl.trim().replace(/\/+$/, '')
+        : resolvedSpeechBase;
+      let nextSpeechKey = resolvedSpeechKey;
+      if (body.speech.clearApiKey) {
+        nextSpeechKey = '';
+      } else if (typeof body.speech.apiKey === 'string' && body.speech.apiKey.trim()) {
+        nextSpeechKey = body.speech.apiKey.trim();
+      }
+      try {
+        const nextSpeechClient = new SpeechClient({
+          baseUrl: nextSpeechBase || undefined,
+          apiKey: nextSpeechKey || undefined,
+          testLoopback: options.speech?.testLoopback,
+        });
+        speech.setClient(nextSpeechClient);
+        resolvedSpeechBase = nextSpeechBase;
+        resolvedSpeechKey = nextSpeechKey;
+      } catch {
+        throw new WorkError('INVALID_SPEECH_CONFIG', '语音识别地址必须为阿里云百炼 https://dashscope.aliyuncs.com/compatible-mode/v1（或国际站 dashscope-intl.aliyuncs.com/compatible-mode/v1）', 400);
+      }
+    }
+
+    // 3. Validate & update Lux3D config
+    if (body.lux3d) {
+      const nextLuxBase = body.lux3d.baseUrl !== undefined
+        ? body.lux3d.baseUrl.trim() || 'https://api.aholo.cn'
+        : resolvedLuxBase;
+      let nextLuxKey = resolvedLuxKey;
+      if (body.lux3d.clearApiKey) {
+        nextLuxKey = '';
+      } else if (typeof body.lux3d.apiKey === 'string' && body.lux3d.apiKey.trim()) {
+        nextLuxKey = body.lux3d.apiKey.trim();
+      }
+      try {
+        luxStatusClient = new Lux3DClient({
+          base: nextLuxBase,
+          key: nextLuxKey || undefined,
+        });
+        resolvedLuxBase = nextLuxBase;
+        resolvedLuxKey = nextLuxKey;
+      } catch (err) {
+        throw new WorkError('INVALID_LUX3D_CONFIG', err instanceof Error ? err.message : 'Lux3D 地址配置不合法', 400);
+      }
+    }
+
+    // 4. Persist to apps/server/.env (UTF-8 without BOM) unless persist === false
+    if (body.persist !== false) {
+      updateEnvFileSafe(envFilePath, {
+        CODING_AGENT_BASE_URL: runtimeAgentConfig.baseUrl ?? '',
+        CODING_AGENT_MODEL: runtimeAgentConfig.model ?? '',
+        CODING_AGENT_API_KEY: runtimeAgentConfig.apiKey ?? '',
+        SPEECH_BASE_URL: resolvedSpeechBase,
+        SPEECH_MODEL: speech.config.model,
+        DASHSCOPE_API_KEY: resolvedSpeechKey,
+        LUX3D_BASE: resolvedLuxBase,
+        LUX3D_API_KEY: resolvedLuxKey,
+      });
+    }
+
+    const nextStatus = buildModelStatusView();
+    emit({ type: 'models.updated' });
+    return {
+      ok: true,
+      status: nextStatus,
+      coding: {
+        baseUrl: runtimeAgentConfig.baseUrl ?? '',
+        model: runtimeAgentConfig.model ?? '',
+        hasApiKey: Boolean((runtimeAgentConfig.apiKey ?? '').trim()),
+        apiKeyMasked: maskSecret(runtimeAgentConfig.apiKey),
+      },
+      speech: {
+        baseUrl: resolvedSpeechBase || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        model: speech.config.model,
+        hasApiKey: Boolean(resolvedSpeechKey.trim()),
+        apiKeyMasked: maskSecret(resolvedSpeechKey),
+      },
+      lux3d: {
+        baseUrl: resolvedLuxBase || 'https://api.aholo.cn',
+        hasApiKey: Boolean(resolvedLuxKey.trim()),
+        apiKeyMasked: maskSecret(resolvedLuxKey),
       },
     };
   });

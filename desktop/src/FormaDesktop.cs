@@ -384,7 +384,7 @@ namespace FormaDesktop
             ShouldRestartService = false;
 
             Text = "Forma 模型与 API 密钥配置 (apps/server/.env)";
-            Size = new Size(680, 560);
+            Size = new Size(700, 610);
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -411,19 +411,61 @@ namespace FormaDesktop
             header.Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold);
             header.ForeColor = Theme.AccentLime;
             header.Location = new Point(22, 16);
-            header.Size = new Size(620, 26);
+            header.Size = new Size(640, 26);
             Controls.Add(header);
 
             Label sub = new Label();
-            sub.Text = "提示：所有密钥仅保存在本机 apps/server/.env，不会写入日志或上传仓库。";
+            sub.Text = "提示：也可直接在工作台右上角点击「接入模型」在线热更新配置并测试连通性。";
             sub.ForeColor = Theme.TextMuted;
             sub.Location = new Point(22, 44);
-            sub.Size = new Size(620, 22);
+            sub.Size = new Size(640, 22);
             Controls.Add(sub);
+
+            Label presetLbl = new Label();
+            presetLbl.Text = "一键选择主流厂商预设";
+            presetLbl.ForeColor = Theme.AccentLime;
+            presetLbl.Location = new Point(22, 78);
+            presetLbl.Size = new Size(270, 24);
+            Controls.Add(presetLbl);
+
+            string[][] presets = new string[][]
+            {
+                new string[] { "阿里云百炼 (DashScope 通用)", "https://dashscope.aliyuncs.com/compatible-mode/v1", "qwen3-coder-plus" },
+                new string[] { "阿里云百炼 (Coding Plan 专享)", "https://coding.dashscope.aliyuncs.com/v1", "qwen3-coder-plus" },
+                new string[] { "DeepSeek (深度求索官方)", "https://api.deepseek.com/v1", "deepseek-chat" },
+                new string[] { "硅基流动 (SiliconFlow)", "https://api.siliconflow.cn/v1", "Qwen/Qwen2.5-Coder-32B-Instruct" },
+                new string[] { "火山方舟 (字节豆包 Volcengine Ark)", "https://ark.cn-beijing.volces.com/api/v3", "doubao-seed-1-6-250615" },
+                new string[] { "智谱清言 (BigModel GLM)", "https://open.bigmodel.cn/api/paas/v4", "glm-4-plus" },
+                new string[] { "月之暗面 (Kimi / Moonshot)", "https://api.moonshot.cn/v1", "kimi-k2-0711-preview" },
+                new string[] { "OpenAI / 第三方兼容中转站", "https://api.openai.com/v1", "gpt-4.1" },
+                new string[] { "Ollama / LM Studio (本机私有模型)", "http://127.0.0.1:11434/v1", "qwen2.5-coder:14b" }
+            };
+
+            ComboBox presetCombo = new ComboBox();
+            presetCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+            presetCombo.BackColor = Theme.BgInput;
+            presetCombo.ForeColor = Theme.TextPrimary;
+            presetCombo.FlatStyle = FlatStyle.Flat;
+            presetCombo.Location = new Point(298, 75);
+            presetCombo.Size = new Size(360, 28);
+            foreach (string[] p in presets)
+            {
+                presetCombo.Items.Add(p[0] + " — " + p[2]);
+            }
+            presetCombo.SelectedIndexChanged += delegate
+            {
+                int idx = presetCombo.SelectedIndex;
+                if (idx >= 0 && idx < presets.Length)
+                {
+                    if (_inputs.ContainsKey("CODING_AGENT_BASE_URL")) _inputs["CODING_AGENT_BASE_URL"].Text = presets[idx][1];
+                    if (_inputs.ContainsKey("CODING_AGENT_MODEL")) _inputs["CODING_AGENT_MODEL"].Text = presets[idx][2];
+                }
+            };
+            Controls.Add(presetCombo);
 
             string[][] fields = new string[][]
             {
-                new string[] { "CODING_AGENT_BASE_URL", "代码生成 Base URL", "https://coding.dashscope.aliyuncs.com/v1", "0" },
+                new string[] { "CODING_AGENT_BASE_URL", "代码生成 Base URL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "0" },
                 new string[] { "CODING_AGENT_MODEL", "代码生成模型名称", "qwen3-coder-plus", "0" },
                 new string[] { "CODING_AGENT_API_KEY", "代码生成 API Key", "sk-...", "1" },
                 new string[] { "SPEECH_BASE_URL", "语音识别 Base URL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "0" },
@@ -433,7 +475,7 @@ namespace FormaDesktop
                 new string[] { "LUX3D_API_KEY", "Lux3D API Key", "lux-...", "1" }
             };
 
-            int y = 78;
+            int y = 118;
             foreach (string[] field in fields)
             {
                 string key = field[0];
@@ -449,7 +491,7 @@ namespace FormaDesktop
 
                 TextBox tb = new TextBox();
                 tb.Location = new Point(298, y);
-                tb.Size = new Size(344, 26);
+                tb.Size = new Size(360, 26);
                 tb.BackColor = Theme.BgInput;
                 tb.ForeColor = Theme.TextPrimary;
                 tb.BorderStyle = BorderStyle.FixedSingle;
@@ -484,7 +526,7 @@ namespace FormaDesktop
             Controls.Add(_showSecretsCheck);
 
             Button btnSaveRestart = CreateButton("保存并重启服务", Theme.AccentLime, Theme.BgCanvas, true);
-            btnSaveRestart.Location = new Point(282, 472);
+            btnSaveRestart.Location = new Point(298, 514);
             btnSaveRestart.Size = new Size(146, 36);
             btnSaveRestart.Click += delegate
             {
@@ -496,7 +538,7 @@ namespace FormaDesktop
             Controls.Add(btnSaveRestart);
 
             Button btnSaveOnly = CreateButton("仅保存", Theme.BgCard, Theme.TextPrimary, false);
-            btnSaveOnly.Location = new Point(438, 472);
+            btnSaveOnly.Location = new Point(454, 514);
             btnSaveOnly.Size = new Size(96, 36);
             btnSaveOnly.Click += delegate
             {
@@ -508,7 +550,7 @@ namespace FormaDesktop
             Controls.Add(btnSaveOnly);
 
             Button btnCancel = CreateButton("取消", Theme.BgCard, Theme.TextMuted, false);
-            btnCancel.Location = new Point(544, 472);
+            btnCancel.Location = new Point(560, 514);
             btnCancel.Size = new Size(96, 36);
             btnCancel.Click += delegate
             {
@@ -521,7 +563,7 @@ namespace FormaDesktop
         private void LoadCurrentValues()
         {
             Dictionary<string, string> current = DotEnvManager.ReadEnv(_envPath);
-            if (!current.ContainsKey("CODING_AGENT_BASE_URL")) current["CODING_AGENT_BASE_URL"] = "https://coding.dashscope.aliyuncs.com/v1";
+            if (!current.ContainsKey("CODING_AGENT_BASE_URL")) current["CODING_AGENT_BASE_URL"] = "https://dashscope.aliyuncs.com/compatible-mode/v1";
             if (!current.ContainsKey("CODING_AGENT_MODEL")) current["CODING_AGENT_MODEL"] = "qwen3-coder-plus";
             if (!current.ContainsKey("SPEECH_BASE_URL")) current["SPEECH_BASE_URL"] = "https://dashscope.aliyuncs.com/compatible-mode/v1";
             if (!current.ContainsKey("SPEECH_MODEL")) current["SPEECH_MODEL"] = "qwen3-asr-flash";
@@ -541,7 +583,12 @@ namespace FormaDesktop
             Dictionary<string, string> updates = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (KeyValuePair<string, TextBox> kv in _inputs)
             {
-                updates[kv.Key] = (kv.Value.Text ?? "").Trim();
+                string val = (kv.Value.Text ?? "").Trim();
+                if (kv.Key == "CODING_AGENT_BASE_URL")
+                {
+                    val = Regex.Replace(val.TrimEnd('/'), @"/chat/completions$", "", RegexOptions.IgnoreCase);
+                }
+                updates[kv.Key] = val;
             }
             DotEnvManager.WriteEnv(_envPath, updates);
         }
