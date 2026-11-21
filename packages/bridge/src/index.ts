@@ -51,7 +51,7 @@ export function installBridge(): () => void {
       const rect = element.getBoundingClientRect();
       const box = document.createElement('div');
       box.dataset.highlightSrc = element.getAttribute('data-src') ?? '';
-      box.style.cssText = `position:absolute;box-sizing:border-box;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px;border:2px solid ${element === hovered ? '#f59e0b' : '#22d3ee'};background:rgba(34,211,238,.08);pointer-events:none;`;
+      box.style.cssText = `position:absolute;box-sizing:border-box;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px;border:2px solid ${element === hovered ? '#c27803' : '#1e6b4b'};background:${element === hovered ? 'rgba(194,120,3,.08)' : 'rgba(30,107,75,.11)'};pointer-events:none;`;
       overlay.append(box);
     }
   };

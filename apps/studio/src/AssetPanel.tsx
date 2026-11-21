@@ -185,7 +185,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
             <h3>📤 上传本机 .glb 模型（免费直入）</h3>
             <span className="muted-note">0 元成本 · 即传即用</span>
           </div>
-          <p className="muted-note" style={{ margin: '0 0 8px' }}>
+          <p className="muted-note asset-section-desc">
             支持直接上传或拖入任意标准 <code>.glb</code> 3D 模型（如从混元 3D、Tripo 免费网页版、Blender 或 Sketchfab 导出的模型），导入后即可一键放入网页。
           </p>
           <input
@@ -194,28 +194,18 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
             accept=".glb,model/gltf-binary"
             data-testid="local-glb-input"
             disabled={busy || !canImport}
-            style={{ display: 'none' }}
+            className="sr-only"
             onChange={handleLocalFileChange}
           />
           <div
             data-testid="local-glb-dropzone"
+            className={`local-glb-dropzone${localDropActive ? ' is-dragover' : ''}`}
             onDragOver={event => {
               event.preventDefault();
               if (!busy && canImport) setLocalDropActive(true);
             }}
             onDragLeave={() => setLocalDropActive(false)}
             onDrop={handleLocalGlbDrop}
-            style={{
-              padding: '14px 12px',
-              borderRadius: '10px',
-              border: `1.5px dashed ${localDropActive ? '#d4ff33' : 'rgba(255,255,255,0.2)'}`,
-              background: localDropActive ? 'rgba(212,255,51,0.08)' : 'rgba(255,255,255,0.03)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '8px',
-              textAlign: 'center',
-            }}
           >
             <button
               type="button"
@@ -226,11 +216,11 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
             >
               {busy ? '正在处理 3D 模型…' : '选择本机 .glb 模型文件'}
             </button>
-            <span className="muted-note" style={{ fontSize: '12px' }}>
+            <span className="muted-note local-glb-hint">
               或直接把电脑上的 <code>.glb</code> 文件拖入此区域（最大 100 MB）
             </span>
           </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', fontSize: '12px', cursor: 'pointer' }}>
+          <label className="local-glb-opt">
             <input
               type="checkbox"
               data-testid="local-glb-optimize-toggle"
@@ -244,19 +234,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
             <div
               role="status"
               data-testid="local-glb-success"
-              style={{
-                marginTop: '8px',
-                padding: '8px 10px',
-                borderRadius: '8px',
-                background: 'rgba(74, 222, 128, 0.12)',
-                color: '#4ade80',
-                fontSize: '12.5px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '8px',
-                flexWrap: 'wrap',
-              }}
+              className="local-glb-notice"
             >
               <span>✓ {localUploadNotice}</span>
               {current?.status === 'ready' && onPlace && (
@@ -271,30 +249,21 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
               )}
             </div>
           )}
-          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <span className="muted-note" style={{ display: 'block', marginBottom: '6px', fontSize: '12px' }}>
+          <div className="free-3d-links">
+            <span className="muted-note free-3d-links-title">
               还没有 .glb 模型？可前往以下免费平台生成或下载后直接拖入：
             </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px' }}>
+            <div className="free-3d-grid">
               {FREE_3D_PLATFORMS.map(platform => (
                 <a
                   key={platform.name}
                   href={platform.url}
                   target="_blank"
                   rel="noreferrer"
-                  style={{
-                    padding: '6px 8px',
-                    borderRadius: '8px',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.09)',
-                    color: 'inherit',
-                    textDecoration: 'none',
-                    fontSize: '11.5px',
-                    lineHeight: 1.35,
-                  }}
+                  className="free-3d-card"
                 >
-                  <strong style={{ display: 'block', color: '#d4ff33' }}>{platform.name} ↗</strong>
-                  <span className="muted-note" style={{ fontSize: '11px' }}>{platform.desc}</span>
+                  <strong>{platform.name} ↗</strong>
+                  <span className="muted-note">{platform.desc}</span>
                 </a>
               ))}
             </div>

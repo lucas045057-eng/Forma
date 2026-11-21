@@ -199,22 +199,14 @@ export default function ModelConfigModal({
           <label className="modal-field">
             <span>1. 选择主流大模型厂商预设（一键自动填入标准 Base URL 与推荐模型）</span>
             <select
+              className="model-preset-select"
               data-testid="model-preset-select"
               value={selectedPresetId}
               disabled={busy}
               onChange={event => applyPreset(event.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                background: 'rgba(255,255,255,0.05)',
-                color: 'inherit',
-                border: '1px solid rgba(255,255,255,0.14)',
-                fontSize: '13.5px',
-              }}
             >
               {presets.map(p => (
-                <option key={p.id} value={p.id} style={{ background: '#1e1e1c', color: '#f2efe9' }}>
+                <option key={p.id} value={p.id}>
                   {p.name} — [{p.badge}]
                 </option>
               ))}
@@ -222,18 +214,7 @@ export default function ModelConfigModal({
           </label>
 
           {currentPreset && (
-            <p
-              className="modal-hint"
-              style={{
-                margin: '-4px 0 4px',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                background: 'rgba(212, 255, 51, 0.08)',
-                border: '1px solid rgba(212, 255, 51, 0.22)',
-                fontSize: '12.5px',
-                lineHeight: 1.55,
-              }}
-            >
+            <p className="model-doc-hint">
               <strong>接入提示：</strong>
               {currentPreset.docHint}
             </p>
@@ -254,7 +235,7 @@ export default function ModelConfigModal({
           </label>
 
           <div className="modal-field">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            <div className="model-field-row">
               <span>3. 模型名称 (Model ID · 需支持 Function Calling 工具调用)</span>
               {currentPreset && currentPreset.models.length > 0 && (
                 <div className="inspiration-chips">
@@ -288,15 +269,15 @@ export default function ModelConfigModal({
           </div>
 
           <div className="modal-field">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="model-field-row">
               <span>
                 4. API Key 密钥{' '}
                 {codingHasKey ? (
-                  <strong style={{ color: '#4ade80', fontWeight: 600 }}>
+                  <strong className="model-key-ok">
                     （当前已配置 {codingKeyMasked}，不修改可留空）
                   </strong>
                 ) : (
-                  <strong style={{ color: '#fbbf24', fontWeight: 600 }}>（尚未配置）</strong>
+                  <strong className="model-key-missing">（尚未配置）</strong>
                 )}
               </span>
               <button
@@ -328,21 +309,14 @@ export default function ModelConfigModal({
             <div
               role="status"
               data-testid="model-probe-result"
-              style={{
-                padding: '12px 14px',
-                borderRadius: '10px',
-                background: probeResult.ok ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)',
-                border: `1px solid ${probeResult.ok ? 'rgba(74, 222, 128, 0.35)' : 'rgba(248, 113, 113, 0.35)'}`,
-                fontSize: '13px',
-                lineHeight: 1.55,
-              }}
+              className={`model-probe-box ${probeResult.ok ? 'is-ok' : 'is-error'}`}
             >
-              <div style={{ fontWeight: 600, color: probeResult.ok ? '#4ade80' : '#f87171' }}>
+              <div className="model-probe-title">
                 {probeResult.ok ? '✓ ' : '✕ '}
                 {probeResult.message}
               </div>
               {probeResult.hint && (
-                <div style={{ marginTop: '4px', color: 'rgba(242,239,233,0.82)', fontSize: '12.5px' }}>
+                <div className="model-probe-hint">
                   排查建议：{probeResult.hint}
                 </div>
               )}
@@ -358,21 +332,13 @@ export default function ModelConfigModal({
             <p
               role="status"
               data-testid="model-save-notice"
-              style={{
-                margin: 0,
-                padding: '10px 12px',
-                borderRadius: '10px',
-                background: 'rgba(74, 222, 128, 0.12)',
-                color: '#4ade80',
-                fontSize: '13px',
-                fontWeight: 600,
-              }}
+              className="model-save-notice"
             >
               ✓ {saveNotice}
             </p>
           )}
 
-          <div className="modal-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+          <div className="modal-actions model-modal-actions">
             <button
               type="button"
               className="secondary-btn"
@@ -382,7 +348,7 @@ export default function ModelConfigModal({
             >
               {probing ? '正在检测连通性…' : '⚡ 测试连通性与工具调用'}
             </button>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="model-modal-actions-right">
               <button type="button" className="ghost-btn" disabled={busy} onClick={onClose}>
                 取消
               </button>

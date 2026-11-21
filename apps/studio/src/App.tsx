@@ -44,6 +44,7 @@ function Studio() {
   const [draggingPlacement,setDraggingPlacement]=useState(false);
   const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
   const [showScene, setShowScene] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
   const [candidateSlot, setCandidateSlot] = useState<HTMLDivElement | null>(null);
   const preview = useRef<HTMLIFrameElement>(null);
   const candidatePreview = useRef<HTMLIFrameElement>(null);
@@ -164,6 +165,7 @@ function Studio() {
           // The previous object stops being submittable the moment a new one is picked.
           setPick({ kind: 'pending', src: payload.src });
           setPickedAt(progressRef.current);
+          setInspectorOpen(true);
           void api<{ version: string }>('/version').then(result => {
             if (requestId !== pickRequest.current) return;
             setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
@@ -397,7 +399,7 @@ function Studio() {
           <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
         </div>
       </header>
-      <div className={`workspace${showScene ? ' scene-editing' : ''}`}>
+      <div className={`workspace${showScene ? ' scene-editing' : ''}${inspectorOpen ? '' : ' inspector-collapsed'}`}>
         <section className="preview-panel" aria-label="作品预览">
           <CandidatePanel
             selectedId={candidate?.id ?? ''}
@@ -474,12 +476,16 @@ function Studio() {
         frame={preview}
         target={targetCard}
         bbox={selection?.bbox ?? null}
-        visible={!!selection && ready && !picking && mode === 'current' && !showScene && !impact && !showAssets && !placingAsset && pickedAt === progress}
+        visible={!!selection && ready && !picking && mode === 'current' && !showScene && !impact && !showAssets && !placingAsset && inspectorOpen && pickedAt === progress}
       />
       <nav className="island dock tools" role="toolbar" aria-label="工具">
         <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
         <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
-        <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setShowScene(true); }}>3D 场景编辑</button>
+        <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setInspectorOpen(true); setShowScene(true); }}>3D 场景编辑</button>
+        <span className="dock-sep" aria-hidden="true"/>
+        <button type="button" className={`tool-btn${inspectorOpen ? '' : ' is-active'}`} aria-pressed={!inspectorOpen} data-testid="inspector-toggle" onClick={() => setInspectorOpen(value => !value)}>
+          {inspectorOpen ? '收起面板' : `展开面板${pending.length > 0 ? ` · ${pending.length} 待定` : ''}`}
+        </button>
         <span className="dock-sep" aria-hidden="true"/>
         <span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>
       </nav>
