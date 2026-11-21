@@ -8,6 +8,11 @@
   },
   "scripts": {
     "forma": "node scripts/forma/start.mjs",
+    "desktop": "node scripts/desktop/cli.mjs start",
+    "desktop:build": "node scripts/desktop/cli.mjs build",
+    "desktop:verify": "node scripts/desktop/cli.mjs verify",
+    "desktop:shortcut": "node scripts/desktop/cli.mjs shortcut",
+    "desktop:test": "node --test scripts/desktop/desktop.test.mjs",
     "dev": "pnpm --parallel --filter @spatial/studio --filter @spatial/product-page --filter @spatial/server dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",

@@ -203,6 +203,19 @@ for (const sig of ['SIGINT', 'SIGTERM']) {
   });
 }
 
+if (process.env.FORMA_DESKTOP_STDIN_SHUTDOWN === '1' && process.stdin) {
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', chunk => {
+    if (String(chunk).toLowerCase().includes('shutdown')) {
+      void shutdownAll().finally(() => process.exit(0));
+    }
+  });
+  process.stdin.once('end', () => {
+    void shutdownAll().finally(() => process.exit(0));
+  });
+  process.stdin.resume();
+}
+
 try {
   await spawnRole('backend-entry.mjs', { ...backendEnv, ...sharedPortsEnv });
   // Frontend child gets ZERO provider API keys!
