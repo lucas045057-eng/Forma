@@ -281,7 +281,8 @@ export type StudioMessage =
 export type PreviewMessage =
   | { type: 'pick:result'; payload: PickSelection }
   | { type: 'viewport:size'; payload: { width: number } }
-  | { type: 'scroll:progress'; payload: { at: number } }
+  /** `sync: false` reports the position without asking the other artboard to follow (no scroll happened). */
+  | { type: 'scroll:progress'; payload: { at: number; sync?: boolean } }
   | { type: 'ready' }
   | { type: 'error'; payload: { message: string } };
 export type BridgeMessage = StudioMessage | PreviewMessage | PlacementPreviewMessage;
@@ -332,7 +333,7 @@ export function isPreviewMessage(value: unknown): value is PreviewMessage {
   if (!record(p)) return false;
   if (value.type === 'error') return typeof p.message === 'string';
   if (value.type === 'viewport:size') return typeof p.width === 'number' && Number.isFinite(p.width) && p.width > 0 && p.width <= 10000;
-  if (value.type === 'scroll:progress') return typeof p.at === 'number' && p.at >= 0 && p.at <= 1;
+  if (value.type === 'scroll:progress') return typeof p.at === 'number' && p.at >= 0 && p.at <= 1 && (p.sync === undefined || typeof p.sync === 'boolean');
   if (value.type !== 'pick:result') return false;
   const styles = p.styles;
   return typeof p.src === 'string' && typeof p.cid === 'string' &&

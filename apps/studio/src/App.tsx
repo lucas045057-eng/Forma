@@ -132,7 +132,7 @@ function Studio() {
         } else if (event.data.type === 'scroll:progress') {
           progressRef.current = event.data.payload.at;
           setProgress(event.data.payload.at);
-          syncScroll(preview.current, event.data.payload.at);
+          if (event.data.payload.sync !== false) syncScroll(preview.current, event.data.payload.at);
         }
         // Candidate frames deliberately never enter picking mode or change Selection.
         return;
@@ -178,7 +178,8 @@ function Studio() {
         case 'scroll:progress':
           progressRef.current = event.data.payload.at;
           setProgress(event.data.payload.at);
-          syncScroll(candidatePreview.current, event.data.payload.at);
+          // Only a real scroll moves the other artboard; a pick reports its position with sync: false.
+          if (event.data.payload.sync !== false) syncScroll(candidatePreview.current, event.data.payload.at);
           break;
         case 'viewport:size': canvasWidth.current = event.data.payload.width; break;
         case 'error': setError(event.data.payload.message); break;
