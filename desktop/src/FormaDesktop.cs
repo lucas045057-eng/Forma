@@ -16,11 +16,39 @@ namespace FormaDesktop
 {
     internal static class NativeMethods
     {
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
         [DllImport("user32.dll")]
         public static extern bool SetProcessDPIAware();
 
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        public const uint WM_CLOSE = 0x0010;
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -37,6 +65,7 @@ namespace FormaDesktop
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool CloseHandle(IntPtr hObject);
 
+        public const int SW_RESTORE = 9;
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
         public const int JobObjectExtendedLimitInformation = 9;
         public const uint JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE = 0x00002000;
@@ -86,7 +115,6 @@ namespace FormaDesktop
             }
             catch
             {
-                // Ignore on older Windows builds
             }
         }
 
@@ -111,6 +139,51 @@ namespace FormaDesktop
             }
             return hJob;
         }
+
+        public static IntPtr FindStudioAppWindow(int excludePid)
+        {
+            IntPtr found = IntPtr.Zero;
+            EnumWindows(delegate(IntPtr hWnd, IntPtr lParam)
+            {
+                if (!IsWindowVisible(hWnd)) return true;
+                uint pid;
+                GetWindowThreadProcessId(hWnd, out pid);
+                if ((int)pid == excludePid) return true;
+
+                int len = GetWindowTextLength(hWnd);
+                if (len <= 0 || len > 256) return true;
+
+                StringBuilder sb = new StringBuilder(len + 2);
+                GetWindowText(hWnd, sb, sb.Capacity);
+                string title = sb.ToString();
+
+                // Match the Studio app window ("Forma 空间工作台") while excluding the C# console window
+                if (title.IndexOf("Forma 空间工作台", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    title.IndexOf("Windows 客户端", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    found = hWnd;
+                    return false;
+                }
+                return true;
+            }, IntPtr.Zero);
+            return found;
+        }
+
+        public static void FocusWindow(IntPtr hWnd)
+        {
+            if (hWnd == IntPtr.Zero) return;
+            try
+            {
+                if (IsIconic(hWnd))
+                {
+                    ShowWindow(hWnd, SW_RESTORE);
+                }
+                SetForegroundWindow(hWnd);
+            }
+            catch
+            {
+            }
+        }
     }
 
     internal static class Theme
@@ -126,6 +199,61 @@ namespace FormaDesktop
         public static readonly Color StatusOk = Color.FromArgb(74, 222, 128);     // #4ADE80
         public static readonly Color StatusWarn = Color.FromArgb(251, 191, 36);   // #FBBF24
         public static readonly Color StatusErr = Color.FromArgb(248, 113, 113);   // #F87171
+    }
+
+    internal sealed class StartupSplashForm : Form
+    {
+        private readonly Label _statusLabel;
+
+        public StartupSplashForm(Icon appIcon)
+        {
+            FormBorderStyle = FormBorderStyle.None;
+            StartPosition = FormStartPosition.CenterScreen;
+            Size = new Size(380, 92);
+            BackColor = Theme.BgIsland;
+            ForeColor = Theme.TextPrimary;
+            ShowInTaskbar = false;
+            TopMost = true;
+            if (appIcon != null) Icon = appIcon;
+
+            Panel border = new Panel();
+            border.Location = new Point(1, 1);
+            border.Size = new Size(378, 90);
+            border.BackColor = Theme.BgCanvas;
+            Controls.Add(border);
+
+            Label badge = new Label();
+            badge.Text = "FORMA";
+            badge.BackColor = Theme.AccentLime;
+            badge.ForeColor = Theme.BgCanvas;
+            badge.Font = new Font("Segoe UI", 10.5f, FontStyle.Bold);
+            badge.TextAlign = ContentAlignment.MiddleCenter;
+            badge.Location = new Point(18, 26);
+            badge.Size = new Size(68, 36);
+            border.Controls.Add(badge);
+
+            Label title = new Label();
+            title.Text = "Forma 空间工作台";
+            title.Font = new Font("Microsoft YaHei UI", 11f, FontStyle.Bold);
+            title.ForeColor = Theme.TextPrimary;
+            title.Location = new Point(100, 22);
+            title.Size = new Size(260, 24);
+            border.Controls.Add(title);
+
+            _statusLabel = new Label();
+            _statusLabel.Text = "正在启动本地创作服务，请稍候...";
+            _statusLabel.Font = new Font("Microsoft YaHei UI", 8.5f, FontStyle.Regular);
+            _statusLabel.ForeColor = Theme.TextMuted;
+            _statusLabel.Location = new Point(100, 48);
+            _statusLabel.Size = new Size(264, 20);
+            border.Controls.Add(_statusLabel);
+        }
+
+        public void UpdateProgress(string text)
+        {
+            if (IsDisposed) return;
+            _statusLabel.Text = text;
+        }
     }
 
     internal sealed class DotEnvManager
@@ -257,7 +385,7 @@ namespace FormaDesktop
 
             Text = "Forma 模型与 API 密钥配置 (apps/server/.env)";
             Size = new Size(680, 560);
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -440,6 +568,7 @@ namespace FormaDesktop
         public string PreferredPort;
         public string DataDir;
         public bool Ephemeral;
+        public bool ShowConsoleOnStart;
         public bool NoAutoOpenWindow;
         public bool SelfTest;
         public string TestDotEnvPath;
@@ -450,13 +579,19 @@ namespace FormaDesktop
         private readonly FormaDesktopOptions _options;
         private readonly Icon _appIcon;
         private readonly EventWaitHandle _activateEvent;
+        private readonly int _selfPid;
         private IntPtr _jobHandle;
         private Process _nodeProcess;
         private Process _appWindowProcess;
-        private DateTime _appWindowLaunchUtc;
+        private StartupSplashForm _splashForm;
+        private System.Windows.Forms.Timer _windowWatchTimer;
+
+        private bool _allowConsoleVisible;
         private bool _isStoppingService;
         private bool _isExitingApp;
         private bool _hasAutoOpenedOnce;
+        private bool _studioWindowSeen;
+        private int _studioWindowMissingTicks;
 
         private string _studioUrl = "";
         private string _activeWorkspace = "";
@@ -485,21 +620,120 @@ namespace FormaDesktop
             _options = options;
             _appIcon = appIcon;
             _activateEvent = activateEvent;
+            _selfPid = Process.GetCurrentProcess().Id;
+            _allowConsoleVisible = options.ShowConsoleOnStart;
             _jobHandle = NativeMethods.CreateKillOnCloseJob();
             ResolveBrowserEngine();
 
-            Text = "Forma 空间化 AI 创作工作台 — Windows 客户端";
+            Text = "Forma 服务控制台 (高级设置)";
             Size = new Size(920, 660);
             MinimumSize = new Size(860, 600);
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Theme.BgCanvas;
             ForeColor = Theme.TextPrimary;
+            ShowInTaskbar = _allowConsoleVisible;
             Font = new Font("Microsoft YaHei UI", 9.5f, FontStyle.Regular);
             if (_appIcon != null) Icon = _appIcon;
 
             BuildUi();
             BuildTrayIcon();
+            BuildWindowWatchTimer();
             StartSingleInstanceActivationListener();
+
+            // Create handle immediately so BeginInvoke works even when console is hidden in tray
+            IntPtr dummy = Handle;
+            if (!_allowConsoleVisible)
+            {
+                ShowSplash();
+            }
+            StartFormaService();
+        }
+
+        protected override void SetVisibleCore(bool value)
+        {
+            if (!_allowConsoleVisible && value)
+            {
+                base.SetVisibleCore(false);
+                return;
+            }
+            base.SetVisibleCore(value);
+        }
+
+        private void ShowSplash()
+        {
+            if (_splashForm != null && !_splashForm.IsDisposed) return;
+            _splashForm = new StartupSplashForm(_appIcon);
+            _splashForm.Show();
+            _splashForm.Refresh();
+        }
+
+        private void CloseSplash()
+        {
+            if (_splashForm != null)
+            {
+                try
+                {
+                    if (!_splashForm.IsDisposed) _splashForm.Close();
+                    _splashForm.Dispose();
+                }
+                catch
+                {
+                }
+                _splashForm = null;
+            }
+        }
+
+        public void ShowConsoleWindow()
+        {
+            _allowConsoleVisible = true;
+            ShowInTaskbar = true;
+            Show();
+            WindowState = FormWindowState.Normal;
+            Activate();
+            NativeMethods.SetForegroundWindow(Handle);
+        }
+
+        public void HideConsoleToTray()
+        {
+            _allowConsoleVisible = false;
+            ShowInTaskbar = false;
+            Hide();
+        }
+
+        private void BuildWindowWatchTimer()
+        {
+            _windowWatchTimer = new System.Windows.Forms.Timer();
+            _windowWatchTimer.Interval = 500;
+            _windowWatchTimer.Tick += OnWindowWatchTick;
+            _windowWatchTimer.Start();
+        }
+
+        private void OnWindowWatchTick(object sender, EventArgs e)
+        {
+            if (_isExitingApp || _isStoppingService) return;
+            if (string.IsNullOrEmpty(_studioUrl)) return;
+
+            IntPtr studioHwnd = NativeMethods.FindStudioAppWindow(_selfPid);
+            if (studioHwnd != IntPtr.Zero)
+            {
+                _studioWindowSeen = true;
+                _studioWindowMissingTicks = 0;
+                CloseSplash();
+            }
+            else if (_studioWindowSeen)
+            {
+                _studioWindowMissingTicks++;
+                // Wait 2 consecutive checks (1s) to confirm the user closed the Studio window
+                if (_studioWindowMissingTicks >= 2)
+                {
+                    _studioWindowSeen = false;
+                    if (_chkExitWithAppWindow != null && _chkExitWithAppWindow.Checked && !_allowConsoleVisible)
+                    {
+                        _isExitingApp = true;
+                        ExitApplicationCleanly();
+                    }
+                }
+            }
         }
 
         private void StartSingleInstanceActivationListener()
@@ -516,13 +750,18 @@ namespace FormaDesktop
                             if (_isExitingApp) break;
                             SafeInvoke(delegate
                             {
-                                Show();
-                                WindowState = FormWindowState.Normal;
-                                Activate();
-                                NativeMethods.SetForegroundWindow(Handle);
-                                if (!string.IsNullOrEmpty(_studioUrl))
+                                IntPtr studioHwnd = NativeMethods.FindStudioAppWindow(_selfPid);
+                                if (studioHwnd != IntPtr.Zero)
+                                {
+                                    NativeMethods.FocusWindow(studioHwnd);
+                                }
+                                else if (!string.IsNullOrEmpty(_studioUrl))
                                 {
                                     LaunchOrFocusStudioAppWindow();
+                                }
+                                else
+                                {
+                                    ShowSplash();
                                 }
                             });
                         }
@@ -543,31 +782,55 @@ namespace FormaDesktop
             NativeMethods.EnableDarkTitleBar(Handle);
         }
 
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-            StartFormaService();
-        }
-
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            // If the user opened the advanced console and clicked X while the Studio app window is still open,
+            // just hide the console back to the tray so only ONE window remains!
             if (!_isExitingApp && e.CloseReason == CloseReason.UserClosing)
             {
+                IntPtr studioHwnd = NativeMethods.FindStudioAppWindow(_selfPid);
+                if (studioHwnd != IntPtr.Zero)
+                {
+                    e.Cancel = true;
+                    HideConsoleToTray();
+                    return;
+                }
                 _isExitingApp = true;
             }
+
+            CleanupAllResources();
+            base.OnFormClosing(e);
+        }
+
+        private void ExitApplicationCleanly()
+        {
+            _isExitingApp = true;
+            CleanupAllResources();
+            Application.Exit();
+        }
+
+        private void CleanupAllResources()
+        {
+            if (_windowWatchTimer != null)
+            {
+                _windowWatchTimer.Stop();
+                _windowWatchTimer.Dispose();
+                _windowWatchTimer = null;
+            }
+            CloseSplash();
             StopFormaService();
             CloseAppWindowIfRunning();
             if (_trayIcon != null)
             {
                 _trayIcon.Visible = false;
                 _trayIcon.Dispose();
+                _trayIcon = null;
             }
             if (_jobHandle != IntPtr.Zero)
             {
                 NativeMethods.CloseHandle(_jobHandle);
                 _jobHandle = IntPtr.Zero;
             }
-            base.OnFormClosing(e);
         }
 
         private void ResolveBrowserEngine()
@@ -615,7 +878,7 @@ namespace FormaDesktop
             headerPanel.Controls.Add(brandBadge);
 
             Label titleLbl = new Label();
-            titleLbl.Text = "Forma 空间化 AI 创作工作台";
+            titleLbl.Text = "Forma 后台服务与模型控制台";
             titleLbl.Font = new Font("Microsoft YaHei UI", 13f, FontStyle.Bold);
             titleLbl.ForeColor = Theme.TextPrimary;
             titleLbl.Location = new Point(108, 14);
@@ -623,7 +886,7 @@ namespace FormaDesktop
             headerPanel.Controls.Add(titleLbl);
 
             Label subTitleLbl = new Label();
-            subTitleLbl.Text = "Windows 桌面客户端 · 同源预览画布 / 实时源码点选 / Lux3D 空间资产";
+            subTitleLbl.Text = "关闭本窗口将自动隐藏回右下角系统托盘，保持单一工作台窗口体验";
             subTitleLbl.Font = new Font("Microsoft YaHei UI", 9f, FontStyle.Regular);
             subTitleLbl.ForeColor = Theme.TextMuted;
             subTitleLbl.Location = new Point(108, 42);
@@ -648,11 +911,15 @@ namespace FormaDesktop
             actionBar.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Controls.Add(actionBar);
 
-            _btnOpenAppWindow = CreateStyledButton("打开独立工作台窗口", Theme.AccentLime, Theme.BgCanvas, true);
+            _btnOpenAppWindow = CreateStyledButton("打开 / 聚焦工作台窗口", Theme.AccentLime, Theme.BgCanvas, true);
             _btnOpenAppWindow.Location = new Point(14, 9);
             _btnOpenAppWindow.Size = new Size(176, 36);
             _btnOpenAppWindow.Enabled = false;
-            _btnOpenAppWindow.Click += delegate { LaunchOrFocusStudioAppWindow(); };
+            _btnOpenAppWindow.Click += delegate
+            {
+                LaunchOrFocusStudioAppWindow();
+                HideConsoleToTray();
+            };
             actionBar.Controls.Add(_btnOpenAppWindow);
 
             Button btnOpenBrowser = CreateStyledButton("在浏览器中打开", Theme.BgCard, Theme.TextPrimary, false);
@@ -695,12 +962,11 @@ namespace FormaDesktop
             };
             actionBar.Controls.Add(_btnToggleService);
 
-            Button btnShortcut = CreateStyledButton("创建桌面快捷方式", Theme.BgCard, Theme.TextMuted, false);
-            btnShortcut.Location = new Point(740, 9);
-            btnShortcut.Size = new Size(112, 36);
-            btnShortcut.Font = new Font("Microsoft YaHei UI", 8.5f, FontStyle.Regular);
-            btnShortcut.Click += delegate { CreateDesktopShortcutInteractive(); };
-            actionBar.Controls.Add(btnShortcut);
+            Button btnQuitAll = CreateStyledButton("完全退出", Theme.BgCard, Theme.StatusErr, false);
+            btnQuitAll.Location = new Point(740, 9);
+            btnQuitAll.Size = new Size(112, 36);
+            btnQuitAll.Click += delegate { ExitApplicationCleanly(); };
+            actionBar.Controls.Add(btnQuitAll);
 
             Panel cardStudio = CreateTelemetryCard("工作台地址与窗口引擎", "等待服务就绪...", out _lblStudioValue, 20, 166, 424, 68);
             cardStudio.Anchor = AnchorStyles.Top | AnchorStyles.Left;
@@ -787,7 +1053,7 @@ namespace FormaDesktop
             wsPanel.Controls.Add(_chkAutoOpen);
 
             _chkExitWithAppWindow = new CheckBox();
-            _chkExitWithAppWindow.Text = "关闭独立工作台窗口时同步退出客户端与后台服务";
+            _chkExitWithAppWindow.Text = "关闭工作台窗口时同步退出后台服务";
             _chkExitWithAppWindow.ForeColor = Theme.TextMuted;
             _chkExitWithAppWindow.Checked = true;
             _chkExitWithAppWindow.Location = new Point(316, 46);
@@ -818,31 +1084,26 @@ namespace FormaDesktop
         private void BuildTrayIcon()
         {
             ContextMenu trayMenu = new ContextMenu();
-            trayMenu.MenuItems.Add("打开 Forma 独立工作台窗口", delegate { LaunchOrFocusStudioAppWindow(); });
-            trayMenu.MenuItems.Add("显示客户端控制台", delegate
-            {
-                Show();
-                WindowState = FormWindowState.Normal;
-                Activate();
-            });
+            trayMenu.MenuItems.Add("打开 Forma 空间工作台", delegate { LaunchOrFocusStudioAppWindow(); });
+            trayMenu.MenuItems.Add("模型与密钥设置 (apps/server/.env)...", delegate { OpenModelConfigDialog(); });
+            trayMenu.MenuItems.Add("高级服务控制台与日志...", delegate { ShowConsoleWindow(); });
             trayMenu.MenuItems.Add("-");
-            trayMenu.MenuItems.Add("模型与密钥设置...", delegate
+            trayMenu.MenuItems.Add("打开当前作品数据目录", delegate
             {
-                Show();
-                WindowState = FormWindowState.Normal;
-                Activate();
-                OpenModelConfigDialog();
+                string dir = !string.IsNullOrEmpty(_activeWorkspace)
+                    ? _activeWorkspace
+                    : Path.Combine(_options.RepoRoot, @".data\forma");
+                if (Directory.Exists(dir))
+                {
+                    try { Process.Start("explorer.exe", "\"" + dir + "\""); } catch { }
+                }
             });
             trayMenu.MenuItems.Add("重启本地服务", delegate { RestartFormaService(); });
             trayMenu.MenuItems.Add("-");
-            trayMenu.MenuItems.Add("完全退出 Forma", delegate
-            {
-                _isExitingApp = true;
-                Close();
-            });
+            trayMenu.MenuItems.Add("完全退出 Forma", delegate { ExitApplicationCleanly(); });
 
             _trayIcon = new NotifyIcon();
-            _trayIcon.Text = "Forma 空间化 AI 创作工作台";
+            _trayIcon.Text = "Forma 空间化 AI 创作工作台 (右键设置/退出)";
             _trayIcon.Icon = _appIcon ?? SystemIcons.Application;
             _trayIcon.ContextMenu = trayMenu;
             _trayIcon.Visible = true;
@@ -938,7 +1199,7 @@ namespace FormaDesktop
             string envPath = Path.Combine(_options.RepoRoot, @"apps\server\.env");
             using (EnvConfigDialog dlg = new EnvConfigDialog(envPath, _appIcon))
             {
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     AppendLog("[客户端] 已更新 apps/server/.env 模型配置。");
                     if (dlg.ShouldRestartService)
@@ -949,42 +1210,14 @@ namespace FormaDesktop
             }
         }
 
-        private void CreateDesktopShortcutInteractive()
-        {
-            try
-            {
-                string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string shortcutPath = Path.Combine(desktopDir, "Forma 空间化AI工作台.lnk");
-                string exePath = Application.ExecutablePath;
-                string iconPath = Path.Combine(_options.RepoRoot, @"desktop\assets\forma.ico");
-
-                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
-                dynamic shell = Activator.CreateInstance(shellType);
-                dynamic shortcut = shell.CreateShortcut(shortcutPath);
-                shortcut.TargetPath = exePath;
-                shortcut.WorkingDirectory = _options.RepoRoot;
-                shortcut.Description = "Forma 空间化 AI 创作工作台 Windows 客户端";
-                if (File.Exists(iconPath))
-                {
-                    shortcut.IconLocation = iconPath;
-                }
-                shortcut.Save();
-
-                AppendLog("[客户端] 已在桌面创建快捷方式: " + shortcutPath);
-                MessageBox.Show(this, "已在桌面创建快捷方式：\n" + shortcutPath, "Forma 桌面快捷方式", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                AppendLog("[客户端] 创建桌面快捷方式失败: " + ex.Message);
-            }
-        }
-
         public void StartFormaService()
         {
             if (_nodeProcess != null && !_nodeProcess.HasExited) return;
 
             _isStoppingService = false;
             _studioUrl = "";
+            _studioWindowSeen = false;
+            _studioWindowMissingTicks = 0;
             UpdateStatusBadge("● 正在启动服务...", Theme.StatusWarn);
             _btnOpenAppWindow.Enabled = false;
             _btnToggleService.Text = "停止服务";
@@ -993,8 +1226,10 @@ namespace FormaDesktop
             string startScript = Path.Combine(_options.RepoRoot, @"scripts\forma\start.mjs");
             if (!File.Exists(startScript))
             {
+                CloseSplash();
                 UpdateStatusBadge("● 启动脚本缺失", Theme.StatusErr);
                 AppendLog("[错误] 未找到启动脚本: " + startScript);
+                ShowConsoleWindow();
                 return;
             }
 
@@ -1048,8 +1283,10 @@ namespace FormaDesktop
             }
             catch (Exception ex)
             {
+                CloseSplash();
                 UpdateStatusBadge("● 启动失败", Theme.StatusErr);
                 AppendLog("[错误] 无法启动 Node 进程: " + ex.Message);
+                ShowConsoleWindow();
             }
         }
 
@@ -1155,8 +1392,9 @@ namespace FormaDesktop
                         if (_chkAutoOpen.Checked && !_hasAutoOpenedOnce)
                         {
                             _hasAutoOpenedOnce = true;
-                            LaunchOrFocusStudioAppWindow();
+                            LaunchOrFocusStudioAppWindow(true);
                         }
+                        CloseSplash();
                     });
                 }
             }
@@ -1178,7 +1416,7 @@ namespace FormaDesktop
         {
             if (string.Equals(rawVal, "unconfigured", StringComparison.OrdinalIgnoreCase))
             {
-                lbl.Text = "未配置 (点击「模型与密钥设置」配置)";
+                lbl.Text = "未配置 (右键托盘图标 -> 模型与密钥设置)";
                 lbl.ForeColor = Theme.StatusWarn;
             }
             else
@@ -1199,30 +1437,37 @@ namespace FormaDesktop
             if (_isStoppingService || _isExitingApp) return;
             SafeInvoke(delegate
             {
+                CloseSplash();
                 UpdateStatusBadge("● 服务异常退出", Theme.StatusErr);
                 _btnOpenAppWindow.Enabled = false;
                 _btnToggleService.Text = "启动服务";
                 _btnToggleService.ForeColor = Theme.AccentLime;
                 AppendLog("[警告] 本地服务进程已退出。可点击「启动服务」或检查日志。");
+                ShowConsoleWindow();
             });
         }
 
         public void LaunchOrFocusStudioAppWindow()
         {
+            LaunchOrFocusStudioAppWindow(false);
+        }
+
+        public void LaunchOrFocusStudioAppWindow(bool isFreshServiceStart)
+        {
             if (string.IsNullOrEmpty(_studioUrl)) return;
 
-            if (_appWindowProcess != null && !_appWindowProcess.HasExited)
+            IntPtr existingHwnd = NativeMethods.FindStudioAppWindow(_selfPid);
+            if (existingHwnd != IntPtr.Zero)
             {
-                try
+                if (isFreshServiceStart)
                 {
-                    if (_appWindowProcess.MainWindowHandle != IntPtr.Zero)
-                    {
-                        NativeMethods.SetForegroundWindow(_appWindowProcess.MainWindowHandle);
-                        return;
-                    }
+                    try { NativeMethods.PostMessage(existingHwnd, NativeMethods.WM_CLOSE, IntPtr.Zero, IntPtr.Zero); } catch { }
+                    Thread.Sleep(200);
                 }
-                catch
+                else
                 {
+                    NativeMethods.FocusWindow(existingHwnd);
+                    return;
                 }
             }
 
@@ -1258,13 +1503,10 @@ namespace FormaDesktop
 
                 Process browserProc = new Process();
                 browserProc.StartInfo = psi;
-                browserProc.EnableRaisingEvents = true;
-                browserProc.Exited += OnAppWindowExited;
-                _appWindowLaunchUtc = DateTime.UtcNow;
                 browserProc.Start();
                 _appWindowProcess = browserProc;
 
-                AppendLog("[客户端] 已打开独立工作台窗口: " + _studioUrl);
+                AppendLog("[客户端] 已打开工作台窗口: " + _studioUrl);
             }
             catch (Exception ex)
             {
@@ -1273,28 +1515,20 @@ namespace FormaDesktop
             }
         }
 
-        private void OnAppWindowExited(object sender, EventArgs e)
-        {
-            if (_isExitingApp || _isStoppingService) return;
-            double aliveSeconds = (DateTime.UtcNow - _appWindowLaunchUtc).TotalSeconds;
-            SafeInvoke(delegate
-            {
-                if (aliveSeconds < 3.5)
-                {
-                    AppendLog("[客户端] 独立工作台窗口已由现有浏览器进程接管，客户端保持后台与托盘运行。");
-                    return;
-                }
-                AppendLog("[客户端] 独立工作台窗口已关闭。");
-                if (_chkExitWithAppWindow != null && _chkExitWithAppWindow.Checked)
-                {
-                    _isExitingApp = true;
-                    Close();
-                }
-            });
-        }
-
         private void CloseAppWindowIfRunning()
         {
+            try
+            {
+                IntPtr studioHwnd = NativeMethods.FindStudioAppWindow(_selfPid);
+                if (studioHwnd != IntPtr.Zero)
+                {
+                    NativeMethods.PostMessage(studioHwnd, NativeMethods.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                }
+            }
+            catch
+            {
+            }
+
             Process proc = _appWindowProcess;
             _appWindowProcess = null;
             if (proc == null) return;
@@ -1303,7 +1537,7 @@ namespace FormaDesktop
                 if (!proc.HasExited)
                 {
                     proc.CloseMainWindow();
-                    if (!proc.WaitForExit(2000))
+                    if (!proc.WaitForExit(1500))
                     {
                         try { proc.Kill(); } catch { }
                     }
@@ -1339,7 +1573,7 @@ namespace FormaDesktop
 
         private void SafeInvoke(MethodInvoker action)
         {
-            if (IsDisposed) return;
+            if (IsDisposed || !IsHandleCreated) return;
             if (InvokeRequired)
             {
                 try { BeginInvoke(action); } catch { }
@@ -1602,6 +1836,7 @@ namespace FormaDesktop
             options.PreferredPort = Environment.GetEnvironmentVariable("FORMA_PORT") ?? "5173";
             options.DataDir = Environment.GetEnvironmentVariable("FORMA_DATA_DIR") ?? Path.Combine(repoRoot, @".data\forma");
             options.Ephemeral = false;
+            options.ShowConsoleOnStart = false;
             options.NoAutoOpenWindow = false;
             options.SelfTest = false;
             options.TestDotEnvPath = null;
@@ -1611,6 +1846,7 @@ namespace FormaDesktop
                 string a = args[i];
                 if (a == "--self-test") options.SelfTest = true;
                 else if (a == "--test-dotenv" && i + 1 < args.Length) { options.TestDotEnvPath = args[++i]; }
+                else if (a == "--console") options.ShowConsoleOnStart = true;
                 else if (a == "--ephemeral") options.Ephemeral = true;
                 else if (a == "--no-open") options.NoAutoOpenWindow = true;
                 else if (a == "--port" && i + 1 < args.Length) { options.PreferredPort = args[++i]; }

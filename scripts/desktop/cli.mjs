@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureFormaIcons } from './generate-icon.mjs';
@@ -34,6 +34,21 @@ export function buildDesktopClient(rootDir = repoRoot) {
   const paths = getDesktopPaths(rootDir);
   const iconInfo = ensureFormaIcons(rootDir);
   mkdirSync(paths.binDir, { recursive: true });
+
+  // Clean up any stale .old binary from previous live-rebuild
+  const oldExePath = `${paths.exePath}.old`;
+  if (existsSync(oldExePath)) {
+    try { unlinkSync(oldExePath); } catch {}
+  }
+
+  // If Forma.exe already exists and is currently running/locked, Windows allows renaming a running .exe
+  if (existsSync(paths.exePath)) {
+    try {
+      unlinkSync(paths.exePath);
+    } catch {
+      try { renameSync(paths.exePath, oldExePath); } catch {}
+    }
+  }
 
   const cscPath = resolveCscPath();
   const cscArgs = [
