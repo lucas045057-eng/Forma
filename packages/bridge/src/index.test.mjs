@@ -166,6 +166,15 @@ test('pick:result is preceded by the click-time scroll progress', async () => {
     assert.equal(messages[index - 1].payload.sync, false, 'a click is not a scroll: the other artboard must not follow it');
     // The real scroll still reports normally (without sync: false) once its event is dispatched.
     await page.waitForFunction(() => window.messages.some(message => message.type === 'scroll:progress' && message.payload.sync === undefined));
+    // A programmatic scroll:to from the parent moves the child without echoing scroll:progress back.
+    await page.evaluate(() => {
+      window.messages.length = 0;
+      document.querySelector('iframe').contentWindow.postMessage({ type: 'scroll:to', payload: { at: 0.25 } }, location.origin);
+    });
+    await frame.waitForFunction(() => Math.abs(window.scrollY - (document.documentElement.scrollHeight - window.innerHeight) * 0.25) <= 2);
+    await frame.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const echoed = await page.evaluate(() => window.messages.filter(message => message.type === 'scroll:progress'));
+    assert.equal(echoed.length, 0, 'scroll:to must not echo scroll:progress back to the parent');
     await frame.evaluate(() => window.disposeBridge());
   } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
 });

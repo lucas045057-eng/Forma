@@ -53,6 +53,7 @@ function Studio() {
   const pickingRef = useRef(false);
   const pickRequest = useRef(0);
   const progressRef = useRef(0);
+  const scrollLeaderRef = useRef<{ source: 'main' | 'candidate'; until: number } | null>(null);
   const targetCard = useRef<HTMLDivElement>(null);
   const [pickedAt, setPickedAt] = useState<number | null>(null);
   const canvasWidth = useRef(400);
@@ -135,9 +136,14 @@ function Studio() {
           sendCandidate({ type: 'pick:stop' });
           syncScroll(candidatePreview.current, progressRef.current);
         } else if (event.data.type === 'scroll:progress') {
+          if (event.data.payload.sync !== false) {
+            const now = performance.now();
+            if (scrollLeaderRef.current?.source === 'main' && now < scrollLeaderRef.current.until) return;
+            scrollLeaderRef.current = { source: 'candidate', until: now + 120 };
+            syncScroll(preview.current, event.data.payload.at);
+          }
           progressRef.current = event.data.payload.at;
           setProgress(event.data.payload.at);
-          if (event.data.payload.sync !== false) syncScroll(preview.current, event.data.payload.at);
         }
         // Candidate frames deliberately never enter picking mode or change Selection.
         return;
@@ -184,10 +190,15 @@ function Studio() {
           break;
         }
         case 'scroll:progress':
+          // Only a real scroll moves the other artboard; a pick reports its position with sync: false.
+          if (event.data.payload.sync !== false) {
+            const now = performance.now();
+            if (scrollLeaderRef.current?.source === 'candidate' && now < scrollLeaderRef.current.until) break;
+            scrollLeaderRef.current = { source: 'main', until: now + 120 };
+            syncScroll(candidatePreview.current, event.data.payload.at);
+          }
           progressRef.current = event.data.payload.at;
           setProgress(event.data.payload.at);
-          // Only a real scroll moves the other artboard; a pick reports its position with sync: false.
-          if (event.data.payload.sync !== false) syncScroll(candidatePreview.current, event.data.payload.at);
           break;
         case 'viewport:size': canvasWidth.current = event.data.payload.width; break;
         case 'error': setError(event.data.payload.message); break;

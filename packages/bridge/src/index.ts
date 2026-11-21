@@ -13,6 +13,8 @@ export function installBridge(): () => void {
   let selectedSrc = '';
   let hovered: Element | null = null;
   let frame = 0;
+  let programmaticScrollTarget: number | null = null;
+  let programmaticScrollTimer = 0;
   const overlay = document.createElement('div');
   overlay.dataset.bridgeOverlay = 'true';
   overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483647;';
@@ -26,7 +28,8 @@ export function installBridge(): () => void {
     send({ type: 'scroll:progress', payload: sync ? { at } : { at, sync: false } });
   };
   let observedCanvas: Element | null = null;
-  const reportSize = () => {
+  let lastReportedWidth = 0;
+  const reportSize = (force = false) => {
     const canvas = document.querySelector('[data-testid="product-scene"] canvas');
     if (canvas !== observedCanvas) {
       if (observedCanvas) sizeObserver.unobserve(observedCanvas);
@@ -34,9 +37,12 @@ export function installBridge(): () => void {
       observedCanvas = canvas;
     }
     const width = canvas?.getBoundingClientRect().width;
-    if (width && width > 0) send({ type: 'viewport:size', payload: { width } });
+    if (width && width > 0 && (force || Math.abs(width - lastReportedWidth) > 0.5)) {
+      lastReportedWidth = width;
+      send({ type: 'viewport:size', payload: { width } });
+    }
   };
-  const sizeObserver = new ResizeObserver(reportSize);
+  const sizeObserver = new ResizeObserver(() => reportSize());
   sizeObserver.observe(document.body);
   const instances = (src: string) => Array.from(document.querySelectorAll('[data-src]'))
     .filter(element => element.getAttribute('data-src') === src);
@@ -62,10 +68,18 @@ export function installBridge(): () => void {
       case 'pick:start': picking = true; break;
       case 'pick:stop': picking = false; hovered = null; selectedSrc = ''; break;
       case 'highlight': selectedSrc = event.data.payload.src; break;
-      case 'viewport:request': reportSize(); break;
+      case 'viewport:request': reportSize(true); break;
       case 'scroll:to': {
         const top = Math.max(0, document.documentElement.scrollHeight - window.innerHeight) * event.data.payload.at;
-        if (Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
+        programmaticScrollTarget = top;
+        if (programmaticScrollTimer) window.clearTimeout(programmaticScrollTimer);
+        programmaticScrollTimer = window.setTimeout(() => {
+          programmaticScrollTarget = null;
+          programmaticScrollTimer = 0;
+        }, 250);
+        if (Math.abs(window.scrollY - top) > 1) {
+          window.scrollTo(0, top);
+        }
         break;
       }
     }
@@ -129,6 +143,17 @@ export function installBridge(): () => void {
   const move = (event: PointerEvent) => { if (picking) { hovered = nearest(event.target); schedule(); } };
   const leave = () => { hovered = null; schedule(); };
   const scroll = () => {
+    if (programmaticScrollTarget !== null) {
+      if (Math.abs(window.scrollY - programmaticScrollTarget) <= 2) {
+        schedule();
+        return;
+      }
+      programmaticScrollTarget = null;
+      if (programmaticScrollTimer) {
+        window.clearTimeout(programmaticScrollTimer);
+        programmaticScrollTimer = 0;
+      }
+    }
     sendProgress();
     schedule();
   };
@@ -150,7 +175,7 @@ export function installBridge(): () => void {
   window.addEventListener('error', error);
   window.addEventListener('unhandledrejection', rejection);
   const observer = new MutationObserver(records => {
-    if (records.every(record => overlay.contains(record.target))) return;
+    if (records.every(record => overlay.contains(record.target) || (record.type === 'attributes' && record.attributeName === 'data-scroll-at'))) return;
     reportSize();
     schedule();
   });
@@ -174,6 +199,7 @@ export function installBridge(): () => void {
     observer.disconnect();
     sizeObserver.disconnect();
     cancelAnimationFrame(frame);
+    if (programmaticScrollTimer) window.clearTimeout(programmaticScrollTimer);
     overlay.remove();
   };
 }
