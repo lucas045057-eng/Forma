@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import Lux3DWorkbench from './Lux3DWorkbench.tsx';
 import AssetModuleControls from './AssetModuleControls.tsx';
 import type {PlacementSession} from './placement-state.ts';
@@ -10,6 +10,13 @@ const fallbackErrors:Record<string,string>={UNKNOWN_PRESET:'备用编号不存�
 import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import './assets.css';
 import { useEventCenter } from './EventCenter.tsx';
+
+const FREE_3D_PLATFORMS = [
+  { name: '腾讯混元 3D 免费工作台', url: 'https://3d.hunyuan.tencent.com', desc: '国内直连 · 每日免费文生/图生 .glb' },
+  { name: 'Tripo 3D 网页免费版', url: 'https://studio.tripo3d.ai', desc: '每月免费 200 积分 · 15秒极速出 .glb' },
+  { name: '魔搭 TRELLIS 免费空间', url: 'https://modelscope.cn/studios', desc: '开源图生 3D · 免费生成并下载 .glb' },
+  { name: 'Poly Pizza 免版权库', url: 'https://poly.pizza', desc: '数千款免费 CC0 3D 模型直接下载 .glb' },
+];
 
 const labels: Record<Asset['status'], string> = {
   submitting: '提交中', submit_unknown: '提交结果待确认，请查询远端任务后导入', polling: '等待生成',
@@ -26,6 +33,10 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
   const [failedUrl, setFailedUrl] = useState('');
   const [fallbacks,setFallbacks]=useState<FallbackPreset[]>([]);
   const [fallbackError,setFallbackError]=useState('');
+  const [optimizeLocalGlb, setOptimizeLocalGlb] = useState(false);
+  const [localUploadNotice, setLocalUploadNotice] = useState('');
+  const [localDropActive, setLocalDropActive] = useState(false);
+  const localFileInputRef = useRef<HTMLInputElement>(null);
   const { subscribe,syncReady,status } = useEventCenter();
   const canImport=syncReady&&status==='connected';
   useEffect(()=>{
@@ -73,6 +84,57 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
     try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new ApiError(response.status,typeof result?.error?.code==='string'?result.error.code:'ASSET_IMPORT_FAILED','备用导入未成功');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
     catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
+  async function uploadAndAdoptLocalGlb(file: File) {
+    if (!canImport || busy) return;
+    if (!file.name.toLowerCase().endsWith('.glb')) {
+      setError('请选择 .glb 格式的 3D 模型文件（GLB 2.0 二进制单文件）');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    setLocalUploadNotice('');
+    try {
+      const bytes = await file.arrayBuffer();
+      const uploadRes = await fetch(`/assets/uploads?kind=glb&filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: bytes,
+      });
+      const uploadData = (await uploadRes.json()) as { id: string; error?: { message?: string } };
+      if (!uploadRes.ok) {
+        throw new Error(uploadData?.error?.message ?? '本地 GLB 上传校验未通过');
+      }
+
+      const adoptRes = await fetch(`/assets/uploads/${encodeURIComponent(uploadData.id)}/adopt-local`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ optimize: optimizeLocalGlb }),
+      });
+      const asset = (await adoptRes.json()) as Asset & { error?: { message?: string } };
+      if (!adoptRes.ok) {
+        throw new Error(asset?.error?.message ?? '本地 GLB 注册入库失败');
+      }
+
+      setAssets(previous => [asset, ...previous.filter(item => item.id !== asset.id)]);
+      setSelected(asset.id);
+      setLocalUploadNotice(`已免费导入「${file.name}」（${(file.size / (1024 * 1024)).toFixed(2)} MB），可直接点击左侧「放入网页」！`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '导入本地 GLB 模型失败');
+    } finally {
+      setBusy(false);
+      if (localFileInputRef.current) localFileInputRef.current.value = '';
+    }
+  }
+  function handleLocalFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) void uploadAndAdoptLocalGlb(file);
+  }
+  function handleLocalGlbDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setLocalDropActive(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) void uploadAndAdoptLocalGlb(file);
+  }
   return <aside className={`asset-dialog${dragging ? ' is-dragging' : ''}`} role="complementary" aria-label="3D 创作与资产">
     <header className="asset-header">
       <div>
@@ -117,8 +179,127 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
 
       <div className="asset-controls">
         {error && <p className="error" role="alert">{error}</p>}
-        <Lux3DWorkbench assets={assets} onPlace={onPlace} onPreparePlace={onPreparePlace}/>
-        <AssetModuleControls/>
+
+        <section className="drawer-section" data-testid="free-glb-import">
+          <div className="drawer-section-head">
+            <h3>📤 上传本机 .glb 模型（免费直入）</h3>
+            <span className="muted-note">0 元成本 · 即传即用</span>
+          </div>
+          <p className="muted-note" style={{ margin: '0 0 8px' }}>
+            支持直接上传或拖入任意标准 <code>.glb</code> 3D 模型（如从混元 3D、Tripo 免费网页版、Blender 或 Sketchfab 导出的模型），导入后即可一键放入网页。
+          </p>
+          <input
+            ref={localFileInputRef}
+            type="file"
+            accept=".glb,model/gltf-binary"
+            data-testid="local-glb-input"
+            disabled={busy || !canImport}
+            style={{ display: 'none' }}
+            onChange={handleLocalFileChange}
+          />
+          <div
+            data-testid="local-glb-dropzone"
+            onDragOver={event => {
+              event.preventDefault();
+              if (!busy && canImport) setLocalDropActive(true);
+            }}
+            onDragLeave={() => setLocalDropActive(false)}
+            onDrop={handleLocalGlbDrop}
+            style={{
+              padding: '14px 12px',
+              borderRadius: '10px',
+              border: `1.5px dashed ${localDropActive ? '#d4ff33' : 'rgba(255,255,255,0.2)'}`,
+              background: localDropActive ? 'rgba(212,255,51,0.08)' : 'rgba(255,255,255,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              textAlign: 'center',
+            }}
+          >
+            <button
+              type="button"
+              className="primary-btn compact-btn"
+              data-testid="local-glb-upload-btn"
+              disabled={busy || !canImport}
+              onClick={() => localFileInputRef.current?.click()}
+            >
+              {busy ? '正在处理 3D 模型…' : '选择本机 .glb 模型文件'}
+            </button>
+            <span className="muted-note" style={{ fontSize: '12px' }}>
+              或直接把电脑上的 <code>.glb</code> 文件拖入此区域（最大 100 MB）
+            </span>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', fontSize: '12px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              data-testid="local-glb-optimize-toggle"
+              checked={optimizeLocalGlb}
+              disabled={busy}
+              onChange={event => setOptimizeLocalGlb(event.target.checked)}
+            />
+            <span>导入时自动执行网格减面与纹理压缩（默认保持原模型材质与骨骼动画）</span>
+          </label>
+          {localUploadNotice && (
+            <div
+              role="status"
+              data-testid="local-glb-success"
+              style={{
+                marginTop: '8px',
+                padding: '8px 10px',
+                borderRadius: '8px',
+                background: 'rgba(74, 222, 128, 0.12)',
+                color: '#4ade80',
+                fontSize: '12.5px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span>✓ {localUploadNotice}</span>
+              {current?.status === 'ready' && onPlace && (
+                <button
+                  type="button"
+                  className="primary-btn compact-btn"
+                  data-testid="local-glb-place-now"
+                  onClick={() => onPlace(current)}
+                >
+                  放入网页
+                </button>
+              )}
+            </div>
+          )}
+          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <span className="muted-note" style={{ display: 'block', marginBottom: '6px', fontSize: '12px' }}>
+              还没有 .glb 模型？可前往以下免费平台生成或下载后直接拖入：
+            </span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px' }}>
+              {FREE_3D_PLATFORMS.map(platform => (
+                <a
+                  key={platform.name}
+                  href={platform.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.09)',
+                    color: 'inherit',
+                    textDecoration: 'none',
+                    fontSize: '11.5px',
+                    lineHeight: 1.35,
+                  }}
+                >
+                  <strong style={{ display: 'block', color: '#d4ff33' }}>{platform.name} ↗</strong>
+                  <span className="muted-note" style={{ fontSize: '11px' }}>{platform.desc}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="drawer-section" data-testid="fallback-list">
           <div className="drawer-section-head">
@@ -138,6 +319,9 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
             </div>)}
           </div>
         </section>
+
+        <AssetModuleControls/>
+        <Lux3DWorkbench assets={assets} onPlace={onPlace} onPreparePlace={onPreparePlace}/>
 
         <details className="drawer-section compact-details">
           <summary>导入已有 Lux3D 任务编号</summary>

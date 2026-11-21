@@ -47,6 +47,28 @@ export async function registerLuxWorkbench(app: FastifyInstance, options: {
     });
   });
   app.get('/assets/uploads', async () => uploads.list().map(({ providerUrl: _url, providerUrlExpiresAt: _expires, ...record }) => record));
+  app.post<{ Params: { id: string }; Body?: { optimize?: boolean } }>('/assets/uploads/:id/adopt-local', async (request, reply) => {
+    const upload = uploads.get(request.params.id);
+    if (!upload || upload.kind !== 'glb') throw new AssetError('UPLOAD_NOT_FOUND', '未找到已上传的本地 GLB 模型', 404);
+    const body = request.body ?? {};
+    if (
+      typeof body !== 'object' ||
+      Array.isArray(body) ||
+      Object.keys(body).some(key => key !== 'optimize') ||
+      ('optimize' in body && typeof body.optimize !== 'boolean')
+    ) {
+      throw new AssetError('INVALID_OPERATION_INPUT', '请求参数不符合约定', 400);
+    }
+    await uploads.bytes(upload.id);
+    const optimize = body.optimize === true;
+    const assetId = optimize ? `local-opt-${upload.sha256.slice(0, 20)}` : `local-${upload.sha256.slice(0, 24)}`;
+    const filePath = uploads.filePath(upload.id);
+    const provenance = { kind: 'unknown' as const, sourceHash: upload.sha256, importedAt: new Date().toISOString() };
+    const asset = optimize
+      ? await options.assets.importLocal(filePath, assetId, provenance)
+      : await options.assets.importOriginal(filePath, assetId, provenance);
+    return reply.code(asset.status === 'ready' ? 200 : 202).send(asset);
+  });
   app.get<{ Params: { id: string } }>('/assets/uploads/:id/preview', async (request, reply) => {
     const upload = uploads.get(request.params.id);
     if (!upload || upload.kind !== 'image') throw new AssetError('UPLOAD_NOT_FOUND', '图片不存在', 404);

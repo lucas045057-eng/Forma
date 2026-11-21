@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createApp } from './app.ts';
 import { AssetError, Lux3DClient } from './assets/lux3d.ts';
+import { Document, NodeIO } from '@gltf-transform/core';
 
 let root: string | undefined;
 let instance: Awaited<ReturnType<typeof createApp>> | undefined;
@@ -135,5 +136,42 @@ it.each([
     expect(result.statusCode).toBe(403);
     expect(result.json()).toMatchObject({ error: { code } });
   }
+  expect(providerCreate.mock.calls.length).toBe(before);
+});
+
+it('uploads and adopts a local .glb file directly into ready assets with zero cloud provider calls', async () => {
+  const before = providerCreate.mock.calls.length;
+  const doc = new Document();
+  const buf = doc.createBuffer();
+  const pos = doc.createAccessor().setType('VEC3').setArray(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])).setBuffer(buf);
+  const prim = doc.createPrimitive().setAttribute('POSITION', pos);
+  const mesh = doc.createMesh('Triangle').addPrimitive(prim);
+  const node = doc.createNode('TriangleNode').setMesh(mesh);
+  doc.createScene('Scene').addChild(node);
+  const glbBytes = Buffer.from(await new NodeIO().writeBinary(doc));
+
+  const uploadRes = await app().inject({
+    method: 'POST',
+    url: '/assets/uploads?kind=glb&filename=free-triangle.glb',
+    headers: { 'content-type': 'application/octet-stream' },
+    payload: glbBytes,
+  });
+  expect(uploadRes.statusCode).toBe(201);
+  const uploaded = uploadRes.json() as { id: string; kind: string; sha256: string };
+  expect(uploaded.kind).toBe('glb');
+
+  const adoptRes = await app().inject({
+    method: 'POST',
+    url: `/assets/uploads/${uploaded.id}/adopt-local`,
+    payload: { optimize: false },
+  });
+  expect(adoptRes.statusCode).toBe(200);
+  const asset = adoptRes.json() as { id: string; status: string; modelUrl: string };
+  expect(asset.status).toBe('ready');
+  expect(asset.id).toMatch(/^local-/);
+
+  const modelRes = await app().inject({ method: 'GET', url: `/assets/${asset.id}/model.glb` });
+  expect(modelRes.statusCode).toBe(200);
+  expect(modelRes.headers['content-type']).toContain('model/gltf-binary');
   expect(providerCreate.mock.calls.length).toBe(before);
 });
