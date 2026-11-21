@@ -1,6 +1,8 @@
 export type DiffLine = { kind: 'add' | 'delete' | 'hunk' | 'meta' | 'context'; text: string };
 
 const hunkHeader = /^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@/;
+/** Appended by the server (apps/server/src/work/repo.ts) when a display patch is capped. */
+export const TRUNCATED_MARKER = '…（差异过长，已截断）';
 
 /**
  * Classifies unified-diff lines. Inside a hunk the header's line counts decide what is
@@ -47,7 +49,8 @@ export function parseDiff(patch: string): DiffLine[] {
 /** Added/deleted line counts, or `null` when the patch cannot be counted reliably. */
 export function countDiff(patch: string): { added: number; deleted: number } | null {
   const { lines, exact } = scan(patch);
-  if (!exact) return null;
+  // A capped patch can end exactly on a hunk boundary and still look consistent.
+  if (!exact || lines.at(-1)?.text === TRUNCATED_MARKER) return null;
   let added = 0;
   let deleted = 0;
   for (const line of lines) {

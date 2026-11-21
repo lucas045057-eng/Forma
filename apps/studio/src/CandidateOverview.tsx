@@ -141,7 +141,7 @@ export default function CandidateOverview({ summaries, selectedId, mode, onOpen 
               <span className="candidate-card-stats" data-testid="candidate-card-stats">
                 {summary.files} 个文件 · {stats.visual
                   ? <><span className="candidate-card-add">+{stats.visual[0]}</span> <span className="candidate-card-del">−{stats.visual[1]}</span></>
-                  : <span title="补丁与 hunk 行数不一致，不显示可能失真的数字">行数未统计</span>}
+                  : <span title="补丁被截断或与 hunk 行数不一致，不显示可能失真的数字">行数未统计</span>}
               </span>
               <span className="candidate-card-flags">
                 <span className={`candidate-card-check tone-${summary.checkTone}`} data-testid="candidate-card-check">{summary.checkLabel}</span>

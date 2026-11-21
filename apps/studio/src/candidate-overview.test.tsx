@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Candidate, CheckRun, Task } from '@spatial/shared';
 import CandidateOverview from './CandidateOverview.tsx';
 import { diffStats, summarizeCandidate, thumbnailSource } from './candidate-overview.ts';
-import { countDiff, parseDiff } from './diff.ts';
+import { countDiff, parseDiff, TRUNCATED_MARKER } from './diff.ts';
 
 const hash = 'a'.repeat(64);
 const candidate = (id: string, extra: Partial<Candidate> = {}): Candidate => ({
@@ -41,6 +41,8 @@ describe('diff line classification', () => {
     expect(countDiff('@@ -1,1 +1,1 @@\n-a\n+b\n+extra')).toBeNull();
     expect(countDiff('@@ -1,3 +1,3 @@\n-a\n+b')).toBeNull();
     expect(countDiff('@@\n-a\n+b')).toBeNull();
+    // Server cap that happens to end right after a complete hunk.
+    expect(countDiff(`@@ -1 +1 @@\n-a\n+b\n${TRUNCATED_MARKER}`)).toBeNull();
     expect(diffStats(candidate('x', { diff: [{ path: 'a', patch: '@@\n-a\n+b' }] }))).toEqual({ files: 1, added: null, deleted: null });
   });
 

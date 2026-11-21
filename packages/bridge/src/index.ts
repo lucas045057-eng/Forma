@@ -20,9 +20,10 @@ export function installBridge(): () => void {
   const send = (message: PreviewMessage) => {
     if (window.parent !== window) window.parent.postMessage(message, origin);
   };
-  const sendProgress = () => {
+  const sendProgress = (sync = true) => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    send({ type: 'scroll:progress', payload: { at: max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0 } });
+    const at = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    send({ type: 'scroll:progress', payload: sync ? { at } : { at, sync: false } });
   };
   let observedCanvas: Element | null = null;
   const reportSize = () => {
@@ -118,8 +119,10 @@ export function installBridge(): () => void {
     // The bbox is in viewport coordinates of this moment. A scroll that just happened (e.g. an
     // element scrolled into view right before the click) may only dispatch its scroll event
     // after this click, so report the click-time progress first: the Studio pairs the
-    // selection with it, and a late scroll event then repeats the same value.
-    sendProgress();
+    // selection with it, and a late scroll event then repeats the same value. It is marked
+    // `sync: false` because a click is not a scroll and must not move the other artboard;
+    // a real scroll still reports (and syncs) through its own scroll event.
+    sendProgress(false);
     send({ type: 'pick:result', payload });
     schedule();
   };

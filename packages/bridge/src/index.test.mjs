@@ -163,6 +163,9 @@ test('pick:result is preceded by the click-time scroll progress', async () => {
     assert.ok(index > 0, 'pick:result needs a preceding message');
     assert.equal(messages[index - 1].type, 'scroll:progress');
     assert.ok(Math.abs(messages[index - 1].payload.at - expected) < 1e-9, 'progress must be the click-time scroll position');
+    assert.equal(messages[index - 1].payload.sync, false, 'a click is not a scroll: the other artboard must not follow it');
+    // The real scroll still reports normally (without sync: false) once its event is dispatched.
+    await page.waitForFunction(() => window.messages.some(message => message.type === 'scroll:progress' && message.payload.sync === undefined));
     await frame.evaluate(() => window.disposeBridge());
   } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
 });
