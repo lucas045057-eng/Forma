@@ -26,13 +26,16 @@ export function Diff({ candidate }: { candidate: Candidate }) {
     </section>)}
   </div>;
 }
-export default function CandidatePanel({ selectedId, onSelect, mode, onMode, headerMeta, headerStatus, detailsTarget, children }: {
+export default function CandidatePanel({ selectedId, onSelect, mode, onMode, headerMeta, headerStatus, topLeftTarget, topCenterTarget, detailsTarget, children }: {
   selectedId: string;
   onSelect: (id: string) => void;
   mode: PreviewMode;
   onMode: (mode: PreviewMode) => void;
   headerMeta?: ReactNode;
   headerStatus?: ReactNode;
+  /** Optional portal mounts for single-row floating top islands (when omitted, renders legacy .preview-controls). */
+  topLeftTarget?: HTMLElement | null;
+  topCenterTarget?: HTMLElement | null;
   /** Where the candidate checks/diff section renders. Omitted → inline below the artboards;
    *  null → the target is not mounted yet, so render nothing rather than mount inline and
    *  remount on teleport (that would abort evidence loading once). */
@@ -137,27 +140,36 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
       </div>
     </section> : null;
 
+  const portalTop = topLeftTarget !== undefined || topCenterTarget !== undefined;
+  const versionControls = <>
+    <span className="version-badge" title="当前主作品版本"><code data-testid="work-version">{state.version ? state.version.slice(0, 8) : '读取中'}</code></span>
+    <button type="button" className="ghost-btn compact-btn" data-testid="version-revert" title="回退上一次采用" disabled={!canRevert} onClick={() => void action('revert')}>{portalTop ? '回退' : '回退上一次采用'}</button>
+  </>;
+  const modeControls = pending.length > 0 ? <>
+    <select aria-label="待定候选版本" data-testid="candidate-select" value={selected?.id ?? ''} onChange={event => { clearEvidence(); onSelect(event.target.value); onMode('candidate'); }}>
+      {pending.map(candidate => <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}</option>)}
+    </select>
+    <div className="segmented-control" aria-label="预览模式">
+      <button type="button" data-testid="preview-current" aria-pressed={mode === 'current'} onClick={() => onMode('current')}>当前版本</button>
+      <button type="button" data-testid="preview-candidate" aria-pressed={mode === 'candidate'} onClick={() => onMode('candidate')}>候选版本</button>
+      <button type="button" data-testid="preview-compare" aria-pressed={mode === 'compare'} onClick={() => onMode('compare')}>并排对比</button>
+    </div>
+  </> : null;
+
   return <>
-    <div className="preview-controls">
+    {!portalTop && <div className="preview-controls">
       <div className="canvas-bar-left">
         {headerMeta}
         <span className="version-badge">版本 <code data-testid="work-version">{state.version ? state.version.slice(0, 8) : '读取中'}</code></span>
         <button type="button" className="ghost-btn compact-btn" data-testid="version-revert" disabled={!canRevert} onClick={() => void action('revert')}>回退上一次采用</button>
       </div>
       <div className="canvas-bar-right">
-        {pending.length > 0 && <>
-          <select aria-label="待定候选版本" data-testid="candidate-select" value={selected?.id ?? ''} onChange={event => { clearEvidence(); onSelect(event.target.value); onMode('candidate'); }}>
-            {pending.map(candidate => <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}</option>)}
-          </select>
-          <div className="segmented-control" aria-label="预览模式">
-            <button type="button" data-testid="preview-current" aria-pressed={mode === 'current'} onClick={() => onMode('current')}>当前版本</button>
-            <button type="button" data-testid="preview-candidate" aria-pressed={mode === 'candidate'} onClick={() => onMode('candidate')}>候选版本</button>
-            <button type="button" data-testid="preview-compare" aria-pressed={mode === 'compare'} onClick={() => onMode('compare')}>并排对比</button>
-          </div>
-        </>}
+        {modeControls}
         {headerStatus}
       </div>
-    </div>
+    </div>}
+    {portalTop && topLeftTarget && createPortal(versionControls, topLeftTarget)}
+    {portalTop && topCenterTarget && modeControls && createPortal(<div className="island mode-island">{modeControls}</div>, topCenterTarget)}
     {error && <p className="candidate-error error" data-testid="candidate-action-error" role="alert">{error}</p>}
     {!canRevert && <p className="candidate-sync-hint" role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
     <div className={`preview-frames mode-${mode}`}>{children}</div>

@@ -44,8 +44,10 @@ function Studio() {
   const [draggingPlacement,setDraggingPlacement]=useState(false);
   const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
   const [showScene, setShowScene] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [candidateSlot, setCandidateSlot] = useState<HTMLDivElement | null>(null);
+  const [topLeftSlot, setTopLeftSlot] = useState<HTMLDivElement | null>(null);
+  const [topCenterSlot, setTopCenterSlot] = useState<HTMLDivElement | null>(null);
   const preview = useRef<HTMLIFrameElement>(null);
   const candidatePreview = useRef<HTMLIFrameElement>(null);
   const pickingRef = useRef(false);
@@ -335,6 +337,9 @@ function Studio() {
     setShowScene(false);
     setMode('current');
     setReady(false);
+    if (!created.task && (created.work.starter === 'blank' || created.work.starter === 'free-web')) {
+      setInspectorOpen(true);
+    }
     setWorksState(previous => {
       const others = previous.works.filter(item => item.id !== created.work.id).map(item => ({ ...item, active: false }));
       return { activeId: created.activeId, works: [...others, { ...created.work, active: true }] };
@@ -342,6 +347,24 @@ function Studio() {
     setPreviewRevision(rev => rev + 1);
     await reload(true).catch(() => {});
   }
+
+  const pendingApprovalsCount = state.approvals.filter(waiting).length;
+  const previousPendingApprovals = useRef(0);
+  useEffect(() => {
+    if (previousPendingApprovals.current === 0 && pendingApprovalsCount > 0) {
+      setInspectorOpen(true);
+    }
+    previousPendingApprovals.current = pendingApprovalsCount;
+  }, [pendingApprovalsCount]);
+
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Escape' || modalTab || showModelConfig || showAssets || placingAsset) return;
+      if (inspectorOpen) setInspectorOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [inspectorOpen, modalTab, showModelConfig, showAssets, placingAsset]);
 
   const activeWorkSummary: WorkSummary | undefined = worksState.works.find(item => item.id === worksState.activeId) ?? worksState.works[0];
   const blankBootstrap = (activeWorkSummary?.starter === 'blank' || activeWorkSummary?.starter === 'free-web') && !state.candidates.some(item => item.decision === 'adopted');
@@ -370,33 +393,74 @@ function Studio() {
       <header className="studio-top">
         <div className="island brand-island">
           <span className="wordmark" aria-hidden="true">F</span>
-          <h1>Forma 空间工作台</h1>
+          <h1 title="Forma 空间工作台">Forma</h1>
+          <span className="island-sep" aria-hidden="true"/>
+          <div className="work-switcher-group">
+            <select
+              aria-label="切换当前作品"
+              data-testid="work-switcher"
+              disabled={switchingWork || !syncReady}
+              value={worksState.activeId}
+              onChange={event => void selectWork(event.target.value)}
+            >
+              {worksState.works.map(item => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                  {item.starter === 'blank'
+                    ? ' · 3D 画布'
+                    : item.starter === 'free-web'
+                      ? ' · 自由网页'
+                      : item.starter === 'imported'
+                        ? ' · 已导入网页'
+                        : ''}
+                </option>
+              ))}
+            </select>
+            <button type="button" className="secondary-btn compact-btn" data-testid="work-new-open" title="新建网页作品" disabled={switchingWork || !syncReady} onClick={() => setModalTab('create')}>+ 新建</button>
+            <button type="button" className="ghost-btn compact-btn" data-testid="work-import-open" title="导入已有网页" disabled={switchingWork || !syncReady} onClick={() => setModalTab('import')}>⤓ 导入</button>
+          </div>
+          <div className="top-slot" ref={setTopLeftSlot}/>
         </div>
-        {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示：语音为固定示例转写，编码与生成上游为模拟；不代表真实语音识别或现场模型生成。</p>}
-        {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式：已接入真实编码模型与云端服务，提交生成或语音识别可能产生对应平台计费。</p>}
+        <div className="top-center-wrap">
+          <div className="top-center-slot" ref={setTopCenterSlot}/>
+          {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示</p>}
+          {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式</p>}
+        </div>
         <div className="island status-island status-cluster">
-          <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览连接'}</span>
-          <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus}>{eventStatus === 'connected' ? '事件已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'} · <output data-testid="events-seq">{lastSeq}</output></span>
+          <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览'}</span>
+          <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus} title={eventStatus === 'connected' ? '事件流已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'}>事件 · <output data-testid="events-seq">{lastSeq}</output></span>
           {modelStatus && (
             <span
-              className={`status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
+              className={`status-pill model-status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
               data-testid="model-status"
               data-mode={modelStatus.coding.mode}
               title={`${modelStatusTooltip}（点击配置或切换大模型）`}
-              style={{ cursor: 'pointer' }}
               onClick={() => setShowModelConfig(true)}
             >
               {modelStatus.coding.mode === 'real'
-                ? `真实模型 · ${modelStatus.coding.model}`
+                ? modelStatus.coding.model
                 : modelStatus.coding.mode === 'mock'
-                  ? '模拟编码模型'
-                  : '未配置编码模型'}
+                  ? '模拟模型'
+                  : '未配置模型'}
             </span>
           )}
-          {!syncReady && <span className="status-pill is-wait" role="status">状态待同步</span>}
+          {!syncReady && <span className="status-pill is-wait" role="status">待同步</span>}
           {syncError && <span className="status-pill is-error" role="alert">{syncError}</span>}
+          <span className="island-sep" aria-hidden="true"/>
           <button type="button" className="ghost-btn compact-btn" data-testid="model-config-open" onClick={() => setShowModelConfig(true)}>接入模型</button>
-          <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" onClick={() => void reload().catch(() => {})}>刷新状态</button>
+          <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" title="刷新状态" onClick={() => void reload().catch(() => {})}>刷新</button>
+          {pendingApprovalsCount > 0 && (
+            <button type="button" className="approval-alert-pill" onClick={() => setInspectorOpen(true)}>
+              越界请示 · {pendingApprovalsCount}
+            </button>
+          )}
+          <button
+            type="button"
+            className={`${inspectorOpen ? 'ghost-btn' : 'secondary-btn'} compact-btn`}
+            onClick={() => setInspectorOpen(value => !value)}
+          >
+            {inspectorOpen ? '收起抽屉' : pending.length > 0 ? '检查与 Diff' : '改写面板'}
+          </button>
         </div>
       </header>
       <div className={`workspace${showScene ? ' scene-editing' : ''}${inspectorOpen ? '' : ' inspector-collapsed'}`}>
@@ -406,37 +470,17 @@ function Studio() {
             onSelect={setCandidateId}
             mode={mode}
             onMode={setMode}
-            headerMeta={<>
-              <div className="work-switcher-group">
-                <select
-                  aria-label="切换当前作品"
-                  data-testid="work-switcher"
-                  disabled={switchingWork || !syncReady}
-                  value={worksState.activeId}
-                  onChange={event => void selectWork(event.target.value)}
-                >
-                  {worksState.works.map(item => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                      {item.starter === 'blank'
-                        ? ' · 3D 画布'
-                        : item.starter === 'free-web'
-                          ? ' · 自由网页'
-                          : item.starter === 'imported'
-                            ? ' · 已导入网页'
-                            : ''}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" className="secondary-btn compact-btn" data-testid="work-new-open" disabled={switchingWork || !syncReady} onClick={() => setModalTab('create')}>+ 新建网页</button>
-                <button type="button" className="ghost-btn compact-btn" data-testid="work-import-open" disabled={switchingWork || !syncReady} onClick={() => setModalTab('import')}>⤓ 导入网页</button>
-              </div>
-              <ModelOriginBadge/>
-            </>}
+            topLeftTarget={topLeftSlot}
+            topCenterTarget={topCenterSlot}
             detailsTarget={candidateSlot}
           >
             <figure className="artboard artboard-main">
-              <figcaption className="artboard-name"><b>{workName}</b><span>当前版本</span></figcaption>
+              <figcaption className="artboard-name">
+                <b>{workName}</b>
+                <span>当前版本</span>
+                <span className="artboard-name-spacer" aria-hidden="true"/>
+                <ModelOriginBadge/>
+              </figcaption>
               {mainFrame}
             </figure>
             {mode !== 'current' && candidate && <figure className="artboard artboard-candidate">
@@ -445,7 +489,14 @@ function Studio() {
             </figure>}
           </CandidatePanel>
         </section>
-        <aside className="inspector">
+        <aside className="inspector" aria-label="画室工具抽屉">
+          <div className="inspector-head">
+            <div className="inspector-head-title">
+              <span className="section-label">ATELIER SHEET</span>
+              <h2>{showScene ? '3D 场景调节' : pending.length > 0 ? '检查与改写' : '点选与改写'}</h2>
+            </div>
+            <button type="button" className="ghost-btn compact-btn" data-testid="inspector-close" onClick={() => setInspectorOpen(false)}>收起</button>
+          </div>
           {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
           <div className="candidate-slot" ref={setCandidateSlot}/>
           <div className="inspector-main" hidden={showScene}>
@@ -483,8 +534,14 @@ function Studio() {
         <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
         <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setInspectorOpen(true); setShowScene(true); }}>3D 场景编辑</button>
         <span className="dock-sep" aria-hidden="true"/>
-        <button type="button" className={`tool-btn${inspectorOpen ? '' : ' is-active'}`} aria-pressed={!inspectorOpen} data-testid="inspector-toggle" onClick={() => setInspectorOpen(value => !value)}>
-          {inspectorOpen ? '收起面板' : `展开面板${pending.length > 0 ? ` · ${pending.length} 待定` : ''}`}
+        <button
+          type="button"
+          className={`tool-btn ${inspectorOpen ? 'is-active' : 'tool-btn-accent'}`}
+          aria-pressed={inspectorOpen}
+          data-testid="inspector-toggle"
+          onClick={() => setInspectorOpen(value => !value)}
+        >
+          {inspectorOpen ? '收起面板' : pending.length > 0 ? `✦ 检查与 Diff · ${pending.length}` : '✦ 改写与检查'}
         </button>
         <span className="dock-sep" aria-hidden="true"/>
         <span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>
