@@ -5,6 +5,8 @@ import { parseDiff } from './diff.ts';
 import { api, ApiError, mutation } from './api.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import CheckPanel from './CheckPanel.tsx';
+import CandidateOverview from './CandidateOverview.tsx';
+import { summarizeCandidate } from './candidate-overview.ts';
 import { activeRun, associatedRun } from './check-state.ts';
 import { adoptionReason, operationError, refreshError, type EvidenceReceipt } from './adoption-gate.ts';
 
@@ -159,6 +161,20 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
     {error && <p className="candidate-error error" data-testid="candidate-action-error" role="alert">{error}</p>}
     {!canRevert && <p className="candidate-sync-hint" role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
     <div className={`preview-frames mode-${mode}`}>{children}</div>
+    <CandidateOverview
+      summaries={pending.map(candidate => summarizeCandidate(candidate, {
+        run: candidate.latestCheckRunId ? state.runs[candidate.latestCheckRunId] : undefined,
+        tasks: state.tasks, version: state.version, ready, checkIssue: state.checkIssues[candidate.id],
+      }))}
+      selectedId={selected?.id ?? ''}
+      comparing={mode !== 'current'}
+      ready={ready}
+      onOpen={id => {
+        if (id === selected?.id && mode === 'compare') return;
+        if (id !== selected?.id) { clearEvidence(); onSelect(id); }
+        onMode('compare');
+      }}
+    />
     {details && (detailsTarget === undefined ? details : detailsTarget && createPortal(details, detailsTarget))}
   </>;
 }
