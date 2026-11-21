@@ -107,6 +107,7 @@ export function ensureBuilt(rootDir = repoRoot) {
 export function createDesktopShortcut(rootDir = repoRoot) {
   const info = ensureBuilt(rootDir);
   const psScript = `
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $desktop = [Environment]::GetFolderPath('DesktopDirectory')
 $lnkPath = Join-Path $desktop 'Forma 空间化AI工作台.lnk'
 $wsh = New-Object -ComObject WScript.Shell
