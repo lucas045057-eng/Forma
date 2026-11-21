@@ -129,4 +129,24 @@ describe('candidate overview render', () => {
     expect(preview).toContain('增删行数无法精确统计');
     expect(renderToStaticMarkup(<CandidateOverview summaries={[summary]} selectedId="cand0001aaaa" mode="current" onOpen={() => {}}/>)).toContain('已选中');
   });
+
+  it('includes variantLabel badge and spoken prefix when a candidate comes from a batch variant', () => {
+    const variantTasks: Task[] = [{
+      id: 'tv1',
+      batchId: 'b1',
+      variantLabel: '方案 B · 对比张力',
+      variantIndex: 2,
+      variantTotal: 3,
+      instruction: '强化对比',
+      status: 'done',
+      candidateId: 'cand0001aaaa',
+      events: [],
+    }];
+    const summary = summarizeCandidate(candidate('cand0001aaaa'), { ...base, tasks: variantTasks });
+    expect(summary.variantLabel).toBe('方案 B · 对比张力');
+    const html = renderToStaticMarkup(<CandidateOverview summaries={[summary]} selectedId="cand0001aaaa" mode="compare" onOpen={() => {}}/>);
+    expect(html).toContain('data-testid="candidate-card-variant"');
+    expect(html).toContain('方案 B · 对比张力');
+    expect(html).toContain('aria-label="候选 cand0001（方案 B · 对比张力）：2 个文件，新增 3 行，删除 2 行，未检查，对比中。修改指令：强化对比。打开并排对比"');
+  });
 });

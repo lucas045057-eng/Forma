@@ -121,6 +121,11 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
         <div className="candidate-title">
           <span className="section-label">CANDIDATE</span>
           <h2>候选 {selected.id.slice(0, 8)}</h2>
+          {state.tasks.find(task => task.candidateId === selected.id)?.variantLabel && (
+            <span className="meta-tag is-accent" data-testid="candidate-variant-tag">
+              {state.tasks.find(task => task.candidateId === selected.id)?.variantLabel}
+            </span>
+          )}
           <span className="meta-tag">{pending.length}/3 待定</span>
         </div>
         <div className="candidate-actions-bar">
@@ -147,7 +152,10 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
   </>;
   const modeControls = pending.length > 0 ? <>
     <select aria-label="待定候选版本" data-testid="candidate-select" value={selected?.id ?? ''} onChange={event => { clearEvidence(); onSelect(event.target.value); onMode('candidate'); }}>
-      {pending.map(candidate => <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}</option>)}
+      {pending.map(candidate => {
+        const variant = state.tasks.find(task => task.candidateId === candidate.id)?.variantLabel;
+        return <option key={candidate.id} value={candidate.id}>候选 {candidate.id.slice(0, 8)}{variant ? ` · ${variant}` : ''}</option>;
+      })}
     </select>
     <div className="segmented-control" aria-label="预览模式">
       <button type="button" data-testid="preview-current" aria-pressed={mode === 'current'} onClick={() => onMode('current')}>当前版本</button>

@@ -2,7 +2,7 @@ import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'reac
 import SpeechInput from './SpeechInput.tsx';
 import {nativeSpeechPorts,SpeechController,speechBusy,type SpeechReview} from './speech-input.ts';
 import {bindingMatches,identityLabel,reviewDecision,type ReviewMode,type SpeechContext} from './speech-review.ts';
-import type { Selection, Task, WorkStarter } from '@spatial/shared';
+import { candidateVariants, type Selection, type Task, type TaskBatchResult, type WorkStarter } from '@spatial/shared';
 import { api, ApiError, mutation } from './api.ts';
 import { operationError, refreshError } from './adoption-gate.ts';
 import { useEventCenter } from './EventCenter.tsx';
@@ -18,6 +18,7 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
   const writable = !blocked && syncReady && status === 'connected' && !locked(['task:create']);
   const submittable = canSubmit(pick) && writable && (!selection || selection.baseVersion === state.version);
   const [instruction, setInstruction] = useState('');
+  const [variantCount, setVariantCount] = useState<1 | 2 | 3>(1);
   const [activeId, setActiveId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -47,6 +48,15 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
     const confirmed={...latestContext.current}; boundText.current=review.text;latestBinding.current=confirmed;setBinding(confirmed);speech.accept();
   }
   const active = state.tasks.find(task => task.id === activeId) ?? state.tasks[0];
+  const pendingCandidates = state.candidates.filter(candidate => candidate.decision === 'pending').length;
+  const pendingApprovals = state.approvals.filter(card => card.status === 'pending' || card.status === 'approving').length;
+  const overflowCandidates = variantCount > 1 && pendingCandidates + variantCount > 3;
+  const batchTasks = active?.batchId
+    ? state.tasks
+        .filter(task => task.batchId === active.batchId)
+        .sort((a, b) => (a.variantIndex ?? 0) - (b.variantIndex ?? 0))
+    : [];
+  const batchReadyCount = batchTasks.filter(task => task.status === 'done').length;
 
   const retryPlan = retrySelection(active?.selection, pick, state.version);
   async function submit(text: string, picked: Selection | null, retry = false) {
@@ -61,8 +71,18 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
     let succeeded = false;
     try {
       const useBootstrap = blankBootstrap && !picked;
-      const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}), ...(useBootstrap ? { bootstrap: true } : {}) }));
-      setActiveId(task.id);
+      if (!retry && variantCount > 1) {
+        const result = await api<TaskBatchResult>('/tasks/batch', mutation('POST', {
+          instruction: text.trim(),
+          count: variantCount,
+          ...(picked ? { selection: picked } : {}),
+          ...(useBootstrap ? { bootstrap: true } : {}),
+        }));
+        setActiveId(result.tasks[0]?.id ?? '');
+      } else {
+        const task = await api<Task>('/tasks', mutation('POST', { instruction: text.trim(), ...(picked ? { selection: picked } : {}), ...(useBootstrap ? { bootstrap: true } : {}) }));
+        setActiveId(task.id);
+      }
       latestBinding.current=null;setBinding(null);
       succeeded = true;
     } catch (cause) { setError(operationError('task', cause instanceof ApiError ? cause.code : undefined, cause instanceof ApiError ? cause.status : undefined, cause instanceof Error ? cause.message : undefined)); }
@@ -130,9 +150,22 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
           <button type="button" className="ghost-btn compact-btn" data-testid="speech-clear-binding" onClick={()=>changeInstruction(instruction===boundText.current?'':instruction,true)}>放弃语音绑定</button>
         </div>
       </div>}
+      <div className="composer-variants" data-testid="composer-variants">
+        <div className="composer-variants-row">
+          <span className="composer-variants-label">生成方案</span>
+          <div className="segmented-control variant-picker" role="group" aria-label="生成候选数量">
+            <button type="button" data-testid="variant-count-1" aria-pressed={variantCount === 1} disabled={busy} onClick={() => setVariantCount(1)}>1 个</button>
+            <button type="button" data-testid="variant-count-2" aria-pressed={variantCount === 2} disabled={busy} onClick={() => setVariantCount(2)}>2 个对比</button>
+            <button type="button" data-testid="variant-count-3" aria-pressed={variantCount === 3} disabled={busy} onClick={() => setVariantCount(3)}>3 个对比</button>
+          </div>
+        </div>
+        {variantCount !== 1 && <p className="composer-variant-hint" data-testid="variant-hint">并行生成：{candidateVariants(variantCount).map(item => `${item.shortLabel} ${item.summary}`).join(' · ')}（约 {variantCount}× 模型调用）</p>}
+        {overflowCandidates && <p className="composer-variant-warn" data-testid="variant-overflow-warn" role="status">当前已有 {pendingCandidates} 个待定候选，最多保留 3 个，新方案就绪后将自动替换较早候选</p>}
+        {variantCount > 1 && pendingApprovals > 0 && !(blankBootstrap && !selection) && <p className="composer-variant-warn" data-testid="variant-approval-warn" role="status">当前有 {pendingApprovals} 张待处理请示，若触发跨范围审核（上限 3 张）建议先处理</p>}
+      </div>
       <div className="composer-footer">
         <span className="composer-caption">{blankBootstrap && !selection ? '由编码模型直接生成首版完整页面候选' : '发送选中源码上下文生成候选草稿'}</span>
-        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>{isFreeWebBootstrap ? '生成首版网页' : isSpatialBootstrap ? '生成首版 3D 网页' : '生成候选版本'}</button>
+        <button type="button" className="primary-btn" data-testid="generate-candidate" disabled={!instruction.trim() || busy || !submittable || !voiceGate} onClick={() => void submit(instruction, selection)}>{variantCount > 1 ? (blankBootstrap && !selection ? `并行生成 ${variantCount} 个首版方案` : `并行生成 ${variantCount} 个候选`) : isFreeWebBootstrap ? '生成首版网页' : isSpatialBootstrap ? '生成首版 3D 网页' : '生成候选版本'}</button>
       </div>
     </div>
     {error && <p className="error" data-testid="task-action-error" role="alert">{error}{error.includes('最多保留') && <a href="#approval-panel">查看待处理请示</a>}</p>}
@@ -141,11 +174,36 @@ export default function PointSpeak({ pick, blocked = false, blankBootstrap = fal
         <div className="task-status-group">
           <span className={`task-status-dot status-${active.status}`}/>
           <strong data-testid="task-status" data-status={active.status}>{statusLabels[active.status]}</strong>
+          {active.variantLabel && <span className="meta-tag is-accent" data-testid="task-variant-tag">{active.variantLabel}</span>}
         </div>
         <code>{active.id.slice(0, 8)}</code>
       </div>
+      {batchTasks.length > 1 && <div className="task-batch-strip" data-testid="task-batch-strip">
+        <div className="task-batch-head">
+          <span className="section-label">BATCH VARIANTS</span>
+          <span>同批对比 · {batchReadyCount}/{batchTasks.length} 已就绪</span>
+        </div>
+        <div className="task-batch-pills" role="group" aria-label="同批候选方案状态">
+          {batchTasks.map(task => {
+            const shortVariant = task.variantLabel ? task.variantLabel.split('·')[0].trim() : `方案 ${task.variantIndex ?? ''}`.trim();
+            return <button
+              key={task.id}
+              type="button"
+              className="task-batch-pill"
+              data-testid="task-batch-pill"
+              data-task-id={task.id}
+              aria-pressed={task.id === active.id}
+              onClick={() => setActiveId(task.id)}
+            >
+              <span className={`task-status-dot status-${task.status}`}/>
+              <b>{shortVariant}</b>
+              <span>{statusLabels[task.status]}</span>
+            </button>;
+          })}
+        </div>
+      </div>}
       {state.tasks.length > 1 && <select aria-label="查看任务" data-testid="task-select" value={active.id} onChange={event => setActiveId(event.target.value)}>
-        {state.tasks.map(task => <option key={task.id} value={task.id}>{task.id.slice(0, 8)} · {statusLabels[task.status]}</option>)}
+        {state.tasks.map(task => <option key={task.id} value={task.id}>{task.id.slice(0, 8)}{task.variantLabel ? ` · ${task.variantLabel}` : ''} · {statusLabels[task.status]}</option>)}
       </select>}
       <p className="task-instruction">{active.instruction}</p>
       {active.events.length > 0 && <ol className="task-steps" data-testid="task-steps">{active.events.map(event => <li key={event.sequence}>{event.message}</li>)}</ol>}

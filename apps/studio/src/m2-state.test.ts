@@ -21,6 +21,19 @@ describe('M2 state reduction', () => {
     expect(reduceM2Event(emptyM2State, { type: 'scene.changed', seq: 1 })).toBe(emptyM2State);
     expect(reduceM2Event(emptyM2State, { type: 'candidate.ready', seq: 1, candidate: { id: 'bad', decision: 'pending', diff: [null] } })).toBe(emptyM2State);
     expect(reduceM2Event(emptyM2State, event(2, { task: { ...task, events: [{ sequence: 1, message: {} }] } }))).toBe(emptyM2State);
+    expect(reduceM2Event(emptyM2State, event(3, { task: { ...task, variantIndex: 0 } }))).toBe(emptyM2State);
+    expect(reduceM2Event(emptyM2State, event(4, { task: { ...task, variantLabel: 123 } }))).toBe(emptyM2State);
+  });
+  it('accepts tasks with batch and variant metadata', () => {
+    const batchTask = { ...task, id: 'tb1', batchId: 'batch001', variantLabel: '方案 A · 稳健精致', variantIndex: 1, variantTotal: 3 };
+    const state = reduceM2Event(emptyM2State, event(1, { task: batchTask }));
+    expect(state.tasks[0]).toMatchObject({
+      id: 'tb1',
+      batchId: 'batch001',
+      variantLabel: '方案 A · 稳健精致',
+      variantIndex: 1,
+      variantTotal: 3,
+    });
   });
 });
 

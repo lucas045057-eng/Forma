@@ -51,5 +51,31 @@ it('exposes the M2 task/candidate/version flow and durable event replay without 
     expect(JSON.stringify(history.json())).not.toContain('mock-agent-secret');
     expect((await app.inject('/events/history?since=-1')).statusCode).toBe(400);
     expect((await app.inject({ method: 'POST', url: `/preview/c/${id}/`, payload: {} })).statusCode).toBe(404);
+
+    // Batch variant creation via POST /tasks/batch
+    expect((await app.inject({ method: 'POST', url: '/tasks/batch', payload: { instruction: '批量校验', count: 1 } })).statusCode).toBe(400);
+    expect((await app.inject({ method: 'POST', url: '/tasks/batch', payload: { instruction: '批量校验', count: 4 } })).statusCode).toBe(400);
+    expect((await app.inject({ method: 'POST', url: '/tasks/batch', payload: { instruction: '批量校验', count: '2' } })).statusCode).toBe(400);
+    const currentVersion = (await app.inject('/version')).json().version;
+    const batchCreated = await app.inject({
+      method: 'POST',
+      url: '/tasks/batch',
+      payload: {
+        instruction: '生成两个对比方案',
+        count: 2,
+        selection: { src: 'src/App.tsx:1:10', baseVersion: currentVersion, cid: 'App', bbox: [0, 0, 1, 1], styles: {}, instances: 1, ancestors: [] },
+      },
+    });
+    expect(batchCreated.statusCode).toBe(202);
+    const batchBody = batchCreated.json();
+    expect(batchBody.batchId).toMatch(/^[a-f0-9]{32}$/);
+    expect(batchBody.tasks).toHaveLength(2);
+    expect(batchBody.tasks.map((t: { variantLabel: string }) => t.variantLabel)).toEqual([
+      '方案 A · 稳健精致',
+      '方案 B · 对比张力',
+    ]);
+    await work.idle();
+    const pendingCandidates = (await app.inject('/candidates')).json().filter((c: { decision: string }) => c.decision === 'pending');
+    expect(pendingCandidates).toHaveLength(2);
   } finally { await app.close(); await mock.close(); await rm(directory, { recursive: true, force: true }); }
-}, 15_000); // Includes the explicit check/gate workflow added by M3-B.
+}, 20_000); // Includes the explicit check/gate workflow added by M3-B plus batch generation.

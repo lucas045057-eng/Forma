@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, readdir } from 'node:fs/promises';
 import { acquireInstanceLock } from '../assets/instance-lock.ts';
 import path from 'node:path';
-import type { ApprovalCard, Candidate, Check, CheckRun, Selection, Task, AssetPlacementTarget, ModelProvenance } from '@spatial/shared';
+import { CANDIDATE_VARIANT_PRESETS, candidateVariants, type ApprovalCard, type Candidate, type Check, type CheckRun, type Selection, type Task, type TaskBatchResult, type AssetPlacementTarget, type ModelProvenance } from '@spatial/shared';
 import type { SceneModuleConfig } from '@spatial/shared/scene-module';
 import { packageAssetModule, removeModulePackage } from './asset-module.ts';
 import { readLedger, verifyCandidateLedger, writeLedger, type AssetLedger, type ManagedBaselineListing } from './asset-ledger.ts';
@@ -92,7 +92,7 @@ export class WorkService {
     const methods = this as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
     // These mutations can await work outside the repo queue. Register admission
     // synchronously so close cannot miss a submit that has not enqueued its task yet.
-    for (const name of ['submit', 'cancel', 'answerApproval', 'startChecks', 'cancelCheckRun', 'discard', 'createAssetCandidate', 'removeModuleCandidate']) {
+    for (const name of ['submit', 'submitBatch', 'cancel', 'answerApproval', 'startChecks', 'cancelCheckRun', 'discard', 'createAssetCandidate', 'removeModuleCandidate']) {
       const operation = methods[name].bind(this);
       methods[name] = (...args) => {
         if (this.closing) return Promise.reject(new WorkError('SERVICE_CLOSING', '后端正在关闭，未接受任务操作', 503));
@@ -469,6 +469,45 @@ export class WorkService {
     return clone(task);
   }
 
+  async submitBatch(instruction: string, selection?: Selection, options?: { bootstrap?: boolean; count?: number }): Promise<TaskBatchResult> {
+    const trimmed = instruction.trim();
+    if (!trimmed) throw new WorkError('INVALID_INPUT', '指令不能为空', 400);
+    const count = options?.count;
+    if (count !== 2 && count !== 3) throw new WorkError('INVALID_INPUT', '批量生成仅支持 2 或 3 个候选方案', 400);
+    if (options?.bootstrap && selection) throw new WorkError('INVALID_INPUT', '首版整页生成不能同时绑定局部选中元素', 400);
+    await this.validateSelection(selection);
+    const batchId = randomUUID().replaceAll('-', '');
+    const presets = candidateVariants(count);
+    const now = new Date().toISOString();
+    const created: StoredTask[] = [];
+    for (let index = 0; index < presets.length; index += 1) {
+      const preset = presets[index];
+      const task: StoredTask = {
+        id: randomUUID().replaceAll('-', ''),
+        batchId,
+        variantLabel: preset.label,
+        variantIndex: index + 1,
+        variantTotal: count,
+        instruction: trimmed,
+        selection,
+        ...(options?.bootstrap ? { bootstrap: true } : {}),
+        status: 'queued',
+        events: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.state.tasks.push(task);
+      created.push(task);
+      await this.append(task, `${preset.label} · ${options?.bootstrap ? '首版网页生成任务已排队' : '任务已排队'}`);
+    }
+    this.taskQueue = this.taskQueue
+      .then(async () => {
+        await Promise.allSettled(created.map(task => this.execute(task.id)));
+      })
+      .catch(() => {});
+    return { batchId, tasks: created.map(task => clone(task)) };
+  }
+
   async createAssetCandidate(input:{baseVersion:string;assetId:string;binary:Buffer;provenance:ModelProvenance;parts?:unknown;target:AssetPlacementTarget;config:SceneModuleConfig;force?:boolean}):Promise<Task>{
     const instanceId=randomUUID().replaceAll('-','');
     return this.createModuleTask({
@@ -556,7 +595,19 @@ export class WorkService {
         ...this.options.agent,
         onStep: async message => { await this.append(task, message); },
       });
-      const result = await agent.run({ taskId: id, instruction: task.instruction, selection: task.selection, bootstrap: task.bootstrap, root: this.repo.candidatePath(id), signal: controller.signal });
+      const preset = task.variantIndex ? CANDIDATE_VARIANT_PRESETS[task.variantIndex - 1] : undefined;
+      const variant = preset && task.variantLabel && task.variantTotal
+        ? { label: task.variantLabel, index: task.variantIndex!, total: task.variantTotal, guidance: preset.guidance }
+        : undefined;
+      const result = await agent.run({
+        taskId: id,
+        instruction: task.instruction,
+        selection: task.selection,
+        bootstrap: task.bootstrap,
+        ...(variant ? { variant } : {}),
+        root: this.repo.candidatePath(id),
+        signal: controller.signal,
+      });
       controller.signal.throwIfAborted();
       const pending = await this.repo.pendingDiff(id, base, undefined, prepared.listing);
       if (!pending.changedFiles.length) throw new WorkError('NO_CHANGES', '编码 Agent 没有产生任何文件改动', 409);

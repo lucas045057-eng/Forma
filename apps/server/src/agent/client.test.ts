@@ -244,3 +244,54 @@ it('normalizes common LLM provider Base URL pitfalls and preserves reasoning_con
     await rm(root, { recursive: true, force: true });
   }
 });
+
+it('injects variantDirection into the user payload and system guidance only when variant is provided', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'spatial-agent-variant-'));
+  await mkdir(path.join(root, 'src'), { recursive: true });
+  await writeFile(path.join(root, 'src', 'App.tsx'), '<button>立即购买</button>\n');
+
+  const capturedRequests: Array<{ system: string; user: Record<string, unknown> }> = [];
+  const customFetch: typeof fetch = async (_input, init) => {
+    const body = JSON.parse(String(init?.body ?? '{}')) as { messages: Array<{ role: string; content: string }> };
+    const sys = body.messages.find(m => m.role === 'system')?.content ?? '';
+    const usr = JSON.parse(body.messages.find(m => m.role === 'user')?.content ?? '{}') as Record<string, unknown>;
+    capturedRequests.push({ system: sys, user: usr });
+    return new Response(
+      JSON.stringify({
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: null,
+            tool_calls: [{ id: 'done-1', type: 'function', function: { name: 'finish', arguments: '{"summary":"已完成方案"}' } }],
+          },
+        }],
+      }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  };
+
+  try {
+    const agent = new CodingAgent({ baseUrl: 'http://127.0.0.1:49999', apiKey: 'mock-only', model: 'mock-coder', fetch: customFetch });
+    await agent.run({ taskId: 'single-task', instruction: '默认单方案', root });
+    await agent.run({
+      taskId: 'variant-task',
+      instruction: '多方案对比',
+      variant: { label: '方案 B · 对比张力', index: 2, total: 3, guidance: '强化视觉对比与版式节奏' },
+      root,
+    });
+
+    expect(capturedRequests).toHaveLength(2);
+    expect(capturedRequests[0].system).not.toContain('variantDirection');
+    expect(capturedRequests[0].user.variantDirection).toBeUndefined();
+
+    expect(capturedRequests[1].system).toContain('variantDirection');
+    expect(capturedRequests[1].user.variantDirection).toEqual({
+      label: '方案 B · 对比张力',
+      index: 2,
+      total: 3,
+      guidance: '强化视觉对比与版式节奏',
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

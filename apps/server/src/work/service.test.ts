@@ -166,3 +166,58 @@ it('marks an interrupted running task as failed and retryable after restart', as
     await restarted.close();
   } finally { await f.mock.close(); await rm(f.directory, { recursive: true, force: true }); }
 });
+
+it('submits a batch of 3 differentiated variants in parallel, produces 3 independent candidates, and supports single-variant cancel', async () => {
+  const f = await fixture('success');
+  try {
+    const base = (await f.work.version()).version;
+    await expect(f.work.submitBatch('   ', selection(base), { count: 2 })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    await expect(f.work.submitBatch('数量错误', selection(base), { count: 4 })).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    await expect(f.work.submitBatch('非法选区', selection(base, '../App.tsx:1:1'), { count: 2 })).rejects.toMatchObject({ code: 'INVALID_SELECTION' });
+    expect(f.work.listTasks()).toEqual([]);
+
+    const batch = await f.work.submitBatch('把购买按钮做成三种风格对比', selection(base), { count: 3 });
+    expect(batch.batchId).toMatch(/^[a-f0-9]{32}$/);
+    expect(batch.tasks).toHaveLength(3);
+    expect(batch.tasks.map(t => t.variantLabel)).toEqual([
+      '方案 A · 稳健精致',
+      '方案 B · 对比张力',
+      '方案 C · 编排重构',
+    ]);
+    expect(batch.tasks.map(t => [t.variantIndex, t.variantTotal, t.batchId])).toEqual([
+      [1, 3, batch.batchId],
+      [2, 3, batch.batchId],
+      [3, 3, batch.batchId],
+    ]);
+
+    await f.work.idle();
+    const candidates = f.work.listCandidates().filter(c => c.decision === 'pending');
+    expect(candidates).toHaveLength(3);
+    for (const task of batch.tasks) {
+      expect(f.work.getTask(task.id)).toMatchObject({
+        status: 'done',
+        candidateId: task.id,
+        batchId: batch.batchId,
+      });
+    }
+  } finally { await cleanup(f); }
+}, 20_000);
+
+it('allows cancelling one variant in a running batch while sibling variants complete', async () => {
+  const f = await fixture('success', 120);
+  // Override agent timeout so 3 rounds * 120ms easily succeed for uncanceled siblings
+  f.work['options'].agent.timeoutMs = 5000;
+  try {
+    const base = (await f.work.version()).version;
+    const batch = await f.work.submitBatch('并行取消单个变体测试', selection(base), { count: 2 });
+    await vi.waitFor(() => {
+      expect(f.work.getTask(batch.tasks[0].id).status).toBe('running');
+      expect(f.work.getTask(batch.tasks[1].id).status).toBe('running');
+    });
+    await f.work.cancel(batch.tasks[0].id);
+    await f.work.idle();
+    expect(f.work.getTask(batch.tasks[0].id).status).toBe('cancelled');
+    expect(f.work.getTask(batch.tasks[1].id).status).toBe('done');
+    expect(f.work.listCandidates().filter(c => c.decision === 'pending').map(c => c.id)).toEqual([batch.tasks[1].id]);
+  } finally { await cleanup(f); }
+}, 15_000);

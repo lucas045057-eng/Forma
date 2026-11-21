@@ -77,42 +77,73 @@ export async function previewViteEntry(workRoot: string): Promise<string> {
 /** One Vite dev server per candidate, reached only through the backend's same-origin proxy. */
 export class PreviewManager {
   private running = new Map<string, Running>();
+  private reservedPorts = new Set<number>();
   private options: { workRoot: string; cacheDirectory: string; startTimeoutMs?: number };
   constructor(options: { workRoot: string; cacheDirectory: string; startTimeoutMs?: number }) { this.options = options; }
   port(id: string) { return this.running.get(id)?.port; }
 
+  private isPortBusy(port: number) {
+    if (this.reservedPorts.has(port)) return true;
+    for (const entry of this.running.values()) if (entry.port === port) return true;
+    return false;
+  }
+
+  private async reservePreviewPort(): Promise<number> {
+    for (let attempt = 0; attempt < 32; attempt += 1) {
+      const candidate = await allocatePreviewPort();
+      if (!this.isPortBusy(candidate)) {
+        this.reservedPorts.add(candidate);
+        return candidate;
+      }
+    }
+    throw new Error('未能分配到空闲候选预览端口');
+  }
+
   async start(id: string, directory: string, signal?: AbortSignal) {
     await this.stop(id);
     const vite = await previewViteEntry(this.options.workRoot);
-    const port = await allocatePreviewPort();
-    // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
-    const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
-    for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT', 'ComSpec']) {
-      if (process.env[key] !== undefined) env[key] = process.env[key];
-    }
-    const worker = fileURLToPath(new URL(import.meta.url.endsWith('.ts') ? './preview-worker.ts' : './preview-worker.js', import.meta.url));
-    const child = spawn(process.execPath, [worker, vite], { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], windowsHide: true });
-    let output = '';
-    const collect = (chunk: Buffer) => { output = (output + chunk.toString('utf8')).slice(-4000); };
-    child.stdout!.on('data', collect); child.stderr!.on('data', collect);
-    let failed = false;
-    const exited = new Promise<void>(resolve => {
-      const finish = () => { failed = true; if (this.running.get(id)?.child === child) this.running.delete(id); resolve(); };
-      child.once('error', finish); child.once('close', finish);
-    });
-    this.running.set(id, { port, child, exited });
-    const deadline = Date.now() + (this.options.startTimeoutMs ?? 90_000);
+    const port = await this.reservePreviewPort();
+    let child: ChildProcess | undefined;
+    let exited: Promise<void>;
     try {
+      signal?.throwIfAborted();
+      // Only what Vite needs: provider keys and NODE_OPTIONS of the backend are not inherited.
+      const env: NodeJS.ProcessEnv = { CI: 'true', PREVIEW_BASE: previewBase(id), PREVIEW_PORT: String(port), PREVIEW_CACHE_DIR: path.join(this.options.cacheDirectory, id), PREVIEW_ORIGIN_PORT: process.env.PREVIEW_ORIGIN_PORT ?? '5175' };
+      for (const key of ['PATH', 'Path', 'SystemRoot', 'TEMP', 'TMP', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT', 'ComSpec']) {
+        if (process.env[key] !== undefined) env[key] = process.env[key];
+      }
+      const worker = fileURLToPath(new URL(import.meta.url.endsWith('.ts') ? './preview-worker.ts' : './preview-worker.js', import.meta.url));
+      child = spawn(process.execPath, [worker, vite], { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], windowsHide: true });
+      const spawned = child;
+      let output = '';
+      const collect = (chunk: Buffer) => { output = (output + chunk.toString('utf8')).slice(-4000); };
+      spawned.stdout!.on('data', collect); spawned.stderr!.on('data', collect);
+      let failed = false;
+      exited = new Promise<void>(resolve => {
+        const finish = () => {
+          failed = true;
+          this.reservedPorts.delete(port);
+          if (this.running.get(id)?.child === spawned) this.running.delete(id);
+          resolve();
+        };
+        spawned.once('error', finish); spawned.once('close', finish);
+      });
+      this.running.set(id, { port, child: spawned, exited });
+      const deadline = Date.now() + (this.options.startTimeoutMs ?? 90_000);
       for (;;) {
         signal?.throwIfAborted();
-        if (failed || child.exitCode !== null) throw new Error(`候选预览服务启动失败：${output.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(-600)}`);
+        if (failed || spawned.exitCode !== null) throw new Error(`候选预览服务启动失败：${output.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(-600)}`);
         if (await probe(port, previewBase(id)) === 200) break;
         if (Date.now() > deadline) throw new Error('候选预览服务启动超时');
         await new Promise(resolve => setTimeout(resolve, 250));
       }
       // Warm the entry module so the first paint in the Studio does not wait for dependency optimisation.
       await probe(port, `${previewBase(id)}src/main.tsx`);
-    } catch (error) { await this.stop(id); throw error; }
+    } catch (error) {
+      if (!child) this.reservedPorts.delete(port);
+      await this.stop(id);
+      throw error;
+    }
     return previewBase(id);
   }
   async stop(id: string) {

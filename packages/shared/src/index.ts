@@ -186,12 +186,53 @@ export interface Task {
   id: string;
   kind?: 'agent' | 'module';
   bootstrap?: boolean;
+  batchId?: string;
+  variantLabel?: string;
+  variantIndex?: number;
+  variantTotal?: number;
   instruction: string;
   selection?: Selection;
   status: 'queued' | 'running' | 'awaiting_approval' | 'done' | 'failed' | 'cancelled';
   candidateId?: string;
   events: TaskEvent[];
   error?: { code: string; message: string };
+}
+export interface TaskBatchResult {
+  batchId: string;
+  tasks: Task[];
+}
+export interface CandidateVariantPreset {
+  key: 'refined' | 'expressive' | 'editorial';
+  shortLabel: string;
+  label: string;
+  summary: string;
+  guidance: string;
+}
+export const CANDIDATE_VARIANT_PRESETS: readonly CandidateVariantPreset[] = [
+  {
+    key: 'refined',
+    shortLabel: '方案 A',
+    label: '方案 A · 稳健精致',
+    summary: '稳健精致',
+    guidance: '采用克制、稳健、易读的高完成度设计：保持清晰信息层级、均衡留白与细腻微交互，严格落实需求与范围，不做多余装饰。',
+  },
+  {
+    key: 'expressive',
+    shortLabel: '方案 B',
+    label: '方案 B · 对比张力',
+    summary: '对比张力',
+    guidance: '强化视觉对比、版式节奏与交互反馈：使用更有辨识度的色彩对比、字号张力、按钮状态与细节层次，与稳健方案形成鲜明差异。',
+  },
+  {
+    key: 'editorial',
+    shortLabel: '方案 C',
+    label: '方案 C · 编排重构',
+    summary: '编排重构',
+    guidance: '在满足全部功能与范围约束的前提下，尝试更具创意的编排结构、非对称比例或画报感排版节奏，提供真正不同的备选方向。',
+  },
+] as const;
+export function candidateVariants(count: 2 | 3): readonly CandidateVariantPreset[] {
+  return CANDIDATE_VARIANT_PRESETS.slice(0, count);
 }
 export interface Candidate {
   id: string;

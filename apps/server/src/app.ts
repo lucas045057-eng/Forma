@@ -570,6 +570,30 @@ export async function createApp(options: AppOptions = {}) {
       selection: { type: 'object', required: ['src', 'baseVersion'], properties: { src: { type: 'string' }, baseVersion: { type: 'string' } } },
     } } },
   }, async (request, reply) => reply.code(202).send(await activeWork().submit(request.body.instruction, request.body.selection, { bootstrap: request.body.bootstrap })));
+  app.post<{ Body: { instruction: string; count: unknown; selection?: Selection; bootstrap?: boolean } }>('/tasks/batch', {
+    preValidation: async request => {
+      const body = request.body as Record<string, unknown> | undefined;
+      if (body && typeof body === 'object' && !Array.isArray(body)) {
+        const count = body.count;
+        if (count !== undefined && (typeof count !== 'number' || !Number.isInteger(count) || (count !== 2 && count !== 3))) {
+          throw new WorkError('INVALID_INPUT', 'count 必须是整数 2 或 3', 400);
+        }
+      }
+    },
+    schema: { body: { type: 'object', additionalProperties: false, required: ['instruction', 'count'], properties: {
+      instruction: { type: 'string', minLength: 1, maxLength: 4000 },
+      // Keep raw JSON type check in preValidation/handler so string "2" is never coerced.
+      count: {},
+      bootstrap: { type: 'boolean' },
+      selection: { type: 'object', required: ['src', 'baseVersion'], properties: { src: { type: 'string' }, baseVersion: { type: 'string' } } },
+    } } },
+  }, async (request, reply) => {
+    const count = request.body.count;
+    if (typeof count !== 'number' || !Number.isInteger(count) || (count !== 2 && count !== 3)) {
+      throw new WorkError('INVALID_INPUT', 'count 必须是整数 2 或 3', 400);
+    }
+    return reply.code(202).send(await activeWork().submitBatch(request.body.instruction, request.body.selection, { bootstrap: request.body.bootstrap, count }));
+  });
   app.get('/tasks', async () => activeWork().listTasks());
   app.get<{ Params: { id: string } }>('/tasks/:id', async request => activeWork().getTask(request.params.id));
   app.post<{ Params: { id: string } }>('/tasks/:id/cancel', async request => activeWork().cancel(request.params.id));

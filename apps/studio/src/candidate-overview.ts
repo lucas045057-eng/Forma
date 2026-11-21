@@ -12,6 +12,7 @@ export interface CandidateSummary {
   id: string;
   shortId: string;
   instruction?: string;
+  variantLabel?: string;
   files: number;
   /** `null` when a patch cannot be counted reliably; the UI then shows no numbers. */
   added: number | null;
@@ -67,7 +68,9 @@ export function summarizeCandidate(candidate: Candidate, input: {
   const view = checkView(candidate, run);
   const stale = proofStale(candidate, run, version, !!input.proofRejected);
   const thumbnail = thumbnailSource(candidate, run, { ready, stale, checkIssue, epoch });
-  const instruction = tasks.find(task => task.candidateId === candidate.id)?.instruction.trim() || undefined;
+  const matchedTask = tasks.find(task => task.candidateId === candidate.id);
+  const instruction = matchedTask?.instruction.trim() || undefined;
+  const variantLabel = matchedTask?.variantLabel?.trim() || undefined;
   // Same precedence as CheckPanel's `check-run-status`.
   const checkLabel = checkIssue ? '检查状态不完整' : stale ? '历史检查结果 · 证明已失效' : ready ? view.label : '状态待同步';
   const checkTone: CandidateSummary['checkTone'] = checkLabel === '检查失败' || checkLabel === '检查状态不完整' ? 'bad'
@@ -84,6 +87,7 @@ export function summarizeCandidate(candidate: Candidate, input: {
     id: candidate.id,
     shortId: candidate.id.slice(0, 8),
     instruction,
+    ...(variantLabel ? { variantLabel } : {}),
     ...diffStats(candidate),
     checkLabel,
     checkTone,

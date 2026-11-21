@@ -111,7 +111,8 @@ export default function CandidateOverview({ summaries, selectedId, mode, onOpen 
         const thumb = summary.thumbnail ? thumbs[summary.thumbnail.key] : undefined;
         const thumbState = !summary.thumbnail ? 'none' : thumb?.url ? 'image' : thumb?.failed ?? 'loading';
         const stats = statsText(summary);
-        const label = `候选 ${summary.shortId}：${stats.spoken}，${summary.checkLabel}`
+        const titlePrefix = summary.variantLabel ? `候选 ${summary.shortId}（${summary.variantLabel}）` : `候选 ${summary.shortId}`;
+        const label = `${titlePrefix}：${stats.spoken}，${summary.checkLabel}`
           + `${summary.outOfScope ? `，超出选中范围 ${summary.outOfScope} 处` : ''}${summary.staleBase ? '，基于旧版本' : ''}`
           + `${selected ? `，${modeTag[mode]}` : ''}。${summary.instruction ? `修改指令：${summary.instruction}。` : ''}打开并排对比`;
         return <li key={summary.id}>
@@ -144,6 +145,7 @@ export default function CandidateOverview({ summaries, selectedId, mode, onOpen 
                   : <span title="补丁被截断或与 hunk 行数不一致，不显示可能失真的数字">行数未统计</span>}
               </span>
               <span className="candidate-card-flags">
+                {summary.variantLabel && <span className="candidate-card-variant" data-testid="candidate-card-variant">{summary.variantLabel}</span>}
                 <span className={`candidate-card-check tone-${summary.checkTone}`} data-testid="candidate-card-check">{summary.checkLabel}</span>
                 {summary.outOfScope > 0 && <span className="candidate-card-flag">超出范围 {summary.outOfScope}</span>}
                 {summary.staleBase && <span className="candidate-card-flag">基于旧版本</span>}

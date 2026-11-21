@@ -28,6 +28,10 @@ export function isTask(value: unknown): value is Task {
   const task = object(value);
   return !!task && typeof task.id === 'string' && typeof task.instruction === 'string' &&
     ['queued', 'running', 'awaiting_approval', 'done', 'failed', 'cancelled'].includes(String(task.status)) &&
+    (task.batchId === undefined || typeof task.batchId === 'string') &&
+    (task.variantLabel === undefined || typeof task.variantLabel === 'string') &&
+    (task.variantIndex === undefined || (typeof task.variantIndex === 'number' && Number.isInteger(task.variantIndex) && task.variantIndex > 0)) &&
+    (task.variantTotal === undefined || (typeof task.variantTotal === 'number' && Number.isInteger(task.variantTotal) && task.variantTotal > 0)) &&
     Array.isArray(task.events) && task.events.every(event => object(event) && typeof event.message === 'string' && typeof event.sequence === 'number') &&
     (task.error === undefined || (!!object(task.error) && typeof object(task.error)!.code === 'string' && typeof object(task.error)!.message === 'string'));
 }

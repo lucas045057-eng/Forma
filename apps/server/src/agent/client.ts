@@ -17,6 +17,13 @@ type Message = {
   name?: string;
 };
 
+export interface CodingVariantDirection {
+  label: string;
+  index: number;
+  total: number;
+  guidance: string;
+}
+
 export interface CodingAgentOptions {
   baseUrl?: string;
   apiKey?: string;
@@ -97,7 +104,7 @@ export class CodingAgent {
     if (!options.model) throw new CodingAgentError('AGENT_CONFIG', '未配置 CODING_AGENT_MODEL');
   }
 
-  async run(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; root: string; signal?: AbortSignal }) {
+  async run(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; variant?: CodingVariantDirection; root: string; signal?: AbortSignal }) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 180_000);
     const signal = input.signal ? AbortSignal.any([input.signal, controller.signal]) : controller.signal;
@@ -109,7 +116,7 @@ export class CodingAgent {
     } finally { clearTimeout(timer); }
   }
 
-  private async execute(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; root: string; signal: AbortSignal }) {
+  private async execute(input: { taskId: string; instruction: string; selection?: Selection; bootstrap?: boolean; variant?: CodingVariantDirection; root: string; signal: AbortSignal }) {
     const maxRounds = Math.min(this.options.maxRounds ?? 16, 16);
     const timeoutMs = this.options.timeoutMs ?? 180_000;
     const deadline = Date.now() + timeoutMs;
@@ -131,11 +138,14 @@ export class CodingAgent {
     const managedSelectionGuidance = isSelectedManagedModule
       ? '6）重要：当前用户点选的是已放入网页的 3D 模块（selection.src 指向只读运行器 src/spatial-module.tsx）。绝不能修改 src/spatial-module.tsx 或 src/scene-modules/*，也绝不能什么都不改就直接调用 finish！你必须去宿主页面源码（如 relatedAncestorFilesWithLineNumbers 中的 src/App.tsx 与 src/style.css）找到对应的 <SpatialModel.../> 标签（保持该无属性自闭合标签本身不删除、不改名、不加任何属性），通过在其外层包裹 <div> 容器及样式/状态来实现需求：若用户要求“定格/锁定/别随滚轮或鼠标滑动”，用 <div style={{ pointerEvents: "none" }}><SpatialModel.../></div> 包裹该模块即可定格锁定；若要求“随页面滚动动画/视差/悬浮定格/加展台卡片边框/图文并排”，在外层包裹容器上编写 scroll 状态变换、sticky 定位或 CSS 样式。'
       : '';
-    const systemPrompt = input.bootstrap
+    const baseSystemPrompt = input.bootstrap
       ? (hasProductHeroStage
         ? '你是 Forma 空间工作台的首席前端与空间网页设计师。用户正在一句话从零创建首版 3D 空间网页。请先用 list_files/read_file 查看现有结构，再用 write_file 完整设计并重写 src/App.tsx 与 src/style.css（必要时可在 src/components/ 下新建辅助组件），全部修改完成后必须调用 finish。严格遵守：1）App 根元素保持 <main data-spatial-page ...>；2）保留导入并渲染 <ProductHero /> 作为页面主 3D 互动舞台，不要修改 src/spatial-module.tsx、src/scene-modules/* 或在源码中硬编码 /assets/*.glb；3）仅允许 import "react"、"react-dom"、"@spatial/scene-renderer" 或 src/ 下相对路径模块，严禁 import lucide-react 等外部第三方包（图标请手写内联 <svg>）；4）包含清晰的标题层级、空间叙事区块与至少一个可点击且有状态反馈的交互按钮，装饰层使用 pointer-events: none 避免遮挡任何按钮或链接；5）严禁在 JSX 或 CSS 中引用任何 http:// 或 https:// 外网图片、字体或外部请求，视觉效果全部使用现代 CSS、渐变与内联 SVG 完成。'
         : '你是 Forma 空间工作台的首席前端设计师与全栈交互工程师。用户正在一句话自由创建全新网页。请先用 list_files/read_file 查看现有结构，再用 write_file 完整设计并重写 src/App.tsx 与 src/style.css（必要时可在 src/components/ 下新建辅助组件），全部修改完成后必须调用 finish。严格遵守：1）App 根元素保持 <main data-spatial-page ...>；2）页面无需强制渲染 3D 舞台（除非用户明确要求），但切勿修改或删除 src/spatial-module.tsx 与 src/scene.config.json，以便用户后续随时拖入 3D 模块；3）仅允许 import "react"、"react-dom" 或 src/ 下相对路径模块，严禁 import lucide-react、framer-motion 等未安装的外部包（图标与插画请手写精美内联 <svg>，动效使用现代 CSS）；4）打造兼具高审美排版、真实可交互状态（如标签切换、筛选、抽屉、计数器或表单反馈）的完整网页，装饰层设置 pointer-events: none 确保所有按钮/链接/输入框不被遮挡；5）严禁在 JSX 或 CSS 中引用任何 http:// 或 https:// 外网图片、字体或脚本，全部视觉使用本地 CSS 与内联 SVG 实现。')
       : `你是 Forma 空间工作台的网页编码 Agent，负责精准修改用户创建的网页或外部拉入的已有网页。请先理解代码（若已有 selectedFileWithLineNumbers 可直接定位，必要时调用 list_files/read_file），再用 replace_in_file 或 write_file 完成用户指令，最后必须调用 finish 汇报中文摘要。严格遵守：1）只能修改 src/ 下的 .tsx/.ts/.css/.json/.svg 文件，严禁修改 src/spatial-module.tsx、src/scene-modules/* 或硬编码 /assets/*.glb（保持已有 <SpatialModel.../> 无属性自闭合标签原封不动，如需调整其交互锁定、布局或外壳动效请在宿主文件外层包 <div> 容器）；2）仅允许 import "react"、"react-dom"、"@spatial/scene-renderer" 或 src/ 内的相对模块，严禁引入外部 npm 包；3）严禁写入任何 http:// 或 https:// 外网图片、字体或脚本链接（保留已有的 import.meta.env.BASE_URL 本地资源路径，新增图形请用 CSS 或内联 <svg>）；4）${hasSpatialRoot ? '保持根元素上的 data-spatial-page 属性不变；' : ''}确保所有按钮与链接可点击且不被遮挡；5）若提供了局部选中元素 selection 且选中文件并非受保护运行器，优先只在选中文件内做最小改动；确实需要调整全局样式时再修改 src/style.css。${managedSelectionGuidance}`;
+    const systemPrompt = input.variant
+      ? `${baseSystemPrompt}当用户输入中包含 variantDirection 时，请严格按照该方案方向进行差异化设计，确保与同批其他候选形成清晰可辨的视觉或交互区别，同时不得违背上述文件范围与安全约束。`
+      : baseSystemPrompt;
     const messages: Message[] = [
       { role: 'system', content: systemPrompt },
       {
@@ -143,6 +153,7 @@ export class CodingAgent {
         content: JSON.stringify({
           instruction: input.instruction,
           ...(input.bootstrap ? { mode: hasProductHeroStage ? 'bootstrap-spatial-3d-webpage' : 'bootstrap-free-webpage' } : {}),
+          ...(input.variant ? { variantDirection: input.variant } : {}),
           selection: input.selection,
           selectedFileWithLineNumbers: selected,
           ...(ancestorSources && Object.keys(ancestorSources).length > 0

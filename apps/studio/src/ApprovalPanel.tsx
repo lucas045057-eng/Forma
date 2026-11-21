@@ -69,7 +69,10 @@ export default function ApprovalPanel({ highlightId, onHighlight, onExit }: {
     return <article key={card.id} className="approval-card" data-testid="approval-card" data-approval-id={card.id} data-task-id={card.taskId} data-status={card.status}>
       <div className="approval-card-head">
         <h3>{card.question}</h3>
-        <code>{card.taskId.slice(0, 8)}</code>
+        <div className="approval-head-meta">
+          {task?.variantLabel && <span className="meta-tag is-accent">{task.variantLabel}</span>}
+          <code>{card.taskId.slice(0, 8)}</code>
+        </div>
       </div>
       <div className="approval-tags">{card.ruleCodes.map(rule => <span key={rule} className="meta-tag is-warn">{rules[rule]}</span>)}</div>
       <p className="approval-reason">{card.reason}</p>
