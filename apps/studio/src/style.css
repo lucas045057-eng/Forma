@@ -639,7 +639,12 @@ h1 {
 }
 
 .candidate-overview-list {
-  display: flex;
+  /* Up to three cards share the tray width (all visible at common desktop widths);
+     below 220px per card the tray scrolls horizontally instead of squeezing. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 300px);
+  justify-content: start;
   gap: 8px;
   margin: -4px;
   padding: 4px;
@@ -648,14 +653,16 @@ h1 {
 }
 
 .candidate-overview-list > li {
-  flex: 0 0 auto;
+  display: flex;
+  min-width: 0;
 }
 
 .candidate-card {
   display: flex;
   align-items: stretch;
   gap: 10px;
-  width: 300px;
+  width: 100%;
+  min-width: 0;
   padding: 6px;
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-md);
@@ -694,7 +701,7 @@ h1 {
   flex: none;
   display: grid;
   place-items: center;
-  width: 112px;
+  width: min(38%, 112px);
   aspect-ratio: 16 / 10;
   overflow: hidden;
   border-radius: 4px;
@@ -753,17 +760,27 @@ h1 {
 }
 
 .candidate-card-title b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-weight: 600;
   font-size: 12px;
 }
 
 .candidate-card-current {
+  flex: none;
   padding: 0 5px;
   border-radius: 3px;
   background: var(--accent);
   color: var(--accent-ink);
   font-size: 10px;
   font-weight: 600;
+}
+
+.candidate-card-current.mode-current {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--border-accent);
 }
 
 .candidate-card-instruction {

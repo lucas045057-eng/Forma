@@ -20,6 +20,10 @@ export function installBridge(): () => void {
   const send = (message: PreviewMessage) => {
     if (window.parent !== window) window.parent.postMessage(message, origin);
   };
+  const sendProgress = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    send({ type: 'scroll:progress', payload: { at: max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0 } });
+  };
   let observedCanvas: Element | null = null;
   const reportSize = () => {
     const canvas = document.querySelector('[data-testid="product-scene"] canvas');
@@ -111,14 +115,18 @@ export function installBridge(): () => void {
       ...(element !== event.target ? { note: 'outer-container' as const } : {}),
     };
     selectedSrc = src;
+    // The bbox is in viewport coordinates of this moment. A scroll that just happened (e.g. an
+    // element scrolled into view right before the click) may only dispatch its scroll event
+    // after this click, so report the click-time progress first: the Studio pairs the
+    // selection with it, and a late scroll event then repeats the same value.
+    sendProgress();
     send({ type: 'pick:result', payload });
     schedule();
   };
   const move = (event: PointerEvent) => { if (picking) { hovered = nearest(event.target); schedule(); } };
   const leave = () => { hovered = null; schedule(); };
   const scroll = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    send({ type: 'scroll:progress', payload: { at: max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0 } });
+    sendProgress();
     schedule();
   };
   const error = (event: ErrorEvent) => send({ type: 'error', payload: { message: event.message } });

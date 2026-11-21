@@ -132,3 +132,37 @@ test('capture isolation, real click selection, restoration and idle overlay with
     assert.equal(await frame.evaluate(() => window.bridgeListeners.filter(item => window.bridgeOwned.includes(item)).length), 0);
   } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
 });
+
+test('pick:result is preceded by the click-time scroll progress', async () => {
+  const server = createServer((req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end(req.url === '/child'
+      ? '<body style="margin:0"><div style="height:1500px"></div><button data-src="src/Button.tsx:1:1" data-cid="Button">Pick</button><div style="height:1500px"></div></body>'
+      : '<iframe src="/child" style="width:600px;height:400px"></iframe>');
+  });
+  await listenForBrowser(server);
+  const chrome = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+  const browser = await chromium.launch({ executablePath: existsSync(chrome) ? chrome : undefined });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`http://127.0.0.1:${server.address().port}/`);
+    await page.evaluate(() => { window.messages = []; window.addEventListener('message', event => window.messages.push(event.data)); });
+    const frame = page.frames().find(item => item.url().endsWith('/child'));
+    await frame.addScriptTag({ content: `${shared}\n${placement}\n${bridge}\nwindow.disposeBridge = installBridge();` });
+    await page.evaluate(() => document.querySelector('iframe').contentWindow.postMessage({ type: 'pick:start' }, location.origin));
+    await frame.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    // Scroll and click in the same task, before any scroll event can be dispatched.
+    const expected = await frame.evaluate(() => {
+      window.scrollTo(0, 1300);
+      document.querySelector('button').click();
+      return window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+    });
+    await page.waitForFunction(() => window.messages.some(message => message.type === 'pick:result'));
+    const messages = await page.evaluate(() => window.messages);
+    const index = messages.findIndex(message => message.type === 'pick:result');
+    assert.ok(index > 0, 'pick:result needs a preceding message');
+    assert.equal(messages[index - 1].type, 'scroll:progress');
+    assert.ok(Math.abs(messages[index - 1].payload.at - expected) < 1e-9, 'progress must be the click-time scroll position');
+    await frame.evaluate(() => window.disposeBridge());
+  } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+});

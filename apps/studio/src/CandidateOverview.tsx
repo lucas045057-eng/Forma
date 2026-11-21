@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { readCheckEvidence } from './api.ts';
-import type { CandidateSummary, ThumbnailSource } from './candidate-overview.ts';
+import type { CandidateSummary, ThumbnailPlaceholder, ThumbnailSource } from './candidate-overview.ts';
+import type { PreviewMode } from './CandidatePanel.tsx';
 
-type ThumbState = Record<string, { url?: string; failed?: boolean }>;
+type ThumbState = Record<string, { url?: string; failed?: 'error' | 'timeout' }>;
 
-/** Reads each finished run's hash-verified smoke screenshot once; no live iframe per card. */
+/** Same budget as CheckPanel's evidence reads. */
+export const THUMBNAIL_TIMEOUT_MS = 30_000;
+
+/**
+ * Reads each eligible run's hash-verified smoke screenshot once; no live iframe per card.
+ * Object URLs are revoked as soon as a source stops being eligible (resync, stale proof,
+ * candidate gone), so an image can never outlive the state that justified it.
+ */
 function useThumbnails(sources: ThumbnailSource[], enabled: boolean) {
   const [thumbs, setThumbs] = useState<ThumbState>({});
   const cache = useRef(new Map<string, string>());
@@ -16,22 +24,34 @@ function useThumbnails(sources: ThumbnailSource[], enabled: boolean) {
       URL.revokeObjectURL(url);
       cache.current.delete(key);
     }
-    setThumbs(previous => Object.fromEntries(Object.entries(previous).filter(([key]) => keys.has(key))));
+    setThumbs(previous => {
+      const kept = Object.entries(previous).filter(([key]) => keys.has(key));
+      return kept.length === Object.keys(previous).length ? previous : Object.fromEntries(kept);
+    });
     if (!enabled) return;
+    const missing = sources.filter(source => !cache.current.has(source.key));
+    if (missing.length === 0) return;
     const controller = new AbortController();
-    for (const source of sources) {
-      if (cache.current.has(source.key)) continue;
+    const settled = new Set<string>();
+    const timer = window.setTimeout(() => {
+      controller.abort();
+      setThumbs(previous => ({ ...previous, ...Object.fromEntries(missing.filter(source => !settled.has(source.key)).map(source => [source.key, { failed: 'timeout' as const }])) }));
+    }, THUMBNAIL_TIMEOUT_MS);
+    for (const source of missing) {
       void readCheckEvidence(source.runId, source.ref, controller.signal).then(result => {
         if (controller.signal.aborted) return;
+        settled.add(source.key);
         const url = URL.createObjectURL(result.blob);
         cache.current.set(source.key, url);
         setThumbs(previous => ({ ...previous, [source.key]: { url } }));
       }).catch(() => {
-        if (!controller.signal.aborted) setThumbs(previous => ({ ...previous, [source.key]: { failed: true } }));
+        if (controller.signal.aborted) return;
+        settled.add(source.key);
+        setThumbs(previous => ({ ...previous, [source.key]: { failed: 'error' } }));
       });
     }
-    return () => controller.abort();
-    // `wanted` fully identifies the sources (run id + artifact hash).
+    return () => { clearTimeout(timer); controller.abort(); };
+    // `wanted` fully identifies the sources (epoch + candidate + run + artifact hash).
   }, [wanted, enabled]);
   useEffect(() => () => {
     for (const url of cache.current.values()) URL.revokeObjectURL(url);
@@ -41,19 +61,31 @@ function useThumbnails(sources: ThumbnailSource[], enabled: boolean) {
   return thumbs;
 }
 
-const placeholderText = { unchecked: '未运行检查 · 暂无截图', checking: '检查中 · 截图待生成', unavailable: '暂无可用截图' } as const;
+const placeholderText: Record<ThumbnailPlaceholder, string> = {
+  unchecked: '未运行检查 · 暂无截图',
+  checking: '检查中 · 截图待生成',
+  syncing: '状态同步后读取截图',
+  stale: '检查已失效 · 不展示旧截图',
+  incomplete: '检查状态不完整 · 不展示截图',
+  unavailable: '暂无可用截图',
+};
+const modeTag: Record<PreviewMode, string> = { current: '已选中', candidate: '候选预览中', compare: '对比中' };
 
-export default function CandidateOverview({ summaries, selectedId, comparing, ready, onOpen }: {
+function statsText(summary: CandidateSummary) {
+  return summary.added === null || summary.deleted === null
+    ? { visual: null, spoken: `${summary.files} 个文件，增删行数无法精确统计` }
+    : { visual: [summary.added, summary.deleted] as const, spoken: `${summary.files} 个文件，新增 ${summary.added} 行，删除 ${summary.deleted} 行` };
+}
+
+export default function CandidateOverview({ summaries, selectedId, mode, onOpen }: {
   summaries: CandidateSummary[];
   selectedId: string;
-  /** Whether the selected candidate is currently shown next to / instead of the live work. */
-  comparing: boolean;
-  ready: boolean;
+  mode: PreviewMode;
   onOpen: (id: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   const list = useRef<HTMLUListElement>(null);
-  const thumbs = useThumbnails(summaries.flatMap(summary => summary.thumbnail ? [summary.thumbnail] : []), ready && open);
+  const thumbs = useThumbnails(summaries.flatMap(summary => summary.thumbnail ? [summary.thumbnail] : []), open);
   if (summaries.length === 0) return null;
 
   function move(event: KeyboardEvent<HTMLButtonElement>) {
@@ -77,33 +109,39 @@ export default function CandidateOverview({ summaries, selectedId, comparing, re
       {summaries.map(summary => {
         const selected = summary.id === selectedId;
         const thumb = summary.thumbnail ? thumbs[summary.thumbnail.key] : undefined;
-        const thumbState = thumb?.url ? 'image' : summary.thumbnail ? (thumb?.failed ? 'error' : ready && open ? 'loading' : 'waiting') : 'none';
+        const thumbState = !summary.thumbnail ? 'none' : thumb?.url ? 'image' : thumb?.failed ?? 'loading';
+        const stats = statsText(summary);
+        const label = `候选 ${summary.shortId}：${stats.spoken}，${summary.checkLabel}`
+          + `${summary.outOfScope ? `，超出选中范围 ${summary.outOfScope} 处` : ''}${summary.staleBase ? '，基于旧版本' : ''}`
+          + `${selected ? `，${modeTag[mode]}` : ''}。${summary.instruction ? `修改指令：${summary.instruction}。` : ''}打开并排对比`;
         return <li key={summary.id}>
           <button
             type="button"
-            className={`candidate-card${selected ? ' is-selected' : ''}${selected && comparing ? ' is-open' : ''}`}
+            className={`candidate-card${selected ? ' is-selected' : ''}${selected && mode !== 'current' ? ' is-open' : ''}`}
             data-testid="candidate-card"
             data-candidate-id={summary.id}
             data-selected={selected}
             aria-current={selected ? 'true' : undefined}
-            aria-label={`候选 ${summary.shortId}：${summary.files} 个文件，新增 ${summary.added} 行，删除 ${summary.deleted} 行，${summary.checkLabel}${summary.outOfScope ? `，超出选中范围 ${summary.outOfScope} 处` : ''}${summary.staleBase ? '，基于旧版本' : ''}。打开并排对比`}
+            aria-label={label}
             onClick={() => onOpen(summary.id)}
             onKeyDown={move}
           >
             <span className="candidate-card-thumb" data-testid="candidate-card-thumb" data-thumb-state={thumbState}>
               {thumb?.url
                 ? <img src={thumb.url} alt="" title="检查截图 · 首屏（来自页面冒烟检查）"/>
-                : <span className="candidate-card-placeholder">{thumbState === 'loading' ? '读取截图…' : thumbState === 'error' ? '截图无法读取' : thumbState === 'waiting' ? '状态同步后读取截图' : placeholderText[summary.placeholder]}</span>}
+                : <span className="candidate-card-placeholder">{thumbState === 'loading' ? '读取截图…' : thumbState === 'timeout' ? '截图读取超时' : thumbState === 'error' ? '截图无法读取' : placeholderText[summary.placeholder]}</span>}
               {thumb?.url && <span className="candidate-card-thumb-tag">检查截图 · 首屏</span>}
             </span>
             <span className="candidate-card-body">
               <span className="candidate-card-title">
                 <b>候选 {summary.shortId}</b>
-                {selected && <span className="candidate-card-current">{comparing ? '对比中' : '已选中'}</span>}
+                {selected && <span className={`candidate-card-current mode-${mode}`}>{modeTag[mode]}</span>}
               </span>
               {summary.instruction && <span className="candidate-card-instruction" title={summary.instruction}>{summary.instruction}</span>}
               <span className="candidate-card-stats" data-testid="candidate-card-stats">
-                {summary.files} 个文件 · <span className="candidate-card-add">+{summary.added}</span> <span className="candidate-card-del">−{summary.deleted}</span>
+                {summary.files} 个文件 · {stats.visual
+                  ? <><span className="candidate-card-add">+{stats.visual[0]}</span> <span className="candidate-card-del">−{stats.visual[1]}</span></>
+                  : <span title="补丁与 hunk 行数不一致，不显示可能失真的数字">行数未统计</span>}
               </span>
               <span className="candidate-card-flags">
                 <span className={`candidate-card-check tone-${summary.checkTone}`} data-testid="candidate-card-check">{summary.checkLabel}</span>

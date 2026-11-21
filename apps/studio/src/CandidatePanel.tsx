@@ -162,13 +162,18 @@ export default function CandidatePanel({ selectedId, onSelect, mode, onMode, hea
     {!canRevert && <p className="candidate-sync-hint" role="status">作品决策暂不可用，等待同步或操作结果确认；可使用“刷新状态”恢复。</p>}
     <div className={`preview-frames mode-${mode}`}>{children}</div>
     <CandidateOverview
-      summaries={pending.map(candidate => summarizeCandidate(candidate, {
-        run: candidate.latestCheckRunId ? state.runs[candidate.latestCheckRunId] : undefined,
-        tasks: state.tasks, version: state.version, ready, checkIssue: state.checkIssues[candidate.id],
-      }))}
+      summaries={pending.map(candidate => {
+        const candidateRun = candidate.latestCheckRunId ? state.runs[candidate.latestCheckRunId] : undefined;
+        // Same inputs CheckPanel receives for the selected candidate, applied to every card.
+        return summarizeCandidate(candidate, {
+          run: candidateRun, tasks: state.tasks, version: state.version, epoch: syncEpoch,
+          ready: ready && !locked([`candidate:${candidate.id}`]),
+          checkIssue: state.checkIssues[candidate.id],
+          proofRejected: !!invalid[candidate.id] || (!!candidateRun && rejected[candidate.id] === candidateRun.id),
+        });
+      })}
       selectedId={selected?.id ?? ''}
-      comparing={mode !== 'current'}
-      ready={ready}
+      mode={mode}
       onOpen={id => {
         if (id === selected?.id && mode === 'compare') return;
         if (id !== selected?.id) { clearEvidence(); onSelect(id); }
