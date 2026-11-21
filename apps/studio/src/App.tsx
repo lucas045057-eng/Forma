@@ -103,7 +103,9 @@ function Studio() {
     const next = { id: card.id, src, baseVersion: card.baseVersion, wasPicking: impactRef.current?.wasPicking ?? pickingRef.current };
     impactRef.current = next;
     setImpact(next);
+    setShowAssets(false);
     setShowScene(false);
+    setInspectorOpen(true);
     setMode('current');
     pickingRef.current = false;
     setPicking(false);
@@ -167,6 +169,8 @@ function Studio() {
           // The previous object stops being submittable the moment a new one is picked.
           setPick({ kind: 'pending', src: payload.src });
           setPickedAt(progressRef.current);
+          setShowAssets(false);
+          setShowScene(false);
           setInspectorOpen(true);
           void api<{ version: string }>('/version').then(result => {
             if (requestId !== pickRequest.current) return;
@@ -229,13 +233,60 @@ function Studio() {
     };
   }, [draggingPlacement]);
 
-  function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
-    exitImpact(false);
+  function closeInspector() {
+    setShowScene(false);
+    setInspectorOpen(false);
+  }
+
+  function stopPicking() {
     pickingRef.current = false;
     setPicking(false);
+    send({ type: 'pick:stop' });
+  }
+
+  function toggleAssets() {
+    if (showAssets) {
+      setShowAssets(false);
+      return;
+    }
+    exitImpact(false);
+    stopPicking();
+    setShowScene(false);
+    setInspectorOpen(false);
+    setPlacingAsset(undefined);
+    setShowAssets(true);
+  }
+
+  function toggleScene() {
+    if (showScene && inspectorOpen) {
+      closeInspector();
+      return;
+    }
+    exitImpact(false);
+    stopPicking();
+    setMode('current');
+    setShowAssets(false);
+    setPlacingAsset(undefined);
+    setShowScene(true);
+    setInspectorOpen(true);
+  }
+
+  function toggleInspector() {
+    if (inspectorOpen && !showScene) {
+      setInspectorOpen(false);
+      return;
+    }
+    setShowAssets(false);
+    setShowScene(false);
+    setInspectorOpen(true);
+  }
+
+  function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
+    exitImpact(false);
+    stopPicking();
     setMode('current');
     setShowScene(false);
-    send({ type: 'pick:stop' });
+    setInspectorOpen(false);
     if (session) {
       send({ type: 'placement:start', payload: session });
     }
@@ -255,10 +306,15 @@ function Studio() {
   function toggle() {
     if (impactRef.current) { exitImpact(); return; }
     if (mode === 'candidate') setMode('current');
-    pickingRef.current = !pickingRef.current;
-    setPicking(pickingRef.current);
-    send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
-    if (pickingRef.current && selection) send({ type: 'highlight', payload: { src: selection.src } });
+    const next = !pickingRef.current;
+    if (next) {
+      setShowAssets(false);
+      setShowScene(false);
+    }
+    pickingRef.current = next;
+    setPicking(next);
+    send({ type: next ? 'pick:start' : 'pick:stop' });
+    if (next && selection) send({ type: 'highlight', payload: { src: selection.src } });
   }
   useEffect(() => {
     let active = true;
@@ -314,7 +370,8 @@ function Studio() {
       setPicking(false);
       setPick({ kind: 'none' });
       setPlacingAsset(undefined);
-      setShowScene(false);
+      setShowAssets(false);
+      closeInspector();
       setMode('current');
       setReady(false);
       await api(`/works/${encodeURIComponent(nextId)}/select`, mutation('POST', {}));
@@ -334,11 +391,14 @@ function Studio() {
     setPicking(false);
     setPick({ kind: 'none' });
     setPlacingAsset(undefined);
+    setShowAssets(false);
     setShowScene(false);
     setMode('current');
     setReady(false);
     if (!created.task && (created.work.starter === 'blank' || created.work.starter === 'free-web')) {
       setInspectorOpen(true);
+    } else {
+      setInspectorOpen(false);
     }
     setWorksState(previous => {
       const others = previous.works.filter(item => item.id !== created.work.id).map(item => ({ ...item, active: false }));
@@ -352,6 +412,8 @@ function Studio() {
   const previousPendingApprovals = useRef(0);
   useEffect(() => {
     if (previousPendingApprovals.current === 0 && pendingApprovalsCount > 0) {
+      setShowAssets(false);
+      setShowScene(false);
       setInspectorOpen(true);
     }
     previousPendingApprovals.current = pendingApprovalsCount;
@@ -359,12 +421,18 @@ function Studio() {
 
   useEffect(() => {
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== 'Escape' || modalTab || showModelConfig || showAssets || placingAsset) return;
-      if (inspectorOpen) setInspectorOpen(false);
+      if (event.key !== 'Escape' || modalTab || showModelConfig || placingAsset) return;
+      if (showAssets) {
+        setShowAssets(false);
+        return;
+      }
+      if (inspectorOpen || showScene) {
+        closeInspector();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [inspectorOpen, modalTab, showModelConfig, showAssets, placingAsset]);
+  }, [inspectorOpen, showScene, modalTab, showModelConfig, showAssets, placingAsset]);
 
   const activeWorkSummary: WorkSummary | undefined = worksState.works.find(item => item.id === worksState.activeId) ?? worksState.works[0];
   const blankBootstrap = (activeWorkSummary?.starter === 'blank' || activeWorkSummary?.starter === 'free-web') && !state.candidates.some(item => item.decision === 'adopted');
@@ -450,16 +518,16 @@ function Studio() {
           <button type="button" className="ghost-btn compact-btn" data-testid="model-config-open" onClick={() => setShowModelConfig(true)}>接入模型</button>
           <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" title="刷新状态" onClick={() => void reload().catch(() => {})}>刷新</button>
           {pendingApprovalsCount > 0 && (
-            <button type="button" className="approval-alert-pill" onClick={() => setInspectorOpen(true)}>
+            <button type="button" className="approval-alert-pill" onClick={() => { setShowAssets(false); setShowScene(false); setInspectorOpen(true); }}>
               越界请示 · {pendingApprovalsCount}
             </button>
           )}
           <button
             type="button"
-            className={`${inspectorOpen ? 'ghost-btn' : 'secondary-btn'} compact-btn`}
-            onClick={() => setInspectorOpen(value => !value)}
+            className={`${inspectorOpen && !showScene ? 'ghost-btn' : 'secondary-btn'} compact-btn`}
+            onClick={toggleInspector}
           >
-            {inspectorOpen ? '收起抽屉' : pending.length > 0 ? '检查与 Diff' : '改写面板'}
+            {inspectorOpen && !showScene ? '收起抽屉' : pending.length > 0 ? '检查与 Diff' : '改写面板'}
           </button>
         </div>
       </header>
@@ -495,9 +563,9 @@ function Studio() {
               <span className="section-label">ATELIER SHEET</span>
               <h2>{showScene ? '3D 场景调节' : pending.length > 0 ? '检查与改写' : '点选与改写'}</h2>
             </div>
-            <button type="button" className="ghost-btn compact-btn" data-testid="inspector-close" onClick={() => setInspectorOpen(false)}>收起</button>
+            <button type="button" className="ghost-btn compact-btn" data-testid="inspector-close" onClick={closeInspector}>收起</button>
           </div>
-          {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={() => setShowScene(false)}/></Suspense>}
+          {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={closeInspector}/></Suspense>}
           <div className="candidate-slot" ref={setCandidateSlot}/>
           <div className="inspector-main" hidden={showScene}>
             <div ref={targetCard} className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
@@ -531,17 +599,17 @@ function Studio() {
       />
       <nav className="island dock tools" role="toolbar" aria-label="工具">
         <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
-        <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} data-testid="asset-open" onClick={() => setShowAssets(true)}>3D 资产</button>
-        <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} data-testid="scene-open" onClick={() => { exitImpact(false); setMode('current'); pickingRef.current = false; setPicking(false); send({ type: 'pick:stop' }); setInspectorOpen(true); setShowScene(true); }}>3D 场景编辑</button>
+        <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} aria-pressed={showAssets} data-testid="asset-open" onClick={toggleAssets}>3D 资产</button>
+        <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} aria-pressed={showScene} data-testid="scene-open" onClick={toggleScene}>3D 场景编辑</button>
         <span className="dock-sep" aria-hidden="true"/>
         <button
           type="button"
-          className={`tool-btn ${inspectorOpen ? 'is-active' : 'tool-btn-accent'}`}
-          aria-pressed={inspectorOpen}
+          className={`tool-btn ${inspectorOpen && !showScene ? 'is-active' : 'tool-btn-accent'}`}
+          aria-pressed={inspectorOpen && !showScene}
           data-testid="inspector-toggle"
-          onClick={() => setInspectorOpen(value => !value)}
+          onClick={toggleInspector}
         >
-          {inspectorOpen ? '收起面板' : pending.length > 0 ? `✦ 检查与 Diff · ${pending.length}` : '✦ 改写与检查'}
+          {inspectorOpen && !showScene ? '收起面板' : pending.length > 0 ? `✦ 检查与 Diff · ${pending.length}` : '✦ 改写与检查'}
         </button>
         <span className="dock-sep" aria-hidden="true"/>
         <span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>

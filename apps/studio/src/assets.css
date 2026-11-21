@@ -1,6 +1,6 @@
 .asset-dialog {
   position: fixed;
-  inset: 58px 14px 14px auto;
+  inset: 60px 16px 74px auto;
   width: min(500px, 46vw);
   z-index: 50;
   display: flex;
@@ -771,7 +771,7 @@
 
 @media (max-width: 720px) {
   .asset-dialog {
-    inset: 58px 8px 8px 8px;
+    inset: 58px 8px 74px 8px;
     width: auto;
     padding: 12px;
   }
