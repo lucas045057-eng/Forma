@@ -7,13 +7,7 @@ dist/
 *.tsbuildinfo
 fallback/
 deliverables/
-orbital/sessions/
-orbital/ledger/
-orbital/tool-results/
-orbital/history/
-orbital/*.json
-orbital/**/.latest
-orbital/sub_agents/*/*.jsonl
+orbital/
 .worktrees/
 
 # 忽略本地 E2E 运行输出与已收敛的历史测试产物，仅跟踪归档索引
