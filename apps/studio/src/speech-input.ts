@@ -120,7 +120,15 @@ interface NativeRecognition {
  onresult:((event:{results:ArrayLike<{isFinal:boolean;0:{transcript:string}}>})=>void)|null;onend:(()=>void)|null;onerror:((event:{error:string})=>void)|null;
  start:()=>void;stop:()=>void;abort:()=>void;
 }
-function recognitionConstructor(){const browser=typeof window==='undefined'?undefined:window as unknown as {SpeechRecognition?:new()=>NativeRecognition;webkitSpeechRecognition?:new()=>NativeRecognition};return browser?.SpeechRecognition??browser?.webkitSpeechRecognition;}
+type NativeRecognitionConstructor = new () => NativeRecognition;
+function isRecognitionConstructor(value: unknown): value is NativeRecognitionConstructor {
+  return typeof value === 'function';
+}
+function recognitionConstructor(): NativeRecognitionConstructor | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const candidate: unknown = Reflect.get(window, 'SpeechRecognition') ?? Reflect.get(window, 'webkitSpeechRecognition');
+  return isRecognitionConstructor(candidate) ? candidate : undefined;
+}
 export function nativeSpeechPorts():SpeechPorts{return{
  secure:()=>typeof window!=='undefined'&&window.isSecureContext,
  getStream:()=>navigator.mediaDevices.getUserMedia({audio:true}),supportsMime:mime=>typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(mime),

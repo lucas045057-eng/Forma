@@ -1,234 +1,88 @@
-import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
+import type { Asset } from '@spatial/shared';
 import { reduceStudioSurface, surfaceFlags } from './surface-state.ts';
-import { isPreviewMessage, type ApprovalCard, type Asset, type ModelStatusView, type StudioMessage, type WorkSummary, type WorksState } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
-import { impactHighlightMessages, isImpactPickError, restorePicking, waiting } from './approval-state.ts';
+import { waiting } from './approval-state.ts';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
 import PointSpeak from './PointSpeak.tsx';
 import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
-import { api, mutation } from './api.ts';
-import { previewOrigin, previewUrl } from './preview-origin.ts';
+import { previewUrl } from './preview-origin.ts';
 import ModelOriginBadge from './model-provenance.tsx';
 import SelectionLink from './SelectionLink.tsx';
-import NewWorkModal, { type CreatedWorkResult, type ModalTab } from './NewWorkModal.tsx';
+import NewWorkModal, { type ModalTab } from './NewWorkModal.tsx';
 import ModelConfigModal from './ModelConfigModal.tsx';
-import type {PlacementSession} from './placement-state.ts';
-import {luxApi} from './lux3d-api.ts';
+import type { PlacementSession } from './placement-state.ts';
+import { luxApi } from './lux3d-api.ts';
+import { usePreviewBridge } from './use-preview-bridge.ts';
+import { useStudioWorks } from './use-studio-works.ts';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
 const AssetPlacement = lazy(() => import('./AssetPlacement'));
 
-function syncScroll(frame: HTMLIFrameElement | null, at: number) {
-  frame?.contentWindow?.postMessage({ type: 'scroll:to', payload: { at } }, previewOrigin);
-}
-
 function Studio() {
   const { state, status: eventStatus, lastSeq, syncReady, syncError, reload, subscribe } = useEventCenter();
-  const [worksState, setWorksState] = useState<WorksState>({
-    activeId: 'default',
-    works: [{ id: 'default', name: '木间香薰', starter: 'product-page', createdAt: '', updatedAt: '', active: true }],
-  });
-  const [modalTab, setModalTab] = useState<ModalTab | null>(null);
-  const [showModelConfig, setShowModelConfig] = useState(false);
-  const [modelStatus, setModelStatus] = useState<ModelStatusView | null>(null);
-  const [switchingWork, setSwitchingWork] = useState(false);
-  const [previewRevision, setPreviewRevision] = useState(0);
-  const [impact, setImpact] = useState<{ id: string; src: string; baseVersion: string; wasPicking: boolean } | null>(null);
-  const impactRef = useRef<typeof impact>(null);
   const [surface, dispatchSurface] = useReducer(reduceStudioSurface, 'canvas');
   const { showAssets, showScene, inspectorOpen } = surfaceFlags(surface);
-  const [placingAsset,setPlacingAsset]=useState<Asset>();
-  const [initialPlacement,setInitialPlacement]=useState<PlacementSession>();
-  const [placementGeneration,setPlacementGeneration]=useState(0);
-  const [draggingPlacement,setDraggingPlacement]=useState(false);
-  const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
+
+  const [modalTab, setModalTab] = useState<ModalTab | null>(null);
+  const [showModelConfig, setShowModelConfig] = useState(false);
+  const [error, setError] = useState('');
+  const [mode, setMode] = useState<PreviewMode>('current');
+  const [candidateId, setCandidateId] = useState('');
+  const [placingAsset, setPlacingAsset] = useState<Asset>();
+  const [initialPlacement, setInitialPlacement] = useState<PlacementSession>();
+  const [placementGeneration, setPlacementGeneration] = useState(0);
+  const [draggingPlacement, setDraggingPlacement] = useState(false);
+  const placementSessions = useRef(new Map<string, Promise<PlacementSession>>());
+
   const [candidateSlot, setCandidateSlot] = useState<HTMLDivElement | null>(null);
   const [topLeftSlot, setTopLeftSlot] = useState<HTMLDivElement | null>(null);
   const [topCenterSlot, setTopCenterSlot] = useState<HTMLDivElement | null>(null);
-  const preview = useRef<HTMLIFrameElement>(null);
-  const candidatePreview = useRef<HTMLIFrameElement>(null);
-  const pickingRef = useRef(false);
-  const pickRequest = useRef(0);
-  const progressRef = useRef(0);
-  const scrollLeaderRef = useRef<{ source: 'main' | 'candidate'; until: number } | null>(null);
   const targetCard = useRef<HTMLDivElement>(null);
-  const [pickedAt, setPickedAt] = useState<number | null>(null);
-  const canvasWidth = useRef(400);
-  const [picking, setPicking] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [candidateReady, setCandidateReady] = useState(false);
-  const [pick, setPick] = useState<PickState>({ kind: 'none' });
-  const selection = pick.kind === 'ready' ? pick.selection : null;
-  const [error, setError] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [mode, setMode] = useState<PreviewMode>('current');
-  const [candidateId, setCandidateId] = useState('');
+
   const pending = state.candidates.filter(candidate => candidate.decision === 'pending');
   const candidate = pending.find(item => item.id === candidateId) ?? pending[0];
-  const send = (message: StudioMessage) => preview.current?.contentWindow?.postMessage(message, previewOrigin);
-  const sendCandidate = (message: StudioMessage) => candidatePreview.current?.contentWindow?.postMessage(message, previewOrigin);
 
-  const selectionVersion = useRef(state.version);
-  useEffect(() => {
-    const previous = selectionVersion.current;
-    selectionVersion.current = state.version;
-    if (!previous || previous === state.version) return;
-    ++pickRequest.current;
-    setPick({ kind: 'none' });
-    pickingRef.current = false;
-    setPicking(false);
-    send({ type: 'pick:stop' });
-    if (pick.kind === 'ready' || pick.kind === 'pending') setError('页面已变化，请重新点选');
-  }, [state.version]);
+  const bridge = usePreviewBridge({
+    state,
+    syncReady,
+    showScene,
+    mode,
+    activeCandidateId: candidate?.id,
+    onSetMode: setMode,
+    onDispatchSurface: dispatchSurface,
+    onError: setError,
+  });
 
-  function exitImpact(restore = true) {
-    const previous = impactRef.current;
-    if (!previous) return;
-    impactRef.current = null;
-    setImpact(null);
-    send({ type: 'pick:stop' });
-    pickingRef.current = !!(restore && restorePicking(previous.wasPicking, selection, state.version));
-    setPicking(pickingRef.current);
-    if (pickingRef.current && selection) {
-      send({ type: 'pick:start' });
-      send({ type: 'highlight', payload: { src: selection.src } });
-    }
-  }
-  function highlight(card: ApprovalCard, src: string) {
-    if (!syncReady || card.baseVersion !== state.version || !waiting(card)) return;
-    ++pickRequest.current;
-    if (pick.kind === 'pending') setPick({ kind: 'none' });
-    const next = { id: card.id, src, baseVersion: card.baseVersion, wasPicking: impactRef.current?.wasPicking ?? pickingRef.current };
-    impactRef.current = next;
-    setImpact(next);
-    dispatchSurface({ type: 'impact-highlight' });
-    setMode('current');
-    pickingRef.current = false;
-    setPicking(false);
-    impactHighlightMessages(src).forEach(send);
-  }
-  useEffect(() => {
-    if (!impact) return;
-    const card = state.approvals.find(item => item.id === impact.id);
-    if (!syncReady || showScene || mode !== 'current' || impact.baseVersion !== state.version || !card || !waiting(card)) exitImpact(syncReady && !showScene);
-  }, [state, syncReady, showScene, mode, impact]);
+  const works = useStudioWorks({
+    tasks: state.tasks,
+    candidates: state.candidates,
+    subscribe,
+    reload,
+    onBeforeWorkChange: () => {
+      bridge.resetForWorkChange();
+      setPlacingAsset(undefined);
+    },
+    onWorkChangedSurface: () => dispatchSurface({ type: 'work-switched' }),
+    onWorkCreatedSurface: openInspector => {
+      setModalTab(null);
+      dispatchSurface({ type: 'work-created', openInspector });
+    },
+    onAutoOpenCandidate: id => {
+      setCandidateId(id);
+      setMode('candidate');
+    },
+    onError: setError,
+    onResetReady: () => bridge.setReady(false),
+    onSetModeCurrent: () => setMode('current'),
+  });
 
   useEffect(() => {
     if (!candidate) { setCandidateId(''); if (mode !== 'current') setMode('current'); }
     else if (!pending.some(item => item.id === candidateId)) setCandidateId(candidate.id);
   }, [candidate, candidateId, mode, pending]);
-  useEffect(() => { setCandidateReady(false); }, [candidate?.id]);
 
-  useEffect(() => {
-    const receive = (event: MessageEvent<unknown>) => {
-      if (event.origin !== previewOrigin || !isPreviewMessage(event.data)) return;
-      const fromMain = event.source === preview.current?.contentWindow;
-      const fromCandidate = event.source === candidatePreview.current?.contentWindow;
-      if (!fromMain && !fromCandidate) return;
-      if (fromCandidate) {
-        if (event.data.type === 'ready') {
-          setCandidateReady(true);
-          sendCandidate({ type: 'pick:stop' });
-          syncScroll(candidatePreview.current, progressRef.current);
-        } else if (event.data.type === 'scroll:progress') {
-          if (event.data.payload.sync !== false) {
-            const now = performance.now();
-            if (scrollLeaderRef.current?.source === 'main' && now < scrollLeaderRef.current.until) return;
-            scrollLeaderRef.current = { source: 'candidate', until: now + 120 };
-            syncScroll(preview.current, event.data.payload.at);
-          }
-          progressRef.current = event.data.payload.at;
-          setProgress(event.data.payload.at);
-        }
-        // Candidate frames deliberately never enter picking mode or change Selection.
-        return;
-      }
-      if (impactRef.current && (event.data.type === 'pick:result' || (event.data.type === 'error' && isImpactPickError(event.data.payload.message)))) {
-        impactHighlightMessages(impactRef.current.src).forEach(send);
-        return;
-      }
-      switch (event.data.type) {
-        case 'ready':
-          if (impactRef.current) {
-            impactRef.current = null;
-            setImpact(null);
-            pickingRef.current = false;
-            setPicking(false);
-            send({ type: 'pick:stop' });
-          }
-          ++pickRequest.current;
-          setReady(true);
-          setError('');
-          setPick({ kind: 'none' });
-          send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
-          break;
-        case 'pick:result': {
-          if (impactRef.current || !pickingRef.current) return;
-          const payload = event.data.payload;
-          const requestId = ++pickRequest.current;
-          send({ type: 'highlight', payload: { src: payload.src } });
-          // The previous object stops being submittable the moment a new one is picked.
-          setPick({ kind: 'pending', src: payload.src });
-          setPickedAt(progressRef.current);
-          dispatchSurface({ type: 'pick-received' });
-          void api<{ version: string }>('/version').then(result => {
-            if (requestId !== pickRequest.current) return;
-            setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
-            setError('');
-          }).catch(() => {
-            if (requestId !== pickRequest.current) return;
-            setPick({ kind: 'failed', src: payload.src });
-            setError('无法读取作品版本，请确认后端已启动后重新点选');
-          });
-          break;
-        }
-        case 'scroll:progress':
-          // Only a real scroll moves the other artboard; a pick reports its position with sync: false.
-          if (event.data.payload.sync !== false) {
-            const now = performance.now();
-            if (scrollLeaderRef.current?.source === 'candidate' && now < scrollLeaderRef.current.until) break;
-            scrollLeaderRef.current = { source: 'main', until: now + 120 };
-            syncScroll(candidatePreview.current, event.data.payload.at);
-          }
-          progressRef.current = event.data.payload.at;
-          setProgress(event.data.payload.at);
-          break;
-        case 'viewport:size': canvasWidth.current = event.data.payload.width; break;
-        case 'error': setError(event.data.payload.message); break;
-      }
-    };
-    window.addEventListener('message', receive);
-    return () => window.removeEventListener('message', receive);
-  }, []);
-
-  async function preparePlacement(asset:Asset):Promise<PlacementSession>{
-    void import('./AssetPlacement');
-    if(!ready||!syncReady||eventStatus!=='connected'||!state.version)throw new Error('请等待主预览和作品状态同步后放置');
-    const key=asset.id+':'+state.version;
-    const request=()=>{
-      const guarded=luxApi.placementSession(asset.id,state.version).catch(error=>{
-        if(placementSessions.current.get(key)===guarded)placementSessions.current.delete(key);
-        throw error;
-      });
-      return guarded;
-    };
-    let pending=placementSessions.current.get(key);
-    if(!pending){pending=request();placementSessions.current.set(key,pending);}
-    const session=await pending;
-    if(session.expiresAt>Date.now())return session;
-    // The cached promise resolved to an expired session: drop only this value and prepare once
-    // more inside the same interaction. A concurrent interaction may already have installed a
-    // fresh request for this asset+version, which is reused instead of creating a second one.
-    if(placementSessions.current.get(key)===pending)placementSessions.current.delete(key);
-    let refreshed=placementSessions.current.get(key);
-    if(!refreshed){refreshed=request();placementSessions.current.set(key,refreshed);}
-    const next=await refreshed;
-    if(next.expiresAt>Date.now())return next;
-    if(placementSessions.current.get(key)===refreshed)placementSessions.current.delete(key);
-    throw new Error('放置会话已过期，请重新准备');
-  }
   useEffect(() => {
     if (!draggingPlacement) return;
     const stopDrag = () => setDraggingPlacement(false);
@@ -239,154 +93,6 @@ function Studio() {
       window.removeEventListener('drop', stopDrag, true);
     };
   }, [draggingPlacement]);
-
-  function closeInspector() {
-    dispatchSurface({ type: 'close' });
-  }
-
-  function stopPicking() {
-    pickingRef.current = false;
-    setPicking(false);
-    send({ type: 'pick:stop' });
-  }
-
-  function toggleAssets() {
-    if (!showAssets) {
-      exitImpact(false);
-      stopPicking();
-      setPlacingAsset(undefined);
-    }
-    dispatchSurface({ type: 'toggle-assets' });
-  }
-
-  function toggleScene() {
-    if (!showScene) {
-      exitImpact(false);
-      stopPicking();
-      setMode('current');
-      setPlacingAsset(undefined);
-    }
-    dispatchSurface({ type: 'toggle-scene' });
-  }
-
-  function toggleInspector() {
-    dispatchSurface({ type: 'toggle-inspector' });
-  }
-
-  function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
-    exitImpact(false);
-    stopPicking();
-    setMode('current');
-    dispatchSurface({ type: 'placement-started', fromDrag });
-    if (session) {
-      send({ type: 'placement:start', payload: session });
-    }
-    setInitialPlacement(session);
-    if (!placingAsset || placingAsset.id !== asset.id || !session) {
-      setPlacementGeneration(value => value + 1);
-    }
-    setPlacingAsset(asset);
-    if (fromDrag) {
-      requestAnimationFrame(() => setDraggingPlacement(true));
-    } else {
-      setDraggingPlacement(false);
-    }
-  }
-  const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
-  function toggle() {
-    if (impactRef.current) { exitImpact(); return; }
-    if (mode === 'candidate') setMode('current');
-    const next = !pickingRef.current;
-    if (next) dispatchSurface({ type: 'pick-started' });
-    pickingRef.current = next;
-    setPicking(next);
-    send({ type: next ? 'pick:start' : 'pick:stop' });
-    if (next && selection) send({ type: 'highlight', payload: { src: selection.src } });
-  }
-  useEffect(() => {
-    let active = true;
-    const loadWorks = () => {
-      void api<WorksState>('/works')
-        .then(value => {
-          if (!active || !value || !Array.isArray(value.works) || typeof value.activeId !== 'string') return;
-          setWorksState(previous => {
-            if (previous.activeId !== value.activeId) {
-              setReady(false);
-              setPreviewRevision(rev => rev + 1);
-            }
-            return value;
-          });
-        })
-        .catch(() => {});
-    };
-    const loadModelStatus = () => {
-      void api<ModelStatusView>('/models/status')
-        .then(value => {
-          if (!active || !value || !value.coding) return;
-          setModelStatus(value);
-        })
-        .catch(() => {});
-    };
-    loadWorks();
-    loadModelStatus();
-    const unsubscribe = subscribe(event => {
-      if (event.type === 'work.changed' || event.type === 'work.updated') loadWorks();
-      if (event.type === 'models.updated') loadModelStatus();
-      if (event.type === 'candidate.ready') {
-        const readyCandidate = event.candidate as { id?: string; taskId?: string } | undefined;
-        const relatedTask = state.tasks.find(t => t.id === readyCandidate?.taskId || t.id === readyCandidate?.id);
-        if (readyCandidate?.id && relatedTask?.bootstrap) {
-          setCandidateId(readyCandidate.id);
-          setMode('candidate');
-        }
-      }
-    });
-    return () => { active = false; unsubscribe(); };
-  }, [subscribe, state.tasks]);
-
-  async function selectWork(nextId: string) {
-    if (!nextId || nextId === worksState.activeId || switchingWork) return;
-    setSwitchingWork(true);
-    setError('');
-    try {
-      exitImpact(false);
-      pickingRef.current = false;
-      setPicking(false);
-      setPick({ kind: 'none' });
-      setPlacingAsset(undefined);
-      dispatchSurface({ type: 'work-switched' });
-      setMode('current');
-      setReady(false);
-      await api(`/works/${encodeURIComponent(nextId)}/select`, mutation('POST', {}));
-      setPreviewRevision(rev => rev + 1);
-      await reload(true);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : '切换作品失败');
-    } finally {
-      setSwitchingWork(false);
-    }
-  }
-
-  async function handleWorkCreated(created: CreatedWorkResult) {
-    setModalTab(null);
-    exitImpact(false);
-    pickingRef.current = false;
-    setPicking(false);
-    setPick({ kind: 'none' });
-    setPlacingAsset(undefined);
-    dispatchSurface({
-      type: 'work-created',
-      openInspector: !created.task && (created.work.starter === 'blank' || created.work.starter === 'free-web'),
-    });
-    setMode('current');
-    setReady(false);
-    setWorksState(previous => {
-      const others = previous.works.filter(item => item.id !== created.work.id).map(item => ({ ...item, active: false }));
-      return { activeId: created.activeId, works: [...others, { ...created.work, active: true }] };
-    });
-    setPreviewRevision(rev => rev + 1);
-    await reload(true).catch(() => {});
-  }
 
   const pendingApprovalsCount = state.approvals.filter(waiting).length;
   const previousPendingApprovals = useRef(0);
@@ -406,82 +112,129 @@ function Studio() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [modalTab, showModelConfig, placingAsset]);
 
-  const activeWorkSummary: WorkSummary | undefined = worksState.works.find(item => item.id === worksState.activeId) ?? worksState.works[0];
-  const blankBootstrap = (activeWorkSummary?.starter === 'blank' || activeWorkSummary?.starter === 'free-web') && !state.candidates.some(item => item.decision === 'adopted');
+  async function preparePlacement(asset: Asset): Promise<PlacementSession> {
+    void import('./AssetPlacement');
+    if (!bridge.ready || !syncReady || eventStatus !== 'connected' || !state.version) throw new Error('请等待主预览和作品状态同步后放置');
+    const key = asset.id + ':' + state.version;
+    const request = () => {
+      const guarded = luxApi.placementSession(asset.id, state.version).catch(err => {
+        if (placementSessions.current.get(key) === guarded) placementSessions.current.delete(key);
+        throw err;
+      });
+      return guarded;
+    };
+    let pendingSession = placementSessions.current.get(key);
+    if (!pendingSession) { pendingSession = request(); placementSessions.current.set(key, pendingSession); }
+    const session = await pendingSession;
+    if (session.expiresAt > Date.now()) return session;
+    // Drop only the stale promise so concurrent preparations reuse any newly installed session request.
+    if (placementSessions.current.get(key) === pendingSession) placementSessions.current.delete(key);
+    let refreshed = placementSessions.current.get(key);
+    if (!refreshed) { refreshed = request(); placementSessions.current.set(key, refreshed); }
+    const next = await refreshed;
+    if (next.expiresAt > Date.now()) return next;
+    if (placementSessions.current.get(key) === refreshed) placementSessions.current.delete(key);
+    throw new Error('放置会话已过期，请重新准备');
+  }
 
-  const modelStatusTooltip = modelStatus
-    ? [
-        `编码模型：${modelStatus.coding.mode === 'real' ? `${modelStatus.coding.model} (${modelStatus.coding.providerHost})` : modelStatus.coding.mode === 'mock' ? '本地模拟' : '未配置'}`,
-        `语音识别：${modelStatus.speech.mode === 'real' ? `百炼 ${modelStatus.speech.model}` : modelStatus.speech.mode === 'mock' ? '本地模拟' : '未配置'}`,
-        `3D 生成：${modelStatus.lux3d.mode === 'real' ? `Lux3D (${modelStatus.lux3d.gateway})` : modelStatus.lux3d.mode === 'mock' ? '本地模拟' : '未配置'}`,
-      ].join(' · ')
-    : '';
+  function closeInspector() { dispatchSurface({ type: 'close' }); }
 
-  const mainFrame = <iframe key={`${worksState.activeId}:${previewRevision}`} ref={preview} src={previewUrl('/preview/main/')} title={`${activeWorkSummary?.name ?? '空间作品'}预览`} data-testid="preview-frame" onLoad={() => {
-    exitImpact(false);
-    send({ type: pickingRef.current ? 'pick:start' : 'pick:stop' });
-  }}/>;
-  const workName = activeWorkSummary?.name ?? '空间作品';
-  const candidateFrame = candidate ? <iframe key={candidate.id} ref={candidatePreview} src={previewUrl(candidate.previewUrl)} title={`候选版本 ${candidate.id.slice(0, 8)}`} data-testid="candidate-frame" data-ready={candidateReady}/> : null;
+  function toggleAssets() {
+    if (!showAssets) {
+      bridge.exitImpact(false);
+      bridge.stopPicking();
+      setPlacingAsset(undefined);
+    }
+    dispatchSurface({ type: 'toggle-assets' });
+  }
+
+  function toggleScene() {
+    if (!showScene) {
+      bridge.exitImpact(false);
+      bridge.stopPicking();
+      setMode('current');
+      setPlacingAsset(undefined);
+    }
+    dispatchSurface({ type: 'toggle-scene' });
+  }
+
+  function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
+    bridge.exitImpact(false);
+    bridge.stopPicking();
+    setMode('current');
+    dispatchSurface({ type: 'placement-started', fromDrag });
+    if (session) bridge.send({ type: 'placement:start', payload: session });
+    setInitialPlacement(session);
+    if (!placingAsset || placingAsset.id !== asset.id || !session) setPlacementGeneration(value => value + 1);
+    setPlacingAsset(asset);
+    if (fromDrag) requestAnimationFrame(() => setDraggingPlacement(true));
+    else setDraggingPlacement(false);
+  }
+
+  const workName = works.activeWorkSummary?.name ?? '空间作品';
+  const mainFrame = (
+    <iframe
+      key={`${works.worksState.activeId}:${works.previewRevision}`}
+      ref={bridge.preview}
+      src={previewUrl('/preview/main/')}
+      title={`${workName}预览`}
+      data-testid="preview-frame"
+      onLoad={bridge.handleMainFrameLoad}
+    />
+  );
+  const candidateFrame = candidate ? (
+    <iframe
+      key={candidate.id}
+      ref={bridge.candidatePreview}
+      src={previewUrl(candidate.previewUrl)}
+      title={`候选版本 ${candidate.id.slice(0, 8)}`}
+      data-testid="candidate-frame"
+      data-ready={bridge.candidateReady}
+    />
+  ) : null;
 
   return (
     <main className="studio">
-      {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
-      {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => setModelStatus(nextStatus)}/>}
-      {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => dispatchSurface({ type: 'close' })} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
-      {placingAsset && <Suspense fallback={<p className="floating-status" role="status">加载 3D 放置预览…</p>}><AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);dispatchSurface({ type: 'close' });}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/></Suspense>}
+      {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void works.handleWorkCreated(result)}/>}
+      {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => works.setModelStatus(nextStatus)}/>}
+      {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={closeInspector} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
+      {placingAsset && <Suspense fallback={<p className="floating-status" role="status">加载 3D 放置预览…</p>}><AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={() => { setDraggingPlacement(false); closeInspector(); }} onConfirmed={outcome => { if (outcome.kind === 'insert' && outcome.candidateId) { setCandidateId(outcome.candidateId); setMode('candidate'); } }} frame={bridge.ready ? bridge.preview.current : null} onClose={() => { setDraggingPlacement(false); for (const key of placementSessions.current.keys()) if (key.startsWith(placingAsset.id + ':')) placementSessions.current.delete(key); setPlacingAsset(undefined); }}/></Suspense>}
       <header className="studio-top">
         <div className="island brand-island">
           <span className="wordmark" aria-hidden="true">F</span>
           <h1 title="Forma 空间工作台">Forma</h1>
           <span className="island-sep" aria-hidden="true"/>
           <div className="work-switcher-group">
-            <select
-              aria-label="切换当前作品"
-              data-testid="work-switcher"
-              disabled={switchingWork || !syncReady}
-              value={worksState.activeId}
-              onChange={event => void selectWork(event.target.value)}
-            >
-              {worksState.works.map(item => (
+            <select aria-label="切换当前作品" data-testid="work-switcher" disabled={works.switchingWork || !syncReady} value={works.worksState.activeId} onChange={event => void works.selectWork(event.target.value)}>
+              {works.worksState.works.map(item => (
                 <option key={item.id} value={item.id}>
                   {item.name}
-                  {item.starter === 'blank'
-                    ? ' · 3D 画布'
-                    : item.starter === 'free-web'
-                      ? ' · 自由网页'
-                      : item.starter === 'imported'
-                        ? ' · 已导入网页'
-                        : ''}
+                  {item.starter === 'blank' ? ' · 3D 画布' : item.starter === 'free-web' ? ' · 自由网页' : item.starter === 'imported' ? ' · 已导入网页' : ''}
                 </option>
               ))}
             </select>
-            <button type="button" className="secondary-btn compact-btn" data-testid="work-new-open" title="新建网页作品" disabled={switchingWork || !syncReady} onClick={() => setModalTab('create')}>+ 新建</button>
-            <button type="button" className="ghost-btn compact-btn" data-testid="work-import-open" title="导入已有网页" disabled={switchingWork || !syncReady} onClick={() => setModalTab('import')}>⤓ 导入</button>
+            <button type="button" className="secondary-btn compact-btn" data-testid="work-new-open" title="新建网页作品" disabled={works.switchingWork || !syncReady} onClick={() => setModalTab('create')}>+ 新建</button>
+            <button type="button" className="ghost-btn compact-btn" data-testid="work-import-open" title="导入已有网页" disabled={works.switchingWork || !syncReady} onClick={() => setModalTab('import')}>⤓ 导入</button>
           </div>
           <div className="top-slot" ref={setTopLeftSlot}/>
         </div>
         <div className="top-center-wrap">
           <div className="top-center-slot" ref={setTopCenterSlot}/>
-          {import.meta.env.VITE_DEMO_MODE==='mock'&&<p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示</p>}
-          {import.meta.env.VITE_DEMO_MODE==='real'&&<p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式</p>}
+          {import.meta.env.VITE_DEMO_MODE === 'mock' && <p className="demo-banner" data-testid="demo-mode" role="status">离线模拟演示</p>}
+          {import.meta.env.VITE_DEMO_MODE === 'real' && <p className="demo-banner is-real" data-testid="demo-mode" role="status">真实服务模式</p>}
         </div>
         <div className="island status-island status-cluster">
-          <span className={`status-pill ${ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{ready ? '预览已连接' : '等待预览'}</span>
+          <span className={`status-pill ${bridge.ready ? 'is-ok' : 'is-wait'}`} data-testid="preview-status">{bridge.ready ? '预览已连接' : '等待预览'}</span>
           <span className={`status-pill ${eventStatus === 'connected' ? 'is-ok' : 'is-wait'}`} data-testid="events-status" data-status={eventStatus} title={eventStatus === 'connected' ? '事件流已连接' : eventStatus === 'reconnecting' ? '事件重连中' : '事件连接中'}>事件 · <output data-testid="events-seq">{lastSeq}</output></span>
-          {modelStatus && (
+          {works.modelStatus && (
             <span
-              className={`status-pill model-status-pill ${modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
+              className={`status-pill model-status-pill ${works.modelStatus.coding.mode === 'real' ? 'is-ok' : 'is-wait'}`}
               data-testid="model-status"
-              data-mode={modelStatus.coding.mode}
-              title={`${modelStatusTooltip}（点击配置或切换大模型）`}
+              data-mode={works.modelStatus.coding.mode}
+              title={`${works.modelStatusTooltip}（点击配置或切换大模型）`}
               onClick={() => setShowModelConfig(true)}
             >
-              {modelStatus.coding.mode === 'real'
-                ? modelStatus.coding.model
-                : modelStatus.coding.mode === 'mock'
-                  ? '模拟模型'
-                  : '未配置模型'}
+              {works.modelStatus.coding.mode === 'real' ? works.modelStatus.coding.model : works.modelStatus.coding.mode === 'mock' ? '模拟模型' : '未配置模型'}
             </span>
           )}
           {!syncReady && <span className="status-pill is-wait" role="status">待同步</span>}
@@ -494,26 +247,14 @@ function Studio() {
               越界请示 · {pendingApprovalsCount}
             </button>
           )}
-          <button
-            type="button"
-            className={`${inspectorOpen && !showScene ? 'ghost-btn' : 'secondary-btn'} compact-btn`}
-            onClick={toggleInspector}
-          >
+          <button type="button" className={`${inspectorOpen && !showScene ? 'ghost-btn' : 'secondary-btn'} compact-btn`} onClick={() => dispatchSurface({ type: 'toggle-inspector' })}>
             {inspectorOpen && !showScene ? '收起抽屉' : pending.length > 0 ? '检查与 Diff' : '改写面板'}
           </button>
         </div>
       </header>
       <div className={`workspace${showScene ? ' scene-editing' : ''}${inspectorOpen ? '' : ' inspector-collapsed'}`}>
         <section className="preview-panel" aria-label="作品预览">
-          <CandidatePanel
-            selectedId={candidate?.id ?? ''}
-            onSelect={setCandidateId}
-            mode={mode}
-            onMode={setMode}
-            topLeftTarget={topLeftSlot}
-            topCenterTarget={topCenterSlot}
-            detailsTarget={candidateSlot}
-          >
+          <CandidatePanel selectedId={candidate?.id ?? ''} onSelect={setCandidateId} mode={mode} onMode={setMode} topLeftTarget={topLeftSlot} topCenterTarget={topCenterSlot} detailsTarget={candidateSlot}>
             <figure className="artboard artboard-main">
               <figcaption className="artboard-name">
                 <b>{workName}</b>
@@ -537,40 +278,40 @@ function Studio() {
             </div>
             <button type="button" className="ghost-btn compact-btn" data-testid="inspector-close" onClick={closeInspector}>收起</button>
           </div>
-          {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={progress} previewSize={previewSize} onClose={closeInspector}/></Suspense>}
+          {showScene && <Suspense fallback={<p className="hint">加载场景编辑器…</p>}><SceneEditor at={bridge.progress} previewSize={bridge.previewSize} onClose={closeInspector}/></Suspense>}
           <div className="candidate-slot" ref={setCandidateSlot}/>
           <div className="inspector-main" hidden={showScene}>
-            <div ref={targetCard} className={`target-card${selection ? ' has-selection' : ''}${picking ? ' is-picking' : ''}`}>
+            <div ref={targetCard} className={`target-card${bridge.selection ? ' has-selection' : ''}${bridge.picking ? ' is-picking' : ''}`}>
               <div className="target-card-header">
                 <span className="section-label">TARGET</span>
-                <button type="button" className="inline-link-btn" onClick={toggle}>{picking ? '完成选取' : selection ? '重选元素' : '点选页面元素'}</button>
+                <button type="button" className="inline-link-btn" onClick={bridge.togglePicking}>{bridge.picking ? '完成选取' : bridge.selection ? '重选元素' : '点选页面元素'}</button>
               </div>
               {error && <p className="error" role="alert">{error}</p>}
-              {selection ? <>
+              {bridge.selection ? <>
                 <div className="selection-summary">
-                  <strong>{selection.cid}</strong>
-                  <code>{selection.src}</code>
+                  <strong>{bridge.selection.cid}</strong>
+                  <code>{bridge.selection.src}</code>
                 </div>
                 <div className="selection-badges">
-                  {selection.note && <span className="meta-tag">外层容器</span>}
-                  <span className="meta-tag" data-testid="instances">同源码实例：{selection.instances} 处{selection.instances > 1 ? '（共享组件/列表，修改将同步生效）' : ''}</span>
+                  {bridge.selection.note && <span className="meta-tag">外层容器</span>}
+                  <span className="meta-tag" data-testid="instances">同源码实例：{bridge.selection.instances} 处{bridge.selection.instances > 1 ? '（共享组件/列表，修改将同步生效）' : ''}</span>
                 </div>
-                <pre className="selection-raw" data-testid="selection-json">{JSON.stringify(selection, null, 2)}</pre>
-              </> : <p className="target-empty">{picking ? '请在左侧网页中点击要修改的标题、按钮或区块…' : '当前作用于整页 · 开启选取可精准锁定局部元素'}</p>}
+                <pre className="selection-raw" data-testid="selection-json">{JSON.stringify(bridge.selection, null, 2)}</pre>
+              </> : <p className="target-empty">{bridge.picking ? '请在左侧网页中点击要修改的标题、按钮或区块…' : '当前作用于整页 · 开启选取可精准锁定局部元素'}</p>}
             </div>
-            <PointSpeak pick={pick} blocked={!!impact || showScene} blankBootstrap={blankBootstrap} starterKind={activeWorkSummary?.starter}/>
+            <PointSpeak pick={bridge.pick} blocked={!!bridge.impact || showScene} blankBootstrap={works.blankBootstrap} starterKind={works.activeWorkSummary?.starter}/>
           </div>
-          <ApprovalPanel highlightId={impact?.id ?? null} onHighlight={highlight} onExit={() => exitImpact()}/>
+          <ApprovalPanel highlightId={bridge.impact?.id ?? null} onHighlight={bridge.highlight} onExit={() => bridge.exitImpact()}/>
         </aside>
       </div>
       <SelectionLink
-        frame={preview}
+        frame={bridge.preview}
         target={targetCard}
-        bbox={selection?.bbox ?? null}
-        visible={!!selection && ready && !picking && mode === 'current' && !showScene && !impact && !showAssets && !placingAsset && inspectorOpen && pickedAt === progress}
+        bbox={bridge.selection?.bbox ?? null}
+        visible={!!bridge.selection && bridge.ready && !bridge.picking && mode === 'current' && !showScene && !bridge.impact && !showAssets && !placingAsset && inspectorOpen && bridge.pickedAt === bridge.progress}
       />
       <nav className="island dock tools" role="toolbar" aria-label="工具">
-        <button type="button" className={`tool-btn${picking ? ' is-active' : ''}`} aria-pressed={picking} data-testid="pick-toggle" onClick={toggle}>{picking ? '退出选取' : '开启选取'}</button>
+        <button type="button" className={`tool-btn${bridge.picking ? ' is-active' : ''}`} aria-pressed={bridge.picking} data-testid="pick-toggle" onClick={bridge.togglePicking}>{bridge.picking ? '退出选取' : '开启选取'}</button>
         <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} aria-pressed={showAssets} data-testid="asset-open" onClick={toggleAssets}>3D 资产</button>
         <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} aria-pressed={showScene} data-testid="scene-open" onClick={toggleScene}>3D 场景编辑</button>
         <span className="dock-sep" aria-hidden="true"/>
@@ -579,12 +320,12 @@ function Studio() {
           className={`tool-btn ${inspectorOpen && !showScene ? 'is-active' : 'tool-btn-accent'}`}
           aria-pressed={inspectorOpen && !showScene}
           data-testid="inspector-toggle"
-          onClick={toggleInspector}
+          onClick={() => dispatchSurface({ type: 'toggle-inspector' })}
         >
           {inspectorOpen && !showScene ? '收起面板' : pending.length > 0 ? `✦ 检查与 Diff · ${pending.length}` : '✦ 改写与检查'}
         </button>
         <span className="dock-sep" aria-hidden="true"/>
-        <span className="viewport-mode-pill">{impact ? '影响定位' : picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(progress * 100)}%</span>
+        <span className="viewport-mode-pill">{bridge.impact ? '影响定位' : bridge.picking ? '选取中 · 点击页面元素' : '浏览'} · {Math.round(bridge.progress * 100)}%</span>
       </nav>
     </main>
   );

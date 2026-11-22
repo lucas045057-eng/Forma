@@ -13,28 +13,12 @@ const RAW_FETCH_TRANSPORT_ALLOWLIST = new Set([
   'EventCenter.tsx',
 ]);
 
-// Ratchet baselines (ai-native-garden Step 2): RAW_FETCH_RATCHET 已清零为 {}；其余基线只准降、不准涨，
-// 新文件必须满足 0 裸 fetch / 0 类型逃生 / <=450 TSX 行数 / <=4 useEffect / <=800 CSS 行数。
+// Ratchet baselines (ai-native-garden): 全部历史棘轮已清零为 {}，对 src/ 全量源码强制零容忍上限
+// （0 裸 fetch / 0 类型逃生 / <=450 TS(X) 行数 / <=4 useEffect / <=800 CSS 行数）。
 const RAW_FETCH_RATCHET: Record<string, number> = {};
-
-const LEGACY_TYPE_ESCAPE_RATCHET: Record<string, number> = {
-  'm2-state.ts': 2,
-  'NewWorkModal.tsx': 1,
-  'SceneEditor.tsx': 4,
-  'speech-input.ts': 1,
-};
-
-const FILE_LINE_RATCHET: Record<string, number> = {
-  'App.tsx': 596,
-  'AssetPlacement.tsx': 545,
-  'NewWorkModal.tsx': 530,
-};
-
-const USE_EFFECT_RATCHET: Record<string, number> = {
-  'App.tsx': 9,
-  'AssetPlacement.tsx': 8,
-  'SceneEditor.tsx': 5,
-};
+const LEGACY_TYPE_ESCAPE_RATCHET: Record<string, number> = {};
+const FILE_LINE_RATCHET: Record<string, number> = {};
+const USE_EFFECT_RATCHET: Record<string, number> = {};
 
 const DEFAULT_MAX_TS_LINES = 450;
 const DEFAULT_MAX_CSS_LINES = 800;

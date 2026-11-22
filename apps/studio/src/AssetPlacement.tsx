@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import type { ApprovalCard, Asset, AssetPlacementSession, AssetPlacementTarget, StudioMessage } from '@spatial/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ApprovalCard, Asset } from '@spatial/shared';
 import { defaultSceneConfig, type SceneConfig } from '@spatial/shared/scene-config';
-import { ProductScene } from '@spatial/scene-renderer';
-import { placementMessage, type PlacementSession } from './placement-state.ts';
+import type { PlacementSession } from './placement-state.ts';
 import { previewOrigin } from './preview-origin.ts';
-import { api, ApiError, mutation } from './api.ts';
+import { api } from './api.ts';
 import { useEventCenter } from './EventCenter.tsx';
+import PlacementStageOverlay from './PlacementStageOverlay.tsx';
+import { placementRequest, usePlacementSession } from './use-placement-session.ts';
 import './assets.css';
 
 export interface PlacementConfirmedOutcome {
@@ -39,17 +40,6 @@ function sanitizeCamera(cam: SceneConfig['hero']['camera']): SceneConfig['hero']
   };
 }
 
-async function requestJson<T>(url: string, method: 'GET' | 'POST' | 'PUT', body?: unknown): Promise<T> {
-  try {
-    return await api<T>(url, method === 'GET' ? undefined : mutation(method, body));
-  } catch (cause) {
-    if (cause instanceof ApiError) {
-      throw new Error(cause.message || '放置结果未确认，请刷新状态');
-    }
-    throw new Error('放置请求未确认，请刷新状态后重试');
-  }
-}
-
 const SIZE_PRESETS = [
   { label: '小', value: 40 },
   { label: '中', value: 65 },
@@ -57,6 +47,7 @@ const SIZE_PRESETS = [
   { label: '满宽', value: 100 },
 ] as const;
 
+/** HUD controller for placing, replacing, framing, and confirming 3D assets directly on the webpage. */
 export default function AssetPlacement({
   asset,
   frame,
@@ -77,27 +68,30 @@ export default function AssetPlacement({
   onConfirmed?: (outcome: PlacementConfirmedOutcome) => void;
 }) {
   const { state, syncReady, status, reload, acquire, awaiting } = useEventCenter();
-  const [session, setSession] = useState<AssetPlacementSession | undefined>(() => initialSession);
-  const [target, setTarget] = useState<AssetPlacementTarget>();
-  const [slotRect, setSlotRect] = useState<[number, number, number, number] | null>(null);
-  const [isVoidTag, setIsVoidTag] = useState(false);
-  const [iframeBounds, setIframeBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const [heroSceneConfig, setHeroSceneConfig] = useState<SceneConfig | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [resizing, setResizing] = useState(false);
   const [widthPercent, setWidthPercent] = useState(65);
   const [align, setAlign] = useState<'start' | 'center' | 'end'>('center');
   const [force, setForce] = useState(false);
 
   const framedCameraRef = useRef<SceneConfig['hero']['camera'] | null>(null);
   const confirmed = useRef(false);
-  const currentVersion = useRef(state.version);
-  currentVersion.current = state.version;
-  const onTargetSelectedRef = useRef(onTargetSelected);
-  onTargetSelectedRef.current = onTargetSelected;
 
-  const send = (message: StudioMessage) => frame?.contentWindow?.postMessage(message, previewOrigin);
+  const { session, target, setTarget, slotRect, isVoidTag, clearTarget } = usePlacementSession({
+    assetId: asset.id,
+    frame,
+    initialSession,
+    syncReady,
+    status,
+    stateVersion: state.version,
+    confirmedRef: confirmed,
+    widthPercent,
+    align,
+    onClose,
+    onError: setError,
+    onTargetSelected,
+  });
 
   useEffect(() => {
     framedCameraRef.current = null;
@@ -114,132 +108,51 @@ export default function AssetPlacement({
     return () => { active = false; };
   }, [state.version]);
 
-  // Keep iframe viewport bounds synchronized so the in-page 3D stage stays locked 1:1 over the webpage slot.
-  useEffect(() => {
-    if (!frame) {
-      setIframeBounds(null);
-      return;
-    }
-    const measure = () => {
-      const r = frame.getBoundingClientRect();
-      setIframeBounds(prev => (
-        prev && prev.left === r.left && prev.top === r.top && prev.width === r.width && prev.height === r.height
-          ? prev
-          : { left: r.left, top: r.top, width: r.width, height: r.height }
-      ));
-    };
-    measure();
-    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
-    observer?.observe(frame);
-    window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, true);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure, true);
-    };
-  }, [frame]);
-
-  useEffect(() => {
-    if (!initialSession || initialSession.expiresAt <= Date.now()) return;
-    if (session?.sessionId === initialSession.sessionId) return;
-    setSession(initialSession);
-    setError('');
-  }, [initialSession, session?.sessionId]);
-
-  useEffect(() => {
-    let active = true;
-    if (confirmed.current || !syncReady || status !== 'connected' || !frame || !state.version) return;
-    if (session) {
-      frame.contentWindow?.postMessage({ type: 'pick:stop' }, previewOrigin);
-      frame.contentWindow?.postMessage({ type: 'placement:start', payload: session }, previewOrigin);
-      frame.contentWindow?.postMessage({
-        type: 'placement:preview-layout',
-        payload: { sessionId: session.sessionId, target: target ?? null, layout: { widthPercent, align } },
-      }, previewOrigin);
-      return;
-    }
-    const version = state.version;
-    void requestJson<AssetPlacementSession>('/assets/placements/sessions', 'POST', { assetId: asset.id, baseVersion: version })
-      .then(result => {
-        if (!active) return;
-        setSession(result);
-        frame.contentWindow?.postMessage({ type: 'pick:stop' }, previewOrigin);
-        frame.contentWindow?.postMessage({ type: 'placement:start', payload: result }, previewOrigin);
-        frame.contentWindow?.postMessage({
-          type: 'placement:preview-layout',
-          payload: { sessionId: result.sessionId, target: null, layout: { widthPercent, align } },
-        }, previewOrigin);
-      })
-      .catch(cause => { if (active) setError(cause instanceof Error ? cause.message : '放置会话未创建'); });
-    return () => { active = false; };
-  }, [asset.id, frame, syncReady, status, state.version, session]);
-
-  // Sync live layout (position / widthPercent / align) into the webpage's in-flow preview slot.
-  useEffect(() => {
-    if (!session || !frame) return;
-    send({
-      type: 'placement:preview-layout',
-      payload: {
-        sessionId: session.sessionId,
-        target: target ?? null,
-        layout: { widthPercent, align },
-      },
-    });
-  }, [session, frame, target, widthPercent, align]);
-
-  useEffect(() => {
-    if (!session) return;
-    const receive = (event: MessageEvent<unknown>) => {
-      const result = placementMessage(event, {
-        origin: previewOrigin,
-        frame: frame?.contentWindow,
-        session,
-        version: currentVersion.current,
-        now: Date.now(),
-      });
-      if (!result) return;
-      if ('cancelled' in result) {
-        onClose();
-        return;
-      }
-      if ('slotRect' in result) {
-        setSlotRect(result.slotRect);
-        if (result.isVoidTag !== undefined) setIsVoidTag(result.isVoidTag);
-        return;
-      }
-      setError('');
-      setTarget(result.target);
-      onTargetSelectedRef.current?.();
-    };
-    window.addEventListener('message', receive);
-    const timer = setTimeout(() => {
-      setError('放置会话已过期，请重新放入');
-      setTarget(undefined);
-      setSlotRect(null);
-      send({ type: 'placement:stop', payload: { sessionId: session.sessionId } });
-    }, Math.max(1, session.expiresAt - Date.now()));
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('message', receive);
-      send({ type: 'placement:stop', payload: { sessionId: session.sessionId } });
-    };
-  }, [session, frame]);
-
-  useEffect(() => {
-    if (session && (state.version !== session.baseVersion || !syncReady)) {
-      setTarget(undefined);
-      setSlotRect(null);
-      if (state.version !== session.baseVersion) setError('作品版本已变化，请重新放置');
-    }
-  }, [state.version, syncReady, session]);
-
   const previewSceneConfig = useMemo<SceneConfig>(() => {
     if (target?.kind === 'replace' && heroSceneConfig) {
       return { ...heroSceneConfig, scroll: [] };
     }
     return { ...defaultSceneConfig, scroll: [] };
   }, [target?.kind, heroSceneConfig]);
+
+  async function applyPostConfirmSideEffects(result: ConfirmResponse, framedCamera: SceneConfig['hero']['camera'] | undefined) {
+    if (result.kind === 'replace' && framedCamera) {
+      try {
+        const latestScene = await placementRequest<SceneConfig>('/scene', 'GET');
+        await placementRequest('/scene', 'PUT', {
+          ...latestScene,
+          hero: { ...latestScene.hero, camera: framedCamera },
+        });
+      } catch {
+        /* preserve adopted model even if optional camera save fails */
+      }
+      return;
+    }
+    if (result.kind === 'replace-module' && framedCamera && target?.instanceId) {
+      try {
+        await placementRequest(`/assets/modules/${encodeURIComponent(target.instanceId)}/adjust`, 'POST', {
+          baseVersion: result.version,
+          adjustment: { camera: framedCamera },
+        });
+      } catch {
+        /* preserve replaced module even if optional camera save fails */
+      }
+      return;
+    }
+    if (result.kind === 'insert' && result.task?.id) {
+      // Auto-approve the insertion draft and kick off quality gates so the candidate opens right away.
+      try {
+        const approvals = await placementRequest<ApprovalCard[]>('/approvals', 'GET');
+        const pendingCard = approvals.find(item => item.taskId === result.task.id && item.status === 'pending');
+        if (pendingCard) {
+          await placementRequest(`/approvals/${encodeURIComponent(pendingCard.id)}`, 'POST', { option: 0 });
+          void placementRequest(`/candidates/${encodeURIComponent(result.task.id)}/checks`, 'POST', {}).catch(() => {});
+        }
+      } catch {
+        /* if auto-approval cannot complete, sidebar ApprovalPanel still holds the card */
+      }
+    }
+  }
 
   async function confirm() {
     if (!session || !target || busy || confirmed.current || !syncReady || status !== 'connected') return;
@@ -256,46 +169,12 @@ export default function AssetPlacement({
             ...(framedCamera ? { camera: framedCamera } : {}),
           }
         : undefined;
-      const result = await requestJson<ConfirmResponse>(`/assets/placements/${session.sessionId}/confirm`, 'POST', {
+      const result = await placementRequest<ConfirmResponse>(`/assets/placements/${session.sessionId}/confirm`, 'POST', {
         target,
         ...(adjustment ? { adjustment } : {}),
         ...(force ? { force: true } : {}),
       });
-
-      if (result.kind === 'replace' && framedCamera) {
-        try {
-          const latestScene = await requestJson<SceneConfig>('/scene', 'GET');
-          await requestJson('/scene', 'PUT', {
-            ...latestScene,
-            hero: { ...latestScene.hero, camera: framedCamera },
-          });
-        } catch {
-          /* preserve adopted model even if optional camera save fails */
-        }
-      } else if (result.kind === 'replace-module' && framedCamera && target.instanceId) {
-        try {
-          await requestJson(`/assets/modules/${encodeURIComponent(target.instanceId)}/adjust`, 'POST', {
-            baseVersion: result.version,
-            adjustment: { camera: framedCamera },
-          });
-        } catch {
-          /* preserve replaced module even if optional camera save fails */
-        }
-      } else if (result.kind === 'insert' && result.task?.id) {
-        // User just previewed the 3D object directly inside the webpage and clicked Confirm:
-        // automatically approve the insertion draft and kick off quality gates so the candidate opens right away.
-        try {
-          const approvals = await requestJson<ApprovalCard[]>('/approvals', 'GET');
-          const pendingCard = approvals.find(item => item.taskId === result.task.id && item.status === 'pending');
-          if (pendingCard) {
-            await requestJson(`/approvals/${encodeURIComponent(pendingCard.id)}`, 'POST', { option: 0 });
-            void requestJson(`/candidates/${encodeURIComponent(result.task.id)}/checks`, 'POST', {}).catch(() => {});
-          }
-        } catch {
-          /* if auto-approval cannot complete, sidebar ApprovalPanel still holds the card */
-        }
-      }
-
+      await applyPostConfirmSideEffects(result, framedCamera);
       awaiting(token);
       await reload();
       onConfirmed?.({
@@ -311,57 +190,6 @@ export default function AssetPlacement({
     } finally {
       setBusy(false);
     }
-  }
-
-  function startCornerResize(downEvent: React.PointerEvent<HTMLButtonElement>) {
-    if (!slotRect || target?.kind !== 'insert') return;
-    downEvent.preventDefault();
-    downEvent.stopPropagation();
-    const startX = downEvent.clientX;
-    const startWidthPx = slotRect[2];
-    const fullContainerWidth = Math.max(220, startWidthPx / Math.max(0.1, widthPercent / 100));
-    setResizing(true);
-
-    const onMove = (moveEvent: PointerEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const deltaWidth = align === 'center' ? dx * 2 : align === 'end' ? -dx : dx;
-      const nextPercent = Math.round(Math.min(100, Math.max(25, ((startWidthPx + deltaWidth) / fullContainerWidth) * 100)));
-      setWidthPercent(nextPercent);
-    };
-    const onUp = () => {
-      setResizing(false);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-    };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
-  }
-
-  // Compute exact 1:1 viewport position + iframe edge clipping for the live in-page 3D object stage.
-  let stageStyle: CSSProperties | null = null;
-  if (target && slotRect && iframeBounds && asset.modelUrl && slotRect[2] > 8 && slotRect[3] > 8) {
-    const [sx, sy, sw, sh] = slotRect;
-    const boxLeft = iframeBounds.left + sx;
-    const boxTop = iframeBounds.top + sy;
-    const clipTop = Math.max(0, -sy);
-    const clipLeft = Math.max(0, -sx);
-    const clipRight = Math.max(0, sx + sw - iframeBounds.width);
-    const clipBottom = Math.max(0, sy + sh - iframeBounds.height);
-    const outOfView = clipTop + clipBottom >= sh - 4 || clipLeft + clipRight >= sw - 4;
-
-    stageStyle = {
-      position: 'fixed',
-      left: `${boxLeft}px`,
-      top: `${boxTop}px`,
-      width: `${sw}px`,
-      height: `${sh}px`,
-      clipPath: `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px round 16px)`,
-      visibility: outOfView ? 'hidden' : 'visible',
-      pointerEvents: outOfView || dragging || busy ? 'none' : 'auto',
-      opacity: dragging ? 0.25 : 1,
-    };
   }
 
   return <>
@@ -413,8 +241,7 @@ export default function AssetPlacement({
                 disabled={busy}
                 onClick={() => {
                   setError('');
-                  setTarget(undefined);
-                  setSlotRect(null);
+                  clearTarget();
                 }}
               >
                 重选位置
@@ -508,37 +335,18 @@ export default function AssetPlacement({
       {error && <p className="error placement-hud-error" role="alert">{error}</p>}
     </section>
 
-    {stageStyle && asset.modelUrl && (
-      <div
-        className={`in-page-3d-preview${resizing ? ' is-resizing' : ''}`}
-        data-testid="in-page-3d-preview"
-        style={stageStyle}
-      >
-        <ProductScene
-          config={previewSceneConfig}
-          modelUrl={asset.modelUrl}
-          controls
-          canvasTestId="in-page-3d-canvas"
-          fallback={<p className="in-page-3d-loading">正在网页中加载 3D 实物…</p>}
-          onCameraChange={nextCam => {
-            framedCameraRef.current = nextCam;
-          }}
-        />
-        <div className="in-page-3d-badge">
-          3D 实物预览 · 拖拽旋转 / 滚轮缩放
-        </div>
-        {target?.kind === 'insert' && (
-          <button
-            type="button"
-            className="in-page-resize-handle"
-            data-testid="placement-resize-handle"
-            title="按住右下角拖拽即可在网页中直接缩放大小"
-            onPointerDown={startCornerResize}
-          >
-            ↘ {widthPercent}%
-          </button>
-        )}
-      </div>
-    )}
+    <PlacementStageOverlay
+      frame={frame}
+      target={target}
+      slotRect={slotRect}
+      modelUrl={asset.modelUrl}
+      previewSceneConfig={previewSceneConfig}
+      dragging={dragging}
+      busy={busy}
+      widthPercent={widthPercent}
+      align={align}
+      onWidthPercentChange={setWidthPercent}
+      onCameraChange={nextCam => { framedCameraRef.current = nextCam; }}
+    />
   </>;
 }

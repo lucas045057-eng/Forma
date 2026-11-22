@@ -1,37 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useThree, type ThreeEvent } from '@react-three/fiber';
-import { Sphere, Vector3 } from 'three';
 import type { Asset } from '@spatial/shared';
 import { defaultSceneConfig, isSceneConfig, type SceneConfig, type Vec3 } from '@spatial/shared/scene-config';
-import { setSceneHero, setSceneKeyframe, temperatureToHex, type SceneChanged } from '@spatial/shared/scene-edit';
+import { setSceneHero, setSceneKeyframe, temperatureToHex, type SceneChanged, type SceneDiff } from '@spatial/shared/scene-edit';
 import { ProductScene, scenePose, sceneRenderSettings } from '@spatial/scene-renderer';
 import './scene-editor.css';
-import { useEventCenter } from './EventCenter.tsx';
+import { useEventCenter, type CenterEvent } from './EventCenter.tsx';
 import { api, ApiError, mutation } from './api.ts';
 import { previewOrigin } from './preview-origin.ts';
 import { SceneDraftGuard } from './scene-draft.ts';
-import {assetOriginLabel} from './model-provenance.tsx';
+import SceneLightHandle from './SceneLightHandle.tsx';
+import { assetOriginLabel } from './model-provenance.tsx';
 
-function LightHandle({ direction, change }: { direction: Vec3; change: (direction: Vec3) => void }) {
-  const dragging = useRef(false);
-  const { controls } = useThree();
-  const orbit = controls as unknown as { enabled: boolean } | null;
-  const center = new Vector3(0, 0.5, 0), radius = 0.65;
-  const position = new Vector3(...direction).normalize().multiplyScalar(radius).add(center);
-  function stop() { dragging.current = false; if (orbit) orbit.enabled = true; }
-  useEffect(() => stop, [orbit]);
-  function move(event: ThreeEvent<PointerEvent>) {
-    if (!dragging.current) return;
-    event.stopPropagation();
-    const point = event.ray.intersectSphere(new Sphere(center, radius), new Vector3());
-    if (point) change(point.sub(center).normalize().multiplyScalar(5).toArray() as Vec3);
-  }
-  return <mesh position={position} onPointerDown={event => {
-    event.stopPropagation(); dragging.current = true; if (orbit) orbit.enabled = false;
-    (event.target as unknown as Element).setPointerCapture(event.pointerId);
-  }} onPointerMove={move} onPointerUp={event => { event.stopPropagation(); (event.target as unknown as Element).releasePointerCapture(event.pointerId); stop(); }}>
-    <sphereGeometry args={[0.045, 16, 12]}/><meshBasicMaterial color="#ffdd77"/>
-  </mesh>;
+function isSceneDiff(value: unknown): value is SceneDiff {
+  return typeof value === 'object' && value !== null && 'path' in value && typeof value.path === 'string';
+}
+
+function toSceneChanged(event: CenterEvent): SceneChanged | undefined {
+  if (event.type !== 'scene.changed' || !isSceneConfig(event.config) || !Array.isArray(event.diff)) return undefined;
+  if (!event.diff.every(isSceneDiff)) return undefined;
+  const sequence = typeof event.sequence === 'number' ? event.sequence : typeof event.seq === 'number' ? event.seq : 0;
+  const ts = typeof event.ts === 'string' ? event.ts : '';
+  return { type: 'scene.changed', sequence, ts, config: event.config, diff: event.diff };
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
@@ -97,9 +86,10 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     const unsubscribe = subscribe(event => {
       if (event.type === 'asset.ready') void loadAssets();
       if (event.type === 'state.reload') { void load(); void loadAssets(); }
-      if (event.type === 'scene.changed' && isSceneConfig(event.config) && Array.isArray(event.diff)) {
-        setLatest(event as unknown as SceneChanged);
-        if (!draftGuard.current.dirty) { draftGuard.current.invalidate(); applyConfig(event.config); }
+      const changed = toSceneChanged(event);
+      if (changed) {
+        setLatest(changed);
+        if (!draftGuard.current.dirty) { draftGuard.current.invalidate(); applyConfig(changed.config); }
       }
     });
     return () => { mounted.current = false; draftGuard.current.invalidate(); unsubscribe(); };
@@ -162,7 +152,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
         fallback={<p>模型尚未就绪</p>}
         onCameraChange={camera => editHero(hero => ({ ...hero, camera }))}
         onRotationChange={!compare && !busy && !writeBlocked && tool === 'rotate' ? editRotation : undefined}>
-        {!compare && !busy && !writeBlocked && tool === 'light' && <LightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
+        {!compare && !busy && !writeBlocked && tool === 'light' && <SceneLightHandle direction={draft.lights.key.direction} change={direction => editHero(hero => ({ ...hero, lights: { ...hero.lights, key: { ...hero.lights.key, direction } } }))}/>}
       </ProductScene>}
     </div></div>
     {canvasOverflow&&<p className="notice" data-testid="scene-size-hint" role="status">画布超出可用宽度，请在画布区域横向滚动；尺寸未缩放。</p>}

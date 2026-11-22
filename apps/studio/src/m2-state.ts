@@ -54,20 +54,19 @@ export function reduceM2Event(state: M2State, event: IncomingEvent): M2State {
     return candidate?.id === run.candidateId ? reduceM2Event(next, { ...event, type: 'candidate.ready' }) : next;
   }
   if (event.type === 'task.updated') {
-    const task = object(event.task);
+    const task = event.task;
     if (!isTask(task)) return state;
     const old = state.tasks.find(item => item.id === task.id);
     const terminal = ['done', 'failed', 'cancelled'];
     if (old && terminal.includes(old.status) && !terminal.includes(task.status)) return state;
-    return { ...state, tasks: upsert(state.tasks, task as unknown as Task) };
+    return { ...state, tasks: upsert(state.tasks, task) };
   }
   if (event.type === 'candidate.ready' || event.type === 'candidate.closed') {
-    const candidate = object(event.candidate);
+    const candidate = event.candidate;
     if (!isCandidate(candidate)) return state;
     const old = state.candidates.find(item => item.id === candidate.id);
     if (old && old.decision !== 'pending' && candidate.decision === 'pending') return state;
-    const value = candidate as unknown as Candidate;
-    const merged = old?.latestCheckRunId && value.latestCheckRunId !== old.latestCheckRunId ? { ...value, latestCheckRunId: old.latestCheckRunId, checks: old.checks } : value;
+    const merged = old?.latestCheckRunId && candidate.latestCheckRunId !== old.latestCheckRunId ? { ...candidate, latestCheckRunId: old.latestCheckRunId, checks: old.checks } : candidate;
     return { ...state, candidates: upsert(state.candidates, merged) };
   }
   if (event.type === 'version.changed' && typeof event.version === 'string') return { ...state, version: event.version };
