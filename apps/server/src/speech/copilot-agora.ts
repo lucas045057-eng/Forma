@@ -1,6 +1,10 @@
-import { RtcRole, RtcTokenBuilder, RtmTokenBuilder } from 'agora-token';
+import { createRequire } from 'node:module';
+import type * as AgoraTokenTypes from 'agora-token';
 import type { VoiceCopilotProbeResult } from '@spatial/shared';
 import { resolveVoiceCopilotMode, validateCopilotUrl, type VoiceCopilotRuntimeConfig } from './copilot-config.ts';
+
+const require = createRequire(import.meta.url);
+const { RtcRole, RtcTokenBuilder, RtmTokenBuilder }: typeof AgoraTokenTypes = require('agora-token');
 
 const DEFAULT_AGORA_CONVO_BASE = 'https://api.agora.io/api/conversational-ai-agent/v2';
 const TOKEN_TTL_SECONDS = 3600;
