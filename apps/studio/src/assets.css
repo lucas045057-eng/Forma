@@ -2,7 +2,7 @@
   position: fixed;
   inset: 60px 16px 74px auto;
   width: min(500px, 46vw);
-  z-index: 50;
+  z-index: var(--z-drawer);
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -521,12 +521,11 @@
   width: fit-content;
   max-width: min(880px, calc(100vw - 32px));
   padding: 9px 12px;
-  background: rgba(255, 253, 249, 0.96);
-  backdrop-filter: blur(16px);
+  background: rgba(255, 253, 249, 0.98);
   border: 1px solid var(--border-accent);
   border-radius: 14px;
   box-shadow: var(--island-shadow);
-  z-index: 60;
+  z-index: var(--z-hud);
   font-size: 12px;
   display: flex;
   flex-direction: column;
@@ -689,7 +688,7 @@
 
 /* Live 1:1 In-Page 3D Preview Stage Overlay */
 .in-page-3d-preview {
-  z-index: 45;
+  z-index: var(--z-placement);
   border-radius: 16px;
   overflow: hidden;
   background: #efe8dc;
@@ -733,8 +732,7 @@
   left: 10px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(25, 24, 22, 0.82);
-  backdrop-filter: blur(8px);
+  background: rgba(25, 24, 22, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #ffffff;
   font-size: 11px;

@@ -1,5 +1,6 @@
 import type { PickState } from './pick-state.ts';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
+import { reduceStudioSurface, surfaceFlags } from './surface-state.ts';
 import { isPreviewMessage, type ApprovalCard, type ModelStatusView, type StudioMessage, type WorkSummary, type WorksState } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
 import { impactHighlightMessages, isImpactPickError, restorePicking, waiting } from './approval-state.ts';
@@ -37,14 +38,13 @@ function Studio() {
   const [previewRevision, setPreviewRevision] = useState(0);
   const [impact, setImpact] = useState<{ id: string; src: string; baseVersion: string; wasPicking: boolean } | null>(null);
   const impactRef = useRef<typeof impact>(null);
-  const [showAssets, setShowAssets] = useState(false);
+  const [surface, dispatchSurface] = useReducer(reduceStudioSurface, 'canvas');
+  const { showAssets, showScene, inspectorOpen } = surfaceFlags(surface);
   const [placingAsset,setPlacingAsset]=useState<Asset>();
   const [initialPlacement,setInitialPlacement]=useState<PlacementSession>();
   const [placementGeneration,setPlacementGeneration]=useState(0);
   const [draggingPlacement,setDraggingPlacement]=useState(false);
   const placementSessions=useRef(new Map<string,Promise<PlacementSession>>());
-  const [showScene, setShowScene] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [candidateSlot, setCandidateSlot] = useState<HTMLDivElement | null>(null);
   const [topLeftSlot, setTopLeftSlot] = useState<HTMLDivElement | null>(null);
   const [topCenterSlot, setTopCenterSlot] = useState<HTMLDivElement | null>(null);
@@ -104,9 +104,7 @@ function Studio() {
     const next = { id: card.id, src, baseVersion: card.baseVersion, wasPicking: impactRef.current?.wasPicking ?? pickingRef.current };
     impactRef.current = next;
     setImpact(next);
-    setShowAssets(false);
-    setShowScene(false);
-    setInspectorOpen(true);
+    dispatchSurface({ type: 'impact-highlight' });
     setMode('current');
     pickingRef.current = false;
     setPicking(false);
@@ -175,9 +173,7 @@ function Studio() {
           // The previous object stops being submittable the moment a new one is picked.
           setPick({ kind: 'pending', src: payload.src });
           setPickedAt(progressRef.current);
-          setShowAssets(false);
-          setShowScene(false);
-          setInspectorOpen(true);
+          dispatchSurface({ type: 'pick-received' });
           void api<{ version: string }>('/version').then(result => {
             if (requestId !== pickRequest.current) return;
             setPick({ kind: 'ready', selection: { ...payload, baseVersion: result.version } });
@@ -245,8 +241,7 @@ function Studio() {
   }, [draggingPlacement]);
 
   function closeInspector() {
-    setShowScene(false);
-    setInspectorOpen(false);
+    dispatchSurface({ type: 'close' });
   }
 
   function stopPicking() {
@@ -256,48 +251,33 @@ function Studio() {
   }
 
   function toggleAssets() {
-    if (showAssets) {
-      setShowAssets(false);
-      return;
+    if (!showAssets) {
+      exitImpact(false);
+      stopPicking();
+      setPlacingAsset(undefined);
     }
-    exitImpact(false);
-    stopPicking();
-    setShowScene(false);
-    setInspectorOpen(false);
-    setPlacingAsset(undefined);
-    setShowAssets(true);
+    dispatchSurface({ type: 'toggle-assets' });
   }
 
   function toggleScene() {
-    if (showScene && inspectorOpen) {
-      closeInspector();
-      return;
+    if (!showScene) {
+      exitImpact(false);
+      stopPicking();
+      setMode('current');
+      setPlacingAsset(undefined);
     }
-    exitImpact(false);
-    stopPicking();
-    setMode('current');
-    setShowAssets(false);
-    setPlacingAsset(undefined);
-    setShowScene(true);
-    setInspectorOpen(true);
+    dispatchSurface({ type: 'toggle-scene' });
   }
 
   function toggleInspector() {
-    if (inspectorOpen && !showScene) {
-      setInspectorOpen(false);
-      return;
-    }
-    setShowAssets(false);
-    setShowScene(false);
-    setInspectorOpen(true);
+    dispatchSurface({ type: 'toggle-inspector' });
   }
 
   function beginAssetPlacement(asset: Asset, session?: PlacementSession, fromDrag = false) {
     exitImpact(false);
     stopPicking();
     setMode('current');
-    setShowScene(false);
-    setInspectorOpen(false);
+    dispatchSurface({ type: 'placement-started', fromDrag });
     if (session) {
       send({ type: 'placement:start', payload: session });
     }
@@ -310,7 +290,6 @@ function Studio() {
       requestAnimationFrame(() => setDraggingPlacement(true));
     } else {
       setDraggingPlacement(false);
-      setShowAssets(false);
     }
   }
   const previewSize = () => { send({ type: 'viewport:request' }); return canvasWidth.current; };
@@ -318,10 +297,7 @@ function Studio() {
     if (impactRef.current) { exitImpact(); return; }
     if (mode === 'candidate') setMode('current');
     const next = !pickingRef.current;
-    if (next) {
-      setShowAssets(false);
-      setShowScene(false);
-    }
+    if (next) dispatchSurface({ type: 'pick-started' });
     pickingRef.current = next;
     setPicking(next);
     send({ type: next ? 'pick:start' : 'pick:stop' });
@@ -381,8 +357,7 @@ function Studio() {
       setPicking(false);
       setPick({ kind: 'none' });
       setPlacingAsset(undefined);
-      setShowAssets(false);
-      closeInspector();
+      dispatchSurface({ type: 'work-switched' });
       setMode('current');
       setReady(false);
       await api(`/works/${encodeURIComponent(nextId)}/select`, mutation('POST', {}));
@@ -402,15 +377,12 @@ function Studio() {
     setPicking(false);
     setPick({ kind: 'none' });
     setPlacingAsset(undefined);
-    setShowAssets(false);
-    setShowScene(false);
+    dispatchSurface({
+      type: 'work-created',
+      openInspector: !created.task && (created.work.starter === 'blank' || created.work.starter === 'free-web'),
+    });
     setMode('current');
     setReady(false);
-    if (!created.task && (created.work.starter === 'blank' || created.work.starter === 'free-web')) {
-      setInspectorOpen(true);
-    } else {
-      setInspectorOpen(false);
-    }
     setWorksState(previous => {
       const others = previous.works.filter(item => item.id !== created.work.id).map(item => ({ ...item, active: false }));
       return { activeId: created.activeId, works: [...others, { ...created.work, active: true }] };
@@ -423,27 +395,19 @@ function Studio() {
   const previousPendingApprovals = useRef(0);
   useEffect(() => {
     if (previousPendingApprovals.current === 0 && pendingApprovalsCount > 0) {
-      setShowAssets(false);
-      setShowScene(false);
-      setInspectorOpen(true);
+      dispatchSurface({ type: 'approval-arrived' });
     }
     previousPendingApprovals.current = pendingApprovalsCount;
   }, [pendingApprovalsCount]);
 
   useEffect(() => {
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== 'Escape' || modalTab || showModelConfig || placingAsset) return;
-      if (showAssets) {
-        setShowAssets(false);
-        return;
-      }
-      if (inspectorOpen || showScene) {
-        closeInspector();
-      }
+      if (event.key !== 'Escape') return;
+      dispatchSurface({ type: 'escape', blocked: Boolean(modalTab || showModelConfig || placingAsset) });
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [inspectorOpen, showScene, modalTab, showModelConfig, showAssets, placingAsset]);
+  }, [modalTab, showModelConfig, placingAsset]);
 
   const activeWorkSummary: WorkSummary | undefined = worksState.works.find(item => item.id === worksState.activeId) ?? worksState.works[0];
   const blankBootstrap = (activeWorkSummary?.starter === 'blank' || activeWorkSummary?.starter === 'free-web') && !state.candidates.some(item => item.decision === 'adopted');
@@ -467,8 +431,8 @@ function Studio() {
     <main className="studio">
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
       {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => setModelStatus(nextStatus)}/>}
-      {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => setShowAssets(false)} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
-      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);setShowAssets(false);}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
+      {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => dispatchSurface({ type: 'close' })} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
+      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);dispatchSurface({ type: 'close' });}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
       <header className="studio-top">
         <div className="island brand-island">
           <span className="wordmark" aria-hidden="true">F</span>
@@ -529,7 +493,7 @@ function Studio() {
           <button type="button" className="ghost-btn compact-btn" data-testid="model-config-open" onClick={() => setShowModelConfig(true)}>接入模型</button>
           <button type="button" className="ghost-btn compact-btn" data-testid="state-refresh" title="刷新状态" onClick={() => void reload().catch(() => {})}>刷新</button>
           {pendingApprovalsCount > 0 && (
-            <button type="button" className="approval-alert-pill" onClick={() => { setShowAssets(false); setShowScene(false); setInspectorOpen(true); }}>
+            <button type="button" className="approval-alert-pill" onClick={() => dispatchSurface({ type: 'open-inspector' })}>
               越界请示 · {pendingApprovalsCount}
             </button>
           )}
