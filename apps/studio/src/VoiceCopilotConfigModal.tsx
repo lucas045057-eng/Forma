@@ -25,7 +25,7 @@ export default function VoiceCopilotConfigModal({ onClose, onSaved }: VoiceCopil
 
   const [presets, setPresets] = useState<VoiceCopilotPreset[]>([]);
   const [vendor, setVendor] = useState<VoiceCopilotVendor>('gemini_live');
-  const [model, setModel] = useState('gemini-2.5-flash-native-audio-preview');
+  const [model, setModel] = useState('models/gemini-3.8-live');
   const [voice, setVoice] = useState('Aoede');
   const [url, setUrl] = useState('');
 

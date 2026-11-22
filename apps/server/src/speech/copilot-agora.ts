@@ -247,9 +247,80 @@ export class AgoraCopilotClient {
 
   async leaveAgent(agentId: string): Promise<void> {
     const { status, rawText } = await this.callAgora('POST', `/agents/${encodeURIComponent(agentId)}/leave`, {});
+    if (status === 404) return;
     if (status < 200 || status >= 300) {
       const detail = parseErrorDetail(rawText);
       throw new AgoraCopilotError('AGORA_LEAVE_FAILED', `关闭语音 Agent 会话失败 (HTTP ${status})${detail ? `：${detail}` : ''}`, 502);
+    }
+  }
+
+  private async probeGeminiLiveModel(latencyMs: number, agoraStatus: number): Promise<VoiceCopilotProbeResult> {
+    const wireModel = this.cfg.model.startsWith('models/') ? this.cfg.model : `models/${this.cfg.model}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.min(this.timeoutMs, 8000));
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(this.cfg.mllmApiKey.trim())}`;
+      const res = await this.fetchImpl(url, { method: 'GET', redirect: 'error', signal: controller.signal });
+      const rawText = await res.text().catch(() => '');
+      const detail = parseErrorDetail(rawText);
+      if (res.status === 400 || res.status === 401 || res.status === 403) {
+        return {
+          ok: false,
+          mode: 'real',
+          status: res.status,
+          latencyMs,
+          message: `声网 4 项凭证已连通（${latencyMs} ms），但 Gemini API Key 被拒绝 (HTTP ${res.status})${detail ? `：${detail}` : ''}`,
+          hint: '请核对 Google AI Studio 的 Gemini API Key 是否复制完整、未过期或未启用受限域名。',
+        };
+      }
+      if (!res.ok) {
+        return {
+          ok: false,
+          mode: 'real',
+          status: res.status,
+          latencyMs,
+          message: `声网已连通（${latencyMs} ms），Gemini 模型接口返回 HTTP ${res.status}${detail ? `：${detail}` : ''}`,
+        };
+      }
+      let models: Array<{ name?: string; supportedGenerationMethods?: string[] }> = [];
+      try {
+        const parsed = JSON.parse(rawText) as { models?: Array<{ name?: string; supportedGenerationMethods?: string[] }> };
+        if (Array.isArray(parsed.models)) models = parsed.models;
+      } catch {
+        models = [];
+      }
+      if (models.length > 0 && !models.some(m => m.name === wireModel || m.name === this.cfg.model)) {
+        const liveModels = models
+          .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('bidiGenerateContent'))
+          .map(m => m.name)
+          .filter((name): name is string => Boolean(name))
+          .slice(0, 6);
+        return {
+          ok: false,
+          mode: 'real',
+          status: res.status,
+          latencyMs,
+          message: `声网 4 项与 Gemini Key 均有效，但当前模型 ${wireModel} 不在可用列表中`,
+          hint: liveModels.length > 0 ? `可用 Live 模型：${liveModels.join(' / ')}` : '请换用模型列表中支持的 Live 模型。',
+        };
+      }
+      return {
+        ok: true,
+        mode: 'real',
+        status: agoraStatus,
+        latencyMs,
+        message: `连接声网国际版与 Gemini Live 成功（${latencyMs} ms）· 已核验模型 ${wireModel} 可用`,
+      };
+    } catch {
+      return {
+        ok: true,
+        mode: 'real',
+        status: agoraStatus,
+        latencyMs,
+        message: `声网国际版连通成功（${latencyMs} ms）；本机直探 Google 接口超时，声网云端将直接发起连线`,
+      };
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -302,15 +373,8 @@ export class AgoraCopilotClient {
       const latencyMs = Date.now() - start;
       const detail = parseErrorDetail(rawText);
       if (status >= 200 && status < 300) {
-        if (this.cfg.vendor === 'gemini_live' && this.cfg.mllmApiKey.trim().startsWith('AQ.')) {
-          return {
-            ok: false,
-            mode: 'real',
-            status,
-            latencyMs,
-            message: `声网国际版 4 项凭证已连通（${latencyMs} ms），但检测到 MLLM API Key 以 AQ. 开头（Vertex AI Express 模式密钥），不适用于 Gemini Live（generativelanguage.googleapis.com）`,
-            hint: '请在 Google AI Studio (https://aistudio.google.com/apikey) 创建标准 Gemini API 密钥（AIzaSy 开头，不要选 Vertex AI Express Key），填入保存即可真实连麦。',
-          };
+        if (this.cfg.vendor === 'gemini_live') {
+          return this.probeGeminiLiveModel(latencyMs, status);
         }
         return {
           ok: true,

@@ -39,7 +39,7 @@ describe('voice copilot backend & Agora v2 integration', () => {
     expect(geminiPayload.properties.advanced_features.enable_mllm).toBe(true);
     expect(geminiPayload.properties.parameters.data_channel).toBe('datastream');
     expect(geminiPayload.properties.mllm.vendor).toBe('gemini');
-    expect(geminiPayload.properties.mllm.model).toBe('models/gemini-2.5-flash-native-audio-preview');
+    expect(geminiPayload.properties.mllm.model).toBe('models/gemini-3.8-live');
     expect(geminiPayload.properties.mllm.transcribe_agent).toBe(true);
     expect(geminiPayload.properties.mllm.transcribe_user).toBe(true);
     expect(geminiPayload.properties.mllm.params.voice).toBe('Aoede');
@@ -65,23 +65,55 @@ describe('voice copilot backend & Agora v2 integration', () => {
     expect(openaiPayload.properties.mllm.params).toMatchObject({ turn_detection: { type: 'server_vad' } });
   });
 
-  it('flags Vertex AI Express AQ. keys clearly after verifying Agora credentials', async () => {
-    const vertexKeyCfg = loadVoiceCopilotRuntimeConfig({
+  it('probes Gemini Live models directly for AQ. keys, flags missing models, and makes leave idempotent on 404', async () => {
+    const validAqCfg = loadVoiceCopilotRuntimeConfig({
       vendor: 'gemini_live',
       agoraAppId: SAMPLE_APP_ID,
       agoraAppCertificate: SAMPLE_CERT,
       agoraCustomerId: 'cust_id_123456',
       agoraCustomerSecret: 'cust_sec_987654',
-      mllmApiKey: 'AQ.SampleVertexExpressKey123',
+      mllmApiKey: 'AQ.SampleDeveloperApiKey123',
     });
-    const client = new AgoraCopilotClient(vertexKeyCfg, {
-      fetchImpl: async () => new Response(JSON.stringify({ agents: [] }), { status: 200 }),
+    const okClient = new AgoraCopilotClient(validAqCfg, {
+      fetchImpl: async input => {
+        const u = String(input);
+        if (u.includes('generativelanguage.googleapis.com')) {
+          return new Response(
+            JSON.stringify({ models: [{ name: 'models/gemini-3.8-live', supportedGenerationMethods: ['bidiGenerateContent'] }] }),
+            { status: 200 },
+          );
+        }
+        return new Response(JSON.stringify({ agents: [] }), { status: 200 });
+      },
     });
-    const result = await client.probeConfig();
-    expect(result.ok).toBe(false);
-    expect(result.mode).toBe('real');
-    expect(result.message).toContain('AQ.');
-    expect(result.hint).toContain('AIzaSy');
+    const okRes = await okClient.probeConfig();
+    expect(okRes.ok).toBe(true);
+    expect(okRes.message).toContain('models/gemini-3.8-live');
+
+    const staleModelCfg = loadVoiceCopilotRuntimeConfig({
+      ...validAqCfg,
+      model: 'gemini-missing-live-model',
+    });
+    const badModelClient = new AgoraCopilotClient(staleModelCfg, {
+      fetchImpl: async input => {
+        const u = String(input);
+        if (u.includes('generativelanguage.googleapis.com')) {
+          return new Response(
+            JSON.stringify({ models: [{ name: 'models/gemini-3.8-live', supportedGenerationMethods: ['bidiGenerateContent'] }] }),
+            { status: 200 },
+          );
+        }
+        return new Response(JSON.stringify({ agents: [] }), { status: 200 });
+      },
+    });
+    const badModelRes = await badModelClient.probeConfig();
+    expect(badModelRes.ok).toBe(false);
+    expect(badModelRes.hint).toContain('models/gemini-3.8-live');
+
+    const goneClient = new AgoraCopilotClient(validAqCfg, {
+      fetchImpl: async () => new Response(JSON.stringify({ message: 'not found' }), { status: 404 }),
+    });
+    await expect(goneClient.leaveAgent('already-stopped-agent')).resolves.toBeUndefined();
   });
 
   it('persists Agora keys to .env without clobbering existing keys and masks secrets in config view', async () => {
@@ -159,6 +191,12 @@ describe('voice copilot backend & Agora v2 integration', () => {
     const agoraCalls: Array<{ method: string; url: string; auth: string | null; body?: unknown }> = [];
     const mockFetch: typeof fetch = async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      if (url.includes('generativelanguage.googleapis.com')) {
+        return new Response(
+          JSON.stringify({ models: [{ name: 'models/gemini-3.8-live', supportedGenerationMethods: ['bidiGenerateContent'] }] }),
+          { status: 200 },
+        );
+      }
       const headers = new Headers(init?.headers);
       const auth = headers.get('authorization');
       const bodyText = typeof init?.body === 'string' ? init.body : undefined;
