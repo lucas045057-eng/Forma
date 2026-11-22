@@ -47,19 +47,22 @@ function basicAuthHeader(customerId: string, customerSecret: string): string {
 }
 
 export function buildAgoraMllmJoinPayload(cfg: VoiceCopilotRuntimeConfig, input: AgoraJoinAgentInput) {
-  const mllmParams =
-    cfg.vendor === 'gemini_live'
-      ? {
-          model: cfg.model,
-          instructions: input.systemPrompt,
-          voice: cfg.voice,
-        }
-      : {
-          model: cfg.model,
-          instructions: input.systemPrompt,
-          voice: cfg.voice,
-          turn_detection: { type: 'server_vad' },
-        };
+  const isGemini = cfg.vendor === 'gemini_live';
+  const wireVendor = isGemini ? 'gemini' : 'openai';
+  const wireModel = isGemini && !cfg.model.startsWith('models/') ? `models/${cfg.model}` : cfg.model;
+
+  const mllmParams = isGemini
+    ? {
+        model: wireModel,
+        instructions: input.systemPrompt,
+        voice: cfg.voice,
+      }
+    : {
+        model: wireModel,
+        instructions: input.systemPrompt,
+        voice: cfg.voice,
+        turn_detection: { type: 'server_vad' },
+      };
 
   return {
     name: input.name,
@@ -88,10 +91,14 @@ export function buildAgoraMllmJoinPayload(cfg: VoiceCopilotRuntimeConfig, input:
       },
       mllm: {
         enable: true,
-        vendor: cfg.vendor,
+        vendor: wireVendor,
         url: cfg.url,
         api_key: cfg.mllmApiKey,
-        model: cfg.model,
+        model: wireModel,
+        voice: cfg.voice,
+        instructions: input.systemPrompt,
+        transcribe_agent: true,
+        transcribe_user: true,
         greeting_message: '我在。你可以直接跟我聊设计想法，或者点中页面元素告诉我怎么改。',
         failure_message: '抱歉，实时语音模型连接暂时遇到一点波动，请稍后再试或使用右侧输入框。',
         input_modalities: ['audio'],
@@ -295,6 +302,16 @@ export class AgoraCopilotClient {
       const latencyMs = Date.now() - start;
       const detail = parseErrorDetail(rawText);
       if (status >= 200 && status < 300) {
+        if (this.cfg.vendor === 'gemini_live' && this.cfg.mllmApiKey.trim().startsWith('AQ.')) {
+          return {
+            ok: false,
+            mode: 'real',
+            status,
+            latencyMs,
+            message: `声网国际版 4 项凭证已连通（${latencyMs} ms），但检测到 MLLM API Key 以 AQ. 开头（Vertex AI Express 模式密钥），不适用于 Gemini Live（generativelanguage.googleapis.com）`,
+            hint: '请在 Google AI Studio (https://aistudio.google.com/apikey) 创建标准 Gemini API 密钥（AIzaSy 开头，不要选 Vertex AI Express Key），填入保存即可真实连麦。',
+          };
+        }
         return {
           ok: true,
           mode: 'real',

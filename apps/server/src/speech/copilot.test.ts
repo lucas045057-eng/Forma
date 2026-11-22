@@ -38,7 +38,10 @@ describe('voice copilot backend & Agora v2 integration', () => {
     });
     expect(geminiPayload.properties.advanced_features.enable_mllm).toBe(true);
     expect(geminiPayload.properties.parameters.data_channel).toBe('datastream');
-    expect(geminiPayload.properties.mllm.vendor).toBe('gemini_live');
+    expect(geminiPayload.properties.mllm.vendor).toBe('gemini');
+    expect(geminiPayload.properties.mllm.model).toBe('models/gemini-2.5-flash-native-audio-preview');
+    expect(geminiPayload.properties.mllm.transcribe_agent).toBe(true);
+    expect(geminiPayload.properties.mllm.transcribe_user).toBe(true);
     expect(geminiPayload.properties.mllm.params.voice).toBe('Aoede');
 
     const openaiCfg = loadVoiceCopilotRuntimeConfig({
@@ -57,9 +60,28 @@ describe('voice copilot backend & Agora v2 integration', () => {
       userUid: 1001,
       systemPrompt: 'You are Jarvis.',
     });
-    expect(openaiPayload.properties.mllm.vendor).toBe('openai_realtime');
+    expect(openaiPayload.properties.mllm.vendor).toBe('openai');
     expect(openaiPayload.properties.mllm.model).toBe('gpt-realtime');
     expect(openaiPayload.properties.mllm.params).toMatchObject({ turn_detection: { type: 'server_vad' } });
+  });
+
+  it('flags Vertex AI Express AQ. keys clearly after verifying Agora credentials', async () => {
+    const vertexKeyCfg = loadVoiceCopilotRuntimeConfig({
+      vendor: 'gemini_live',
+      agoraAppId: SAMPLE_APP_ID,
+      agoraAppCertificate: SAMPLE_CERT,
+      agoraCustomerId: 'cust_id_123456',
+      agoraCustomerSecret: 'cust_sec_987654',
+      mllmApiKey: 'AQ.SampleVertexExpressKey123',
+    });
+    const client = new AgoraCopilotClient(vertexKeyCfg, {
+      fetchImpl: async () => new Response(JSON.stringify({ agents: [] }), { status: 200 }),
+    });
+    const result = await client.probeConfig();
+    expect(result.ok).toBe(false);
+    expect(result.mode).toBe('real');
+    expect(result.message).toContain('AQ.');
+    expect(result.hint).toContain('AIzaSy');
   });
 
   it('persists Agora keys to .env without clobbering existing keys and masks secrets in config view', async () => {
