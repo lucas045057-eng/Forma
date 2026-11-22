@@ -11,22 +11,27 @@ import ModelOriginBadge from './model-provenance.tsx';
 import SelectionLink from './SelectionLink.tsx';
 import NewWorkModal, { type ModalTab } from './NewWorkModal.tsx';
 import ModelConfigModal from './ModelConfigModal.tsx';
+import VoiceCopilotHud from './VoiceCopilotHud.tsx';
 import type { PlacementSession } from './placement-state.ts';
+import { api, mutation } from './api.ts';
 import { luxApi } from './lux3d-api.ts';
 import { usePreviewBridge } from './use-preview-bridge.ts';
 import { useStudioWorks } from './use-studio-works.ts';
+import { useVoiceCopilot } from './use-voice-copilot.ts';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
 const AssetPlacement = lazy(() => import('./AssetPlacement'));
+const VoiceCopilotConfigModal = lazy(() => import('./VoiceCopilotConfigModal'));
 
 function Studio() {
-  const { state, status: eventStatus, lastSeq, syncReady, syncError, reload, subscribe } = useEventCenter();
+  const { state, status: eventStatus, lastSeq, syncReady, syncError, reload, subscribe, acquire, awaiting } = useEventCenter();
   const [surface, dispatchSurface] = useReducer(reduceStudioSurface, 'canvas');
   const { showAssets, showScene, inspectorOpen } = surfaceFlags(surface);
 
   const [modalTab, setModalTab] = useState<ModalTab | null>(null);
   const [showModelConfig, setShowModelConfig] = useState(false);
+  const [showVoiceConfig, setShowVoiceConfig] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState<PreviewMode>('current');
   const [candidateId, setCandidateId] = useState('');
@@ -106,11 +111,11 @@ function Studio() {
   useEffect(() => {
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      dispatchSurface({ type: 'escape', blocked: Boolean(modalTab || showModelConfig || placingAsset) });
+      dispatchSurface({ type: 'escape', blocked: Boolean(modalTab || showModelConfig || showVoiceConfig || placingAsset) });
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [modalTab, showModelConfig, placingAsset]);
+  }, [modalTab, showModelConfig, showVoiceConfig, placingAsset]);
 
   async function preparePlacement(asset: Asset): Promise<PlacementSession> {
     void import('./AssetPlacement');
@@ -172,6 +177,55 @@ function Studio() {
   }
 
   const workName = works.activeWorkSummary?.name ?? '空间作品';
+  async function submitVoiceEdit(instruction: string, variantCount: 1 | 2 | 3) {
+    if (!syncReady || eventStatus !== 'connected') {
+      setError('当前未连接到后端事件流，无法派发语音修改任务');
+      return;
+    }
+    const token = acquire(['task:create']);
+    if (!token) return;
+    setError('');
+    try {
+      const useBootstrap = works.blankBootstrap && !bridge.selection;
+      const picked = bridge.selection;
+      if (variantCount > 1) {
+        await api('/tasks/batch', mutation('POST', {
+          instruction,
+          count: variantCount,
+          ...(picked ? { selection: picked } : {}),
+          ...(useBootstrap ? { bootstrap: true } : {}),
+        }));
+      } else {
+        await api('/tasks', mutation('POST', {
+          instruction,
+          ...(picked ? { selection: picked } : {}),
+          ...(useBootstrap ? { bootstrap: true } : {}),
+        }));
+      }
+      dispatchSurface({ type: 'open-inspector' });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '语音派单失败');
+    } finally {
+      awaiting(token);
+      await reload().catch(() => {});
+    }
+  }
+
+  const voiceCopilot = useVoiceCopilot({
+    workName,
+    selection: bridge.selection,
+    pendingCandidates: pending,
+    onSubmitEdit: submitVoiceEdit,
+    onSwitchCandidate: (nextMode, targetCandidateId) => {
+      if (targetCandidateId) setCandidateId(targetCandidateId);
+      setMode(nextMode);
+    },
+    onDispatchSurface: dispatchSurface,
+    onSetPicking: active => {
+      if (active && !bridge.picking) bridge.togglePicking();
+      else if (!active && bridge.picking) bridge.stopPicking();
+    },
+  });
   const mainFrame = (
     <iframe
       key={`${works.worksState.activeId}:${works.previewRevision}`}
@@ -197,6 +251,7 @@ function Studio() {
     <main className="studio">
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void works.handleWorkCreated(result)}/>}
       {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => works.setModelStatus(nextStatus)}/>}
+      {showVoiceConfig && <Suspense fallback={<p className="floating-status" role="status">加载声网配置…</p>}><VoiceCopilotConfigModal onClose={() => setShowVoiceConfig(false)} onSaved={nextConfig => voiceCopilot.setConfig(nextConfig)}/></Suspense>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={closeInspector} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
       {placingAsset && <Suspense fallback={<p className="floating-status" role="status">加载 3D 放置预览…</p>}><AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={() => { setDraggingPlacement(false); closeInspector(); }} onConfirmed={outcome => { if (outcome.kind === 'insert' && outcome.candidateId) { setCandidateId(outcome.candidateId); setMode('candidate'); } }} frame={bridge.ready ? bridge.preview.current : null} onClose={() => { setDraggingPlacement(false); for (const key of placementSessions.current.keys()) if (key.startsWith(placingAsset.id + ':')) placementSessions.current.delete(key); setPlacingAsset(undefined); }}/></Suspense>}
       <header className="studio-top">
@@ -310,10 +365,37 @@ function Studio() {
         bbox={bridge.selection?.bbox ?? null}
         visible={!!bridge.selection && bridge.ready && !bridge.picking && mode === 'current' && !showScene && !bridge.impact && !showAssets && !placingAsset && inspectorOpen && bridge.pickedAt === bridge.progress}
       />
+      <VoiceCopilotHud
+        state={voiceCopilot.state}
+        config={voiceCopilot.config}
+        micRecognizing={voiceCopilot.micRecognizing}
+        supportsDictation={voiceCopilot.supportsBrowserDictation}
+        onToggleMute={() => void voiceCopilot.toggleMute()}
+        onToggleTts={voiceCopilot.toggleTts}
+        onToggleExpanded={voiceCopilot.toggleExpanded}
+        onInterrupt={() => void voiceCopilot.interrupt()}
+        onDisconnect={() => void voiceCopilot.stopSession()}
+        onOpenConfig={() => setShowVoiceConfig(true)}
+        onSendText={voiceCopilot.sendTextTurn}
+        onStartDictation={voiceCopilot.startBrowserDictation}
+      />
       <nav className="island dock tools" role="toolbar" aria-label="工具">
         <button type="button" className={`tool-btn${bridge.picking ? ' is-active' : ''}`} aria-pressed={bridge.picking} data-testid="pick-toggle" onClick={bridge.togglePicking}>{bridge.picking ? '退出选取' : '开启选取'}</button>
         <button type="button" className={`tool-btn${showAssets ? ' is-active' : ''}`} aria-pressed={showAssets} data-testid="asset-open" onClick={toggleAssets}>3D 资产</button>
         <button type="button" className={`tool-btn${showScene ? ' is-active' : ''}`} aria-pressed={showScene} data-testid="scene-open" onClick={toggleScene}>3D 场景编辑</button>
+        <button
+          type="button"
+          className={`tool-btn${voiceCopilot.state.active ? ' is-active' : ''}`}
+          aria-pressed={voiceCopilot.state.active}
+          data-testid="voice-copilot-toggle"
+          title={voiceCopilot.config?.mode === 'real' ? '连接声网实时语音副驾' : '开启贾维斯语音副驾（未配密钥时自动 Mock 演练）'}
+          onClick={() => {
+            if (voiceCopilot.state.active) void voiceCopilot.stopSession();
+            else void voiceCopilot.startSession();
+          }}
+        >
+          {voiceCopilot.state.active ? '🎙 语音已连麦' : '🎙 实时语音'}
+        </button>
         <span className="dock-sep" aria-hidden="true"/>
         <button
           type="button"

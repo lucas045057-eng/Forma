@@ -386,3 +386,140 @@ export function isPreviewMessage(value: unknown): value is PreviewMessage {
     record(styles) && ['display', 'position', 'color', 'backgroundColor', 'fontSize', 'fontFamily',
       'fontWeight', 'lineHeight', 'padding', 'margin', 'borderRadius', 'width', 'height'].every(k => typeof styles[k] === 'string');
 }
+
+export type VoiceCopilotVendor = 'gemini_live' | 'openai_realtime';
+export type VoiceCopilotMode = 'unconfigured' | 'mock' | 'real';
+export type VoiceCopilotAgentState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error';
+
+export interface VoiceCopilotPreset {
+  vendor: VoiceCopilotVendor;
+  name: string;
+  badge: string;
+  defaultModel: string;
+  models: string[];
+  defaultVoice: string;
+  voices: string[];
+  defaultUrl: string;
+  keyPlaceholder: string;
+  docHint: string;
+}
+
+export interface VoiceCopilotConfigView {
+  configured: boolean;
+  mode: VoiceCopilotMode;
+  vendor: VoiceCopilotVendor;
+  model: string;
+  voice: string;
+  url: string;
+  agoraAppId: string;
+  hasAppCertificate: boolean;
+  appCertificateMasked: string;
+  hasCustomerId: boolean;
+  customerIdMasked: string;
+  hasCustomerSecret: boolean;
+  customerSecretMasked: string;
+  hasMllmApiKey: boolean;
+  mllmApiKeyMasked: string;
+  presets: VoiceCopilotPreset[];
+}
+
+export interface VoiceCopilotProbeResult {
+  ok: boolean;
+  mode: VoiceCopilotMode;
+  latencyMs: number;
+  status?: number;
+  message: string;
+  hint?: string;
+}
+
+export interface VoiceCopilotSession {
+  sessionId: string;
+  mode: 'mock' | 'real';
+  vendor: VoiceCopilotVendor;
+  model: string;
+  voice: string;
+  agentId: string;
+  appId: string;
+  channel: string;
+  userUid: number;
+  agentUid: number;
+  rtcToken: string;
+  rtmToken: string;
+  createdAt: string;
+  notice?: string;
+}
+
+export type VoiceCopilotAction =
+  | { type: 'submit_edit'; instruction: string; variantCount?: 1 | 2 | 3 }
+  | { type: 'switch_candidate'; candidateId?: string; mode: 'current' | 'candidate' | 'compare' }
+  | { type: 'open_surface'; surface: 'canvas' | 'inspector' | 'scene' | 'assets' }
+  | { type: 'toggle_picking'; active: boolean };
+
+export interface VoiceCopilotTranscriptItem {
+  id: string;
+  turnId: number;
+  role: 'user' | 'agent' | 'system';
+  text: string;
+  status: 'in_progress' | 'completed' | 'interrupted';
+  timestamp: number;
+  actions?: VoiceCopilotAction[];
+}
+
+export interface VoiceCopilotContextPayload {
+  kind: 'user_text' | 'selection' | 'candidate_ready' | 'checks_done' | 'work_switched';
+  text: string;
+  workName?: string;
+  selection?: Pick<Selection, 'src' | 'cid' | 'instances' | 'text'> | null;
+  candidateSummary?: {
+    id: string;
+    decision: Candidate['decision'];
+    passedChecks: number;
+    totalChecks: number;
+  };
+}
+
+/** Validates structured actions emitted by the real-time voice copilot against the Studio allowlist. */
+export function isVoiceCopilotAction(value: unknown): value is VoiceCopilotAction {
+  if (!record(value) || typeof value.type !== 'string') return false;
+  switch (value.type) {
+    case 'submit_edit': {
+      if (typeof value.instruction !== 'string' || !value.instruction.trim() || value.instruction.length > 4000) {
+        return false;
+      }
+      if (value.variantCount !== undefined && value.variantCount !== 1 && value.variantCount !== 2 && value.variantCount !== 3) {
+        return false;
+      }
+      return true;
+    }
+    case 'switch_candidate': {
+      if (value.candidateId !== undefined && typeof value.candidateId !== 'string') return false;
+      return value.mode === 'current' || value.mode === 'candidate' || value.mode === 'compare';
+    }
+    case 'open_surface':
+      return value.surface === 'canvas' || value.surface === 'inspector' || value.surface === 'scene' || value.surface === 'assets';
+    case 'toggle_picking':
+      return typeof value.active === 'boolean';
+    default:
+      return false;
+  }
+}
+
+const FORMA_ACTION_BLOCK = /\[FORMA_ACTION\]([\s\S]*?)\[\/FORMA_ACTION\]/g;
+
+/** Strips `[FORMA_ACTION]{...}[/FORMA_ACTION]` blocks from spoken/transcript text and returns valid actions. */
+export function parseVoiceCopilotActions(text: string): { cleanText: string; actions: VoiceCopilotAction[] } {
+  const actions: VoiceCopilotAction[] = [];
+  const cleanText = text
+    .replace(FORMA_ACTION_BLOCK, (_full, body: string) => {
+      try {
+        const parsed: unknown = JSON.parse(body.trim());
+        if (isVoiceCopilotAction(parsed)) actions.push(parsed);
+      } catch {
+        // Ignore malformed directive payloads without corrupting spoken transcript display.
+      }
+      return '';
+    })
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return { cleanText, actions };
+}

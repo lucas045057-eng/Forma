@@ -22,6 +22,8 @@ import { SnapshotBudgetError, SnapshotError } from './checks/snapshot.ts';
 import { SpeechClient, type SpeechClientOptions } from './speech/client.ts';
 import { SpeechService } from './speech/service.ts';
 import { registerSpeechRoutes } from './speech/routes.ts';
+import { VoiceCopilotService, type VoiceCopilotServiceOptions } from './speech/copilot-service.ts';
+import { registerVoiceCopilotRoutes } from './speech/copilot-routes.ts';
 import { registerLuxWorkbench } from './assets/lux3d-routes.ts';
 import { registerPlacementRoutes } from './assets/placement.ts';
 import { codingAgentEndpoint, CodingAgentError, normalizeCodingAgentBaseUrl, type CodingAgentOptions } from './agent/client.ts';
@@ -94,6 +96,8 @@ export interface AppOptions {
   importer?: ImporterInternalOptions;
   /** Optional override for .env persistence target used by PUT /models/config. */
   envFilePath?: string;
+  /** Optional voice copilot options (for tests / fetch injection). */
+  voiceCopilot?: VoiceCopilotServiceOptions;
   logger?: FastifyServerOptions['logger'];
 }
 
@@ -683,6 +687,12 @@ export async function createApp(options: AppOptions = {}) {
   // preClose must not wait for handlers: Fastify drains HTTP after this hook.
   // Keep admitted handlers and their nested repo operations usable until onClose.
   await registerSpeechRoutes(app, speech);
+  const voiceCopilot = new VoiceCopilotService({
+    envFilePath,
+    ...options.voiceCopilot,
+  });
+  closers.push(() => voiceCopilot.close());
+  await registerVoiceCopilotRoutes(app, voiceCopilot);
   app.addHook('onClose', closeAll);
   const currentDefault = workspace.current();
   return { app, service, scene: currentDefault.scene, work: currentDefault.work, workspace, events, speech };

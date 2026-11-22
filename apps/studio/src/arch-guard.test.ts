@@ -306,9 +306,9 @@ describe('Studio architecture & slop guardrails (ai-native-garden)', () => {
     ).toEqual([]);
   });
 
-  it('L2 bundle boundary: static entry import graph from main.tsx never eagerly pulls 3D engines', () => {
+  it('L2 bundle boundary: static entry import graph from main.tsx never eagerly pulls 3D or Agora RTC SDKs', () => {
     const sourceByRel = new Map(tsFiles.map(file => [file.rel, file]));
-    const HEAVY_3D_IMPORT = /^(?:three(?:\/|$)|@react-three\/|@spatial\/scene-renderer(?:\/|$))/;
+    const HEAVY_EAGER_IMPORT = /^(?:three(?:\/|$)|@react-three\/|@spatial\/scene-renderer(?:\/|$)|agora-rtc-sdk-ng(?:\/|$)|agora-rtm-sdk(?:\/|$))/;
 
     function collectRuntimeStaticSpecifiers(file: SourceEntry): string[] {
       const sf = ts.createSourceFile(
@@ -374,7 +374,7 @@ describe('Studio architecture & slop guardrails (ai-native-garden)', () => {
       const entry = sourceByRel.get(current.rel);
       if (!entry) continue;
       for (const spec of collectRuntimeStaticSpecifiers(entry)) {
-        if (HEAVY_3D_IMPORT.test(spec)) {
+        if (HEAVY_EAGER_IMPORT.test(spec)) {
           violations.push(`${current.chain.join(' -> ')} -> ${spec}`);
           continue;
         }
@@ -389,7 +389,7 @@ describe('Studio architecture & slop guardrails (ai-native-garden)', () => {
     expect(visited.has('App.tsx'), '入口依赖图遍历未能解析到 App.tsx，请检查 resolveLocalTs 逻辑。').toBe(true);
     expect(
       violations,
-      '禁止首屏入口静态引入 3D 渲染依赖（three / @react-three/* / @spatial/scene-renderer）：这会把 ~1.1MB 3D 引擎打入首屏主包。请改为 React.lazy(() => import(...)) 按需懒加载含 3D 视口的组件，并在仅需类型时使用 import type。',
+      '禁止首屏入口静态引入 3D 渲染或声网 RTC 依赖（three / @react-three/* / @spatial/scene-renderer / agora-rtc-sdk-ng / agora-rtm-sdk）：这会把重型引擎打入首屏主包。请改为 React.lazy 或动态 await import(...) 按需懒加载，并在仅需类型时使用 import type。',
     ).toEqual([]);
   });
 });

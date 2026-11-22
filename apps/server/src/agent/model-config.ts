@@ -132,6 +132,15 @@ const KNOWN_ENV_KEYS = [
   'DASHSCOPE_API_KEY',
   'LUX3D_BASE',
   'LUX3D_API_KEY',
+  'AGORA_APP_ID',
+  'AGORA_APP_CERTIFICATE',
+  'AGORA_CUSTOMER_ID',
+  'AGORA_CUSTOMER_SECRET',
+  'VOICE_COPILOT_VENDOR',
+  'VOICE_COPILOT_MODEL',
+  'VOICE_COPILOT_VOICE',
+  'VOICE_COPILOT_URL',
+  'VOICE_COPILOT_MLLM_API_KEY',
 ] as const;
 
 export function updateEnvFileSafe(envFilePath: string, updates: Record<string, string | undefined>): void {
