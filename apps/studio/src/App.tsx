@@ -305,10 +305,8 @@ function Studio() {
   }
   useEffect(() => {
     let active = true;
-    const isJson = (res: Response) => res.ok && (res.headers.get('content-type') ?? '').includes('application/json');
     const loadWorks = () => {
-      void fetch('/works', { cache: 'no-store' })
-        .then(res => (isJson(res) ? (res.json() as Promise<WorksState>) : null))
+      void api<WorksState>('/works')
         .then(value => {
           if (!active || !value || !Array.isArray(value.works) || typeof value.activeId !== 'string') return;
           setWorksState(previous => {
@@ -322,8 +320,7 @@ function Studio() {
         .catch(() => {});
     };
     const loadModelStatus = () => {
-      void fetch('/models/status', { cache: 'no-store' })
-        .then(res => (isJson(res) ? (res.json() as Promise<ModelStatusView>) : null))
+      void api<ModelStatusView>('/models/status')
         .then(value => {
           if (!active || !value || !value.coding) return;
           setModelStatus(value);

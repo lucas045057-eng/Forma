@@ -7,6 +7,7 @@ import { setSceneHero, setSceneKeyframe, temperatureToHex, type SceneChanged } f
 import { ProductScene, scenePose, sceneRenderSettings } from '@spatial/scene-renderer';
 import './scene-editor.css';
 import { useEventCenter } from './EventCenter.tsx';
+import { api, ApiError, mutation } from './api.ts';
 import { previewOrigin } from './preview-origin.ts';
 import { SceneDraftGuard } from './scene-draft.ts';
 import {assetOriginLabel} from './model-provenance.tsx';
@@ -34,12 +35,15 @@ function LightHandle({ direction, change }: { direction: Vec3; change: (directio
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(60_000) });
-  const result = await response.json();
-  if (!response.ok) throw new Error(`${result.error?.message ?? '场景请求失败'}${result.error?.fields ? `：${JSON.stringify(result.error.fields)}` : ''}`);
-  return result as T;
+  try {
+    return await api<T>(url, init);
+  } catch (cause) {
+    if (cause instanceof ApiError) {
+      throw new Error(`${cause.message || '场景请求失败'}${cause.fields ? `：${JSON.stringify(cause.fields)}` : ''}`);
+    }
+    throw cause;
+  }
 }
-const jsonRequest = (method: string, body?: unknown): RequestInit => ({ method, ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }) });
 
 export default function SceneEditor({ at, previewSize, onClose }: { at: number; previewSize: () => number; onClose: () => void }) {
   const [saved, setSaved] = useState<SceneConfig>();
@@ -109,7 +113,7 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
     let active = true; setRecognized(false); setLoaded(false);
     if (saved?.model) {
       const metadata = saved.model === '/assets/diffuser-4969889.glb' ? '/assets/parts.json' : saved.model.replace(/\.glb$/, '.parts.json');
-      void fetch(`${previewOrigin}/preview/main${metadata}`).then(response => response.ok ? response.json() : null)
+      void api<{ recognized?: boolean; lid?: string }>(`${previewOrigin}/preview/main${metadata}`)
         .then(value => { if (active) setRecognized(value?.recognized === true && value?.lid === 'lid'); }).catch(() => {});
     }
     return () => { active = false; };
@@ -172,15 +176,15 @@ export default function SceneEditor({ at, previewSize, onClose }: { at: number; 
       <label className="slider-block"><span className="slider-head"><span>开盖行程</span><code>{lid.toFixed(3)}</code></span><input data-testid="scene-lid" type="range" min="0" max="0.15" step="0.001" value={lid} disabled={!recognized} onChange={e => { draftGuard.current.edit(); setLid(Number(e.target.value)); }}/></label>
       {!recognized && <p className="muted-note" data-testid="scene-parts-warning">未识别部件，开盖关键帧不可用。</p>}
       <div className="scene-action-bar">
-        <button type="button" className="primary-btn compact-btn" data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
-        <button type="button" className="secondary-btn compact-btn" data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', jsonRequest('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
-        <button type="button" className="ghost-btn compact-btn" data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', jsonRequest('POST')))}>撤回上一次写入</button>
+        <button type="button" className="primary-btn compact-btn" data-testid="scene-save-hero" onClick={() => saved && void action(() => request('/scene', mutation('PUT', setSceneHero(saved, { ...draft, model: { ...draft.model, rotation } }, recognized ? lid : undefined))))}>设为首屏</button>
+        <button type="button" className="secondary-btn compact-btn" data-testid="scene-save-keyframe" onClick={() => saved && void action(() => request('/scene', mutation('PUT', setSceneKeyframe(saved, at, rotation, recognized ? lid : undefined))))}>记为此处关键帧</button>
+        <button type="button" className="ghost-btn compact-btn" data-testid="scene-undo" disabled={busy || !saved || writeBlocked} onClick={() => void action(() => request('/scene/undo', mutation('POST')))}>撤回上一次写入</button>
       </div>
     </fieldset>
     <fieldset disabled={busy || !saved || writeBlocked}><legend>快速采用主槽位模型</legend>
       <div className="inline-form">
         <select data-testid="scene-asset-select" value={assetId} onChange={e => { setAssetId(e.target.value); setForce(false); }}><option value="">选择已处理模型…</option>{assets.filter(a => a.status === 'ready').map(a => <option key={a.id} value={a.id}>{a.id.slice(0, 18)} · {assetOriginLabel(a.provenance)}{a.metrics?.webReady === false ? '（超门槛）' : ''}</option>)}</select>
-        <button type="button" className="secondary-btn compact-btn" data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, jsonRequest('POST', { force })))}>采用此模型到作品</button>
+        <button type="button" className="secondary-btn compact-btn" data-testid="scene-adopt" disabled={!assetId} onClick={() => void action(() => request(`/assets/${encodeURIComponent(assetId)}/adopt`, mutation('POST', { force })))}>采用此模型到作品</button>
       </div>
       <label className="checkbox-row"><input type="checkbox" data-testid="scene-force-adopt" checked={force} onChange={e => setForce(e.target.checked)}/>允许采用超过网页门槛的模型</label>
     </fieldset>

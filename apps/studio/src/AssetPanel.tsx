@@ -5,7 +5,7 @@ import type {PlacementSession} from './placement-state.ts';
 import { ProductScene, sceneRenderSettings } from '@spatial/scene-renderer';
 import type { Asset, FallbackPreset } from '@spatial/shared';
 import {assetOriginLabel} from './model-provenance.tsx';
-import {ApiError} from './api.ts';
+import {api,ApiError,binaryUpload,mutation} from './api.ts';
 const fallbackErrors:Record<string,string>={UNKNOWN_PRESET:'备用编号不存在，请刷新目录。',ASSET_EXISTS:'该编号已有不同内容，请保留现有资产并刷新状态。',FALLBACK_CHANGED:'本地备用文件已变化，请恢复指定材料。',FALLBACK_PATH_DENIED:'备用路径未通过安全检查。',FALLBACK_TOO_LARGE:'备用模型超过32MiB，未开始处理。',INVALID_GLB:'备用文件不是完整的GLB模型。',SERVICE_STOPPED:'资产服务正在停止，请稍后刷新。'};
 import { defaultSceneConfig } from '@spatial/shared/scene-config';
 import './assets.css';
@@ -41,7 +41,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
   const canImport=syncReady&&status==='connected';
   useEffect(()=>{
     const abort=new AbortController();const timer=setTimeout(()=>abort.abort(),5000);let active=true;
-    void fetch('/assets/fallbacks',{signal:abort.signal,cache:'no-store'}).then(async response=>{if(!response.ok)throw new Error();const list=await response.json();if(!Array.isArray(list)||!list.every(item=>item&&typeof item.id==='string'&&typeof item.title==='string'&&typeof item.description==='string'&&typeof item.available==='boolean'))throw new Error();if(active)setFallbacks(list);}).catch(()=>{if(active)setFallbackError('备用列表暂不可用，请关闭后重新打开资产面板。');}).finally(()=>clearTimeout(timer));
+    void api<FallbackPreset[]>('/assets/fallbacks',{signal:abort.signal}).then(list=>{if(!Array.isArray(list)||!list.every(item=>item&&typeof item.id==='string'&&typeof item.title==='string'&&typeof item.description==='string'&&typeof item.available==='boolean'))throw new Error();if(active)setFallbacks(list);}).catch(()=>{if(active)setFallbackError('备用列表暂不可用，请关闭后重新打开资产面板。');}).finally(()=>clearTimeout(timer));
     return()=>{active=false;abort.abort();clearTimeout(timer);};
   },[]);
   const current = assets.find(asset => asset.id === selected);
@@ -51,9 +51,8 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
     let active = true;
     const refresh = async () => {
       try {
-        const response = await fetch('/assets');
-        if (!response.ok) throw new Error('资产服务未连接，请确认后端已启动');
-        const list = await response.json() as Asset[];
+        const list = await api<Asset[]>('/assets');
+        if (!Array.isArray(list)) throw new Error('资产服务未连接，请确认后端已启动');
         if (active) {
           setAssets(list);
           setSelected(previous => previous || list.find(asset => asset.status === 'ready')?.id || '');
@@ -71,9 +70,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
     if(!canImport||busy)return;
     setBusy(true); setError('');
     try {
-      const response = await fetch('/assets/lux3d/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ taskId }) });
-      const result = await response.json() as Asset & { error?: { message: string } };
-      if (!response.ok) throw new Error(result.error?.message ?? '导入失败');
+      const result = await api<Asset>('/assets/lux3d/import', mutation('POST', { taskId }));
       setAssets(previous => [result, ...previous.filter(asset => asset.id !== result.id)]);
       setSelected(result.id);
     } catch (cause) { setError(cause instanceof Error ? cause.message : '导入失败'); }
@@ -81,7 +78,7 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
   }
   async function importFallback(id:string){
     if(!canImport||busy)return;setBusy(true);setError('');
-    try{const response=await fetch(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(15000)});const result=await response.json();if(!response.ok)throw new ApiError(response.status,typeof result?.error?.code==='string'?result.error.code:'ASSET_IMPORT_FAILED','备用导入未成功');setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
+    try{const result=await api<Asset>(`/assets/fallbacks/${encodeURIComponent(id)}/import`,{...mutation('POST',{}),signal:AbortSignal.timeout(15000)});setAssets(previous=>[result,...previous.filter(asset=>asset.id!==result.id)]);setSelected(result.id);}
     catch(cause){setError(cause instanceof ApiError&&fallbackErrors[cause.code]?fallbackErrors[cause.code]:'无法确认备用导入结果，请刷新资产状态；本操作不会发起Lux3D生成。');}finally{setBusy(false);}
   }
   async function uploadAndAdoptLocalGlb(file: File) {
@@ -95,25 +92,18 @@ export default function AssetPanel({ onClose,onPlace,onPreparePlace,dragging=fal
     setLocalUploadNotice('');
     try {
       const bytes = await file.arrayBuffer();
-      const uploadRes = await fetch(`/assets/uploads?kind=glb&filename=${encodeURIComponent(file.name)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: bytes,
-      });
-      const uploadData = (await uploadRes.json()) as { id: string; error?: { message?: string } };
-      if (!uploadRes.ok) {
-        throw new Error(uploadData?.error?.message ?? '本地 GLB 上传校验未通过');
+      const uploadData = await api<{ id: string }>(
+        `/assets/uploads?kind=glb&filename=${encodeURIComponent(file.name)}`,
+        binaryUpload(bytes),
+      );
+      if (!uploadData?.id) {
+        throw new Error('本地 GLB 上传校验未通过');
       }
 
-      const adoptRes = await fetch(`/assets/uploads/${encodeURIComponent(uploadData.id)}/adopt-local`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ optimize: optimizeLocalGlb }),
-      });
-      const asset = (await adoptRes.json()) as Asset & { error?: { message?: string } };
-      if (!adoptRes.ok) {
-        throw new Error(asset?.error?.message ?? '本地 GLB 注册入库失败');
-      }
+      const asset = await api<Asset>(
+        `/assets/uploads/${encodeURIComponent(uploadData.id)}/adopt-local`,
+        mutation('POST', { optimize: optimizeLocalGlb }),
+      );
 
       setAssets(previous => [asset, ...previous.filter(item => item.id !== asset.id)]);
       setSelected(asset.id);

@@ -25,13 +25,36 @@ export async function readCheckEvidence(runId: string, ref: CheckArtifact, signa
 export class ApiError extends Error {
   readonly code: string;
   readonly status: number;
-  constructor(status: number, code: string, message: string) { super(message); this.status = status; this.code = code; }
+  readonly fields?: unknown;
+  constructor(status: number, code: string, message: string, fields?: unknown) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.fields = fields;
+  }
 }
 
 export async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(60_000) });
-  const result = await response.json().catch(() => ({})) as { error?: { code?: string; message?: string } };
-  if (!response.ok) throw new ApiError(response.status, result.error?.code ?? 'REQUEST_FAILED', result.error?.message ?? `请求失败（${response.status}）`);
+  const response = await fetch(url, {
+    cache: 'no-store',
+    redirect: 'error',
+    ...init,
+    signal: init?.signal ?? AbortSignal.timeout(60_000),
+  });
+  const result = await response.json().catch(() => ({})) as { error?: { code?: string; message?: string; fields?: unknown } };
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      result.error?.code ?? 'REQUEST_FAILED',
+      result.error?.message ?? `请求失败（${response.status}）`,
+      result.error?.fields,
+    );
+  }
   return result as T;
 }
 export const mutation = (method: string, body?: unknown): RequestInit => ({ method, ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }) });
+export const binaryUpload = (bytes: ArrayBuffer): RequestInit => ({
+  method: 'POST',
+  headers: { 'Content-Type': 'application/octet-stream' },
+  body: bytes,
+});

@@ -13,16 +13,9 @@ const RAW_FETCH_TRANSPORT_ALLOWLIST = new Set([
   'EventCenter.tsx',
 ]);
 
-// Ratchet baselines (ai-native-garden Step 2): existing debt may shrink to 0, never grow;
-// new files must satisfy 0 raw fetch / 0 type escapes / <=450 TSX lines / <=4 useEffect / <=800 CSS lines.
-const RAW_FETCH_RATCHET: Record<string, number> = {
-  'App.tsx': 2,
-  'AssetPanel.tsx': 6,
-  'AssetPlacement.tsx': 2,
-  'model-provenance.tsx': 1,
-  'NewWorkModal.tsx': 1,
-  'SceneEditor.tsx': 2,
-};
+// Ratchet baselines (ai-native-garden Step 2): RAW_FETCH_RATCHET 已清零为 {}；其余基线只准降、不准涨，
+// 新文件必须满足 0 裸 fetch / 0 类型逃生 / <=450 TSX 行数 / <=4 useEffect / <=800 CSS 行数。
+const RAW_FETCH_RATCHET: Record<string, number> = {};
 
 const LEGACY_TYPE_ESCAPE_RATCHET: Record<string, number> = {
   'm2-state.ts': 2,
@@ -32,9 +25,9 @@ const LEGACY_TYPE_ESCAPE_RATCHET: Record<string, number> = {
 };
 
 const FILE_LINE_RATCHET: Record<string, number> = {
-  'App.tsx': 599,
-  'AssetPlacement.tsx': 555,
-  'NewWorkModal.tsx': 531,
+  'App.tsx': 596,
+  'AssetPlacement.tsx': 545,
+  'NewWorkModal.tsx': 530,
   'style.css': 2343,
 };
 

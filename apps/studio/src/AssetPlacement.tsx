@@ -4,6 +4,7 @@ import { defaultSceneConfig, type SceneConfig } from '@spatial/shared/scene-conf
 import { ProductScene } from '@spatial/scene-renderer';
 import { placementMessage, type PlacementSession } from './placement-state.ts';
 import { previewOrigin } from './preview-origin.ts';
+import { api, ApiError, mutation } from './api.ts';
 import { useEventCenter } from './EventCenter.tsx';
 import './assets.css';
 
@@ -39,24 +40,14 @@ function sanitizeCamera(cam: SceneConfig['hero']['camera']): SceneConfig['hero']
 }
 
 async function requestJson<T>(url: string, method: 'GET' | 'POST' | 'PUT', body?: unknown): Promise<T> {
-  let response: Response;
   try {
-    response = await fetch(url, {
-      method,
-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(60000),
-    });
-  } catch {
+    return await api<T>(url, method === 'GET' ? undefined : mutation(method, body));
+  } catch (cause) {
+    if (cause instanceof ApiError) {
+      throw new Error(cause.message || '放置结果未确认，请刷新状态');
+    }
     throw new Error('放置请求未确认，请刷新状态后重试');
   }
-  let result: unknown;
-  try { result = await response.json(); } catch { /* handled below */ }
-  if (!response.ok) {
-    const message = result && typeof result === 'object' ? (result as { error?: { message?: unknown } }).error?.message : undefined;
-    throw new Error(typeof message === 'string' ? message : '放置结果未确认，请刷新状态');
-  }
-  return result as T;
 }
 
 const SIZE_PRESETS = [
@@ -115,8 +106,7 @@ export default function AssetPlacement({
   // Fetch active work's hero scene config once so replacing the hero 3D stage previews with matching lights & camera.
   useEffect(() => {
     let active = true;
-    void fetch('/scene', { cache: 'no-store' })
-      .then(res => (res.ok ? (res.json() as Promise<SceneConfig>) : null))
+    void api<SceneConfig>('/scene')
       .then(cfg => {
         if (active && cfg && cfg.hero?.camera) setHeroSceneConfig(cfg);
       })

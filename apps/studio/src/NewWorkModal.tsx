@@ -121,8 +121,7 @@ export default function NewWorkModal({
 
   useEffect(() => {
     let active = true;
-    void fetch('/assets')
-      .then(res => (res.ok ? (res.json() as Promise<Asset[]>) : []))
+    void api<Asset[]>('/assets')
       .then(list => {
         if (active && Array.isArray(list)) {
           setAssets(list.filter(item => item.status === 'ready'));
