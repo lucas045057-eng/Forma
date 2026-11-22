@@ -28,7 +28,6 @@ const FILE_LINE_RATCHET: Record<string, number> = {
   'App.tsx': 596,
   'AssetPlacement.tsx': 545,
   'NewWorkModal.tsx': 530,
-  'style.css': 2343,
 };
 
 const USE_EFFECT_RATCHET: Record<string, number> = {
@@ -162,7 +161,7 @@ describe('Studio architecture & slop guardrails (ai-native-garden)', () => {
     }
     expect(
       violations,
-      '禁止在 CSS 中硬编码数字 z-index（易导致浮层互相遮挡）。请在 src/style.css 的 :root 使用并复用语义令牌：var(--z-link) / var(--z-dock) / var(--z-placement) / var(--z-drawer) / var(--z-hud) / var(--z-toast) / var(--z-modal)。',
+      '禁止在 CSS 中硬编码数字 z-index（易导致浮层互相遮挡）。请在 src/styles/tokens.css 的 :root 使用并复用语义令牌：var(--z-link) / var(--z-dock) / var(--z-placement) / var(--z-drawer) / var(--z-hud) / var(--z-toast) / var(--z-modal)。',
     ).toEqual([]);
   });
 
@@ -320,6 +319,93 @@ describe('Studio architecture & slop guardrails (ai-native-garden)', () => {
     expect(
       effectViolations,
       '单组件 useEffect 数量超出上限（副作用链过多易引发循环更新与竞争态）。请将事件订阅或派生状态收敛为纯函数 reducer / 独立 Hook。',
+    ).toEqual([]);
+  });
+
+  it('L2 bundle boundary: static entry import graph from main.tsx never eagerly pulls 3D engines', () => {
+    const sourceByRel = new Map(tsFiles.map(file => [file.rel, file]));
+    const HEAVY_3D_IMPORT = /^(?:three(?:\/|$)|@react-three\/|@spatial\/scene-renderer(?:\/|$))/;
+
+    function collectRuntimeStaticSpecifiers(file: SourceEntry): string[] {
+      const sf = ts.createSourceFile(
+        file.abs,
+        file.content,
+        ts.ScriptTarget.Latest,
+        true,
+        file.ext === 'tsx' ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+      );
+      const specs: string[] = [];
+      for (const stmt of sf.statements) {
+        if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
+          const clause = stmt.importClause;
+          const allNamedTypeOnly = Boolean(
+            clause &&
+            !clause.name &&
+            clause.namedBindings &&
+            ts.isNamedImports(clause.namedBindings) &&
+            clause.namedBindings.elements.length > 0 &&
+            clause.namedBindings.elements.every(el => el.isTypeOnly),
+          );
+          if (clause?.isTypeOnly || allNamedTypeOnly) continue;
+          specs.push(stmt.moduleSpecifier.text);
+        } else if (ts.isExportDeclaration(stmt) && stmt.moduleSpecifier && ts.isStringLiteral(stmt.moduleSpecifier)) {
+          const allNamedTypeOnly = Boolean(
+            stmt.exportClause &&
+            ts.isNamedExports(stmt.exportClause) &&
+            stmt.exportClause.elements.length > 0 &&
+            stmt.exportClause.elements.every(el => el.isTypeOnly),
+          );
+          if (stmt.isTypeOnly || allNamedTypeOnly) continue;
+          specs.push(stmt.moduleSpecifier.text);
+        }
+      }
+      return specs;
+    }
+
+    function resolveLocalTs(fromRel: string, spec: string): string | undefined {
+      if (!spec.startsWith('./') && !spec.startsWith('../')) return undefined;
+      const joined = path.posix.normalize(path.posix.join(path.posix.dirname(fromRel), spec));
+      const candidates = [joined];
+      if (joined.endsWith('.js')) {
+        candidates.push(joined.slice(0, -3) + '.ts', joined.slice(0, -3) + '.tsx');
+      } else if (joined.endsWith('.jsx')) {
+        candidates.push(joined.slice(0, -4) + '.tsx', joined.slice(0, -4) + '.ts');
+      }
+      candidates.push(
+        `${joined}.ts`,
+        `${joined}.tsx`,
+        path.posix.join(joined, 'index.ts'),
+        path.posix.join(joined, 'index.tsx'),
+      );
+      return candidates.find(candidate => sourceByRel.has(candidate));
+    }
+
+    expect(sourceByRel.has('main.tsx')).toBe(true);
+    const visited = new Set<string>(['main.tsx']);
+    const queue: Array<{ rel: string; chain: string[] }> = [{ rel: 'main.tsx', chain: ['main.tsx'] }];
+    const violations: string[] = [];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      const entry = sourceByRel.get(current.rel);
+      if (!entry) continue;
+      for (const spec of collectRuntimeStaticSpecifiers(entry)) {
+        if (HEAVY_3D_IMPORT.test(spec)) {
+          violations.push(`${current.chain.join(' -> ')} -> ${spec}`);
+          continue;
+        }
+        const nextRel = resolveLocalTs(current.rel, spec);
+        if (nextRel && !visited.has(nextRel)) {
+          visited.add(nextRel);
+          queue.push({ rel: nextRel, chain: [...current.chain, nextRel] });
+        }
+      }
+    }
+
+    expect(visited.has('App.tsx'), '入口依赖图遍历未能解析到 App.tsx，请检查 resolveLocalTs 逻辑。').toBe(true);
+    expect(
+      violations,
+      '禁止首屏入口静态引入 3D 渲染依赖（three / @react-three/* / @spatial/scene-renderer）：这会把 ~1.1MB 3D 引擎打入首屏主包。请改为 React.lazy(() => import(...)) 按需懒加载含 3D 视口的组件，并在仅需类型时使用 import type。',
     ).toEqual([]);
   });
 });

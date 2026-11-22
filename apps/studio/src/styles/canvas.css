@@ -1,0 +1,512 @@
+/* ---------------- Spatial Canvas Shell ----------------
+   The work is an artboard lying on warm atelier paper; every control lives on a
+   frosted ivory island around it. Islands never overlap the preview iframe, so
+   picking, hit-testing and 1:1 placement coordinates stay untouched. */
+
+.island {
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--island-shadow);
+}
+
+.studio-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand-island {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 6px;
+  flex: none;
+}
+
+.island-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-hairline);
+  flex: none;
+}
+
+.top-slot,
+.top-center-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.top-slot:empty,
+.top-center-slot:empty {
+  display: none;
+}
+
+.top-center-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.top-center-wrap:empty {
+  display: none;
+}
+
+.mode-island {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+
+.wordmark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--text-primary);
+  color: #ffffff;
+  font: 700 13.5px/1 var(--font-serif);
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.status-cluster {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.status-island {
+  margin-left: 0;
+  padding: 5px 7px;
+  justify-content: flex-end;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.model-status-pill {
+  cursor: pointer;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-status-pill:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.approval-alert-pill {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  border: 1px solid rgba(161, 98, 7, 0.34);
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.approval-alert-pill:hover:not(:disabled) {
+  background: rgba(161, 98, 7, 0.18);
+  border-color: var(--amber);
+}
+
+.status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-pill.is-ok::before {
+  background: var(--accent);
+}
+
+.status-pill.is-wait::before {
+  background: var(--amber);
+}
+
+.status-pill.is-error {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.status-pill.is-error::before {
+  background: var(--danger);
+}
+
+.demo-banner {
+  margin: 0;
+  min-width: 0;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  color: #7c4a03;
+  background: rgba(161, 98, 7, 0.12);
+  border: 1px solid rgba(161, 98, 7, 0.24);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.demo-banner.is-real {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--border-accent);
+}
+
+.floating-status {
+  position: fixed;
+  top: 64px;
+  right: 20px;
+  z-index: var(--z-toast);
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--island-shadow);
+  font-size: 12px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 392px;
+  gap: 16px;
+  min-height: 0;
+}
+
+.workspace.inspector-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace.inspector-collapsed > .inspector {
+  display: none;
+}
+
+.workspace.inspector-collapsed .preview-frames:not(.mode-compare) > .artboard,
+.workspace.inspector-collapsed .candidate-overview,
+.workspace.inspector-collapsed .candidate-sync-hint,
+.workspace.inspector-collapsed .candidate-error {
+  width: min(1160px, 100%);
+  margin-inline: auto;
+}
+
+.preview-panel, .inspector {
+  min-width: 0;
+}
+
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+/* Bottom tool dock (above the selection connector) */
+.dock {
+  position: relative;
+  z-index: var(--z-dock);
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 7px;
+}
+
+.dock-sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px;
+  background: var(--border-subtle);
+}
+
+.tool-btn {
+  height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.tool-btn:hover:not(:disabled) {
+  background: var(--bg-surface-2);
+  border-color: transparent;
+  color: var(--text-primary);
+}
+
+.tool-btn[aria-pressed="true"],
+.tool-btn.is-active {
+  background: var(--text-primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tool-btn[aria-pressed="true"]:hover:not(:disabled),
+.tool-btn.is-active:hover:not(:disabled) {
+  background: #2f2d29;
+  color: #ffffff;
+}
+
+.tool-btn.tool-btn-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.tool-btn.tool-btn-accent:hover:not(:disabled) {
+  background: var(--accent-strong);
+  color: var(--accent-ink);
+}
+
+/* ---------------- Unified Canvas Topbar ---------------- */
+
+.preview-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--island-shadow);
+  font-size: 11.5px;
+}
+
+.canvas-bar-left,
+.canvas-bar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.work-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.model-origin {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--border-accent);
+  overflow-wrap: anywhere;
+}
+
+.model-origin[data-kind="unknown"] {
+  color: var(--amber);
+  background: var(--amber-soft);
+  border-color: rgba(161, 98, 7, 0.28);
+}
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.viewport-mode-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmented-control {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-hairline);
+  gap: 2px;
+}
+
+.segmented-control button {
+  padding: 4px 9px;
+  font-size: 11px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.segmented-control button:hover:not(:disabled) {
+  background: rgba(25, 24, 22, 0.05);
+  color: var(--text-primary);
+}
+
+.segmented-control button[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(25, 24, 22, 0.10);
+}
+
+.preview-controls select,
+.mode-island select {
+  padding: 4px 8px;
+  font-size: 11.5px;
+}
+
+.candidate-sync-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--floor-ink);
+}
+
+/* Artboards: the live work (and its candidate) placed on the paper canvas. */
+.preview-frames {
+  flex: 1;
+  min-height: 240px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.preview-frames.mode-compare {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.artboard > iframe {
+  flex: 1 1 0;
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  box-shadow: var(--board-shadow);
+}
+
+.preview-frames.mode-compare .artboard-candidate > iframe {
+  border-color: rgba(30, 107, 75, 0.48);
+  outline: 2px solid rgba(30, 107, 75, 0.18);
+}
+
+.preview-frames.mode-compare .artboard-candidate .artboard-name b {
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Connector from the picked element to the inspector target card (pointer-transparent). */
+.selection-link {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-link);
+  overflow: visible;
+  pointer-events: none;
+  animation: selection-link-in 0.18s var(--ease-out);
+}
+
+.selection-link path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.selection-link-casing {
+  stroke: rgba(255, 253, 249, 0.92);
+  stroke-width: 4.5;
+}
+
+.selection-link-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.selection-link-dot {
+  fill: var(--accent);
+  stroke: #fffdf9;
+  stroke-width: 2;
+}
+
+@keyframes selection-link-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.preview-frames.mode-candidate > .artboard-main {
+  display: none;
+}
+
+.artboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  isolation: isolate;
+  contain: paint;
+}
+
+.artboard-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-inline: 2px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--floor-ink-muted);
+  white-space: nowrap;
+}
+
+.artboard-name-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.artboard-name b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--floor-ink);
+}

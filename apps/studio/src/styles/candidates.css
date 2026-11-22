@@ -1,0 +1,519 @@
+/* Candidate overview: a tray below the artboards (never over the live preview). */
+.candidate-overview {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--island-shadow);
+}
+
+.candidate-overview.is-collapsed {
+  padding-bottom: 8px;
+}
+
+.candidate-overview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+}
+
+.candidate-overview-count {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+}
+
+.candidate-overview-list {
+  /* Up to three cards share the tray width (all visible at common desktop widths);
+     below 220px per card the tray scrolls horizontally instead of squeezing. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 300px);
+  justify-content: start;
+  gap: 8px;
+  margin: -4px;
+  padding: 4px;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.candidate-overview-list > li {
+  display: flex;
+  min-width: 0;
+}
+
+.candidate-card {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease-out), background-color 0.16s var(--ease-out), transform 0.12s var(--ease-out);
+}
+
+.candidate-card:hover {
+  border-color: var(--border-subtle);
+  background: #ffffff;
+}
+
+.candidate-card:active {
+  transform: scale(0.98);
+}
+
+.candidate-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.candidate-card.is-selected {
+  border-color: var(--accent);
+  background: #ffffff;
+}
+
+.candidate-card.is-open {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.candidate-card-thumb {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: min(38%, 112px);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--bg-surface-solid);
+  border: 1px dashed var(--border-subtle);
+}
+
+.candidate-card-thumb[data-thumb-state="image"] {
+  border-style: solid;
+  border-color: var(--border-hairline);
+  background: #faf6ee;
+}
+
+.candidate-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.candidate-card-thumb-tag {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(25, 24, 22, 0.76);
+  color: #ffffff;
+  font-size: 9.5px;
+  line-height: 15px;
+}
+
+.candidate-card-placeholder {
+  padding: 0 6px;
+  color: var(--text-muted);
+  font-size: 10.5px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.candidate-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.candidate-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.candidate-card-title b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.candidate-card-variant {
+  flex: none;
+  white-space: nowrap;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--border-accent);
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.candidate-card-current {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.candidate-card-current.mode-current {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--border-accent);
+}
+
+.candidate-card-instruction {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
+.candidate-card-stats {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.candidate-card-add { color: var(--accent); font-weight: 600; }
+.candidate-card-del { color: var(--danger); font-weight: 600; }
+
+.candidate-card-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.candidate-card-check,
+.candidate-card-flag {
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 16px;
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
+}
+
+.candidate-card-check.tone-ok { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.candidate-card-check.tone-bad { background: var(--danger-soft); color: var(--danger); font-weight: 600; }
+.candidate-card-check.tone-wait,
+.candidate-card-flag { background: var(--amber-soft); color: var(--amber); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .candidate-card { transition: none; }
+  .candidate-card:active { transform: none; }
+}
+
+
+iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  border: 0;
+  background: #ffffff;
+}
+
+/* ---------------- Candidate Drawer (Bottom of Canvas) ---------------- */
+
+.candidate-error {
+  margin: 0;
+}
+
+/* Candidate checks + diff are portalled into the inspector island. */
+.candidate-details {
+  padding: 12px 14px;
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.candidate-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -12px -14px 10px;
+  padding: 10px 14px;
+  background: rgba(255, 253, 249, 0.94);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.candidate-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.candidate-title h2 {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.candidate-actions-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.candidate-body-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.checks-overview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.check-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.check-card {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-hairline);
+  font-size: 11.5px;
+}
+
+.check-card[data-status="passed"] {
+  border-color: rgba(30, 107, 75, 0.25);
+  background: rgba(30, 107, 75, 0.06);
+}
+
+.check-card[data-status="failed"] {
+  border-color: rgba(196, 81, 45, 0.35);
+  background: var(--danger-soft);
+}
+
+.check-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.check-card-head strong {
+  white-space: nowrap;
+}
+
+.check-badge {
+  flex: none;
+  white-space: nowrap;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
+}
+
+.check-badge.status-passed {
+  color: var(--accent);
+  background: rgba(30, 107, 75, 0.14);
+  font-weight: 600;
+}
+
+.check-badge.status-failed {
+  color: var(--danger);
+  background: rgba(196, 81, 45, 0.16);
+  font-weight: 600;
+}
+
+.check-duration {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.check-msg {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.check-evidence-list {
+  margin-top: 8px;
+}
+
+.evidence-summary {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.evidence-chip {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-hairline);
+  font-size: 11px;
+}
+
+.evidence-chip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.evidence-chip-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.evidence-chip-actions a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.evidence-chip-actions a:hover {
+  text-decoration: underline;
+}
+
+.evidence-chip-actions summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.check-evidence-list img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+
+.check-evidence-list pre {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.gate-reason {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.scope-warning {
+  margin: 0 0 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--amber);
+  background: var(--amber-soft);
+  border: 1px solid rgba(161, 98, 7, 0.28);
+  font-size: 11.5px;
+}
+
+.candidate-diff {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.diff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.diff-file-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.diff-file-pills li code {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hairline);
+}
+
+.diff-file-block + .diff-file-block {
+  margin-top: 8px;
+}
+
+.diff-file-label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-secondary);
+}
+
+.diff-view {
+  max-height: 190px;
+  overflow: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+  margin: 0;
+  padding: 8px;
+  background: var(--bg-code);
+  color: var(--code-ink);
+}
+
+.diff-view span { display: block; min-height: 1.65em; }
+.diff-add { color: #86efac; background: rgba(74, 222, 128, 0.11); }
+.diff-delete { color: #fda4af; background: rgba(251, 113, 133, 0.11); }
+.diff-hunk { color: #c2bdb3; background: rgba(255, 255, 255, 0.08); }
+.diff-meta { color: #8c867c; }

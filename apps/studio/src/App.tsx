@@ -1,7 +1,7 @@
 import type { PickState } from './pick-state.ts';
 import { lazy, Suspense, useEffect, useReducer, useRef, useState } from 'react';
 import { reduceStudioSurface, surfaceFlags } from './surface-state.ts';
-import { isPreviewMessage, type ApprovalCard, type ModelStatusView, type StudioMessage, type WorkSummary, type WorksState } from '@spatial/shared';
+import { isPreviewMessage, type ApprovalCard, type Asset, type ModelStatusView, type StudioMessage, type WorkSummary, type WorksState } from '@spatial/shared';
 import ApprovalPanel from './ApprovalPanel.tsx';
 import { impactHighlightMessages, isImpactPickError, restorePicking, waiting } from './approval-state.ts';
 import { EventCenterProvider, useEventCenter } from './EventCenter.tsx';
@@ -10,16 +10,15 @@ import CandidatePanel, { type PreviewMode } from './CandidatePanel.tsx';
 import { api, mutation } from './api.ts';
 import { previewOrigin, previewUrl } from './preview-origin.ts';
 import ModelOriginBadge from './model-provenance.tsx';
-import AssetPlacement from './AssetPlacement.tsx';
 import SelectionLink from './SelectionLink.tsx';
 import NewWorkModal, { type CreatedWorkResult, type ModalTab } from './NewWorkModal.tsx';
 import ModelConfigModal from './ModelConfigModal.tsx';
-import type {Asset} from '@spatial/shared';
 import type {PlacementSession} from './placement-state.ts';
 import {luxApi} from './lux3d-api.ts';
 
 const AssetPanel = lazy(() => import('./AssetPanel'));
 const SceneEditor = lazy(() => import('./SceneEditor'));
+const AssetPlacement = lazy(() => import('./AssetPlacement'));
 
 function syncScroll(frame: HTMLIFrameElement | null, at: number) {
   frame?.contentWindow?.postMessage({ type: 'scroll:to', payload: { at } }, previewOrigin);
@@ -205,6 +204,7 @@ function Studio() {
   }, []);
 
   async function preparePlacement(asset:Asset):Promise<PlacementSession>{
+    void import('./AssetPlacement');
     if(!ready||!syncReady||eventStatus!=='connected'||!state.version)throw new Error('请等待主预览和作品状态同步后放置');
     const key=asset.id+':'+state.version;
     const request=()=>{
@@ -429,7 +429,7 @@ function Studio() {
       {modalTab && <NewWorkModal initialTab={modalTab} onClose={() => setModalTab(null)} onCreated={result => void handleWorkCreated(result)}/>}
       {showModelConfig && <ModelConfigModal onClose={() => setShowModelConfig(false)} onSaved={nextStatus => setModelStatus(nextStatus)}/>}
       {showAssets && <Suspense fallback={<p className="floating-status" role="status">加载 3D 视口…</p>}><AssetPanel dragging={draggingPlacement} onClose={() => dispatchSurface({ type: 'close' })} onPreparePlace={preparePlacement} onPlace={beginAssetPlacement}/></Suspense>}
-      {placingAsset&&<AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);dispatchSurface({ type: 'close' });}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/>}
+      {placingAsset && <Suspense fallback={<p className="floating-status" role="status">加载 3D 放置预览…</p>}><AssetPlacement key={`${placingAsset.id}:${placementGeneration}`} asset={placingAsset} initialSession={initialPlacement} dragging={draggingPlacement} onDragStateChange={setDraggingPlacement} onTargetSelected={()=>{setDraggingPlacement(false);dispatchSurface({ type: 'close' });}} onConfirmed={outcome=>{if(outcome.kind==='insert'&&outcome.candidateId){setCandidateId(outcome.candidateId);setMode('candidate');}}} frame={ready?preview.current:null} onClose={()=>{setDraggingPlacement(false);for(const key of placementSessions.current.keys())if(key.startsWith(placingAsset.id+':'))placementSessions.current.delete(key);setPlacingAsset(undefined);}}/></Suspense>}
       <header className="studio-top">
         <div className="island brand-island">
           <span className="wordmark" aria-hidden="true">F</span>
