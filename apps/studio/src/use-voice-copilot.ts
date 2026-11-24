@@ -278,11 +278,13 @@ export function useVoiceCopilot(options: UseVoiceCopilotOptions) {
       announcedCandidates.current.add(`ready:${c.id}`);
     }
 
+    let createdSession: VoiceCopilotSession | null = null;
     try {
       const session = await api<VoiceCopilotSession>(
         '/speech/copilot/sessions',
         mutation('POST', { workName: optionsRef.current.workName, ...(preferMock ? { preferMock: true } : {}) }),
       );
+      createdSession = session;
       if (session.mode === 'real') {
         const { startAgoraVoiceTransport } = await import('./voice-copilot-agora.ts');
         transportRef.current = await startAgoraVoiceTransport(session, {
@@ -306,6 +308,11 @@ export function useVoiceCopilot(options: UseVoiceCopilotOptions) {
         item: { id: `agent-${tid}`, turnId: tid, role: 'agent', text: greeting, status: 'completed', timestamp: Date.now() },
       });
     } catch (error) {
+      if (createdSession) {
+        await api(`/speech/copilot/sessions/${encodeURIComponent(createdSession.sessionId)}`, mutation('DELETE')).catch(
+          () => {},
+        );
+      }
       dispatch({ type: 'error', message: error instanceof Error ? error.message : '启动实时语音副驾失败' });
     }
   }
